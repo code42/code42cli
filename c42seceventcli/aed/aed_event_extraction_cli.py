@@ -17,9 +17,7 @@ def main():
         _ignore_ssl_errors()
 
     sdk = _create_sdk(
-        address=args.c42_authority_url,
-        username=args.c42_username,
-        password=args.c42_password
+        address=args.c42_authority_url, username=args.c42_username, password=args.c42_password
     )
 
     _set_handlers()
@@ -64,11 +62,7 @@ def _get_arg_parser():
         required=True,
     )
     optional.add_argument(
-        "-h",
-        "--help",
-        action="help",
-        default=SUPPRESS,
-        help="Show this help message and exit",
+        "-h", "--help", action="help", default=SUPPRESS, help="Show this help message and exit"
     )
     optional.add_argument(
         "-i",

@@ -40,9 +40,7 @@ def aed_cursor_store(mocker, sqlite_connection, execute_function):
     )
 
 
-def configure_store_with_mock_sqlite(
-    store, mocker, sqlite_connection, execute_function
-):
+def configure_store_with_mock_sqlite(store, mocker, sqlite_connection, execute_function):
     store._connection = sqlite_connection
     with store._connection as conn:
         mock_cursor = mocker.MagicMock()

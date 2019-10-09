@@ -9,9 +9,7 @@ class TestAEDCursorStore(object):
             INSERTION_TIMESTAMP_FIELD_NAME
         )
         _ = aed_cursor_store.insertion_timestamp
-        execute_function.assert_called_once_with(
-            expected_query, (aed_cursor_store._primary_key,)
-        )
+        execute_function.assert_called_once_with(expected_query, (aed_cursor_store._primary_key,))
 
     def test_set_insertion_timestamp_updates_insertion_timestamp_where_cursor_id_is_primary_key(
         self, aed_cursor_store, execute_function
