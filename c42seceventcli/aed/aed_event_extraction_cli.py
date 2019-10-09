@@ -52,14 +52,13 @@ def _get_arg_parser():
         help="The password of the Code42 API user.",
         required=True,
     )
-    required.add_argument(
+    optional.add_argument(
         "-b",
         "--begin",
         action="store",
         dest="c42_begin_date",
         help="The beginning of the date range in which to look for events, "
         "in YYYY-MM-DD format OR a number (number of minutes ago).",
-        required=True,
     )
     optional.add_argument(
         "-h", "--help", action="help", default=SUPPRESS, help="Show this help message and exit"
