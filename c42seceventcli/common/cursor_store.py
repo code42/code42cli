@@ -7,7 +7,7 @@ class SecurityEventCursorStore(object):
         # type: (str) -> None
         if db_file_path is None:
             script_path = path.dirname(path.realpath(__file__))
-            db_file_path = "{0}/siem_checkpoint.db".format(script_path)
+            db_file_path = "{0}/{1}.db".format(script_path, self._table_name)
 
         self._connection = sqlite3.connect(db_file_path)
         if self._is_empty():
