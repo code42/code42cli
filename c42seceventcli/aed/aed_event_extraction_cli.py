@@ -6,7 +6,7 @@ from py42.sdk import SDK
 from py42 import settings
 from c42secevents.extractors import extract_aed_events
 from c42secevents.common import FileEventHandlers
-from aed_cursor_store import AEDCursorStore
+from c42seceventcli.aed.aed_cursor_store import AEDCursorStore
 
 
 def main():

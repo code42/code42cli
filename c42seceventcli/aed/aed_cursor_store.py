@@ -1,4 +1,4 @@
-from common import SecurityEventCursorStore
+from c42seceventcli.common.cursor_store import SecurityEventCursorStore
 
 _INSERTION_TIMESTAMP_FIELD_NAME = u"insertionTimestamp"
 
