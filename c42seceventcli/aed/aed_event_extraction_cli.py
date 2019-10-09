@@ -21,7 +21,7 @@ def main():
     )
 
     _set_handlers()
-    extract_aed_events(sdk, 1564694804)
+    extract_aed_events(sdk)
 
 
 def _get_arg_parser():
