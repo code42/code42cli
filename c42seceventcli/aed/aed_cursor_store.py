@@ -20,7 +20,7 @@ class AEDCursorStore(SecurityEventCursorStore):
 
     @property
     def _primary_key(self):
-        return "1"
+        return 1
 
     def _init_table(self):
         columns = "{0}, {1}".format(self._primary_key_column_name, _INSERTION_TIMESTAMP_FIELD_NAME)

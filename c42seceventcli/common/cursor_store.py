@@ -30,7 +30,7 @@ class SecurityEventCursorStore(object):
         pass
 
     def _get(self, columns, primary_key):
-        # type: (str, str) -> tuple
+        # type: (str, any) -> tuple
         query = "SELECT {0} FROM {1} WHERE {2}=?"
         query = query.format(columns, self._table_name, self._primary_key_column_name)
         with self._connection as conn:
@@ -39,7 +39,7 @@ class SecurityEventCursorStore(object):
             return cursor.fetchone()
 
     def _set(self, column_name, new_value, primary_key):
-        # type: (str, any, str) -> None
+        # type: (str, any, any) -> None
         query = "UPDATE {0} SET {1}=? WHERE {2} = ?".format(
             self._table_name, column_name, self._primary_key_column_name
         )
