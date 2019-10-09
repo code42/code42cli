@@ -23,8 +23,7 @@ class AEDCursorStore(SecurityEventCursorStore):
         return "1"
 
     def _init_table(self):
-        insertion_ts_col = _INSERTION_TIMESTAMP_FIELD_NAME
-        columns = "{0}, {1}".format(self._primary_key_column_name, insertion_ts_col)
+        columns = "{0}, {1}".format(self._primary_key_column_name, _INSERTION_TIMESTAMP_FIELD_NAME)
         create_table_query = "CREATE TABLE {0} ({1})".format(self._table_name, columns)
         insert_query = "INSERT INTO {0} VALUES(?, null)".format(self._table_name)
         with self._connection as conn:
