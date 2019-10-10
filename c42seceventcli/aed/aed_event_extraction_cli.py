@@ -62,7 +62,12 @@ def _set_handlers():
 
     FileEventHandlers.record_cursor_position = record_timestamp
     FileEventHandlers.get_cursor_position = get_timestamp
-    # TODO: FileEventHandlers.handle_response = HOOK FOR LOGGING
+    FileEventHandlers.handle_response = _handle_response
+
+
+def _handle_response(response):
+    print(response.text)
+    # TODO: Replace with logging
 
 
 if __name__ == "__main__":
