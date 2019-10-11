@@ -37,8 +37,8 @@ def main():
         password=password
     )
 
-    _set_handlers()
-    extractor = AEDEventExtractor(sdk)
+    handlers = _create_handlers()
+    extractor = AEDEventExtractor(sdk, handlers)
     extractor.extract()
 
 
@@ -81,13 +81,14 @@ def _create_sdk(address, username, password):
     )
 
 
-def _set_handlers():
+def _create_handlers():
     store = AEDCursorStore()
-    FileEventHandlers.record_cursor_position = staticmethod(
-        store.replace_stored_insertion_timestamp
-    )
-    FileEventHandlers.get_cursor_position = staticmethod(store.get_stored_insertion_timestamp)
-    FileEventHandlers.handle_response = staticmethod(_handle_response)
+    handlers = FileEventHandlers()
+
+    handlers.record_cursor_position = store.replace_stored_insertion_timestamp
+    handlers.get_cursor_position = store.get_stored_insertion_timestamp
+    handlers.handle_response = _handle_response
+    return handlers
 
 
 def _handle_response(response):
