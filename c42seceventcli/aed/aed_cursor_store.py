@@ -23,6 +23,10 @@ class AEDCursorStore(SecurityEventCursorStore):
             primary_key=self._PRIMARY_KEY,
         )
 
+    def reset(self):
+        self._drop_table()
+        self._init_table()
+
     def _init_table(self):
         columns = "{0}, {1}".format(self._PRIMARY_KEY_COLUMN_NAME, _INSERTION_TIMESTAMP_FIELD_NAME)
         create_table_query = "CREATE TABLE {0} ({1})".format(self._TABLE_NAME, columns)

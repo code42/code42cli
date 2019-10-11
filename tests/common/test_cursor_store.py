@@ -2,10 +2,6 @@ from c42seceventcli.common.cursor_store import SecurityEventCursorStore
 
 
 class TestSecurityEventCursorStore(object):
-    def test_reset_calls_connection_drop_table_query(self, test_store, execute_function):
-        test_store.reset()
-        execute_function.assert_called_once_with("DROP TABLE siem_checkpoint")
-
     def test_init_cursor_store_when_not_given_db_file_path_used_expected_path(self, mocker):
         expected_path = "TEST_PATH"
         mock_connect_function = mocker.patch("sqlite3.connect")

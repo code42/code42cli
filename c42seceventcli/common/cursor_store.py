@@ -16,10 +16,6 @@ class SecurityEventCursorStore(object):
         if self._is_empty():
             self._init_table()
 
-    def reset(self):
-        self._drop_table()
-        self._init_table()
-
     def _get(self, columns, primary_key):
         # type: (str, any) -> list
         query = "SELECT {0} FROM {1} WHERE {2}=?"
