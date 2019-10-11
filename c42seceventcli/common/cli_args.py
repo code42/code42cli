@@ -1,11 +1,9 @@
 from argparse import SUPPRESS
 
 
-def get_required_credential_args(parser):
+def get_required_args(parser):
     required = parser.add_argument_group("required arguments")
     add_authority_host_address_arg(required)
-    add_username_arg(required)
-    add_password_arg(required)
     return required
 
 
@@ -27,17 +25,6 @@ def add_username_arg(arg_group):
         action="store",
         dest="c42_username",
         help="The username of the Code42 API user.",
-        required=True,
-    )
-
-
-def add_password_arg(arg_group):
-    arg_group.add_argument(
-        "-p",
-        "--password",
-        action="store",
-        dest="c42_password",
-        help="The password of the Code42 API user.",
         required=True,
     )
 

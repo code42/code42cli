@@ -29,9 +29,7 @@ class TestAEDCursorStore(object):
             expected = "INSERT INTO siem_checkpoint VALUES(?, null)"
             assert actual == expected
 
-    def test_get_stored_insertion_timestamp_executes_expected_select_query(
-        self, sqlite_connection
-    ):
+    def test_get_stored_insertion_timestamp_executes_expected_select_query(self, sqlite_connection):
         store = AEDCursorStore(MOCK_TEST_DB_PATH)
         store.get_stored_insertion_timestamp()
         with store._connection as conn:
