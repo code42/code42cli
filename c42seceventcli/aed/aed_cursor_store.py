@@ -4,9 +4,11 @@ _INSERTION_TIMESTAMP_FIELD_NAME = u"insertionTimestamp"
 
 
 class AEDCursorStore(SecurityEventCursorStore):
+    _PRIMARY_KEY = 1
+
     @property
     def insertion_timestamp(self):
-        rows = self._get(_INSERTION_TIMESTAMP_FIELD_NAME, self._primary_key)
+        rows = self._get(_INSERTION_TIMESTAMP_FIELD_NAME, self._PRIMARY_KEY)
         if rows and rows[0]:
             return rows[0][0]
 
@@ -15,12 +17,8 @@ class AEDCursorStore(SecurityEventCursorStore):
         self._set(
             column_name=_INSERTION_TIMESTAMP_FIELD_NAME,
             new_value=value,
-            primary_key=self._primary_key,
+            primary_key=self._PRIMARY_KEY,
         )
-
-    @property
-    def _primary_key(self):
-        return 1
 
     def _init_table(self):
         columns = "{0}, {1}".format(self._PRIMARY_KEY_COLUMN_NAME, _INSERTION_TIMESTAMP_FIELD_NAME)
@@ -28,4 +26,4 @@ class AEDCursorStore(SecurityEventCursorStore):
         insert_query = "INSERT INTO {0} VALUES(?, null)".format(self._TABLE_NAME)
         with self._connection as conn:
             conn.execute(create_table_query)
-            conn.execute(insert_query, (self._primary_key,))
+            conn.execute(insert_query, (self._PRIMARY_KEY,))
