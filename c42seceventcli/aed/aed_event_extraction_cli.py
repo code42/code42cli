@@ -20,6 +20,7 @@ from c42seceventcli.common.cli_args import (
     add_ignore_ssl_errors_arg,
     add_output_format_arg,
     add_end_timestamp_arg,
+    add_record_cursor_arg
 )
 
 _SERVICE = "c42seceventcli"
@@ -54,11 +55,14 @@ def _get_arg_parser():
     required = init_required_args(parser)
     add_username_arg(required)
 
+    mutually_exclusives = parser.add_mutually_exclusive_group()
+    add_end_timestamp_arg(mutually_exclusives)
+    add_record_cursor_arg(mutually_exclusives)
+
     optionals = init_optional_arg_group(parser)
     add_help_arg(optionals)
     add_begin_timestamp_arg(optionals)
     add_ignore_ssl_errors_arg(optionals)
-    add_end_timestamp_arg(optionals)
     add_output_format_arg(optionals)
     return parser
 
