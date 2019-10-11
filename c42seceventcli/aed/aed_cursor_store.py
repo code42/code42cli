@@ -6,6 +6,11 @@ _INSERTION_TIMESTAMP_FIELD_NAME = u"insertionTimestamp"
 class AEDCursorStore(SecurityEventCursorStore):
     _PRIMARY_KEY = 1
 
+    def __init__(self, db_file_path=None):
+        super().__init__(db_file_path)
+        if self._is_empty():
+            self._init_table()
+
     def get_stored_insertion_timestamp(self):
         rows = self._get(_INSERTION_TIMESTAMP_FIELD_NAME, self._PRIMARY_KEY)
         if rows and rows[0]:

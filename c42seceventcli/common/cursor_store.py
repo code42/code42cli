@@ -20,10 +20,6 @@ class SecurityEventCursorStore(object):
         self._drop_table()
         self._init_table()
 
-    def _init_table(self):
-        """Abstract - Create the table for your cursor store and possibly insert default values"""
-        pass
-
     def _get(self, columns, primary_key):
         # type: (str, any) -> list
         query = "SELECT {0} FROM {1} WHERE {2}=?"
