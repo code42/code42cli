@@ -7,8 +7,8 @@ class AEDCursorStore(SecurityEventCursorStore):
     @property
     def insertion_timestamp(self):
         rows = self._get(_INSERTION_TIMESTAMP_FIELD_NAME, self._primary_key)
-        if rows:
-            return rows[0]
+        if rows and rows[0]:
+            return rows[0][0]
 
     @insertion_timestamp.setter
     def insertion_timestamp(self, value):

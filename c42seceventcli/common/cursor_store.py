@@ -30,13 +30,13 @@ class SecurityEventCursorStore(object):
         pass
 
     def _get(self, columns, primary_key):
-        # type: (str, any) -> tuple
+        # type: (str, any) -> list
         query = "SELECT {0} FROM {1} WHERE {2}=?"
         query = query.format(columns, self._table_name, self._primary_key_column_name)
         with self._connection as conn:
             cursor = conn.cursor()
             cursor.execute(query, (primary_key,))
-            return cursor.fetchone()
+            return cursor.fetchall()
 
     def _set(self, column_name, new_value, primary_key):
         # type: (str, any, any) -> None
