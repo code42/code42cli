@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
+from datetime import datetime, timedelta
 from keyring import get_password, set_password
 from getpass import getpass
 import urllib3
-
 
 from py42.sdk import SDK
 from py42 import settings
@@ -35,16 +35,17 @@ def main():
     username = args.c42_username
     password = _get_password(username)
 
-    sdk = _create_sdk(
-        address=args.c42_authority_url,
-        username=username,
-        password=password
-    )
+    min_timestamp = parse_timestamp(args.c42_begin_date) if args.c42_begin_date else None
+    max_timestamp = parse_timestamp(args.c42_end_date) if args.c42_end_date else None
 
-    timestamps = _create_timestamps(args.c42_begin_date, args.c42_end_date)
+    if min_timestamp is not None and not _verify_min_timestamp(min_timestamp):
+        print("Argument --begin must be within 90 days")
+        exit(1)
+
+    sdk = _create_sdk(address=args.c42_authority_url, username=username, password=password)
     handlers = _create_handlers(args.c42_output_format)
     extractor = AEDEventExtractor(sdk, handlers)
-    extractor.extract(timestamps["min_timestamp"], timestamps["max_timestamp"])
+    extractor.extract(min_timestamp, max_timestamp)
 
 
 def _get_arg_parser():
@@ -76,19 +77,16 @@ def _get_password(username):
     return password
 
 
+def _verify_min_timestamp(min_timestamp):
+    now = datetime.utcnow()
+    boundary = datetime.timestamp(now - timedelta(days=90))
+    return min_timestamp >= boundary
+
+
 def _create_sdk(address, username, password):
     return SDK.create_using_local_account(
         host_address=address, username=username, password=password
     )
-
-
-def _create_timestamps(begin_date, end_date):
-    timestamps = {"min_timestamp": None, "max_timestamp": None}
-    if begin_date is not None:
-        timestamps["min_timestamp"] = parse_timestamp(begin_date)
-    if end_date is not None:
-        timestamps["max_timestamp"] = parse_timestamp(end_date)
-    return timestamps
 
 
 def _create_handlers(output_type):
