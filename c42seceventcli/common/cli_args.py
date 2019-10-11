@@ -1,4 +1,5 @@
 from argparse import SUPPRESS
+from datetime import datetime, timedelta
 
 
 def init_required_args(parser):
@@ -40,11 +41,14 @@ def add_help_arg(arg_group):
 
 
 def add_begin_timestamp_arg(arg_group):
+    default_begin_date = datetime.now() - timedelta(days=60)
+    default_begin_date_str = default_begin_date.strftime("%Y-%m-%d")
     arg_group.add_argument(
         "-b",
         "--begin",
         action="store",
         dest="c42_begin_date",
+        default=default_begin_date_str,
         help="The end of the date range in which to look for events, "
         "in YYYY-MM-DD format OR a number (number of minutes ago).",
     )
@@ -67,6 +71,7 @@ def add_ignore_ssl_errors_arg(arg_group):
         "--ignore-ssl-errors",
         action="store_true",
         dest="c42_ignore_ssl_errors",
+        default=False,
         help="Set to ignore ssl errors.",
     )
 
@@ -76,5 +81,6 @@ def add_output_format_arg(arg_group):
         "-o", "--output-format",
         dest="c42_output_format",
         action="store",
+        default="JSON",
         help="Either CEF or JSON"
     )

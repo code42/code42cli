@@ -28,15 +28,13 @@ _SERVICE = "c42seceventcli"
 def main():
     parser = _get_arg_parser()
     args = parser.parse_args()
-
-    if args.c42_ignore_ssl_errors:
-        _ignore_ssl_errors()
+    _setup_ssl_error_verification(args.c42_ignore_ssl_errors)
 
     username = args.c42_username
     password = _get_password(username)
 
-    min_timestamp = parse_timestamp(args.c42_begin_date) if args.c42_begin_date else None
-    max_timestamp = parse_timestamp(args.c42_end_date) if args.c42_end_date else None
+    min_timestamp = parse_timestamp(args.c42_begin_date)
+    max_timestamp = parse_timestamp(args.c42_end_date)
 
     if min_timestamp is not None and not _verify_min_timestamp(min_timestamp):
         print("Argument --begin must be within 90 days")
@@ -53,19 +51,20 @@ def _get_arg_parser():
 
     required = init_required_args(parser)
     add_username_arg(required)
-    add_output_format_arg(required)
 
     optionals = init_optional_arg_group(parser)
     add_help_arg(optionals)
     add_begin_timestamp_arg(optionals)
     add_ignore_ssl_errors_arg(optionals)
     add_end_timestamp_arg(optionals)
+    add_output_format_arg(optionals)
     return parser
 
 
-def _ignore_ssl_errors():
-    settings.verify_ssl_certs = False
-    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+def _setup_ssl_error_verification(ignore_ssl_errors):
+    settings.verify_ssl_certs = not ignore_ssl_errors
+    if ignore_ssl_errors:
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def _get_password(username):
