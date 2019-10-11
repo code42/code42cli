@@ -28,7 +28,9 @@ _SERVICE = "c42seceventcli"
 def main():
     parser = _get_arg_parser()
     args = parser.parse_args()
-    _setup_ssl_error_verification(args.c42_ignore_ssl_errors)
+
+    if args.c42_ignore_ssl_errors:
+        _ignore_ssl_errors()
 
     username = args.c42_username
     password = _get_password(username)
@@ -36,7 +38,7 @@ def main():
     min_timestamp = parse_timestamp(args.c42_begin_date)
     max_timestamp = parse_timestamp(args.c42_end_date)
 
-    if min_timestamp is not None and not _verify_min_timestamp(min_timestamp):
+    if not _verify_min_timestamp(min_timestamp):
         print("Argument --begin must be within 90 days")
         exit(1)
 
@@ -61,10 +63,9 @@ def _get_arg_parser():
     return parser
 
 
-def _setup_ssl_error_verification(ignore_ssl_errors):
-    settings.verify_ssl_certs = not ignore_ssl_errors
-    if ignore_ssl_errors:
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+def _ignore_ssl_errors():
+    settings.verify_ssl_certs = False
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def _get_password(username):
