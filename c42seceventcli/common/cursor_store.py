@@ -21,7 +21,7 @@ class SecurityEventCursorStore(object):
         self._init_table()
 
     def _init_table(self):
-        """Create the table and possibly insert default values"""
+        """Abstract - Create the table for your cursor store and possibly insert default values"""
         pass
 
     def _get(self, columns, primary_key):
