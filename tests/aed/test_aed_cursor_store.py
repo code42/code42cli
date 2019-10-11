@@ -25,7 +25,7 @@ class TestAEDCursorStore(object):
         store._connection = sqlite_connection
         store.reset()
         with store._connection as conn:
-            actual = conn.execute.call_args_list[2][0][0]
+            actual = conn.execute.call_args[0][0]
             expected = "INSERT INTO siem_checkpoint VALUES(?, null)"
             assert actual == expected
 
@@ -38,7 +38,7 @@ class TestAEDCursorStore(object):
             expected = "SELECT {0} FROM siem_checkpoint WHERE cursor_id=?".format(
                 INSERTION_TIMESTAMP_FIELD_NAME
             )
-            actual = conn.cursor().execute.call_args_list[1][0][0]
+            actual = conn.cursor().execute.call_args[0][0]
             assert actual == expected
 
     def test_replace_stored_insertion_timestamp_executes_expected_update_query(
@@ -51,5 +51,5 @@ class TestAEDCursorStore(object):
             expected = "UPDATE siem_checkpoint SET {0}=? WHERE cursor_id = ?".format(
                 INSERTION_TIMESTAMP_FIELD_NAME, new_insertion_timestamp
             )
-            actual = conn.execute.call_args_list[0][0][0]
+            actual = conn.execute.call_args[0][0]
             assert actual == expected
