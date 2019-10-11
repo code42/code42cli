@@ -60,9 +60,9 @@ def _set_handlers():
     def get_timestamp():
         return store.insertion_timestamp
 
-    FileEventHandlers.record_cursor_position = record_timestamp
-    FileEventHandlers.get_cursor_position = get_timestamp
-    FileEventHandlers.handle_response = _handle_response
+    FileEventHandlers.record_cursor_position = staticmethod(record_timestamp)
+    FileEventHandlers.get_cursor_position = staticmethod(get_timestamp)
+    FileEventHandlers.handle_response = staticmethod(_handle_response)
 
 
 def _handle_response(response):
