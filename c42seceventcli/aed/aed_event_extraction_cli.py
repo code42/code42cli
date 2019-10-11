@@ -53,15 +53,8 @@ def _create_sdk(address, username, password):
 
 def _set_handlers():
     store = AEDCursorStore()
-
-    def record_timestamp(timestamp):
-        store.insertion_timestamp = timestamp
-
-    def get_timestamp():
-        return store.insertion_timestamp
-
-    FileEventHandlers.record_cursor_position = staticmethod(record_timestamp)
-    FileEventHandlers.get_cursor_position = staticmethod(get_timestamp)
+    FileEventHandlers.record_cursor_position = staticmethod(store.replace_stored_insertion_timestamp)
+    FileEventHandlers.get_cursor_position = staticmethod(store.get_stored_insertion_timestamp)
     FileEventHandlers.handle_response = staticmethod(_handle_response)
 
 

@@ -6,17 +6,15 @@ _INSERTION_TIMESTAMP_FIELD_NAME = u"insertionTimestamp"
 class AEDCursorStore(SecurityEventCursorStore):
     _PRIMARY_KEY = 1
 
-    @property
-    def insertion_timestamp(self):
+    def get_stored_insertion_timestamp(self):
         rows = self._get(_INSERTION_TIMESTAMP_FIELD_NAME, self._PRIMARY_KEY)
         if rows and rows[0]:
             return rows[0][0]
 
-    @insertion_timestamp.setter
-    def insertion_timestamp(self, value):
+    def replace_stored_insertion_timestamp(self, new_insertion_timestamp):
         self._set(
             column_name=_INSERTION_TIMESTAMP_FIELD_NAME,
-            new_value=value,
+            new_value=new_insertion_timestamp,
             primary_key=self._PRIMARY_KEY,
         )
 
