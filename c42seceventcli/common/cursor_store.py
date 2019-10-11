@@ -13,8 +13,6 @@ class SecurityEventCursorStore(object):
             db_file_path = "{0}/{1}.db".format(script_path, self._TABLE_NAME)
 
         self._connection = sqlite3.connect(db_file_path)
-        if self._is_empty():
-            self._init_table()
 
     def _get(self, columns, primary_key):
         # type: (str, any) -> list
