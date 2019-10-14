@@ -22,16 +22,6 @@ def add_username_arg(arg_group):
     )
 
 
-def add_config_file_arg(arg_group):
-    arg_group.add_argument(
-        "-c",
-        "--config",
-        action="store",
-        dest="c42_config_file",
-        help="Path to a .cfg file containing a username and Code42 authority host address."
-    )
-
-
 def add_help_arg(arg_group):
     arg_group.add_argument(
         "-h", "--help", action="help", default=SUPPRESS, help="Show this help message and exit"
