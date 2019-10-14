@@ -20,10 +20,15 @@ from c42seceventcli.common.cli_args import (
     add_ignore_ssl_errors_arg,
     add_output_format_arg,
     add_end_timestamp_arg,
-    add_record_cursor_arg
+    add_record_cursor_arg,
+    add_event_type_args
 )
 
-_SERVICE = "c42seceventcli"
+_SERVICE = u"c42seceventcli"
+_CREATED = u"CREATED"
+_MODIFIED = u"MODIFIED"
+_DELETED = u"DELETED"
+_READ_BY_APP = u"READ_BY_APP"
 
 
 def main():
@@ -46,7 +51,7 @@ def main():
     sdk = _create_sdk(address=args.c42_authority_url, username=username, password=password)
     handlers = _create_handlers(args.c42_output_format)
     extractor = AEDEventExtractor(sdk, handlers)
-    extractor.extract(min_timestamp, max_timestamp)
+    extractor.extract(min_timestamp, max_timestamp, args.c42_event_types)
 
 
 def _get_arg_parser():
@@ -55,6 +60,7 @@ def _get_arg_parser():
     required = init_required_args(parser)
     add_username_arg(required)
 
+    # Makes sure that you can't give both an end_timestamp and tell it to record cursor positions
     mutually_exclusives = parser.add_mutually_exclusive_group()
     add_end_timestamp_arg(mutually_exclusives)
     add_record_cursor_arg(mutually_exclusives)
@@ -64,6 +70,7 @@ def _get_arg_parser():
     add_begin_timestamp_arg(optionals)
     add_ignore_ssl_errors_arg(optionals)
     add_output_format_arg(optionals)
+    add_event_type_args(optionals)
     return parser
 
 
@@ -104,7 +111,6 @@ def _create_handlers(output_type):
 
 
 def _get_response_handler(output_format):
-
     def handle_response(response):
         print(response.text)
         # TODO: Replace with logging
