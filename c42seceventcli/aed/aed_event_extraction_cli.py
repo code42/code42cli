@@ -23,7 +23,7 @@ from c42seceventcli.common.cli_args import (
     add_end_timestamp_arg,
     add_record_cursor_arg,
     add_event_type_args,
-    add_debug_arg
+    add_debug_arg,
 )
 
 _SERVICE_NAME_FOR_KEYCHAIN = u"c42seceventcli"
@@ -43,7 +43,9 @@ def main():
     config.read("config.cfg")
 
     username = config["Code42"]["username"] if args.c42_username is None else args.c42_username
-    server = config["Code42"]["server"] if args.c42_authority_url is None else args.c42_authority_url
+    server = (
+        config["Code42"]["server"] if args.c42_authority_url is None else args.c42_authority_url
+    )
 
     if server is None:
         print("Host address not provided.")
