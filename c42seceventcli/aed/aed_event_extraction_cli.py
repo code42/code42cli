@@ -5,6 +5,7 @@ from getpass import getpass
 import urllib3
 
 from py42.sdk import SDK
+import py42.debug_level as debug_level
 from py42 import settings
 from c42secevents.extractors import AEDEventExtractor
 from c42secevents.common import FileEventHandlers
@@ -34,6 +35,9 @@ def main():
 
     if args.c42_ignore_ssl_errors:
         _ignore_ssl_errors()
+
+    if args.c42_debug_mode:
+        settings.debug_level = debug_level.DEBUG
 
     username = args.c42_username
     password = _get_password(username)
