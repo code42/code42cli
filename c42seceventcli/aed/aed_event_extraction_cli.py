@@ -40,24 +40,21 @@ def main():
     if args.c42_debug_mode:
         settings.debug_level = debug_level.DEBUG
 
-    config = configparser.ConfigParser()
-    config.read("config.cfg")
+    config = _get_config()
 
     # Must either pass in a username and server address or provide them in config.cfg.
-    username = config["Code42"]["username"] if args.c42_username is None else args.c42_username
-    server = (
-        config["Code42"]["server"] if args.c42_authority_url is None else args.c42_authority_url
-    )
+    if config:
+        username = config["Code42"]["username"]
+        server = config["Code42"]["server"]
+    else:
+        username = args.c42_username
+        server = args.c42_authority_url
 
     if server is None:
-        print("Host address not provided.")
-        parser.print_usage()
-        exit(1)
+        _exit_from_argument_error("Host address not provided.", parser)
 
     if username is None:
-        print("Username not provided.")
-        parser.print_usage()
-        exit(1)
+        _exit_from_argument_error("Username not provided.", parser)
 
     password = _get_password(username)
 
@@ -129,6 +126,18 @@ def _get_response_handler(output_format):
         # TODO: Replace with logging from Alan's branch
 
     return handle_response
+
+
+def _get_config():
+    config = configparser.ConfigParser()
+    config_file_found = len(config.read("config.cfg")) > 0
+    return config if config_file_found else None
+
+
+def _exit_from_argument_error(message, parser):
+    print(message)
+    parser.print_usage()
+    exit(1)
 
 
 if __name__ == "__main__":
