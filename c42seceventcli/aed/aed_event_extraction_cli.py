@@ -32,6 +32,7 @@ _SERVICE_NAME_FOR_KEYCHAIN = u"c42seceventcli"
 def main():
     parser = _get_arg_parser()
     args = parser.parse_args()
+    parser.print_help()
 
     if args.c42_ignore_ssl_errors:
         _ignore_ssl_errors()
