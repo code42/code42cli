@@ -25,10 +25,6 @@ from c42seceventcli.common.cli_args import (
 )
 
 _SERVICE = u"c42seceventcli"
-_CREATED = u"CREATED"
-_MODIFIED = u"MODIFIED"
-_DELETED = u"DELETED"
-_READ_BY_APP = u"READ_BY_APP"
 
 
 def main():
