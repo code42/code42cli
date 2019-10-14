@@ -18,6 +18,11 @@ A simple usage only requires the code42 authority url and your username:
         
 If this is the first execution, the program will prompt for your password.
 
+To use a config file, rename `config.default.cfg` to `config.cfg` and edit the fields to be your
+authority server URL and your Code42 logon username. Then, do not provide those command line arguments:
+
+        python aed_event_extraction_cli.py
+
 If you get a keychain error when running this script, you may have to add a code signature to the script:
 
         codesign -f -s - $(which python)

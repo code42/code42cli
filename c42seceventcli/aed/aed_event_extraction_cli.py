@@ -16,7 +16,6 @@ from c42seceventcli.aed.aed_cursor_store import AEDCursorStore
 from c42seceventcli.common.cli_args import (
     add_authority_host_address_arg,
     add_username_arg,
-    add_config_file_arg,
     add_begin_timestamp_arg,
     add_help_arg,
     add_ignore_ssl_errors_arg,
@@ -27,7 +26,7 @@ from c42seceventcli.common.cli_args import (
     add_debug_arg
 )
 
-_SERVICE = u"c42seceventcli"
+_SERVICE_NAME_FOR_KEYCHAIN = u"c42seceventcli"
 
 
 def main():
@@ -40,14 +39,13 @@ def main():
     if args.c42_debug_mode:
         settings.debug_level = debug_level.DEBUG
 
-    if args.c42_config_file is None:
-        username = args.c42_username
-        host_address = args.c42_authority_url
-    else:
-        username = ""
-        host_address = ""
+    config = configparser.ConfigParser()
+    config.read("config.cfg")
 
-    if host_address is None:
+    username = config["Code42"]["username"] if args.c42_username is None else args.c42_username
+    server = config["Code42"]["server"] if args.c42_authority_url is None else args.c42_authority_url
+
+    if server is None:
         print("Host address not provided.")
         parser.print_usage()
         exit(1)
@@ -66,7 +64,7 @@ def main():
         print("Argument --begin must be within 90 days")
         exit(1)
 
-    sdk = _create_sdk(address=host_address, username=username, password=password)
+    sdk = _create_sdk(address=server, username=username, password=password)
     handlers = _create_handlers(args.c42_output_format)
     extractor = AEDEventExtractor(sdk, handlers)
     extractor.extract(min_timestamp, max_timestamp, args.c42_event_types)
@@ -74,23 +72,21 @@ def main():
 
 def _get_arg_parser():
     parser = ArgumentParser(add_help=False)
-    logon_group = parser.add_mutually_exclusive_group(required=True)
-    add_authority_host_address_arg(logon_group)
-    add_config_file_arg(logon_group)
 
     # Makes sure that you can't give both an end_timestamp and tell it to record cursor positions
     mutually_exclusive_timestamp_group = parser.add_mutually_exclusive_group()
     add_end_timestamp_arg(mutually_exclusive_timestamp_group)
     add_record_cursor_arg(mutually_exclusive_timestamp_group)
 
-    optionals = parser.add_argument_group("optional arguments")
-    add_username_arg(optionals)
-    add_help_arg(optionals)
-    add_begin_timestamp_arg(optionals)
-    add_ignore_ssl_errors_arg(optionals)
-    add_output_format_arg(optionals)
-    add_event_type_args(optionals)
-    add_debug_arg(optionals)
+    main_args = parser.add_argument_group("main")
+    add_authority_host_address_arg(main_args)
+    add_username_arg(main_args)
+    add_help_arg(main_args)
+    add_begin_timestamp_arg(main_args)
+    add_ignore_ssl_errors_arg(main_args)
+    add_output_format_arg(main_args)
+    add_event_type_args(main_args)
+    add_debug_arg(main_args)
     return parser
 
 
@@ -100,10 +96,10 @@ def _ignore_ssl_errors():
 
 
 def _get_password(username):
-    password = get_password(_SERVICE, username)
+    password = get_password(_SERVICE_NAME_FOR_KEYCHAIN, username)
     if password is None:
         pwd = getpass()
-        set_password(_SERVICE, username, pwd)
+        set_password(_SERVICE_NAME_FOR_KEYCHAIN, username, pwd)
 
     return password
 
