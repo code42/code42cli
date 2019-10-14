@@ -59,4 +59,4 @@ Full usage:
                             The format used for outputting events.
       -t [{created,modified,deleted,read_by_app} [{created,modified,deleted,read_by_app} ...]], --types [{created,modified,deleted,read_by_app} [{created,modified,deleted,read_by_app} ...]]
                             The types of events to extract.
-    -d--debug             Set to turn on debug logging.
+      -d--debug             Set to turn on debug logging.
