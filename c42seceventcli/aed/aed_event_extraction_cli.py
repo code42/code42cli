@@ -125,7 +125,7 @@ def _create_handlers(output_type):
 def _get_response_handler(output_format):
     def handle_response(response):
         print(response.text)
-        # TODO: Replace with logging
+        # TODO: Replace with logging from Alan's branch
 
     return handle_response
 
