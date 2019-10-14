@@ -42,7 +42,7 @@ def main():
     config = configparser.ConfigParser()
     config.read("config.cfg")
 
-    # Must either pass in a username and server address or provide them in config.cfg. See README.
+    # Must either pass in a username and server address or provide them in config.cfg.
     username = config["Code42"]["username"] if args.c42_username is None else args.c42_username
     server = (
         config["Code42"]["server"] if args.c42_authority_url is None else args.c42_authority_url
@@ -76,7 +76,7 @@ def main():
 def _get_arg_parser():
     parser = ArgumentParser(add_help=False)
 
-    # Makes sure that you can't give both an end_timestamp and tell it to record cursor positions
+    # Makes sure that you can't give both an end_timestamp and record cursor positions
     mutually_exclusive_timestamp_group = parser.add_mutually_exclusive_group()
     add_end_timestamp_arg(mutually_exclusive_timestamp_group)
     add_record_cursor_arg(mutually_exclusive_timestamp_group)
