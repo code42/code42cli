@@ -2,16 +2,6 @@ from argparse import SUPPRESS
 from datetime import datetime, timedelta
 
 
-def init_required_args(parser):
-    required = parser.add_argument_group("required arguments")
-    add_authority_host_address_arg(required)
-    return required
-
-
-def init_optional_arg_group(parser):
-    return parser.add_argument_group("optional arguments")
-
-
 def add_authority_host_address_arg(arg_group):
     arg_group.add_argument(
         "-s",
@@ -19,7 +9,6 @@ def add_authority_host_address_arg(arg_group):
         dest="c42_authority_url",
         action="store",
         help="The full scheme, url and port of the Code42 server.",
-        required=True,
     )
 
 
@@ -30,7 +19,16 @@ def add_username_arg(arg_group):
         action="store",
         dest="c42_username",
         help="The username of the Code42 API user.",
-        required=True,
+    )
+
+
+def add_config_file_arg(arg_group):
+    arg_group.add_argument(
+        "-c",
+        "--config",
+        action="store",
+        dest="c42_config_file",
+        help="Path to a .cfg file containing a username and Code42 authority host address."
     )
 
 

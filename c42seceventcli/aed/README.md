@@ -18,6 +18,10 @@ A simple usage only requires the code42 authority url and your username:
         
 If this is the first execution, the program will prompt for your password.
 
+If you get a keychain error when running this script, you may have to add a code signature to the script:
+
+        codesign -f -s - $(which python)
+
 Full usage:
 
         aed_event_extraction_cli.py -s C42_AUTHORITY_URL -u C42_USERNAME

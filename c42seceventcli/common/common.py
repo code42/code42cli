@@ -11,4 +11,8 @@ def parse_timestamp(input_string):
         else:
             raise ValueError("input must be a positive integer or a date in YYYY-MM-DD format.")
 
-    return datetime.timestamp(time)
+    return convert_date_to_timestamp(time)
+
+
+def convert_date_to_timestamp(date):
+    return (date - datetime.utcfromtimestamp(0)).total_seconds()
