@@ -30,8 +30,7 @@ _SERVICE_NAME_FOR_KEYCHAIN = u"c42seceventcli"
 
 
 def main():
-    parser = _get_arg_parser()
-    args = parser.parse_args()
+    args = _parse_args()
 
     if args.c42_ignore_ssl_errors:
         _ignore_ssl_errors()
@@ -70,7 +69,7 @@ def main():
     extractor.extract(min_timestamp, max_timestamp, args.c42_event_types)
 
 
-def _get_arg_parser():
+def _parse_args():
     parser = ArgumentParser(add_help=False)
 
     # Makes sure that you can't give both an end_timestamp and tell it to record cursor positions
@@ -87,7 +86,7 @@ def _get_arg_parser():
     add_output_format_arg(main_args)
     add_event_type_args(main_args)
     add_debug_arg(main_args)
-    return parser
+    return parser.parse_args()
 
 
 def _ignore_ssl_errors():
