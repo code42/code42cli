@@ -30,11 +30,11 @@ If you get a keychain error when running this script, you may have to add a code
 Full usage:
 
      aed_event_extraction_cli.py [-e C42_END_DATE | -r]
-                                       [-s C42_AUTHORITY_URL] [-u C42_USERNAME]
-                                       [-h] [-b C42_BEGIN_DATE] [-i]
-                                       [-o {CEF,JSON}]
-                                       [-t [{created,modified,deleted,read_by_app} [{created,modified,deleted,read_by_app} ...]]]
-                                       [-d--debug]
+                                 [-s C42_AUTHORITY_URL] [-u C42_USERNAME]
+                                 [-h] [-b C42_BEGIN_DATE] [-i]
+                                 [-o {CEF,JSON}]
+                                 [-t [{created,modified,deleted,read_by_app} [{created,modified,deleted,read_by_app} ...]]]
+                                 [-d--debug]
     
     optional arguments:
       -e C42_END_DATE, --end C42_END_DATE
