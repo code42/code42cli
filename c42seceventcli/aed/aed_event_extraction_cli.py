@@ -21,7 +21,8 @@ from c42seceventcli.common.cli_args import (
     add_output_format_arg,
     add_end_timestamp_arg,
     add_record_cursor_arg,
-    add_event_type_args
+    add_event_type_args,
+    add_debug_arg
 )
 
 _SERVICE = u"c42seceventcli"
@@ -67,6 +68,7 @@ def _get_arg_parser():
     add_ignore_ssl_errors_arg(optionals)
     add_output_format_arg(optionals)
     add_event_type_args(optionals)
+    add_debug_arg(optionals)
     return parser
 
 

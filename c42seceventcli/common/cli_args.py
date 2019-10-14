@@ -112,3 +112,13 @@ def add_event_type_args(arg_group):
         choices=[u"created", u"modified", u"deleted", u"read_by_app"],
         help="The types of events to extract."
     )
+
+
+def add_debug_arg(arg_group):
+    arg_group.add_argument(
+        "-d"
+        "--debug",
+        action="store_true",
+        dest="c42_debug_mode",
+        help="Set to turn on debug logging."
+    )
