@@ -67,7 +67,7 @@ def main():
         print("Argument --begin must be within 90 days")
         exit(1)
 
-    sdk = _create_sdk(address=server, username=username, password=password)
+    sdk = SDK.create_using_local_account(host_address=server, username=username, password=password)
     handlers = _create_handlers(args.c42_output_format)
     extractor = AEDEventExtractor(sdk, handlers)
     extractor.extract(min_timestamp, max_timestamp, args.c42_event_types)
@@ -111,12 +111,6 @@ def _verify_min_timestamp(min_timestamp):
     boundary_date = datetime.utcnow() - timedelta(days=90)
     boundary = convert_date_to_timestamp(boundary_date)
     return min_timestamp >= boundary
-
-
-def _create_sdk(address, username, password):
-    return SDK.create_using_local_account(
-        host_address=address, username=username, password=password
-    )
 
 
 def _create_handlers(output_type):
