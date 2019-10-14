@@ -33,7 +33,8 @@ Full usage:
                                  [-s C42_AUTHORITY_URL] [-u C42_USERNAME]
                                  [-h] [-b C42_BEGIN_DATE] [-i]
                                  [-o {CEF,JSON}]
-                                 [-t [{created,modified,deleted,read_by_app} [{created,modified,deleted,read_by_app} ...]]]
+                                 [-t [{created,modified,deleted,read_by_app} 
+                                     [{created,modified,deleted,read_by_app} ...]]]
                                  [-d--debug]
     
     optional arguments:
@@ -57,6 +58,7 @@ Full usage:
                             Set to ignore ssl errors.
       -o {CEF,JSON}, --output-format {CEF,JSON}
                             The format used for outputting events.
-      -t [{created,modified,deleted,read_by_app} [{created,modified,deleted,read_by_app} ...]], --types [{created,modified,deleted,read_by_app} [{created,modified,deleted,read_by_app} ...]]
+      -t [{created,modified,deleted,read_by_app} [{created,modified,deleted,read_by_app} ...]], 
+      --types [{created,modified,deleted,read_by_app} [{created,modified,deleted,read_by_app} ...]]
                             The types of events to extract.
       -d--debug             Set to turn on debug logging.
