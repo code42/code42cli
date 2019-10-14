@@ -38,7 +38,7 @@ def add_begin_timestamp_arg(arg_group):
         dest="c42_begin_date",
         default=default_begin_date_str,
         help="The end of the date range in which to look for events, "
-        "in YYYY-MM-DD format OR a number (number of minutes ago).",
+        "in YYYY-MM-DD UTC format OR a number (number of minutes ago).",
     )
 
 
@@ -52,7 +52,7 @@ def add_end_timestamp_arg(arg_group):
         dest="c42_end_date",
         default=default_end_date_str,
         help="The beginning of the date range in which to look for events, "
-        "in YYYY-MM-DD format OR a number (number of minutes ago).",
+        "in YYYY-MM-DD UTC format OR a number (number of minutes ago).",
     )
 
 

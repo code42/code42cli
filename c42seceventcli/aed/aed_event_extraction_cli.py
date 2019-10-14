@@ -42,6 +42,7 @@ def main():
     config = configparser.ConfigParser()
     config.read("config.cfg")
 
+    # Must either pass in a username and server address or provide them in config.cfg. See README.
     username = config["Code42"]["username"] if args.c42_username is None else args.c42_username
     server = (
         config["Code42"]["server"] if args.c42_authority_url is None else args.c42_authority_url
