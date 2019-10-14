@@ -116,7 +116,6 @@ def _verify_min_timestamp(min_timestamp):
 def _create_handlers(output_type):
     store = AEDCursorStore()
     handlers = FileEventHandlers()
-
     handlers.record_cursor_position = store.replace_stored_insertion_timestamp
     handlers.get_cursor_position = store.get_stored_insertion_timestamp
     handlers.handle_response = _get_response_handler(output_type)
