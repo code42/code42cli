@@ -209,22 +209,9 @@ def _create_handlers(args):
     handlers = FileEventHandlers()
     handlers.record_cursor_position = store.replace_stored_insertion_timestamp
     handlers.get_cursor_position = store.get_stored_insertion_timestamp
-    handlers.handle_response = _get_response_handler(args)
-    return handlers
-
-
-def _get_response_handler(args):
     logger = _get_logger(args)
-
-    def handle_response(response):
-        response_dict = json.loads(response.text)
-        file_events_key = u"fileEvents"
-        if file_events_key in response_dict:
-            events = response_dict[file_events_key]
-            for event in events:
-                logger.info(event)
-
-    return handle_response
+    handlers.handle_response = _get_response_handler(logger)
+    return handlers
 
 
 def _get_logger(args):
@@ -256,6 +243,18 @@ def _get_log_handler(destination, destination_type="stdout"):
         return NoPrioritySysLogHandler(destination)
     elif destination_type == "file":
         return FileHandler(filename=destination)
+
+
+def _get_response_handler(logger):
+    def handle_response(response):
+        response_dict = json.loads(response.text)
+        file_events_key = u"fileEvents"
+        if file_events_key in response_dict:
+            events = response_dict[file_events_key]
+            for event in events:
+                logger.info(event)
+
+    return handle_response
 
 
 if __name__ == "__main__":
