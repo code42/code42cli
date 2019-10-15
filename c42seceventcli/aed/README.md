@@ -79,3 +79,7 @@ Full usage:
                             The types of events to extract.
       -d--debug             Set to turn on debug logging.
 ```
+
+# Known Issues
+
+If your client inserted more than 10,000 events at the same time, you will only get 10,000 of them.
