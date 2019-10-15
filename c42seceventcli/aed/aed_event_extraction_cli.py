@@ -12,11 +12,7 @@ from c42secevents.extractors import AEDEventExtractor
 from c42secevents.common import FileEventHandlers, convert_datetime_to_timestamp
 from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
 
-from c42seceventcli.common.common import (
-    SecEventConfigParser,
-    parse_timestamp,
-    get_logger,
-)
+from c42seceventcli.common.common import SecurityEventConfigParser, parse_timestamp, get_logger
 from c42seceventcli.aed.aed_cursor_store import AEDCursorStore
 from c42seceventcli.common.cli_args import (
     add_authority_host_address_arg,
@@ -41,7 +37,7 @@ _SERVICE_NAME_FOR_KEYCHAIN = u"c42seceventcli"
 def main():
     parser = _get_arg_parser()
     cli_args = parser.parse_args()
-    config_parser = _get_config_parser()
+    config_parser = SecurityEventConfigParser("config.cfg")
     args = _union_cli_args_with_config_args(cli_args, config_parser)
 
     _parse_ignore_ssl_errors(args)
@@ -77,11 +73,6 @@ def _get_arg_parser():
     add_syslog_port_arg(main_args)
     add_syslog_protocol_arg(main_args)
     return parser
-
-
-def _get_config_parser():
-    config = SecEventConfigParser("config.cfg")
-    return config if config.is_valid else None
 
 
 def _union_cli_args_with_config_args(cli_args, config_parser):

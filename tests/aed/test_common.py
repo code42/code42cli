@@ -1,10 +1,23 @@
+import pytest
 from datetime import datetime
 
-from c42secevents.common import convert_datetime_to_timestamp
+from c42seceventcli.common.common import SecurityEventConfigParser
 
 
-def test_convert_datetime_to_timestamp_returns_expected_timestamp():
-    test_date = datetime.utcnow()
-    actual = convert_datetime_to_timestamp(test_date)
-    expected = (test_date - datetime.utcfromtimestamp(0)).total_seconds()
-    assert actual == expected
+@pytest.fixture
+def mock_config_reader(mocker):
+    return mocker.patch("configparser.ConfigParser.read")
+
+
+class TestSecurityEventConfigParser(object):
+    def test_is_valid_when_read_returns_empty_list_is_false(self, mock_config_reader):
+        mock_config_reader.return_value = []
+        parser = SecurityEventConfigParser("test")
+        assert not parser.is_valid
+
+    def test_is_valid_when_read_returns_list_with_values_is_true(self, mock_config_reader):
+        mock_config_reader.return_value = []
+        parser = SecurityEventConfigParser("test")
+        assert parser.is_valid
+
+

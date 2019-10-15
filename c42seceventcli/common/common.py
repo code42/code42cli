@@ -1,23 +1,18 @@
 import sys
 from datetime import datetime, timedelta
-from configparser import ConfigParser, NoOptionError
+from configparser import ConfigParser, NoOptionError, NoSectionError
 from logging import StreamHandler, FileHandler, getLogger, INFO
 
 from c42secevents.logging.handlers import NoPrioritySysLogHandler
 from c42secevents.common import convert_datetime_to_timestamp
 
 
-class SecEventConfigParser(object):
+class SecurityEventConfigParser(object):
     _MAIN_SECTION = "Code42"
 
     def __init__(self, config_file):
         config = ConfigParser()
-        self._is_valid = len(config.read(config_file)) > 0
         self._config = config
-
-    @property
-    def is_valid(self):
-        return self._is_valid
 
     def parse_server(self):
         return self._get("server")
@@ -62,19 +57,19 @@ class SecEventConfigParser(object):
     def _get(self, key):
         try:
             return self._config.get(self._MAIN_SECTION, key)
-        except NoOptionError:
+        except (NoOptionError, NoSectionError):
             return None
 
     def _get_bool(self, key):
         try:
             return self._config.getboolean(self._MAIN_SECTION, key)
-        except NoOptionError:
+        except (NoOptionError, NoSectionError):
             return None
 
     def _get_int(self, key):
         try:
             return self._config.getint(self._MAIN_SECTION, key)
-        except NoOptionError:
+        except (NoOptionError, NoSectionError):
             return None
 
 
