@@ -43,12 +43,12 @@ def main():
     _parse_ignore_ssl_errors(args)
     _parse_debug_mode(args)
     min_timestamp = _parse_min_timestamp(args)
-    max_timestamp = _parse_max_timestamp(args)
+    max_timestamp = parse_timestamp(args.end_date)
 
     sdk = _create_sdk_from_args(args, parser)
     handlers = _create_handlers(args)
     extractor = AEDEventExtractor(sdk, handlers)
-    extractor.extract(min_timestamp, max_timestamp, args.get("exposure_types"))
+    extractor.extract(min_timestamp, max_timestamp, args.exposure_types)
 
 
 def _get_arg_parser():
@@ -75,48 +75,94 @@ def _get_arg_parser():
     return parser
 
 
+class AEDArgs(object):
+    server = None
+    username = None
+    begin_date = None
+    end_date = None
+    ignore_ssl_errors = False
+    output_format = "JSON"
+    record_cursor = False
+    exposure_types = None
+    debug_mode = None
+    destination_type = "stdout"
+    destination = None
+    syslog_port = 514
+    syslog_protocol = "TCP"
+
+
 def _union_cli_args_with_config_args(cli_args, config_parser):
-    return {
-        "username": cli_args.c42_username
-        if cli_args.c42_username
-        else config_parser.parse_username(),
-        "server": cli_args.c42_authority_url
-        if cli_args.c42_authority_url
-        else config_parser.parse_server(),
-        "begin_date": cli_args.c42_begin_date
-        if cli_args.c42_begin_date
-        else config_parser.parse_begin_date(),
-        "end_date": cli_args.c42_end_date
-        if cli_args.c42_end_date
-        else config_parser.parse_end_date(),
-        "ignore_ssl_errors": cli_args.c42_ignore_ssl_errors
+    args = AEDArgs()
+    args.server = (
+        cli_args.c42_authority_url if cli_args.c42_authority_url else config_parser.get("server")
+    )
+    args.username = (
+        cli_args.c42_username if cli_args.c42_username else config_parser.get("username")
+    )
+    args.begin_date = (
+        cli_args.c42_begin_date if cli_args.c42_begin_date else config_parser.get("begin_date")
+    )
+
+    if args.begin_date is None:
+        args.begin_date = _get_default_begin_date()
+
+    args.end_date = (
+        cli_args.c42_end_date if cli_args.c42_end_date else config_parser.get("end_date")
+    )
+
+    if args.end_date is None:
+        args.end_date = _get_default_end_date()
+
+    args.ignore_ssl_errors = (
+        cli_args.c42_ignore_ssl_errors
         if cli_args.c42_ignore_ssl_errors
-        else config_parser.parse_ignore_ssl_errors(),
-        "output_format": cli_args.c42_output_format
+        else config_parser.get("ignore_ssl_errors")
+    )
+    args.output_format = (
+        cli_args.c42_output_format
         if cli_args.c42_output_format
-        else config_parser.parse_output_format(),
-        "record_cursor": cli_args.c42_record_cursor
+        else config_parser.get("output_format")
+    )
+    args.record_cursor = (
+        cli_args.c42_record_cursor
         if cli_args.c42_record_cursor
-        else config_parser.parse_record_cursor(),
-        "exposure_types": cli_args.c42_exposure_types
+        else config_parser.get("record_cursor")
+    )
+    args.exposure_types = (
+        cli_args.c42_exposure_types
         if cli_args.c42_exposure_types
-        else config_parser.parse_exposure_types(),
-        "debug_mode": cli_args.c42_debug_mode
-        if cli_args.c42_debug_mode
-        else config_parser.parse_debug_mode(),
-        "destination_type": cli_args.c42_destination_type
+        else config_parser.get("exposure_types")
+    )
+    args.debug_mode = (
+        cli_args.c42_debug_mode if cli_args.c42_debug_mode else config_parser.get("debug_mode")
+    )
+    args.destination_type = (
+        cli_args.c42_destination_type
         if cli_args.c42_destination_type
-        else config_parser.parse_destination_type(),
-        "destination": cli_args.c42_destination
-        if cli_args.c42_destination
-        else config_parser.parse_destination(),
-        "syslog_port": cli_args.c42_syslog_port
-        if cli_args.c42_syslog_port
-        else config_parser.parse_syslog_port(),
-        "syslog_protocol": cli_args.c42_syslog_protocol
+        else config_parser.get("destination_type")
+    )
+    args.destination = (
+        cli_args.c42_destination if cli_args.c42_destination else config_parser.get("destination")
+    )
+    args.syslog_port = (
+        cli_args.c42_syslog_port if cli_args.c42_syslog_port else config_parser.get("syslog_port")
+    )
+    args.syslog_protocol = (
+        cli_args.c42_syslog_protocol
         if cli_args.c42_syslog_protocol
-        else config_parser.parse_syslog_protocol(),
-    }
+        else config_parser.get("syslog_protocol")
+    )
+    return args
+
+
+def _get_default_begin_date():
+    default_begin_date = datetime.now() - timedelta(days=60)
+    return default_begin_date.strftime("%Y-%m-%d")
+
+
+def _get_default_end_date():
+    default_end_date = datetime.now()
+    return default_end_date.strftime("%Y-%m-%d")
 
 
 def _ignore_ssl_errors():
@@ -125,17 +171,17 @@ def _ignore_ssl_errors():
 
 
 def _parse_ignore_ssl_errors(args):
-    if args.get("ignore_ssl_errors"):
+    if args.ignore_ssl_errors:
         _ignore_ssl_errors()
 
 
 def _parse_debug_mode(args):
-    if args.get("debug_mode"):
+    if args.debug_mode:
         settings.debug_level = debug_level.DEBUG
 
 
 def _parse_min_timestamp(args):
-    min_timestamp = parse_timestamp(args.get("begin_date"))
+    min_timestamp = parse_timestamp(args.begin_date)
     boundary_date = datetime.utcnow() - timedelta(days=90)
     boundary = convert_datetime_to_timestamp(boundary_date)
     if min_timestamp < boundary:
@@ -143,10 +189,6 @@ def _parse_min_timestamp(args):
         exit(1)
 
     return min_timestamp
-
-
-def _parse_max_timestamp(args):
-    return parse_timestamp(args.get("end_date"))
 
 
 def _create_sdk_from_args(args, parser):
@@ -158,7 +200,7 @@ def _create_sdk_from_args(args, parser):
 
 
 def _parse_server_address(args, parser):
-    server = args.get("server")
+    server = args.server
     if server is None:
         _exit_from_argument_error("Host address not provided.", parser)
 
@@ -166,7 +208,7 @@ def _parse_server_address(args, parser):
 
 
 def _parse_username(args, parser):
-    username = args.get("username")
+    username = args.username
     if username is None:
         _exit_from_argument_error("Username not provided.", parser)
 
@@ -193,8 +235,8 @@ def _create_handlers(args):
     handlers = FileEventHandlers()
     handlers.record_cursor_position = store.replace_stored_insertion_timestamp
     handlers.get_cursor_position = store.get_stored_insertion_timestamp
-    output_format = args.get("output_format")
-    destination = args.get("destination")
+    output_format = args.output_format
+    destination = args.destination
     logger_formatter = _get_log_formatter(output_format)
     logger = get_logger(logger_formatter, destination)
     handlers.handle_response = _get_response_handler(logger)
