@@ -40,8 +40,12 @@ def main():
     config_parser = SecurityEventConfigParser("config.cfg")
     args = _union_cli_args_with_config_args(cli_args, config_parser)
 
-    _parse_ignore_ssl_errors(args)
-    _parse_debug_mode(args)
+    if args.ignore_ssl_errors:
+        _ignore_ssl_errors()
+
+    if args.debug_mode:
+        settings.debug_level = debug_level.DEBUG
+
     min_timestamp = _parse_min_timestamp(args)
     max_timestamp = parse_timestamp(args.end_date)
 
@@ -170,16 +174,6 @@ def _ignore_ssl_errors():
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
-def _parse_ignore_ssl_errors(args):
-    if args.ignore_ssl_errors:
-        _ignore_ssl_errors()
-
-
-def _parse_debug_mode(args):
-    if args.debug_mode:
-        settings.debug_level = debug_level.DEBUG
-
-
 def _parse_min_timestamp(args):
     min_timestamp = parse_timestamp(args.begin_date)
     boundary_date = datetime.utcnow() - timedelta(days=90)
@@ -192,14 +186,14 @@ def _parse_min_timestamp(args):
 
 
 def _create_sdk_from_args(args, parser):
-    server = _parse_server_address(args, parser)
-    username = _parse_username(args, parser)
+    server = _get_server_from_args(args, parser)
+    username = _get_username_from_args(args, parser)
     password = _get_password(username)
     sdk = SDK.create_using_local_account(host_address=server, username=username, password=password)
     return sdk
 
 
-def _parse_server_address(args, parser):
+def _get_server_from_args(args, parser):
     server = args.server
     if server is None:
         _exit_from_argument_error("Host address not provided.", parser)
@@ -207,7 +201,7 @@ def _parse_server_address(args, parser):
     return server
 
 
-def _parse_username(args, parser):
+def _get_username_from_args(args, parser):
     username = args.username
     if username is None:
         _exit_from_argument_error("Username not provided.", parser)
