@@ -12,23 +12,39 @@ most recently extracted event as a cursor so that only new events come through o
 
 ## Usage
 
-A simple usage requires either your code42 authority url and username passed in as arguments:
+A simple usage requires you to pass in your Code42 authority URL and username as arguments:
 
-    python aed_event_extraction_cli.py -s https://example.authority.com -u security.admin@example.com
+```bash
+python aed_event_extraction_cli.py -s https://example.authority.com -u security.admin@example.com
+```
         
-Or, stated in a file named `config.cfg`. Rename `config.default.cfg` to `config.cfg` and edit the fields to be your
-authority server URL and username. Then, run the script as follows:
+Another option is to put your Code42 authority URL and username in a file named `config.cfg`. 
+Rename `config.default.cfg` to `config.cfg` and edit the fields to be your
+authority server URL and username.
 
-    python aed_event_extraction_cli.py
+```buildoutcfg
+[Code42]
+username=user@code42.com
+server=https://example.authority.com
+```
+
+Then, run the script as follows:
+
+```bash
+python aed_event_extraction_cli.py
+```
 
 If this is the first run, it will prompt you for your password.
 
 If you get a keychain error when running this script, you may have to add a code signature:
 
-    codesign -f -s - $(which python)
+```bash
+codesign -f -s - $(which python)
+```
 
 Full usage:
 
+```
      aed_event_extraction_cli.py [-e C42_END_DATE | -r]
                                  [-s C42_AUTHORITY_URL] [-u C42_USERNAME]
                                  [-h] [-b C42_BEGIN_DATE] [-i]
@@ -62,3 +78,4 @@ Full usage:
       --types [{created,modified,deleted,read_by_app} [{created,modified,deleted,read_by_app} ...]]
                             The types of events to extract.
       -d--debug             Set to turn on debug logging.
+```
