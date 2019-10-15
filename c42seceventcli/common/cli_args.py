@@ -22,13 +22,7 @@ def add_username_arg(arg_group):
     )
 
 
-def add_help_arg(arg_group):
-    arg_group.add_argument(
-        "-h", "--help", action="help", default=SUPPRESS, help="Show this help message and exit"
-    )
-
-
-def add_begin_timestamp_arg(arg_group):
+def add_begin_date_arg(arg_group):
     default_begin_date = datetime.now() - timedelta(days=60)
     default_begin_date_str = default_begin_date.strftime("%Y-%m-%d")
     arg_group.add_argument(
@@ -42,7 +36,7 @@ def add_begin_timestamp_arg(arg_group):
     )
 
 
-def add_end_timestamp_arg(arg_group):
+def add_end_date_arg(arg_group):
     default_end_date = datetime.now()
     default_end_date_str = default_end_date.strftime("%Y-%m-%d")
     arg_group.add_argument(
@@ -75,7 +69,7 @@ def add_output_format_arg(arg_group):
         action="store",
         default="JSON",
         choices=["CEF", "JSON"],
-        help="The format used for outputting events."
+        help="The format used for outputting events.",
     )
 
 
@@ -86,27 +80,39 @@ def add_record_cursor_arg(arg_group):
         dest="c42_record_cursor",
         action="store_true",
         default=False,
-        help="Used to only get new events on subsequent runs."
+        help="Used to only get new events on subsequent runs.",
     )
 
 
-def add_event_type_args(arg_group):
+def add_exposure_types_arg(arg_group):
     arg_group.add_argument(
         "-t",
         "--types",
         nargs="*",
         action="store",
-        dest="c42_event_types",
-        choices=[u"created", u"modified", u"deleted", u"read_by_app"],
-        help="The types of events to extract."
+        dest="c42_exposure_types",
+        choices=[
+            u"SharedViaLink",
+            u"SharedToDomain",
+            u"ApplicationRead",
+            u"CloudStorage",
+            u"RemovableMedia",
+            u"IsPublic",
+        ],
+        help="The events with given exposure types to extract.",
     )
 
 
 def add_debug_arg(arg_group):
     arg_group.add_argument(
-        "-d"
-        "--debug",
+        "-d" "--debug",
         action="store_true",
         dest="c42_debug_mode",
-        help="Set to turn on debug logging."
+        help="Set to turn on debug logging.",
+    )
+
+
+def add_help_arg(arg_group):
+    arg_group.add_argument(
+        "-h", "--help", action="help", default=SUPPRESS, help="Show this help message and exit"
     )

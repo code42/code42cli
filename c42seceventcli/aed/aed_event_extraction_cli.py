@@ -36,14 +36,10 @@ def main():
 
     _parse_ignore_ssl_errors(args)
     _parse_debug_mode(args)
-    server = _parse_server_address(args, parser)
-    username = _parse_username(args, parser)
-    password = _get_password(username)
-
     min_timestamp = _parse_min_timestamp(args)
     max_timestamp = _parse_max_timestamp(args)
 
-    sdk = SDK.create_using_local_account(host_address=server, username=username, password=password)
+    sdk = _create_sdk_from_args(args, parser)
     handlers = _create_handlers(args.get("output_format"))
     extractor = AEDEventExtractor(sdk, handlers)
     extractor.extract(min_timestamp, max_timestamp, args.get("exposure_types"))
@@ -121,6 +117,27 @@ def _parse_debug_mode(args):
         settings.debug_level = debug_level.DEBUG
 
 
+def _parse_min_timestamp(args):
+    min_timestamp = parse_timestamp(args.get("begin_date"))
+    if not _verify_min_timestamp(min_timestamp):
+        print("Argument --begin must be within 90 days")
+        exit(1)
+
+    return min_timestamp
+
+
+def _parse_max_timestamp(args):
+    return parse_timestamp(args.get("end_date"))
+
+
+def _create_sdk_from_args(args, parser):
+    server = _parse_server_address(args, parser)
+    username = _parse_username(args, parser)
+    password = _get_password(username)
+    sdk = SDK.create_using_local_account(host_address=server, username=username, password=password)
+    return sdk
+
+
 def _parse_server_address(args, parser):
     server = args.get("server")
     if server is None:
@@ -144,19 +161,6 @@ def _get_password(username):
         set_password(_SERVICE_NAME_FOR_KEYCHAIN, username, pwd)
 
     return password
-
-
-def _parse_min_timestamp(args):
-    min_timestamp = parse_timestamp(args.get("begin_date"))
-    if not _verify_min_timestamp(min_timestamp):
-        print("Argument --begin must be within 90 days")
-        exit(1)
-
-    return min_timestamp
-
-
-def _parse_max_timestamp(args):
-    return parse_timestamp(args.get("end_date"))
 
 
 def _verify_min_timestamp(min_timestamp):
