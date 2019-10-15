@@ -1,16 +1,25 @@
+import sys
+import urllib3
+import json
 from argparse import ArgumentParser
 from datetime import datetime, timedelta
 from keyring import get_password, set_password
 from getpass import getpass
-import urllib3
+from logging import StreamHandler, FileHandler, getLogger, INFO
 
-from py42.sdk import SDK
 import py42.debug_level as debug_level
+from py42.sdk import SDK
 from py42 import settings
 from c42secevents.extractors import AEDEventExtractor
 from c42secevents.common import FileEventHandlers
+from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
+from c42secevents.logging.handlers import NoPrioritySysLogHandler
 
-from c42seceventcli.common.common import SecEventConfigParser, parse_timestamp, convert_date_to_timestamp
+from c42seceventcli.common.common import (
+    SecEventConfigParser,
+    parse_timestamp,
+    convert_date_to_timestamp,
+)
 from c42seceventcli.aed.aed_cursor_store import AEDCursorStore
 from c42seceventcli.common.cli_args import (
     add_authority_host_address_arg,
@@ -22,6 +31,10 @@ from c42seceventcli.common.cli_args import (
     add_record_cursor_arg,
     add_exposure_types_arg,
     add_debug_arg,
+    add_destination_type_arg,
+    add_destination_arg,
+    add_syslog_port_arg,
+    add_syslog_protocol_arg,
     add_help_arg,
 )
 
@@ -40,7 +53,7 @@ def main():
     max_timestamp = _parse_max_timestamp(args)
 
     sdk = _create_sdk_from_args(args, parser)
-    handlers = _create_handlers(args.get("output_format"))
+    handlers = _create_handlers(args)
     extractor = AEDEventExtractor(sdk, handlers)
     extractor.extract(min_timestamp, max_timestamp, args.get("exposure_types"))
 
@@ -62,6 +75,10 @@ def _get_arg_parser():
     add_output_format_arg(main_args)
     add_exposure_types_arg(main_args)
     add_debug_arg(main_args)
+    add_destination_type_arg(main_args)
+    add_destination_arg(main_args)
+    add_syslog_port_arg(main_args)
+    add_syslog_protocol_arg(main_args)
     return parser
 
 
@@ -99,6 +116,18 @@ def _get_args(cli_args, config_parser):
         "debug_mode": cli_args.c42_debug_mode
         if cli_args.c42_debug_mode
         else config_parser.parse_debug_mode(),
+        "destination_type": cli_args.c42_destination_type
+        if cli_args.c42_destination_type
+        else config_parser.parse_destination_type(),
+        "destination": cli_args.c42_destination
+        if cli_args.c42_destination
+        else config_parser.parse_destination(),
+        "syslog_port": cli_args.c42_syslog_port
+        if cli_args.c42_syslog_port
+        else config_parser.parse_syslog_port(),
+        "syslog_protocol": cli_args.c42_syslog_protocol
+        if cli_args.c42_syslog_protocol
+        else config_parser.parse_syslog_protocol(),
     }
 
 
@@ -160,6 +189,12 @@ def _parse_username(args, parser):
     return username
 
 
+def _exit_from_argument_error(message, parser):
+    print(message)
+    parser.print_usage()
+    exit(1)
+
+
 def _get_password(username):
     password = get_password(_SERVICE_NAME_FOR_KEYCHAIN, username)
     if password is None:
@@ -169,27 +204,58 @@ def _get_password(username):
     return password
 
 
-def _create_handlers(output_type):
+def _create_handlers(args):
     store = AEDCursorStore()
     handlers = FileEventHandlers()
     handlers.record_cursor_position = store.replace_stored_insertion_timestamp
     handlers.get_cursor_position = store.get_stored_insertion_timestamp
-    handlers.handle_response = _get_response_handler(output_type)
+    handlers.handle_response = _get_response_handler(args)
     return handlers
 
 
-def _get_response_handler(output_format):
+def _get_response_handler(args):
+    logger = _get_logger(args)
+
     def handle_response(response):
-        print(response.text)
-        # TODO: Replace with logging from Alan's branch
+        response_dict = json.loads(response.text)
+        file_events_key = u"fileEvents"
+        if file_events_key in response_dict:
+            events = response_dict[file_events_key]
+            for event in events:
+                logger.info(event)
 
     return handle_response
 
 
-def _exit_from_argument_error(message, parser):
-    print(message)
-    parser.print_usage()
-    exit(1)
+def _get_logger(args):
+    output_format = args.get("output_format")
+    destination = args.get("destination")
+    logger = getLogger("Code42_SecEventCli_Logger")
+    formatter = _get_log_formatter(output_format)
+    handler = _get_log_handler(args.get(destination))
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(INFO)
+    return logger
+
+
+def _get_log_formatter(output_format):
+    if output_format == "JSON":
+        return AEDDictToJSONFormatter()
+    elif output_format == "CEF":
+        return AEDDictToCEFFormatter()
+    else:
+        print("Unsupported output format {0}".format(output_format))
+        exit(1)
+
+
+def _get_log_handler(destination, destination_type="stdout"):
+    if destination_type == "stdout":
+        return StreamHandler(sys.stdout)
+    elif destination_type == "syslog":
+        return NoPrioritySysLogHandler(destination)
+    elif destination_type == "file":
+        return FileHandler(filename=destination)
 
 
 if __name__ == "__main__":
