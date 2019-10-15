@@ -22,7 +22,7 @@ from c42seceventcli.common.cli_args import (
     add_output_format_arg,
     add_end_timestamp_arg,
     add_record_cursor_arg,
-    add_event_type_args,
+    add_exposure_type_args,
     add_debug_arg,
 )
 
@@ -66,7 +66,7 @@ def main():
     sdk = SDK.create_using_local_account(host_address=server, username=username, password=password)
     handlers = _create_handlers(args.c42_output_format)
     extractor = AEDEventExtractor(sdk, handlers)
-    extractor.extract(min_timestamp, max_timestamp, args.c42_event_types)
+    extractor.extract(min_timestamp, max_timestamp, args.c42_exposure_types)
 
 
 def _get_arg_parser():
@@ -84,7 +84,7 @@ def _get_arg_parser():
     add_begin_timestamp_arg(main_args)
     add_ignore_ssl_errors_arg(main_args)
     add_output_format_arg(main_args)
-    add_event_type_args(main_args)
+    add_exposure_type_args(main_args)
     add_debug_arg(main_args)
     return parser
 
