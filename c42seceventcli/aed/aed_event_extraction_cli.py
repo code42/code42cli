@@ -32,7 +32,6 @@ _SERVICE_NAME_FOR_KEYCHAIN = u"c42seceventcli"
 def main():
     parser = _get_arg_parser()
     args = parser.parse_args()
-    parser.print_help()
 
     if args.c42_ignore_ssl_errors:
         _ignore_ssl_errors()
@@ -40,12 +39,11 @@ def main():
     if args.c42_debug_mode:
         settings.debug_level = debug_level.DEBUG
 
-    config = _get_config()
-
     # Must either pass in a username and server address or provide them in config.cfg.
+    config = _get_config()
     if config:
-        username = config["Code42"]["username"]
-        server = config["Code42"]["server"]
+        username = config.get("username")
+        server = config.get("server")
     else:
         username = args.c42_username
         server = args.c42_authority_url
@@ -131,7 +129,7 @@ def _get_response_handler(output_format):
 def _get_config():
     config = configparser.ConfigParser()
     config_file_found = len(config.read("config.cfg")) > 0
-    return config if config_file_found else None
+    return config["Code42"] if config_file_found else None
 
 
 def _exit_from_argument_error(message, parser):
