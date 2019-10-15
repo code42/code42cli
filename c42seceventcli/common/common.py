@@ -1,5 +1,10 @@
+import sys
 from datetime import datetime, timedelta
 from configparser import ConfigParser, NoOptionError
+from logging import StreamHandler, FileHandler, getLogger, INFO
+
+from c42secevents.logging.handlers import NoPrioritySysLogHandler
+from c42secevents.common import convert_datetime_to_timestamp
 
 
 class SecEventConfigParser(object):
@@ -83,8 +88,22 @@ def parse_timestamp(input_string):
         else:
             raise ValueError("input must be a positive integer or a date in YYYY-MM-DD format.")
 
-    return convert_date_to_timestamp(time)
+    return convert_datetime_to_timestamp(time)
 
 
-def convert_date_to_timestamp(date):
-    return (date - datetime.utcfromtimestamp(0)).total_seconds()
+def get_logger(formatter, destination):
+    logger = getLogger("Code42_SecEventCli_Logger")
+    handler = _get_log_handler(destination)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(INFO)
+    return logger
+
+
+def _get_log_handler(destination, destination_type="stdout"):
+    if destination_type == "stdout":
+        return StreamHandler(sys.stdout)
+    elif destination_type == "syslog":
+        return NoPrioritySysLogHandler(destination)
+    elif destination_type == "file":
+        return FileHandler(filename=destination)

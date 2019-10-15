@@ -9,13 +9,12 @@ import py42.debug_level as debug_level
 from py42.sdk import SDK
 from py42 import settings
 from c42secevents.extractors import AEDEventExtractor
-from c42secevents.common import FileEventHandlers
+from c42secevents.common import FileEventHandlers, convert_datetime_to_timestamp
 from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
 
 from c42seceventcli.common.common import (
     SecEventConfigParser,
     parse_timestamp,
-    convert_date_to_timestamp,
     get_logger,
 )
 from c42seceventcli.aed.aed_cursor_store import AEDCursorStore
@@ -147,7 +146,7 @@ def _parse_debug_mode(args):
 def _parse_min_timestamp(args):
     min_timestamp = parse_timestamp(args.get("begin_date"))
     boundary_date = datetime.utcnow() - timedelta(days=90)
-    boundary = convert_date_to_timestamp(boundary_date)
+    boundary = convert_datetime_to_timestamp(boundary_date)
     if min_timestamp < boundary:
         print("Argument --begin must be within 90 days")
         exit(1)
