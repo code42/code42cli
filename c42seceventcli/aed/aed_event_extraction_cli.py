@@ -44,8 +44,8 @@ _SERVICE_NAME_FOR_KEYCHAIN = u"c42seceventcli"
 def main():
     parser = _get_arg_parser()
     cli_args = parser.parse_args()
-    config = _get_config()
-    args = _get_args(cli_args, config)
+    config_parser = _get_config_parser()
+    args = _union_cli_args_with_config_args(cli_args, config_parser)
 
     _parse_ignore_ssl_errors(args)
     _parse_debug_mode(args)
@@ -82,12 +82,12 @@ def _get_arg_parser():
     return parser
 
 
-def _get_config():
+def _get_config_parser():
     config = SecEventConfigParser("config.cfg")
     return config if config.is_valid else None
 
 
-def _get_args(cli_args, config_parser):
+def _union_cli_args_with_config_args(cli_args, config_parser):
     return {
         "username": cli_args.c42_username
         if cli_args.c42_username
