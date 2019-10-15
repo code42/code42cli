@@ -3,7 +3,7 @@ from configparser import ConfigParser, NoOptionError
 
 
 class SecEventConfigParser(object):
-    _SECTION = "Code42"
+    _MAIN_SECTION = "Code42"
 
     def __init__(self, config_file):
         config = ConfigParser()
@@ -42,15 +42,33 @@ class SecEventConfigParser(object):
     def parse_debug_mode(self):
         return self._get_bool("debug_mode")
 
+    def parse_destination_type(self):
+        return self._get("destination_type")
+
+    def parse_destination(self):
+        return self._get("destination")
+
+    def parse_syslog_port(self):
+        return self._get("destination_port")
+
+    def parse_syslog_protocol(self):
+        return self._get("destination_protocol")
+
     def _get(self, key):
         try:
-            return self._config.get(self._SECTION, key)
+            return self._config.get(self._MAIN_SECTION, key)
         except NoOptionError:
             return None
 
     def _get_bool(self, key):
         try:
-            return self._config.getboolean(self._SECTION, key)
+            return self._config.getboolean(self._MAIN_SECTION, key)
+        except NoOptionError:
+            return None
+
+    def _get_int(self, key):
+        try:
+            return self._config.getint(self._MAIN_SECTION, key)
         except NoOptionError:
             return None
 
