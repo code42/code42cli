@@ -1,11 +1,9 @@
-import sys
 import urllib3
 import json
 from argparse import ArgumentParser
 from datetime import datetime, timedelta
 from keyring import get_password, set_password
 from getpass import getpass
-from logging import StreamHandler, FileHandler, getLogger, INFO
 
 import py42.debug_level as debug_level
 from py42.sdk import SDK
@@ -13,12 +11,12 @@ from py42 import settings
 from c42secevents.extractors import AEDEventExtractor
 from c42secevents.common import FileEventHandlers
 from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
-from c42secevents.logging.handlers import NoPrioritySysLogHandler
 
 from c42seceventcli.common.common import (
     SecEventConfigParser,
     parse_timestamp,
     convert_date_to_timestamp,
+    get_logger,
 )
 from c42seceventcli.aed.aed_cursor_store import AEDCursorStore
 from c42seceventcli.common.cli_args import (
@@ -148,17 +146,13 @@ def _parse_debug_mode(args):
 
 def _parse_min_timestamp(args):
     min_timestamp = parse_timestamp(args.get("begin_date"))
-    if not _verify_min_timestamp(min_timestamp):
+    boundary_date = datetime.utcnow() - timedelta(days=90)
+    boundary = convert_date_to_timestamp(boundary_date)
+    if min_timestamp < boundary:
         print("Argument --begin must be within 90 days")
         exit(1)
 
     return min_timestamp
-
-
-def _verify_min_timestamp(min_timestamp):
-    boundary_date = datetime.utcnow() - timedelta(days=90)
-    boundary = convert_date_to_timestamp(boundary_date)
-    return min_timestamp >= boundary
 
 
 def _parse_max_timestamp(args):
@@ -209,21 +203,12 @@ def _create_handlers(args):
     handlers = FileEventHandlers()
     handlers.record_cursor_position = store.replace_stored_insertion_timestamp
     handlers.get_cursor_position = store.get_stored_insertion_timestamp
-    logger = _get_logger(args)
-    handlers.handle_response = _get_response_handler(logger)
-    return handlers
-
-
-def _get_logger(args):
     output_format = args.get("output_format")
     destination = args.get("destination")
-    logger = getLogger("Code42_SecEventCli_Logger")
-    formatter = _get_log_formatter(output_format)
-    handler = _get_log_handler(args.get(destination))
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(INFO)
-    return logger
+    logger_formatter = _get_log_formatter(output_format)
+    logger = get_logger(logger_formatter, destination)
+    handlers.handle_response = _get_response_handler(logger)
+    return handlers
 
 
 def _get_log_formatter(output_format):
@@ -234,15 +219,6 @@ def _get_log_formatter(output_format):
     else:
         print("Unsupported output format {0}".format(output_format))
         exit(1)
-
-
-def _get_log_handler(destination, destination_type="stdout"):
-    if destination_type == "stdout":
-        return StreamHandler(sys.stdout)
-    elif destination_type == "syslog":
-        return NoPrioritySysLogHandler(destination)
-    elif destination_type == "file":
-        return FileHandler(filename=destination)
 
 
 def _get_response_handler(logger):
