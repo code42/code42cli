@@ -34,28 +34,14 @@ def main():
     config = _get_config()
     args = _get_args(cli_args, config)
 
-    if args.get("ignore_ssl_errors"):
-        _ignore_ssl_errors()
-
-    if args.get("debug_mode"):
-        settings.debug_level = debug_level.DEBUG
-
-    server = args.get("server")
-    username = args.get("username")
-
-    if server is None:
-        _exit_from_argument_error("Host address not provided.", parser)
-
-    if username is None:
-        _exit_from_argument_error("Username not provided.", parser)
-
+    _parse_ignore_ssl_errors(args)
+    _parse_debug_mode(args)
+    server = _parse_server_address(args, parser)
+    username = _parse_username(args, parser)
     password = _get_password(username)
-    min_timestamp = parse_timestamp(args.get("begin_date"))
-    max_timestamp = parse_timestamp(args.get("end_date"))
 
-    if not _verify_min_timestamp(min_timestamp):
-        print("Argument --begin must be within 90 days")
-        exit(1)
+    min_timestamp = _parse_min_timestamp(args)
+    max_timestamp = _parse_max_timestamp(args)
 
     sdk = SDK.create_using_local_account(host_address=server, username=username, password=password)
     handlers = _create_handlers(args.get("output_format"))
@@ -89,7 +75,7 @@ def _get_config():
 
 
 def _get_args(cli_args, config_parser):
-    args = {
+    return {
         "username": cli_args.c42_username
         if cli_args.c42_username
         else config_parser.parse_username(),
@@ -118,12 +104,37 @@ def _get_args(cli_args, config_parser):
         if cli_args.c42_debug_mode
         else config_parser.parse_debug_mode(),
     }
-    return args
 
 
 def _ignore_ssl_errors():
     settings.verify_ssl_certs = False
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+
+def _parse_ignore_ssl_errors(args):
+    if args.get("ignore_ssl_errors"):
+        _ignore_ssl_errors()
+
+
+def _parse_debug_mode(args):
+    if args.get("debug_mode"):
+        settings.debug_level = debug_level.DEBUG
+
+
+def _parse_server_address(args, parser):
+    server = args.get("server")
+    if server is None:
+        _exit_from_argument_error("Host address not provided.", parser)
+
+    return server
+
+
+def _parse_username(args, parser):
+    username = args.get("username")
+    if username is None:
+        _exit_from_argument_error("Username not provided.", parser)
+
+    return username
 
 
 def _get_password(username):
@@ -133,6 +144,19 @@ def _get_password(username):
         set_password(_SERVICE_NAME_FOR_KEYCHAIN, username, pwd)
 
     return password
+
+
+def _parse_min_timestamp(args):
+    min_timestamp = parse_timestamp(args.get("begin_date"))
+    if not _verify_min_timestamp(min_timestamp):
+        print("Argument --begin must be within 90 days")
+        exit(1)
+
+    return min_timestamp
+
+
+def _parse_max_timestamp(args):
+    return parse_timestamp(args.get("end_date"))
 
 
 def _verify_min_timestamp(min_timestamp):
