@@ -126,6 +126,12 @@ def _parse_min_timestamp(args):
     return min_timestamp
 
 
+def _verify_min_timestamp(min_timestamp):
+    boundary_date = datetime.utcnow() - timedelta(days=90)
+    boundary = convert_date_to_timestamp(boundary_date)
+    return min_timestamp >= boundary
+
+
 def _parse_max_timestamp(args):
     return parse_timestamp(args.get("end_date"))
 
@@ -161,12 +167,6 @@ def _get_password(username):
         set_password(_SERVICE_NAME_FOR_KEYCHAIN, username, pwd)
 
     return password
-
-
-def _verify_min_timestamp(min_timestamp):
-    boundary_date = datetime.utcnow() - timedelta(days=90)
-    boundary = convert_date_to_timestamp(boundary_date)
-    return min_timestamp >= boundary
 
 
 def _create_handlers(output_type):
