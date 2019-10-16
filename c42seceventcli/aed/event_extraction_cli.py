@@ -199,8 +199,8 @@ def _exit_from_argument_error(message, parser):
 def _get_password(username):
     password = get_password(_SERVICE_NAME_FOR_KEYCHAIN, username)
     if password is None:
-        pwd = getpass()
-        set_password(_SERVICE_NAME_FOR_KEYCHAIN, username, pwd)
+        password = getpass()
+        set_password(_SERVICE_NAME_FOR_KEYCHAIN, username, password)
 
     return password
 

@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 
 from py42 import settings
 import py42.debug_level as debug_level
+from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
+
 from c42seceventcli.aed import event_extraction_cli
 
 
@@ -67,8 +69,18 @@ def mock_get_password(mocker):
     return mock
 
 
+@pytest.fixture
+def mock_get_logger(mocker):
+    return mocker.patch("c42seceventcli.aed.event_extraction_cli.get_logger")
+
+
+@pytest.fixture
+def mock_getpass(mocker):
+    return mocker.patch("c42seceventcli.aed.event_extraction_cli.getpass")
+
+
 def test_main_when_cli_arg_ignore_ssl_errors_is_true_that_py42_settings_verify_ssl_certs_is_false(
-   mock_42, mock_arg_parse, mock_args, mock_aed_extractor, mock_config_parser, mock_get_password
+    mock_42, mock_arg_parse, mock_args, mock_aed_extractor, mock_config_parser, mock_get_password
 ):
     mock_args.c42_ignore_ssl_errors = True
     event_extraction_cli.main()
@@ -84,7 +96,12 @@ def test_main_when_cli_arg_ignore_ssl_errors_is_false_that_py42_settings_verify_
 
 
 def test_main_when_config_arg_ignore_ssl_errors_is_true_py42_settings_verify_ssl_certs_is_false(
-    mock_42, mock_arg_parse, mock_aed_extractor, mock_config_parser, mock_get_password, mock_config_get_bool
+    mock_42,
+    mock_arg_parse,
+    mock_aed_extractor,
+    mock_config_parser,
+    mock_get_password,
+    mock_config_get_bool,
 ):
     mock_config_get_bool.return_value = True
     event_extraction_cli.main()
@@ -92,7 +109,12 @@ def test_main_when_config_arg_ignore_ssl_errors_is_true_py42_settings_verify_ssl
 
 
 def test_main_when_config_arg_ignore_ssl_errors_is_false_py42_settings_verify_ssl_certs_is_true(
-    mock_42, mock_arg_parse, mock_aed_extractor, mock_config_parser, mock_get_password, mock_config_get_bool
+    mock_42,
+    mock_arg_parse,
+    mock_aed_extractor,
+    mock_config_parser,
+    mock_get_password,
+    mock_config_get_bool,
 ):
     mock_config_get_bool.return_value = False
     event_extraction_cli.main()
@@ -116,7 +138,13 @@ def test_main_when_cli_arg_debug_mode_is_false_that_py42_settings_debug_mode_is_
 
 
 def test_main_when_config_arg_debug_mode_is_true_that_py42_settings_debug_mode_is_debug(
-    mock_42, mock_arg_parse, mock_args, mock_aed_extractor, mock_config_parser, mock_get_password, mock_config_get_bool
+    mock_42,
+    mock_arg_parse,
+    mock_args,
+    mock_aed_extractor,
+    mock_config_parser,
+    mock_get_password,
+    mock_config_get_bool,
 ):
     mock_config_get_bool.return_value = True
     event_extraction_cli.main()
@@ -124,7 +152,13 @@ def test_main_when_config_arg_debug_mode_is_true_that_py42_settings_debug_mode_i
 
 
 def test_main_when_config_arg_debug_mode_is_false_that_py42_settings_debug_mode_is_not_debug(
-    mock_42, mock_arg_parse, mock_args, mock_aed_extractor, mock_config_parser, mock_get_password, mock_config_get_bool
+    mock_42,
+    mock_arg_parse,
+    mock_args,
+    mock_aed_extractor,
+    mock_config_parser,
+    mock_get_password,
+    mock_config_get_bool,
 ):
     mock_config_get_bool.return_value = False
     event_extraction_cli.main()
@@ -140,7 +174,13 @@ def test_main_when_cli_arg_begin_date_is_before_ninety_days_causes_program_exit(
 
 
 def test_main_when_config_arg_begin_date_is_before_ninety_days_causes_program_exit(
-    mock_42, mock_arg_parse, mock_args, mock_aed_extractor, mock_config_parser, mock_get_password, mock_config_get_arg
+    mock_42,
+    mock_arg_parse,
+    mock_args,
+    mock_aed_extractor,
+    mock_config_parser,
+    mock_get_password,
+    mock_config_get_arg,
 ):
     mock_config_get_arg.return_value = "1970-10-31"
     with pytest.raises(SystemExit):
@@ -151,6 +191,191 @@ def test_main_when_cli_arg_begin_date_is_not_given_uses_min_timestamp_from_sixty
     mock_42, mock_arg_parse, mock_args, mock_aed_extractor, mock_config_parser, mock_get_password
 ):
     event_extraction_cli.main()
-    expected = ((datetime.now() - timedelta(days=60)) - datetime.utcfromtimestamp(0)).total_seconds()
+    expected = (
+        (datetime.now() - timedelta(days=60)) - datetime.utcfromtimestamp(0)
+    ).total_seconds()
     actual = mock_aed_extractor.call_args[0][0]
     assert pytest.approx(expected, actual)
+
+
+def test_main_when_cli_arg_end_date_is_not_given_uses_max_timestamp_from_now(
+    mock_42, mock_arg_parse, mock_args, mock_aed_extractor, mock_config_parser, mock_get_password
+):
+    event_extraction_cli.main()
+    expected = (datetime.now() - datetime.utcfromtimestamp(0)).total_seconds()
+    actual = mock_aed_extractor.call_args[0][1]
+    assert pytest.approx(expected, actual)
+
+
+def test_main_creates_sdk_with_cli_args_and_stored_password(
+    mock_42, mock_arg_parse, mock_args, mock_aed_extractor, mock_config_parser, mock_get_password
+):
+    expected_authority = "https://user.authority.com"
+    expected_username = "user.userson@userson.solutions"
+    expected_password = "querty"
+    mock_args.c42_authority_url = expected_authority
+    mock_args.c42_username = expected_username
+    mock_get_password.return_value = expected_password
+    event_extraction_cli.main()
+    mock_42.assert_called_once_with(
+        host_address=expected_authority, username=expected_username, password=expected_password
+    )
+
+
+def test_main_creates_sdk_with_config_args_and_stored_password(
+    mock_42,
+    mock_arg_parse,
+    mock_args,
+    mock_aed_extractor,
+    mock_config_parser,
+    mock_get_password,
+    mock_config_get_arg,
+):
+    mock_args.c42_authority_url = None
+    mock_args.c42_username = None
+
+    expected_authority = "https://user.authority.com"
+    expected_username = "user.userson@userson.solutions"
+    expected_password = "querty"
+    mock_get_password.return_value = expected_password
+
+    def get_config_arg_side_effect(key):
+        if key == "server":
+            return expected_authority
+        if key == "username":
+            return expected_username
+
+    mock_config_get_arg.side_effect = get_config_arg_side_effect
+    event_extraction_cli.main()
+    mock_42.assert_called_once_with(
+        host_address=expected_authority, username=expected_username, password=expected_password
+    )
+
+
+def test_main_creates_sdk_favoring_cli_args_over_config_args(
+    mock_42,
+    mock_arg_parse,
+    mock_args,
+    mock_aed_extractor,
+    mock_config_parser,
+    mock_get_password,
+    mock_config_get_arg,
+):
+    expected_authority = "https://user.authority.com"
+    expected_username = "user.userson@userson.solutions"
+    expected_password = "querty"
+    mock_args.c42_authority_url = expected_authority
+    mock_args.c42_username = expected_username
+    mock_get_password.return_value = expected_password
+
+    def get_config_arg_side_effect(key):
+        # This value should not be used because cli args are favored and set above.
+        bad_str = "https://FreeViruses.example.net"
+        if key == "server" or key == "username":
+            return bad_str
+
+    mock_config_get_arg.side_effect = get_config_arg_side_effect
+
+    event_extraction_cli.main()
+    mock_42.assert_called_once_with(
+        host_address=expected_authority, username=expected_username, password=expected_password
+    )
+
+
+def test_main_calls_uses_password_from_getpass_when_keyring_get_password_returns_none(
+    mock_42,
+    mock_arg_parse,
+    mock_args,
+    mock_aed_extractor,
+    mock_config_parser,
+    mock_get_password,
+    mock_getpass,
+):
+    mock_get_password.return_value = None
+    expected = "super_secret_password"
+    mock_getpass.return_value = expected
+    event_extraction_cli.main()
+    actual = mock_42.call_args[1]["password"]
+    assert actual == expected
+
+
+def test_main_when_output_format_not_supports_exits(
+    mock_42, mock_arg_parse, mock_args, mock_aed_extractor, mock_config_parser, mock_get_password
+):
+    mock_args.c42_output_format = "EAS3"
+    with pytest.raises(SystemExit):
+        event_extraction_cli.main()
+
+
+def test_main_when_cli_arg_output_format_is_json_creates_json_formatter(
+    mock_42,
+    mock_arg_parse,
+    mock_args,
+    mock_aed_extractor,
+    mock_config_parser,
+    mock_get_password,
+    mock_get_logger,
+):
+    mock_args.c42_output_format = "JSON"
+    event_extraction_cli.main()
+    expected = AEDDictToJSONFormatter
+    actual = type(mock_get_logger.call_args[0][0])
+    assert actual == expected
+
+
+def test_main_when_config_arg_output_format_is_json_creates_json_formatter(
+    mock_42,
+    mock_arg_parse,
+    mock_args,
+    mock_aed_extractor,
+    mock_config_parser,
+    mock_get_password,
+    mock_config_get_arg,
+    mock_get_logger,
+):
+    def get_config_arg_side_effect(key):
+        if key == "output_format":
+            return "JSON"
+
+    mock_config_get_arg.side_effect = get_config_arg_side_effect
+    event_extraction_cli.main()
+    expected = AEDDictToJSONFormatter
+    actual = type(mock_get_logger.call_args[0][0])
+    assert actual == expected
+
+
+def test_main_when_cli_arg_output_format_is_cef_creates_cef_formatter(
+    mock_42,
+    mock_arg_parse,
+    mock_args,
+    mock_aed_extractor,
+    mock_config_parser,
+    mock_get_password,
+    mock_get_logger,
+):
+    mock_args.c42_output_format = "CEF"
+    event_extraction_cli.main()
+    expected = AEDDictToCEFFormatter
+    actual = type(mock_get_logger.call_args[0][0])
+    assert actual == expected
+
+
+def test_main_when_config_arg_output_format_is_cer_creates_cef_formatter(
+    mock_42,
+    mock_arg_parse,
+    mock_args,
+    mock_aed_extractor,
+    mock_config_parser,
+    mock_get_password,
+    mock_config_get_arg,
+    mock_get_logger,
+):
+    def get_config_arg_side_effect(key):
+        if key == "output_format":
+            return "CEF"
+
+    mock_config_get_arg.side_effect = get_config_arg_side_effect
+    event_extraction_cli.main()
+    expected = AEDDictToCEFFormatter
+    actual = type(mock_get_logger.call_args[0][0])
+    assert actual == expected
