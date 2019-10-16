@@ -88,7 +88,7 @@ class AEDArgs(object):
     output_format = "JSON"
     record_cursor = False
     exposure_types = None
-    debug_mode = None
+    debug_mode = False
     destination_type = "stdout"
     destination = None
     syslog_port = 514
