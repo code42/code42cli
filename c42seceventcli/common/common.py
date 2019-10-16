@@ -1,4 +1,5 @@
 import sys
+from os.path import expanduser
 from datetime import datetime, timedelta
 from configparser import ConfigParser, NoOptionError, NoSectionError
 from logging import StreamHandler, FileHandler, getLogger, INFO
@@ -12,7 +13,9 @@ class SecurityEventConfigParser(object):
 
     def __init__(self, config_file):
         config = ConfigParser()
-        config.read(config_file)
+        if config_file:
+            if not config.read(expanduser(config_file)):
+                raise IOError("Supplied an empty config file {0}".format(config_file))
         self._config = config
 
     def get(self, key):

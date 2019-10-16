@@ -2,6 +2,16 @@ from argparse import SUPPRESS
 from datetime import datetime, timedelta
 
 
+def add_config_file_path_arg(arg_group):
+    arg_group.add_argument(
+        "-c",
+        "--config-file",
+        dest="c42_config_file",
+        action="store",
+        help="The path to the config file to use for the rest of the arguments.",
+    )
+
+
 def add_authority_host_address_arg(arg_group):
     arg_group.add_argument(
         "-s",

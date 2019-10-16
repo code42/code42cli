@@ -15,6 +15,7 @@ from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSON
 from c42seceventcli.common.common import SecurityEventConfigParser, parse_timestamp, get_logger
 from c42seceventcli.aed.cursor_store import AEDCursorStore
 from c42seceventcli.common.cli_args import (
+    add_config_file_path_arg,
     add_authority_host_address_arg,
     add_username_arg,
     add_begin_date_arg,
@@ -37,8 +38,9 @@ _SERVICE_NAME_FOR_KEYCHAIN = u"c42seceventcli"
 def main():
     parser = _get_arg_parser()
     cli_args = parser.parse_args()
-    config_args = SecurityEventConfigParser("config.cfg")
+    config_args = SecurityEventConfigParser(cli_args.c42_config_file)
     args = _union_cli_args_with_config_args(cli_args, config_args)
+
     _verify_destination_args(args)
 
     if args.ignore_ssl_errors:
@@ -65,6 +67,7 @@ def _get_arg_parser():
     add_record_cursor_arg(mutually_exclusive_timestamp_group)
 
     main_args = parser.add_argument_group("main")
+    add_config_file_path_arg(main_args)
     add_authority_host_address_arg(main_args)
     add_username_arg(main_args)
     add_help_arg(main_args)

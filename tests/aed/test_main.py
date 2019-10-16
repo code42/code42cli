@@ -31,6 +31,7 @@ def mock_arg_parser(mocker, mock_args):
 @pytest.fixture
 def mock_args():
     args = Namespace()
+    args.c42_config_file = None
     args.c42_authority_url = "https://example.com"
     args.c42_username = "test.testerson@example.com"
     args.c42_begin_date = None

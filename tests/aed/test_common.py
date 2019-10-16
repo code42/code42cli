@@ -31,6 +31,12 @@ def mock_get_logger(mocker):
 
 
 class TestSecurityEventConfigParser(object):
+    def test_init_when_given_read_returns_empty_list_raises_io_error(self, mocker):
+        reader = mocker.patch("configparser.ConfigParser.read")
+        reader.return_value = []
+        with pytest.raises(IOError):
+            SecurityEventConfigParser("test")
+
     def test_get_returns_expected_value(self, mock_config_read, mock_config_get_function):
         expected = "Value"
         mock_config_get_function.return_value = expected

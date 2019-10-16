@@ -48,7 +48,9 @@ class TestAEDCursorStore(object):
             actual = conn.cursor().execute.call_args[0][0]
             assert actual == expected
 
-    def test_get_stored_insertion_timestamp_executes_query_with_expected_primary_key(self, sqlite_connection):
+    def test_get_stored_insertion_timestamp_executes_query_with_expected_primary_key(
+        self, sqlite_connection
+    ):
         store = AEDCursorStore(MOCK_TEST_DB_PATH)
         store.get_stored_insertion_timestamp()
         with store._connection as conn:
