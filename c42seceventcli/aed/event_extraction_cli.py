@@ -84,15 +84,15 @@ class AEDArgs(object):
     username = None
     begin_date = None
     end_date = None
-    ignore_ssl_errors = False
-    output_format = "JSON"
-    record_cursor = False
+    ignore_ssl_errors = None
+    output_format = None
+    record_cursor = None
     exposure_types = None
-    debug_mode = False
-    destination_type = "stdout"
+    debug_mode = None
+    destination_type = None
     destination = None
-    syslog_port = 514
-    syslog_protocol = "TCP"
+    syslog_port = None
+    syslog_protocol = None
 
 
 def _union_cli_args_with_config_args(cli_args, config_args):
