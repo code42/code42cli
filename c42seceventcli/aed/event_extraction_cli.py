@@ -97,65 +97,91 @@ class AEDArgs(object):
 
 def _union_cli_args_with_config_args(cli_args, config_parser):
     args = AEDArgs()
-    args.server = (
+
+    server = (
         cli_args.c42_authority_url if cli_args.c42_authority_url else config_parser.get("server")
     )
-    args.username = (
-        cli_args.c42_username if cli_args.c42_username else config_parser.get("username")
-    )
-    args.begin_date = (
+    if server is not None:
+        args.server = server
+
+    username = cli_args.c42_username if cli_args.c42_username else config_parser.get("username")
+    if username is not None:
+        args.username = username
+
+    begin_date = (
         cli_args.c42_begin_date if cli_args.c42_begin_date else config_parser.get("begin_date")
     )
+    args.begin_date = begin_date if begin_date is not None else _get_default_begin_date()
 
-    if args.begin_date is None:
-        args.begin_date = _get_default_begin_date()
+    end_date = cli_args.c42_end_date if cli_args.c42_end_date else config_parser.get("end_date")
+    args.end_date = end_date if end_date is not None else _get_default_end_date()
 
-    args.end_date = (
-        cli_args.c42_end_date if cli_args.c42_end_date else config_parser.get("end_date")
-    )
-
-    if args.end_date is None:
-        args.end_date = _get_default_end_date()
-
-    args.ignore_ssl_errors = (
+    ignore_ssl_errors = (
         cli_args.c42_ignore_ssl_errors
         if cli_args.c42_ignore_ssl_errors
         else config_parser.get("ignore_ssl_errors")
     )
-    args.output_format = (
+    if ignore_ssl_errors is not None:
+        args.ignore_ssl_errors = ignore_ssl_errors
+
+    output_format = (
         cli_args.c42_output_format
         if cli_args.c42_output_format
         else config_parser.get("output_format")
     )
-    args.record_cursor = (
+    if output_format is not None:
+        args.output_format = output_format
+
+    record_cursor = (
         cli_args.c42_record_cursor
         if cli_args.c42_record_cursor
         else config_parser.get("record_cursor")
     )
-    args.exposure_types = (
+    if record_cursor is not None:
+        args.record_cursor = record_cursor
+
+    exposure_types = (
         cli_args.c42_exposure_types
         if cli_args.c42_exposure_types
         else config_parser.get("exposure_types")
     )
-    args.debug_mode = (
+    if exposure_types is not None:
+        args.exposure_types = exposure_types
+
+    debug_mode = (
         cli_args.c42_debug_mode if cli_args.c42_debug_mode else config_parser.get("debug_mode")
     )
-    args.destination_type = (
+    if debug_mode is not None:
+        args.debug_mode = debug_mode
+
+    destination_type = (
         cli_args.c42_destination_type
         if cli_args.c42_destination_type
         else config_parser.get("destination_type")
     )
-    args.destination = (
+    if destination_type is not None:
+        args.destination_type = destination_type
+
+    destination = (
         cli_args.c42_destination if cli_args.c42_destination else config_parser.get("destination")
     )
-    args.syslog_port = (
+    if destination is not None:
+        args.destination = destination
+
+    syslog_port = (
         cli_args.c42_syslog_port if cli_args.c42_syslog_port else config_parser.get("syslog_port")
     )
-    args.syslog_protocol = (
+    if syslog_port is not None:
+        args.syslog_port = syslog_port
+
+    syslog_protocol = (
         cli_args.c42_syslog_protocol
         if cli_args.c42_syslog_protocol
         else config_parser.get("syslog_protocol")
     )
+    if syslog_protocol is not None:
+        args.syslog_protocol = syslog_protocol
+
     return args
 
 
