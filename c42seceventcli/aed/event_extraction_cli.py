@@ -96,40 +96,56 @@ class AEDArgs(object):
 
 
 def _union_cli_args_with_config_args(cli_args, config_args):
-    server = _create_arg_entry(cli_args.c42_authority_url, config_args.get("server"), None)
-    user = _create_arg_entry(cli_args.c42_username, config_args.get("username"), None)
-    begin_date = _create_arg_entry(cli_args.c42_begin_date, config_args.get("begin_date"), _get_default_begin_date())
-    end_date = _create_arg_entry(cli_args.c42_end_date, config_args.get("end_date"), _get_default_end_date())
-    ignore_ssl_err = _create_arg_entry(cli_args.c42_ignore_ssl_errors, config_args.get_bool("ignore_ssl_errors"), False)
-    output_format = _create_arg_entry(cli_args.c42_output_format, config_args.get("output_format"), "JSON")
-    record_cursor = _create_arg_entry(cli_args.c42_record_cursor, config_args.get_bool("record_cursor"), False)
-    exposure_types = _create_arg_entry(cli_args.c42_exposure_types, config_args.get("exposure_types"), None)
-    debug_mode = _create_arg_entry(cli_args.c42_debug_mode, config_args.get_bool("debug_mode"), False)
-    dest_type = _create_arg_entry(cli_args.c42_destination_type, config_args.get("destination_type"), "stdout")
-    dest = _create_arg_entry(cli_args.c42_destination, config_args.get("destination"), None)
-    syslog_port = _create_arg_entry(cli_args.c42_syslog_port, config_args.get_int("syslog_port"), 514)
-    syslog_protocol = _create_arg_entry(cli_args.c42_syslog_protocol, config_args.get("syslog_protocol"), "TCP")
-
-    arg_map = {}
-    _append_arg_entry_to_arg_map(arg_map, "server", server)
-    _append_arg_entry_to_arg_map(arg_map, "username", user)
-    _append_arg_entry_to_arg_map(arg_map, "begin_date", begin_date)
-    _append_arg_entry_to_arg_map(arg_map, "end_date", end_date)
-    _append_arg_entry_to_arg_map(arg_map, "ignore_ssl_errors", ignore_ssl_err)
-    _append_arg_entry_to_arg_map(arg_map, "output_format", output_format)
-    _append_arg_entry_to_arg_map(arg_map, "record_cursor", record_cursor)
-    _append_arg_entry_to_arg_map(arg_map, "exposure_types", exposure_types)
-    _append_arg_entry_to_arg_map(arg_map, "debug_mode", debug_mode)
-    _append_arg_entry_to_arg_map(arg_map, "destination_type", dest_type)
-    _append_arg_entry_to_arg_map(arg_map, "destination", dest)
-    _append_arg_entry_to_arg_map(arg_map, "syslog_port", syslog_port)
-    _append_arg_entry_to_arg_map(arg_map, "syslog_protocol", syslog_protocol)
-
+    arg_map = _create_arg_map(cli_args, config_args)
     args = AEDArgs()
     for key in arg_map:
         _set_arg_attr(args, key, arg_map[key])
 
     return args
+
+
+def _create_arg_map(cli_args, config_args):
+    keys = _get_keys()
+    entries = [
+        _create_arg_entry(cli_args.c42_authority_url, config_args.get(keys[0]), None),
+        _create_arg_entry(cli_args.c42_username, config_args.get(keys[1]), None),
+        _create_arg_entry(cli_args.c42_begin_date, config_args.get(keys[2]), _get_default_begin_date()),
+        _create_arg_entry(cli_args.c42_end_date, config_args.get(keys[3]), _get_default_end_date()),
+        _create_arg_entry(cli_args.c42_ignore_ssl_errors, config_args.get_bool(keys[4]), False),
+        _create_arg_entry(cli_args.c42_output_format, config_args.get(keys[5]), "JSON"),
+        _create_arg_entry(cli_args.c42_record_cursor, config_args.get_bool(keys[6]), False),
+        _create_arg_entry(cli_args.c42_exposure_types, config_args.get(keys[7]), None),
+        _create_arg_entry(cli_args.c42_debug_mode, config_args.get_bool(keys[8]), False),
+        _create_arg_entry(cli_args.c42_destination_type, config_args.get(keys[9]), "stdout"),
+        _create_arg_entry(cli_args.c42_destination, config_args.get(keys[10]), None),
+        _create_arg_entry(cli_args.c42_syslog_port, config_args.get_int(keys[11]), 514),
+        _create_arg_entry(cli_args.c42_syslog_protocol, config_args.get(keys[12]), "TCP")
+    ]
+
+    arg_map = {}
+    count = min(len(keys), len(entries))
+    for i in range(0, count):
+        _append_arg_entry_to_arg_map(arg_map, entries[i], keys[i])
+
+    return arg_map
+
+
+def _get_keys():
+    return [
+        "server",
+        "username",
+        "begin_date",
+        "end_date",
+        "ignore_ssl_errors",
+        "output_format",
+        "record_cursor",
+        "exposure_types",
+        "debug_mode",
+        "destination_type",
+        "destination",
+        "syslog_port",
+        "syslog_protocol",
+    ]
 
 
 def _append_arg_entry_to_arg_map(arg_map, key, entry):
