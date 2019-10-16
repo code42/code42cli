@@ -29,6 +29,8 @@ Then, run the script as follows:
 c42aed
 ```
 
+You can also use CLI args with config-file args, but the program will favor the CLI args.
+
 If this is the first run, it will prompt you for your password.
 
 If you get a keychain error when running this script, you may have to add a code signature:
