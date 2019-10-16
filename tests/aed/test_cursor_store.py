@@ -47,7 +47,7 @@ class TestAEDCursorStore(object):
         store.replace_stored_insertion_timestamp(new_insertion_timestamp)
         with store._connection as conn:
             expected = "UPDATE siem_checkpoint SET {0}=? WHERE cursor_id = ?".format(
-                INSERTION_TIMESTAMP_FIELD_NAME, new_insertion_timestamp
+                INSERTION_TIMESTAMP_FIELD_NAME
             )
             actual = conn.execute.call_args[0][0]
             assert actual == expected
