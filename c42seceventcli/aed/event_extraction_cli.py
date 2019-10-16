@@ -119,7 +119,7 @@ def _union_cli_args_with_config_args(cli_args, config_parser):
     ignore_ssl_errors = (
         cli_args.c42_ignore_ssl_errors
         if cli_args.c42_ignore_ssl_errors
-        else config_parser.get("ignore_ssl_errors")
+        else config_parser.get_bool("ignore_ssl_errors")
     )
     if ignore_ssl_errors is not None:
         args.ignore_ssl_errors = ignore_ssl_errors
@@ -135,7 +135,7 @@ def _union_cli_args_with_config_args(cli_args, config_parser):
     record_cursor = (
         cli_args.c42_record_cursor
         if cli_args.c42_record_cursor
-        else config_parser.get("record_cursor")
+        else config_parser.get_bool("record_cursor")
     )
     if record_cursor is not None:
         args.record_cursor = record_cursor
@@ -149,7 +149,7 @@ def _union_cli_args_with_config_args(cli_args, config_parser):
         args.exposure_types = exposure_types
 
     debug_mode = (
-        cli_args.c42_debug_mode if cli_args.c42_debug_mode else config_parser.get("debug_mode")
+        cli_args.c42_debug_mode if cli_args.c42_debug_mode else config_parser.get_bool("debug_mode")
     )
     if debug_mode is not None:
         args.debug_mode = debug_mode
@@ -169,7 +169,7 @@ def _union_cli_args_with_config_args(cli_args, config_parser):
         args.destination = destination
 
     syslog_port = (
-        cli_args.c42_syslog_port if cli_args.c42_syslog_port else config_parser.get("syslog_port")
+        cli_args.c42_syslog_port if cli_args.c42_syslog_port else config_parser.get_int("syslog_port")
     )
     if syslog_port is not None:
         args.syslog_port = syslog_port
