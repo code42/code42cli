@@ -282,7 +282,7 @@ def test_main_creates_sdk_favoring_cli_args_over_config_args(
     )
 
 
-def test_main_calls_uses_password_from_getpass_when_keyring_get_password_returns_none(
+def test_main_when_get_password_returns_none_uses_password_from_getpass(
     mock_42,
     mock_arg_parse,
     mock_args,
@@ -297,6 +297,26 @@ def test_main_calls_uses_password_from_getpass_when_keyring_get_password_returns
     event_extraction_cli.main()
     actual = mock_42.call_args[1]["password"]
     assert actual == expected
+
+
+def test_main_when_get_password_returns_none_calls_set_password_with_password_from_getpass(
+    mocker,
+    mock_42,
+    mock_arg_parse,
+    mock_args,
+    mock_aed_extractor,
+    mock_config_parser,
+    mock_get_password,
+    mock_getpass,
+):
+    expected_username = "ME"
+    expected_password = "super_secret_password"
+    mock_args.c42_username = expected_username
+    mock_get_password.return_value = None
+    mock_getpass.return_value = expected_password
+    mock_set_password = mocker.patch("c42seceventcli.aed.event_extraction_cli.set_password")
+    event_extraction_cli.main()
+    mock_set_password.assert_called_once_with(u"c42seceventcli", expected_username, expected_password)
 
 
 def test_main_when_output_format_not_supports_exits(
