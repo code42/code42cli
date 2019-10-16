@@ -242,9 +242,8 @@ def _create_handlers(args):
     handlers.record_cursor_position = store.replace_stored_insertion_timestamp
     handlers.get_cursor_position = store.get_stored_insertion_timestamp
     output_format = args.output_format
-    destination = args.destination
     logger_formatter = _get_log_formatter(output_format)
-    logger = get_logger(logger_formatter, destination)
+    logger = get_logger(logger_formatter, args.destination, args.destination_type)
     handlers.handle_response = _get_response_handler(logger)
     return handlers
 
