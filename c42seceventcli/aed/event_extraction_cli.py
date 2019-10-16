@@ -109,7 +109,9 @@ def _create_arg_map(cli_args, config_args):
     entries = [
         _create_arg_entry(cli_args.c42_authority_url, config_args.get(keys[0]), None),
         _create_arg_entry(cli_args.c42_username, config_args.get(keys[1]), None),
-        _create_arg_entry(cli_args.c42_begin_date, config_args.get(keys[2]), _get_default_begin_date()),
+        _create_arg_entry(
+            cli_args.c42_begin_date, config_args.get(keys[2]), _get_default_begin_date()
+        ),
         _create_arg_entry(cli_args.c42_end_date, config_args.get(keys[3]), _get_default_end_date()),
         _create_arg_entry(cli_args.c42_ignore_ssl_errors, config_args.get_bool(keys[4]), False),
         _create_arg_entry(cli_args.c42_output_format, config_args.get(keys[5]), "JSON"),
@@ -119,7 +121,7 @@ def _create_arg_map(cli_args, config_args):
         _create_arg_entry(cli_args.c42_destination_type, config_args.get(keys[9]), "stdout"),
         _create_arg_entry(cli_args.c42_destination, config_args.get(keys[10]), None),
         _create_arg_entry(cli_args.c42_syslog_port, config_args.get_int(keys[11]), 514),
-        _create_arg_entry(cli_args.c42_syslog_protocol, config_args.get(keys[12]), "TCP")
+        _create_arg_entry(cli_args.c42_syslog_protocol, config_args.get(keys[12]), "TCP"),
     ]
 
     arg_map = {}

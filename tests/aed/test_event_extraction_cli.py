@@ -316,7 +316,9 @@ def test_main_when_get_password_returns_none_calls_set_password_with_password_fr
     mock_getpass.return_value = expected_password
     mock_set_password = mocker.patch("c42seceventcli.aed.event_extraction_cli.set_password")
     event_extraction_cli.main()
-    mock_set_password.assert_called_once_with(u"c42seceventcli", expected_username, expected_password)
+    mock_set_password.assert_called_once_with(
+        u"c42seceventcli", expected_username, expected_password
+    )
 
 
 def test_main_when_output_format_not_supports_exits(
