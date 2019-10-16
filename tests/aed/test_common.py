@@ -82,8 +82,12 @@ def test_get_logger_when_destination_type_is_file_adds_file_handler_to_logger(mo
     assert actual == expected
 
 
-def test_get_logger_when_destination_type_is_syslog_adds_no_priority_sys_log_handler_to_logger(mocker, mock_get_logger):
-    mock_handler_init = mocker.patch("c42secevents.logging.handlers.NoPrioritySysLogHandler.__init__")
+def test_get_logger_when_destination_type_is_syslog_adds_no_priority_sys_log_handler_to_logger(
+    mocker, mock_get_logger
+):
+    mock_handler_init = mocker.patch(
+        "c42secevents.logging.handlers.NoPrioritySysLogHandler.__init__"
+    )
     mock_handler_init.return_value = None
     logger = get_logger(None, "Somewhere", "syslog")
     actual = type(logger.addHandler.call_args[0][0])

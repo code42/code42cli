@@ -232,7 +232,6 @@ def test_main_when_destination_is_none_and_destination_type_is_file_exits(
     mock_args.c42_destination = None
 
 
-
 def test_main_creates_sdk_with_cli_args_and_stored_password(
     mock_42, mock_arg_parse, mock_args, mock_aed_extractor, mock_config_parser, mock_get_password
 ):
