@@ -4,11 +4,6 @@ The c42seceventcli AED module contains a CLI for extracting AED events as well a
 for recording and retrieving insertion timestamps. This project uses the insertion timestamp of the 
 most recently extracted event as a cursor so that only new events come through on subsequent runs.
 
-## Requirements
-- python 2.7
-- c42secevents
-- py42
-- Code42 Server 6.8.x+
 
 ## Usage
 
