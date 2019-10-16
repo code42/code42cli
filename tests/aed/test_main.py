@@ -64,19 +64,19 @@ def mock_config_get_bool_function(mocker):
 
 @pytest.fixture
 def mock_get_password_function(mocker):
-    mock = mocker.patch("c42seceventcli.aed.event_extraction_cli.get_password")
+    mock = mocker.patch("c42seceventcli.aed.main.get_password")
     mock.get_password.return_value = "PASSWORD"
     return mock
 
 
 @pytest.fixture
 def mock_logger(mocker):
-    return mocker.patch("c42seceventcli.aed.event_extraction_cli.get_logger")
+    return mocker.patch("c42seceventcli.aed.main.get_logger")
 
 
 @pytest.fixture
 def mock_getpass_function(mocker):
-    return mocker.patch("c42seceventcli.aed.event_extraction_cli.getpass")
+    return mocker.patch("c42seceventcli.aed.main.getpass")
 
 
 def test_main_when_cli_arg_ignore_ssl_errors_is_true_that_py42_settings_verify_ssl_certs_is_false(
@@ -394,7 +394,7 @@ def test_main_when_get_password_returns_none_calls_set_password_with_password_fr
     mock_args.c42_username = expected_username
     mock_get_password_function.return_value = None
     mock_getpass_function.return_value = expected_password
-    mock_set_password = mocker.patch("c42seceventcli.aed.event_extraction_cli.set_password")
+    mock_set_password = mocker.patch("c42seceventcli.aed.main.set_password")
     main.main()
     mock_set_password.assert_called_once_with(
         u"c42seceventcli", expected_username, expected_password
