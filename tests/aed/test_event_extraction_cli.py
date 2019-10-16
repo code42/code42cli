@@ -1,6 +1,8 @@
 import pytest
 from argparse import ArgumentParser
 
+from py42 import settings
+
 
 @pytest.fixture
 def mock_aed_extractor(mocker):
@@ -19,7 +21,7 @@ def mock_config_parser(mocker):
 
 @pytest.fixture
 def mock_get_password(mocker):
-    mock = mocker.patch("keyring.get_password")
+    mock = mocker.patch("c42seceventcli.aed.aed_event_extraction_cli.get_password")
     mock.get_password.return_value = "PASSWORD"
     return mock
 
@@ -35,8 +37,7 @@ def mock_args(mocker):
 def test_main_sets_verify_ssl_to_false_when_ignore_ssl_errors_arg_passed_in(
    mock_42, mock_args, mock_aed_extractor, mock_config_parser, mock_get_password
 ):
-    assert True
-    # from c42seceventcli.aed import aed_event_extraction_cli
-    # aed_event_extraction_cli.main()
-    # assert not settings.verify_ssl_certs
+    from c42seceventcli.aed import event_extraction_cli
+    event_extraction_cli.main()
+    assert not settings.verify_ssl_certs
 

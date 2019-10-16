@@ -13,7 +13,7 @@ from c42secevents.common import FileEventHandlers, convert_datetime_to_timestamp
 from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
 
 from c42seceventcli.common.common import SecurityEventConfigParser, parse_timestamp, get_logger
-from c42seceventcli.aed.aed_cursor_store import AEDCursorStore
+from c42seceventcli.aed.cursor_store import AEDCursorStore
 from c42seceventcli.common.cli_args import (
     add_authority_host_address_arg,
     add_username_arg,

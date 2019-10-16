@@ -1,6 +1,6 @@
 import pytest
 
-from c42seceventcli.aed.aed_cursor_store import AEDCursorStore
+from c42seceventcli.aed.cursor_store import AEDCursorStore
 from c42seceventcli.common.cursor_store import SecurityEventCursorStore
 
 
