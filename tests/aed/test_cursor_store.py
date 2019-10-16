@@ -4,7 +4,7 @@ from tests.conftest import MOCK_TEST_DB_PATH
 
 
 class TestAEDCursorStore(object):
-    def test_reset_execute_expected_drop_table_query(self, sqlite_connection):
+    def test_reset_executes_expected_drop_table_query(self, sqlite_connection):
         store = AEDCursorStore(MOCK_TEST_DB_PATH)
         store.reset()
         with store._connection as conn:

@@ -92,7 +92,7 @@ def test_main_when_cli_arg_ignore_ssl_errors_is_true_that_py42_settings_verify_s
     assert not settings.verify_ssl_certs
 
 
-def test_main_when_cli_arg_ignore_ssl_errors_is_false_that_py42_settings_verify_ssl_certs_to_true(
+def test_main_when_cli_arg_ignore_ssl_errors_is_false_that_py42_settings_verify_ssl_certs_is_true(
     mock_42,
     mock_arg_parser,
     mock_args,
@@ -242,7 +242,7 @@ def test_main_when_cli_arg_end_date_is_not_given_uses_max_timestamp_from_now(
     assert pytest.approx(expected, actual)
 
 
-def test_main_when_destination_is_not_none_and_destination_type_is_stdout_exits(
+def test_main_when_destination_is_not_none_and_destination_type_is_stdout_causes_exit(
     mock_42,
     mock_arg_parser,
     mock_args,
@@ -256,7 +256,7 @@ def test_main_when_destination_is_not_none_and_destination_type_is_stdout_exits(
         event_extraction_cli.main()
 
 
-def test_main_when_destination_is_none_and_destination_type_is_syslog_exits(
+def test_main_when_destination_is_none_and_destination_type_is_syslog_causes_exit(
     mock_42,
     mock_arg_parser,
     mock_args,
@@ -270,7 +270,7 @@ def test_main_when_destination_is_none_and_destination_type_is_syslog_exits(
         event_extraction_cli.main()
 
 
-def test_main_when_destination_is_none_and_destination_type_is_file_exits(
+def test_main_when_destination_is_none_and_destination_type_is_file_causes_exit(
     mock_42,
     mock_arg_parser,
     mock_args,
@@ -401,7 +401,7 @@ def test_main_when_get_password_returns_none_calls_set_password_with_password_fr
     )
 
 
-def test_main_when_output_format_not_supports_exits(
+def test_main_when_output_format_not_supported_exits(
     mock_42,
     mock_arg_parser,
     mock_args,
@@ -467,7 +467,7 @@ def test_main_when_cli_arg_output_format_is_cef_creates_cef_formatter(
     assert actual == expected
 
 
-def test_main_when_config_arg_output_format_is_cer_creates_cef_formatter(
+def test_main_when_config_arg_output_format_is_cef_creates_cef_formatter(
     mock_42,
     mock_arg_parser,
     mock_args,
