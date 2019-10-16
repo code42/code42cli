@@ -10,7 +10,7 @@ most recently extracted event as a cursor so that only new events come through o
 A simple usage requires you to pass in your Code42 authority URL and username as arguments:
 
 ```bash
-python aed_event_extraction_cli.py -s https://example.authority.com -u security.admin@example.com
+c42aed -s https://example.authority.com -u security.admin@example.com
 ```
         
 Another option is to put your Code42 authority URL and username in a file named `config.cfg`. 
@@ -26,7 +26,7 @@ server=https://example.authority.com
 Then, run the script as follows:
 
 ```bash
-python aed_event_extraction_cli.py
+c42aed
 ```
 
 If this is the first run, it will prompt you for your password.
