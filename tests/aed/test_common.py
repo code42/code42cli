@@ -12,6 +12,11 @@ def mock_config_get_function(mocker):
     return mocker.patch("configparser.ConfigParser.get")
 
 
+@pytest.fixture
+def mock_config_get_bool_function(mocker):
+    return mocker.patch("configparser.ConfigParser.getboolean")
+
+
 class TestSecurityEventConfigParser(object):
     def test_get_returns_expected_value(self, mock_config_get_function):
         expected = "Value"
@@ -20,8 +25,8 @@ class TestSecurityEventConfigParser(object):
         actual = parser.get(_DUMMY_KEY)
         assert actual == expected
 
-    def test_get_bool_returns_expected_bool(self, mock_config_get_function):
-        mock_config_get_function.return_value = True
+    def test_get_bool_returns_expected_bool(self, mock_config_get_bool_function):
+        mock_config_get_bool_function.return_value = True
         parser = SecurityEventConfigParser("test")
         assert parser.get_bool(_DUMMY_KEY)
 
