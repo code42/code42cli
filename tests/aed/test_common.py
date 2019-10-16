@@ -68,14 +68,16 @@ def test_parse_timestamp_when_given_bad_string_throws_value_error():
         parse_timestamp("BAD!")
 
 
-def test_get_logger_when_destination_type_is_stdout_adds_stream_handler_to_logger(mock_get_logger):
+def test_get_logger_when_destination_type_is_stdout_adds_stream_handler_to_logger(mocker, mock_get_logger):
     logger = get_logger(None, "Somewhere", "stdout")
     actual = type(logger.addHandler.call_args[0][0])
     expected = StreamHandler
     assert actual == expected
 
 
-def test_get_logger_when_destination_type_is_file_adds_file_handler_to_logger(mock_get_logger):
+def test_get_logger_when_destination_type_is_file_adds_file_handler_to_logger(mocker, mock_get_logger):
+    mock_handler_init = mocker.patch("logging.FileHandler.__init__")
+    mock_handler_init.return_value = None
     logger = get_logger(None, "Somewhere", "file")
     actual = type(logger.addHandler.call_args[0][0])
     expected = FileHandler
