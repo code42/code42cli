@@ -48,6 +48,7 @@ def parse_timestamp(input_string):
 
 
 def get_logger(formatter, destination, destination_type="stdout"):
+    destination_type = destination_type.lower()
     logger = getLogger("Code42_SecEventCli_Logger")
     handler = _get_log_handler(destination, destination_type)
     handler.setFormatter(formatter)
