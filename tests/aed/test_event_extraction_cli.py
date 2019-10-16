@@ -207,6 +207,32 @@ def test_main_when_cli_arg_end_date_is_not_given_uses_max_timestamp_from_now(
     assert pytest.approx(expected, actual)
 
 
+def test_main_when_destination_is_not_none_and_destination_type_is_stdout_exits(
+    mock_42, mock_arg_parse, mock_args, mock_aed_extractor, mock_config_parser, mock_get_password
+):
+    mock_args.c42_destination_type = "stdout"
+    mock_args.c42_destination = "Delaware"
+    with pytest.raises(SystemExit):
+        event_extraction_cli.main()
+
+
+def test_main_when_destination_is_none_and_destination_type_is_syslog_exits(
+    mock_42, mock_arg_parse, mock_args, mock_aed_extractor, mock_config_parser, mock_get_password
+):
+    mock_args.c42_destination_type = "syslog"
+    mock_args.c42_destination = None
+    with pytest.raises(SystemExit):
+        event_extraction_cli.main()
+
+
+def test_main_when_destination_is_none_and_destination_type_is_file_exits(
+    mock_42, mock_arg_parse, mock_args, mock_aed_extractor, mock_config_parser, mock_get_password
+):
+    mock_args.c42_destination_type = "file"
+    mock_args.c42_destination = None
+
+
+
 def test_main_creates_sdk_with_cli_args_and_stored_password(
     mock_42, mock_arg_parse, mock_args, mock_aed_extractor, mock_config_parser, mock_get_password
 ):

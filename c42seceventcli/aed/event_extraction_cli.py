@@ -39,6 +39,7 @@ def main():
     cli_args = parser.parse_args()
     config_args = SecurityEventConfigParser("config.cfg")
     args = _union_cli_args_with_config_args(cli_args, config_args)
+    _verify_destination_args(args)
 
     if args.ignore_ssl_errors:
         _ignore_ssl_errors()
@@ -178,6 +179,24 @@ def _get_default_begin_date():
 def _get_default_end_date():
     default_end_date = datetime.now()
     return default_end_date.strftime("%Y-%m-%d")
+
+
+def _verify_destination_args(args):
+    if args.destination_type == "stdout" and args.destination is not None:
+        print(
+            "Ambiguous destination '{0}' for '{1}' destination type.".format(
+                args.destination, args.destination_type
+            )
+        )
+        exit(1)
+
+    if args.destination_type == "file" and args.destination is None:
+        print("Missing file name for --dest arg.")
+        exit(1)
+
+    if args.destination_type == "syslog" and args.destination is None:
+        print("Missing syslog server URL for --dest arg.")
+        exit(1)
 
 
 def _ignore_ssl_errors():
