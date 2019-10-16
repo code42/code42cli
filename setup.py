@@ -11,5 +11,5 @@ setup(
     include_package_data=True,
     zip_safe=False,
     extras_require={"dev": ["pre-commit==1.18.3", "pytest==4.6.5", "pytest-mock==1.10.4"]},
-    entry_points={"console_scripts": ["c42aed=c42seceventcli.aed.command_line:main"]},
+    entry_points={"console_scripts": ["c42aed=c42seceventcli.aed.main:main"]},
 )
