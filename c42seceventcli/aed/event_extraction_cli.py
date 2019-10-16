@@ -95,94 +95,49 @@ class AEDArgs(object):
     syslog_protocol = "TCP"
 
 
-def _union_cli_args_with_config_args(cli_args, config_parser):
+def _union_cli_args_with_config_args(cli_args, config_args):
     args = AEDArgs()
-
-    server = (
-        cli_args.c42_authority_url if cli_args.c42_authority_url else config_parser.get("server")
+    server = _select_arg(cli_args.c42_authority_url, config_args.get("server"))
+    _set_arg_attr(args, "server", server)
+    username = _select_arg(cli_args.c42_username, config_args.get("username"))
+    _set_arg_attr(args, "username", username)
+    begin_date = _select_arg(cli_args.c42_begin_date, config_args.get("begin_date"))
+    _set_arg_attr(args, "begin_date", begin_date, _get_default_begin_date)
+    end_date = _select_arg(cli_args.c42_end_date, config_args.get("end_date"))
+    _set_arg_attr(args, "end_date", end_date, _get_default_end_date)
+    ignore_ssl_errors = _select_arg(
+        cli_args.c42_ignore_ssl_errors, config_args.get_bool("ignore_ssl_errors")
     )
-    if server is not None:
-        args.server = server
-
-    username = cli_args.c42_username if cli_args.c42_username else config_parser.get("username")
-    if username is not None:
-        args.username = username
-
-    begin_date = (
-        cli_args.c42_begin_date if cli_args.c42_begin_date else config_parser.get("begin_date")
-    )
-    args.begin_date = begin_date if begin_date is not None else _get_default_begin_date()
-
-    end_date = cli_args.c42_end_date if cli_args.c42_end_date else config_parser.get("end_date")
-    args.end_date = end_date if end_date is not None else _get_default_end_date()
-
-    ignore_ssl_errors = (
-        cli_args.c42_ignore_ssl_errors
-        if cli_args.c42_ignore_ssl_errors
-        else config_parser.get_bool("ignore_ssl_errors")
-    )
-    if ignore_ssl_errors is not None:
-        args.ignore_ssl_errors = ignore_ssl_errors
-
-    output_format = (
-        cli_args.c42_output_format
-        if cli_args.c42_output_format
-        else config_parser.get("output_format")
-    )
-    if output_format is not None:
-        args.output_format = output_format
-
-    record_cursor = (
-        cli_args.c42_record_cursor
-        if cli_args.c42_record_cursor
-        else config_parser.get_bool("record_cursor")
-    )
-    if record_cursor is not None:
-        args.record_cursor = record_cursor
-
-    exposure_types = (
-        cli_args.c42_exposure_types
-        if cli_args.c42_exposure_types
-        else config_parser.get("exposure_types")
-    )
-    if exposure_types is not None:
-        args.exposure_types = exposure_types
-
-    debug_mode = (
-        cli_args.c42_debug_mode if cli_args.c42_debug_mode else config_parser.get_bool("debug_mode")
-    )
-    if debug_mode is not None:
-        args.debug_mode = debug_mode
-
-    destination_type = (
-        cli_args.c42_destination_type
-        if cli_args.c42_destination_type
-        else config_parser.get("destination_type")
-    )
-    if destination_type is not None:
-        args.destination_type = destination_type
-
-    destination = (
-        cli_args.c42_destination if cli_args.c42_destination else config_parser.get("destination")
-    )
-    if destination is not None:
-        args.destination = destination
-
-    syslog_port = (
-        cli_args.c42_syslog_port if cli_args.c42_syslog_port else config_parser.get_int("syslog_port")
-    )
-    if syslog_port is not None:
-        args.syslog_port = syslog_port
-
-    syslog_protocol = (
-        cli_args.c42_syslog_protocol
-        if cli_args.c42_syslog_protocol
-        else config_parser.get("syslog_protocol")
-    )
-    if syslog_protocol is not None:
-        args.syslog_protocol = syslog_protocol
-
+    _set_arg_attr(args, "ignore_ssl_errors", ignore_ssl_errors)
+    output_format = _select_arg(cli_args.c42_output_format, config_args.get("output_format"))
+    _set_arg_attr(args, "output_format", output_format)
+    record_cursor = _select_arg(cli_args.c42_record_cursor, config_args.get_bool("record_cursor"))
+    _set_arg_attr(args, "record_cursor", record_cursor)
+    exposure_types = _select_arg(cli_args.c42_exposure_types, config_args.get("exposure_types"))
+    _set_arg_attr(args, "exposure_types", exposure_types)
+    debug_mode = _select_arg(cli_args.c42_debug_mode, config_args.get_bool("debug_mode"))
+    _set_arg_attr(args, "debug_mode", debug_mode)
+    dest_type = _select_arg(cli_args.c42_destination_type, config_args.get("destination_type"))
+    _set_arg_attr(args, "destination_type", dest_type)
+    dest = _select_arg(cli_args.c42_destination, config_args.get("destination"))
+    _set_arg_attr(args, "destination", dest)
+    syslog_port = _select_arg(cli_args.c42_syslog_port, config_args.get_int("syslog_port"))
+    _set_arg_attr(args, "syslog_port", syslog_port)
+    syslog_protocol = _select_arg(cli_args.c42_syslog_protocol, config_args.get("syslog_protocol"))
+    _set_arg_attr(args, "syslog_protocol", syslog_protocol)
     return args
+
+
+def _select_arg(cli_arg, config_arg):
+    return cli_arg if cli_arg is not None else config_arg
+
+
+def _set_arg_attr(args, name, value, get_default_value=None):
+    if value is not None:
+        setattr(args, name, value)
+    elif get_default_value is not None:
+        default_value = get_default_value()
+        setattr(args, name, default_value)
 
 
 def _get_default_begin_date():
