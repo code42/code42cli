@@ -5,8 +5,16 @@ from datetime import datetime, timedelta
 from py42 import settings
 import py42.debug_level as debug_level
 from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
+from c42seceventcli.aed.cursor_store import AEDCursorStore
 
 from c42seceventcli.aed import main
+
+
+@pytest.fixture
+def mock_aed_extractor_constructor(mocker):
+    mock = mocker.patch("c42secevents.extractors.AEDEventExtractor.__init__")
+    mock.return_value = None
+    return mock
 
 
 @pytest.fixture
@@ -579,3 +587,163 @@ def test_main_when_given_syslog_protocol_via_config_file_passes_port_to_get_logg
     main.main()
     actual = mock_logger.call_args[1]["syslog_protocol"]
     assert actual == expected
+
+
+def test_main_when_cli_record_cursor_arg_is_true_overrides_handlers_record_cursor_position(
+    mocker,
+    mock_42,
+    mock_store,
+    mock_cli_args,
+    mock_cli_arg_parser,
+    mock_config_arg_parser,
+    mock_aed_extractor,
+    mock_get_password_function,
+    mock_logger,
+    mock_aed_extractor_constructor,
+):
+    expected = mocker.MagicMock()
+    AEDCursorStore.replace_stored_insertion_timestamp = expected
+    mock_cli_args.c42_record_cursor = True
+    main.main()
+    actual = mock_aed_extractor_constructor.call_args[0][1].record_cursor_position
+    assert actual is expected
+
+
+def test_main_when_cli_record_cursor_arg_is_false_does_not_override_handlers_record_cursor_position(
+    mocker,
+    mock_42,
+    mock_store,
+    mock_cli_args,
+    mock_cli_arg_parser,
+    mock_config_arg_parser,
+    mock_aed_extractor,
+    mock_get_password_function,
+    mock_logger,
+    mock_aed_extractor_constructor,
+):
+    unexpected = mocker.MagicMock()
+    AEDCursorStore.replace_stored_insertion_timestamp = unexpected
+    mock_cli_args.c42_record_cursor = False
+    main.main()
+    actual = mock_aed_extractor_constructor.call_args[0][1].record_cursor_position
+    assert actual is not unexpected
+
+
+def test_main_when_cli_record_cursor_arg_is_true_overrides_handlers_get_cursor_position(
+    mocker,
+    mock_42,
+    mock_store,
+    mock_cli_args,
+    mock_cli_arg_parser,
+    mock_config_arg_parser,
+    mock_aed_extractor,
+    mock_get_password_function,
+    mock_logger,
+    mock_aed_extractor_constructor,
+):
+    expected = mocker.MagicMock()
+    AEDCursorStore.get_stored_insertion_timestamp = expected
+    mock_cli_args.c42_record_cursor = True
+    main.main()
+    actual = mock_aed_extractor_constructor.call_args[0][1].get_cursor_position
+    assert actual is expected
+
+
+def test_main_when_cli_record_cursor_arg_is_false_does_not_override_handlers_get_cursor_position(
+    mocker,
+    mock_42,
+    mock_store,
+    mock_cli_args,
+    mock_cli_arg_parser,
+    mock_config_arg_parser,
+    mock_aed_extractor,
+    mock_get_password_function,
+    mock_logger,
+    mock_aed_extractor_constructor,
+):
+    unexpected = mocker.MagicMock()
+    AEDCursorStore.get_stored_insertion_timestamp = unexpected
+    mock_cli_args.c42_record_cursor = False
+    main.main()
+    actual = mock_aed_extractor_constructor.call_args[0][1].get_cursor_position
+    assert actual is not unexpected
+
+
+def test_main_when_config_record_cursor_arg_is_true_overrides_handlers_record_cursor_position(
+    mocker,
+    mock_42,
+    mock_store,
+    mock_config_args,
+    mock_cli_arg_parser,
+    mock_config_arg_parser,
+    mock_aed_extractor,
+    mock_get_password_function,
+    mock_logger,
+    mock_aed_extractor_constructor,
+):
+    expected = mocker.MagicMock()
+    AEDCursorStore.replace_stored_insertion_timestamp = expected
+    mock_config_args["c42_record_cursor"] = True
+    main.main()
+    record_method = mock_aed_extractor_constructor.call_args[0][1].record_cursor_position
+    assert record_method is expected
+
+
+def test_main_when_config_record_cursor_arg_is_false_does_not_override_handlers_record_cursor_position(
+    mocker,
+    mock_42,
+    mock_store,
+    mock_config_args,
+    mock_cli_arg_parser,
+    mock_config_arg_parser,
+    mock_aed_extractor,
+    mock_get_password_function,
+    mock_logger,
+    mock_aed_extractor_constructor,
+):
+    unexpected = mocker.MagicMock()
+    AEDCursorStore.replace_stored_insertion_timestamp = unexpected
+    mock_config_args["c42_record_cursor"] = False
+    main.main()
+    actual = mock_aed_extractor_constructor.call_args[0][1].record_cursor_position
+    assert actual is not unexpected
+
+
+def test_main_when_config_record_cursor_arg_is_true_overrides_handlers_get_cursor_position(
+    mocker,
+    mock_42,
+    mock_store,
+    mock_config_args,
+    mock_cli_arg_parser,
+    mock_config_arg_parser,
+    mock_aed_extractor,
+    mock_get_password_function,
+    mock_logger,
+    mock_aed_extractor_constructor,
+):
+    expected = mocker.MagicMock()
+    AEDCursorStore.get_stored_insertion_timestamp = expected
+    mock_config_args["c42_record_cursor"] = True
+    main.main()
+    actual = mock_aed_extractor_constructor.call_args[0][1].get_cursor_position
+    assert actual is expected
+
+
+def test_main_when_config_record_cursor_arg_is_false_does_not_override_handlers_get_cursor_position(
+    mocker,
+    mock_42,
+    mock_store,
+    mock_config_args,
+    mock_cli_arg_parser,
+    mock_config_arg_parser,
+    mock_aed_extractor,
+    mock_get_password_function,
+    mock_logger,
+    mock_aed_extractor_constructor,
+):
+    unexpected = mocker.MagicMock()
+    AEDCursorStore.get_stored_insertion_timestamp = unexpected
+    mock_config_args["c42_record_cursor"] = False
+    main.main()
+    actual = mock_aed_extractor_constructor.call_args[0][1].get_cursor_position
+    assert actual is not unexpected

@@ -59,7 +59,9 @@ def test_get_config_args_when_sections_returns_empty_list_returns_empty_dict(
     assert get_config_args("Test") == {}
 
 
-def test_get_config_args_returns_dict_made_from_items(mocker, mock_config_file_reader, mock_config_file_sections):
+def test_get_config_args_returns_dict_made_from_items(
+    mocker, mock_config_file_reader, mock_config_file_sections
+):
     mock_tuples = mocker.patch("configparser.ConfigParser.items")
     mock_tuples.return_value = [("Hi", "Bye"), ("Pizza", "FrenchFries")]
     arg_dict = get_config_args("Test")
