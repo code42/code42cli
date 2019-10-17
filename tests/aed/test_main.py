@@ -11,6 +11,36 @@ from c42seceventcli.aed import main
 
 
 @pytest.fixture
+def patches(
+    mocker,
+    mock_aed_extractor_constructor,
+    mock_aed_extractor,
+    mock_store,
+    mock_42,
+    mock_cli_arg_parser,
+    mock_cli_args,
+    mock_config_arg_parser,
+    mock_config_args,
+    mock_get_password_function,
+    mock_logger,
+    mock_getpass_function,
+):
+    mock = mocker.MagicMock()
+    mock.aed_extractor_constructor = mock_aed_extractor_constructor
+    mock.aed_extractor = mock_aed_extractor
+    mock.store = mock_store
+    mock.py42 = mock_42
+    mock.cli_arg_parser = mock_cli_arg_parser
+    mock.cli_args = mock_cli_args
+    mock.config_arg_parser = mock_config_arg_parser
+    mock.config_args = mock_config_args
+    mock.get_password = mock_get_password_function
+    mock.logger = mock_logger
+    mock.getpass = mock_getpass_function
+    return mock
+
+
+@pytest.fixture
 def mock_aed_extractor_constructor(mocker):
     mock = mocker.patch("c42secevents.extractors.AEDEventExtractor.__init__")
     mock.return_value = None
@@ -106,303 +136,154 @@ def mock_getpass_function(mocker):
     return mocker.patch("c42seceventcli.aed.main.getpass")
 
 
-def test_main_when_cli_arg_ignore_ssl_errors_is_true_that_py42_settings_verify_ssl_certs_is_false(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_cli_args,
-    mock_aed_extractor,
-    mock_config_args,
-    mock_get_password_function,
-):
-    mock_cli_args.c42_ignore_ssl_errors = True
+def test_main_when_cli_arg_ignore_ssl_errors_is_true_that_py42_settings_verify_ssl_certs_is_false(patches):
+    patches.cli_args.c42_ignore_ssl_errors = True
     main.main()
     assert not settings.verify_ssl_certs
 
 
-def test_main_when_cli_arg_ignore_ssl_errors_is_false_that_py42_settings_verify_ssl_certs_is_true(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_cli_args,
-    mock_aed_extractor,
-    mock_config_args,
-    mock_get_password_function,
-):
-    mock_cli_args.c42_ignore_ssl_errors = False
+def test_main_when_cli_arg_ignore_ssl_errors_is_false_that_py42_settings_verify_ssl_certs_is_true(patches):
+    patches.cli_args.c42_ignore_ssl_errors = False
     main.main()
     assert settings.verify_ssl_certs
 
 
-def test_main_when_config_arg_ignore_ssl_errors_is_true_py42_settings_verify_ssl_certs_is_false(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_aed_extractor,
-    mock_config_args,
-    mock_get_password_function,
-):
-    mock_config_args["c42_ignore_ssl_errors"] = True
+def test_main_when_config_arg_ignore_ssl_errors_is_true_py42_settings_verify_ssl_certs_is_false(patches):
+    patches.config_args["c42_ignore_ssl_errors"] = True
     main.main()
     assert not settings.verify_ssl_certs
 
 
-def test_main_when_config_arg_ignore_ssl_errors_is_false_py42_settings_verify_ssl_certs_is_true(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_aed_extractor,
-    mock_config_args,
-    mock_get_password_function,
-):
-    mock_config_args["c42_ignore_ssl_errors"] = False
+def test_main_when_config_arg_ignore_ssl_errors_is_false_py42_settings_verify_ssl_certs_is_true(patches):
+    patches.config_args["c42_ignore_ssl_errors"] = False
     main.main()
     assert settings.verify_ssl_certs
 
 
-def test_main_when_cli_arg_debug_mode_is_true_that_py42_settings_debug_mode_is_debug(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_cli_args,
-    mock_aed_extractor,
-):
-    mock_cli_args.c42_debug_mode = True
+def test_main_when_cli_arg_debug_mode_is_true_that_py42_settings_debug_mode_is_debug(patches):
+    patches.cli_args.c42_debug_mode = True
     main.main()
     assert settings.debug_level == debug_level.DEBUG
 
 
-def test_main_when_config_arg_debug_mode_is_true_that_py42_settings_debug_mode_is_debug(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_config_args,
-    mock_aed_extractor,
-    mock_get_password_function,
-):
-    mock_config_args["c42_debug_mode"] = True
+def test_main_when_config_arg_debug_mode_is_true_that_py42_settings_debug_mode_is_debug(patches):
+    patches.config_args["c42_debug_mode"] = True
     main.main()
     assert settings.debug_level == debug_level.DEBUG
 
 
-def test_main_when_cli_arg_begin_date_is_before_ninety_days_causes_program_exit(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_cli_args,
-    mock_aed_extractor,
-    mock_get_password_function,
-):
-    mock_cli_args.c42_begin_date = "1970-10-31"
+def test_main_when_cli_arg_begin_date_is_before_ninety_days_causes_program_exit(patches):
+    patches.cli_args.c42_begin_date = "1970-10-31"
     with pytest.raises(SystemExit):
         main.main()
 
 
-def test_main_when_config_arg_begin_date_is_before_ninety_days_causes_program_exit(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_config_args,
-    mock_aed_extractor,
-    mock_get_password_function,
-):
-    mock_config_args["c42_begin_date"] = "1970-10-31"
+def test_main_when_config_arg_begin_date_is_before_ninety_days_causes_program_exit(patches):
+    patches.config_args["c42_begin_date"] = "1970-10-31"
     with pytest.raises(SystemExit):
         main.main()
 
 
-def test_main_when_cli_arg_begin_date_is_not_given_uses_min_timestamp_from_sixty_days_ago(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_cli_args,
-    mock_aed_extractor,
-    mock_get_password_function,
-):
+def test_main_when_cli_arg_begin_date_is_not_given_uses_min_timestamp_from_sixty_days_ago(patches):
     main.main()
     expected = (
         (datetime.now() - timedelta(days=60)) - datetime.utcfromtimestamp(0)
     ).total_seconds()
-    actual = mock_aed_extractor.call_args[0][0]
+    actual = patches.aed_extractor.call_args[0][0]
     assert pytest.approx(expected, actual)
 
 
-def test_main_when_cli_arg_end_date_is_not_given_uses_max_timestamp_from_now(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_cli_args,
-    mock_aed_extractor,
-    mock_get_password_function,
-):
+def test_main_when_cli_arg_end_date_is_not_given_uses_max_timestamp_from_now(patches):
     main.main()
     expected = (datetime.now() - datetime.utcfromtimestamp(0)).total_seconds()
-    actual = mock_aed_extractor.call_args[0][1]
+    actual = patches.aed_extractor.call_args[0][1]
     assert pytest.approx(expected, actual)
 
 
-def test_main_when_destination_is_not_none_and_destination_type_is_stdout_causes_exit(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_cli_args,
-    mock_aed_extractor,
-    mock_get_password_function,
-):
-    mock_cli_args.c42_destination_type = "stdout"
-    mock_cli_args.c42_destination = "Delaware"
+def test_main_when_destination_is_not_none_and_destination_type_is_stdout_causes_exit(patches):
+    patches.cli_args.c42_destination_type = "stdout"
+    patches.cli_args.c42_destination = "Delaware"
     with pytest.raises(SystemExit):
         main.main()
 
 
-def test_main_when_destination_is_none_and_destination_type_is_syslog_causes_exit(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_cli_args,
-    mock_aed_extractor,
-    mock_get_password_function,
-):
-    mock_cli_args.c42_destination_type = "syslog"
-    mock_cli_args.c42_destination = None
+def test_main_when_destination_is_none_and_destination_type_is_syslog_causes_exit(patches):
+    patches.cli_args.c42_destination_type = "syslog"
+    patches.cli_args.c42_destination = None
     with pytest.raises(SystemExit):
         main.main()
 
 
-def test_main_when_destination_is_none_and_destination_type_is_file_causes_exit(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_cli_args,
-    mock_aed_extractor,
-    mock_get_password_function,
-):
-    mock_cli_args.c42_destination_type = "file"
-    mock_cli_args.c42_destination = None
+def test_main_when_destination_is_none_and_destination_type_is_file_causes_exit(patches):
+    patches.cli_args.c42_destination_type = "file"
+    patches.cli_args.c42_destination = None
     with pytest.raises(SystemExit):
         main.main()
 
 
-def test_main_creates_sdk_with_cli_args_and_stored_password(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_cli_args,
-    mock_aed_extractor,
-    mock_get_password_function,
-):
+def test_main_creates_sdk_with_cli_args_and_stored_password(patches):
     expected_authority = "https://user.authority.com"
     expected_username = "user.userson@userson.solutions"
     expected_password = "querty"
-    mock_cli_args.c42_authority_url = expected_authority
-    mock_cli_args.c42_username = expected_username
-    mock_get_password_function.return_value = expected_password
+    patches.cli_args.c42_authority_url = expected_authority
+    patches.cli_args.c42_username = expected_username
+    patches.get_password.return_value = expected_password
     main.main()
-    mock_42.assert_called_once_with(
+    patches.py42.assert_called_once_with(
         host_address=expected_authority, username=expected_username, password=expected_password
     )
 
 
-def test_main_creates_sdk_with_config_args_and_stored_password(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_cli_args,
-    mock_config_args,
-    mock_aed_extractor,
-    mock_get_password_function,
-):
-    mock_cli_args.c42_authority_url = None
-    mock_cli_args.c42_username = None
+def test_main_creates_sdk_with_config_args_and_stored_password(patches):
+    patches.cli_args.c42_authority_url = None
+    patches.cli_args.c42_username = None
 
     expected_authority = "https://user.authority.com"
     expected_username = "user.userson@userson.solutions"
     expected_password = "querty"
 
-    mock_config_args["c42_authority_url"] = expected_authority
-    mock_config_args["c42_username"] = expected_username
+    patches.config_args["c42_authority_url"] = expected_authority
+    patches.config_args["c42_username"] = expected_username
 
-    mock_get_password_function.return_value = expected_password
+    patches.get_password.return_value = expected_password
     main.main()
-    mock_42.assert_called_once_with(
+    patches.py42.assert_called_once_with(
         host_address=expected_authority, username=expected_username, password=expected_password
     )
 
 
-def test_main_creates_sdk_favoring_cli_args_over_config_args(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_cli_args,
-    mock_config_args,
-    mock_aed_extractor,
-    mock_get_password_function,
-):
+def test_main_creates_sdk_favoring_cli_args_over_config_args(patches):
     expected_authority = "https://user.authority.com"
     expected_username = "user.userson@userson.solutions"
     expected_password = "querty"
-    mock_cli_args.c42_authority_url = expected_authority
-    mock_cli_args.c42_username = expected_username
+    patches.cli_args.c42_authority_url = expected_authority
+    patches.cli_args.c42_username = expected_username
 
-    mock_config_args["c42_authority_url"] = "DO NOT USE"
-    mock_config_args["c42_username"] = "NOT REAL PERSON"
+    patches.config_args["c42_authority_url"] = "DO NOT USE"
+    patches.config_args["c42_username"] = "NOT REAL PERSON"
 
-    mock_get_password_function.return_value = expected_password
+    patches.get_password.return_value = expected_password
     main.main()
-    mock_42.assert_called_once_with(
+    patches.py42.assert_called_once_with(
         host_address=expected_authority, username=expected_username, password=expected_password
     )
 
 
-def test_main_when_get_password_returns_none_uses_password_from_getpass(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_aed_extractor,
-    mock_get_password_function,
-    mock_getpass_function,
-):
-    mock_get_password_function.return_value = None
+def test_main_when_get_password_returns_none_uses_password_from_getpass(patches):
+    patches.get_password.return_value = None
     expected = "super_secret_password"
-    mock_getpass_function.return_value = expected
+    patches.getpass.return_value = expected
     main.main()
-    actual = mock_42.call_args[1]["password"]
+    actual = patches.py42.call_args[1]["password"]
     assert actual == expected
 
 
-def test_main_when_get_password_returns_none_calls_set_password_with_password_from_getpass(
-    mocker,
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_cli_args,
-    mock_aed_extractor,
-    mock_get_password_function,
-    mock_getpass_function,
-):
+def test_main_when_get_password_returns_none_calls_set_password_with_password_from_getpass(mocker, patches):
     expected_username = "ME"
     expected_password = "super_secret_password"
-    mock_cli_args.c42_username = expected_username
-    mock_get_password_function.return_value = None
-    mock_getpass_function.return_value = expected_password
+    patches.cli_args.c42_username = expected_username
+    patches.get_password.return_value = None
+    patches.getpass.return_value = expected_password
     mock_set_password = mocker.patch("c42seceventcli.aed.main.set_password")
     main.main()
     mock_set_password.assert_called_once_with(
@@ -410,312 +291,144 @@ def test_main_when_get_password_returns_none_calls_set_password_with_password_fr
     )
 
 
-def test_main_when_output_format_not_supported_exits(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_cli_args,
-    mock_aed_extractor,
-    mock_get_password_function,
-):
-    mock_cli_args.c42_output_format = "EAS3"
+def test_main_when_output_format_not_supported_exits(patches):
+    patches.cli_args.c42_output_format = "EAS3"
     with pytest.raises(SystemExit):
         main.main()
 
 
-def test_main_when_cli_arg_output_format_is_json_creates_json_formatter(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_cli_args,
-    mock_aed_extractor,
-    mock_get_password_function,
-    mock_logger,
-):
-    mock_cli_args.c42_output_format = "JSON"
+def test_main_when_cli_arg_output_format_is_json_creates_json_formatter(patches):
+    patches.cli_args.c42_output_format = "JSON"
     main.main()
     expected = AEDDictToJSONFormatter
-    actual = type(mock_logger.call_args[1]["formatter"])
+    actual = type(patches.logger.call_args[1]["formatter"])
     assert actual == expected
 
 
-def test_main_when_config_arg_output_format_is_json_creates_json_formatter(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_config_args,
-    mock_aed_extractor,
-    mock_get_password_function,
-    mock_logger,
-):
-    mock_config_args["c42_output_format"] = "JSON"
+def test_main_when_config_arg_output_format_is_json_creates_json_formatter(patches):
+    patches.config_args["c42_output_format"] = "JSON"
     main.main()
     expected = AEDDictToJSONFormatter
-    actual = type(mock_logger.call_args[1]["formatter"])
+    actual = type(patches.logger.call_args[1]["formatter"])
     assert actual == expected
 
 
-def test_main_when_cli_arg_output_format_is_cef_creates_cef_formatter(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_cli_args,
-    mock_aed_extractor,
-    mock_get_password_function,
-    mock_logger,
-):
-    mock_cli_args.c42_output_format = "CEF"
+def test_main_when_cli_arg_output_format_is_cef_creates_cef_formatter(patches):
+    patches.cli_args.c42_output_format = "CEF"
     main.main()
     expected = AEDDictToCEFFormatter
-    actual = type(mock_logger.call_args[1]["formatter"])
+    actual = type(patches.logger.call_args[1]["formatter"])
     assert actual == expected
 
 
-def test_main_when_config_arg_output_format_is_cef_creates_cef_formatter(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_config_args,
-    mock_aed_extractor,
-    mock_get_password_function,
-    mock_logger,
-):
-    mock_config_args["c42_output_format"] = "CEF"
+def test_main_when_config_arg_output_format_is_cef_creates_cef_formatter(patches):
+    patches.config_args["c42_output_format"] = "CEF"
     main.main()
     expected = AEDDictToCEFFormatter
-    actual = type(mock_logger.call_args[1]["formatter"])
+    actual = type(patches.logger.call_args[1]["formatter"])
     assert actual == expected
 
 
-def test_main_when_given_syslog_port_via_cli_passes_port_to_get_logger(
-    mock_42,
-    mock_store,
-    mock_cli_args,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_aed_extractor,
-    mock_get_password_function,
-    mock_logger,
-):
+def test_main_when_given_syslog_port_via_cli_passes_port_to_get_logger(patches):
     expected = 1000
-    mock_cli_args.c42_syslog_port = expected
+    patches.cli_args.c42_syslog_port = expected
     main.main()
-    actual = mock_logger.call_args[1]["syslog_port"]
+    actual = patches.logger.call_args[1]["syslog_port"]
     assert actual == expected
 
 
-def test_main_when_given_syslog_port_via_config_file_passes_port_to_get_logger(
-    mock_42,
-    mock_store,
-    mock_config_args,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_aed_extractor,
-    mock_get_password_function,
-    mock_logger,
-):
+def test_main_when_given_syslog_port_via_config_file_passes_port_to_get_logger(patches):
     expected = 1000
-    mock_config_args["c42_syslog_port"] = expected
-    mock_cli_args.c42_syslog_port = expected
+    patches.config_args["c42_syslog_port"] = expected
+    patches.cli_args.c42_syslog_port = expected
     main.main()
-    actual = mock_logger.call_args[1]["syslog_port"]
+    actual = patches.logger.call_args[1]["syslog_port"]
     assert actual == expected
 
 
-def test_main_when_given_syslog_protocol_via_cli_passes_port_to_get_logger(
-    mock_42,
-    mock_store,
-    mock_cli_args,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_aed_extractor,
-    mock_get_password_function,
-    mock_logger,
-):
+def test_main_when_given_syslog_protocol_via_cli_passes_port_to_get_logger(patches):
     expected = "SOME PROTOCOL"
-    mock_cli_args.c42_syslog_protocol = expected
+    patches.cli_args.c42_syslog_protocol = expected
     main.main()
-    actual = mock_logger.call_args[1]["syslog_protocol"]
+    actual = patches.logger.call_args[1]["syslog_protocol"]
     assert actual == expected
 
 
-def test_main_when_given_syslog_protocol_via_config_file_passes_port_to_get_logger(
-    mock_42,
-    mock_store,
-    mock_config_args,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_aed_extractor,
-    mock_get_password_function,
-    mock_logger,
-):
+def test_main_when_given_syslog_protocol_via_config_file_passes_port_to_get_logger(patches):
     expected = "SOME PROTOCOL"
-    mock_config_args["c42_syslog_protocol"] = expected
+    patches.config_args["c42_syslog_protocol"] = expected
     main.main()
-    actual = mock_logger.call_args[1]["syslog_protocol"]
+    actual = patches.logger.call_args[1]["syslog_protocol"]
     assert actual == expected
 
 
-def test_main_when_cli_record_cursor_arg_is_true_overrides_handlers_record_cursor_position(
-    mocker,
-    mock_42,
-    mock_store,
-    mock_cli_args,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_aed_extractor,
-    mock_get_password_function,
-    mock_logger,
-    mock_aed_extractor_constructor,
-):
+def test_main_when_cli_record_cursor_arg_is_true_overrides_handlers_record_cursor_position(mocker, patches):
     expected = mocker.MagicMock()
     AEDCursorStore.replace_stored_insertion_timestamp = expected
-    mock_cli_args.c42_record_cursor = True
+    patches.cli_args.c42_record_cursor = True
     main.main()
-    actual = mock_aed_extractor_constructor.call_args[0][1].record_cursor_position
+    actual = patches.aed_extractor_constructor.call_args[0][1].record_cursor_position
     assert actual is expected
 
 
-def test_main_when_cli_record_cursor_arg_is_false_does_not_override_handlers_record_cursor_position(
-    mocker,
-    mock_42,
-    mock_store,
-    mock_cli_args,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_aed_extractor,
-    mock_get_password_function,
-    mock_logger,
-    mock_aed_extractor_constructor,
-):
+def test_main_when_cli_record_cursor_arg_is_false_does_not_override_handlers_record_cursor_position(mocker, patches):
     unexpected = mocker.MagicMock()
     AEDCursorStore.replace_stored_insertion_timestamp = unexpected
-    mock_cli_args.c42_record_cursor = False
+    patches.cli_args.c42_record_cursor = False
     main.main()
-    actual = mock_aed_extractor_constructor.call_args[0][1].record_cursor_position
+    actual = patches.aed_extractor_constructor.call_args[0][1].record_cursor_position
     assert actual is not unexpected
 
 
-def test_main_when_cli_record_cursor_arg_is_true_overrides_handlers_get_cursor_position(
-    mocker,
-    mock_42,
-    mock_store,
-    mock_cli_args,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_aed_extractor,
-    mock_get_password_function,
-    mock_logger,
-    mock_aed_extractor_constructor,
-):
+def test_main_when_cli_record_cursor_arg_is_true_overrides_handlers_get_cursor_position(mocker, patches):
     expected = mocker.MagicMock()
     AEDCursorStore.get_stored_insertion_timestamp = expected
-    mock_cli_args.c42_record_cursor = True
+    patches.cli_args.c42_record_cursor = True
     main.main()
-    actual = mock_aed_extractor_constructor.call_args[0][1].get_cursor_position
+    actual = patches.aed_extractor_constructor.call_args[0][1].get_cursor_position
     assert actual is expected
 
 
-def test_main_when_cli_record_cursor_arg_is_false_does_not_override_handlers_get_cursor_position(
-    mocker,
-    mock_42,
-    mock_store,
-    mock_cli_args,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_aed_extractor,
-    mock_get_password_function,
-    mock_logger,
-    mock_aed_extractor_constructor,
-):
+def test_main_when_cli_record_cursor_arg_is_false_does_not_override_handlers_get_cursor_position(mocker, patches):
     unexpected = mocker.MagicMock()
     AEDCursorStore.get_stored_insertion_timestamp = unexpected
-    mock_cli_args.c42_record_cursor = False
+    patches.cli_args.c42_record_cursor = False
     main.main()
-    actual = mock_aed_extractor_constructor.call_args[0][1].get_cursor_position
+    actual = patches.aed_extractor_constructor.call_args[0][1].get_cursor_position
     assert actual is not unexpected
 
 
-def test_main_when_config_record_cursor_arg_is_true_overrides_handlers_record_cursor_position(
-    mocker,
-    mock_42,
-    mock_store,
-    mock_config_args,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_aed_extractor,
-    mock_get_password_function,
-    mock_logger,
-    mock_aed_extractor_constructor,
-):
+def test_main_when_config_record_cursor_arg_is_true_overrides_handlers_record_cursor_position(mocker, patches):
     expected = mocker.MagicMock()
     AEDCursorStore.replace_stored_insertion_timestamp = expected
-    mock_config_args["c42_record_cursor"] = True
+    patches.config_args["c42_record_cursor"] = True
     main.main()
-    record_method = mock_aed_extractor_constructor.call_args[0][1].record_cursor_position
+    record_method = patches.aed_extractor_constructor.call_args[0][1].record_cursor_position
     assert record_method is expected
 
 
-def test_main_when_config_record_cursor_arg_is_false_does_not_override_handlers_record_cursor_position(
-    mocker,
-    mock_42,
-    mock_store,
-    mock_config_args,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_aed_extractor,
-    mock_get_password_function,
-    mock_logger,
-    mock_aed_extractor_constructor,
-):
+def test_main_when_config_record_cursor_arg_is_false_does_not_override_handlers_record_cursor_position(mocker,patches):
     unexpected = mocker.MagicMock()
     AEDCursorStore.replace_stored_insertion_timestamp = unexpected
-    mock_config_args["c42_record_cursor"] = False
+    patches.config_args["c42_record_cursor"] = False
     main.main()
-    actual = mock_aed_extractor_constructor.call_args[0][1].record_cursor_position
+    actual = patches.aed_extractor_constructor.call_args[0][1].record_cursor_position
     assert actual is not unexpected
 
 
-def test_main_when_config_record_cursor_arg_is_true_overrides_handlers_get_cursor_position(
-    mocker,
-    mock_42,
-    mock_store,
-    mock_config_args,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_aed_extractor,
-    mock_get_password_function,
-    mock_logger,
-    mock_aed_extractor_constructor,
-):
+def test_main_when_config_record_cursor_arg_is_true_overrides_handlers_get_cursor_position(mocker, patches):
     expected = mocker.MagicMock()
     AEDCursorStore.get_stored_insertion_timestamp = expected
-    mock_config_args["c42_record_cursor"] = True
+    patches.config_args["c42_record_cursor"] = True
     main.main()
-    actual = mock_aed_extractor_constructor.call_args[0][1].get_cursor_position
+    actual = patches.aed_extractor_constructor.call_args[0][1].get_cursor_position
     assert actual is expected
 
 
-def test_main_when_config_record_cursor_arg_is_false_does_not_override_handlers_get_cursor_position(
-    mocker,
-    mock_42,
-    mock_store,
-    mock_config_args,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_aed_extractor,
-    mock_get_password_function,
-    mock_logger,
-    mock_aed_extractor_constructor,
-):
+def test_main_when_config_record_cursor_arg_is_false_does_not_override_handlers_get_cursor_position(mocker, patches):
     unexpected = mocker.MagicMock()
     AEDCursorStore.get_stored_insertion_timestamp = unexpected
-    mock_config_args["c42_record_cursor"] = False
+    patches.config_args["c42_record_cursor"] = False
     main.main()
-    actual = mock_aed_extractor_constructor.call_args[0][1].get_cursor_position
+    actual = patches.aed_extractor_constructor.call_args[0][1].get_cursor_position
     assert actual is not unexpected
