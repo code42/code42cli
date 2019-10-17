@@ -155,7 +155,7 @@ def _parse_min_timestamp(begin_date):
     boundary_date = datetime.utcnow() - timedelta(days=90)
     boundary = convert_datetime_to_timestamp(boundary_date)
     if min_timestamp < boundary:
-        print("Argument --begin must be within 90 days")
+        print("Argument --begin must be within 90 days.")
         exit(1)
 
     return min_timestamp
