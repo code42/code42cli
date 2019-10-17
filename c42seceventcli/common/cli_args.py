@@ -100,7 +100,7 @@ def add_exposure_types_arg(arg_group):
             u"RemovableMedia",
             u"IsPublic",
         ],
-        help="The events with given exposure types to extract.",
+        help="To limit extracted events to those with given exposure types.",
     )
 
 
@@ -128,7 +128,7 @@ def add_destination_arg(arg_group):
         "--dest",
         action="store",
         dest="c42_destination",
-        help="Either a name of a local file or SysLog host address. Ignored if destination type is stdout.",
+        help="Either a name of a local file or syslog host address. Ignored if destination type is stdout.",
     )
 
 
@@ -137,7 +137,7 @@ def add_syslog_port_arg(arg_group):
         "--dest-port",
         action="store",
         dest="c42_syslog_port",
-        help="Port used on SysLog destination. Ignored if destination type is not SysLog.",
+        help="Port used on syslog destination. Ignored if destination type is not syslog.",
     )
 
 
@@ -147,11 +147,11 @@ def add_syslog_protocol_arg(arg_group):
         action="store",
         dest="c42_syslog_protocol",
         choices=["TCP", "UDP"],
-        help="Protocol used to send logs to SysLog server. Ignored if destination type is not SysLog.",
+        help="Protocol used to send logs to syslog server. Ignored if destination type is not syslog.",
     )
 
 
 def add_help_arg(arg_group):
     arg_group.add_argument(
-        "-h", "--help", action="help", default=SUPPRESS, help="Show this help message and exit"
+        "-h", "--help", action="help", default=SUPPRESS, help="Show this help message and exit."
     )
