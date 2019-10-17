@@ -21,6 +21,7 @@ def get_config_args(config_file_path):
     items = parser.items("Code42")
     for item in items:
         args[item[0]] = item[1]
+
     return args
 
 
