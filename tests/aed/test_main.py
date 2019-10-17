@@ -136,25 +136,33 @@ def mock_getpass_function(mocker):
     return mocker.patch("c42seceventcli.aed.main.getpass")
 
 
-def test_main_when_cli_arg_ignore_ssl_errors_is_true_that_py42_settings_verify_ssl_certs_is_false(patches):
+def test_main_when_cli_arg_ignore_ssl_errors_is_true_that_py42_settings_verify_ssl_certs_is_false(
+    patches
+):
     patches.cli_args.c42_ignore_ssl_errors = True
     main.main()
     assert not settings.verify_ssl_certs
 
 
-def test_main_when_cli_arg_ignore_ssl_errors_is_false_that_py42_settings_verify_ssl_certs_is_true(patches):
+def test_main_when_cli_arg_ignore_ssl_errors_is_false_that_py42_settings_verify_ssl_certs_is_true(
+    patches
+):
     patches.cli_args.c42_ignore_ssl_errors = False
     main.main()
     assert settings.verify_ssl_certs
 
 
-def test_main_when_config_arg_ignore_ssl_errors_is_true_py42_settings_verify_ssl_certs_is_false(patches):
+def test_main_when_config_arg_ignore_ssl_errors_is_true_py42_settings_verify_ssl_certs_is_false(
+    patches
+):
     patches.config_args["c42_ignore_ssl_errors"] = True
     main.main()
     assert not settings.verify_ssl_certs
 
 
-def test_main_when_config_arg_ignore_ssl_errors_is_false_py42_settings_verify_ssl_certs_is_true(patches):
+def test_main_when_config_arg_ignore_ssl_errors_is_false_py42_settings_verify_ssl_certs_is_true(
+    patches
+):
     patches.config_args["c42_ignore_ssl_errors"] = False
     main.main()
     assert settings.verify_ssl_certs
@@ -278,7 +286,9 @@ def test_main_when_get_password_returns_none_uses_password_from_getpass(patches)
     assert actual == expected
 
 
-def test_main_when_get_password_returns_none_calls_set_password_with_password_from_getpass(mocker, patches):
+def test_main_when_get_password_returns_none_calls_set_password_with_password_from_getpass(
+    mocker, patches
+):
     expected_username = "ME"
     expected_password = "super_secret_password"
     patches.cli_args.c42_username = expected_username
@@ -362,7 +372,9 @@ def test_main_when_given_syslog_protocol_via_config_file_passes_port_to_get_logg
     assert actual == expected
 
 
-def test_main_when_cli_record_cursor_arg_is_true_overrides_handlers_record_cursor_position(mocker, patches):
+def test_main_when_cli_record_cursor_arg_is_true_overrides_handlers_record_cursor_position(
+    mocker, patches
+):
     expected = mocker.MagicMock()
     AEDCursorStore.replace_stored_insertion_timestamp = expected
     patches.cli_args.c42_record_cursor = True
@@ -371,7 +383,9 @@ def test_main_when_cli_record_cursor_arg_is_true_overrides_handlers_record_curso
     assert actual is expected
 
 
-def test_main_when_cli_record_cursor_arg_is_false_does_not_override_handlers_record_cursor_position(mocker, patches):
+def test_main_when_cli_record_cursor_arg_is_false_does_not_override_handlers_record_cursor_position(
+    mocker, patches
+):
     unexpected = mocker.MagicMock()
     AEDCursorStore.replace_stored_insertion_timestamp = unexpected
     patches.cli_args.c42_record_cursor = False
@@ -380,7 +394,9 @@ def test_main_when_cli_record_cursor_arg_is_false_does_not_override_handlers_rec
     assert actual is not unexpected
 
 
-def test_main_when_cli_record_cursor_arg_is_true_overrides_handlers_get_cursor_position(mocker, patches):
+def test_main_when_cli_record_cursor_arg_is_true_overrides_handlers_get_cursor_position(
+    mocker, patches
+):
     expected = mocker.MagicMock()
     AEDCursorStore.get_stored_insertion_timestamp = expected
     patches.cli_args.c42_record_cursor = True
@@ -389,7 +405,9 @@ def test_main_when_cli_record_cursor_arg_is_true_overrides_handlers_get_cursor_p
     assert actual is expected
 
 
-def test_main_when_cli_record_cursor_arg_is_false_does_not_override_handlers_get_cursor_position(mocker, patches):
+def test_main_when_cli_record_cursor_arg_is_false_does_not_override_handlers_get_cursor_position(
+    mocker, patches
+):
     unexpected = mocker.MagicMock()
     AEDCursorStore.get_stored_insertion_timestamp = unexpected
     patches.cli_args.c42_record_cursor = False
@@ -398,7 +416,9 @@ def test_main_when_cli_record_cursor_arg_is_false_does_not_override_handlers_get
     assert actual is not unexpected
 
 
-def test_main_when_config_record_cursor_arg_is_true_overrides_handlers_record_cursor_position(mocker, patches):
+def test_main_when_config_record_cursor_arg_is_true_overrides_handlers_record_cursor_position(
+    mocker, patches
+):
     expected = mocker.MagicMock()
     AEDCursorStore.replace_stored_insertion_timestamp = expected
     patches.config_args["c42_record_cursor"] = True
@@ -407,7 +427,9 @@ def test_main_when_config_record_cursor_arg_is_true_overrides_handlers_record_cu
     assert record_method is expected
 
 
-def test_main_when_config_record_cursor_arg_is_false_does_not_override_handlers_record_cursor_position(mocker,patches):
+def test_main_when_config_record_cursor_arg_is_false_does_not_override_handlers_record_cursor_position(
+    mocker, patches
+):
     unexpected = mocker.MagicMock()
     AEDCursorStore.replace_stored_insertion_timestamp = unexpected
     patches.config_args["c42_record_cursor"] = False
@@ -416,7 +438,9 @@ def test_main_when_config_record_cursor_arg_is_false_does_not_override_handlers_
     assert actual is not unexpected
 
 
-def test_main_when_config_record_cursor_arg_is_true_overrides_handlers_get_cursor_position(mocker, patches):
+def test_main_when_config_record_cursor_arg_is_true_overrides_handlers_get_cursor_position(
+    mocker, patches
+):
     expected = mocker.MagicMock()
     AEDCursorStore.get_stored_insertion_timestamp = expected
     patches.config_args["c42_record_cursor"] = True
@@ -425,7 +449,9 @@ def test_main_when_config_record_cursor_arg_is_true_overrides_handlers_get_curso
     assert actual is expected
 
 
-def test_main_when_config_record_cursor_arg_is_false_does_not_override_handlers_get_cursor_position(mocker, patches):
+def test_main_when_config_record_cursor_arg_is_false_does_not_override_handlers_get_cursor_position(
+    mocker, patches
+):
     unexpected = mocker.MagicMock()
     AEDCursorStore.get_stored_insertion_timestamp = unexpected
     patches.config_args["c42_record_cursor"] = False
