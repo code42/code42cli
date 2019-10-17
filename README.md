@@ -13,11 +13,9 @@ most recently extracted event as a cursor to only get events that were not previ
 Until `py42` and `c42secevents` are available on PyPI, you will need to first install them manually.
 
 `py42` is available for download [here](https://confluence.corp.code42.com/pages/viewpage.action?pageId=61767969#py42%E2%80%93Code42PythonSDK-Downloads).
-
 For py42 installation instructions, see its [README](https://stash.corp.code42.com/projects/SH/repos/lib_c42_python_sdk/browse/README.md).
 
 `c42secevents` is available [here](https://confluence.corp.code42.com/display/LS/Security+Event+Extractor+-+Python).
-
 For `c42secevents` installation instructions, see its [README](https://stash.corp.code42.com/projects/INT/repos/security-event-extractor/browse/README.md).
 
 Once you've done that, install `c42seceventscli` using:
