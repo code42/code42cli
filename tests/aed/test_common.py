@@ -4,7 +4,7 @@ from logging import StreamHandler, FileHandler
 
 from c42secevents.logging.handlers import NoPrioritySysLogHandler
 
-from c42seceventcli.common.common import SecurityEventConfigParser, parse_timestamp, get_logger
+from c42seceventcli.common.common import get_config_args, parse_timestamp, get_logger
 
 
 _DUMMY_KEY = "Key"
@@ -30,31 +30,40 @@ def mock_get_logger(mocker):
     return mocker.patch("c42seceventcli.common.common.getLogger")
 
 
-class TestSecurityEventConfigParser(object):
-    def test_init_when_given_read_returns_empty_list_raises_io_error(self, mocker):
-        reader = mocker.patch("configparser.ConfigParser.read")
-        reader.return_value = []
-        with pytest.raises(IOError):
-            SecurityEventConfigParser("test")
+@pytest.fixture
+def mock_config_file_reader(mocker):
+    reader = mocker.patch("configparser.ConfigParser.read")
+    reader.return_value = ["NOT EMPTY LIST"]
+    return reader
 
-    def test_get_returns_expected_value(self, mock_config_read, mock_config_get_function):
-        expected = "Value"
-        mock_config_get_function.return_value = expected
-        parser = SecurityEventConfigParser("test")
-        actual = parser.get(_DUMMY_KEY)
-        assert actual == expected
 
-    def test_get_bool_returns_expected_bool(self, mock_config_read, mock_config_get_bool_function):
-        mock_config_get_bool_function.return_value = True
-        parser = SecurityEventConfigParser("test")
-        assert parser.get_bool(_DUMMY_KEY)
+@pytest.fixture
+def mock_config_file_sections(mocker):
+    sections = mocker.patch("configparser.ConfigParser.sections")
+    sections.return_value = ["NOT EMPTY LIST"]
+    return sections
 
-    def test_get_int_returns_expected_int(self, mock_config_read, mock_config_get_function):
-        expected = 42
-        mock_config_get_function.return_value = 42
-        parser = SecurityEventConfigParser("test")
-        actual = parser.get_int(_DUMMY_KEY)
-        assert actual == expected
+
+def test_get_config_args_when_read_returns_empty_list_raises_io_error(mocker):
+    reader = mocker.patch("configparser.ConfigParser.read")
+    reader.return_value = []
+    with pytest.raises(IOError):
+        get_config_args("Test")
+
+
+def test_get_config_args_when_sections_returns_empty_list_returns_empty_dict(
+    mocker, mock_config_file_reader
+):
+    sections = mocker.patch("configparser.ConfigParser.sections")
+    sections.return_value = []
+    assert get_config_args("Test") == {}
+
+
+def test_get_config_args_returns_dict_made_from_items(mocker, mock_config_file_reader, mock_config_file_sections):
+    mock_tuples = mocker.patch("configparser.ConfigParser.items")
+    mock_tuples.return_value = [("Hi", "Bye"), ("Pizza", "FrenchFries")]
+    arg_dict = get_config_args("Test")
+    assert arg_dict == {"Hi": "Bye", "Pizza": "FrenchFries"}
 
 
 def test_parse_timestamp_when_given_date_format_returns_expected_timestamp():

@@ -1,40 +1,27 @@
 import sys
 from os.path import expanduser
 from datetime import datetime, timedelta
-from configparser import ConfigParser, NoOptionError, NoSectionError
+from configparser import ConfigParser
 from logging import StreamHandler, FileHandler, getLogger, INFO
 
 from c42secevents.logging.handlers import NoPrioritySysLogHandler
 from c42secevents.common import convert_datetime_to_timestamp
 
 
-class SecurityEventConfigParser(object):
-    _MAIN_SECTION = "Code42"
+def get_config_args(config_file_path):
+    args = {}
+    parser = ConfigParser()
+    if config_file_path:
+        if not parser.read(expanduser(config_file_path)):
+            raise IOError("Supplied an empty config file {0}".format(config_file_path))
 
-    def __init__(self, config_file):
-        config = ConfigParser()
-        if config_file:
-            if not config.read(expanduser(config_file)):
-                raise IOError("Supplied an empty config file {0}".format(config_file))
-        self._config = config
+    if not parser.sections():
+        return args
 
-    def get(self, key):
-        try:
-            return self._config.get(self._MAIN_SECTION, key)
-        except (NoOptionError, NoSectionError):
-            return None
-
-    def get_bool(self, key):
-        try:
-            return self._config.getboolean(self._MAIN_SECTION, key)
-        except (NoOptionError, NoSectionError):
-            return None
-
-    def get_int(self, key):
-        try:
-            return self._config.getint(self._MAIN_SECTION, key)
-        except (NoOptionError, NoSectionError):
-            return None
+    items = parser.items("Code42")
+    for item in items:
+        args[item[0]] = item[1]
+    return args
 
 
 def parse_timestamp(input_string):
@@ -50,20 +37,27 @@ def parse_timestamp(input_string):
     return convert_datetime_to_timestamp(time)
 
 
-def get_logger(formatter, destination, destination_type="stdout"):
+def get_logger(formatter, destination, destination_type, syslog_port=514, syslog_protocol="TCP"):
     destination_type = destination_type.lower()
     logger = getLogger("Code42_SecEventCli_Logger")
-    handler = _get_log_handler(destination, destination_type)
+    handler = _get_log_handler(
+        destination=destination,
+        destination_type=destination_type,
+        syslog_port=syslog_port,
+        syslog_protocol=syslog_protocol,
+    )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.setLevel(INFO)
     return logger
 
 
-def _get_log_handler(destination, destination_type="stdout"):
+def _get_log_handler(destination, destination_type, syslog_port=514, syslog_protocol="TCP"):
     if destination_type == "stdout":
         return StreamHandler(sys.stdout)
     elif destination_type == "syslog":
-        return NoPrioritySysLogHandler(destination)
+        return NoPrioritySysLogHandler(
+            hostname=destination, port=syslog_port, protocol=syslog_protocol
+        )
     elif destination_type == "file":
         return FileHandler(filename=destination)

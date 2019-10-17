@@ -12,7 +12,7 @@ from c42secevents.extractors import AEDEventExtractor
 from c42secevents.common import FileEventHandlers, convert_datetime_to_timestamp
 from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
 
-from c42seceventcli.common.common import SecurityEventConfigParser, parse_timestamp, get_logger
+from c42seceventcli.common.common import get_config_args, parse_timestamp, get_logger
 from c42seceventcli.aed.cursor_store import AEDCursorStore
 from c42seceventcli.common.cli_args import (
     add_config_file_path_arg,
@@ -37,25 +37,24 @@ _SERVICE_NAME_FOR_KEYCHAIN = u"c42seceventcli"
 
 def main():
     parser = _get_arg_parser()
-    cli_args = parser.parse_args()
-    config_args = SecurityEventConfigParser(cli_args.c42_config_file)
-    args = _union_cli_args_with_config_args(cli_args, config_args)
-
+    cli_args = vars(parser.parse_args())
+    config_args = get_config_args(cli_args["c42_config_file"])
+    args = _create_args(cli_args, config_args)
     _verify_destination_args(args)
 
-    if args.ignore_ssl_errors:
+    if bool(args.c42_ignore_ssl_errors):
         _ignore_ssl_errors()
 
-    if args.debug_mode:
+    if bool(args.c42_debug_mode):
         settings.debug_level = debug_level.DEBUG
 
-    min_timestamp = _parse_min_timestamp(args)
-    max_timestamp = parse_timestamp(args.end_date)
+    min_timestamp = _parse_min_timestamp(args.c42_begin_date)
+    max_timestamp = parse_timestamp(args.c42_end_date)
 
     sdk = _create_sdk_from_args(args, parser)
     handlers = _create_handlers(args)
     extractor = AEDEventExtractor(sdk, handlers)
-    extractor.extract(min_timestamp, max_timestamp, args.exposure_types)
+    extractor.extract(min_timestamp, max_timestamp, args.c42_exposure_types)
 
 
 def _get_arg_parser():
@@ -83,121 +82,65 @@ def _get_arg_parser():
     return parser
 
 
-class AEDArgs(object):
-    server = None
-    username = None
-    begin_date = None
-    end_date = None
-    ignore_ssl_errors = None
-    output_format = None
-    record_cursor = None
-    exposure_types = None
-    debug_mode = None
-    destination_type = None
-    destination = None
-    syslog_port = None
-    syslog_protocol = None
-
-
-def _union_cli_args_with_config_args(cli_args, config_args):
-    arg_map = _create_arg_map(cli_args, config_args)
+def _create_args(cli_args, config_args):
     args = AEDArgs()
-    for key in arg_map:
-        _set_arg_attr(args, key, arg_map[key])
+    keys = cli_args.keys()
+    for key in keys:
+        args.try_set(key, cli_args.get(key), config_args.get(key))
 
     return args
 
 
-def _create_arg_map(cli_args, config_args):
-    keys = _get_keys()
-    entries = _get_arg_entries(cli_args, config_args, keys)
-    arg_map = {}
-    count = min(len(keys), len(entries))
-    for i in range(0, count):
-        arg_map[keys[i]] = entries[i]
+class AEDArgs(object):
+    c42_authority_url = None
+    c42_username = None
+    c42_begin_date = None
+    c42_end_date = None
+    c42_ignore_ssl_errors = False
+    c42_output_format = "JSON"
+    c42_record_cursor = False
+    c42_exposure_types = None
+    c42_debug_mode = False
+    c42_destination_type = "stdout"
+    c42_destination = None
+    c42_syslog_port = 514
+    c42_syslog_protocol = "TCP"
 
-    return arg_map
+    def __init__(self):
+        self.c42_begin_date = AEDArgs._get_default_begin_date()
+        self.c42_end_date = AEDArgs._get_default_end_date()
 
+    def try_set(self, arg_name, cli_arg=None, config_arg=None):
+        if cli_arg is not None:
+            setattr(self, arg_name, cli_arg)
+        elif config_arg is not None:
+            setattr(self, arg_name, config_arg)
 
-def _get_keys():
-    return [
-        "server",
-        "username",
-        "begin_date",
-        "end_date",
-        "ignore_ssl_errors",
-        "output_format",
-        "record_cursor",
-        "exposure_types",
-        "debug_mode",
-        "destination_type",
-        "destination",
-        "syslog_port",
-        "syslog_protocol",
-    ]
+    @staticmethod
+    def _get_default_begin_date():
+        default_begin_date = datetime.now() - timedelta(days=60)
+        return default_begin_date.strftime("%Y-%m-%d")
 
-
-def _get_arg_entries(cli_args, config_args, keys):
-    return [
-        _create_arg_entry(cli_args.c42_authority_url, config_args.get(keys[0]), None),
-        _create_arg_entry(cli_args.c42_username, config_args.get(keys[1]), None),
-        _create_arg_entry(
-            cli_args.c42_begin_date, config_args.get(keys[2]), _get_default_begin_date()
-        ),
-        _create_arg_entry(cli_args.c42_end_date, config_args.get(keys[3]), _get_default_end_date()),
-        _create_arg_entry(cli_args.c42_ignore_ssl_errors, config_args.get_bool(keys[4]), False),
-        _create_arg_entry(cli_args.c42_output_format, config_args.get(keys[5]), "JSON"),
-        _create_arg_entry(cli_args.c42_record_cursor, config_args.get_bool(keys[6]), False),
-        _create_arg_entry(cli_args.c42_exposure_types, config_args.get(keys[7]), None),
-        _create_arg_entry(cli_args.c42_debug_mode, config_args.get_bool(keys[8]), False),
-        _create_arg_entry(cli_args.c42_destination_type, config_args.get(keys[9]), "stdout"),
-        _create_arg_entry(cli_args.c42_destination, config_args.get(keys[10]), None),
-        _create_arg_entry(cli_args.c42_syslog_port, config_args.get_int(keys[11]), 514),
-        _create_arg_entry(cli_args.c42_syslog_protocol, config_args.get(keys[12]), "TCP"),
-    ]
-
-
-def _create_arg_entry(cli_arg, config_arg, default_arg):
-    return {"cli_arg": cli_arg, "config_arg": config_arg, "default_arg": default_arg}
-
-
-def _set_arg_attr(args, attr_name, arg_map_entry):
-    cli_arg = arg_map_entry["cli_arg"]
-    config_arg = arg_map_entry["config_arg"]
-    default_arg = arg_map_entry["default_arg"]
-    if cli_arg is not None:
-        arg = cli_arg
-    elif config_arg is not None:
-        arg = config_arg
-    else:
-        arg = default_arg
-    setattr(args, attr_name, arg)
-
-
-def _get_default_begin_date():
-    default_begin_date = datetime.now() - timedelta(days=60)
-    return default_begin_date.strftime("%Y-%m-%d")
-
-
-def _get_default_end_date():
-    default_end_date = datetime.now()
-    return default_end_date.strftime("%Y-%m-%d")
+    @staticmethod
+    def _get_default_end_date():
+        default_end_date = datetime.now()
+        return default_end_date.strftime("%Y-%m-%d")
 
 
 def _verify_destination_args(args):
-    if args.destination_type == "stdout" and args.destination is not None:
+    if args.c42_destination_type == "stdout" and args.c42_destination is not None:
         print(
             "Ambiguous destination '{0}' for '{1}' destination type.".format(
-                args.destination, args.destination_type
+                args.c42_destination, args.c42_destination_type
             )
         )
         exit(1)
 
-    if args.destination_type == "file" and args.destination is None:
+    if args.c42_destination_type == "file" and args.c42_destination is None:
         print("Missing file name for --dest arg.")
         exit(1)
 
-    if args.destination_type == "syslog" and args.destination is None:
+    if args.c42_destination_type == "syslog" and args.c42_destination is None:
         print("Missing syslog server URL for --dest arg.")
         exit(1)
 
@@ -207,8 +150,8 @@ def _ignore_ssl_errors():
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
-def _parse_min_timestamp(args):
-    min_timestamp = parse_timestamp(args.begin_date)
+def _parse_min_timestamp(begin_date):
+    min_timestamp = parse_timestamp(begin_date)
     boundary_date = datetime.utcnow() - timedelta(days=90)
     boundary = convert_datetime_to_timestamp(boundary_date)
     if min_timestamp < boundary:
@@ -227,7 +170,7 @@ def _create_sdk_from_args(args, parser):
 
 
 def _get_server_from_args(args, parser):
-    server = args.server
+    server = args.c42_authority_url
     if server is None:
         _exit_from_argument_error("Host address not provided.", parser)
 
@@ -235,7 +178,7 @@ def _get_server_from_args(args, parser):
 
 
 def _get_username_from_args(args, parser):
-    username = args.username
+    username = args.c42_username
     if username is None:
         _exit_from_argument_error("Username not provided.", parser)
 
@@ -260,11 +203,20 @@ def _get_password(username):
 def _create_handlers(args):
     store = AEDCursorStore()
     handlers = FileEventHandlers()
-    handlers.record_cursor_position = store.replace_stored_insertion_timestamp
-    handlers.get_cursor_position = store.get_stored_insertion_timestamp
-    output_format = args.output_format
+
+    if bool(args.c42_record_cursor):
+        handlers.record_cursor_position = store.replace_stored_insertion_timestamp
+        handlers.get_cursor_position = store.get_stored_insertion_timestamp
+
+    output_format = args.c42_output_format
     logger_formatter = _get_log_formatter(output_format)
-    logger = get_logger(logger_formatter, args.destination, args.destination_type)
+    logger = get_logger(
+        formatter=logger_formatter,
+        destination=args.c42_destination,
+        destination_type=args.c42_destination_type,
+        syslog_port=int(args.c42_syslog_port),
+        syslog_protocol=args.c42_syslog_protocol,
+    )
     handlers.handle_response = _get_response_handler(logger)
     return handlers
 
