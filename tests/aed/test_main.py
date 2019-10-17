@@ -177,20 +177,6 @@ def test_main_when_cli_arg_debug_mode_is_true_that_py42_settings_debug_mode_is_d
     assert settings.debug_level == debug_level.DEBUG
 
 
-def test_main_when_cli_arg_debug_mode_is_false_that_py42_settings_debug_mode_is_not_debug(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_cli_args,
-    mock_aed_extractor,
-    mock_get_password_function,
-):
-    mock_cli_args.c42_debug_mode = False
-    main.main()
-    assert settings.debug_level != debug_level.DEBUG
-
-
 def test_main_when_config_arg_debug_mode_is_true_that_py42_settings_debug_mode_is_debug(
     mock_42,
     mock_store,
@@ -203,20 +189,6 @@ def test_main_when_config_arg_debug_mode_is_true_that_py42_settings_debug_mode_i
     mock_config_args["c42_debug_mode"] = True
     main.main()
     assert settings.debug_level == debug_level.DEBUG
-
-
-def test_main_when_config_arg_debug_mode_is_false_that_py42_settings_debug_mode_is_not_debug(
-    mock_42,
-    mock_store,
-    mock_cli_arg_parser,
-    mock_config_arg_parser,
-    mock_config_args,
-    mock_aed_extractor,
-    mock_get_password_function,
-):
-    mock_config_args["c42_debug_mode"] = False
-    main.main()
-    assert settings.debug_level != debug_level.DEBUG
 
 
 def test_main_when_cli_arg_begin_date_is_before_ninety_days_causes_program_exit(
