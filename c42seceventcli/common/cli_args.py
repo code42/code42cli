@@ -81,7 +81,7 @@ def add_record_cursor_arg(arg_group):
         "--record-cursor",
         dest="c42_record_cursor",
         action="store_true",
-        help="Used to only get new events on subsequent runs.",
+        help="To only get events that were not previously retrieved.",
     )
 
 
