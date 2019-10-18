@@ -1,5 +1,6 @@
 import sqlite3
-from os.path import dirname, realpath
+
+from c42seceventcli.save.path import get_save_path
 
 
 class SecurityEventCursorStore(object):
@@ -9,8 +10,8 @@ class SecurityEventCursorStore(object):
         # type: (str, str) -> None
         self._table_name = db_table_name
         if db_file_path is None:
-            script_path = dirname(realpath(__file__))
-            db_file_path = "{0}/{1}.db".format(script_path, self._table_name)
+            save_path = get_save_path()
+            db_file_path = "{0}/{1}.db".format(save_path, self._table_name)
 
         self._connection = sqlite3.connect(db_file_path)
 

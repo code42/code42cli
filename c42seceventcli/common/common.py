@@ -1,10 +1,11 @@
 import sys
-from os.path import expanduser, dirname, realpath
+from os.path import expanduser
 from datetime import datetime, timedelta
 from configparser import ConfigParser
 from logging import StreamHandler, FileHandler, getLogger, INFO, Formatter
 from logging.handlers import RotatingFileHandler
 
+from c42seceventcli.save.path import get_save_path
 from c42secevents.logging.handlers import NoPrioritySysLogHandler
 from c42secevents.common import convert_datetime_to_timestamp
 
@@ -55,8 +56,8 @@ def get_logger(formatter, destination, destination_type, syslog_port=514, syslog
 
 
 def get_error_logger():
-    script_path = dirname(realpath(__file__))
-    log_path = "{0}/c42seceventcli_errors.log".format(script_path)
+    save_path = get_save_path()
+    log_path = "{0}/c42seceventcli_errors.log".format(save_path)
     logger = getLogger("Code42_SecEventCli_Error_Logger")
     formatter = Formatter("%(message)s")
     handler = RotatingFileHandler(log_path, maxBytes=250000000)
