@@ -2,7 +2,9 @@ from c42seceventcli.common.cursor_store import SecurityEventCursorStore
 
 
 class TestSecurityEventCursorStore(object):
-    def test_init_cursor_store_when_not_given_db_file_path_uses_expected_path_with_db_table_name_as_db_file_name(self, mocker, sqlite_connection):
+    def test_init_cursor_store_when_not_given_db_file_path_uses_expected_path_with_db_table_name_as_db_file_name(
+        self, mocker, sqlite_connection
+    ):
         expected_path = "TEST_PATH"
         expected_db_name = "TEST"
         mock_path = mocker.patch("os.path.dirname")

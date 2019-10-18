@@ -5,7 +5,12 @@ from logging.handlers import RotatingFileHandler
 
 from c42secevents.logging.handlers import NoPrioritySysLogHandler
 
-from c42seceventcli.common.common import get_config_args, parse_timestamp, get_logger, get_error_logger
+from c42seceventcli.common.common import (
+    get_config_args,
+    parse_timestamp,
+    get_logger,
+    get_error_logger,
+)
 
 
 _DUMMY_KEY = "Key"
