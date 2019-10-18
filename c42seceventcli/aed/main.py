@@ -3,6 +3,7 @@ import json
 from argparse import ArgumentParser
 from datetime import datetime, timedelta
 from keyring import get_password, set_password, delete_password
+from keyring.errors import PasswordDeleteError
 from getpass import getpass
 
 import py42.debug_level as debug_level
@@ -45,7 +46,7 @@ def main():
     args = _create_args(cli_args, config_args)
 
     if cli_args.get("c42_reset_password"):
-        delete_password(_SERVICE_NAME_FOR_KEYCHAIN, args.c42_username)
+        _delete_stored_password(args.c42_username)
 
     store = AEDCursorStore()
     handlers = _create_handlers(store, args)
@@ -136,6 +137,13 @@ class AEDArgs(object):
         return default_end_date.strftime("%Y-%m-%d")
 
 
+def _delete_stored_password(username):
+    try:
+        delete_password(_SERVICE_NAME_FOR_KEYCHAIN, username)
+    except PasswordDeleteError:
+        return
+
+
 def _ignore_ssl_errors():
     settings.verify_ssl_certs = False
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -219,7 +227,7 @@ def _exit_from_argument_error(message, parser):
 def _get_password(username):
     password = get_password(_SERVICE_NAME_FOR_KEYCHAIN, username)
     if password is None:
-        password = getpass()
+        password = getpass(prompt="Code42 password: ")
         set_password(_SERVICE_NAME_FOR_KEYCHAIN, username, password)
 
     return password
