@@ -62,16 +62,15 @@ c42_username=user@code42.com
 c42_authority_url=https://example.authority.com
 c42_record_cursor=True
 ```
+By excluding `-r`, future runs will not know about previous events you got, and 
+you will get all the events in the given time range (or default time range of 60 days back). 
+`-r` is particularly useful if you wish to run this script on a recurring job.
 
 To clear the cursor:
 
 ```bash
 c42aed -s https://example.authority.com -u security.admin@example.com -r --clear-cursor
 ```
-
-By excluding `-r`, future runs will not know about previous events you got, and 
-you will get all the events in the given time range (or default time range of 60 days back). 
-`-r` is particularly useful if you wish to run this script on a recurring job.
 
 
 You can also use CLI args with config-file args, but the program will favor the CLI args.
