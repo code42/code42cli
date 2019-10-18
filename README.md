@@ -96,13 +96,13 @@ All errors are sent to an error log file named `c42seceventcli_errors.log`.
 Full usage:
 
 ```
-usage: main.py [-e C42_END_DATE | -r] [-c C42_CONFIG_FILE]
-               [-s C42_AUTHORITY_URL] [-u C42_USERNAME] [-h]
-               [-b C42_BEGIN_DATE] [-i] [-o {CEF,JSON}]
-               [-t [{SharedViaLink,SharedToDomain,ApplicationRead,CloudStorage,RemovableMedia,IsPublic} [{SharedViaLink,SharedToDomain,ApplicationRead,CloudStorage,RemovableMedia,IsPublic} ...]]]
-               [-d--debug] [--dest-type {stdout,file,syslog}]
-               [--dest C42_DESTINATION] [--dest-port C42_SYSLOG_PORT]
-               [--dest-protocol {TCP,UDP}]
+usage: c42aed [-e C42_END_DATE | -r] [--clear-cursor] [--reset-password]
+              [-c C42_CONFIG_FILE] [-s C42_AUTHORITY_URL] [-u C42_USERNAME]
+              [-h] [-b C42_BEGIN_DATE] [-i] [-o {CEF,JSON}]
+              [-t [{SharedViaLink,SharedToDomain,ApplicationRead,CloudStorage,RemovableMedia,IsPublic} [{SharedViaLink,SharedToDomain,ApplicationRead,CloudStorage,RemovableMedia,IsPublic} ...]]]
+              [-d--debug] [--dest-type {stdout,file,syslog}]
+              [--dest C42_DESTINATION] [--dest-port C42_SYSLOG_PORT]
+              [--dest-protocol {TCP,UDP}]
 
 optional arguments:
   -e C42_END_DATE, --end C42_END_DATE
@@ -112,6 +112,8 @@ optional arguments:
   -r, --record-cursor   To only get events that were not previously retrieved.
 
 main:
+  --clear-cursor        Resets the stored cursor.
+  --reset-password      Clears stored password and prompts user for password.
   -c C42_CONFIG_FILE, --config-file C42_CONFIG_FILE
                         The path to the config file to use for the rest of the
                         arguments.
@@ -119,7 +121,7 @@ main:
                         The full scheme, url and port of the Code42 server.
   -u C42_USERNAME, --username C42_USERNAME
                         The username of the Code42 API user.
-  -h, --help            Show this help message and exit
+  -h, --help            Show this help message and exit.
   -b C42_BEGIN_DATE, --begin C42_BEGIN_DATE
                         The end of the date range in which to look for events,
                         in YYYY-MM-DD UTC format OR a number (number of
@@ -129,19 +131,20 @@ main:
   -o {CEF,JSON}, --output-format {CEF,JSON}
                         The format used for outputting events.
   -t [{SharedViaLink,SharedToDomain,ApplicationRead,CloudStorage,RemovableMedia,IsPublic} [{SharedViaLink,SharedToDomain,ApplicationRead,CloudStorage,RemovableMedia,IsPublic} ...]], --types [{SharedViaLink,SharedToDomain,ApplicationRead,CloudStorage,RemovableMedia,IsPublic} [{SharedViaLink,SharedToDomain,ApplicationRead,CloudStorage,RemovableMedia,IsPublic} ...]]
-                        The events with given exposure types to extract.
+                        To limit extracted events to those with given exposure
+                        types.
   -d--debug             Set to turn on debug logging.
   --dest-type {stdout,file,syslog}
                         The type of destination to send output to.
   --dest C42_DESTINATION
-                        Either a name of a local file or SysLog host address.
+                        Either a name of a local file or syslog host address.
                         Ignored if destination type is stdout.
   --dest-port C42_SYSLOG_PORT
-                        Port used on SysLog destination. Ignored if
-                        destination type is not SysLog.
+                        Port used on syslog destination. Ignored if
+                        destination type is not syslog.
   --dest-protocol {TCP,UDP}
-                        Protocol used to send logs to SysLog server. Ignored
-                        if destination type is not SysLog.
+                        Protocol used to send logs to syslog server. Ignored
+                        if destination type is not syslog.
 ```
 
 # Known Issues
