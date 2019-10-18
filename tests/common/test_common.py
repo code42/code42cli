@@ -1,10 +1,11 @@
 import pytest
 from datetime import datetime, timedelta
 from logging import StreamHandler, FileHandler
+from logging.handlers import RotatingFileHandler
 
 from c42secevents.logging.handlers import NoPrioritySysLogHandler
 
-from c42seceventcli.common.common import get_config_args, parse_timestamp, get_logger
+from c42seceventcli.common.common import get_config_args, parse_timestamp, get_logger, get_error_logger
 
 
 _DUMMY_KEY = "Key"
@@ -118,4 +119,13 @@ def test_get_logger_when_destination_type_is_syslog_adds_no_priority_sys_log_han
     logger = get_logger(None, "Somewhere", "syslog")
     actual = type(logger.addHandler.call_args[0][0])
     expected = NoPrioritySysLogHandler
+    assert actual == expected
+
+
+def test_get_error_logger_uses_rotating_file_handler(mocker, mock_get_logger):
+    mock_handler = mocker.patch("logging.handlers.RotatingFileHandler.__init__")
+    mock_handler.return_value = None
+    logger = get_error_logger()
+    actual = type(logger.addHandler.call_args[0][0])
+    expected = RotatingFileHandler
     assert actual == expected
