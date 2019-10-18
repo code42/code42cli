@@ -84,6 +84,15 @@ If you get a keychain error when running this script, you may have to add a code
 codesign -f -s - $(which python)
 ```
 
+If you get an `OperationError: unable to open database file`, trying running again with `sudo`:
+
+```bash
+sudo c42aed -s https://example.authority.com -u security.admin@example.com
+``` 
+
+All errors are sent to an error log file named `c42seceventcli_errors.log`.
+
+
 Full usage:
 
 ```
