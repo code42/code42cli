@@ -9,7 +9,7 @@ class TestAEDCursorStore(object):
         store.reset()
         with store._connection as conn:
             actual = conn.execute.call_args_list[0][0][0]
-            expected = "DROP TABLE siem_checkpoint"
+            expected = "DROP TABLE aed_siem_checkpoint"
             assert actual == expected
 
     def test_reset_executes_expected_create_table_query(self, sqlite_connection):
@@ -17,7 +17,7 @@ class TestAEDCursorStore(object):
         store.reset()
         with store._connection as conn:
             actual = conn.execute.call_args_list[1][0][0]
-            expected = "CREATE TABLE siem_checkpoint (cursor_id, insertionTimestamp)"
+            expected = "CREATE TABLE aed_siem_checkpoint (cursor_id, insertionTimestamp)"
             assert actual == expected
 
     def test_reset_executes_expected_insert_query(self, sqlite_connection):
@@ -26,7 +26,7 @@ class TestAEDCursorStore(object):
         store.reset()
         with store._connection as conn:
             actual = conn.execute.call_args[0][0]
-            expected = "INSERT INTO siem_checkpoint VALUES(?, null)"
+            expected = "INSERT INTO aed_siem_checkpoint VALUES(?, null)"
             assert actual == expected
 
     def test_reset_executes_query_with_expected_primary_key(self, sqlite_connection):
@@ -42,7 +42,7 @@ class TestAEDCursorStore(object):
         store = AEDCursorStore(MOCK_TEST_DB_PATH)
         store.get_stored_insertion_timestamp()
         with store._connection as conn:
-            expected = "SELECT {0} FROM siem_checkpoint WHERE cursor_id=?".format(
+            expected = "SELECT {0} FROM aed_siem_checkpoint WHERE cursor_id=?".format(
                 INSERTION_TIMESTAMP_FIELD_NAME
             )
             actual = conn.cursor().execute.call_args[0][0]
@@ -64,7 +64,7 @@ class TestAEDCursorStore(object):
         store = AEDCursorStore(MOCK_TEST_DB_PATH)
         store.replace_stored_insertion_timestamp(123)
         with store._connection as conn:
-            expected = "UPDATE siem_checkpoint SET {0}=? WHERE cursor_id = ?".format(
+            expected = "UPDATE aed_siem_checkpoint SET {0}=? WHERE cursor_id = ?".format(
                 INSERTION_TIMESTAMP_FIELD_NAME
             )
             actual = conn.execute.call_args[0][0]
