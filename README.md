@@ -127,8 +127,8 @@ If you get an `OperationError: unable to open database file`, trying running aga
 sudo c42aed -s https://example.authority.com -u security.admin@example.com
 ``` 
 
-All errors are sent to an error log file named `c42seceventcli_errors.log` located in your python's site-packages.
-To find the location of the log and look at the location:
+All errors are sent to an error log file named `c42seceventcli_errors.log` located in your python's site-packages/c42seceventcli/save.
+To find the location of c42seceventcli:
 
 ```bash
 pip show c42seceventcli
