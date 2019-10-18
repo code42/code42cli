@@ -55,7 +55,7 @@ def main():
 
     store = AEDCursorStore()
     handlers = _create_handlers(store, args)
-    sdk = _create_sdk_from_args(args, parser)
+    sdk = _create_sdk_from_args(args, parser, handlers)
     _verify_destination_args(args)
 
     if cli_args.get("c42_clear_cursor"):
@@ -199,12 +199,16 @@ def _get_response_handler(logger):
     return handle_response
 
 
-def _create_sdk_from_args(args, parser):
-    server = _get_server_from_args(args, parser)
-    username = _get_username_from_args(args, parser)
-    password = _get_password(username)
-    sdk = SDK.create_using_local_account(host_address=server, username=username, password=password)
-    return sdk
+def _create_sdk_from_args(args, parser, handlers):
+    try:
+        server = _get_server_from_args(args, parser)
+        username = _get_username_from_args(args, parser)
+        password = _get_password(username)
+        sdk = SDK.create_using_local_account(host_address=server, username=username, password=password)
+        return sdk
+    except Exception as ex:
+        handlers.handle_exception(ex)
+        exit(1)
 
 
 def _get_server_from_args(args, parser):
