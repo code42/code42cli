@@ -210,6 +210,7 @@ def _create_sdk_from_args(args, parser, handlers):
         return sdk
     except Exception as ex:
         handlers.handle_exception(ex)
+        print("Incorrect username or password.")
         exit(1)
 
 
