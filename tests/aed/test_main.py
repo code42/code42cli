@@ -23,6 +23,7 @@ def patches(
     mock_config_args,
     mock_get_password_function,
     mock_logger,
+    mock_error_logger,
     mock_getpass_function,
 ):
     mock = mocker.MagicMock()
@@ -36,6 +37,7 @@ def patches(
     mock.config_args = mock_config_args
     mock.get_password = mock_get_password_function
     mock.logger = mock_logger
+    mock.error_logger = mock_error_logger
     mock.getpass = mock_getpass_function
     return mock
 
@@ -131,6 +133,11 @@ def mock_get_password_function(mocker):
 @pytest.fixture
 def mock_logger(mocker):
     return mocker.patch("c42seceventcli.aed.main.get_logger")
+
+
+@pytest.fixture
+def mock_error_logger(mocker):
+    return mocker.patch("c42seceventcli.aed.main.get_error_logger")
 
 
 @pytest.fixture
