@@ -159,7 +159,7 @@ def _create_handlers(args, store):
     handlers = FileEventHandlers()
     error_logger = get_error_logger()
     settings.global_exception_message_receiver = error_logger.error
-    handlers.handle_exception = error_logger.error
+    handlers.handle_error = error_logger.error
 
     if bool(args.c42_record_cursor):
         handlers.record_cursor_position = store.replace_stored_insertion_timestamp
