@@ -240,7 +240,12 @@ def _exit_from_argument_error(message, parser):
 def _get_password(username):
     password = get_password(_SERVICE_NAME_FOR_KEYCHAIN, username)
     if password is None:
-        password = getpass(prompt="Code42 password: ")
+        try:
+            password = getpass(prompt="Code42 password: ")
+        except KeyboardInterrupt:
+            print()
+            exit(1)
+
         set_password(_SERVICE_NAME_FOR_KEYCHAIN, username, password)
 
     return password
