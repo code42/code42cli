@@ -2,7 +2,7 @@ import urllib3
 import json
 from argparse import ArgumentParser
 from datetime import datetime, timedelta
-from keyring import get_password, set_password
+from keyring import get_password, set_password, delete_password
 from getpass import getpass
 
 import py42.debug_level as debug_level
@@ -15,6 +15,8 @@ from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSON
 from c42seceventcli.common.common import get_config_args, parse_timestamp, get_logger
 from c42seceventcli.aed.cursor_store import AEDCursorStore
 from c42seceventcli.common.cli_args import (
+    add_clear_cursor_arg,
+    add_reset_password_arg,
     add_config_file_path_arg,
     add_authority_host_address_arg,
     add_username_arg,
@@ -38,9 +40,20 @@ _SERVICE_NAME_FOR_KEYCHAIN = u"c42seceventcli"
 def main():
     parser = _get_arg_parser()
     cli_args = vars(parser.parse_args())
+
     config_args = get_config_args(cli_args["c42_config_file"])
     args = _create_args(cli_args, config_args)
+
+    if cli_args.get("c42_reset_password"):
+        delete_password(_SERVICE_NAME_FOR_KEYCHAIN, args.c42_username)
+
+    sdk = _create_sdk_from_args(args, parser)
     _verify_destination_args(args)
+
+    store = AEDCursorStore()
+
+    if cli_args.get("c42_clear_cursor"):
+        store.reset()
 
     if bool(args.c42_ignore_ssl_errors):
         _ignore_ssl_errors()
@@ -48,13 +61,7 @@ def main():
     if bool(args.c42_debug_mode):
         settings.debug_level = debug_level.DEBUG
 
-    min_timestamp = _parse_min_timestamp(args.c42_begin_date)
-    max_timestamp = parse_timestamp(args.c42_end_date)
-
-    sdk = _create_sdk_from_args(args, parser)
-    handlers = _create_handlers(args)
-    extractor = AEDEventExtractor(sdk, handlers)
-    extractor.extract(min_timestamp, max_timestamp, args.c42_exposure_types)
+    _extract(args=args, sdk=sdk, store=store)
 
 
 def _get_arg_parser():
@@ -66,6 +73,8 @@ def _get_arg_parser():
     add_record_cursor_arg(mutually_exclusive_timestamp_group)
 
     main_args = parser.add_argument_group("main")
+    add_clear_cursor_arg(main_args)
+    add_reset_password_arg(main_args)
     add_config_file_path_arg(main_args)
     add_authority_host_address_arg(main_args)
     add_username_arg(main_args)
@@ -200,8 +209,7 @@ def _get_password(username):
     return password
 
 
-def _create_handlers(args):
-    store = AEDCursorStore()
+def _create_handlers(store, args):
     handlers = FileEventHandlers()
 
     if bool(args.c42_record_cursor):
@@ -241,6 +249,14 @@ def _get_response_handler(logger):
                 logger.info(event)
 
     return handle_response
+
+
+def _extract(args, sdk, store):
+    handlers = _create_handlers(store, args)
+    min_timestamp = _parse_min_timestamp(args.c42_begin_date)
+    max_timestamp = parse_timestamp(args.c42_end_date)
+    extractor = AEDEventExtractor(sdk, handlers)
+    extractor.extract(min_timestamp, max_timestamp, args.c42_exposure_types)
 
 
 if __name__ == "__main__":

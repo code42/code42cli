@@ -12,6 +12,26 @@ def add_config_file_path_arg(arg_group):
     )
 
 
+def add_clear_cursor_arg(arg_group):
+    arg_group.add_argument(
+        "--clear-cursor",
+        dest="c42_clear_cursor",
+        action="store_true",
+        help="Resets the stored cursor.",
+        default=False
+    )
+
+
+def add_reset_password_arg(arg_group):
+    arg_group.add_argument(
+        "--reset-password",
+        dest="c42_reset_password",
+        action="store_true",
+        help="Clears stored password and prompts user for password.",
+        default=False
+    )
+
+
 def add_authority_host_address_arg(arg_group):
     arg_group.add_argument(
         "-s",

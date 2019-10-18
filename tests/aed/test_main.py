@@ -76,6 +76,8 @@ def mock_cli_arg_parser(mocker, mock_cli_args):
 @pytest.fixture
 def mock_cli_args():
     args = Namespace()
+    args.c42_reset_password = None
+    args.c42_clear_cursor = None
     args.c42_config_file = None
     args.c42_authority_url = "https://example.com"
     args.c42_username = "test.testerson@example.com"
@@ -166,6 +168,34 @@ def test_main_when_config_arg_ignore_ssl_errors_is_false_py42_settings_verify_ss
     patches.config_args["c42_ignore_ssl_errors"] = False
     main.main()
     assert settings.verify_ssl_certs
+
+
+def test_main_when_cli_arg_reset_password_is_true_calls_delete_password(mocker, patches):
+    patches.cli_args.c42_reset_password = True
+    password_remover = mocker.patch("c42seceventcli.aed.main.delete_password")
+    main.main()
+    assert password_remover.call_count == 1
+
+
+def test_main_when_cli_arg_reset_password_is_false_does_not_call_delete_password(mocker, patches):
+    patches.cli_args.c42_reset_password = False
+    password_remover = mocker.patch("c42seceventcli.aed.main.delete_password")
+    main.main()
+    assert not password_remover.call_count
+
+
+def test_main_when_cli_arg_clear_cursor_is_true_calls_aed_cursor_store_reset(mocker, patches):
+    patches.cli_args.c42_clear_cursor = True
+    mock_store_reset_function = mocker.patch("c42seceventcli.aed.main.AEDCursorStore.reset")
+    main.main()
+    assert mock_store_reset_function.call_count == 1
+
+
+def test_main_when_cli_arg_clear_cursor_is_false_does_not_call_aed_cursor_store_reset(mocker, patches):
+    patches.cli_args.c42_clear_cursor = False
+    mock_store_reset_function = mocker.patch("c42seceventcli.aed.main.AEDCursorStore.reset")
+    main.main()
+    assert not mock_store_reset_function.call_count
 
 
 def test_main_when_cli_arg_debug_mode_is_true_that_py42_settings_debug_mode_is_debug(patches):

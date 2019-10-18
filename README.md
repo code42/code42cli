@@ -38,8 +38,8 @@ authority server URL and username.
 
 ```buildoutcfg
 [Code42]
-username=user@code42.com
-server=https://example.authority.com
+c42_username=user@code42.com
+c42_authority_url=https://example.authority.com
 ```
 
 Then, run the script as follows:
@@ -47,6 +47,32 @@ Then, run the script as follows:
 ```bash
 c42aed -c path/to/config
 ```
+
+To use a the state management service, simply provide the `-r` to the command line:
+
+```bash
+c42aed -s https://example.authority.com -u security.admin@example.com -r
+```
+
+Alternatively, set the `c42_record_cursor` arg in the config file to True:
+
+```buildoutcfg
+[Code42]
+c42_username=user@code42.com
+c42_authority_url=https://example.authority.com
+c42_record_cursor=True
+```
+
+To reset the cursor:
+
+```bash
+c42aed -s https://example.authority.com -u security.admin@example.com -r --reset-cursor
+```
+
+By not using `-r`, the following runs will have no knowledge of previous extracted events, and 
+you will get all the events in the given time range (or default time range of 60 days back). 
+`-r` is particularly useful if you wish to run this script on a recurring job.
+
 
 You can also use CLI args with config-file args, but the program will favor the CLI args.
 
