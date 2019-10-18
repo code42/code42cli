@@ -7,7 +7,7 @@ class AEDCursorStore(SecurityEventCursorStore):
     _PRIMARY_KEY = 1
 
     def __init__(self, db_file_path=None):
-        super(AEDCursorStore, self).__init__(db_file_path)
+        super(AEDCursorStore, self).__init__("aed_siem_checkpoint", db_file_path)
         if self._is_empty():
             self._init_table()
 
@@ -29,8 +29,8 @@ class AEDCursorStore(SecurityEventCursorStore):
 
     def _init_table(self):
         columns = "{0}, {1}".format(self._PRIMARY_KEY_COLUMN_NAME, _INSERTION_TIMESTAMP_FIELD_NAME)
-        create_table_query = "CREATE TABLE {0} ({1})".format(self._TABLE_NAME, columns)
-        insert_query = "INSERT INTO {0} VALUES(?, null)".format(self._TABLE_NAME)
+        create_table_query = "CREATE TABLE {0} ({1})".format(self._table_name, columns)
+        insert_query = "INSERT INTO {0} VALUES(?, null)".format(self._table_name)
         with self._connection as conn:
             conn.execute(create_table_query)
             conn.execute(insert_query, (self._PRIMARY_KEY,))

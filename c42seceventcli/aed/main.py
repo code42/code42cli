@@ -12,7 +12,7 @@ from c42secevents.extractors import AEDEventExtractor
 from c42secevents.common import FileEventHandlers, convert_datetime_to_timestamp
 from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
 
-from c42seceventcli.common.common import get_config_args, parse_timestamp, get_logger
+from c42seceventcli.common.common import get_config_args, parse_timestamp, get_logger, get_error_logger
 from c42seceventcli.aed.cursor_store import AEDCursorStore
 from c42seceventcli.common.cli_args import (
     add_clear_cursor_arg,
@@ -159,17 +159,6 @@ def _ignore_ssl_errors():
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
-def _parse_min_timestamp(begin_date):
-    min_timestamp = parse_timestamp(begin_date)
-    boundary_date = datetime.utcnow() - timedelta(days=90)
-    boundary = convert_datetime_to_timestamp(boundary_date)
-    if min_timestamp < boundary:
-        print("Argument --begin must be within 90 days.")
-        exit(1)
-
-    return min_timestamp
-
-
 def _create_sdk_from_args(args, parser):
     server = _get_server_from_args(args, parser)
     username = _get_username_from_args(args, parser)
@@ -209,8 +198,19 @@ def _get_password(username):
     return password
 
 
+def _extract(args, sdk, store):
+    handlers = _create_handlers(store, args)
+    min_timestamp = _parse_min_timestamp(args.c42_begin_date)
+    max_timestamp = parse_timestamp(args.c42_end_date)
+    extractor = AEDEventExtractor(sdk, handlers)
+    extractor.extract(min_timestamp, max_timestamp, args.c42_exposure_types)
+
+
 def _create_handlers(store, args):
     handlers = FileEventHandlers()
+    error_logger = get_error_logger()
+    settings.global_exception_message_receiver = error_logger.error
+    handlers.handle_exception = error_logger.error
 
     if bool(args.c42_record_cursor):
         handlers.record_cursor_position = store.replace_stored_insertion_timestamp
@@ -251,12 +251,15 @@ def _get_response_handler(logger):
     return handle_response
 
 
-def _extract(args, sdk, store):
-    handlers = _create_handlers(store, args)
-    min_timestamp = _parse_min_timestamp(args.c42_begin_date)
-    max_timestamp = parse_timestamp(args.c42_end_date)
-    extractor = AEDEventExtractor(sdk, handlers)
-    extractor.extract(min_timestamp, max_timestamp, args.c42_exposure_types)
+def _parse_min_timestamp(begin_date):
+    min_timestamp = parse_timestamp(begin_date)
+    boundary_date = datetime.utcnow() - timedelta(days=90)
+    boundary = convert_datetime_to_timestamp(boundary_date)
+    if min_timestamp < boundary:
+        print("Argument --begin must be within 90 days.")
+        exit(1)
+
+    return min_timestamp
 
 
 if __name__ == "__main__":
