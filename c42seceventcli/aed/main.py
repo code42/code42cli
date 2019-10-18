@@ -47,7 +47,7 @@ def main():
     parser = _get_arg_parser()
     cli_args = vars(parser.parse_args())
 
-    config_args = get_config_args(cli_args["c42_config_file"])
+    config_args = get_config_args(cli_args.get("c42_config_file"))
     args = _create_args(cli_args, config_args)
 
     if cli_args.get("c42_reset_password"):
