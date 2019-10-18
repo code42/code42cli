@@ -201,10 +201,10 @@ def _get_response_handler(logger):
 
 
 def _create_sdk_from_args(args, parser, handlers):
+    server = _get_server_from_args(args, parser)
+    username = _get_username_from_args(args, parser)
+    password = _get_password(username)
     try:
-        server = _get_server_from_args(args, parser)
-        username = _get_username_from_args(args, parser)
-        password = _get_password(username)
         sdk = SDK.create_using_local_account(
             host_address=server, username=username, password=password
         )
