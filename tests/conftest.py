@@ -1,9 +1,5 @@
 import pytest
 
-from c42seceventcli.aed.cursor_store import AEDCursorStore
-from c42seceventcli.common.cursor_store import SecurityEventCursorStore
-
-
 MOCK_TEST_DB_PATH = "test_path.db"
 
 
