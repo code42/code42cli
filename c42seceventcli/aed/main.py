@@ -54,7 +54,7 @@ def main():
         _delete_stored_password(args.c42_username)
 
     store = AEDCursorStore()
-    handlers = _create_handlers(store, args)
+    handlers = _create_handlers(args, store)
     sdk = _create_sdk_from_args(args, parser, handlers)
     _verify_destination_args(args)
 
@@ -154,7 +154,7 @@ def _ignore_ssl_errors():
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
-def _create_handlers(store, args):
+def _create_handlers(args, store):
     handlers = FileEventHandlers()
     error_logger = get_error_logger()
     settings.global_exception_message_receiver = error_logger.error
