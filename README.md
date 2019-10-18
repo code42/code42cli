@@ -9,7 +9,7 @@ for only getting events you did not previously get.
 - Code42 Server 6.8.x+
 
 ## Installation
-Until `py42` and `c42secevents` are available on PyPI, you will need to first install them manually.
+Until we are able to put `py42` and `c42secevents` on PyPI, you will need to first install them manually.
 
 `py42` is available for download [here](https://confluence.corp.code42.com/pages/viewpage.action?pageId=61767969#py42%E2%80%93Code42PythonSDK-Downloads).
 For py42 installation instructions, see its [README](https://stash.corp.code42.com/projects/SH/repos/lib_c42_python_sdk/browse/README.md).
@@ -63,20 +63,20 @@ c42_authority_url=https://example.authority.com
 c42_record_cursor=True
 ```
 
-To reset the cursor:
+To clear the cursor:
 
 ```bash
-c42aed -s https://example.authority.com -u security.admin@example.com -r --reset-cursor
+c42aed -s https://example.authority.com -u security.admin@example.com -r --clear-cursor
 ```
 
-By not using `-r`, the following runs will have no knowledge of previous extracted events, and 
+By excluding `-r`, future runs will not know about previous events you got, and 
 you will get all the events in the given time range (or default time range of 60 days back). 
 `-r` is particularly useful if you wish to run this script on a recurring job.
 
 
 You can also use CLI args with config-file args, but the program will favor the CLI args.
 
-If this is the first run, you will be prompted for your password.
+If this is your first time running, you will be prompted for your Code42 password.
 
 If you get a keychain error when running this script, you may have to add a code signature:
 
@@ -84,7 +84,7 @@ If you get a keychain error when running this script, you may have to add a code
 codesign -f -s - $(which python)
 ```
 
-If you get an `OperationError: unable to open database file`, trying running again with `sudo`:
+If you get an `OperationError: unable to open database file`, trying running again with `sudo` and entering you device password:
 
 ```bash
 sudo c42aed -s https://example.authority.com -u security.admin@example.com
