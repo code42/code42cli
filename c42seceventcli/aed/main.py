@@ -1,14 +1,15 @@
-import urllib3
 import json
+from urllib3 import disable_warnings
+from urllib3.exceptions import InsecureRequestWarning
 from argparse import ArgumentParser
 from datetime import datetime, timedelta
 from keyring import get_password, set_password, delete_password
 from keyring.errors import PasswordDeleteError
 from getpass import getpass
 
-import py42.debug_level as debug_level
-from py42.sdk import SDK
+from py42 import debug_level
 from py42 import settings
+from py42.sdk import SDK
 from c42secevents.extractors import AEDEventExtractor
 from c42secevents.common import FileEventHandlers, convert_datetime_to_timestamp
 from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
@@ -151,7 +152,7 @@ def _delete_stored_password(username):
 
 def _ignore_ssl_errors():
     settings.verify_ssl_certs = False
-    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    disable_warnings(InsecureRequestWarning)
 
 
 def _create_handlers(args, store):
