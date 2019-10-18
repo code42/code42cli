@@ -1,5 +1,5 @@
 import sys
-from os.path import expanduser
+from os.path import expanduser, dirname, realpath
 from datetime import datetime, timedelta
 from configparser import ConfigParser
 from logging import StreamHandler, FileHandler, getLogger, INFO, Formatter
@@ -55,9 +55,11 @@ def get_logger(formatter, destination, destination_type, syslog_port=514, syslog
 
 
 def get_error_logger():
+    script_path = dirname(realpath(__file__))
+    log_path = "{0}/c42seceventcli_errors.log".format(script_path)
     logger = getLogger("Code42_SecEventCli_Error_Logger")
     formatter = Formatter("%(message)s")
-    handler = RotatingFileHandler("c42seceventcli_errors.log", maxBytes=250000000)
+    handler = RotatingFileHandler(log_path, maxBytes=250000000)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     return logger

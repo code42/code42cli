@@ -7,7 +7,7 @@ class TestSecurityEventCursorStore(object):
     ):
         expected_path = "TEST_PATH"
         expected_db_name = "TEST"
-        mock_path = mocker.patch("os.path.dirname")
+        mock_path = mocker.patch("c42seceventcli.common.cursor_store.dirname")
         mock_path.return_value = expected_path
         expected_db_file_path = "{0}/{1}.db".format(expected_path, expected_db_name)
         SecurityEventCursorStore(expected_db_name)
