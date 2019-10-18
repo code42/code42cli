@@ -266,6 +266,12 @@ def test_main_when_destination_is_none_and_destination_type_is_file_causes_exit(
         main.main()
 
 
+def test_main_when_create_sdk_raises_exception_causes_exit(patches):
+    patches.py42.side_effect = Exception
+    with pytest.raises(SystemExit):
+        main.main()
+
+
 def test_main_creates_sdk_with_cli_args_and_stored_password(patches):
     expected_authority = "https://user.authority.com"
     expected_username = "user.userson@userson.solutions"
