@@ -38,8 +38,8 @@ There are also other optional arguments in `config.default.cfg` that mirror CLI 
 
 ```buildoutcfg
 [Code42]
-c42_username=user@code42.com
 c42_authority_url=https://example.authority.com
+c42_username=user@code42.com
 ```
 
 Then, run the script as follows:
@@ -48,30 +48,68 @@ Then, run the script as follows:
 c42aed -c path/to/config
 ```
 
-To use a the state management service, simply provide the `-r` to the command line:
+To use a the state management service, simply provide the `-r` to the command line.
+`-r` is particularly useful if you wish to run this script on a recurring job:
 
 ```bash
 c42aed -s https://example.authority.com -u security.admin@example.com -r
 ```
 
-Alternatively, set the `c42_record_cursor` arg in the config file to True:
+If you are using a config file with `-c`, set the `c42_record_cursor` arg in the config file to True:
 
 ```buildoutcfg
 [Code42]
-c42_username=user@code42.com
 c42_authority_url=https://example.authority.com
+c42_username=user@code42.com
 c42_record_cursor=True
 ```
 By excluding `-r`, future runs will not know about previous events you got, and 
 you will get all the events in the given time range (or default time range of 60 days back). 
-`-r` is particularly useful if you wish to run this script on a recurring job.
 
 To clear the cursor:
 
 ```bash
 c42aed -s https://example.authority.com -u security.admin@example.com -r --clear-cursor
 ```
+There are two possible output formats.
 
+* CEF
+* JSON
+
+JSON is the default. To use CEF, use `-o CEF`:
+
+```bash
+c42aed -s https://example.authority.com -u security.admin@example.com -o CEF
+```
+
+Or if you are using a config file with `-c`:
+
+```buildoutcfg
+[Code42]
+c42_authority_url=https://example.authority.com
+c42_username=user@code42.com
+c42_output_format=CEF
+```
+
+There are three possible destination types to use:
+
+* stdout - printing to console
+* file - writing to a file
+* syslog - transmitting to a syslog server
+
+The program defaults to `stdout`. To use a file, use `--dest-type` and `--dest` this way:
+
+```bash
+c42aed -s https://example.authority.com -u security.admin@example.com --dest-type file --dest name-of-file.txt
+```
+
+To use syslog:
+
+```bash
+c42aed -s https://example.authority.com -u security.admin@example.com --dest-type syslog --dest https://syslog.example.com
+```
+
+Both `c42_destination_type` and `c42_destination` are possible fields in the config file as well.
 
 You can also use CLI args with config-file args, but the program will favor the CLI args.
 
