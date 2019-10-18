@@ -53,10 +53,10 @@ def main():
     if cli_args.get("c42_reset_password"):
         _delete_stored_password(args.c42_username)
 
+    _verify_destination_args(args)
     store = AEDCursorStore()
     handlers = _create_handlers(args, store)
     sdk = _create_sdk_from_args(args, parser, handlers)
-    _verify_destination_args(args)
 
     if cli_args.get("c42_clear_cursor"):
         store.reset()
@@ -254,11 +254,11 @@ def _verify_destination_args(args):
         exit(1)
 
     if args.c42_destination_type == "file" and args.c42_destination is None:
-        print("Missing file name for --dest arg.")
+        print("Missing file name. Try: '--dest path/to/file'.")
         exit(1)
 
     if args.c42_destination_type == "syslog" and args.c42_destination is None:
-        print("Missing syslog server URL for --dest arg.")
+        print("Missing syslog server URL. Try: '--dest https://syslog.example.com'.")
         exit(1)
 
 
