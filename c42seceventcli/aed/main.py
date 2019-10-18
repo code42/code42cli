@@ -47,10 +47,10 @@ def main():
     if cli_args.get("c42_reset_password"):
         delete_password(_SERVICE_NAME_FOR_KEYCHAIN, args.c42_username)
 
+    store = AEDCursorStore()
+    handlers = _create_handlers(store, args)
     sdk = _create_sdk_from_args(args, parser)
     _verify_destination_args(args)
-
-    store = AEDCursorStore()
 
     if cli_args.get("c42_clear_cursor"):
         store.reset()
@@ -61,7 +61,7 @@ def main():
     if bool(args.c42_debug_mode):
         settings.debug_level = debug_level.DEBUG
 
-    _extract(args=args, sdk=sdk, store=store)
+    _extract(args=args, sdk=sdk, handlers=handlers)
 
 
 def _get_arg_parser():
@@ -136,74 +136,9 @@ class AEDArgs(object):
         return default_end_date.strftime("%Y-%m-%d")
 
 
-def _verify_destination_args(args):
-    if args.c42_destination_type == "stdout" and args.c42_destination is not None:
-        print(
-            "Ambiguous destination '{0}' for '{1}' destination type.".format(
-                args.c42_destination, args.c42_destination_type
-            )
-        )
-        exit(1)
-
-    if args.c42_destination_type == "file" and args.c42_destination is None:
-        print("Missing file name for --dest arg.")
-        exit(1)
-
-    if args.c42_destination_type == "syslog" and args.c42_destination is None:
-        print("Missing syslog server URL for --dest arg.")
-        exit(1)
-
-
 def _ignore_ssl_errors():
     settings.verify_ssl_certs = False
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-
-def _create_sdk_from_args(args, parser):
-    server = _get_server_from_args(args, parser)
-    username = _get_username_from_args(args, parser)
-    password = _get_password(username)
-    sdk = SDK.create_using_local_account(host_address=server, username=username, password=password)
-    return sdk
-
-
-def _get_server_from_args(args, parser):
-    server = args.c42_authority_url
-    if server is None:
-        _exit_from_argument_error("Host address not provided.", parser)
-
-    return server
-
-
-def _get_username_from_args(args, parser):
-    username = args.c42_username
-    if username is None:
-        _exit_from_argument_error("Username not provided.", parser)
-
-    return username
-
-
-def _exit_from_argument_error(message, parser):
-    print(message)
-    parser.print_usage()
-    exit(1)
-
-
-def _get_password(username):
-    password = get_password(_SERVICE_NAME_FOR_KEYCHAIN, username)
-    if password is None:
-        password = getpass()
-        set_password(_SERVICE_NAME_FOR_KEYCHAIN, username, password)
-
-    return password
-
-
-def _extract(args, sdk, store):
-    handlers = _create_handlers(store, args)
-    min_timestamp = _parse_min_timestamp(args.c42_begin_date)
-    max_timestamp = parse_timestamp(args.c42_end_date)
-    extractor = AEDEventExtractor(sdk, handlers)
-    extractor.extract(min_timestamp, max_timestamp, args.c42_exposure_types)
 
 
 def _create_handlers(store, args):
@@ -249,6 +184,70 @@ def _get_response_handler(logger):
                 logger.info(event)
 
     return handle_response
+
+
+def _create_sdk_from_args(args, parser):
+    server = _get_server_from_args(args, parser)
+    username = _get_username_from_args(args, parser)
+    password = _get_password(username)
+    sdk = SDK.create_using_local_account(host_address=server, username=username, password=password)
+    return sdk
+
+
+def _get_server_from_args(args, parser):
+    server = args.c42_authority_url
+    if server is None:
+        _exit_from_argument_error("Host address not provided.", parser)
+
+    return server
+
+
+def _get_username_from_args(args, parser):
+    username = args.c42_username
+    if username is None:
+        _exit_from_argument_error("Username not provided.", parser)
+
+    return username
+
+
+def _exit_from_argument_error(message, parser):
+    print(message)
+    parser.print_usage()
+    exit(1)
+
+
+def _get_password(username):
+    password = get_password(_SERVICE_NAME_FOR_KEYCHAIN, username)
+    if password is None:
+        password = getpass()
+        set_password(_SERVICE_NAME_FOR_KEYCHAIN, username, password)
+
+    return password
+
+
+def _verify_destination_args(args):
+    if args.c42_destination_type == "stdout" and args.c42_destination is not None:
+        print(
+            "Ambiguous destination '{0}' for '{1}' destination type.".format(
+                args.c42_destination, args.c42_destination_type
+            )
+        )
+        exit(1)
+
+    if args.c42_destination_type == "file" and args.c42_destination is None:
+        print("Missing file name for --dest arg.")
+        exit(1)
+
+    if args.c42_destination_type == "syslog" and args.c42_destination is None:
+        print("Missing syslog server URL for --dest arg.")
+        exit(1)
+
+
+def _extract(args, sdk, handlers):
+    min_timestamp = _parse_min_timestamp(args.c42_begin_date)
+    max_timestamp = parse_timestamp(args.c42_end_date)
+    extractor = AEDEventExtractor(sdk, handlers)
+    extractor.extract(min_timestamp, max_timestamp, args.c42_exposure_types)
 
 
 def _parse_min_timestamp(begin_date):
