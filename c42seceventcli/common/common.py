@@ -18,6 +18,10 @@ def get_project_path():
     return desired_dir_name
 
 
+def get_input(prompt):
+    return input(prompt)
+
+
 def get_config_args(config_file_path):
     args = {}
     parser = ConfigParser()

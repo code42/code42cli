@@ -20,6 +20,7 @@ from c42seceventcli.common.common import (
     parse_timestamp,
     get_logger,
     get_error_logger,
+    get_input,
 )
 from c42seceventcli.aed.cursor_store import AEDCursorStore
 from c42seceventcli.common.cli_args import (
@@ -301,11 +302,13 @@ def _get_password(username):
     if password is None:
         try:
             password = getpass(prompt="Code42 password: ")
+            save_password = get_input("Save password to keychain? (y/n): ")
+            if save_password.lower()[0] == "y":
+                set_password(_SERVICE_NAME_FOR_KEYCHAIN, username, password)
+
         except KeyboardInterrupt:
             print()
             exit(1)
-
-        set_password(_SERVICE_NAME_FOR_KEYCHAIN, username, password)
 
     return password
 

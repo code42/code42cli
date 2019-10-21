@@ -25,6 +25,7 @@ def patches(
     mock_logger,
     mock_error_logger,
     mock_getpass_function,
+    mock_get_input,
 ):
     mock = mocker.MagicMock()
     mock.aed_extractor_constructor = mock_aed_extractor_constructor
@@ -39,6 +40,7 @@ def patches(
     mock.logger = mock_logger
     mock.error_logger = mock_error_logger
     mock.getpass = mock_getpass_function
+    mock.input = mock_get_input
     return mock
 
 
@@ -73,6 +75,11 @@ def mock_cli_arg_parser(mocker, mock_cli_args):
     mock_parser = mocker.patch("argparse.ArgumentParser.parse_args")
     mock_parser.return_value = mock_cli_args
     return mock_parser
+
+
+@pytest.fixture
+def mock_get_input(mocker):
+    return mocker.patch("c42seceventcli.aed.main.get_input")
 
 
 @pytest.fixture
@@ -335,19 +342,34 @@ def test_main_when_get_password_returns_none_uses_password_from_getpass(patches)
     assert actual == expected
 
 
-def test_main_when_get_password_returns_none_calls_set_password_with_password_from_getpass(
+def test_main_when_get_password_returns_none_and_get_input_returns_y_calls_set_password_with_password_from_getpass(
     mocker, patches
 ):
     expected_username = "ME"
     expected_password = "super_secret_password"
     patches.cli_args.c42_username = expected_username
     patches.get_password.return_value = None
+    patches.input.return_value = "y"
     patches.getpass.return_value = expected_password
     mock_set_password = mocker.patch("c42seceventcli.aed.main.set_password")
     main.main()
     mock_set_password.assert_called_once_with(
         u"c42seceventcli", expected_username, expected_password
     )
+
+
+def test_main_when_get_password_returns_none_and_get_input_returns_n_does_not_call_set_password(
+    mocker, patches
+):
+    expected_username = "ME"
+    expected_password = "super_secret_password"
+    patches.cli_args.c42_username = expected_username
+    patches.get_password.return_value = None
+    patches.input.return_value = "n"
+    patches.getpass.return_value = expected_password
+    mock_set_password = mocker.patch("c42seceventcli.aed.main.set_password")
+    main.main()
+    assert not mock_set_password.call_count
 
 
 def test_main_when_output_format_not_supported_exits(patches):
