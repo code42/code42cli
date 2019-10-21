@@ -1,5 +1,6 @@
 import sys
-from os.path import expanduser, dirname
+from os import path
+from os.path import expanduser, dirname, sep
 from datetime import datetime, timedelta
 from configparser import ConfigParser
 from logging import StreamHandler, FileHandler, getLogger, INFO, Formatter
@@ -10,7 +11,8 @@ from c42secevents.common import convert_datetime_to_timestamp
 
 
 def get_project_path():
-    return dirname(sys.modules['__main__'].__file__)
+    project_path = path.join(dirname(sys.modules['__main__'].__file__), "..")
+    return project_path
 
 
 def get_config_args(config_file_path):
