@@ -55,7 +55,8 @@ def main():
         _delete_stored_password(args.c42_username)
 
     _verify_destination_args(args)
-    store = AEDCursorStore()
+
+    store = AEDCursorStore() if args.c42_record_cursor else None
     handlers = _create_handlers(args, store)
     sdk = _create_sdk_from_args(args, parser, handlers)
 
