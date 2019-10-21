@@ -55,13 +55,7 @@ def main():
         _delete_stored_password(args.c42_username)
 
     handlers = _create_handlers(args)
-
-    should_reset_cursor = cli_args.get("c42_clear_cursor")
-    if args.c42_record_cursor or should_reset_cursor:
-        store = _create_store(handlers)
-        if should_reset_cursor:
-            store.reset()
-
+    _set_up_cursor_store(args, handlers, cli_args.get("c42_clear_cursor"))
     sdk = _create_sdk_from_args(args, handlers, parser)
 
     if bool(args.c42_ignore_ssl_errors):
@@ -175,11 +169,15 @@ def _create_handlers(args):
     return handlers
 
 
-def _create_store(handlers):
-    store = AEDCursorStore()
-    handlers.record_cursor_position = store.replace_stored_insertion_timestamp
-    handlers.get_cursor_position = store.get_stored_insertion_timestamp
-    return store
+def _set_up_cursor_store(args, handlers, clear_cursor):
+    if args.c42_record_cursor or clear_cursor:
+        store = AEDCursorStore()
+        handlers.record_cursor_position = store.replace_stored_insertion_timestamp
+        handlers.get_cursor_position = store.get_stored_insertion_timestamp
+        if clear_cursor:
+            store.reset()
+
+        return store
 
 
 def _get_log_formatter(output_format):
