@@ -148,7 +148,7 @@ def mock_getpass_function(mocker):
 def test_main_when_cli_arg_ignore_ssl_errors_is_true_that_py42_settings_verify_ssl_certs_is_false(
     patches
 ):
-    patches.cli_args.c42_ignore_ssl_errors = True
+    patches.cli_args.ignore_ssl_errors = True
     main.main()
     assert not settings.verify_ssl_certs
 
@@ -156,7 +156,7 @@ def test_main_when_cli_arg_ignore_ssl_errors_is_true_that_py42_settings_verify_s
 def test_main_when_cli_arg_ignore_ssl_errors_is_false_that_py42_settings_verify_ssl_certs_is_true(
     patches
 ):
-    patches.cli_args.c42_ignore_ssl_errors = False
+    patches.cli_args.ignore_ssl_errors = False
     main.main()
     assert settings.verify_ssl_certs
 
@@ -164,7 +164,7 @@ def test_main_when_cli_arg_ignore_ssl_errors_is_false_that_py42_settings_verify_
 def test_main_when_config_arg_ignore_ssl_errors_is_true_py42_settings_verify_ssl_certs_is_false(
     patches
 ):
-    patches.config_args["c42_ignore_ssl_errors"] = True
+    patches.config_args["ignore_ssl_errors"] = True
     main.main()
     assert not settings.verify_ssl_certs
 
@@ -172,28 +172,28 @@ def test_main_when_config_arg_ignore_ssl_errors_is_true_py42_settings_verify_ssl
 def test_main_when_config_arg_ignore_ssl_errors_is_false_py42_settings_verify_ssl_certs_is_true(
     patches
 ):
-    patches.config_args["c42_ignore_ssl_errors"] = False
+    patches.config_args["ignore_ssl_errors"] = False
     main.main()
     assert settings.verify_ssl_certs
 
 
 def test_main_when_cli_arg_reset_password_is_true_calls_delete_password(mocker, patches):
-    patches.cli_args.c42_reset_password = True
+    patches.cli_args.reset_password = True
     password_remover = mocker.patch("c42seceventcli.aed.main.delete_password")
     main.main()
     assert password_remover.call_count == 1
 
 
 def test_main_when_cli_arg_reset_password_is_false_does_not_call_delete_password(mocker, patches):
-    patches.cli_args.c42_reset_password = False
+    patches.cli_args.reset_password = False
     password_remover = mocker.patch("c42seceventcli.aed.main.delete_password")
     main.main()
     assert not password_remover.call_count
 
 
 def test_main_when_cli_arg_clear_cursor_is_true_calls_aed_cursor_store_reset(mocker, patches):
-    patches.cli_args.c42_record_cursor = True
-    patches.cli_args.c42_clear_cursor = True
+    patches.cli_args.record_cursor = True
+    patches.cli_args.clear_cursor = True
     mock_store_reset_function = mocker.patch("c42seceventcli.aed.main.AEDCursorStore.reset")
     main.main()
     assert mock_store_reset_function.call_count == 1
@@ -202,33 +202,33 @@ def test_main_when_cli_arg_clear_cursor_is_true_calls_aed_cursor_store_reset(moc
 def test_main_when_cli_arg_clear_cursor_is_false_does_not_call_aed_cursor_store_reset(
     mocker, patches
 ):
-    patches.cli_args.c42_record_cursor = True
-    patches.cli_args.c42_clear_cursor = False
+    patches.cli_args.record_cursor = True
+    patches.cli_args.clear_cursor = False
     mock_store_reset_function = mocker.patch("c42seceventcli.aed.main.AEDCursorStore.reset")
     main.main()
     assert not mock_store_reset_function.call_count
 
 
 def test_main_when_cli_arg_debug_mode_is_true_that_py42_settings_debug_mode_is_debug(patches):
-    patches.cli_args.c42_debug_mode = True
+    patches.cli_args.debug_mode = True
     main.main()
     assert settings.debug_level == debug_level.DEBUG
 
 
 def test_main_when_config_arg_debug_mode_is_true_that_py42_settings_debug_mode_is_debug(patches):
-    patches.config_args["c42_debug_mode"] = True
+    patches.config_args["debug_mode"] = True
     main.main()
     assert settings.debug_level == debug_level.DEBUG
 
 
 def test_main_when_cli_arg_begin_date_is_before_ninety_days_causes_program_exit(patches):
-    patches.cli_args.c42_begin_date = "1970-10-31"
+    patches.cli_args.begin_date = "1970-10-31"
     with pytest.raises(SystemExit):
         main.main()
 
 
 def test_main_when_config_arg_begin_date_is_before_ninety_days_causes_program_exit(patches):
-    patches.config_args["c42_begin_date"] = "1970-10-31"
+    patches.config_args["begin_date"] = "1970-10-31"
     with pytest.raises(SystemExit):
         main.main()
 
@@ -250,22 +250,22 @@ def test_main_when_cli_arg_end_date_is_not_given_uses_max_timestamp_from_now(pat
 
 
 def test_main_when_destination_is_not_none_and_destination_type_is_stdout_causes_exit(patches):
-    patches.cli_args.c42_destination_type = "stdout"
-    patches.cli_args.c42_destination = "Delaware"
+    patches.cli_args.destination_type = "stdout"
+    patches.cli_args.destination = "Delaware"
     with pytest.raises(SystemExit):
         main.main()
 
 
 def test_main_when_destination_is_none_and_destination_type_is_server_causes_exit(patches):
-    patches.cli_args.c42_destination_type = "server"
-    patches.cli_args.c42_destination = None
+    patches.cli_args.destination_type = "server"
+    patches.cli_args.destination = None
     with pytest.raises(SystemExit):
         main.main()
 
 
 def test_main_when_destination_is_none_and_destination_type_is_file_causes_exit(patches):
-    patches.cli_args.c42_destination_type = "file"
-    patches.cli_args.c42_destination = None
+    patches.cli_args.destination_type = "file"
+    patches.cli_args.destination = None
     with pytest.raises(SystemExit):
         main.main()
 
@@ -295,7 +295,7 @@ def test_main_creates_sdk_with_config_args_and_stored_password(patches):
 
     expected_authority = "https://user.authority.com"
     expected_username = "user.userson@userson.solutions"
-    expected_password = "querty"
+    expected_password = "qwerty"
 
     patches.config_args["c42_authority_url"] = expected_authority
     patches.config_args["c42_username"] = expected_username
@@ -349,13 +349,13 @@ def test_main_when_get_password_returns_none_calls_set_password_with_password_fr
 
 
 def test_main_when_output_format_not_supported_exits(patches):
-    patches.cli_args.c42_output_format = "EAS3"
+    patches.cli_args.output_format = "EAS3"
     with pytest.raises(SystemExit):
         main.main()
 
 
 def test_main_when_cli_arg_output_format_is_json_creates_json_formatter(patches):
-    patches.cli_args.c42_output_format = "JSON"
+    patches.cli_args.output_format = "JSON"
     main.main()
     expected = AEDDictToJSONFormatter
     actual = type(patches.logger.call_args[1]["formatter"])
@@ -363,7 +363,7 @@ def test_main_when_cli_arg_output_format_is_json_creates_json_formatter(patches)
 
 
 def test_main_when_config_arg_output_format_is_json_creates_json_formatter(patches):
-    patches.config_args["c42_output_format"] = "JSON"
+    patches.config_args["output_format"] = "JSON"
     main.main()
     expected = AEDDictToJSONFormatter
     actual = type(patches.logger.call_args[1]["formatter"])
@@ -371,7 +371,7 @@ def test_main_when_config_arg_output_format_is_json_creates_json_formatter(patch
 
 
 def test_main_when_cli_arg_output_format_is_cef_creates_cef_formatter(patches):
-    patches.cli_args.c42_output_format = "CEF"
+    patches.cli_args.output_format = "CEF"
     main.main()
     expected = AEDDictToCEFFormatter
     actual = type(patches.logger.call_args[1]["formatter"])
@@ -379,7 +379,7 @@ def test_main_when_cli_arg_output_format_is_cef_creates_cef_formatter(patches):
 
 
 def test_main_when_config_arg_output_format_is_cef_creates_cef_formatter(patches):
-    patches.config_args["c42_output_format"] = "CEF"
+    patches.config_args["output_format"] = "CEF"
     main.main()
     expected = AEDDictToCEFFormatter
     actual = type(patches.logger.call_args[1]["formatter"])
@@ -388,7 +388,7 @@ def test_main_when_config_arg_output_format_is_cef_creates_cef_formatter(patches
 
 def test_main_when_given_destination_port_via_cli_passes_port_to_get_logger(patches):
     expected = 1000
-    patches.cli_args.c42_destination_port = expected
+    patches.cli_args.destination_port = expected
     main.main()
     actual = patches.logger.call_args[1]["destination_port"]
     assert actual == expected
@@ -396,7 +396,7 @@ def test_main_when_given_destination_port_via_cli_passes_port_to_get_logger(patc
 
 def test_main_when_given_destination_port_via_config_file_passes_port_to_get_logger(patches):
     expected = 1000
-    patches.config_args["c42_destination_port"] = expected
+    patches.config_args["destination_port"] = expected
     patches.cli_args.c42_destination_port = expected
     main.main()
     actual = patches.logger.call_args[1]["destination_port"]
@@ -405,7 +405,7 @@ def test_main_when_given_destination_port_via_config_file_passes_port_to_get_log
 
 def test_main_when_given_destinaton_protocol_via_cli_passes_port_to_get_logger(patches):
     expected = "SOME PROTOCOL"
-    patches.cli_args.c42_destination_protocol = expected
+    patches.cli_args.destination_protocol = expected
     main.main()
     actual = patches.logger.call_args[1]["destination_protocol"]
     assert actual == expected
@@ -413,7 +413,7 @@ def test_main_when_given_destinaton_protocol_via_cli_passes_port_to_get_logger(p
 
 def test_main_when_given_destination_protocol_via_config_file_passes_port_to_get_logger(patches):
     expected = "SOME PROTOCOL"
-    patches.config_args["c42_destination_protocol"] = expected
+    patches.config_args["destination_protocol"] = expected
     main.main()
     actual = patches.logger.call_args[1]["destination_protocol"]
     assert actual == expected
@@ -424,7 +424,7 @@ def test_main_when_cli_record_cursor_arg_is_true_overrides_handlers_record_curso
 ):
     expected = mocker.MagicMock()
     AEDCursorStore.replace_stored_insertion_timestamp = expected
-    patches.cli_args.c42_record_cursor = True
+    patches.cli_args.record_cursor = True
     main.main()
     actual = patches.aed_extractor_constructor.call_args[0][1].record_cursor_position
     assert actual is expected
@@ -435,7 +435,7 @@ def test_main_when_cli_record_cursor_arg_is_false_does_not_override_handlers_rec
 ):
     unexpected = mocker.MagicMock()
     AEDCursorStore.replace_stored_insertion_timestamp = unexpected
-    patches.cli_args.c42_record_cursor = False
+    patches.cli_args.record_cursor = False
     main.main()
     actual = patches.aed_extractor_constructor.call_args[0][1].record_cursor_position
     assert actual is not unexpected
@@ -446,7 +446,7 @@ def test_main_when_cli_record_cursor_arg_is_true_overrides_handlers_get_cursor_p
 ):
     expected = mocker.MagicMock()
     AEDCursorStore.get_stored_insertion_timestamp = expected
-    patches.cli_args.c42_record_cursor = True
+    patches.cli_args.record_cursor = True
     main.main()
     actual = patches.aed_extractor_constructor.call_args[0][1].get_cursor_position
     assert actual is expected
@@ -457,7 +457,7 @@ def test_main_when_cli_record_cursor_arg_is_false_does_not_override_handlers_get
 ):
     unexpected = mocker.MagicMock()
     AEDCursorStore.get_stored_insertion_timestamp = unexpected
-    patches.cli_args.c42_record_cursor = False
+    patches.cli_args.record_cursor = False
     main.main()
     actual = patches.aed_extractor_constructor.call_args[0][1].get_cursor_position
     assert actual is not unexpected
@@ -468,7 +468,7 @@ def test_main_when_config_record_cursor_arg_is_true_overrides_handlers_record_cu
 ):
     expected = mocker.MagicMock()
     AEDCursorStore.replace_stored_insertion_timestamp = expected
-    patches.config_args["c42_record_cursor"] = True
+    patches.config_args["record_cursor"] = True
     main.main()
     record_method = patches.aed_extractor_constructor.call_args[0][1].record_cursor_position
     assert record_method is expected
@@ -479,7 +479,7 @@ def test_main_when_config_record_cursor_arg_is_false_does_not_override_handlers_
 ):
     unexpected = mocker.MagicMock()
     AEDCursorStore.replace_stored_insertion_timestamp = unexpected
-    patches.config_args["c42_record_cursor"] = False
+    patches.config_args["record_cursor"] = False
     main.main()
     actual = patches.aed_extractor_constructor.call_args[0][1].record_cursor_position
     assert actual is not unexpected
@@ -490,7 +490,7 @@ def test_main_when_config_record_cursor_arg_is_true_overrides_handlers_get_curso
 ):
     expected = mocker.MagicMock()
     AEDCursorStore.get_stored_insertion_timestamp = expected
-    patches.config_args["c42_record_cursor"] = True
+    patches.config_args["record_cursor"] = True
     main.main()
     actual = patches.aed_extractor_constructor.call_args[0][1].get_cursor_position
     assert actual is expected
@@ -501,14 +501,14 @@ def test_main_when_config_record_cursor_arg_is_false_does_not_override_handlers_
 ):
     unexpected = mocker.MagicMock()
     AEDCursorStore.get_stored_insertion_timestamp = unexpected
-    patches.config_args["c42_record_cursor"] = False
+    patches.config_args["record_cursor"] = False
     main.main()
     actual = patches.aed_extractor_constructor.call_args[0][1].get_cursor_position
     assert actual is not unexpected
 
 
 def test_main_when_destination_type_is_file_and_get_logger_raises_io_error_causes_exit(patches,):
-    patches.cli_args.c42_destination_type = "file"
+    patches.cli_args.destination_type = "file"
     patches.logger.side_effect = IOError
     with pytest.raises(SystemExit):
         main.main()
@@ -517,7 +517,7 @@ def test_main_when_destination_type_is_file_and_get_logger_raises_io_error_cause
 def test_main_when_destination_type_is_server_and_get_logger_raises_attribute_error_causes_exit(
     patches,
 ):
-    patches.cli_args.c42_destination_type = "server"
+    patches.cli_args.destination_type = "server"
     patches.logger.side_effect = AttributeError
     with pytest.raises(SystemExit):
         main.main()

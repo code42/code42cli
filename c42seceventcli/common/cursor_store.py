@@ -1,6 +1,5 @@
 import sqlite3
-
-from c42seceventcli.common.common import get_project_path
+from os import path, makedirs
 
 
 class SecurityEventCursorStore(object):
@@ -10,7 +9,13 @@ class SecurityEventCursorStore(object):
         # type: (str, str) -> None
         self._table_name = db_table_name
         if db_file_path is None:
-            save_path = get_project_path()
+            package_name = __name__.split(".")[0]
+            home = path.expanduser("~")
+            save_path = path.join(home, ".{0}".format(package_name))
+
+            if not path.exists(save_path):
+                makedirs(save_path)
+
             db_file_path = "{0}/{1}.db".format(save_path, self._table_name)
 
         self._connection = sqlite3.connect(db_file_path)
