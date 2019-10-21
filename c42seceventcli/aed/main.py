@@ -50,21 +50,21 @@ def main():
     cli_args = vars(parser.parse_args())
     args = _union_cli_args_with_config_file_args(cli_args)
 
-    if cli_args.get("c42_reset_password"):
+    if cli_args.get("reset_password"):
         _delete_stored_password(args.c42_username)
 
     handlers = _create_handlers(args)
     _set_up_cursor_store(
-        record_cursor=args.c42_record_cursor,
-        clear_cursor=cli_args.get("c42_clear_cursor"),
+        record_cursor=args.record_cursor,
+        clear_cursor=cli_args.get("clear_cursor"),
         handlers=handlers,
     )
     sdk = _create_sdk_from_args(args, handlers, parser)
 
-    if bool(args.c42_ignore_ssl_errors):
+    if bool(args.ignore_ssl_errors):
         _ignore_ssl_errors()
 
-    if bool(args.c42_debug_mode):
+    if bool(args.debug_mode):
         settings.debug_level = debug_level.DEBUG
 
     _extract(args=args, sdk=sdk, handlers=handlers)
@@ -99,7 +99,7 @@ def _get_arg_parser():
 
 
 def _union_cli_args_with_config_file_args(cli_args):
-    config_args = _get_config_args(cli_args.get("c42_config_file"))
+    config_args = _get_config_args(cli_args.get("config_file"))
     args = AEDArgs()
     keys = cli_args.keys()
     for key in keys:
@@ -120,21 +120,21 @@ def _get_config_args(config_file_path):
 class AEDArgs(object):
     c42_authority_url = None
     c42_username = None
-    c42_begin_date = None
-    c42_end_date = None
-    c42_ignore_ssl_errors = False
-    c42_output_format = "JSON"
-    c42_record_cursor = False
-    c42_exposure_types = None
-    c42_debug_mode = False
-    c42_destination_type = "stdout"
-    c42_destination = None
-    c42_destination_port = 514
-    c42_destination_protocol = "TCP"
+    begin_date = None
+    end_date = None
+    ignore_ssl_errors = False
+    output_format = "JSON"
+    record_cursor = False
+    exposure_types = None
+    debug_mode = False
+    destination_type = "stdout"
+    destination = None
+    destination_port = 514
+    destination_protocol = "TCP"
 
     def __init__(self):
-        self.c42_begin_date = AEDArgs._get_default_begin_date()
-        self.c42_end_date = AEDArgs._get_default_end_date()
+        self.begin_date = AEDArgs._get_default_begin_date()
+        self.end_date = AEDArgs._get_default_end_date()
 
     def try_set(self, arg_name, cli_arg=None, config_arg=None):
         if cli_arg is not None:
@@ -154,20 +154,20 @@ class AEDArgs(object):
 
 
 def _verify_destination_args(args):
-    if args.c42_destination_type == "stdout" and args.c42_destination is not None:
+    if args.destination_type == "stdout" and args.destination is not None:
         msg = (
             "Destination '{0}' not applicable for stdout. "
             "Try removing '--dest' arg or change '--dest-type' to 'file' or 'server'."
         )
-        msg = msg.format(args.c42_destination)
+        msg = msg.format(args.destination)
         print(msg)
         exit(1)
 
-    if args.c42_destination_type == "file" and args.c42_destination is None:
+    if args.destination_type == "file" and args.destination is None:
         print("Missing file name. Try: '--dest path/to/file'.")
         exit(1)
 
-    if args.c42_destination_type == "server" and args.c42_destination is None:
+    if args.destination_type == "server" and args.destination is None:
         print("Missing server URL. Try: '--dest https://syslog.example.com'.")
         exit(1)
 
@@ -189,14 +189,14 @@ def _create_handlers(args):
     error_logger = get_error_logger()
     settings.global_exception_message_receiver = error_logger.error
     handlers.handle_error = error_logger.error
-    output_format = args.c42_output_format
+    output_format = args.output_format
     logger_formatter = _get_log_formatter(output_format)
     logger = _get_logger(
         formatter=logger_formatter,
-        destination=args.c42_destination,
-        destination_type=args.c42_destination_type,
-        destination_port=int(args.c42_destination_port),
-        destination_protocol=args.c42_destination_protocol,
+        destination=args.destination,
+        destination_type=args.destination_type,
+        destination_port=int(args.destination_port),
+        destination_protocol=args.destination_protocol,
     )
     handlers.handle_response = _get_response_handler(logger)
     return handlers
@@ -311,10 +311,10 @@ def _get_password(username):
 
 
 def _extract(args, sdk, handlers):
-    min_timestamp = _parse_min_timestamp(args.c42_begin_date)
-    max_timestamp = parse_timestamp(args.c42_end_date)
+    min_timestamp = _parse_min_timestamp(args.begin_date)
+    max_timestamp = parse_timestamp(args.end_date)
     extractor = AEDEventExtractor(sdk, handlers)
-    extractor.extract(min_timestamp, max_timestamp, args.c42_exposure_types)
+    extractor.extract(min_timestamp, max_timestamp, args.exposure_types)
 
 
 def _parse_min_timestamp(begin_date):
