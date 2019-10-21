@@ -6,7 +6,7 @@ setup(
     description="CLI for retrieving Code42 Exfiltration Detection events",
     packages=find_packages(include=["c42seceventcli", "c42seceventcli.*"]),
     python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4",
-    install_requires=["c42secevents", "urllib3", "keyring"],
+    install_requires=["c42secevents", "urllib3", "keyring==18.0.1"],
     license="MIT",
     include_package_data=True,
     zip_safe=False,
