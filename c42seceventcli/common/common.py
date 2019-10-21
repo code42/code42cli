@@ -10,8 +10,7 @@ from c42secevents.common import convert_datetime_to_timestamp
 
 
 def get_project_path():
-    project_path = path.join(path.dirname(path.dirname(path.realpath(__file__))), "..")
-    return project_path
+    return path.dirname(path.dirname(path.realpath(__file__)))
 
 
 def get_config_args(config_file_path):
