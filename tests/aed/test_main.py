@@ -202,6 +202,7 @@ def test_main_when_cli_arg_clear_cursor_is_true_calls_aed_cursor_store_reset(moc
 def test_main_when_cli_arg_clear_cursor_is_false_does_not_call_aed_cursor_store_reset(
     mocker, patches
 ):
+    patches.cli_args.c42_record_cursor = True
     patches.cli_args.c42_clear_cursor = False
     mock_store_reset_function = mocker.patch("c42seceventcli.aed.main.AEDCursorStore.reset")
     main.main()

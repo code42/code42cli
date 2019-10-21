@@ -55,11 +55,14 @@ def main():
         _delete_stored_password(args.c42_username)
 
     handlers = _create_handlers(args)
-    store = _create_store(handlers)
-    sdk = _create_sdk_from_args(args, handlers, parser)
 
-    if store is not None and cli_args.get("c42_clear_cursor"):
-        store.reset()
+    should_reset_cursor = cli_args.get("c42_clear_cursor")
+    if args.c42_record_cursor or should_reset_cursor:
+        store = _create_store(handlers)
+        if should_reset_cursor:
+            store.reset()
+
+    sdk = _create_sdk_from_args(args, handlers, parser)
 
     if bool(args.c42_ignore_ssl_errors):
         _ignore_ssl_errors()
