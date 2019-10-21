@@ -178,10 +178,12 @@ def test_main_when_config_arg_ignore_ssl_errors_is_false_py42_settings_verify_ss
 
 
 def test_main_when_cli_arg_reset_password_is_true_calls_delete_password(mocker, patches):
+    expected_username = "Bob"
+    patches.cli_args.c42_username = expected_username
     patches.cli_args.reset_password = True
     password_remover = mocker.patch("c42seceventcli.aed.main.delete_password")
     main.main()
-    assert password_remover.call_count == 1
+    password_remover.assert_called_once_with(u"c42seceventcli", expected_username)
 
 
 def test_main_when_cli_arg_reset_password_is_false_does_not_call_delete_password(mocker, patches):
