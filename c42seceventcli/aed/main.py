@@ -202,12 +202,13 @@ def _get_logger(formatter, destination, destination_type, syslog_port=514, syslo
 def _set_up_cursor_store(args, handlers, clear_cursor):
     if args.c42_record_cursor or clear_cursor:
         store = AEDCursorStore()
-        handlers.record_cursor_position = store.replace_stored_insertion_timestamp
-        handlers.get_cursor_position = store.get_stored_insertion_timestamp
         if clear_cursor:
             store.reset()
 
-        return store
+        if args.c42_record_cursor:
+            handlers.record_cursor_position = store.replace_stored_insertion_timestamp
+            handlers.get_cursor_position = store.get_stored_insertion_timestamp
+            return store
 
 
 def _get_log_formatter(output_format):
