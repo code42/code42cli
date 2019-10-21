@@ -147,9 +147,9 @@ usage: c42aed [-e C42_END_DATE | -r] [--clear-cursor] [--reset-password]
 
 optional arguments:
   -e C42_END_DATE, --end C42_END_DATE
-                        The beginning of the date range in which to look for
-                        events, in YYYY-MM-DD UTC format OR a number (number
-                        of minutes ago).
+                        The end of the date range in which to look for events,
+                        in YYYY-MM-DD UTC format OR a number (number of
+                        minutes ago).
   -r, --record-cursor   To only get events that were not previously retrieved.
 
 main:
@@ -164,9 +164,9 @@ main:
                         The username of the Code42 API user.
   -h, --help            Show this help message and exit.
   -b C42_BEGIN_DATE, --begin C42_BEGIN_DATE
-                        The end of the date range in which to look for events,
-                        in YYYY-MM-DD UTC format OR a number (number of
-                        minutes ago).
+                        The beginning of the date range in which to look for
+                        events, in YYYY-MM-DD UTC format OR a number (number
+                        of minutes ago).
   -i, --ignore-ssl-errors
                         Set to ignore ssl errors.
   -o {CEF,JSON}, --output-format {CEF,JSON}
@@ -186,7 +186,6 @@ main:
   --dest-protocol {TCP,UDP}
                         Protocol used to send logs to server. Ignored if
                         destination type is not 'server'.
-
 ```
 
 # Known Issues

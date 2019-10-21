@@ -58,7 +58,7 @@ def add_begin_date_arg(arg_group):
         "--begin",
         action="store",
         dest="c42_begin_date",
-        help="The end of the date range in which to look for events, "
+        help="The beginning of the date range in which to look for events, "
         "in YYYY-MM-DD UTC format OR a number (number of minutes ago).",
     )
 
@@ -69,7 +69,7 @@ def add_end_date_arg(arg_group):
         "--end",
         action="store",
         dest="c42_end_date",
-        help="The beginning of the date range in which to look for events, "
+        help="The end of the date range in which to look for events, "
         "in YYYY-MM-DD UTC format OR a number (number of minutes ago).",
     )
 
