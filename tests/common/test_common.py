@@ -137,7 +137,7 @@ def test_get_logger_when_destination_type_is_file_adds_file_handler_to_logger(
     assert actual == expected
 
 
-def test_get_logger_when_destination_type_is_syslog_adds_no_priority_sys_log_handler_to_logger(
+def test_get_logger_when_destination_type_is_syslog_adds_no_priority_syslog_handler_to_logger(
     mock_get_logger, mock_no_priority_syslog_handler
 ):
     logger = get_logger(None, "Somewhere", "syslog")
