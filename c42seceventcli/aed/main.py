@@ -47,9 +47,7 @@ _SERVICE_NAME_FOR_KEYCHAIN = u"c42seceventcli"
 def main():
     parser = _get_arg_parser()
     cli_args = vars(parser.parse_args())
-    config_args = get_config_args(cli_args.get("c42_config_file"))
-    args = _create_args(cli_args, config_args)
-    _verify_destination_args(args)
+    args = _union_cli_args_with_config_file_args(cli_args)
 
     if cli_args.get("c42_reset_password"):
         _delete_stored_password(args.c42_username)
@@ -94,12 +92,14 @@ def _get_arg_parser():
     return parser
 
 
-def _create_args(cli_args, config_args):
+def _union_cli_args_with_config_file_args(cli_args):
+    config_args = get_config_args(cli_args.get("c42_config_file"))
     args = AEDArgs()
     keys = cli_args.keys()
     for key in keys:
         args.try_set(key, cli_args.get(key), config_args.get(key))
 
+    _verify_destination_args(args)
     return args
 
 
