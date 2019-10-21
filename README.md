@@ -1,7 +1,7 @@
 # c42seceventcli - AED
 
-The c42seceventcli AED module contains a CLI tool for extracting AED events as well as an optional state manager so 
-that on future runs, you only get events you did not previously extract.
+The c42seceventcli AED module contains a CLI tool for extracting AED events as well as an optional state manager 
+for recording timestamps so that on future runs, you only extract events you did not previously extract.
 
 ## Requirements
 
