@@ -26,7 +26,7 @@ class SecurityEventCursorStore(object):
 
     def _set(self, column_name, new_value, primary_key):
         # type: (str, any, any) -> None
-        query = "UPDATE {0} SET {1}=? WHERE {2} = ?".format(
+        query = "UPDATE {0} SET {1}=? WHERE {2}=?".format(
             self._table_name, column_name, self._PRIMARY_KEY_COLUMN_NAME
         )
         with self._connection as conn:

@@ -64,7 +64,7 @@ class TestAEDCursorStore(object):
         store = AEDCursorStore(MOCK_TEST_DB_PATH)
         store.replace_stored_insertion_timestamp(123)
         with store._connection as conn:
-            expected = "UPDATE aed_siem_checkpoint SET {0}=? WHERE cursor_id = ?".format(
+            expected = "UPDATE aed_siem_checkpoint SET {0}=? WHERE cursor_id=?".format(
                 INSERTION_TIMESTAMP_FIELD_NAME
             )
             actual = conn.execute.call_args[0][0]

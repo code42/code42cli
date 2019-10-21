@@ -77,8 +77,12 @@ def _get_log_handler(destination, destination_type, syslog_port=514, syslog_prot
             hostname=destination, port=syslog_port, protocol=syslog_protocol
         )
     elif destination_type == "file":
-        try:
-            return FileHandler(filename=destination)
-        except IOError:
-            print("Error with provided file path. Try --dest path/to/file.")
-            exit(1)
+        return _get_file_handler(destination)
+
+
+def _get_file_handler(filename):
+    try:
+        return FileHandler(filename=filename)
+    except IOError:
+        print("Error with provided file path {0}. Try --dest path/to/file.".format(filename))
+        exit(1)
