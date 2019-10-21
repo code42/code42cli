@@ -505,3 +505,21 @@ def test_main_when_config_record_cursor_arg_is_false_does_not_override_handlers_
     main.main()
     actual = patches.aed_extractor_constructor.call_args[0][1].get_cursor_position
     assert actual is not unexpected
+
+
+def test_main_when_destination_type_is_file_and_get_logger_raises_io_error_causes_exit(
+    patches,
+):
+    patches.cli_args.c42_destination_type = "file"
+    patches.logger.side_effect = IOError
+    with pytest.raises(SystemExit):
+        main.main()
+
+
+def test_main_when_destination_type_is_syslog_and_get_logger_raises_attribute_error_causes_exit(
+    patches,
+):
+    patches.cli_args.c42_destination_type = "syslog"
+    patches.logger.side_effect = AttributeError
+    with pytest.raises(SystemExit):
+        main.main()

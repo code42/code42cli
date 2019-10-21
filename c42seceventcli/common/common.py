@@ -1,6 +1,5 @@
 import sys
 from os import path
-from socket import gaierror
 from datetime import datetime, timedelta
 from configparser import ConfigParser
 from logging import StreamHandler, FileHandler, getLogger, INFO, Formatter
@@ -79,26 +78,8 @@ def _get_log_handler(destination, destination_type, syslog_port=514, syslog_prot
     if destination_type == "stdout":
         return StreamHandler(sys.stdout)
     elif destination_type == "syslog":
-        return _get_no_priority_syslog_handler(destination, syslog_port, syslog_protocol)
-    elif destination_type == "file":
-        return _get_file_handler(destination)
-
-
-def _get_no_priority_syslog_handler(hostname, port=514, protocol="TCP"):
-    try:
-        return NoPrioritySysLogHandler(hostname=hostname, port=port, protocol=protocol)
-    except (AttributeError, gaierror):
-        print(
-            "Error with provided syslog arguments: hostname={0}, port={1}, protocol={2}.".format(
-                hostname, port, protocol
-            )
+        return NoPrioritySysLogHandler(
+            hostname=destination, port=syslog_port, protocol=syslog_protocol
         )
-        exit(1)
-
-
-def _get_file_handler(filename):
-    try:
-        return FileHandler(filename=filename)
-    except IOError:
-        print("Error with provided file path {0}. Try --dest path/to/file.".format(filename))
-        exit(1)
+    elif destination_type == "file":
+        return FileHandler(filename=destination)

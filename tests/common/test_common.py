@@ -32,11 +32,6 @@ def mock_config_get_bool_function(mocker):
 
 
 @pytest.fixture
-def mock_get_logger(mocker):
-    return mocker.patch("c42seceventcli.common.common.getLogger")
-
-
-@pytest.fixture
 def mock_config_file_reader(mocker):
     reader = mocker.patch("configparser.ConfigParser.read")
     reader.return_value = ["NOT EMPTY LIST"]
@@ -48,6 +43,11 @@ def mock_config_file_sections(mocker):
     sections = mocker.patch("configparser.ConfigParser.sections")
     sections.return_value = ["NOT EMPTY LIST"]
     return sections
+
+
+@pytest.fixture
+def mock_get_logger(mocker):
+    return mocker.patch("c42seceventcli.common.common.getLogger")
 
 
 @pytest.fixture
@@ -144,19 +144,3 @@ def test_get_logger_when_destination_type_is_syslog_adds_no_priority_sys_log_han
     actual = type(logger.addHandler.call_args[0][0])
     expected = NoPrioritySysLogHandler
     assert actual == expected
-
-
-def test_get_logger_when_destination_type_is_file_and_file_handler_raises_io_error_causes_exit(
-    mock_get_logger, mock_file_handler
-):
-    mock_file_handler.side_effect = IOError
-    with pytest.raises(SystemExit):
-        get_logger(None, "Blah", "file")
-
-
-def test_get_logger_when_destination_type_is_syslog_and_no_priority_syslog_handler_raises_attribute_error_causes_exit(
-    mock_get_logger, mock_no_priority_syslog_handler
-):
-    mock_no_priority_syslog_handler.side_effect = AttributeError
-    with pytest.raises(SystemExit):
-        get_logger(None, "Blah", "syslog")

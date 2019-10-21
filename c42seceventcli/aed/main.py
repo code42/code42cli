@@ -1,4 +1,5 @@
 import json
+from socket import gaierror
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 from argparse import ArgumentParser
@@ -93,7 +94,7 @@ def _get_arg_parser():
 
 
 def _union_cli_args_with_config_file_args(cli_args):
-    config_args = get_config_args(cli_args.get("c42_config_file"))
+    config_args = _get_config_args(cli_args.get("c42_config_file"))
     args = AEDArgs()
     keys = cli_args.keys()
     for key in keys:
@@ -101,6 +102,14 @@ def _union_cli_args_with_config_file_args(cli_args):
 
     _verify_destination_args(args)
     return args
+
+
+def _get_config_args(config_file_path):
+    try:
+        return get_config_args(config_file_path)
+    except IOError:
+        print("Path to config file {0} not found".format(config_file_path))
+        exit(1)
 
 
 class AEDArgs(object):
@@ -158,7 +167,7 @@ def _create_handlers(args):
     handlers.handle_error = error_logger.error
     output_format = args.c42_output_format
     logger_formatter = _get_log_formatter(output_format)
-    logger = get_logger(
+    logger = _get_logger(
         formatter=logger_formatter,
         destination=args.c42_destination,
         destination_type=args.c42_destination_type,
@@ -167,6 +176,27 @@ def _create_handlers(args):
     )
     handlers.handle_response = _get_response_handler(logger)
     return handlers
+
+
+def _get_logger(formatter, destination, destination_type, syslog_port=514, syslog_protocol="TCP"):
+    try:
+        return get_logger(
+            formatter=formatter,
+            destination=destination,
+            destination_type=destination_type,
+            syslog_port=syslog_port,
+            syslog_protocol=syslog_protocol,
+        )
+    except (AttributeError, gaierror):
+        print(
+            "Error with provided syslog arguments: hostname={0}, port={1}, protocol={2}.".format(
+                destination, syslog_port, syslog_protocol
+            )
+        )
+        exit(1)
+    except IOError:
+        print("Error with provided file path {0}. Try --dest path/to/file.".format(destination))
+        exit(1)
 
 
 def _set_up_cursor_store(args, handlers, clear_cursor):
