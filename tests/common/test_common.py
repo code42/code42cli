@@ -50,6 +50,22 @@ def mock_config_file_sections(mocker):
     return sections
 
 
+@pytest.fixture
+def mock_no_priority_syslog_handler(mocker):
+    mock_handler_init = mocker.patch(
+        "c42secevents.logging.handlers.NoPrioritySysLogHandler.__init__"
+    )
+    mock_handler_init.return_value = None
+    return mock_handler_init
+
+
+@pytest.fixture
+def mock_file_handler(mocker):
+    mock_handler_init = mocker.patch("logging.FileHandler.__init__")
+    mock_handler_init.return_value = None
+    return mock_handler_init
+
+
 def test_get_config_args_when_read_returns_empty_list_raises_io_error(mocker):
     reader = mocker.patch("configparser.ConfigParser.read")
     reader.return_value = []
@@ -96,6 +112,15 @@ def test_parse_timestamp_when_given_bad_string_throws_value_error():
         parse_timestamp("BAD!")
 
 
+def test_get_error_logger_uses_rotating_file_handler(mocker, mock_get_logger):
+    mock_handler = mocker.patch("logging.handlers.RotatingFileHandler.__init__")
+    mock_handler.return_value = None
+    logger = get_error_logger()
+    actual = type(logger.addHandler.call_args[0][0])
+    expected = RotatingFileHandler
+    assert actual == expected
+
+
 def test_get_logger_when_destination_type_is_stdout_adds_stream_handler_to_logger(mock_get_logger):
     logger = get_logger(None, "Somewhere", "stdout")
     actual = type(logger.addHandler.call_args[0][0])
@@ -104,10 +129,8 @@ def test_get_logger_when_destination_type_is_stdout_adds_stream_handler_to_logge
 
 
 def test_get_logger_when_destination_type_is_file_adds_file_handler_to_logger(
-    mocker, mock_get_logger
+     mock_get_logger, mock_file_handler
 ):
-    mock_handler_init = mocker.patch("logging.FileHandler.__init__")
-    mock_handler_init.return_value = None
     logger = get_logger(None, "Somewhere", "file")
     actual = type(logger.addHandler.call_args[0][0])
     expected = FileHandler
@@ -115,22 +138,25 @@ def test_get_logger_when_destination_type_is_file_adds_file_handler_to_logger(
 
 
 def test_get_logger_when_destination_type_is_syslog_adds_no_priority_sys_log_handler_to_logger(
-    mocker, mock_get_logger
+    mock_get_logger, mock_no_priority_syslog_handler
 ):
-    mock_handler_init = mocker.patch(
-        "c42secevents.logging.handlers.NoPrioritySysLogHandler.__init__"
-    )
-    mock_handler_init.return_value = None
     logger = get_logger(None, "Somewhere", "syslog")
     actual = type(logger.addHandler.call_args[0][0])
     expected = NoPrioritySysLogHandler
     assert actual == expected
 
 
-def test_get_error_logger_uses_rotating_file_handler(mocker, mock_get_logger):
-    mock_handler = mocker.patch("logging.handlers.RotatingFileHandler.__init__")
-    mock_handler.return_value = None
-    logger = get_error_logger()
-    actual = type(logger.addHandler.call_args[0][0])
-    expected = RotatingFileHandler
-    assert actual == expected
+def test_get_logger_when_destination_type_is_file_and_file_handler_raises_io_error_causes_exit(
+    mock_get_logger, mock_file_handler
+):
+    mock_file_handler.side_effect = IOError
+    with pytest.raises(SystemExit):
+        get_logger(None, "Blah", "file")
+
+
+def test_get_logger_when_destination_type_is_syslog_and_no_priority_syslog_handler_raises_attribute_error_causes_exit(
+    mock_get_logger, mock_no_priority_syslog_handler
+):
+    mock_no_priority_syslog_handler.side_effect = AttributeError
+    with pytest.raises(SystemExit):
+        get_logger(None, "Blah", "syslog")

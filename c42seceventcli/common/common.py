@@ -44,6 +44,17 @@ def parse_timestamp(input_string):
     return convert_datetime_to_timestamp(time)
 
 
+def get_error_logger():
+    save_path = get_project_path()
+    log_path = "{0}/c42seceventcli_errors.log".format(save_path)
+    logger = getLogger("Code42_SecEventCli_Error_Logger")
+    formatter = Formatter("%(message)s")
+    handler = RotatingFileHandler(log_path, maxBytes=250000000)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    return logger
+
+
 def get_logger(formatter, destination, destination_type, syslog_port=514, syslog_protocol="TCP"):
     destination_type = destination_type.lower()
     logger = getLogger("Code42_SecEventCli_Logger")
@@ -56,17 +67,6 @@ def get_logger(formatter, destination, destination_type, syslog_port=514, syslog
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.setLevel(INFO)
-    return logger
-
-
-def get_error_logger():
-    save_path = get_project_path()
-    log_path = "{0}/c42seceventcli_errors.log".format(save_path)
-    logger = getLogger("Code42_SecEventCli_Error_Logger")
-    formatter = Formatter("%(message)s")
-    handler = RotatingFileHandler(log_path, maxBytes=250000000)
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
     return logger
 
 
