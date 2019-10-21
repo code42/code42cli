@@ -11,7 +11,12 @@ from c42secevents.common import convert_datetime_to_timestamp
 
 
 def get_project_path():
-    return path.dirname(path.dirname(path.realpath(__file__)))
+    package_name = __name__.split(".")[0]
+    path_to_this_file = path.realpath(__file__)
+    last_pos = path_to_this_file.rfind(package_name)
+    ending_pos = last_pos + len(package_name)
+    desired_dir_name = path_to_this_file[0:ending_pos]
+    return desired_dir_name
 
 
 def get_config_args(config_file_path):
