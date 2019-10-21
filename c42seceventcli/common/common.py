@@ -1,6 +1,5 @@
 import sys
 from os import path
-from os.path import expanduser, dirname, sep
 from datetime import datetime, timedelta
 from configparser import ConfigParser
 from logging import StreamHandler, FileHandler, getLogger, INFO, Formatter
@@ -11,7 +10,7 @@ from c42secevents.common import convert_datetime_to_timestamp
 
 
 def get_project_path():
-    project_path = path.join(dirname(sys.modules['__main__'].__file__), "..")
+    project_path = path.join(path.dirname(path.dirname(path.realpath(__file__))), "..")
     return project_path
 
 
