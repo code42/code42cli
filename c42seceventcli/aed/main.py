@@ -60,7 +60,7 @@ def main():
     handlers = _create_handlers(args, store)
     sdk = _create_sdk_from_args(args, parser, handlers)
 
-    if cli_args.get("c42_clear_cursor"):
+    if store is not None and cli_args.get("c42_clear_cursor"):
         store.reset()
 
     if bool(args.c42_ignore_ssl_errors):
