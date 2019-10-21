@@ -58,7 +58,7 @@ def main():
 
     handlers = _create_handlers(args)
     store = _create_store(handlers)
-    sdk = _create_sdk_from_args(args, parser, handlers)
+    sdk = _create_sdk_from_args(args, handlers, parser)
 
     if store is not None and cli_args.get("c42_clear_cursor"):
         store.reset()
@@ -203,7 +203,7 @@ def _get_response_handler(logger):
     return handle_response
 
 
-def _create_sdk_from_args(args, parser, handlers):
+def _create_sdk_from_args(args, handlers, parser):
     server = _get_server_from_args(args, parser)
     username = _get_username_from_args(args, parser)
     password = _get_password(username)
