@@ -52,7 +52,7 @@ def get_error_logger():
     save_path = get_project_path()
     log_path = "{0}/c42seceventcli_errors.log".format(save_path)
     logger = getLogger("Code42_SecEventCli_Error_Logger")
-    formatter = Formatter("%(message)s")
+    formatter = Formatter("%(asctime)s %(message)s")
     handler = RotatingFileHandler(log_path, maxBytes=250000000)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
