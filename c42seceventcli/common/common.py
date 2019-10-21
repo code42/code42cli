@@ -17,7 +17,7 @@ def get_config_args(config_file_path):
     args = {}
     parser = ConfigParser()
     if config_file_path:
-        if not parser.read(expanduser(config_file_path)):
+        if not parser.read(path.expanduser(config_file_path)):
             raise IOError("Supplied an empty config file {0}".format(config_file_path))
 
     if not parser.sections():
