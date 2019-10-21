@@ -129,7 +129,7 @@ def test_get_logger_when_destination_type_is_stdout_adds_stream_handler_to_logge
 
 
 def test_get_logger_when_destination_type_is_file_adds_file_handler_to_logger(
-     mock_get_logger, mock_file_handler
+    mock_get_logger, mock_file_handler
 ):
     logger = get_logger(None, "Somewhere", "file")
     actual = type(logger.addHandler.call_args[0][0])
