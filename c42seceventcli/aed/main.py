@@ -56,8 +56,8 @@ def main():
 
     _verify_destination_args(args)
 
-    store = AEDCursorStore() if args.c42_record_cursor else None
-    handlers = _create_handlers(args, store)
+    handlers = _create_handlers(args)
+    store = _create_store(handlers)
     sdk = _create_sdk_from_args(args, parser, handlers)
 
     if store is not None and cli_args.get("c42_clear_cursor"):
@@ -156,16 +156,11 @@ def _ignore_ssl_errors():
     disable_warnings(InsecureRequestWarning)
 
 
-def _create_handlers(args, store):
+def _create_handlers(args):
     handlers = FileEventHandlers()
     error_logger = get_error_logger()
     settings.global_exception_message_receiver = error_logger.error
     handlers.handle_error = error_logger.error
-
-    if bool(args.c42_record_cursor):
-        handlers.record_cursor_position = store.replace_stored_insertion_timestamp
-        handlers.get_cursor_position = store.get_stored_insertion_timestamp
-
     output_format = args.c42_output_format
     logger_formatter = _get_log_formatter(output_format)
     logger = get_logger(
@@ -177,6 +172,13 @@ def _create_handlers(args, store):
     )
     handlers.handle_response = _get_response_handler(logger)
     return handlers
+
+
+def _create_store(handlers):
+    store = AEDCursorStore()
+    handlers.record_cursor_position = store.replace_stored_insertion_timestamp
+    handlers.get_cursor_position = store.get_stored_insertion_timestamp
+    return store
 
 
 def _get_log_formatter(output_format):
