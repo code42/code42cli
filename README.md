@@ -92,7 +92,7 @@ c42_output_format=CEF
 
 There are three possible destination types to use:
 
-* stdout - printing to console
+* stdout 
 * file - writing to a file
 * server - transmitting to a server, such as a syslog
 

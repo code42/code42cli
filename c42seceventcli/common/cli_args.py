@@ -80,7 +80,7 @@ def add_ignore_ssl_errors_arg(arg_group):
         "--ignore-ssl-errors",
         action="store_true",
         dest="c42_ignore_ssl_errors",
-        help="Set to ignore ssl errors.",
+        help="Do not validate the SSL certificates of Code42 servers.",
     )
 
 
@@ -101,7 +101,7 @@ def add_record_cursor_arg(arg_group):
         "--record-cursor",
         dest="c42_record_cursor",
         action="store_true",
-        help="To only get events that were not previously retrieved.",
+        help="Only get events that were not previously retrieved.",
     )
 
 
@@ -129,7 +129,7 @@ def add_debug_arg(arg_group):
         "-d" "--debug",
         action="store_true",
         dest="c42_debug_mode",
-        help="Set to turn on debug logging.",
+        help="Turn on debug logging.",
     )
 
 
