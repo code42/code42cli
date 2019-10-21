@@ -152,6 +152,25 @@ class AEDArgs(object):
         return default_end_date.strftime("%Y-%m-%d")
 
 
+def _verify_destination_args(args):
+    if args.c42_destination_type == "stdout" and args.c42_destination is not None:
+        msg = (
+            "Destination '{0}' not applicable for stdout. "
+            "Try removing '--dest' arg or change '--dest-type' to 'file' or 'syslog'."
+        )
+        msg = msg.format(args.c42_destination)
+        print(msg)
+        exit(1)
+
+    if args.c42_destination_type == "file" and args.c42_destination is None:
+        print("Missing file name. Try: '--dest path/to/file'.")
+        exit(1)
+
+    if args.c42_destination_type == "syslog" and args.c42_destination is None:
+        print("Missing syslog server URL. Try: '--dest https://syslog.example.com'.")
+        exit(1)
+
+
 def _delete_stored_password(username):
     try:
         delete_password(_SERVICE_NAME_FOR_KEYCHAIN, username)
@@ -286,25 +305,6 @@ def _get_password(username):
         set_password(_SERVICE_NAME_FOR_KEYCHAIN, username, password)
 
     return password
-
-
-def _verify_destination_args(args):
-    if args.c42_destination_type == "stdout" and args.c42_destination is not None:
-        msg = (
-            "Destination '{0}' not applicable for stdout. "
-            "Try removing '--dest' arg or change '--dest-type' to 'file' or 'syslog'."
-        )
-        msg = msg.format(args.c42_destination)
-        print(msg)
-        exit(1)
-
-    if args.c42_destination_type == "file" and args.c42_destination is None:
-        print("Missing file name. Try: '--dest path/to/file'.")
-        exit(1)
-
-    if args.c42_destination_type == "syslog" and args.c42_destination is None:
-        print("Missing syslog server URL. Try: '--dest https://syslog.example.com'.")
-        exit(1)
 
 
 def _extract(args, sdk, handlers):
