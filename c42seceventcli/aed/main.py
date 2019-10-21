@@ -255,7 +255,7 @@ def _get_password(username):
 def _verify_destination_args(args):
     if args.c42_destination_type == "stdout" and args.c42_destination is not None:
         print(
-            "Ambiguous destination '{0}' for '{1}' destination type.".format(
+            "Uncertain destination '{0}' for '{1}' destination type.".format(
                 args.c42_destination, args.c42_destination_type
             )
         )
