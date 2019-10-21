@@ -94,7 +94,7 @@ There are three possible destination types to use:
 
 * stdout - printing to console
 * file - writing to a file
-* syslog - transmitting to a syslog server
+* server - transmitting to a server, such as a syslog
 
 The program defaults to `stdout`. To use a file, use `--dest-type` and `--dest` this way:
 
@@ -102,10 +102,10 @@ The program defaults to `stdout`. To use a file, use `--dest-type` and `--dest` 
 c42aed -s https://example.authority.com -u security.admin@example.com --dest-type file --dest name-of-file.txt
 ```
 
-To use syslog:
+To use a server destination (like syslog):
 
 ```bash
-c42aed -s https://example.authority.com -u security.admin@example.com --dest-type syslog --dest https://syslog.example.com
+c42aed -s https://example.authority.com -u security.admin@example.com --dest-type server --dest https://syslog.example.com
 ```
 
 Both `c42_destination_type` and `c42_destination` are possible fields in the config file as well.
@@ -141,8 +141,8 @@ usage: c42aed [-e C42_END_DATE | -r] [--clear-cursor] [--reset-password]
               [-c C42_CONFIG_FILE] [-s C42_AUTHORITY_URL] [-u C42_USERNAME]
               [-h] [-b C42_BEGIN_DATE] [-i] [-o {CEF,JSON}]
               [-t [{SharedViaLink,SharedToDomain,ApplicationRead,CloudStorage,RemovableMedia,IsPublic} [{SharedViaLink,SharedToDomain,ApplicationRead,CloudStorage,RemovableMedia,IsPublic} ...]]]
-              [-d--debug] [--dest-type {stdout,file,syslog}]
-              [--dest C42_DESTINATION] [--dest-port C42_SYSLOG_PORT]
+              [-d--debug] [--dest-type {stdout,file,server}]
+              [--dest C42_DESTINATION] [--dest-port C42_DESTINATION_PORT]
               [--dest-protocol {TCP,UDP}]
 
 optional arguments:
@@ -175,17 +175,18 @@ main:
                         To limit extracted events to those with given exposure
                         types.
   -d--debug             Set to turn on debug logging.
-  --dest-type {stdout,file,syslog}
+  --dest-type {stdout,file,server}
                         The type of destination to send output to.
   --dest C42_DESTINATION
                         Either a name of a local file or syslog host address.
-                        Ignored if destination type is stdout.
-  --dest-port C42_SYSLOG_PORT
-                        Port used on syslog destination. Ignored if
-                        destination type is not syslog.
+                        Ignored if destination type is 'stdout'.
+  --dest-port C42_DESTINATION_PORT
+                        Port used when sending logs to server. Ignored if
+                        destination type is not 'server'.
   --dest-protocol {TCP,UDP}
-                        Protocol used to send logs to syslog server. Ignored
-                        if destination type is not syslog.
+                        Protocol used to send logs to server. Ignored if
+                        destination type is not 'server'.
+
 ```
 
 # Known Issues

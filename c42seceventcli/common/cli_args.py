@@ -154,7 +154,7 @@ def add_destination_arg(arg_group):
 
 def add_port_arg(arg_group):
     arg_group.add_argument(
-        "--syslog-port",
+        "--dest-port",
         action="store",
         dest="c42_destination_port",
         help="Port used when sending logs to server. Ignored if destination type is not 'server'.",
@@ -163,7 +163,7 @@ def add_port_arg(arg_group):
 
 def add_protocol_arg(arg_group):
     arg_group.add_argument(
-        "--syslog-protocol",
+        "--dest-protocol",
         action="store",
         dest="c42_destination_protocol",
         choices=["TCP", "UDP"],
