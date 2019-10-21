@@ -148,7 +148,7 @@ def add_destination_arg(arg_group):
         "--dest",
         action="store",
         dest="c42_destination",
-        help="Either a name of a local file or syslog host address. Ignored if destination type is stdout.",
+        help="Either a name of a local file or syslog host address. Ignored if destination type is 'stdout'.",
     )
 
 
@@ -157,7 +157,7 @@ def add_port_arg(arg_group):
         "--syslog-port",
         action="store",
         dest="c42_destination_port",
-        help="Port used on syslog destination. Ignored if destination type is not syslog.",
+        help="Port used when sending logs to server. Ignored if destination type is not 'server'.",
     )
 
 
@@ -167,7 +167,7 @@ def add_protocol_arg(arg_group):
         action="store",
         dest="c42_destination_protocol",
         choices=["TCP", "UDP"],
-        help="Protocol used to send logs to syslog server. Ignored if destination type is not syslog.",
+        help="Protocol used to send logs to server. Ignored if destination type is not 'server'.",
     )
 
 
