@@ -47,14 +47,12 @@ _SERVICE_NAME_FOR_KEYCHAIN = u"c42seceventcli"
 def main():
     parser = _get_arg_parser()
     cli_args = vars(parser.parse_args())
-
     config_args = get_config_args(cli_args.get("c42_config_file"))
     args = _create_args(cli_args, config_args)
+    _verify_destination_args(args)
 
     if cli_args.get("c42_reset_password"):
         _delete_stored_password(args.c42_username)
-
-    _verify_destination_args(args)
 
     handlers = _create_handlers(args)
     store = _create_store(handlers)
