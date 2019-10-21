@@ -507,9 +507,7 @@ def test_main_when_config_record_cursor_arg_is_false_does_not_override_handlers_
     assert actual is not unexpected
 
 
-def test_main_when_destination_type_is_file_and_get_logger_raises_io_error_causes_exit(
-    patches,
-):
+def test_main_when_destination_type_is_file_and_get_logger_raises_io_error_causes_exit(patches,):
     patches.cli_args.c42_destination_type = "file"
     patches.logger.side_effect = IOError
     with pytest.raises(SystemExit):
