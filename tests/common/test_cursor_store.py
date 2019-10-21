@@ -1,14 +1,14 @@
+from os import path
 from c42seceventcli.common.cursor_store import SecurityEventCursorStore
 
 
 class TestSecurityEventCursorStore(object):
     def test_init_cursor_store_when_not_given_db_file_path_uses_expected_path_with_db_table_name_as_db_file_name(
-        self, mocker, sqlite_connection
+        self, sqlite_connection
     ):
-        expected_path = "TEST_PATH"
+        home_dir = path.expanduser("~")
+        expected_path = path.join(home_dir, ".c42seceventcli")
         expected_db_name = "TEST"
-        mock_path = mocker.patch("c42seceventcli.common.cursor_store.get_project_path")
-        mock_path.return_value = expected_path
         expected_db_file_path = "{0}/{1}.db".format(expected_path, expected_db_name)
         SecurityEventCursorStore(expected_db_name)
         sqlite_connection.assert_called_once_with(expected_db_file_path)

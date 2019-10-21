@@ -78,22 +78,22 @@ def mock_cli_arg_parser(mocker, mock_cli_args):
 @pytest.fixture
 def mock_cli_args():
     args = Namespace()
-    args.c42_reset_password = None
-    args.c42_clear_cursor = None
-    args.c42_config_file = None
+    args.reset_password = None
+    args.clear_cursor = None
+    args.config_file = None
     args.c42_authority_url = "https://example.com"
     args.c42_username = "test.testerson@example.com"
-    args.c42_begin_date = None
-    args.c42_end_date = None
-    args.c42_ignore_ssl_errors = None
-    args.c42_output_format = None
-    args.c42_record_cursor = None
-    args.c42_exposure_types = None
-    args.c42_debug_mode = None
-    args.c42_destination_type = None
-    args.c42_destination = None
-    args.c42_destination_port = None
-    args.c42_destination_protocol = None
+    args.begin_date = None
+    args.end_date = None
+    args.ignore_ssl_errors = None
+    args.output_format = None
+    args.record_cursor = None
+    args.exposure_types = None
+    args.debug_mode = None
+    args.destination_type = None
+    args.destination = None
+    args.destination_port = None
+    args.destination_protocol = None
     return args
 
 
