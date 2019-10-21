@@ -152,7 +152,7 @@ def add_destination_arg(arg_group):
     )
 
 
-def add_port_arg(arg_group):
+def add_destination_port_arg(arg_group):
     arg_group.add_argument(
         "--dest-port",
         action="store",
@@ -161,7 +161,7 @@ def add_port_arg(arg_group):
     )
 
 
-def add_protocol_arg(arg_group):
+def add_destination_protocol_arg(arg_group):
     arg_group.add_argument(
         "--dest-protocol",
         action="store",

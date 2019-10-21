@@ -37,8 +37,8 @@ from c42seceventcli.common.cli_args import (
     add_debug_arg,
     add_destination_type_arg,
     add_destination_arg,
-    add_port_arg,
-    add_protocol_arg,
+    add_destination_port_arg,
+    add_destination_protocol_arg,
     add_help_arg,
 )
 
@@ -92,8 +92,8 @@ def _get_arg_parser():
     add_debug_arg(main_args)
     add_destination_type_arg(main_args)
     add_destination_arg(main_args)
-    add_port_arg(main_args)
-    add_protocol_arg(main_args)
+    add_destination_port_arg(main_args)
+    add_destination_protocol_arg(main_args)
     return parser
 
 
