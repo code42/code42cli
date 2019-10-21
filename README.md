@@ -1,7 +1,7 @@
 # c42seceventcli - AED
 
-The c42seceventcli AED module contains a CLI for extracting AED events as well as an optional state manager
-for only getting events you did not previously get.
+The c42seceventcli AED module contains a CLI tool for extracting AED events as well as an optional state manager so 
+that on future runs, you only get events you did not previously extract.
 
 ## Requirements
 
@@ -32,8 +32,7 @@ c42aed -s https://example.authority.com -u security.admin@example.com
 ```
         
 Another option is to put your Code42 authority URL and username in a file named `config.cfg`. 
-Rename `config.default.cfg` to `config.cfg` and edit the fields to be your
-authority server URL and username.
+Rename `config.default.cfg` to `config.cfg` and edit the fields to be your authority server URL and username.
 There are also other optional arguments in `config.default.cfg` that mirror CLI args.
 
 ```buildoutcfg
@@ -191,4 +190,4 @@ main:
 
 # Known Issues
 
-Only the first 10,000 of each set of events containing the exact same insertion timestamp will be reported.
+Only the first 10,000 of each set of events containing the exact same insertion timestamp is reported.
