@@ -73,11 +73,6 @@ def main():
 def _get_arg_parser():
     parser = ArgumentParser(add_help=False)
 
-    # Makes sure that you can't give both an end_timestamp and record cursor positions
-    mutually_exclusive_timestamp_group = parser.add_mutually_exclusive_group()
-    add_end_date_arg(mutually_exclusive_timestamp_group)
-    add_record_cursor_arg(mutually_exclusive_timestamp_group)
-
     main_args = parser.add_argument_group("main")
     add_clear_cursor_arg(main_args)
     add_reset_password_arg(main_args)
@@ -94,6 +89,12 @@ def _get_arg_parser():
     add_destination_arg(main_args)
     add_destination_port_arg(main_args)
     add_destination_protocol_arg(main_args)
+
+    # Makes sure that you can't give both an end_timestamp and record cursor positions
+    mutually_exclusive_timestamp_group = parser.add_mutually_exclusive_group()
+    add_end_date_arg(mutually_exclusive_timestamp_group)
+    add_record_cursor_arg(mutually_exclusive_timestamp_group)
+
     return parser
 
 
