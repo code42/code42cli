@@ -92,8 +92,8 @@ def mock_cli_args():
     args.c42_debug_mode = None
     args.c42_destination_type = None
     args.c42_destination = None
-    args.c42_syslog_port = None
-    args.c42_syslog_protocol = None
+    args.c42_destination_port = None
+    args.c42_destination_protocol = None
     return args
 
 
@@ -118,8 +118,8 @@ def mock_config_args():
         "c42_debug_mode": None,
         "c42_destination_type": None,
         "c42_destination": None,
-        "c42_syslog_port": None,
-        "c42_syslog_protocol": None,
+        "c42_destination_port": None,
+        "c42_destination_protocol": None,
     }
 
 
@@ -256,8 +256,8 @@ def test_main_when_destination_is_not_none_and_destination_type_is_stdout_causes
         main.main()
 
 
-def test_main_when_destination_is_none_and_destination_type_is_syslog_causes_exit(patches):
-    patches.cli_args.c42_destination_type = "syslog"
+def test_main_when_destination_is_none_and_destination_type_is_server_causes_exit(patches):
+    patches.cli_args.c42_destination_type = "server"
     patches.cli_args.c42_destination = None
     with pytest.raises(SystemExit):
         main.main()
@@ -386,36 +386,36 @@ def test_main_when_config_arg_output_format_is_cef_creates_cef_formatter(patches
     assert actual == expected
 
 
-def test_main_when_given_syslog_port_via_cli_passes_port_to_get_logger(patches):
+def test_main_when_given_destination_port_via_cli_passes_port_to_get_logger(patches):
     expected = 1000
-    patches.cli_args.c42_syslog_port = expected
+    patches.cli_args.c42_destination_port = expected
     main.main()
-    actual = patches.logger.call_args[1]["syslog_port"]
+    actual = patches.logger.call_args[1]["destination_port"]
     assert actual == expected
 
 
-def test_main_when_given_syslog_port_via_config_file_passes_port_to_get_logger(patches):
+def test_main_when_given_destination_port_via_config_file_passes_port_to_get_logger(patches):
     expected = 1000
-    patches.config_args["c42_syslog_port"] = expected
-    patches.cli_args.c42_syslog_port = expected
+    patches.config_args["c42_destination_port"] = expected
+    patches.cli_args.c42_destination_port = expected
     main.main()
-    actual = patches.logger.call_args[1]["syslog_port"]
+    actual = patches.logger.call_args[1]["destination_port"]
     assert actual == expected
 
 
-def test_main_when_given_syslog_protocol_via_cli_passes_port_to_get_logger(patches):
+def test_main_when_given_destinaton_protocol_via_cli_passes_port_to_get_logger(patches):
     expected = "SOME PROTOCOL"
-    patches.cli_args.c42_syslog_protocol = expected
+    patches.cli_args.c42_destination_protocol = expected
     main.main()
-    actual = patches.logger.call_args[1]["syslog_protocol"]
+    actual = patches.logger.call_args[1]["destination_protocol"]
     assert actual == expected
 
 
-def test_main_when_given_syslog_protocol_via_config_file_passes_port_to_get_logger(patches):
+def test_main_when_given_destination_protocol_via_config_file_passes_port_to_get_logger(patches):
     expected = "SOME PROTOCOL"
-    patches.config_args["c42_syslog_protocol"] = expected
+    patches.config_args["c42_destination_protocol"] = expected
     main.main()
-    actual = patches.logger.call_args[1]["syslog_protocol"]
+    actual = patches.logger.call_args[1]["destination_protocol"]
     assert actual == expected
 
 
@@ -514,10 +514,10 @@ def test_main_when_destination_type_is_file_and_get_logger_raises_io_error_cause
         main.main()
 
 
-def test_main_when_destination_type_is_syslog_and_get_logger_raises_attribute_error_causes_exit(
+def test_main_when_destination_type_is_server_and_get_logger_raises_attribute_error_causes_exit(
     patches,
 ):
-    patches.cli_args.c42_destination_type = "syslog"
+    patches.cli_args.c42_destination_type = "server"
     patches.logger.side_effect = AttributeError
     with pytest.raises(SystemExit):
         main.main()

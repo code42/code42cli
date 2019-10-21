@@ -59,14 +59,16 @@ def get_error_logger():
     return logger
 
 
-def get_logger(formatter, destination, destination_type, syslog_port=514, syslog_protocol="TCP"):
+def get_logger(
+    formatter, destination, destination_type, destination_port=514, destination_protocol="TCP"
+):
     destination_type = destination_type.lower()
     logger = getLogger("Code42_SecEventCli_Logger")
     handler = _get_log_handler(
         destination=destination,
         destination_type=destination_type,
-        syslog_port=syslog_port,
-        syslog_protocol=syslog_protocol,
+        destination_port=destination_port,
+        destination_protocol=destination_protocol,
     )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
@@ -74,12 +76,14 @@ def get_logger(formatter, destination, destination_type, syslog_port=514, syslog
     return logger
 
 
-def _get_log_handler(destination, destination_type, syslog_port=514, syslog_protocol="TCP"):
+def _get_log_handler(
+    destination, destination_type, destination_port=514, destination_protocol="TCP"
+):
     if destination_type == "stdout":
         return StreamHandler(sys.stdout)
-    elif destination_type == "syslog":
+    elif destination_type == "server":
         return NoPrioritySysLogHandler(
-            hostname=destination, port=syslog_port, protocol=syslog_protocol
+            hostname=destination, port=destination_port, protocol=destination_protocol
         )
     elif destination_type == "file":
         return FileHandler(filename=destination)

@@ -37,8 +37,8 @@ from c42seceventcli.common.cli_args import (
     add_debug_arg,
     add_destination_type_arg,
     add_destination_arg,
-    add_syslog_port_arg,
-    add_syslog_protocol_arg,
+    add_port_arg,
+    add_protocol_arg,
     add_help_arg,
 )
 
@@ -92,8 +92,8 @@ def _get_arg_parser():
     add_debug_arg(main_args)
     add_destination_type_arg(main_args)
     add_destination_arg(main_args)
-    add_syslog_port_arg(main_args)
-    add_syslog_protocol_arg(main_args)
+    add_port_arg(main_args)
+    add_protocol_arg(main_args)
     return parser
 
 
@@ -128,8 +128,8 @@ class AEDArgs(object):
     c42_debug_mode = False
     c42_destination_type = "stdout"
     c42_destination = None
-    c42_syslog_port = 514
-    c42_syslog_protocol = "TCP"
+    c42_destination_port = 514
+    c42_destination_protocol = "TCP"
 
     def __init__(self):
         self.c42_begin_date = AEDArgs._get_default_begin_date()
@@ -156,7 +156,7 @@ def _verify_destination_args(args):
     if args.c42_destination_type == "stdout" and args.c42_destination is not None:
         msg = (
             "Destination '{0}' not applicable for stdout. "
-            "Try removing '--dest' arg or change '--dest-type' to 'file' or 'syslog'."
+            "Try removing '--dest' arg or change '--dest-type' to 'file' or 'server'."
         )
         msg = msg.format(args.c42_destination)
         print(msg)
@@ -166,8 +166,8 @@ def _verify_destination_args(args):
         print("Missing file name. Try: '--dest path/to/file'.")
         exit(1)
 
-    if args.c42_destination_type == "syslog" and args.c42_destination is None:
-        print("Missing syslog server URL. Try: '--dest https://syslog.example.com'.")
+    if args.c42_destination_type == "server" and args.c42_destination is None:
+        print("Missing server URL. Try: '--dest https://syslog.example.com'.")
         exit(1)
 
 
@@ -194,26 +194,28 @@ def _create_handlers(args):
         formatter=logger_formatter,
         destination=args.c42_destination,
         destination_type=args.c42_destination_type,
-        syslog_port=int(args.c42_syslog_port),
-        syslog_protocol=args.c42_syslog_protocol,
+        destination_port=int(args.c42_destination_port),
+        destination_protocol=args.c42_destination_protocol,
     )
     handlers.handle_response = _get_response_handler(logger)
     return handlers
 
 
-def _get_logger(formatter, destination, destination_type, syslog_port=514, syslog_protocol="TCP"):
+def _get_logger(
+    formatter, destination, destination_type, destination_port=514, destination_protocol="TCP"
+):
     try:
         return get_logger(
             formatter=formatter,
             destination=destination,
             destination_type=destination_type,
-            syslog_port=syslog_port,
-            syslog_protocol=syslog_protocol,
+            destination_port=destination_port,
+            destination_protocol=destination_protocol,
         )
     except (AttributeError, gaierror):
         print(
-            "Error with provided syslog arguments: hostname={0}, port={1}, protocol={2}.".format(
-                destination, syslog_port, syslog_protocol
+            "Error with provided server destination arguments: hostname={0}, port={1}, protocol={2}.".format(
+                destination, destination_port, destination_protocol
             )
         )
         exit(1)

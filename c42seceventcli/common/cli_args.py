@@ -138,7 +138,7 @@ def add_destination_type_arg(arg_group):
         "--dest-type",
         action="store",
         dest="c42_destination_type",
-        choices=["stdout", "file", "syslog"],
+        choices=["stdout", "file", "server"],
         help="The type of destination to send output to.",
     )
 
@@ -152,20 +152,20 @@ def add_destination_arg(arg_group):
     )
 
 
-def add_syslog_port_arg(arg_group):
+def add_port_arg(arg_group):
     arg_group.add_argument(
         "--syslog-port",
         action="store",
-        dest="c42_syslog_port",
+        dest="c42_destination_port",
         help="Port used on syslog destination. Ignored if destination type is not syslog.",
     )
 
 
-def add_syslog_protocol_arg(arg_group):
+def add_protocol_arg(arg_group):
     arg_group.add_argument(
         "--syslog-protocol",
         action="store",
-        dest="c42_syslog_protocol",
+        dest="c42_destination_protocol",
         choices=["TCP", "UDP"],
         help="Protocol used to send logs to syslog server. Ignored if destination type is not syslog.",
     )
