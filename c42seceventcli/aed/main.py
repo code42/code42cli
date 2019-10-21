@@ -255,8 +255,10 @@ def _get_password(username):
 
 def _verify_destination_args(args):
     if args.c42_destination_type == "stdout" and args.c42_destination is not None:
-        msg = "Destination '{0}' not applicable for stdout. " \
-              "Try removing '--dest' arg or change '--dest-type' to 'file' or 'syslog'."
+        msg = (
+            "Destination '{0}' not applicable for stdout. "
+            "Try removing '--dest' arg or change '--dest-type' to 'file' or 'syslog'."
+        )
         msg = msg.format(args.c42_destination)
         print(msg)
         exit(1)
