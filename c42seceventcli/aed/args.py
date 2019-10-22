@@ -48,7 +48,7 @@ def _get_arg_parser():
     add_destination_port_arg(parser)
     add_destination_protocol_arg(parser)
 
-    # Makes sure that you can't give both an end_timestamp and record cursor positions
+    # Makes sure that you can't give both an end_timestamp and record_cursor
     mutually_exclusive_timestamp_group = parser.add_mutually_exclusive_group()
     add_end_date_arg(mutually_exclusive_timestamp_group)
     add_record_cursor_arg(mutually_exclusive_timestamp_group)
