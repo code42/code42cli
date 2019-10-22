@@ -1,5 +1,4 @@
 import sqlite3
-from os import path
 from c42seceventcli.common.common import get_user_project_path
 
 

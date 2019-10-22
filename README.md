@@ -184,7 +184,6 @@ optional arguments:
                         in YYYY-MM-DD UTC format OR a number (number of
                         minutes ago).
   -r, --record-cursor   Only get events that were not previously retrieved.
-
 ```
 
 # Known Issues
