@@ -7,7 +7,7 @@ class TestSecurityEventCursorStore(object):
         self, sqlite_connection
     ):
         home_dir = path.expanduser("~")
-        expected_path = path.join(home_dir, ".c42seceventcli")
+        expected_path = path.join(home_dir, ".c42seceventcli/db")
         expected_db_name = "TEST"
         expected_db_file_path = "{0}/{1}.db".format(expected_path, expected_db_name)
         SecurityEventCursorStore(expected_db_name)

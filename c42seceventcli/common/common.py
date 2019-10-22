@@ -1,5 +1,5 @@
 import sys
-from os import path
+from os import path, makedirs
 import keyring
 from keyring.errors import PasswordDeleteError
 from datetime import datetime, timedelta
@@ -11,13 +11,16 @@ from c42secevents.logging.handlers import NoPrioritySysLogHandler
 from c42secevents.common import convert_datetime_to_timestamp
 
 
-def get_project_path():
+def get_user_project_path(subdir=None):
+    """The path on the system user directory to the directory .c42seceventcli"""
     package_name = __name__.split(".")[0]
-    path_to_this_file = path.realpath(__file__)
-    last_pos = path_to_this_file.rfind(package_name)
-    ending_pos = last_pos + len(package_name)
-    desired_dir_name = path_to_this_file[0:ending_pos]
-    return desired_dir_name
+    home = path.expanduser("~")
+    user_project_path = path.join(home, ".{0}".format(package_name), subdir)
+
+    if not path.exists(user_project_path):
+        makedirs(user_project_path)
+
+    return user_project_path
 
 
 def get_input(prompt):
@@ -58,8 +61,8 @@ def parse_timestamp(input_string):
 
 
 def get_error_logger():
-    save_path = get_project_path()
-    log_path = "{0}/c42seceventcli_errors.log".format(save_path)
+    log_path = get_user_project_path("log")
+    log_path = "{0}/c42seceventcli_errors.log".format(log_path)
     logger = getLogger("Code42_SecEventCli_Error_Logger")
     formatter = Formatter("%(asctime)s %(message)s")
     handler = RotatingFileHandler(log_path, maxBytes=250000000)
