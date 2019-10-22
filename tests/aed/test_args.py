@@ -55,7 +55,7 @@ def mock_config_args():
 
 @pytest.fixture
 def mock_config_arg_parser(mocker, mock_config_args):
-    mock_parser = mocker.patch("c42seceventcli.aed.args.get_config_args")
+    mock_parser = mocker.patch("c42seceventcli.common.common.get_config_args")
     mock_parser.return_value = mock_config_args
     return mock_parser
 

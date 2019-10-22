@@ -19,8 +19,7 @@ from c42seceventcli.common.cli_args import (
     add_destination_port_arg,
     add_destination_protocol_arg,
 )
-
-from c42seceventcli.common.common import get_config_args
+import c42seceventcli.common.common as common
 
 
 def get_args():
@@ -69,7 +68,7 @@ def _union_cli_args_with_config_file_args(cli_args):
 
 def _get_config_args(config_file_path):
     try:
-        return get_config_args(config_file_path)
+        return common.get_config_args(config_file_path)
     except IOError:
         print("Path to config file {0} not found".format(config_file_path))
         exit(1)
