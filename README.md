@@ -137,55 +137,54 @@ pip show c42seceventcli
 Full usage:
 
 ```
-usage: c42aed [-e C42_END_DATE | -r] [--clear-cursor] [--reset-password]
-              [-c C42_CONFIG_FILE] [-s C42_AUTHORITY_URL] [-u C42_USERNAME]
-              [-h] [-b C42_BEGIN_DATE] [-i] [-o {CEF,JSON}]
+usage: c42aed [-h] [--clear-cursor] [--reset-password] [-c CONFIG_FILE]
+              [-s C42_AUTHORITY_URL] [-u C42_USERNAME] [-b BEGIN_DATE] [-i]
+              [-o {CEF,JSON}]
               [-t [{SharedViaLink,SharedToDomain,ApplicationRead,CloudStorage,RemovableMedia,IsPublic} [{SharedViaLink,SharedToDomain,ApplicationRead,CloudStorage,RemovableMedia,IsPublic} ...]]]
               [-d--debug] [--dest-type {stdout,file,server}]
-              [--dest C42_DESTINATION] [--dest-port C42_DESTINATION_PORT]
-              [--dest-protocol {TCP,UDP}]
+              [--dest DESTINATION] [--dest-port DESTINATION_PORT]
+              [--dest-protocol {TCP,UDP}] [-e END_DATE | -r]
 
 optional arguments:
-  -e C42_END_DATE, --end C42_END_DATE
-                        The end of the date range in which to look for events,
-                        in YYYY-MM-DD UTC format OR a number (number of
-                        minutes ago).
-  -r, --record-cursor   To only get events that were not previously retrieved.
-
-main:
+  -h, --help            show this help message and exit
   --clear-cursor        Resets the stored cursor.
   --reset-password      Clears stored password and prompts user for password.
-  -c C42_CONFIG_FILE, --config-file C42_CONFIG_FILE
+  -c CONFIG_FILE, --config-file CONFIG_FILE
                         The path to the config file to use for the rest of the
                         arguments.
   -s C42_AUTHORITY_URL, --server C42_AUTHORITY_URL
                         The full scheme, url and port of the Code42 server.
   -u C42_USERNAME, --username C42_USERNAME
                         The username of the Code42 API user.
-  -h, --help            Show this help message and exit.
-  -b C42_BEGIN_DATE, --begin C42_BEGIN_DATE
+  -b BEGIN_DATE, --begin BEGIN_DATE
                         The beginning of the date range in which to look for
                         events, in YYYY-MM-DD UTC format OR a number (number
                         of minutes ago).
   -i, --ignore-ssl-errors
-                        Set to ignore ssl errors.
+                        Do not validate the SSL certificates of Code42
+                        servers.
   -o {CEF,JSON}, --output-format {CEF,JSON}
                         The format used for outputting events.
   -t [{SharedViaLink,SharedToDomain,ApplicationRead,CloudStorage,RemovableMedia,IsPublic} [{SharedViaLink,SharedToDomain,ApplicationRead,CloudStorage,RemovableMedia,IsPublic} ...]], --types [{SharedViaLink,SharedToDomain,ApplicationRead,CloudStorage,RemovableMedia,IsPublic} [{SharedViaLink,SharedToDomain,ApplicationRead,CloudStorage,RemovableMedia,IsPublic} ...]]
                         To limit extracted events to those with given exposure
                         types.
-  -d--debug             Set to turn on debug logging.
+  -d--debug             Turn on debug logging.
   --dest-type {stdout,file,server}
                         The type of destination to send output to.
-  --dest C42_DESTINATION
-                        Either a name of a local file or syslog host address.
+  --dest DESTINATION    Either a name of a local file or syslog host address.
                         Ignored if destination type is 'stdout'.
-  --dest-port C42_DESTINATION_PORT
+  --dest-port DESTINATION_PORT
                         Port used when sending logs to server. Ignored if
                         destination type is not 'server'.
   --dest-protocol {TCP,UDP}
                         Protocol used to send logs to server. Ignored if
                         destination type is not 'server'.
+  -e END_DATE, --end END_DATE
+                        The end of the date range in which to look for events,
+                        in YYYY-MM-DD UTC format OR a number (number of
+                        minutes ago).
+  -r, --record-cursor   Only get events that were not previously retrieved.
+
 ```
 
 # Known Issues
