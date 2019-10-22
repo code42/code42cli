@@ -12,7 +12,7 @@ from c42secevents.common import convert_datetime_to_timestamp
 
 
 def get_user_project_path(subdir=None):
-    """The path on the system user directory to the directory .c42seceventcli"""
+    """The path /Users/[user]/.c42seceventcli/[subdir]"""
     package_name = __name__.split(".")[0]
     home = path.expanduser("~")
     user_project_path = path.join(home, ".{0}".format(package_name), subdir)
