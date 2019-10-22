@@ -130,4 +130,3 @@ def _verify_destination_args(args):
     if args.destination_type == "server" and args.destination is None:
         msg = "Missing server URL. Try: '--dest https://syslog.example.com'."
         raise AttributeError(msg)
-
