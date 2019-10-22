@@ -2,7 +2,6 @@ import json
 from socket import gaierror
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
-from argparse import ArgumentParser
 from datetime import datetime, timedelta
 from keyring import get_password, set_password, delete_password
 from keyring.errors import PasswordDeleteError
@@ -15,52 +14,25 @@ from c42secevents.extractors import AEDEventExtractor
 from c42secevents.common import FileEventHandlers, convert_datetime_to_timestamp
 from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
 
-from c42seceventcli.common.common import (
-    get_config_args,
-    parse_timestamp,
-    get_logger,
-    get_error_logger,
-    get_input,
-)
+from c42seceventcli.common.common import parse_timestamp, get_logger, get_error_logger, get_input
 from c42seceventcli.aed.cursor_store import AEDCursorStore
-from c42seceventcli.common.cli_args import (
-    add_clear_cursor_arg,
-    add_reset_password_arg,
-    add_config_file_path_arg,
-    add_authority_host_address_arg,
-    add_username_arg,
-    add_begin_date_arg,
-    add_end_date_arg,
-    add_ignore_ssl_errors_arg,
-    add_output_format_arg,
-    add_record_cursor_arg,
-    add_exposure_types_arg,
-    add_debug_arg,
-    add_destination_type_arg,
-    add_destination_arg,
-    add_destination_port_arg,
-    add_destination_protocol_arg,
-    add_help_arg,
-)
+from c42seceventcli.aed.args import get_args
 
 _SERVICE_NAME_FOR_KEYCHAIN = u"c42seceventcli"
 
 
 def main():
-    parser = _get_arg_parser()
-    cli_args = vars(parser.parse_args())
-    args = _union_cli_args_with_config_file_args(cli_args)
+    args = get_args()
+    _verify_destination_args(args)
 
-    if cli_args.get("reset_password"):
+    if args.reset_password:
         _delete_stored_password(args.c42_username)
 
     handlers = _create_handlers(args)
     _set_up_cursor_store(
-        record_cursor=args.record_cursor,
-        clear_cursor=cli_args.get("clear_cursor"),
-        handlers=handlers,
+        record_cursor=args.record_cursor, clear_cursor=args.clear_cursor, handlers=handlers
     )
-    sdk = _create_sdk_from_args(args, handlers, parser)
+    sdk = _create_sdk_from_args(args, handlers)
 
     if bool(args.ignore_ssl_errors):
         _ignore_ssl_errors()
@@ -69,89 +41,6 @@ def main():
         settings.debug_level = debug_level.DEBUG
 
     _extract(args=args, sdk=sdk, handlers=handlers)
-
-
-def _get_arg_parser():
-    parser = ArgumentParser(add_help=False)
-
-    main_args = parser.add_argument_group("main")
-    add_clear_cursor_arg(main_args)
-    add_reset_password_arg(main_args)
-    add_config_file_path_arg(main_args)
-    add_authority_host_address_arg(main_args)
-    add_username_arg(main_args)
-    add_help_arg(main_args)
-    add_begin_date_arg(main_args)
-    add_ignore_ssl_errors_arg(main_args)
-    add_output_format_arg(main_args)
-    add_exposure_types_arg(main_args)
-    add_debug_arg(main_args)
-    add_destination_type_arg(main_args)
-    add_destination_arg(main_args)
-    add_destination_port_arg(main_args)
-    add_destination_protocol_arg(main_args)
-
-    # Makes sure that you can't give both an end_timestamp and record cursor positions
-    mutually_exclusive_timestamp_group = parser.add_mutually_exclusive_group()
-    add_end_date_arg(mutually_exclusive_timestamp_group)
-    add_record_cursor_arg(mutually_exclusive_timestamp_group)
-
-    return parser
-
-
-def _union_cli_args_with_config_file_args(cli_args):
-    config_args = _get_config_args(cli_args.get("config_file"))
-    args = AEDArgs()
-    keys = cli_args.keys()
-    for key in keys:
-        args.try_set(key, cli_args.get(key), config_args.get(key))
-
-    _verify_destination_args(args)
-    return args
-
-
-def _get_config_args(config_file_path):
-    try:
-        return get_config_args(config_file_path)
-    except IOError:
-        print("Path to config file {0} not found".format(config_file_path))
-        exit(1)
-
-
-class AEDArgs(object):
-    c42_authority_url = None
-    c42_username = None
-    begin_date = None
-    end_date = None
-    ignore_ssl_errors = False
-    output_format = "JSON"
-    record_cursor = False
-    exposure_types = None
-    debug_mode = False
-    destination_type = "stdout"
-    destination = None
-    destination_port = 514
-    destination_protocol = "TCP"
-
-    def __init__(self):
-        self.begin_date = AEDArgs._get_default_begin_date()
-        self.end_date = AEDArgs._get_default_end_date()
-
-    def try_set(self, arg_name, cli_arg=None, config_arg=None):
-        if cli_arg is not None:
-            setattr(self, arg_name, cli_arg)
-        elif config_arg is not None:
-            setattr(self, arg_name, config_arg)
-
-    @staticmethod
-    def _get_default_begin_date():
-        default_begin_date = datetime.now() - timedelta(days=60)
-        return default_begin_date.strftime("%Y-%m-%d")
-
-    @staticmethod
-    def _get_default_end_date():
-        default_end_date = datetime.now()
-        return default_end_date.strftime("%Y-%m-%d")
 
 
 def _verify_destination_args(args):
@@ -260,9 +149,9 @@ def _get_response_handler(logger):
     return handle_response
 
 
-def _create_sdk_from_args(args, handlers, parser):
-    server = _get_server_from_args(args, parser)
-    username = _get_username_from_args(args, parser)
+def _create_sdk_from_args(args, handlers):
+    server = _get_server_from_args(args)
+    username = _get_username_from_args(args)
     password = _get_password(username)
     try:
         sdk = SDK.create_using_local_account(
@@ -275,18 +164,18 @@ def _create_sdk_from_args(args, handlers, parser):
         exit(1)
 
 
-def _get_server_from_args(args, parser):
+def _get_server_from_args(args):
     server = args.c42_authority_url
     if server is None:
-        _exit_from_argument_error("Host address not provided.", parser)
+        _exit_from_argument_error("Host address not provided.", args.cli_parser)
 
     return server
 
 
-def _get_username_from_args(args, parser):
+def _get_username_from_args(args):
     username = args.c42_username
     if username is None:
-        _exit_from_argument_error("Username not provided.", parser)
+        _exit_from_argument_error("Username not provided.", args.cli_parser)
 
     return username
 

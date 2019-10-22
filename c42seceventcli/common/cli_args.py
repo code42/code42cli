@@ -125,10 +125,7 @@ def add_exposure_types_arg(arg_group):
 
 def add_debug_arg(arg_group):
     arg_group.add_argument(
-        "-d" "--debug",
-        action="store_true",
-        dest="debug_mode",
-        help="Turn on debug logging.",
+        "-d" "--debug", action="store_true", dest="debug_mode", help="Turn on debug logging."
     )
 
 
