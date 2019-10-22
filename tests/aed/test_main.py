@@ -1,5 +1,4 @@
 import pytest
-from argparse import Namespace
 from datetime import datetime, timedelta
 
 from py42 import settings
@@ -82,7 +81,7 @@ def mock_get_input(mocker):
 
 @pytest.fixture
 def mock_get_password_function(mocker):
-    mock = mocker.patch("c42seceventcli.aed.main.get_password")
+    mock = mocker.patch("keyring.get_password")
     mock.get_password.return_value = "PASSWORD"
     return mock
 
@@ -118,14 +117,14 @@ def test_main_when_reset_password_is_true_calls_delete_password(mocker, patches)
     expected_username = "Bob"
     patches.aed_args.c42_username = expected_username
     patches.aed_args.reset_password = True
-    password_remover = mocker.patch("c42seceventcli.aed.main.delete_password")
+    password_remover = mocker.patch("keyring.delete_password")
     main.main()
     password_remover.assert_called_once_with(u"c42seceventcli", expected_username)
 
 
 def test_main_when_reset_password_is_false_does_not_call_delete_password(mocker, patches):
     patches.aed_args.reset_password = False
-    password_remover = mocker.patch("c42seceventcli.aed.main.delete_password")
+    password_remover = mocker.patch("keyring.delete_password")
     main.main()
     assert not password_remover.call_count
 
@@ -241,7 +240,7 @@ def test_main_when_get_password_returns_none_and_get_input_returns_y_calls_set_p
     patches.get_password.return_value = None
     patches.input.return_value = "y"
     patches.getpass.return_value = expected_password
-    mock_set_password = mocker.patch("c42seceventcli.aed.main.set_password")
+    mock_set_password = mocker.patch("keyring.set_password")
     main.main()
     mock_set_password.assert_called_once_with(
         u"c42seceventcli", expected_username, expected_password
@@ -257,7 +256,7 @@ def test_main_when_get_password_returns_none_and_get_input_returns_n_does_not_ca
     patches.get_password.return_value = None
     patches.input.return_value = "n"
     patches.getpass.return_value = expected_password
-    mock_set_password = mocker.patch("c42seceventcli.aed.main.set_password")
+    mock_set_password = mocker.patch("keyring.set_password")
     main.main()
     assert not mock_set_password.call_count
 

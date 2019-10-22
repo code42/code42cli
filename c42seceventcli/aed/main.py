@@ -1,10 +1,10 @@
 import json
+import keyring
+from keyring.errors import PasswordDeleteError
 from socket import gaierror
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 from datetime import datetime, timedelta
-from keyring import get_password, set_password, delete_password
-from keyring.errors import PasswordDeleteError
 from getpass import getpass
 
 from py42 import debug_level
@@ -64,7 +64,7 @@ def _verify_destination_args(args):
 
 def _delete_stored_password(username):
     try:
-        delete_password(_SERVICE_NAME_FOR_KEYCHAIN, username)
+        keyring.delete_password(_SERVICE_NAME_FOR_KEYCHAIN, username)
     except PasswordDeleteError:
         return
 
@@ -187,13 +187,13 @@ def _exit_from_argument_error(message, parser):
 
 
 def _get_password(username):
-    password = get_password(_SERVICE_NAME_FOR_KEYCHAIN, username)
+    password = keyring.get_password(_SERVICE_NAME_FOR_KEYCHAIN, username)
     if password is None:
         try:
             password = getpass(prompt="Code42 password: ")
             save_password = get_input("Save password to keychain? (y/n): ")
             if save_password.lower()[0] == "y":
-                set_password(_SERVICE_NAME_FOR_KEYCHAIN, username, password)
+                keyring.set_password(_SERVICE_NAME_FOR_KEYCHAIN, username, password)
 
         except KeyboardInterrupt:
             print()
