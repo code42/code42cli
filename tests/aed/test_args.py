@@ -109,3 +109,24 @@ def test_get_args_favors_cli_username_over_config_username(patches):
     patches.config_args["c42_username"] = "SecondUser"
     args = get_args()
     assert args.c42_username == expected_user
+
+
+def test_verify_destination_args_when_destination_is_not_none_and_destination_type_is_stdout_causes_exit(patches):
+    patches.cli_args.destination_type = "stdout"
+    patches.cli_args.destination = "Delaware"
+    with pytest.raises(AttributeError):
+        get_args()
+
+
+def test_verify_destination_args_when_destination_is_none_and_destination_type_is_server_causes_exit(patches):
+    patches.cli_args.destination_type = "server"
+    patches.cli_args.destination = None
+    with pytest.raises(AttributeError):
+        get_args()
+
+
+def test_verify_destination_args_when_destination_is_none_and_destination_type_is_file_causes_exit(patches):
+    patches.cli_args.destination_type = "file"
+    patches.cli_args.destination = None
+    with pytest.raises(AttributeError):
+        get_args()

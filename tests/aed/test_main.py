@@ -18,6 +18,7 @@ def patches(
     mock_store,
     mock_42,
     mock_args,
+    mock_args_getter,
     mock_get_password_function,
     mock_logger,
     mock_error_logger,
@@ -30,6 +31,7 @@ def patches(
     mock.store = mock_store
     mock.py42 = mock_42
     mock.aed_args = mock_args
+    mock.args_getter = mock_args_getter
     mock.get_password = mock_get_password_function
     mock.logger = mock_logger
     mock.error_logger = mock_error_logger
@@ -65,13 +67,17 @@ def mock_42(mocker):
 
 
 @pytest.fixture
-def mock_args(mocker):
+def mock_args(mock_args_getter):
     args = AEDArgs()
     args.c42_authority_url = "https://example.com"
     args.c42_username = "test.testerson@example.com"
-    mock_arg_getter = mocker.patch("c42seceventcli.aed.args.get_args")
-    mock_arg_getter.return_value = args
+    mock_args_getter.return_value = args
     return args
+
+
+@pytest.fixture
+def mock_args_getter(mocker):
+    return mocker.patch("c42seceventcli.aed.args.get_args")
 
 
 @pytest.fixture
@@ -99,6 +105,12 @@ def mock_error_logger(mocker):
 @pytest.fixture
 def mock_getpass_function(mocker):
     return mocker.patch("getpass.getpass")
+
+
+def test_main_when_get_args_raises_attribute_error_causes_system_exit(patches):
+    patches.args_getter.side_effect = AttributeError
+    with pytest.raises(SystemExit):
+        main.main()
 
 
 def test_main_when_ignore_ssl_errors_is_true_that_py42_settings_verify_ssl_certs_is_false(patches):
@@ -165,27 +177,6 @@ def test_main_uses_max_timestamp_from_now(patches):
     expected = (datetime.now() - datetime.utcfromtimestamp(0)).total_seconds()
     actual = patches.aed_extractor.call_args[0][1]
     assert pytest.approx(expected, actual)
-
-
-def test_main_when_destination_is_not_none_and_destination_type_is_stdout_causes_exit(patches):
-    patches.aed_args.destination_type = "stdout"
-    patches.aed_args.destination = "Delaware"
-    with pytest.raises(SystemExit):
-        main.main()
-
-
-def test_main_when_destination_is_none_and_destination_type_is_server_causes_exit(patches):
-    patches.aed_args.destination_type = "server"
-    patches.aed_args.destination = None
-    with pytest.raises(SystemExit):
-        main.main()
-
-
-def test_main_when_destination_is_none_and_destination_type_is_file_causes_exit(patches):
-    patches.aed_args.destination_type = "file"
-    patches.aed_args.destination = None
-    with pytest.raises(SystemExit):
-        main.main()
 
 
 def test_main_when_create_sdk_raises_exception_causes_exit(patches):

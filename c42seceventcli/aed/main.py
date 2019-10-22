@@ -21,8 +21,7 @@ _SERVICE_NAME_FOR_KEYCHAIN = u"c42seceventcli"
 
 
 def main():
-    args = aed_args.get_args()
-    _verify_destination_args(args)
+    args = _get_args()
 
     if args.reset_password:
         common.delete_stored_password(_SERVICE_NAME_FOR_KEYCHAIN, args.c42_username)
@@ -42,22 +41,11 @@ def main():
     _extract(args=args, sdk=sdk, handlers=handlers)
 
 
-def _verify_destination_args(args):
-    if args.destination_type == "stdout" and args.destination is not None:
-        msg = (
-            "Destination '{0}' not applicable for stdout. "
-            "Try removing '--dest' arg or change '--dest-type' to 'file' or 'server'."
-        )
-        msg = msg.format(args.destination)
-        print(msg)
-        exit(1)
-
-    if args.destination_type == "file" and args.destination is None:
-        print("Missing file name. Try: '--dest path/to/file'.")
-        exit(1)
-
-    if args.destination_type == "server" and args.destination is None:
-        print("Missing server URL. Try: '--dest https://syslog.example.com'.")
+def _get_args():
+    try:
+        return aed_args.get_args()
+    except AttributeError as ex:
+        print(repr(ex))
         exit(1)
 
 

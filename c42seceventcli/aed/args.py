@@ -27,6 +27,7 @@ def get_args():
     cli_args = vars(parser.parse_args())
     args = _union_cli_args_with_config_file_args(cli_args)
     args.cli_parser = parser
+    _verify_destination_args(args)
     return args
 
 
@@ -111,3 +112,22 @@ class AEDArgs(object):
     def _get_default_end_date():
         default_end_date = datetime.now()
         return default_end_date.strftime("%Y-%m-%d")
+
+
+def _verify_destination_args(args):
+    if args.destination_type == "stdout" and args.destination is not None:
+        msg = (
+            "Destination '{0}' not applicable for stdout. "
+            "Try removing '--dest' arg or change '--dest-type' to 'file' or 'server'."
+        )
+        msg = msg.format(args.destination)
+        raise AttributeError(msg)
+
+    if args.destination_type == "file" and args.destination is None:
+        msg = "Missing file name. Try: '--dest path/to/file'."
+        raise AttributeError(msg)
+
+    if args.destination_type == "server" and args.destination is None:
+        msg = "Missing server URL. Try: '--dest https://syslog.example.com'."
+        raise AttributeError(msg)
+
