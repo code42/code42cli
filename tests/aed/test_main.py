@@ -98,7 +98,7 @@ def mock_error_logger(mocker):
 
 @pytest.fixture
 def mock_getpass_function(mocker):
-    return mocker.patch("c42seceventcli.aed.main.getpass")
+    return mocker.patch("getpass.getpass")
 
 
 def test_main_when_ignore_ssl_errors_is_true_that_py42_settings_verify_ssl_certs_is_false(patches):

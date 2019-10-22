@@ -1,11 +1,11 @@
 import json
 import keyring
+import getpass
 from keyring.errors import PasswordDeleteError
 from socket import gaierror
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 from datetime import datetime, timedelta
-from getpass import getpass
 
 from py42 import debug_level
 from py42 import settings
@@ -190,7 +190,7 @@ def _get_password(username):
     password = keyring.get_password(_SERVICE_NAME_FOR_KEYCHAIN, username)
     if password is None:
         try:
-            password = getpass(prompt="Code42 password: ")
+            password = getpass.getpass(prompt="Code42 password: ")
             save_password = get_input("Save password to keychain? (y/n): ")
             if save_password.lower()[0] == "y":
                 keyring.set_password(_SERVICE_NAME_FOR_KEYCHAIN, username, password)
