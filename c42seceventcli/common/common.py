@@ -19,7 +19,10 @@ def get_project_path():
 
 
 def get_input(prompt):
-    return input(prompt)
+    if sys.version_info >= (3, 0):
+        return input(prompt)
+    else:
+        return raw_input(prompt)
 
 
 def get_config_args(config_file_path):
