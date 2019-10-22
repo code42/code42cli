@@ -62,7 +62,7 @@ def parse_timestamp(input_string):
 
 def get_error_logger():
     log_path = get_user_project_path("log")
-    log_path = "{0}/c42seceventcli_errors.log".format(log_path)
+    log_path = "{0}/c42seceventcli_aed_errors.log".format(log_path)
     logger = getLogger("Code42_SecEventCli_Error_Logger")
     formatter = Formatter("%(asctime)s %(message)s")
     handler = RotatingFileHandler(log_path, maxBytes=250000000)
