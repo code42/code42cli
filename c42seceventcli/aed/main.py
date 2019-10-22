@@ -14,15 +14,15 @@ from c42secevents.extractors import AEDEventExtractor
 from c42secevents.common import FileEventHandlers, convert_datetime_to_timestamp
 from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
 
-from c42seceventcli.common.common import parse_timestamp, get_logger, get_error_logger, get_input
+import c42seceventcli.common.common as common
+import c42seceventcli.aed.args as aed_args
 from c42seceventcli.aed.cursor_store import AEDCursorStore
-from c42seceventcli.aed.args import get_args
 
 _SERVICE_NAME_FOR_KEYCHAIN = u"c42seceventcli"
 
 
 def main():
-    args = get_args()
+    args = aed_args.get_args()
     _verify_destination_args(args)
 
     if args.reset_password:
@@ -76,7 +76,7 @@ def _ignore_ssl_errors():
 
 def _create_handlers(args):
     handlers = FileEventHandlers()
-    error_logger = get_error_logger()
+    error_logger = common.get_error_logger()
     settings.global_exception_message_receiver = error_logger.error
     handlers.handle_error = error_logger.error
     output_format = args.output_format
@@ -96,7 +96,7 @@ def _get_logger(
     formatter, destination, destination_type, destination_port=514, destination_protocol="TCP"
 ):
     try:
-        return get_logger(
+        return common.get_logger(
             formatter=formatter,
             destination=destination,
             destination_type=destination_type,
@@ -191,7 +191,7 @@ def _get_password(username):
     if password is None:
         try:
             password = getpass.getpass(prompt="Code42 password: ")
-            save_password = get_input("Save password to keychain? (y/n): ")
+            save_password = common.get_input("Save password to keychain? (y/n): ")
             if save_password.lower()[0] == "y":
                 keyring.set_password(_SERVICE_NAME_FOR_KEYCHAIN, username, password)
 
@@ -204,13 +204,13 @@ def _get_password(username):
 
 def _extract(args, sdk, handlers):
     min_timestamp = _parse_min_timestamp(args.begin_date)
-    max_timestamp = parse_timestamp(args.end_date)
+    max_timestamp = common.parse_timestamp(args.end_date)
     extractor = AEDEventExtractor(sdk, handlers)
     extractor.extract(min_timestamp, max_timestamp, args.exposure_types)
 
 
 def _parse_min_timestamp(begin_date):
-    min_timestamp = parse_timestamp(begin_date)
+    min_timestamp = common.parse_timestamp(begin_date)
     boundary_date = datetime.utcnow() - timedelta(days=90)
     boundary = convert_datetime_to_timestamp(boundary_date)
     if min_timestamp < boundary:

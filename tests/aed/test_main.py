@@ -69,14 +69,14 @@ def mock_args(mocker):
     args = AEDArgs()
     args.c42_authority_url = "https://example.com"
     args.c42_username = "test.testerson@example.com"
-    mock_arg_getter = mocker.patch("c42seceventcli.aed.main.get_args")
+    mock_arg_getter = mocker.patch("c42seceventcli.aed.args.get_args")
     mock_arg_getter.return_value = args
     return args
 
 
 @pytest.fixture
 def mock_get_input(mocker):
-    return mocker.patch("c42seceventcli.aed.main.get_input")
+    return mocker.patch("c42seceventcli.common.common.get_input")
 
 
 @pytest.fixture
@@ -88,12 +88,12 @@ def mock_get_password_function(mocker):
 
 @pytest.fixture
 def mock_logger(mocker):
-    return mocker.patch("c42seceventcli.aed.main.get_logger")
+    return mocker.patch("c42seceventcli.common.common.get_logger")
 
 
 @pytest.fixture
 def mock_error_logger(mocker):
-    return mocker.patch("c42seceventcli.aed.main.get_error_logger")
+    return mocker.patch("c42seceventcli.common.common.get_error_logger")
 
 
 @pytest.fixture
