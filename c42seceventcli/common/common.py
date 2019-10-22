@@ -1,5 +1,7 @@
 import sys
 from os import path
+import keyring
+from keyring.errors import PasswordDeleteError
 from datetime import datetime, timedelta
 from configparser import ConfigParser
 from logging import StreamHandler, FileHandler, getLogger, INFO, Formatter
@@ -94,3 +96,10 @@ def _get_log_handler(
         )
     elif destination_type == "file":
         return FileHandler(filename=destination)
+
+
+def delete_stored_password(service_name, username):
+    try:
+        keyring.delete_password(service_name, username)
+    except PasswordDeleteError:
+        return

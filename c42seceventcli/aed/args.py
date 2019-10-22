@@ -18,7 +18,6 @@ from c42seceventcli.common.cli_args import (
     add_destination_arg,
     add_destination_port_arg,
     add_destination_protocol_arg,
-    add_help_arg,
 )
 
 from c42seceventcli.common.common import get_config_args

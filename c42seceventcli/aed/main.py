@@ -1,7 +1,6 @@
 import json
-import keyring
 import getpass
-from keyring.errors import PasswordDeleteError
+import keyring
 from socket import gaierror
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
@@ -26,7 +25,7 @@ def main():
     _verify_destination_args(args)
 
     if args.reset_password:
-        _delete_stored_password(args.c42_username)
+        common.delete_stored_password(_SERVICE_NAME_FOR_KEYCHAIN, args.c42_username)
 
     handlers = _create_handlers(args)
     _set_up_cursor_store(
@@ -60,13 +59,6 @@ def _verify_destination_args(args):
     if args.destination_type == "server" and args.destination is None:
         print("Missing server URL. Try: '--dest https://syslog.example.com'.")
         exit(1)
-
-
-def _delete_stored_password(username):
-    try:
-        keyring.delete_password(_SERVICE_NAME_FOR_KEYCHAIN, username)
-    except PasswordDeleteError:
-        return
 
 
 def _ignore_ssl_errors():
