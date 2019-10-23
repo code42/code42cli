@@ -14,14 +14,12 @@ def patches(mocker, mock_cli_arg_parser, mock_cli_args, mock_config_arg_parser, 
 
 @pytest.fixture
 def mock_cli_args():
-    args = Namespace()
-    args.c42_authority_url = None
-    return args
+    return Namespace()
 
 
 @pytest.fixture
 def mock_config_args():
-    return {"c42_authority_url": None}
+    return {}
 
 
 @pytest.fixture
