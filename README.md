@@ -1,7 +1,8 @@
 # c42seceventcli - AED
 
 The c42seceventcli AED module contains a CLI tool for extracting AED events as well as an optional state manager 
-for recording timestamps so that on future runs, you only extract events you did not previously extract.
+for recording timestamps. The state manager records timestamps so that on future runs,
+you only extract events you did not previously extract.
 
 ## Requirements
 
@@ -17,7 +18,7 @@ For py42 installation instructions, see its [README](https://stash.corp.code42.c
 `c42secevents` is available [here](https://confluence.corp.code42.com/display/LS/Security+Event+Extractor+-+Python).
 For `c42secevents` installation instructions, see its [README](https://stash.corp.code42.com/projects/INT/repos/security-event-extractor/browse/README.md).
 
-Once you've done that, install `c42seceventscli` using:
+Once you've done that, install `c42seceventcli` using:
 
 ```bash
 $ python setup.py install
@@ -31,9 +32,9 @@ A simple usage requires you to pass in your Code42 authority URL and username as
 c42aed -s https://example.authority.com -u security.admin@example.com
 ```
         
-Another option is to put your Code42 authority URL and username in a file named `config.cfg`. 
-Rename `config.default.cfg` to `config.cfg` and edit the fields to be your authority server URL and username.
-There are also other optional arguments in `config.default.cfg` that mirror CLI args.
+Another option is to put your Code42 authority URL and username (and other arguments) in a config file. 
+Use `default.config.cfg` as an example to make your own config file; it has all the supported arguments.
+The arguments in `default.config.cfg` mirror the CLI arguments.
 
 ```buildoutcfg
 [Code42]
@@ -47,20 +48,20 @@ Then, run the script as follows:
 c42aed -c path/to/config
 ```
 
-To use a the state management service, simply provide the `-r` to the command line.
+To use the state management service, simply provide the `-r` to the command line.
 `-r` is particularly useful if you wish to run this script on a recurring job:
 
 ```bash
 c42aed -s https://example.authority.com -u security.admin@example.com -r
 ```
 
-If you are using a config file with `-c`, set the `c42_record_cursor` arg in the config file to True:
+If you are using a config file with `-c`, set `record_cursor` to True:
 
 ```buildoutcfg
 [Code42]
 c42_authority_url=https://example.authority.com
 c42_username=user@code42.com
-c42_record_cursor=True
+record_cursor=True
 ```
 By excluding `-r`, future runs will not know about previous events you got, and 
 you will get all the events in the given time range (or default time range of 60 days back). 
@@ -87,14 +88,14 @@ Or if you are using a config file with `-c`:
 [Code42]
 c42_authority_url=https://example.authority.com
 c42_username=user@code42.com
-c42_output_format=CEF
+output_format=CEF
 ```
 
 There are three possible destination types to use:
 
 * stdout 
 * file - writing to a file
-* server - transmitting to a server, such as a syslog
+* server - transmitting to a server, such as syslog
 
 The program defaults to `stdout`. To use a file, use `--dest-type` and `--dest` this way:
 
@@ -108,9 +109,9 @@ To use a server destination (like syslog):
 c42aed -s https://example.authority.com -u security.admin@example.com --dest-type server --dest https://syslog.example.com
 ```
 
-Both `c42_destination_type` and `c42_destination` are possible fields in the config file as well.
+Both `destination_type` and `destination` are possible fields in the config file as well.
 
-You can also use CLI args with config-file args, but the program will favor the CLI args.
+You can also use CLI arguments with config file arguments, but the program will favor the CLI arguments.
 
 If this is your first time running, you will be prompted for your Code42 password.
 
@@ -120,15 +121,8 @@ If you get a keychain error when running this script, you may have to add a code
 codesign -f -s - $(which python)
 ```
 
-If you get an `OperationError: unable to open database file`, trying running again with `sudo` and entering you device password:
-
-```bash
-sudo c42aed -s https://example.authority.com -u security.admin@example.com
-``` 
-
-All errors are sent to an error log file named `c42seceventcli_errors.log` 
+All errors are sent to an error log file named `c42seceventcli_aed_errors.log` 
 located in your user directory under `.c42seceventcli/log`.
-
 
 Full usage:
 

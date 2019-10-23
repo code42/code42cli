@@ -217,7 +217,7 @@ def test_get_error_logger_uses_rotating_file_with_expected_args(mocker, mock_get
     mock_handler = mocker.patch("logging.handlers.RotatingFileHandler.__init__")
     mock_handler.return_value = None
     get_error_logger(expected_service_name)
-    expected_path = "{0}/{1}_error.log".format(get_user_project_path("log"), expected_service_name)
+    expected_path = "{0}/{1}_errors.log".format(get_user_project_path("log"), expected_service_name)
     mock_handler.assert_called_once_with(expected_path, maxBytes=250000000)
 
 
