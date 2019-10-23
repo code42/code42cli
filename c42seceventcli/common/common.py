@@ -57,7 +57,7 @@ def parse_timestamp(input_string):
 def get_error_logger(service_name):
     log_path = get_user_project_path("log")
     log_path = "{0}/{1}_errors.log".format(log_path, service_name)
-    logger = logging.getLogger("{0}_logger".format(service_name))
+    logger = logging.getLogger("{0}_error_logger".format(service_name))
     formatter = logging.Formatter("%(asctime)s %(message)s")
     handler = RotatingFileHandler(log_path, maxBytes=250000000)
     handler.setFormatter(formatter)
@@ -74,7 +74,7 @@ def get_logger(
     destination_protocol="TCP",
 ):
     destination_type = destination_type.lower()
-    logger = logging.getLogger(service_name)
+    logger = logging.getLogger("{0}_logger".format(service_name))
     handler = _get_log_handler(
         destination=destination,
         destination_type=destination_type,
