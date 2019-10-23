@@ -1,11 +1,11 @@
 import sys
 import keyring
 import getpass
+import logging
 from os import path, makedirs
 from keyring.errors import PasswordDeleteError
 from datetime import datetime, timedelta
 from configparser import ConfigParser
-from logging import StreamHandler, FileHandler, getLogger, INFO, Formatter
 from logging.handlers import RotatingFileHandler
 
 from c42secevents.logging.handlers import NoPrioritySysLogHandler
@@ -57,8 +57,8 @@ def parse_timestamp(input_string):
 def get_error_logger(service_name):
     log_path = get_user_project_path("log")
     log_path = "{0}/{1}_error.log".format(log_path, service_name)
-    logger = getLogger("Code42_SecEventCli_Error_Logger")
-    formatter = Formatter("%(asctime)s %(message)s")
+    logger = logging.getLogger("Code42_SecEventCli_Error_Logger")
+    formatter = logging.Formatter("%(asctime)s %(message)s")
     handler = RotatingFileHandler(log_path, maxBytes=250000000)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
@@ -66,10 +66,10 @@ def get_error_logger(service_name):
 
 
 def get_logger(
-    formatter, destination, destination_type, destination_port=514, destination_protocol="TCP"
+    formatter, service_name, destination, destination_type, destination_port=514, destination_protocol="TCP"
 ):
     destination_type = destination_type.lower()
-    logger = getLogger("Code42_SecEventCli_Logger")
+    logger = logging.getLogger(service_name)
     handler = _get_log_handler(
         destination=destination,
         destination_type=destination_type,
@@ -78,7 +78,7 @@ def get_logger(
     )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    logger.setLevel(INFO)
+    logger.setLevel(logging.INFO)
     return logger
 
 
@@ -86,13 +86,13 @@ def _get_log_handler(
     destination, destination_type, destination_port=514, destination_protocol="TCP"
 ):
     if destination_type == "stdout":
-        return StreamHandler(sys.stdout)
+        return logging.StreamHandler(sys.stdout)
     elif destination_type == "server":
         return NoPrioritySysLogHandler(
             hostname=destination, port=destination_port, protocol=destination_protocol
         )
     elif destination_type == "file":
-        return FileHandler(filename=destination)
+        return logging.FileHandler(filename=destination)
 
 
 def get_stored_password(service_name, username):

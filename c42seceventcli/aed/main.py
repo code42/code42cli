@@ -61,6 +61,7 @@ def _create_handlers(args):
     logger_formatter = _get_log_formatter(output_format)
     logger = _get_logger(
         formatter=logger_formatter,
+        service_name=_SERVICE_NAME,
         destination=args.destination,
         destination_type=args.destination_type,
         destination_port=int(args.destination_port),
@@ -71,11 +72,12 @@ def _create_handlers(args):
 
 
 def _get_logger(
-    formatter, destination, destination_type, destination_port=514, destination_protocol="TCP"
+    formatter, service_name, destination, destination_type, destination_port=514, destination_protocol="TCP"
 ):
     try:
         return common.get_logger(
             formatter=formatter,
+            service_name=service_name,
             destination=destination,
             destination_type=destination_type,
             destination_port=destination_port,

@@ -51,7 +51,7 @@ def mock_config_file_sections(mocker):
 
 @pytest.fixture
 def mock_get_logger(mocker):
-    return mocker.patch("c42seceventcli.common.common.getLogger")
+    return mocker.patch("logging.getLogger")
 
 
 @pytest.fixture
@@ -169,7 +169,8 @@ def test_get_error_logger_uses_rotating_file_with_expected_args(mocker, mock_get
 
 
 def test_get_logger_when_destination_type_is_stdout_adds_stream_handler_to_logger(mock_get_logger):
-    logger = get_logger(None, "Somewhere", "stdout")
+    service = "TEST_SERVICE"
+    logger = get_logger(None, service, "Somewhere", "stdout")
     actual = type(logger.addHandler.call_args[0][0])
     expected = StreamHandler
     assert actual == expected
@@ -178,7 +179,8 @@ def test_get_logger_when_destination_type_is_stdout_adds_stream_handler_to_logge
 def test_get_logger_when_destination_type_is_file_adds_file_handler_to_logger(
     mock_get_logger, mock_file_handler
 ):
-    logger = get_logger(None, "Somewhere", "file")
+    service = "TEST_SERVICE"
+    logger = get_logger(None, service, "Somewhere", "file")
     actual = type(logger.addHandler.call_args[0][0])
     expected = FileHandler
     assert actual == expected
@@ -187,7 +189,8 @@ def test_get_logger_when_destination_type_is_file_adds_file_handler_to_logger(
 def test_get_logger_when_destination_type_is_server_adds_no_priority_syslog_handler_to_logger(
     mock_get_logger, mock_no_priority_syslog_handler
 ):
-    logger = get_logger(None, "Somewhere", "server")
+    service = "TEST_SERVICE"
+    logger = get_logger(None, service, "Somewhere", "server")
     actual = type(logger.addHandler.call_args[0][0])
     expected = NoPrioritySysLogHandler
     assert actual == expected
