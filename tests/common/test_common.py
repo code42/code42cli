@@ -157,7 +157,7 @@ def test_get_user_project_path_calls_make_dirs_when_path_does_not_exist(path_pat
     path_patches.make_dirs.assert_called_once_with(expected_path)
 
 
-def test_get_user_project_path_does_not_call_make_durs_when_path_exists(path_patches):
+def test_get_user_project_path_does_not_call_make_dirs_when_path_exists(path_patches):
     expected_home = "/PATH/"
     expected_subdir = "SUBDIR"
     path_patches.expand_user.return_value = expected_home
