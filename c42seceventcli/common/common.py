@@ -66,7 +66,12 @@ def get_error_logger(service_name):
 
 
 def get_logger(
-    formatter, service_name, destination, destination_type, destination_port=514, destination_protocol="TCP"
+    formatter,
+    service_name,
+    destination,
+    destination_type,
+    destination_port=514,
+    destination_protocol="TCP",
 ):
     destination_type = destination_type.lower()
     logger = logging.getLogger(service_name)

@@ -27,7 +27,9 @@ def get_args():
     cli_args = vars(parser.parse_args())
     args = _union_cli_args_with_config_file_args(cli_args)
     args.cli_parser = parser
-    _verify_destination_args(args)
+    args.verify_authority_arg()
+    args.verify_username_arg()
+    args.verify_destination_args()
     return args
 
 
@@ -107,20 +109,31 @@ class AEDArgs(common.SecArgs):
         default_end_date = datetime.now()
         return default_end_date.strftime("%Y-%m-%d")
 
+    def verify_authority_arg(self):
+        if self.c42_authority_url is None:
+            self._raise_attribute_error("Code42 authority host address not provided.")
 
-def _verify_destination_args(args):
-    if args.destination_type == "stdout" and args.destination is not None:
-        msg = (
-            "Destination '{0}' not applicable for stdout. "
-            "Try removing '--dest' arg or change '--dest-type' to 'file' or 'server'."
-        )
-        msg = msg.format(args.destination)
-        raise AttributeError(msg)
+    def verify_username_arg(self):
+        if self.c42_username is None:
+            self._raise_attribute_error("Code42 username not provided.")
 
-    if args.destination_type == "file" and args.destination is None:
-        msg = "Missing file name. Try: '--dest path/to/file'."
-        raise AttributeError(msg)
+    def verify_destination_args(self):
+        if self.destination_type == "stdout" and self.destination is not None:
+            msg = (
+                "Destination '{0}' not applicable for stdout. "
+                "Try removing '--dest' arg or change '--dest-type' to 'file' or 'server'."
+            )
+            msg = msg.format(self.destination)
+            self._raise_attribute_error(msg)
 
-    if args.destination_type == "server" and args.destination is None:
-        msg = "Missing server URL. Try: '--dest https://syslog.example.com'."
+        if self.destination_type == "file" and self.destination is None:
+            msg = "Missing file name. Try: '--dest path/to/file'."
+            self._raise_attribute_error(msg)
+
+        if self.destination_type == "server" and self.destination is None:
+            msg = "Missing server URL. Try: '--dest https://syslog.example.com'."
+            self._raise_attribute_error(msg)
+
+    def _raise_attribute_error(self, msg):
+        self.cli_parser.print_usage()
         raise AttributeError(msg)

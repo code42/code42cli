@@ -20,7 +20,6 @@ _SERVICE_NAME = u"c42seceventcli_aed"
 
 def main():
     args = _get_args()
-
     if args.reset_password:
         common.delete_stored_password(_SERVICE_NAME, args.c42_username)
 
@@ -72,7 +71,12 @@ def _create_handlers(args):
 
 
 def _get_logger(
-    formatter, service_name, destination, destination_type, destination_port=514, destination_protocol="TCP"
+    formatter,
+    service_name,
+    destination,
+    destination_type,
+    destination_port=514,
+    destination_protocol="TCP",
 ):
     try:
         return common.get_logger(
@@ -130,40 +134,16 @@ def _get_response_handler(logger):
 
 
 def _create_sdk_from_args(args, handlers):
-    server = _get_server_from_args(args)
-    username = _get_username_from_args(args)
-    password = common.get_stored_password(_SERVICE_NAME, username)
+    password = common.get_stored_password(_SERVICE_NAME, args.c42_username)
     try:
         sdk = SDK.create_using_local_account(
-            host_address=server, username=username, password=password
+            host_address=args.c42_authority_url, username=args.c42_username, password=password
         )
         return sdk
     except Exception as ex:
         handlers.handle_error(ex)
         print("Incorrect username or password.")
         exit(1)
-
-
-def _get_server_from_args(args):
-    server = args.c42_authority_url
-    if server is None:
-        _exit_from_argument_error("Host address not provided.", args.cli_parser)
-
-    return server
-
-
-def _get_username_from_args(args):
-    username = args.c42_username
-    if username is None:
-        _exit_from_argument_error("Username not provided.", args.cli_parser)
-
-    return username
-
-
-def _exit_from_argument_error(message, parser):
-    print(message)
-    parser.print_usage()
-    exit(1)
 
 
 def _extract(args, sdk, handlers):
