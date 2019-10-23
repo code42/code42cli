@@ -154,7 +154,7 @@ def test_parse_timestamp_when_given_minutes_ago_format_returns_expected_timestam
     assert pytest.approx(actual, expected)
 
 
-def test_parse_timestamp_when_given_bad_string_throws_value_error():
+def test_parse_timestamp_when_given_bad_string_raises_value_error():
     with pytest.raises(ValueError):
         parse_timestamp("BAD!")
 
@@ -194,19 +194,6 @@ def test_get_logger_when_destination_type_is_server_adds_no_priority_syslog_hand
     actual = type(logger.addHandler.call_args[0][0])
     expected = NoPrioritySysLogHandler
     assert actual == expected
-
-
-def test_subclass_of_sec_args_try_set_favors_cli_arg_over_config_arg():
-    class SubclassSecArgs(SecArgs):
-        test = None
-
-    arg_name = "test"
-    cli_arg_value = 1
-    config_arg_value = 2
-    args = SubclassSecArgs()
-    args.try_set(arg_name, cli_arg_value, config_arg_value)
-    expected = cli_arg_value
-    assert args.test == expected
 
 
 def test_get_stored_password_when_keyring_returns_none_uses_password_from_getpass(password_patches):
@@ -261,3 +248,16 @@ def test_delete_stored_password_calls_keyring_delete_password(password_patches):
     password_patches.delete_password.assert_called_once_with(
         expected_service_name, expected_username
     )
+
+
+def test_subclass_of_sec_args_try_set_favors_cli_arg_over_config_arg():
+    class SubclassSecArgs(SecArgs):
+        test = None
+
+    arg_name = "test"
+    cli_arg_value = 1
+    config_arg_value = 2
+    args = SubclassSecArgs()
+    args.try_set(arg_name, cli_arg_value, config_arg_value)
+    expected = cli_arg_value
+    assert args.test == expected

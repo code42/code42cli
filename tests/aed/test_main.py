@@ -34,7 +34,7 @@ def patches(
     mock.args_getter = mock_args_getter
     mock.get_password = mock_password_getter
     mock.delete_password = mock_password_deleter
-    mock.logger = mock_logger
+    mock.get_logger = mock_logger
     mock.error_logger = mock_error_logger
     mock.reset_cursor = mock_cursor_reset_function
     return mock
@@ -181,7 +181,7 @@ def test_main_when_create_sdk_raises_exception_causes_exit(patches):
         main.main()
 
 
-def test_main_creates_sdk_with_args_and_stored_password(patches):
+def test_main_creates_sdk_with_args_and_password_from_get_password(patches):
     expected_authority = "https://user.authority.com"
     expected_username = "user.userson@userson.solutions"
     expected_password = "querty"
@@ -194,7 +194,7 @@ def test_main_creates_sdk_with_args_and_stored_password(patches):
     )
 
 
-def test_main_when_output_format_not_supported_exits(patches):
+def test_main_when_output_format_not_supported_causes_exit(patches):
     patches.aed_args.output_format = "EAS3"
     with pytest.raises(SystemExit):
         main.main()
@@ -204,7 +204,7 @@ def test_main_when_output_format_is_json_creates_json_formatter(patches):
     patches.aed_args.output_format = "JSON"
     main.main()
     expected = AEDDictToJSONFormatter
-    actual = type(patches.logger.call_args[1]["formatter"])
+    actual = type(patches.get_logger.call_args[1]["formatter"])
     assert actual == expected
 
 
@@ -212,7 +212,7 @@ def test_main_when_output_format_is_cef_creates_cef_formatter(patches):
     patches.aed_args.output_format = "CEF"
     main.main()
     expected = AEDDictToCEFFormatter
-    actual = type(patches.logger.call_args[1]["formatter"])
+    actual = type(patches.get_logger.call_args[1]["formatter"])
     assert actual == expected
 
 
@@ -220,7 +220,7 @@ def test_main_when_destination_port_is_set_passes_port_to_get_logger(patches):
     expected = 1000
     patches.aed_args.destination_port = expected
     main.main()
-    actual = patches.logger.call_args[1]["destination_port"]
+    actual = patches.get_logger.call_args[1]["destination_port"]
     assert actual == expected
 
 
@@ -228,8 +228,20 @@ def test_main_when_given_destination_protocol_via_cli_passes_port_to_get_logger(
     expected = "SOME PROTOCOL"
     patches.aed_args.destination_protocol = expected
     main.main()
-    actual = patches.logger.call_args[1]["destination_protocol"]
+    actual = patches.get_logger.call_args[1]["destination_protocol"]
     assert actual == expected
+
+
+def test_main_when_get_logger_raises_io_error_causes_exit(patches):
+    patches.get_logger.side_effect = IOError
+    with pytest.raises(SystemExit):
+        main.main()
+
+
+def test_main_when_get_logger_raises_attribute_error_causes_exit(patches):
+    patches.get_logger.side_effect = AttributeError
+    with pytest.raises(SystemExit):
+        main.main()
 
 
 def test_main_when_record_cursor_is_true_overrides_handlers_record_cursor_position(mocker, patches):
@@ -270,15 +282,3 @@ def test_main_when_record_cursor_is_false_does_not_override_handlers_get_cursor_
     main.main()
     actual = patches.aed_extractor_constructor.call_args[0][1].get_cursor_position
     assert actual is not unexpected
-
-
-def test_main_when_get_logger_raises_io_error_causes_exit(patches):
-    patches.logger.side_effect = IOError
-    with pytest.raises(SystemExit):
-        main.main()
-
-
-def test_main_when_get_logger_raises_attribute_error_causes_exit(patches):
-    patches.logger.side_effect = AttributeError
-    with pytest.raises(SystemExit):
-        main.main()

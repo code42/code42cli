@@ -47,7 +47,7 @@ def test_get_args_calls_sec_args_try_set_with_expected_args(mocker, patches):
     mock_setter.assert_called_once_with(key, expected_cli_val, expected_config_val)
 
 
-def test_verify_destination_args_when_destination_is_not_none_and_destination_type_is_stdout_causes_exit(
+def test_get_args_when_destination_is_not_none_and_destination_type_is_stdout_causes_exit(
     patches
 ):
     patches.cli_args.destination_type = "stdout"
@@ -56,7 +56,7 @@ def test_verify_destination_args_when_destination_is_not_none_and_destination_ty
         get_args()
 
 
-def test_verify_destination_args_when_destination_is_none_and_destination_type_is_server_causes_exit(
+def test_get_args_when_destination_is_none_and_destination_type_is_server_causes_exit(
     patches
 ):
     patches.cli_args.destination_type = "server"
@@ -65,7 +65,7 @@ def test_verify_destination_args_when_destination_is_none_and_destination_type_i
         get_args()
 
 
-def test_verify_destination_args_when_destination_is_none_and_destination_type_is_file_causes_exit(
+def test_get_args_when_destination_is_none_and_destination_type_is_file_causes_exit(
     patches
 ):
     patches.cli_args.destination_type = "file"
