@@ -13,6 +13,7 @@ from c42seceventcli.common.common import (
     SecArgs,
     get_stored_password,
     delete_stored_password,
+    get_user_project_path,
 )
 
 
@@ -158,13 +159,13 @@ def test_parse_timestamp_when_given_bad_string_throws_value_error():
         parse_timestamp("BAD!")
 
 
-def test_get_error_logger_uses_rotating_file_handler(mocker, mock_get_logger):
+def test_get_error_logger_uses_rotating_file_with_expected_args(mocker, mock_get_logger):
+    expected_service_name = "TEST_SERVICE"
     mock_handler = mocker.patch("logging.handlers.RotatingFileHandler.__init__")
     mock_handler.return_value = None
-    logger = get_error_logger()
-    actual = type(logger.addHandler.call_args[0][0])
-    expected = RotatingFileHandler
-    assert actual == expected
+    get_error_logger(expected_service_name)
+    expected_path = "{0}/{1}_error.log".format(get_user_project_path("log"), expected_service_name)
+    mock_handler.assert_called_once_with(expected_path, maxBytes=250000000)
 
 
 def test_get_logger_when_destination_type_is_stdout_adds_stream_handler_to_logger(mock_get_logger):

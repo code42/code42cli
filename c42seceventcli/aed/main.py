@@ -15,14 +15,14 @@ import c42seceventcli.common.common as common
 import c42seceventcli.aed.args as aed_args
 from c42seceventcli.aed.cursor_store import AEDCursorStore
 
-_SERVICE_NAME_FOR_KEYCHAIN = u"c42seceventcli_aed"
+_SERVICE_NAME = u"c42seceventcli_aed"
 
 
 def main():
     args = _get_args()
 
     if args.reset_password:
-        common.delete_stored_password(_SERVICE_NAME_FOR_KEYCHAIN, args.c42_username)
+        common.delete_stored_password(_SERVICE_NAME, args.c42_username)
 
     handlers = _create_handlers(args)
     _set_up_cursor_store(
@@ -54,7 +54,7 @@ def _ignore_ssl_errors():
 
 def _create_handlers(args):
     handlers = FileEventHandlers()
-    error_logger = common.get_error_logger()
+    error_logger = common.get_error_logger(_SERVICE_NAME)
     settings.global_exception_message_receiver = error_logger.error
     handlers.handle_error = error_logger.error
     output_format = args.output_format
@@ -130,7 +130,7 @@ def _get_response_handler(logger):
 def _create_sdk_from_args(args, handlers):
     server = _get_server_from_args(args)
     username = _get_username_from_args(args)
-    password = common.get_stored_password(_SERVICE_NAME_FOR_KEYCHAIN, username)
+    password = common.get_stored_password(_SERVICE_NAME, username)
     try:
         sdk = SDK.create_using_local_account(
             host_address=server, username=username, password=password

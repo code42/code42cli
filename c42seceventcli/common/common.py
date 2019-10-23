@@ -54,9 +54,9 @@ def parse_timestamp(input_string):
     return convert_datetime_to_timestamp(time)
 
 
-def get_error_logger():
+def get_error_logger(service_name):
     log_path = get_user_project_path("log")
-    log_path = "{0}/c42seceventcli_aed_errors.log".format(log_path)
+    log_path = "{0}/{1}_error.log".format(log_path, service_name)
     logger = getLogger("Code42_SecEventCli_Error_Logger")
     formatter = Formatter("%(asctime)s %(message)s")
     handler = RotatingFileHandler(log_path, maxBytes=250000000)

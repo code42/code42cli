@@ -130,7 +130,7 @@ def test_main_when_reset_password_is_true_calls_delete_password(patches):
     patches.aed_args.c42_username = expected_username
     patches.aed_args.reset_password = True
     main.main()
-    patches.delete_password.assert_called_once_with(u"c42seceventcli_aed", expected_username)
+    patches.delete_password.assert_called_once_with(main._SERVICE_NAME, expected_username)
 
 
 def test_main_when_reset_password_is_false_does_not_call_delete_password(patches):
