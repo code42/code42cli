@@ -76,7 +76,12 @@ def mock_password_getter(mocker):
 
 @pytest.fixture
 def password_patches(
-    mocker, mock_password_getter, mock_password_setter, mock_password_deleter, mock_get_input, mock_getpass_function
+    mocker,
+    mock_password_getter,
+    mock_password_setter,
+    mock_password_deleter,
+    mock_get_input,
+    mock_getpass_function,
 ):
     mock = mocker.MagicMock()
     mock.get_password = mock_password_getter
@@ -200,9 +205,7 @@ def test_subclass_of_sec_args_try_set_favors_cli_arg_over_config_arg():
     assert args.test == expected
 
 
-def test_get_stored_password_when_keyring_returns_none_uses_password_from_getpass(
-    password_patches
-):
+def test_get_stored_password_when_keyring_returns_none_uses_password_from_getpass(password_patches):
     password_patches.get_password.return_value = None
     expected = "super_secret_password"
     password_patches.getpass.return_value = expected
@@ -210,7 +213,14 @@ def test_get_stored_password_when_keyring_returns_none_uses_password_from_getpas
     assert actual == expected
 
 
-def test_main_when_get_password_returns_none_and_get_input_returns_y_calls_set_password_with_password_from_getpass(
+def test_get_stored_password_returns_same_value_from_keyring(password_patches):
+    expected = "super_secret_password"
+    password_patches.get_password.return_value = expected
+    actual = get_stored_password("TEST", "USER")
+    assert actual == expected
+
+
+def test_get_stored_password_when_keyring_returns_none_and_get_input_returns_y_calls_set_password_with_password_from_getpass(
     password_patches
 ):
     expected_service_name = "SERVICE"
@@ -226,7 +236,7 @@ def test_main_when_get_password_returns_none_and_get_input_returns_y_calls_set_p
     )
 
 
-def test_main_when_get_password_returns_none_and_get_input_returns_n_does_not_call_set_password(
+def test_get_stored_password_when_keyring_returns_none_and_get_input_returns_n_does_not_call_set_password(
     password_patches
 ):
     expected_service_name = "SERVICE"
@@ -238,3 +248,10 @@ def test_main_when_get_password_returns_none_and_get_input_returns_n_does_not_ca
 
     get_stored_password(expected_service_name, expected_username)
     assert not password_patches.set_password.call_count
+
+
+def test_delete_stored_password_calls_keyring_delete_password(password_patches):
+    expected_service_name = "SERVICE"
+    expected_username = "ME"
+    delete_stored_password(expected_service_name, expected_username)
+    password_patches.delete_password.assert_called_once_with(expected_service_name, expected_username)
