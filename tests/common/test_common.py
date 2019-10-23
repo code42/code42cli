@@ -10,7 +10,7 @@ from c42seceventcli.common.common import (
     parse_timestamp,
     get_logger,
     get_error_logger,
-    SecArgs
+    SecArgs,
 )
 
 
@@ -158,4 +158,3 @@ def test_subclass_of_sec_args_try_set_favors_cli_arg_over_config_arg():
     args.try_set(arg_name, cli_arg_value, config_arg_value)
     expected = cli_arg_value
     assert args.test == expected
-
