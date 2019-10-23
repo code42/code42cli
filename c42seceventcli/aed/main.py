@@ -1,6 +1,4 @@
 import json
-import getpass
-import keyring
 from socket import gaierror
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
@@ -17,7 +15,7 @@ import c42seceventcli.common.common as common
 import c42seceventcli.aed.args as aed_args
 from c42seceventcli.aed.cursor_store import AEDCursorStore
 
-_SERVICE_NAME_FOR_KEYCHAIN = u"c42seceventcli"
+_SERVICE_NAME_FOR_KEYCHAIN = u"c42seceventcli_aed"
 
 
 def main():
@@ -132,7 +130,7 @@ def _get_response_handler(logger):
 def _create_sdk_from_args(args, handlers):
     server = _get_server_from_args(args)
     username = _get_username_from_args(args)
-    password = _get_password(username)
+    password = common.get_stored_password(_SERVICE_NAME_FOR_KEYCHAIN, username)
     try:
         sdk = SDK.create_using_local_account(
             host_address=server, username=username, password=password
@@ -164,22 +162,6 @@ def _exit_from_argument_error(message, parser):
     print(message)
     parser.print_usage()
     exit(1)
-
-
-def _get_password(username):
-    password = keyring.get_password(_SERVICE_NAME_FOR_KEYCHAIN, username)
-    if password is None:
-        try:
-            password = getpass.getpass(prompt="Code42 password: ")
-            save_password = common.get_input("Save password to keychain? (y/n): ")
-            if save_password.lower()[0] == "y":
-                keyring.set_password(_SERVICE_NAME_FOR_KEYCHAIN, username, password)
-
-        except KeyboardInterrupt:
-            print()
-            exit(1)
-
-    return password
 
 
 def _extract(args, sdk, handlers):

@@ -5,7 +5,7 @@ from py42 import settings
 import py42.debug_level as debug_level
 from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
 from c42seceventcli.aed.cursor_store import AEDCursorStore
-from c42seceventcli.aed.args import get_args, AEDArgs
+from c42seceventcli.aed.args import AEDArgs
 
 from c42seceventcli.aed import main
 
@@ -20,13 +20,10 @@ def patches(
     mock_args,
     mock_args_getter,
     mock_password_getter,
-    mock_password_setter,
     mock_password_deleter,
     mock_logger,
     mock_error_logger,
-    mock_getpass_function,
-    mock_get_input,
-    mock_cursor_reset_function
+    mock_cursor_reset_function,
 ):
     mock = mocker.MagicMock()
     mock.aed_extractor_constructor = mock_aed_extractor_constructor
@@ -36,12 +33,9 @@ def patches(
     mock.aed_args = mock_args
     mock.args_getter = mock_args_getter
     mock.get_password = mock_password_getter
-    mock.set_password = mock_password_setter
     mock.delete_password = mock_password_deleter
     mock.logger = mock_logger
     mock.error_logger = mock_error_logger
-    mock.getpass = mock_getpass_function
-    mock.input = mock_get_input
     mock.reset_cursor = mock_cursor_reset_function
     return mock
 
@@ -87,25 +81,15 @@ def mock_args_getter(mocker):
 
 
 @pytest.fixture
-def mock_get_input(mocker):
-    return mocker.patch("c42seceventcli.common.common.get_input")
-
-
-@pytest.fixture
 def mock_password_getter(mocker):
-    mock = mocker.patch("keyring.get_password")
+    mock = mocker.patch("c42seceventcli.common.common.get_stored_password")
     mock.get_password.return_value = "PASSWORD"
     return mock
 
 
 @pytest.fixture
-def mock_password_setter(mocker):
-    return mocker.patch("keyring.set_password")
-
-
-@pytest.fixture
 def mock_password_deleter(mocker):
-    return mocker.patch("keyring.delete_password")
+    return mocker.patch("c42seceventcli.common.common.delete_stored_password")
 
 
 @pytest.fixture
@@ -116,11 +100,6 @@ def mock_logger(mocker):
 @pytest.fixture
 def mock_error_logger(mocker):
     return mocker.patch("c42seceventcli.common.common.get_error_logger")
-
-
-@pytest.fixture
-def mock_getpass_function(mocker):
-    return mocker.patch("getpass.getpass")
 
 
 @pytest.fixture
@@ -151,7 +130,7 @@ def test_main_when_reset_password_is_true_calls_delete_password(patches):
     patches.aed_args.c42_username = expected_username
     patches.aed_args.reset_password = True
     main.main()
-    patches.delete_password.assert_called_once_with(u"c42seceventcli", expected_username)
+    patches.delete_password.assert_called_once_with(u"c42seceventcli_aed", expected_username)
 
 
 def test_main_when_reset_password_is_false_does_not_call_delete_password(patches):
@@ -228,43 +207,6 @@ def test_main_creates_sdk_with_config_args_and_stored_password(patches):
     patches.py42.assert_called_once_with(
         host_address=expected_authority, username=expected_username, password=expected_password
     )
-
-
-def test_main_when_get_password_returns_none_uses_password_from_getpass(patches):
-    patches.get_password.return_value = None
-    expected = "super_secret_password"
-    patches.getpass.return_value = expected
-    main.main()
-    actual = patches.py42.call_args[1]["password"]
-    assert actual == expected
-
-
-def test_main_when_get_password_returns_none_and_get_input_returns_y_calls_set_password_with_password_from_getpass(
-    patches
-):
-    expected_username = "ME"
-    expected_password = "super_secret_password"
-    patches.aed_args.c42_username = expected_username
-    patches.get_password.return_value = None
-    patches.input.return_value = "y"
-    patches.getpass.return_value = expected_password
-    main.main()
-    patches.set_password.assert_called_once_with(
-        u"c42seceventcli", expected_username, expected_password
-    )
-
-
-def test_main_when_get_password_returns_none_and_get_input_returns_n_does_not_call_set_password(
-    patches
-):
-    expected_username = "ME"
-    expected_password = "super_secret_password"
-    patches.aed_args.c42_username = expected_username
-    patches.get_password.return_value = None
-    patches.input.return_value = "n"
-    patches.getpass.return_value = expected_password
-    main.main()
-    assert not patches.set_password.call_count
 
 
 def test_main_when_output_format_not_supported_exits(patches):

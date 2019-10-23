@@ -11,6 +11,8 @@ from c42seceventcli.common.common import (
     get_logger,
     get_error_logger,
     SecArgs,
+    get_stored_password,
+    delete_stored_password,
 )
 
 
@@ -65,6 +67,44 @@ def mock_file_handler(mocker):
     mock_handler_init = mocker.patch("logging.FileHandler.__init__")
     mock_handler_init.return_value = None
     return mock_handler_init
+
+
+@pytest.fixture
+def mock_password_getter(mocker):
+    return mocker.patch("keyring.get_password")
+
+
+@pytest.fixture
+def password_patches(
+    mocker, mock_password_getter, mock_password_setter, mock_password_deleter, mock_get_input, mock_getpass_function
+):
+    mock = mocker.MagicMock()
+    mock.get_password = mock_password_getter
+    mock.set_password = mock_password_setter
+    mock.delete_password = mock_password_deleter
+    mock.getpass = mock_getpass_function
+    mock.get_input = mock_get_input
+    return mock
+
+
+@pytest.fixture
+def mock_password_setter(mocker):
+    return mocker.patch("keyring.set_password")
+
+
+@pytest.fixture
+def mock_password_deleter(mocker):
+    return mocker.patch("keyring.delete_password")
+
+
+@pytest.fixture
+def mock_getpass_function(mocker):
+    return mocker.patch("getpass.getpass")
+
+
+@pytest.fixture
+def mock_get_input(mocker):
+    return mocker.patch("c42seceventcli.common.common._get_input")
 
 
 def test_get_config_args_when_read_returns_empty_list_raises_io_error(mocker):
@@ -158,3 +198,43 @@ def test_subclass_of_sec_args_try_set_favors_cli_arg_over_config_arg():
     args.try_set(arg_name, cli_arg_value, config_arg_value)
     expected = cli_arg_value
     assert args.test == expected
+
+
+def test_get_stored_password_when_keyring_returns_none_uses_password_from_getpass(
+    password_patches
+):
+    password_patches.get_password.return_value = None
+    expected = "super_secret_password"
+    password_patches.getpass.return_value = expected
+    actual = get_stored_password("TEST", "USER")
+    assert actual == expected
+
+
+def test_main_when_get_password_returns_none_and_get_input_returns_y_calls_set_password_with_password_from_getpass(
+    password_patches
+):
+    expected_service_name = "SERVICE"
+    expected_username = "ME"
+    expected_password = "super_secret_password"
+    password_patches.get_password.return_value = None
+    password_patches.get_input.return_value = "y"
+    password_patches.getpass.return_value = expected_password
+
+    get_stored_password(expected_service_name, expected_username)
+    password_patches.set_password.assert_called_once_with(
+        expected_service_name, expected_username, expected_password
+    )
+
+
+def test_main_when_get_password_returns_none_and_get_input_returns_n_does_not_call_set_password(
+    password_patches
+):
+    expected_service_name = "SERVICE"
+    expected_username = "ME"
+    expected_password = "super_secret_password"
+    password_patches.get_password.return_value = expected_username
+    password_patches.get_input.return_value = "n"
+    password_patches.getpass.return_value = expected_password
+
+    get_stored_password(expected_service_name, expected_username)
+    assert not password_patches.set_password.call_count
