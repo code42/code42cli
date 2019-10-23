@@ -111,6 +111,25 @@ def test_get_args_favors_cli_username_over_config_username(patches):
     assert args.c42_username == expected_user
 
 
+def test_get_args_when_cli_ignore_ssl_errors_is_set_returns_args_with_same_ignore_ssl_errors(patches):
+    patches.cli_args.ignore_ssl_errors = True
+    args = get_args()
+    assert args.ignore_ssl_errors
+
+
+def test_get_args_when_config_ignore_ssl_errors_is_set_returns_args_with_same_ignore_ssl_errors(patches):
+    patches.config_args["ignore_ssl_errors"] = True
+    args = get_args()
+    assert args.ignore_ssl_errors
+
+
+def test_get_args_favors_cli_ignore_ssl_errors_over_config_ignore_ssl_errors(patches):
+    patches.cli_args.ignore_ssl_errors = True
+    patches.config_args["ignore_ssl_errors"] = False
+    args = get_args()
+    assert args.ignore_ssl_errors
+
+
 def test_verify_destination_args_when_destination_is_not_none_and_destination_type_is_stdout_causes_exit(
     patches
 ):
