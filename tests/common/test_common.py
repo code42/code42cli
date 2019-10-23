@@ -254,4 +254,6 @@ def test_delete_stored_password_calls_keyring_delete_password(password_patches):
     expected_service_name = "SERVICE"
     expected_username = "ME"
     delete_stored_password(expected_service_name, expected_username)
-    password_patches.delete_password.assert_called_once_with(expected_service_name, expected_username)
+    password_patches.delete_password.assert_called_once_with(
+        expected_service_name, expected_username
+    )

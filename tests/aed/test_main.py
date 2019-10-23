@@ -194,21 +194,6 @@ def test_main_creates_sdk_with_args_and_stored_password(patches):
     )
 
 
-def test_main_creates_sdk_with_config_args_and_stored_password(patches):
-    expected_authority = "https://user.authority.com"
-    expected_username = "user.userson@userson.solutions"
-    expected_password = "qwerty"
-
-    patches.aed_args.c42_authority_url = expected_authority
-    patches.aed_args.c42_username = expected_username
-
-    patches.get_password.return_value = expected_password
-    main.main()
-    patches.py42.assert_called_once_with(
-        host_address=expected_authority, username=expected_username, password=expected_password
-    )
-
-
 def test_main_when_output_format_not_supported_exits(patches):
     patches.aed_args.output_format = "EAS3"
     with pytest.raises(SystemExit):
@@ -287,17 +272,13 @@ def test_main_when_record_cursor_is_false_does_not_override_handlers_get_cursor_
     assert actual is not unexpected
 
 
-def test_main_when_destination_type_is_file_and_get_logger_raises_io_error_causes_exit(patches,):
-    patches.aed_args.destination_type = "file"
+def test_main_when_get_logger_raises_io_error_causes_exit(patches):
     patches.logger.side_effect = IOError
     with pytest.raises(SystemExit):
         main.main()
 
 
-def test_main_when_destination_type_is_server_and_get_logger_raises_attribute_error_causes_exit(
-    patches,
-):
-    patches.aed_args.destination_type = "server"
+def test_main_when_get_logger_raises_attribute_error_causes_exit(patches):
     patches.logger.side_effect = AttributeError
     with pytest.raises(SystemExit):
         main.main()
