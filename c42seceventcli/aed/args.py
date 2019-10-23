@@ -75,7 +75,7 @@ def _get_config_args(config_file_path):
         exit(1)
 
 
-class AEDArgs(object):
+class AEDArgs(common.SecArgs):
     cli_parser = None
     c42_authority_url = None
     c42_username = None
@@ -96,12 +96,6 @@ class AEDArgs(object):
     def __init__(self):
         self.begin_date = AEDArgs._get_default_begin_date()
         self.end_date = AEDArgs._get_default_end_date()
-
-    def try_set(self, arg_name, cli_arg=None, config_arg=None):
-        if cli_arg is not None:
-            setattr(self, arg_name, cli_arg)
-        elif config_arg is not None:
-            setattr(self, arg_name, config_arg)
 
     @staticmethod
     def _get_default_begin_date():

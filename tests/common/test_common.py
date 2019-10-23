@@ -10,6 +10,7 @@ from c42seceventcli.common.common import (
     parse_timestamp,
     get_logger,
     get_error_logger,
+    SecArgs
 )
 
 
@@ -144,3 +145,17 @@ def test_get_logger_when_destination_type_is_server_adds_no_priority_syslog_hand
     actual = type(logger.addHandler.call_args[0][0])
     expected = NoPrioritySysLogHandler
     assert actual == expected
+
+
+def test_subclass_of_sec_args_try_set_favors_cli_arg_over_config_arg():
+    class SubclassSecArgs(SecArgs):
+        test = None
+
+    arg_name = "test"
+    cli_arg_value = 1
+    config_arg_value = 2
+    args = SubclassSecArgs()
+    args.try_set(arg_name, cli_arg_value, config_arg_value)
+    expected = cli_arg_value
+    assert args.test == expected
+

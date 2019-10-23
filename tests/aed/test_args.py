@@ -15,42 +15,13 @@ def patches(mocker, mock_cli_arg_parser, mock_cli_args, mock_config_arg_parser, 
 @pytest.fixture
 def mock_cli_args():
     args = Namespace()
-    args.reset_password = None
-    args.clear_cursor = None
-    args.config_file = None
     args.c42_authority_url = None
-    args.c42_username = None
-    args.begin_date = None
-    args.end_date = None
-    args.ignore_ssl_errors = None
-    args.output_format = None
-    args.record_cursor = None
-    args.exposure_types = None
-    args.debug_mode = None
-    args.destination_type = None
-    args.destination = None
-    args.destination_port = None
-    args.destination_protocol = None
     return args
 
 
 @pytest.fixture
 def mock_config_args():
-    return {
-        "c42_authority_url": None,
-        "c42_username": None,
-        "c42_begin_date": None,
-        "c42_end_date": None,
-        "c42_ignore_ssl_errors": None,
-        "c42_output_format": None,
-        "c42_record_cursor": None,
-        "c42_exposure_types": None,
-        "c42_debug_mode": None,
-        "c42_destination_type": None,
-        "c42_destination": None,
-        "c42_destination_port": None,
-        "c42_destination_protocol": None,
-    }
+    return {"c42_authority_url": None}
 
 
 @pytest.fixture
@@ -67,67 +38,15 @@ def mock_cli_arg_parser(mocker, mock_cli_args):
     return mock_parser
 
 
-def test_get_args_when_cli_authority_url_is_set_returns_args_with_same_username(patches):
-    expected_url = "https://www.example.com"
-    patches.cli_args.c42_authority_url = expected_url
-    args = get_args()
-    assert args.c42_authority_url == expected_url
-
-
-def test_get_args_when_config_authority_url_is_set_returns_args_with_same_username(patches):
-    expected_url = "https://www.example.com"
-    patches.config_args["c42_authority_url"] = expected_url
-    args = get_args()
-    assert args.c42_authority_url == expected_url
-
-
-def test_get_args_favors_cli_authority_url_over_config_authority_url(patches):
-    expected_url = "https://www.example.com"
-    patches.cli_args.c42_authority_url = expected_url
-    patches.config_args["c42_authority_url"] = "https://virus_probably.com"
-    args = get_args()
-    assert args.c42_authority_url == expected_url
-
-
-def test_get_args_when_cli_username_is_set_returns_args_with_same_username(patches):
-    expected_user = "FirstUser"
-    patches.cli_args.c42_username = expected_user
-    args = get_args()
-    assert args.c42_username == expected_user
-
-
-def test_get_args_when_config_username_is_set_returns_args_with_same_username(patches):
-    expected_user = "FirstUser"
-    patches.config_args["c42_username"] = expected_user
-    args = get_args()
-    assert args.c42_username == expected_user
-
-
-def test_get_args_favors_cli_username_over_config_username(patches):
-    expected_user = "FirstUser"
-    patches.cli_args.c42_username = expected_user
-    patches.config_args["c42_username"] = "SecondUser"
-    args = get_args()
-    assert args.c42_username == expected_user
-
-
-def test_get_args_when_cli_ignore_ssl_errors_is_set_returns_args_with_same_ignore_ssl_errors(patches):
-    patches.cli_args.ignore_ssl_errors = True
-    args = get_args()
-    assert args.ignore_ssl_errors
-
-
-def test_get_args_when_config_ignore_ssl_errors_is_set_returns_args_with_same_ignore_ssl_errors(patches):
-    patches.config_args["ignore_ssl_errors"] = True
-    args = get_args()
-    assert args.ignore_ssl_errors
-
-
-def test_get_args_favors_cli_ignore_ssl_errors_over_config_ignore_ssl_errors(patches):
-    patches.cli_args.ignore_ssl_errors = True
-    patches.config_args["ignore_ssl_errors"] = False
-    args = get_args()
-    assert args.ignore_ssl_errors
+def test_get_args_calls_sec_args_try_set_with_expected_args(mocker, patches):
+    mock_setter = mocker.patch("c42seceventcli.common.common.SecArgs.try_set")
+    key = "c42_authority_url"
+    expected_cli_val = "URL1"
+    expected_config_val = "URL2"
+    patches.cli_args.c42_authority_url = expected_cli_val
+    patches.config_args[key] = expected_config_val
+    get_args()
+    mock_setter.assert_called_once_with(key, expected_cli_val, expected_config_val)
 
 
 def test_verify_destination_args_when_destination_is_not_none_and_destination_type_is_stdout_causes_exit(

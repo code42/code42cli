@@ -106,3 +106,11 @@ def delete_stored_password(service_name, username):
         keyring.delete_password(service_name, username)
     except PasswordDeleteError:
         return
+
+
+class SecArgs(object):
+    def try_set(self, arg_name, cli_arg=None, config_arg=None):
+        if cli_arg is not None:
+            setattr(self, arg_name, cli_arg)
+        elif config_arg is not None:
+            setattr(self, arg_name, config_arg)
