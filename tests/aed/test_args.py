@@ -84,21 +84,21 @@ def test_get_args_calls_sec_args_try_set_with_expected_args(
     mock_setter.assert_called_once_with(key, expected_cli_val, expected_config_val)
 
 
-def test_get_args_when_destination_is_not_none_and_destination_type_is_stdout_causes_exit(patches):
+def test_get_args_when_destination_is_not_none_and_destination_type_is_stdout_raises_value_error(patches):
     patches.cli_args.destination_type = "stdout"
     patches.cli_args.destination = "Delaware"
     with pytest.raises(ValueError):
         get_args()
 
 
-def test_get_args_when_destination_is_none_and_destination_type_is_server_causes_exit(patches):
+def test_get_args_when_destination_is_none_and_destination_type_is_server_raises_value_error(patches):
     patches.cli_args.destination_type = "server"
     patches.cli_args.destination = None
     with pytest.raises(ValueError):
         get_args()
 
 
-def test_get_args_when_destination_is_none_and_destination_type_is_file_causes_exit(patches):
+def test_get_args_when_destination_is_none_and_destination_type_is_file_raises_value_error(patches):
     patches.cli_args.destination_type = "file"
     patches.cli_args.destination = None
     with pytest.raises(ValueError):
