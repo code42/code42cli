@@ -6,7 +6,7 @@ from logging.handlers import RotatingFileHandler
 
 from c42secevents.logging.handlers import NoPrioritySysLogHandler
 
-from c42seceventcli.common.common import (
+from c42seceventcli.common.util import (
     get_config_args,
     parse_timestamp,
     get_logger,
@@ -111,7 +111,7 @@ def mock_getpass_function(mocker):
 
 @pytest.fixture
 def mock_get_input(mocker):
-    return mocker.patch("c42seceventcli.common.common._get_input")
+    return mocker.patch("c42seceventcli.common.util._get_input")
 
 
 @pytest.fixture
@@ -130,7 +130,7 @@ def mock_user_expansion(mocker):
 
 @pytest.fixture
 def mock_dir_maker(mocker):
-    return mocker.patch("c42seceventcli.common.common.makedirs")
+    return mocker.patch("c42seceventcli.common.util.makedirs")
 
 
 @pytest.fixture

@@ -11,7 +11,7 @@ from c42secevents.extractors import AEDEventExtractor
 from c42secevents.common import FileEventHandlers, convert_datetime_to_timestamp
 from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
 
-import c42seceventcli.common.common as common
+import c42seceventcli.common.util as common
 import c42seceventcli.aed.args as aed_args
 from c42seceventcli.aed.cursor_store import AEDCursorStore
 

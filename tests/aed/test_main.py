@@ -84,24 +84,24 @@ def mock_args_getter(mocker):
 
 @pytest.fixture
 def mock_password_getter(mocker):
-    mock = mocker.patch("c42seceventcli.common.common.get_stored_password")
+    mock = mocker.patch("c42seceventcli.common.util.get_stored_password")
     mock.get_password.return_value = "PASSWORD"
     return mock
 
 
 @pytest.fixture
 def mock_password_deleter(mocker):
-    return mocker.patch("c42seceventcli.common.common.delete_stored_password")
+    return mocker.patch("c42seceventcli.common.util.delete_stored_password")
 
 
 @pytest.fixture
 def mock_logger(mocker):
-    return mocker.patch("c42seceventcli.common.common.get_logger")
+    return mocker.patch("c42seceventcli.common.util.get_logger")
 
 
 @pytest.fixture
 def mock_error_logger(mocker):
-    return mocker.patch("c42seceventcli.common.common.get_error_logger")
+    return mocker.patch("c42seceventcli.common.util.get_error_logger")
 
 
 @pytest.fixture

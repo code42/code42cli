@@ -44,7 +44,7 @@ def mock_config_args():
 
 @pytest.fixture
 def mock_config_arg_parser(mocker, mock_config_args):
-    mock_parser = mocker.patch("c42seceventcli.common.common.get_config_args")
+    mock_parser = mocker.patch("c42seceventcli.common.util.get_config_args")
     mock_parser.return_value = mock_config_args
     return mock_parser
 
@@ -74,7 +74,7 @@ def mock_destination_args_verification(mocker):
 def test_get_args_calls_sec_args_try_set_with_expected_args(
     mocker, patches_with_mocked_args_verifications
 ):
-    mock_setter = mocker.patch("c42seceventcli.common.common.SecArgs.try_set")
+    mock_setter = mocker.patch("c42seceventcli.common.util.SecArgs.try_set")
     key = "c42_authority_url"
     expected_cli_val = "URL1"
     expected_config_val = "URL2"

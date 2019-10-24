@@ -19,7 +19,7 @@ from c42seceventcli.common.cli_args import (
     add_destination_port_arg,
     add_destination_protocol_arg,
 )
-import c42seceventcli.common.common as common
+import c42seceventcli.common.util as common
 
 
 def get_args():
