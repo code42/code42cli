@@ -136,4 +136,4 @@ class AEDArgs(common.SecArgs):
 
     def _raise_attribute_error(self, msg):
         self.cli_parser.print_usage()
-        raise AttributeError(msg)
+        raise ValueError(msg)

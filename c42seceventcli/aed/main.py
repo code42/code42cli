@@ -41,7 +41,7 @@ def main():
 def _get_args():
     try:
         return aed_args.get_args()
-    except AttributeError as ex:
+    except ValueError as ex:
         print(repr(ex))
         exit(1)
 
@@ -87,7 +87,7 @@ def _get_logger(
             destination_port=destination_port,
             destination_protocol=destination_protocol,
         )
-    except (AttributeError, gaierror):
+    except gaierror:
         print(
             "Error with provided server destination arguments: hostname={0}, port={1}, protocol={2}.".format(
                 destination, destination_port, destination_protocol
