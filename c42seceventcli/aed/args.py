@@ -111,11 +111,11 @@ class AEDArgs(common.SecArgs):
 
     def verify_authority_arg(self):
         if self.c42_authority_url is None:
-            self._raise_attribute_error("Code42 authority host address not provided.")
+            self._raise_value_error("Code42 authority host address not provided.")
 
     def verify_username_arg(self):
         if self.c42_username is None:
-            self._raise_attribute_error("Code42 username not provided.")
+            self._raise_value_error("Code42 username not provided.")
 
     def verify_destination_args(self):
         if self.destination_type == "stdout" and self.destination is not None:
@@ -124,16 +124,16 @@ class AEDArgs(common.SecArgs):
                 "Try removing '--dest' arg or change '--dest-type' to 'file' or 'server'."
             )
             msg = msg.format(self.destination)
-            self._raise_attribute_error(msg)
+            self._raise_value_error(msg)
 
         if self.destination_type == "file" and self.destination is None:
             msg = "Missing file name. Try: '--dest path/to/file'."
-            self._raise_attribute_error(msg)
+            self._raise_value_error(msg)
 
         if self.destination_type == "server" and self.destination is None:
             msg = "Missing server URL. Try: '--dest https://syslog.example.com'."
-            self._raise_attribute_error(msg)
+            self._raise_value_error(msg)
 
-    def _raise_attribute_error(self, msg):
+    def _raise_value_error(self, msg):
         self.cli_parser.print_usage()
         raise ValueError(msg)
