@@ -1,5 +1,6 @@
 import pytest
 from datetime import datetime, timedelta
+from socket import gaierror
 
 from py42 import settings
 import py42.debug_level as debug_level
@@ -67,8 +68,9 @@ def mock_42(mocker):
 
 
 @pytest.fixture
-def mock_args(mock_args_getter):
+def mock_args(mocker, mock_args_getter):
     args = AEDArgs()
+    args.cli_parser = mocker.MagicMock()
     args.c42_authority_url = "https://example.com"
     args.c42_username = "test.testerson@example.com"
     mock_args_getter.return_value = args
@@ -107,8 +109,8 @@ def mock_cursor_reset_function(mocker):
     return mocker.patch("c42seceventcli.aed.main.AEDCursorStore.reset")
 
 
-def test_main_when_get_args_raises_attribute_error_causes_system_exit(patches):
-    patches.args_getter.side_effect = AttributeError
+def test_main_when_get_args_raises_value_error_causes_system_exit(patches):
+    patches.args_getter.side_effect = ValueError
     with pytest.raises(SystemExit):
         main.main()
 
@@ -238,8 +240,8 @@ def test_main_when_get_logger_raises_io_error_causes_exit(patches):
         main.main()
 
 
-def test_main_when_get_logger_raises_attribute_error_causes_exit(patches):
-    patches.get_logger.side_effect = AttributeError
+def test_main_when_get_logger_raises_gaierror_causes_exit(patches):
+    patches.get_logger.side_effect = gaierror
     with pytest.raises(SystemExit):
         main.main()
 

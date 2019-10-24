@@ -87,19 +87,19 @@ def test_get_args_calls_sec_args_try_set_with_expected_args(
 def test_get_args_when_destination_is_not_none_and_destination_type_is_stdout_causes_exit(patches):
     patches.cli_args.destination_type = "stdout"
     patches.cli_args.destination = "Delaware"
-    with pytest.raises(AttributeError):
+    with pytest.raises(ValueError):
         get_args()
 
 
 def test_get_args_when_destination_is_none_and_destination_type_is_server_causes_exit(patches):
     patches.cli_args.destination_type = "server"
     patches.cli_args.destination = None
-    with pytest.raises(AttributeError):
+    with pytest.raises(ValueError):
         get_args()
 
 
 def test_get_args_when_destination_is_none_and_destination_type_is_file_causes_exit(patches):
     patches.cli_args.destination_type = "file"
     patches.cli_args.destination = None
-    with pytest.raises(AttributeError):
+    with pytest.raises(ValueError):
         get_args()

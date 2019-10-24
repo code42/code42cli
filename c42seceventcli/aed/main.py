@@ -59,6 +59,7 @@ def _create_handlers(args):
     output_format = args.output_format
     logger_formatter = _get_log_formatter(output_format)
     logger = _get_logger(
+        args,
         formatter=logger_formatter,
         service_name=_SERVICE_NAME,
         destination=args.destination,
@@ -71,6 +72,7 @@ def _create_handlers(args):
 
 
 def _get_logger(
+    args,
     formatter,
     service_name,
     destination,
@@ -88,6 +90,7 @@ def _get_logger(
             destination_protocol=destination_protocol,
         )
     except gaierror:
+        args.cli_parser.print_usage()
         print(
             "Error with provided server destination arguments: hostname={0}, port={1}, protocol={2}.".format(
                 destination, destination_port, destination_protocol
@@ -95,6 +98,7 @@ def _get_logger(
         )
         exit(1)
     except IOError:
+        args.cli_parser.print_usage()
         print("Error with provided file path {0}. Try --dest path/to/file.".format(destination))
         exit(1)
 
