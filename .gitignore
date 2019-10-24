@@ -1,5 +1,11 @@
+# Test config file
+*config.cfg
+
 # IDE files
 .idea/
+
+# Database files
+*.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
