@@ -72,7 +72,6 @@ def _create_handlers(args):
 
 
 def _get_logger(
-    args,
     formatter,
     service_name,
     destination,
