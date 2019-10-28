@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime, timedelta
-from socket import gaierror
+from socket import error as socket_error
 
 from py42 import settings
 import py42.debug_level as debug_level
@@ -240,8 +240,8 @@ def test_main_when_get_logger_raises_io_error_causes_exit(patches):
         main.main()
 
 
-def test_main_when_get_logger_raises_gaierror_causes_exit(patches):
-    patches.get_logger.side_effect = gaierror
+def test_main_when_get_logger_raises_socket_error_causes_exit(patches):
+    patches.get_logger.side_effect = socket_error
     with pytest.raises(SystemExit):
         main.main()
 
