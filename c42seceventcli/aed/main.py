@@ -1,5 +1,5 @@
 import json
-from socket import gaierror
+from socket import error as socket_error
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 from datetime import datetime, timedelta
@@ -89,17 +89,17 @@ def _get_logger(
             destination_port=destination_port,
             destination_protocol=destination_protocol,
         )
-    except gaierror:
-        args.cli_parser.print_usage()
+    except socket_error as ex:
+        print(repr(ex))
         print(
-            "Error with provided server destination arguments: hostname={0}, port={1}, protocol={2}.".format(
+            "Hostname={0}, port={1}, protocol={2}.".format(
                 destination, destination_port, destination_protocol
             )
         )
         exit(1)
-    except IOError:
-        args.cli_parser.print_usage()
-        print("Error with provided file path {0}. Try --dest path/to/file.".format(destination))
+    except IOError as ex:
+        print(repr(ex))
+        print("File path: {0}.".format(destination))
         exit(1)
 
 
