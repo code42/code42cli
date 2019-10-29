@@ -73,6 +73,18 @@ class DestinationArgs(object):
 
 
 def get_logger(formatter, service_name, destination_args):
+    """Args:
+           formatter: The formatter for logger.
+           service_name: The name of the script getting the logger.
+                Necessary for distinguishing multiple loggers.
+           destination_args: DTO holding the destination_type, destination, destination_port, and destination_protocol.
+        Returns:
+            A logger with the correct handler per destination_type.
+            For destination_type == stdout, it uses a StreamHandler.
+            For destination_type == file, it uses a FileHandler.
+            For destination_type == server, it uses a NoPrioritySyslogHandler.
+    """
+
     logger = logging.getLogger("{0}_logger".format(service_name))
     handler = _get_log_handler(destination_args)
     handler.setFormatter(formatter)
