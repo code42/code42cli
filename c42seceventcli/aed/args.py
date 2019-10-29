@@ -118,6 +118,7 @@ class AEDArgs(common.SecArgs):
             self._raise_value_error("Code42 username not provided.")
 
     def verify_destination_args(self):
+        self.destination_type = self.destination_type.lower()
         if self.destination_type == "stdout" and self.destination is not None:
             msg = (
                 "Destination '{0}' not applicable for stdout. "

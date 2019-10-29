@@ -222,7 +222,7 @@ def test_main_when_destination_port_is_set_passes_port_to_get_logger(patches):
     expected = 1000
     patches.aed_args.destination_port = expected
     main.main()
-    actual = patches.get_logger.call_args[1]["destination_port"]
+    actual = patches.get_logger.call_args[1]["destination_args"].destination_port
     assert actual == expected
 
 
@@ -230,7 +230,7 @@ def test_main_when_given_destination_protocol_via_cli_passes_port_to_get_logger(
     expected = "SOME PROTOCOL"
     patches.aed_args.destination_protocol = expected
     main.main()
-    actual = patches.get_logger.call_args[1]["destination_protocol"]
+    actual = patches.get_logger.call_args[1]["destination_args"].destination_protocol
     assert actual == expected
 
 

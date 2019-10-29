@@ -58,47 +58,48 @@ def _create_handlers(args):
     handlers.handle_error = error_logger.error
     output_format = args.output_format
     logger_formatter = _get_log_formatter(output_format)
+    destination_args = _create_destination_args(args)
     logger = _get_logger(
-        formatter=logger_formatter,
-        service_name=_SERVICE_NAME,
-        destination=args.destination,
-        destination_type=args.destination_type,
-        destination_port=int(args.destination_port),
-        destination_protocol=args.destination_protocol,
+        formatter=logger_formatter, service_name=_SERVICE_NAME, destination_args=destination_args
     )
     handlers.handle_response = _get_response_handler(logger)
     return handlers
 
 
-def _get_logger(
-    formatter,
-    service_name,
-    destination,
-    destination_type,
-    destination_port=514,
-    destination_protocol="TCP",
-):
+def _create_destination_args(args):
+    destination_args = common.DestinationArgs()
+    destination_args.destination_type = args.destination_type
+    destination_args.destination = args.destination
+    destination_args.destination_port = args.destination_port
+    destination_args.destination_protocol = args.destination_protocol
+    return destination_args
+
+
+def _get_logger(formatter, service_name, destination_args):
     try:
         return common.get_logger(
-            formatter=formatter,
-            service_name=service_name,
-            destination=destination,
-            destination_type=destination_type,
-            destination_port=destination_port,
-            destination_protocol=destination_protocol,
+            formatter=formatter, service_name=service_name, destination_args=destination_args
         )
     except (herror, gaierror, timeout) as ex:
         print(repr(ex))
-        print(
-            "Hostname={0}, port={1}, protocol={2}.".format(
-                destination, destination_port, destination_protocol
-            )
-        )
+        _print_server_args(destination_args)
         exit(1)
     except IOError as ex:
         print(repr(ex))
-        print("File path: {0}.".format(destination))
+        if ex.errno == 61:
+            _print_server_args(destination_args)
+            return
+
+        print("File path: {0}.".format(destination_args.destination))
         exit(1)
+
+
+def _print_server_args(server_args):
+    print(
+        "Hostname={0}, port={1}, protocol={2}.".format(
+            server_args.destination, server_args.destination_port, server_args.destination_protocol
+        )
+    )
 
 
 def _set_up_cursor_store(record_cursor, clear_cursor, handlers):

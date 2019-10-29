@@ -65,39 +65,33 @@ def get_error_logger(service_name):
     return logger
 
 
-def get_logger(
-    formatter,
-    service_name,
-    destination,
-    destination_type,
-    destination_port=514,
-    destination_protocol="TCP",
-):
-    destination_type = destination_type.lower()
+class DestinationArgs(object):
+    destination_type = None
+    destination = None
+    destination_port = 514
+    destination_protocol = "TCP"
+
+
+def get_logger(formatter, service_name, destination_args):
     logger = logging.getLogger("{0}_logger".format(service_name))
-    handler = _get_log_handler(
-        destination=destination,
-        destination_type=destination_type,
-        destination_port=destination_port,
-        destination_protocol=destination_protocol,
-    )
+    handler = _get_log_handler(destination_args)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
     return logger
 
 
-def _get_log_handler(
-    destination, destination_type, destination_port=514, destination_protocol="TCP"
-):
-    if destination_type == "stdout":
+def _get_log_handler(destination_args):
+    if destination_args.destination_type == "stdout":
         return logging.StreamHandler(sys.stdout)
-    elif destination_type == "server":
+    elif destination_args.destination_type == "server":
         return NoPrioritySysLogHandler(
-            hostname=destination, port=destination_port, protocol=destination_protocol
+            hostname=destination_args.destination,
+            port=destination_args.destination_port,
+            protocol=destination_args.destination_protocol,
         )
-    elif destination_type == "file":
-        return logging.FileHandler(filename=destination)
+    elif destination_args.destination_type == "file":
+        return logging.FileHandler(filename=destination_args.destination)
 
 
 def get_stored_password(service_name, username):

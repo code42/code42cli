@@ -2,7 +2,6 @@ import pytest
 from os import path
 from datetime import datetime, timedelta
 from logging import StreamHandler, FileHandler
-from logging.handlers import RotatingFileHandler
 
 from c42secevents.logging.handlers import NoPrioritySysLogHandler
 
@@ -15,6 +14,7 @@ from c42seceventcli.common.util import (
     get_stored_password,
     delete_stored_password,
     get_user_project_path,
+    DestinationArgs,
 )
 
 
@@ -223,7 +223,9 @@ def test_get_error_logger_uses_rotating_file_with_expected_args(mocker, mock_get
 
 def test_get_logger_when_destination_type_is_stdout_adds_stream_handler_to_logger(mock_get_logger):
     service = "TEST_SERVICE"
-    logger = get_logger(None, service, "Somewhere", "stdout")
+    args = DestinationArgs()
+    args.destination_type = "stdout"
+    logger = get_logger(None, service, args)
     actual = type(logger.addHandler.call_args[0][0])
     expected = StreamHandler
     assert actual == expected
@@ -233,7 +235,9 @@ def test_get_logger_when_destination_type_is_file_adds_file_handler_to_logger(
     mock_get_logger, mock_file_handler
 ):
     service = "TEST_SERVICE"
-    logger = get_logger(None, service, "Somewhere", "file")
+    args = DestinationArgs()
+    args.destination_type = "file"
+    logger = get_logger(None, service, args)
     actual = type(logger.addHandler.call_args[0][0])
     expected = FileHandler
     assert actual == expected
@@ -243,7 +247,9 @@ def test_get_logger_when_destination_type_is_server_adds_no_priority_syslog_hand
     mock_get_logger, mock_no_priority_syslog_handler
 ):
     service = "TEST_SERVICE"
-    logger = get_logger(None, service, "Somewhere", "server")
+    args = DestinationArgs()
+    args.destination_type = "server"
+    logger = get_logger(None, service, args)
     actual = type(logger.addHandler.call_args[0][0])
     expected = NoPrioritySysLogHandler
     assert actual == expected
