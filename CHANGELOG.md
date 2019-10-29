@@ -10,7 +10,13 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ## 0.1.1 - 2019-10-29
 
 ### Fixed
-- Issue where error message was inaccurate when using the wrong port for server destinations.
+- Issue where IOError message was inaccurate when using the wrong port for server destinations.
 
 ### Added
 - Error handling for all socket errors.
+- Error handling for IOError 'connection refused'.
+- `aed.common.util.DestinationArgs` DTO for `aed.common.util.get_logger`. 
+    - `destination_type`
+    - `destination`
+    - `destination_port`
+    - `destination_protocol`
