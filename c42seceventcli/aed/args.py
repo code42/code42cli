@@ -119,6 +119,7 @@ class AEDArgs(common.SecArgs):
 
     def verify_destination_args(self):
         self.destination_type = self.destination_type.lower()
+        self.destination_port = int(self.destination_port)
         if self.destination_type == "stdout" and self.destination is not None:
             msg = (
                 "Destination '{0}' not applicable for stdout. "

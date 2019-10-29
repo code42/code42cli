@@ -88,7 +88,7 @@ def _get_logger(formatter, service_name, destination_args):
         print(repr(ex))
         if ex.errno == 61:
             _print_server_args(destination_args)
-            return
+            exit(1)
 
         print("File path: {0}.".format(destination_args.destination))
         exit(1)
