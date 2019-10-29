@@ -127,7 +127,7 @@ class AEDArgs(common.SecArgs):
         try:
             self.destination_port = int(self.destination_port)
         except ValueError:
-            msg = ("Destination port '{0}' not a base 10 integer.".format(self.destination_port))
+            msg = "Destination port '{0}' not a base 10 integer.".format(self.destination_port)
             self._raise_value_error(msg)
 
     def _verify_stdout_destination(self):

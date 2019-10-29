@@ -234,7 +234,9 @@ def test_main_when_given_destination_protocol_via_cli_passes_port_to_get_logger(
     assert actual == expected
 
 
-def test_main_when_get_logger_raises_io_error_without_errno_61_print_error_about_file_path(patches, capsys):
+def test_main_when_get_logger_raises_io_error_without_errno_61_print_error_about_file_path(
+    patches, capsys
+):
     patches.get_logger.side_effect = IOError
     with pytest.raises(SystemExit):
         main.main()
@@ -242,7 +244,9 @@ def test_main_when_get_logger_raises_io_error_without_errno_61_print_error_about
     assert "file path" in capsys.readouterr().out.lower()
 
 
-def test_main_when_get_logger_raises_io_error_with_errno_61_prints_error_about_hostname(patches, capsys):
+def test_main_when_get_logger_raises_io_error_with_errno_61_prints_error_about_hostname(
+    patches, capsys
+):
     err = IOError()
     err.errno = 61
     patches.get_logger.side_effect = err
