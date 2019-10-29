@@ -1,4 +1,5 @@
 import json
+from socket import gaierror, herror, timeout
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 from datetime import datetime, timedelta
@@ -86,7 +87,7 @@ def _get_logger(
             destination_port=destination_port,
             destination_protocol=destination_protocol,
         )
-    except OSError as ex:
+    except (herror, gaierror, timeout) as ex:
         print(repr(ex))
         print(
             "Hostname={0}, port={1}, protocol={2}.".format(

@@ -1,5 +1,6 @@
 import pytest
 from datetime import datetime, timedelta
+from socket import herror, gaierror, timeout
 
 from py42 import settings
 import py42.debug_level as debug_level
@@ -239,8 +240,20 @@ def test_main_when_get_logger_raises_io_error_causes_exit(patches):
         main.main()
 
 
-def test_main_when_get_logger_raises_os_error_causes_exit(patches):
-    patches.get_logger.side_effect = OSError
+def test_main_when_get_logger_raises_h_error_causes_exit(patches):
+    patches.get_logger.side_effect = gaierror
+    with pytest.raises(SystemExit):
+        main.main()
+
+
+def test_main_when_get_logger_raises_gai_error_causes_exit(patches):
+    patches.get_logger.side_effect = herror
+    with pytest.raises(SystemExit):
+        main.main()
+
+
+def test_main_when_get_logger_raises_timeout_causes_exit(patches):
+    patches.get_logger.side_effect = timeout
     with pytest.raises(SystemExit):
         main.main()
 
