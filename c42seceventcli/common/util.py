@@ -68,8 +68,8 @@ def get_error_logger(service_name):
 class DestinationArgs(object):
     destination_type = None
     destination = None
-    destination_port = 514
-    destination_protocol = "TCP"
+    destination_port = None
+    destination_protocol = None
 
 
 def get_logger(formatter, service_name, destination_args):

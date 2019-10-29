@@ -72,6 +72,13 @@ def _create_destination_args(args):
     destination_args.destination = args.destination
     destination_args.destination_port = args.destination_port
     destination_args.destination_protocol = args.destination_protocol
+
+    if destination_args.destination_port is None:
+        destination_args.destination_port = 514
+
+    if destination_args.destination_protocol is None:
+        destination_args.destination_protocol = "TCP"
+
     return destination_args
 
 
