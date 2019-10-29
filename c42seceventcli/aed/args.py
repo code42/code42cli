@@ -119,7 +119,11 @@ class AEDArgs(common.SecArgs):
 
     def verify_destination_args(self):
         self.destination_type = self.destination_type.lower()
-        self.destination_port = int(self.destination_port)
+        try:
+            self.destination_port = int(self.destination_port)
+        except ValueError:
+            msg = ("Destination port '{0}' not a base 10 integer.".format(self.destination_port))
+            self._raise_value_error(msg)
         if self.destination_type == "stdout" and self.destination is not None:
             msg = (
                 "Destination '{0}' not applicable for stdout. "
