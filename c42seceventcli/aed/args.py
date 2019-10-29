@@ -27,6 +27,7 @@ def get_args():
     cli_args = vars(parser.parse_args())
     args = _union_cli_args_with_config_file_args(cli_args)
     args.cli_parser = parser
+    args.initialize_args()
     args.verify_authority_arg()
     args.verify_username_arg()
     args.verify_destination_args()
@@ -99,6 +100,14 @@ class AEDArgs(common.SecArgs):
         self.begin_date = AEDArgs._get_default_begin_date()
         self.end_date = AEDArgs._get_default_end_date()
 
+    def initialize_args(self):
+        self.destination_type = self.destination_type.lower()
+        try:
+            self.destination_port = int(self.destination_port)
+        except ValueError:
+            msg = "Destination port '{0}' not a base 10 integer.".format(self.destination_port)
+            self._raise_value_error(msg)
+
     @staticmethod
     def _get_default_begin_date():
         default_begin_date = datetime.now() - timedelta(days=60)
@@ -118,6 +127,10 @@ class AEDArgs(common.SecArgs):
             self._raise_value_error("Code42 username not provided.")
 
     def verify_destination_args(self):
+        self._verify_stdout_destination()
+        self._verify_server_destination()
+
+    def _verify_stdout_destination(self):
         if self.destination_type == "stdout" and self.destination is not None:
             msg = (
                 "Destination '{0}' not applicable for stdout. "
@@ -126,10 +139,12 @@ class AEDArgs(common.SecArgs):
             msg = msg.format(self.destination)
             self._raise_value_error(msg)
 
+    def _verify_file_destination(self):
         if self.destination_type == "file" and self.destination is None:
             msg = "Missing file name. Try: '--dest path/to/file'."
             self._raise_value_error(msg)
 
+    def _verify_server_destination(self):
         if self.destination_type == "server" and self.destination is None:
             msg = "Missing server URL. Try: '--dest https://syslog.example.com'."
             self._raise_value_error(msg)

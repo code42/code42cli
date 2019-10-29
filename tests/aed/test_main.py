@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime, timedelta
-from socket import gaierror
+from socket import herror, gaierror, timeout
 
 from py42 import settings
 import py42.debug_level as debug_level
@@ -222,7 +222,7 @@ def test_main_when_destination_port_is_set_passes_port_to_get_logger(patches):
     expected = 1000
     patches.aed_args.destination_port = expected
     main.main()
-    actual = patches.get_logger.call_args[1]["destination_port"]
+    actual = patches.get_logger.call_args[1]["destination_args"].destination_port
     assert actual == expected
 
 
@@ -230,18 +230,47 @@ def test_main_when_given_destination_protocol_via_cli_passes_port_to_get_logger(
     expected = "SOME PROTOCOL"
     patches.aed_args.destination_protocol = expected
     main.main()
-    actual = patches.get_logger.call_args[1]["destination_protocol"]
+    actual = patches.get_logger.call_args[1]["destination_args"].destination_protocol
     assert actual == expected
 
 
-def test_main_when_get_logger_raises_io_error_causes_exit(patches):
+def test_main_when_get_logger_raises_io_error_without_errno_61_print_error_about_file_path(
+    patches, capsys
+):
     patches.get_logger.side_effect = IOError
     with pytest.raises(SystemExit):
         main.main()
 
+    assert "file path" in capsys.readouterr().out.lower()
 
-def test_main_when_get_logger_raises_gaierror_causes_exit(patches):
+
+def test_main_when_get_logger_raises_io_error_with_errno_61_prints_error_about_hostname(
+    patches, capsys
+):
+    err = IOError()
+    err.errno = 61
+    patches.get_logger.side_effect = err
+
+    with pytest.raises(SystemExit):
+        main.main()
+
+    assert "hostname" in capsys.readouterr().out.lower()
+
+
+def test_main_when_get_logger_raises_h_error_causes_exit(patches):
     patches.get_logger.side_effect = gaierror
+    with pytest.raises(SystemExit):
+        main.main()
+
+
+def test_main_when_get_logger_raises_gai_error_causes_exit(patches):
+    patches.get_logger.side_effect = herror
+    with pytest.raises(SystemExit):
+        main.main()
+
+
+def test_main_when_get_logger_raises_timeout_causes_exit(patches):
+    patches.get_logger.side_effect = timeout
     with pytest.raises(SystemExit):
         main.main()
 
