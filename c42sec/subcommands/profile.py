@@ -38,7 +38,7 @@ def show(*args):
 
 
 def set(*args):
-    print("Set called")
+    print(args)
 
 
 def _add_set_command_args(parser):
