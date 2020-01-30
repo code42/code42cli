@@ -1,6 +1,5 @@
 import keyring
-import getpass
-from c42sec.util import get_user_project_path, get_input, SERVICE_NAME
+from c42sec.util import get_user_project_path, SERVICE_NAME
 from configparser import ConfigParser
 
 
