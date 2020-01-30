@@ -12,8 +12,8 @@ from c42secevents.logging.handlers import NoPrioritySysLogHandler
 from c42secevents.common import convert_datetime_to_timestamp
 
 
-def get_user_project_path(subdir=None):
-    """The path on your user dir to /.c42seceventcli/[subdir]"""
+def get_user_project_path(subdir=""):
+    """The path on your user dir to /.c42sec/[subdir]"""
     package_name = __name__.split(".")[0]
     home = path.expanduser("~")
     user_project_path = path.join(home, ".{0}".format(package_name), subdir)

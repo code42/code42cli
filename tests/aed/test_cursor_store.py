@@ -1,5 +1,5 @@
 from c42secevents.extractors import INSERTION_TIMESTAMP_FIELD_NAME
-from c42seceventcli.aed.cursor_store import AEDCursorStore
+from c42sec.cursor_store import AEDCursorStore
 from tests.conftest import MOCK_TEST_DB_PATH
 
 

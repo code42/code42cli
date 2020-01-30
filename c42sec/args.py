@@ -1,12 +1,8 @@
 from datetime import datetime, timedelta
 from argparse import ArgumentParser
 
-from c42seceventcli.common.cli_args import (
+from c42sec.common.cli_args import (
     add_clear_cursor_arg,
-    add_reset_password_arg,
-    add_config_file_path_arg,
-    add_authority_host_address_arg,
-    add_username_arg,
     add_begin_date_arg,
     add_end_date_arg,
     add_ignore_ssl_errors_arg,
@@ -19,7 +15,7 @@ from c42seceventcli.common.cli_args import (
     add_destination_port_arg,
     add_destination_protocol_arg,
 )
-import c42seceventcli.common.util as common
+import c42sec.common.util as common
 
 
 def get_args():
@@ -38,10 +34,6 @@ def _get_arg_parser():
     parser = ArgumentParser()
 
     add_clear_cursor_arg(parser)
-    add_reset_password_arg(parser)
-    add_config_file_path_arg(parser)
-    add_authority_host_address_arg(parser)
-    add_username_arg(parser)
     add_begin_date_arg(parser)
     add_ignore_ssl_errors_arg(parser)
     add_output_format_arg(parser)

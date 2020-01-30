@@ -1,5 +1,5 @@
 from os import path
-from c42seceventcli.common.cursor_store import SecurityEventCursorStore
+from c42sec.common.cursor_store import SecurityEventCursorStore
 
 
 class TestSecurityEventCursorStore(object):
@@ -7,7 +7,7 @@ class TestSecurityEventCursorStore(object):
         self, sqlite_connection
     ):
         home_dir = path.expanduser("~")
-        expected_path = path.join(home_dir, ".c42seceventcli/db")
+        expected_path = path.join(home_dir, ".c42sec/db")
         expected_db_name = "TEST"
         expected_db_file_path = "{0}/{1}.db".format(expected_path, expected_db_name)
         SecurityEventCursorStore(expected_db_name)

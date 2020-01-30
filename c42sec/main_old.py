@@ -11,11 +11,11 @@ from c42secevents.extractors import AEDEventExtractor
 from c42secevents.common import FileEventHandlers, convert_datetime_to_timestamp
 from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
 
-import c42seceventcli.common.util as common
-import c42seceventcli.aed.args as aed_args
-from c42seceventcli.aed.cursor_store import AEDCursorStore
+import c42sec.common.util as common
+import c42sec.args as aed_args
+from c42sec.cursor_store import AEDCursorStore
 
-_SERVICE_NAME = u"c42seceventcli_aed"
+_SERVICE_NAME = u"c42sec"
 
 
 def main():

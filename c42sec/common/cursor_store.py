@@ -1,5 +1,5 @@
 import sqlite3
-from c42seceventcli.common.util import get_user_project_path
+from c42sec.common.util import get_user_project_path
 
 
 class SecurityEventCursorStore(object):

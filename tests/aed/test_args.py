@@ -1,7 +1,7 @@
 import pytest
 from argparse import Namespace
 
-from c42seceventcli.aed.args import get_args
+from c42sec.args import get_args
 
 
 @pytest.fixture
@@ -44,7 +44,7 @@ def mock_config_args():
 
 @pytest.fixture
 def mock_config_arg_parser(mocker, mock_config_args):
-    mock_parser = mocker.patch("c42seceventcli.common.util.get_config_args")
+    mock_parser = mocker.patch("c42sec.common.util.get_config_args")
     mock_parser.return_value = mock_config_args
     return mock_parser
 
@@ -58,23 +58,23 @@ def mock_cli_arg_parser(mocker, mock_cli_args):
 
 @pytest.fixture
 def mock_authority_verification(mocker):
-    return mocker.patch("c42seceventcli.aed.args.AEDArgs.verify_authority_arg")
+    return mocker.patch("c42sec.aed.args.AEDArgs.verify_authority_arg")
 
 
 @pytest.fixture
 def mock_username_verification(mocker):
-    return mocker.patch("c42seceventcli.aed.args.AEDArgs.verify_username_arg")
+    return mocker.patch("c42sec.aed.args.AEDArgs.verify_username_arg")
 
 
 @pytest.fixture
 def mock_destination_args_verification(mocker):
-    return mocker.patch("c42seceventcli.aed.args.AEDArgs.verify_destination_args")
+    return mocker.patch("c42sec.aed.args.AEDArgs.verify_destination_args")
 
 
 def test_get_args_calls_sec_args_try_set_with_expected_args(
     mocker, patches_with_mocked_args_verifications
 ):
-    mock_setter = mocker.patch("c42seceventcli.common.util.SecArgs.try_set")
+    mock_setter = mocker.patch("c42sec.common.util.SecArgs.try_set")
     key = "c42_authority_url"
     expected_cli_val = "URL1"
     expected_config_val = "URL2"

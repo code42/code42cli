@@ -1,16 +1,6 @@
 from argparse import SUPPRESS
 
 
-def add_config_file_path_arg(arg_group):
-    arg_group.add_argument(
-        "-c",
-        "--config-file",
-        dest="config_file",
-        action="store",
-        help="The path to the config file to use for the rest of the arguments.",
-    )
-
-
 def add_clear_cursor_arg(arg_group):
     arg_group.add_argument(
         "--clear-cursor",
@@ -18,36 +8,6 @@ def add_clear_cursor_arg(arg_group):
         action="store_true",
         help="Resets the stored cursor.",
         default=False,
-    )
-
-
-def add_reset_password_arg(arg_group):
-    arg_group.add_argument(
-        "--reset-password",
-        dest="reset_password",
-        action="store_true",
-        help="Clears stored password and prompts user for password.",
-        default=False,
-    )
-
-
-def add_authority_host_address_arg(arg_group):
-    arg_group.add_argument(
-        "-s",
-        "--server",
-        dest="c42_authority_url",
-        action="store",
-        help="The full scheme, url and port of the Code42 server.",
-    )
-
-
-def add_username_arg(arg_group):
-    arg_group.add_argument(
-        "-u",
-        "--username",
-        action="store",
-        dest="c42_username",
-        help="The username of the Code42 API user.",
     )
 
 

@@ -5,7 +5,7 @@ from logging import StreamHandler, FileHandler
 
 from c42secevents.logging.handlers import NoPrioritySysLogHandler
 
-from c42seceventcli.common.util import (
+from c42sec.common.util import (
     get_config_args,
     parse_timestamp,
     get_logger,
@@ -111,7 +111,7 @@ def mock_getpass_function(mocker):
 
 @pytest.fixture
 def mock_get_input(mocker):
-    return mocker.patch("c42seceventcli.common.util._get_input")
+    return mocker.patch("c42sec.common.util._get_input")
 
 
 @pytest.fixture
@@ -130,7 +130,7 @@ def mock_user_expansion(mocker):
 
 @pytest.fixture
 def mock_dir_maker(mocker):
-    return mocker.patch("c42seceventcli.common.util.makedirs")
+    return mocker.patch("c42sec.common.util.makedirs")
 
 
 @pytest.fixture
@@ -142,7 +142,7 @@ def test_get_user_project_path_returns_expected_path(path_patches):
     expected_home = "/PATH/"
     expected_subdir = "SUBDIR"
     path_patches.expand_user.return_value = expected_home
-    expected = path.join(expected_home, ".c42seceventcli", expected_subdir)
+    expected = path.join(expected_home, ".c42sec", expected_subdir)
     actual = get_user_project_path(expected_subdir)
     assert actual == expected
 
@@ -151,7 +151,7 @@ def test_get_user_project_path_calls_make_dirs_when_path_does_not_exist(path_pat
     expected_home = "/PATH/"
     expected_subdir = "SUBDIR"
     path_patches.expand_user.return_value = expected_home
-    expected_path = path.join(expected_home, ".c42seceventcli", expected_subdir)
+    expected_path = path.join(expected_home, ".c42sec", expected_subdir)
     path_patches.path_exists.return_value = False
     get_user_project_path(expected_subdir)
     path_patches.make_dirs.assert_called_once_with(expected_path)
