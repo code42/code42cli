@@ -1,5 +1,14 @@
 from os import path
-from c42sec.common.cursor_store import SecurityEventCursorStore
+
+import pytest
+from c42sec.cursor_store import SecurityEventCursorStore
+
+MOCK_TEST_DB_PATH = "test_path.db"
+
+
+@pytest.fixture
+def sqlite_connection(mocker):
+    return mocker.patch("sqlite3.connect")
 
 
 class TestSecurityEventCursorStore(object):
