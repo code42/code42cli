@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from c42sec.subcommands import profile
+from c42sec.profile import profile
 
 
 def main():
