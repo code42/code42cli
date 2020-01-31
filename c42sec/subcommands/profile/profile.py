@@ -1,16 +1,22 @@
-import keyring
-from c42sec.util import get_user_project_path, SERVICE_NAME
-from configparser import ConfigParser
-
-
-_SECTION = u"Code42"
-_AUTHORITY_KEY = u"c42_authority_url"
-_USERNAME_KEY = u"c42_username"
-_PASSWORD_KEY = u"c42_password"
-_IGNORE_SSL_ERRORS_KEY = u"ignore_ssl_errors"
+from argparse import ArgumentParser
+from c42sec.subcommands.profile._config import (
+    get_config_profile,
+    set_authority_url,
+    set_username,
+    set_ignore_ssl_errors,
+    ConfigurationKeys,
+)
+from c42sec.subcommands.profile._password import get_password, set_password
 
 
 def init(parent_parser):
+    # type: (ArgumentParser) -> None
+    """Sets up the `profile` command with `show` and `set` subcommands.
+            `show` will print the current profile while `set` will modify profile properties.
+            Use `-h` after any subcommand for usage.
+        Args:
+            parent_parser: The parser for the CLI command before this one (c42sec)
+    """
     subparsers = parent_parser.add_subparsers()
     parser_profile = subparsers.add_parser("profile")
     parser_profile.set_defaults(func=show_profile)
@@ -25,50 +31,47 @@ def init(parent_parser):
 
 
 def get_profile():
-    profile = _get_config_profile()
-    profile[_PASSWORD_KEY] = _get_password()
+    """Returns the current profile as a dict"""
+    profile = get_config_profile()
+    profile[ConfigurationKeys.PASSWORD_KEY] = get_password()
     return profile
 
 
 def show_profile(*args):
-    profile = _get_config_profile()
+    """Prints the current profile to stdout."""
+    profile = get_config_profile()
     print()
     print("Current profile:")
     print("========================")
     for key in profile:
         print("{} = {}".format(key, profile[key]))
 
-    print()
-    if _get_password() is not None:
+    if get_password() is not None:
+        print()
         print("A password exists for this profile.")
 
     print()
 
 
 def set_profile(args):
-    path = _get_config_file_path()
-    parser = ConfigParser()
-    profile = _get_config_profile_from_parser(parser)
+    """Sets the current profile using command line arguments."""
 
     if args.c42_authority_url is not None:
-        profile[_AUTHORITY_KEY] = args.c42_authority_url
+        set_authority_url(args.c42_authority_url)
         print("'Code42 authority URL' saved. New value: {}".format(args.c42_authority_url))
 
     if args.c42_username is not None:
-        profile[_USERNAME_KEY] = args.c42_username
+        set_username(args.c42_username)
         print("'Code42 username' saved. New value: {}".format(args.c42_username))
 
     if args.ignore_ssl_errors is not None:
-        profile[_IGNORE_SSL_ERRORS_KEY] = str(args.ignore_ssl_errors)
+        set_ignore_ssl_errors(args.ignore_ssl_errors)
         print("'Ignore SSL errors' saved. New value: {}".format(args.ignore_ssl_errors))
 
     # Must happen after setting password
     if args.c42_password is not None:
-        _set_password(args.c42_password)
+        set_password(args.c42_password)
         print("'Code42 Password' saved.")
-
-    with open(path, "w+") as config_file:
-        parser.write(config_file)
 
 
 def _add_set_command_args(parser):
@@ -83,7 +86,7 @@ def _add_authority_arg(parser):
         "-s",
         "--server",
         action="store",
-        dest=_AUTHORITY_KEY,
+        dest=ConfigurationKeys.AUTHORITY_KEY,
         help="The full scheme, url and port of the Code42 server.",
     )
 
@@ -93,7 +96,7 @@ def _add_username_arg(parser):
         "-u",
         "--username",
         action="store",
-        dest=_USERNAME_KEY,
+        dest=ConfigurationKeys.USERNAME_KEY,
         help="The username of the Code42 API user.",
     )
 
@@ -103,7 +106,7 @@ def _add_password_arg(parser):
         "-p",
         "--password",
         action="store",
-        dest=_PASSWORD_KEY,
+        dest=ConfigurationKeys.PASSWORD_KEY,
         help="The password for the Code42 API user. "
         "Note: if you don't supply a password, you will be prompted. "
         "Passwords are not stored in plain text.",
@@ -115,52 +118,9 @@ def _add_ignore_ssl_errors_arg(parser):
         "--ignore-ssl-errors",
         action="store_true",
         default=None,
-        dest=_IGNORE_SSL_ERRORS_KEY,
+        dest=ConfigurationKeys.IGNORE_SSL_ERRORS_KEY,
         help="Do not validate the SSL certificates of Code42 servers",
     )
-
-
-def _get_config_file_path():
-    path = "{}/config.cfg".format(get_user_project_path())
-    try:
-        # Make sure exists
-        open(path, "r").close()
-    except IOError:
-        _create_new_config_file()
-
-    return path
-
-
-def _get_config_profile():
-    parser = ConfigParser()
-    return _get_config_profile_from_parser(parser)
-
-
-def _get_config_profile_from_parser(parser):
-    config_file_path = _get_config_file_path()
-    parser.read(config_file_path)
-    return parser[_SECTION]
-
-
-def _create_new_config_file():
-    config_parser = ConfigParser()
-    config_parser[_SECTION] = {}
-    config_parser[_SECTION][_AUTHORITY_KEY] = "null"
-    config_parser[_SECTION][_USERNAME_KEY] = "null"
-    config_parser[_SECTION][_IGNORE_SSL_ERRORS_KEY] = False
-    config_file_path = _get_config_file_path()
-    with open(config_file_path, "w+") as config_file:
-        config_parser.write(config_file)
-
-
-def _get_password():
-    username = _get_config_profile()[_USERNAME_KEY]
-    return keyring.get_password(SERVICE_NAME, username)
-
-
-def _set_password(password):
-    username = _get_config_profile()[_USERNAME_KEY]
-    keyring.set_password(SERVICE_NAME, username, password)
 
 
 if __name__ == "__main__":

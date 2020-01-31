@@ -2,9 +2,6 @@ import sys
 from os import path, makedirs
 
 
-SERVICE_NAME = u"c42sec"
-
-
 def get_input(prompt):
     if sys.version_info >= (3, 0):
         return input(prompt)
