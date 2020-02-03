@@ -8,14 +8,14 @@ def main():
     args = c42sec_arg_parser.parse_args()
 
     # Call which ever subcommand was given.
-    _call(args)
+    _call(args, c42sec_arg_parser.print_help)
 
 
-def _call(args):
+def _call(args, print_help):
     try:
         args.func(args)
     except AttributeError:
-        pass
+        print_help()
 
 
 if __name__ == "__main__":
