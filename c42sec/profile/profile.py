@@ -1,4 +1,6 @@
 from argparse import ArgumentParser
+from getpass import getpass
+
 from c42sec.profile._config import (
     get_config_profile,
     set_authority_url,
@@ -69,8 +71,9 @@ def set_profile(args):
         print("'Ignore SSL errors' saved. New value: {}".format(args.ignore_ssl_errors))
 
     # Must happen after setting password
-    if args.c42_password is not None:
-        set_password(args.c42_password)
+    if args.c42_password:
+        password = getpass()
+        set_password(password)
         print("'Code42 Password' saved.")
 
 
@@ -105,7 +108,7 @@ def _add_password_arg(parser):
     parser.add_argument(
         "-p",
         "--password",
-        action="store",
+        action="store_true",
         dest=ConfigurationKeys.PASSWORD_KEY,
         help="The password for the Code42 API user. "
         "Note: if you don't supply a password, you will be prompted. "
