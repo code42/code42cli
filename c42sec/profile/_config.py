@@ -7,7 +7,6 @@ class ConfigurationKeys(object):
     SECTION = u"Code42"
     AUTHORITY_KEY = u"c42_authority_url"
     USERNAME_KEY = u"c42_username"
-    PASSWORD_KEY = u"c42_password"
     IGNORE_SSL_ERRORS_KEY = u"ignore_ssl_errors"
 
 

@@ -1,6 +1,5 @@
 import sqlite3
-from c42seceventcli.common.util import get_user_project_path\
-
+from c42sec.util import get_user_project_path
 
 _INSERTION_TIMESTAMP_FIELD_NAME = u"insertionTimestamp"
 

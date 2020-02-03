@@ -1,5 +1,4 @@
 from getpass import getpass
-from py42.sdk import SDK
 
 from c42sec.profile._config import (
     get_config_profile,
@@ -15,7 +14,7 @@ class C42SecProfile(object):
     authority_url = ""
     username = ""
     ignore_ssl_errors = False
-    get_password = None
+    get_password = get_password
 
 
 def init(subcommand_parser):
@@ -42,10 +41,9 @@ def get_profile():
     """Returns the current profile object"""
     profile_values = get_config_profile()
     profile = C42SecProfile()
-    profile.authority_url = profile_values[ConfigurationKeys.AUTHORITY_KEY]
-    profile.username = profile_values[ConfigurationKeys.USERNAME_KEY]
-    profile.ignore_ssl_errors = profile_values[ConfigurationKeys.IGNORE_SSL_ERRORS_KEY]
-    profile.get_password = get_password
+    profile.authority_url = profile_values.get(ConfigurationKeys.AUTHORITY_KEY)
+    profile.username = profile_values.get(ConfigurationKeys.USERNAME_KEY)
+    profile.ignore_ssl_errors = profile_values.get(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
     return profile
 
 
@@ -80,23 +78,10 @@ def set_profile(args):
         print("'Ignore SSL errors' saved. New value: {}".format(args.ignore_ssl_errors))
 
     # Must happen after setting password
-    if args.c42_password:
+    if args.do_set_c42_password:
         password = getpass()
         set_password(password)
         print("'Code42 Password' saved.")
-
-
-def login():
-    # type: () -> SDK
-    try:
-        user = get_profile()
-        sdk = SDK.create_using_local_account(
-            host_address=user.authority_url, username=user.username, password=user.get_password()
-        )
-        return sdk
-    except Exception as ex:
-        print("Incorrect username, password, or authority host address.")
-        exit(1)
 
 
 def _add_set_command_args(parser):
@@ -131,9 +116,8 @@ def _add_password_arg(parser):
         "-p",
         "--password",
         action="store_true",
-        dest=ConfigurationKeys.PASSWORD_KEY,
-        help="The password for the Code42 API user. "
-        "Passwords are not stored in plain text.",
+        dest="do_set_c42_password",
+        help="The password for the Code42 API user. " "Passwords are not stored in plain text.",
     )
 
 

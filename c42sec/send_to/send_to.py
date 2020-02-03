@@ -1,5 +1,7 @@
+def init(subcommand_parser):
+    send_to_parser = subcommand_parser.add_parser("send-to")
+    send_to_parser.set_defaults(func=send_to)
 
 
-def init(parent_parser):
-    subparsers = parent_parser.add_subparsers()
-    write_to_parser = subparsers.add_parser("write-to")
+def send_to(args):
+    print("Send to called")
