@@ -1,5 +1,5 @@
-from argparse import ArgumentParser
 from getpass import getpass
+from py42.sdk import SDK
 
 from c42sec.profile._config import (
     get_config_profile,
@@ -11,16 +11,21 @@ from c42sec.profile._config import (
 from c42sec.profile._password import get_password, set_password
 
 
-def init(parent_parser):
-    # type: (ArgumentParser) -> None
+class C42SecProfile(object):
+    authority_url = ""
+    username = ""
+    ignore_ssl_errors = False
+    get_password = None
+
+
+def init(subcommand_parser):
     """Sets up the `profile` command with `show` and `set` subcommands.
             `show` will print the current profile while `set` will modify profile properties.
             Use `-h` after any subcommand for usage.
         Args:
-            parent_parser: The parser for the CLI command before this one (c42sec)
+            subcommand_parser: The subparsers group created by the parent parser
     """
-    subparsers = parent_parser.add_subparsers()
-    parser_profile = subparsers.add_parser("profile")
+    parser_profile = subcommand_parser.add_parser("profile")
     parser_profile.set_defaults(func=show_profile)
     profile_subparsers = parser_profile.add_subparsers()
 
@@ -33,9 +38,14 @@ def init(parent_parser):
 
 
 def get_profile():
-    """Returns the current profile as a dict"""
-    profile = get_config_profile()
-    profile[ConfigurationKeys.PASSWORD_KEY] = get_password()
+    # type: () -> C42SecProfile
+    """Returns the current profile object"""
+    profile_values = get_config_profile()
+    profile = C42SecProfile()
+    profile.authority_url = profile_values[ConfigurationKeys.AUTHORITY_KEY]
+    profile.username = profile_values[ConfigurationKeys.USERNAME_KEY]
+    profile.ignore_ssl_errors = profile_values[ConfigurationKeys.IGNORE_SSL_ERRORS_KEY]
+    profile.get_password = get_password
     return profile
 
 
@@ -43,14 +53,13 @@ def show_profile(*args):
     """Prints the current profile to stdout."""
     profile = get_config_profile()
     print()
-    print("Current profile:")
-    print("========================")
+    print("Profile:")
+
     for key in profile:
-        print("{} = {}".format(key, profile[key]))
+        print("\t* {} = {}".format(key, profile[key]))
 
     if get_password() is not None:
-        print()
-        print("A password exists for this profile.")
+        print("\t* A password exists for this profile.")
 
     print()
 
@@ -75,6 +84,19 @@ def set_profile(args):
         password = getpass()
         set_password(password)
         print("'Code42 Password' saved.")
+
+
+def login():
+    # type: () -> SDK
+    try:
+        user = get_profile()
+        sdk = SDK.create_using_local_account(
+            host_address=user.authority_url, username=user.username, password=user.get_password()
+        )
+        return sdk
+    except Exception as ex:
+        print("Incorrect username, password, or authority host address.")
+        exit(1)
 
 
 def _add_set_command_args(parser):
@@ -111,7 +133,6 @@ def _add_password_arg(parser):
         action="store_true",
         dest=ConfigurationKeys.PASSWORD_KEY,
         help="The password for the Code42 API user. "
-        "Note: if you don't supply a password, you will be prompted. "
         "Passwords are not stored in plain text.",
     )
 
