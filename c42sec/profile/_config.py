@@ -1,3 +1,4 @@
+import os
 from configparser import ConfigParser
 from c42sec.util import get_user_project_path
 
@@ -42,10 +43,7 @@ def set_ignore_ssl_errors(new_value):
 
 def get_config_file_path():
     path = "{}/config.cfg".format(get_user_project_path())
-    try:
-        # Make sure exists
-        open(path, "r").close()
-    except IOError:
+    if not os.path.exists(path):
         _create_new_config_file()
 
     return path
