@@ -36,7 +36,7 @@ def set_authority_url(new_url):
 def set_ignore_ssl_errors(new_value):
     parser = ConfigParser()
     profile = _get_config_profile_from_parser(parser)
-    profile[ConfigurationKeys.IGNORE_SSL_ERRORS_KEY] = new_value
+    profile[ConfigurationKeys.IGNORE_SSL_ERRORS_KEY] = str(int(new_value))
     _save(parser)
 
 
@@ -59,7 +59,7 @@ def _create_new_config_file():
     config_parser[ConfigurationKeys.SECTION] = {}
     config_parser[ConfigurationKeys.SECTION][ConfigurationKeys.AUTHORITY_KEY] = "null"
     config_parser[ConfigurationKeys.SECTION][ConfigurationKeys.USERNAME_KEY] = "null"
-    config_parser[ConfigurationKeys.SECTION][ConfigurationKeys.IGNORE_SSL_ERRORS_KEY] = False
+    config_parser[ConfigurationKeys.SECTION][ConfigurationKeys.IGNORE_SSL_ERRORS_KEY] = "0"
     config_file_path = get_config_file_path()
     with open(config_file_path, "w+") as config_file:
         config_parser.write(config_file)

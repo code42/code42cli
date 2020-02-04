@@ -43,7 +43,7 @@ def get_profile():
     profile = C42SecProfile()
     profile.authority_url = profile_values.get(ConfigurationKeys.AUTHORITY_KEY)
     profile.username = profile_values.get(ConfigurationKeys.USERNAME_KEY)
-    profile.ignore_ssl_errors = profile_values.get(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
+    profile.ignore_ssl_errors = bool(int(profile_values.get(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)))
     return profile
 
 
@@ -67,21 +67,23 @@ def set_profile(args):
 
     if args.c42_authority_url is not None:
         set_authority_url(args.c42_authority_url)
-        print("'Code42 authority URL' saved. New value: {}".format(args.c42_authority_url))
+        print("'Code42 authority URL' updated.".format(args.c42_authority_url))
 
     if args.c42_username is not None:
         set_username(args.c42_username)
-        print("'Code42 username' saved. New value: {}".format(args.c42_username))
+        print("'Code42 username' updated.".format(args.c42_username))
 
     if args.ignore_ssl_errors is not None:
         set_ignore_ssl_errors(args.ignore_ssl_errors)
-        print("'Ignore SSL errors' saved. New value: {}".format(args.ignore_ssl_errors))
+        print("'Ignore SSL errors' updated.".format(args.ignore_ssl_errors))
 
     # Must happen after setting password
     if args.do_set_c42_password:
         password = getpass()
         set_password(password)
-        print("'Code42 Password' saved.")
+        print("'Code42 Password' updated.")
+
+    show_profile()
 
 
 def _add_set_command_args(parser):
