@@ -9,10 +9,17 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
-- Renamed `c42aed` to `c42sec`.
-- Broke up arguments for setting username, password, authority URL, and whether to ignore SSL errors into subcommand.
-- Removed config file settings. Use `c42sec profile set`.
+### Removed
+- Removed config file settings and `-c` CLI arg. Use `c42sec profile set`.
+- Removed `--clear-password` CLI argument. Use `c42sec profile set -p`. It will prompt you.
+
+### Added
 - Added ability to view your profile: `c4sec profile show`.
+
+### Changed
+- Renamed `c42aed` to `c42sec`.
+- Moved CLI arguments `-s`, `-u`, and `--ignore-ssl-errors` to `c42sec profile set` command.
+
 
 ## 0.1.1 - 2019-10-29
 
