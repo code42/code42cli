@@ -21,7 +21,7 @@ $ python setup.py install
 First, set your profile
 
 ```bash
-c42sec profile -s https://example.authority.com -u security.admin@example.com -p
+c42sec profile set -s https://example.authority.com -u security.admin@example.com -p
 ```
 
 `-p` will prompt for your password securely.
@@ -29,7 +29,7 @@ c42sec profile -s https://example.authority.com -u security.admin@example.com -p
 To ignore SSL errors, do:
 
 ```bash
-c42sec profile --ignore-ssl-errors true
+c42sec profile set --ignore-ssl-errors true
 ```
 
 # Known Issues
