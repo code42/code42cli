@@ -43,7 +43,9 @@ def get_profile():
     profile = C42SecProfile()
     profile.authority_url = profile_values.get(ConfigurationKeys.AUTHORITY_KEY)
     profile.username = profile_values.get(ConfigurationKeys.USERNAME_KEY)
-    profile.ignore_ssl_errors = bool(int(profile_values.get(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)))
+
+    config_ignore_ssl_errors = profile_values.get(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
+    profile.ignore_ssl_errors = config_ignore_ssl_errors == "true"
     return profile
 
 
@@ -83,7 +85,8 @@ def set_profile(args):
         set_password(password)
         print("'Code42 Password' updated.")
 
-    show_profile()
+    if args.show:
+        show_profile()
 
 
 def _add_set_command_args(parser):
@@ -91,6 +94,7 @@ def _add_set_command_args(parser):
     _add_username_arg(parser)
     _add_password_arg(parser)
     _add_ignore_ssl_errors_arg(parser)
+    _add_show_arg(parser)
 
 
 def _add_authority_arg(parser):
@@ -126,10 +130,19 @@ def _add_password_arg(parser):
 def _add_ignore_ssl_errors_arg(parser):
     parser.add_argument(
         "--ignore-ssl-errors",
-        action="store_true",
-        default=None,
+        action="store",
         dest=ConfigurationKeys.IGNORE_SSL_ERRORS_KEY,
-        help="Do not validate the SSL certificates of Code42 servers",
+        choices=["true", "false"],
+        help="Do not validate the SSL certificates of Code42 servers.",
+    )
+
+
+def _add_show_arg(parser):
+    parser.add_argument(
+        "--show",
+        action="store_true",
+        dest="show",
+        help="Whether to show the profile after setting it.",
     )
 
 
