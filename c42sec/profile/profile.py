@@ -50,7 +50,7 @@ def get_profile():
 def show_profile(*args):
     """Prints the current profile to stdout."""
     profile = get_config_profile()
-    print()
+    print("")
     print("Profile:")
 
     for key in profile:
@@ -59,7 +59,7 @@ def show_profile(*args):
     if get_password() is not None:
         print("\t* A password exists for this profile.")
 
-    print()
+    print("")
 
 
 def set_profile(args):
