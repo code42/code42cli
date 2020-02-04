@@ -26,6 +26,12 @@ c42sec profile -s https://example.authority.com -u security.admin@example.com -p
 
 `-p` will prompt for your password securely.
 
+To ignore SSL errors, do:
+
+```bash
+c42sec profile --ignore-ssl-errors true
+```
+
 # Known Issues
 
 Only the first 10,000 of each set of events containing the exact same insertion timestamp is reported.
