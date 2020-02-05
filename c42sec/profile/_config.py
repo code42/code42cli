@@ -43,10 +43,6 @@ def profile_has_been_set():
     return is_set
 
 
-def get_username():
-    return get_config_profile()[ConfigurationKeys.USERNAME_KEY]
-
-
 def set_username(new_username):
     parser = ConfigParser()
     profile = _get_config_profile_from_parser(parser)
