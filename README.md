@@ -24,7 +24,7 @@ First, set your profile
 c42sec profile set -s https://example.authority.com -u security.admin@example.com -p
 ```
 
-`-p` will prompt for your password securely.
+`-p` will prompt for your password securely. If your username does not have a password stored, you will be prompted anyway.
 
 To ignore SSL errors, do:
 

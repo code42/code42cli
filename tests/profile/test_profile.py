@@ -35,7 +35,7 @@ def test_init_adds_parser_that_can_parse_set_command():
 
     # Commands that require a value will fail here if not provided
     assert profile_parser.parse_args(
-        ["set", "-s", "server-arg", "-p", "-u", "username-arg", "--ignore-ssl-errors", "true"]
+        ["set", "-s", "server-arg", "-p", "-u", "username-arg", "--enable-ssl-errors"]
     )
 
 
@@ -66,12 +66,20 @@ def test_set_profile_when_given_authority_url_sets_authority_url(mocker):
     authority_url_setter.assert_called_once_with("https://wwww.new.authority.example.com")
 
 
-def test_set_profile_when_given_ignore_ssl_errors_sets_ignore_ssl_errors(mocker):
+def test_set_profile_when_given_enable_ssl_errors_sets_ignore_ssl_errors_to_true(mocker):
     ignore_ssl_errors_setter = mocker.patch("c42sec.profile._config.set_ignore_ssl_errors")
     parser = _get_profile_parser()
-    namespace = parser.parse_args(["set", "--ignore-ssl-errors", "true"])
+    namespace = parser.parse_args(["set", "--enable-ssl-errors"])
     profile.set_profile(namespace)
-    ignore_ssl_errors_setter.assert_called_once_with("true")
+    ignore_ssl_errors_setter.assert_called_once_with(False)
+
+
+def test_set_profile_when_given_disable_ssl_errors_sets_ignore_ssl_errors_to_false(mocker):
+    ignore_ssl_errors_setter = mocker.patch("c42sec.profile._config.set_ignore_ssl_errors")
+    parser = _get_profile_parser()
+    namespace = parser.parse_args(["set", "--disable-ssl-errors"])
+    profile.set_profile(namespace)
+    ignore_ssl_errors_setter.assert_called_once_with(True)
 
 
 def test_set_profile_when_given_password_sets_password_returned_from_getpass(mocker):

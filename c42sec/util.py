@@ -19,3 +19,11 @@ def get_user_project_path(subdir=""):
         makedirs(user_project_path)
 
     return user_project_path
+
+
+def print_error(error_text):
+    print("\033[91m{}\033[0m".format(error_text))
+
+
+def print_bold(bold_text):
+    print("\033[1m{}\033[0m".format(bold_text))

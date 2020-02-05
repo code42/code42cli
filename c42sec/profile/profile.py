@@ -64,27 +64,10 @@ def set_profile(args):
     if _set_has_args(args):
         config.mark_as_set()
 
-    if args.c42_authority_url is not None:
-        config.set_authority_url(args.c42_authority_url)
-        print("'Code42 authority URL' updated.".format(args.c42_authority_url))
-
-    if args.c42_username is not None:
-        config.set_username(args.c42_username)
-        print("'Code42 username' updated.".format(args.c42_username))
-
-    if args.disable_ssl_errors is not None and not args.enable_ssl_errors:
-        config.set_ignore_ssl_errors(args.disable_ssl_errors)
-        print("'Ignore SSL errors' updated.".format(args.ignore_ssl_errors))
-
-    if args.enable_ssl_errors is not None:
-        config.set_ignore_ssl_errors(args.enable_ssl_errors)
-        print("'Ignore SSL errors' updated.".format(args.ignore_ssl_errors))
-
-    # Must happen after setting password
-    if args.do_set_c42_password:
-        user_password = getpass()
-        password.set_password(user_password)
-        print("'Code42 Password' updated.")
+    _try_set_authority_url(args)
+    _try_set_username(args)
+    _try_set_ignore_ssl_errors(args)
+    _try_set_password(args)
 
     if args.show:
         show_profile()
@@ -159,12 +142,38 @@ def _add_show_arg(parser):
 
 
 def _set_has_args(args):
-    return (
-        args.c42_authority_url is not None
-        or args.c4_username is not None
-        or args.disable_ssl_errors
-        or args.enable_ssl_errors is not None
-    )
+    return args.c42_authority_url is not None or args.c42_username is not None
+
+
+def _try_set_authority_url(args):
+    if args.c42_authority_url is not None:
+        config.set_authority_url(args.c42_authority_url)
+        print("'Code42 authority URL' updated.")
+
+
+def _try_set_username(args):
+    if args.c42_username is not None:
+        config.set_username(args.c42_username)
+        print("'Code42 username' updated.")
+
+
+def _try_set_ignore_ssl_errors(args):
+    print(args)
+    if args.disable_ssl_errors is not None and not args.enable_ssl_errors:
+        config.set_ignore_ssl_errors(True)
+        print("'Ignore SSL errors' updated.")
+
+    if args.enable_ssl_errors is not None:
+        config.set_ignore_ssl_errors(False)
+        print("'Ignore SSL errors' updated.")
+
+
+def _try_set_password(args):
+    # Must happen after setting username
+    if args.do_set_c42_password or (password.get_password() is None and args.c42_username is not None):
+        user_password = getpass()
+        password.set_password(user_password)
+        print("'Code42 Password' updated.")
 
 
 if __name__ == "__main__":

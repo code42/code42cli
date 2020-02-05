@@ -1,6 +1,6 @@
 import os
 from configparser import ConfigParser
-from c42sec.util import get_user_project_path
+from c42sec.util import get_user_project_path, print_error, print_bold
 
 
 class ConfigurationKeys(object):
@@ -16,8 +16,11 @@ class ConfigurationKeys(object):
 def get_config_profile():
     parser = ConfigParser()
     if not _is_set():
-        print("ERROR: Profile is not set.")
-        print("Use `c42sec profile set` to set your profile.")
+        print_error("ERROR: Profile is not set.")
+        print("")
+        print("To set, use: ")
+        print_bold("\tc42sec profile set -s <authority-URL> -u <username>")
+        print("")
         exit(1)
 
     return _get_config_profile_from_parser(parser)

@@ -21,8 +21,11 @@ def main():
 def _call(args, print_help):
     try:
         args.func(args)
-    except AttributeError:
-        print_help()
+    except AttributeError as err:
+        if str(err) == "'Namespace' object has no attribute 'func'":
+            print_help()
+        else:
+            print(err)
 
 
 if __name__ == "__main__":
