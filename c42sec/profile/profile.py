@@ -1,20 +1,15 @@
 from getpass import getpass
 
-from c42sec.profile._config import (
-    get_config_profile,
-    set_authority_url,
-    set_username,
-    set_ignore_ssl_errors,
-    ConfigurationKeys,
-)
-from c42sec.profile._password import get_password, set_password
+import c42sec.profile._config as config
+import c42sec.profile._password as password
+from c42sec.profile._config import ConfigurationKeys
 
 
 class C42SecProfile(object):
     authority_url = ""
     username = ""
     ignore_ssl_errors = False
-    get_password = get_password
+    get_password = password.get_password
 
 
 def init(subcommand_parser):
@@ -39,26 +34,26 @@ def init(subcommand_parser):
 def get_profile():
     # type: () -> C42SecProfile
     """Returns the current profile object"""
-    profile_values = get_config_profile()
+    profile_values = config.get_config_profile()
     profile = C42SecProfile()
     profile.authority_url = profile_values.get(ConfigurationKeys.AUTHORITY_KEY)
     profile.username = profile_values.get(ConfigurationKeys.USERNAME_KEY)
 
     config_ignore_ssl_errors = profile_values.get(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
-    profile.ignore_ssl_errors = config_ignore_ssl_errors == "true"
+    profile.ignore_ssl_errors = bool(int(config_ignore_ssl_errors))
     return profile
 
 
 def show_profile(*args):
     """Prints the current profile to stdout."""
-    profile = get_config_profile()
+    profile = config.get_config_profile()
     print("")
     print("Profile:")
 
     for key in profile:
         print("\t* {} = {}".format(key, profile[key]))
 
-    if get_password() is not None:
+    if password.get_password() is not None:
         print("\t* A password exists for this profile.")
 
     print("")
@@ -66,23 +61,24 @@ def show_profile(*args):
 
 def set_profile(args):
     """Sets the current profile using command line arguments."""
+    config.mark_as_set()
 
     if args.c42_authority_url is not None:
-        set_authority_url(args.c42_authority_url)
+        config.set_authority_url(args.c42_authority_url)
         print("'Code42 authority URL' updated.".format(args.c42_authority_url))
 
     if args.c42_username is not None:
-        set_username(args.c42_username)
+        config.set_username(args.c42_username)
         print("'Code42 username' updated.".format(args.c42_username))
 
     if args.ignore_ssl_errors is not None:
-        set_ignore_ssl_errors(args.ignore_ssl_errors)
+        config.set_ignore_ssl_errors(args.ignore_ssl_errors)
         print("'Ignore SSL errors' updated.".format(args.ignore_ssl_errors))
 
     # Must happen after setting password
     if args.do_set_c42_password:
-        password = getpass()
-        set_password(password)
+        user_password = getpass()
+        password.set_password(user_password)
         print("'Code42 Password' updated.")
 
     if args.show:

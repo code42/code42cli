@@ -6,11 +6,11 @@ from c42sec.profile._config import ConfigurationKeys
 
 @pytest.fixture
 def config_file(mocker):
-    mock_config = mocker.patch("c42sec.profile.profile.get_config_profile")
+    mock_config = mocker.patch("c42sec.profile._config.get_config_profile")
     mock_config.return_value = {
         ConfigurationKeys.USERNAME_KEY: "test.username",
         ConfigurationKeys.AUTHORITY_KEY: "https://authority.example.com",
-        ConfigurationKeys.IGNORE_SSL_ERRORS_KEY: True,
+        ConfigurationKeys.IGNORE_SSL_ERRORS_KEY: "1",
     }
     return mock_config
 
@@ -35,7 +35,7 @@ def test_init_adds_parser_that_can_parse_set_command():
 
     # Commands that require a value will fail here if not provided
     assert profile_parser.parse_args(
-        ["set", "-s", "server-arg", "-p", "-u", "username-arg", "--ignore-ssl-errors"]
+        ["set", "-s", "server-arg", "-p", "-u", "username-arg", "--ignore-ssl-errors", "true"]
     )
 
 
@@ -51,7 +51,7 @@ def test_get_profile_returns_object_from_config_file(config_file):
 
 
 def test_set_profile_when_given_username_sets_username(mocker):
-    username_setter = mocker.patch("c42sec.profile.profile.set_username")
+    username_setter = mocker.patch("c42sec.profile._config.set_username")
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "-u", "a.new.user@example.com"])
     profile.set_profile(namespace)
@@ -59,7 +59,7 @@ def test_set_profile_when_given_username_sets_username(mocker):
 
 
 def test_set_profile_when_given_authority_url_sets_authority_url(mocker):
-    authority_url_setter = mocker.patch("c42sec.profile.profile.set_authority_url")
+    authority_url_setter = mocker.patch("c42sec.profile._config.set_authority_url")
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "-s", "https://wwww.new.authority.example.com"])
     profile.set_profile(namespace)
@@ -67,15 +67,15 @@ def test_set_profile_when_given_authority_url_sets_authority_url(mocker):
 
 
 def test_set_profile_when_given_ignore_ssl_errors_sets_ignore_ssl_errors(mocker):
-    ignore_ssl_errors_setter = mocker.patch("c42sec.profile.profile.set_ignore_ssl_errors")
+    ignore_ssl_errors_setter = mocker.patch("c42sec.profile._config.set_ignore_ssl_errors")
     parser = _get_profile_parser()
-    namespace = parser.parse_args(["set", "--ignore-ssl-errors"])
+    namespace = parser.parse_args(["set", "--ignore-ssl-errors", "true"])
     profile.set_profile(namespace)
-    ignore_ssl_errors_setter.assert_called_once_with(True)
+    ignore_ssl_errors_setter.assert_called_once_with("true")
 
 
 def test_set_profile_when_given_password_sets_password_returned_from_getpass(mocker):
-    password_setter = mocker.patch("c42sec.profile.profile.set_password")
+    password_setter = mocker.patch("c42sec.profile._password.set_password")
     getpass_function = mocker.patch("c42sec.profile.profile.getpass")
     getpass_function.return_value = "a New p@55w0rd"
 

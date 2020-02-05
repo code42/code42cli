@@ -4,15 +4,38 @@ from c42sec.util import get_user_project_path
 
 
 class ConfigurationKeys(object):
-    SECTION = u"Code42"
+    USER_SECTION = u"Code42"
     AUTHORITY_KEY = u"c42_authority_url"
     USERNAME_KEY = u"c42_username"
     IGNORE_SSL_ERRORS_KEY = u"ignore_ssl_errors"
+    INTERNAL_SECTION = u"Internal"
+    HAS_SET_PROFILE_KEY = u"has_set_profile"
 
 
 def get_config_profile():
     parser = ConfigParser()
+    if not _is_set():
+        print("Profile is not set. To set, use `c42sec profile set`.")
+        exit(1)
+
     return _get_config_profile_from_parser(parser)
+
+
+def mark_as_set():
+    parser = ConfigParser()
+    config_file_path = get_config_file_path()
+    parser.read(config_file_path)
+    settings = parser[ConfigurationKeys.INTERNAL_SECTION]
+    settings[ConfigurationKeys.HAS_SET_PROFILE_KEY] = "1"
+    _save(parser)
+
+
+def _is_set():
+    parser = ConfigParser()
+    config_file_path = get_config_file_path()
+    parser.read(config_file_path)
+    settings = parser[ConfigurationKeys.INTERNAL_SECTION]
+    return bool(int(settings[ConfigurationKeys.HAS_SET_PROFILE_KEY]))
 
 
 def get_username():
@@ -36,14 +59,14 @@ def set_authority_url(new_url):
 def set_ignore_ssl_errors(new_value):
     parser = ConfigParser()
     profile = _get_config_profile_from_parser(parser)
-    profile[ConfigurationKeys.IGNORE_SSL_ERRORS_KEY] = new_value
+    profile[ConfigurationKeys.IGNORE_SSL_ERRORS_KEY] = str(int(new_value == "true"))
     _save(parser)
 
 
 def get_config_file_path():
     path = "{}/config.cfg".format(get_user_project_path())
     if not os.path.exists(path):
-        _create_new_config_file()
+        _create_new_config_file(path)
 
     return path
 
@@ -51,17 +74,21 @@ def get_config_file_path():
 def _get_config_profile_from_parser(parser):
     config_file_path = get_config_file_path()
     parser.read(config_file_path)
-    return parser[ConfigurationKeys.SECTION]
+    return parser[ConfigurationKeys.USER_SECTION]
 
 
-def _create_new_config_file():
+def _create_new_config_file(path):
     config_parser = ConfigParser()
-    config_parser[ConfigurationKeys.SECTION] = {}
-    config_parser[ConfigurationKeys.SECTION][ConfigurationKeys.AUTHORITY_KEY] = "null"
-    config_parser[ConfigurationKeys.SECTION][ConfigurationKeys.USERNAME_KEY] = "null"
-    config_parser[ConfigurationKeys.SECTION][ConfigurationKeys.IGNORE_SSL_ERRORS_KEY] = "null"
-    config_file_path = get_config_file_path()
-    with open(config_file_path, "w+") as config_file:
+    keys = ConfigurationKeys
+    config_parser.add_section(keys.USER_SECTION)
+    config_parser.add_section(keys.INTERNAL_SECTION)
+
+    config_parser[keys.USER_SECTION] = {}
+    config_parser[keys.USER_SECTION][keys.AUTHORITY_KEY] = "null"
+    config_parser[keys.USER_SECTION][keys.USERNAME_KEY] = "null"
+    config_parser[keys.USER_SECTION][keys.IGNORE_SSL_ERRORS_KEY] = "0"
+    config_parser[keys.INTERNAL_SECTION][keys.HAS_SET_PROFILE_KEY] = "0"
+    with open(path, "w+") as config_file:
         config_parser.write(config_file)
 
 
