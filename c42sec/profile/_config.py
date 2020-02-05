@@ -15,7 +15,7 @@ class ConfigurationKeys(object):
 
 def get_config_profile():
     parser = ConfigParser()
-    if not _is_set():
+    if not profile_has_been_set():
         print_error("ERROR: Profile is not set.")
         print("")
         print("To set, use: ")
@@ -35,7 +35,7 @@ def mark_as_set():
     _save(parser)
 
 
-def _is_set():
+def profile_has_been_set():
     parser = ConfigParser()
     config_file_path = get_config_file_path()
     parser.read(config_file_path)

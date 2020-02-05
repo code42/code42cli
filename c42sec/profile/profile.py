@@ -3,6 +3,7 @@ from getpass import getpass
 import c42sec.profile._config as config
 import c42sec.profile._password as password
 from c42sec.profile._config import ConfigurationKeys
+from c42sec.util import print_error
 
 
 class C42SecProfile(object):
@@ -61,7 +62,9 @@ def show_profile(*args):
 
 def set_profile(args):
     """Sets the current profile using command line arguments."""
-    if _set_has_args(args):
+    if not _verify_args_for_initial_profile_set(args):
+        exit(1)
+    else:
         config.mark_as_set()
 
     _try_set_authority_url(args)
@@ -158,7 +161,6 @@ def _try_set_username(args):
 
 
 def _try_set_ignore_ssl_errors(args):
-    print(args)
     if args.disable_ssl_errors is not None and not args.enable_ssl_errors:
         config.set_ignore_ssl_errors(True)
         print("'Ignore SSL errors' updated.")
@@ -174,6 +176,19 @@ def _try_set_password(args):
         user_password = getpass()
         password.set_password(user_password)
         print("'Code42 Password' updated.")
+
+
+def _verify_args_for_initial_profile_set(args):
+    if not config.profile_has_been_set() and (args.c42_username is None or args.c42_authority_url is None):
+        if args.c42_username is None:
+            print_error("ERROR: Missing username argument.")
+
+        if args.c42_authority_url is None:
+            print_error("ERROR: Missing Code42 Authority URL argument.")
+
+        return False
+
+    return True
 
 
 if __name__ == "__main__":
