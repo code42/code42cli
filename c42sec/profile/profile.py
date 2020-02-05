@@ -39,9 +39,7 @@ def get_profile():
     profile = C42SecProfile()
     profile.authority_url = profile_values.get(ConfigurationKeys.AUTHORITY_KEY)
     profile.username = profile_values.get(ConfigurationKeys.USERNAME_KEY)
-
-    config_ignore_ssl_errors = profile_values.get(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
-    profile.ignore_ssl_errors = config_ignore_ssl_errors == "True"
+    profile.ignore_ssl_errors = profile_values.get(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
     return profile
 
 

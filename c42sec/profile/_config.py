@@ -30,7 +30,7 @@ def mark_as_set():
     config_file_path = get_config_file_path()
     parser.read(config_file_path)
     settings = parser[ConfigurationKeys.INTERNAL_SECTION]
-    settings[ConfigurationKeys.HAS_SET_PROFILE_KEY] = "1"
+    settings[ConfigurationKeys.HAS_SET_PROFILE_KEY] = "True"
     _save(parser)
 
 
@@ -39,7 +39,7 @@ def profile_has_been_set():
     config_file_path = get_config_file_path()
     parser.read(config_file_path)
     settings = parser[ConfigurationKeys.INTERNAL_SECTION]
-    return bool(int(settings[ConfigurationKeys.HAS_SET_PROFILE_KEY]))
+    return settings.getboolean(ConfigurationKeys.HAS_SET_PROFILE_KEY)
 
 
 def get_username():
@@ -78,27 +78,37 @@ def get_config_file_path():
 def _get_config_profile_from_parser(parser):
     config_file_path = get_config_file_path()
     parser.read(config_file_path)
-    return parser[ConfigurationKeys.USER_SECTION]
+    config = parser[ConfigurationKeys.USER_SECTION]
+    config.ignore_ssl_errors = config.getboolean(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
+    return config
 
 
 def _create_new_config_file(path):
     config_parser = ConfigParser()
+    config_parser = _create_user_section(config_parser)
+    config_parser = _create_internal_section(config_parser)
+    _save(config_parser, path)
+
+
+def _create_user_section(parser):
     keys = ConfigurationKeys
-    config_parser.add_section(keys.USER_SECTION)
-    config_parser.add_section(keys.INTERNAL_SECTION)
-
-    config_parser[keys.USER_SECTION] = {}
-    config_parser[keys.USER_SECTION][keys.AUTHORITY_KEY] = "null"
-    config_parser[keys.USER_SECTION][keys.USERNAME_KEY] = "null"
-    config_parser[keys.USER_SECTION][keys.IGNORE_SSL_ERRORS_KEY] = "False"
-
-    config_parser[keys.INTERNAL_SECTION][keys.HAS_SET_PROFILE_KEY] = "0"
-
-    with open(path, "w+") as config_file:
-        config_parser.write(config_file)
+    parser.add_section(keys.USER_SECTION)
+    parser[keys.USER_SECTION] = {}
+    parser[keys.USER_SECTION][keys.AUTHORITY_KEY] = "null"
+    parser[keys.USER_SECTION][keys.USERNAME_KEY] = "null"
+    parser[keys.USER_SECTION][keys.IGNORE_SSL_ERRORS_KEY] = "False"
+    return parser
 
 
-def _save(parser):
-    path = get_config_file_path()
+def _create_internal_section(parser):
+    keys = ConfigurationKeys
+    parser.add_section(keys.INTERNAL_SECTION)
+    parser[keys.INTERNAL_SECTION] = {}
+    parser[keys.INTERNAL_SECTION][keys.HAS_SET_PROFILE_KEY] = "False"
+    return parser
+
+
+def _save(parser, path=None):
+    path = get_config_file_path() if path is None else path
     with open(path, "w+") as config_file:
         parser.write(config_file)
