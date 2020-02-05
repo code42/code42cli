@@ -1,18 +1,6 @@
 import pytest
 from argparse import ArgumentParser
 from c42sec.profile import profile
-from c42sec.profile._config import ConfigurationKeys
-
-
-@pytest.fixture
-def config_file(mocker):
-    mock_config = mocker.patch("c42sec.profile._config.get_config_profile")
-    mock_config.return_value = {
-        ConfigurationKeys.USERNAME_KEY: "test.username",
-        ConfigurationKeys.AUTHORITY_KEY: "https://authority.example.com",
-        ConfigurationKeys.IGNORE_SSL_ERRORS_KEY: "True",
-    }
-    return mock_config
 
 
 @pytest.fixture
@@ -83,7 +71,7 @@ def test_init_adds_parser_that_can_parse_set_command():
     )
 
 
-def test_get_profile_returns_object_from_config_file(config_file):
+def test_get_profile_returns_object_from_config_file(config_profile):
     user = profile.get_profile()
 
     # Values from config_file fixture
