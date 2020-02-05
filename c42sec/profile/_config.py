@@ -7,7 +7,8 @@ class ConfigurationKeys(object):
     USER_SECTION = u"Code42"
     AUTHORITY_KEY = u"c42_authority_url"
     USERNAME_KEY = u"c42_username"
-    IGNORE_SSL_ERRORS_KEY = u"ignore_ssl_errors"
+    DISABLE_SSL_ERRORS_KEY = u"disable_ssl_errors"
+    ENABLE_SSL_ERRORS_KEY = u"enable_ssl_errors"
     INTERNAL_SECTION = u"Internal"
     HAS_SET_PROFILE_KEY = u"has_set_profile"
 
@@ -15,7 +16,8 @@ class ConfigurationKeys(object):
 def get_config_profile():
     parser = ConfigParser()
     if not _is_set():
-        print("Profile is not set. To set, use `c42sec profile set`.")
+        print("ERROR: Profile is not set.")
+        print("Use `c42sec profile set` to set your profile.")
         exit(1)
 
     return _get_config_profile_from_parser(parser)
@@ -59,7 +61,7 @@ def set_authority_url(new_url):
 def set_ignore_ssl_errors(new_value):
     parser = ConfigParser()
     profile = _get_config_profile_from_parser(parser)
-    profile[ConfigurationKeys.IGNORE_SSL_ERRORS_KEY] = str(int(new_value == "true"))
+    profile[ConfigurationKeys.DISABLE_SSL_ERRORS_KEY] = str(int(new_value == "true"))
     _save(parser)
 
 
@@ -86,7 +88,7 @@ def _create_new_config_file(path):
     config_parser[keys.USER_SECTION] = {}
     config_parser[keys.USER_SECTION][keys.AUTHORITY_KEY] = "null"
     config_parser[keys.USER_SECTION][keys.USERNAME_KEY] = "null"
-    config_parser[keys.USER_SECTION][keys.IGNORE_SSL_ERRORS_KEY] = "0"
+    config_parser[keys.USER_SECTION][keys.DISABLE_SSL_ERRORS_KEY] = "0"
     config_parser[keys.INTERNAL_SECTION][keys.HAS_SET_PROFILE_KEY] = "0"
     with open(path, "w+") as config_file:
         config_parser.write(config_file)

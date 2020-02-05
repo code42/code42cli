@@ -14,7 +14,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - Removed `--clear-password` CLI argument. Use `c42sec profile set -p`. It will prompt you.
 
 ### Added
-- Added ability to view your profile: `c4sec profile show`.
+- Added ability to view your profile: `c42sec profile show`.
 
 ### Changed
 - Renamed `c42aed` to `c42sec`.

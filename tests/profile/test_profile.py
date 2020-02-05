@@ -10,7 +10,7 @@ def config_file(mocker):
     mock_config.return_value = {
         ConfigurationKeys.USERNAME_KEY: "test.username",
         ConfigurationKeys.AUTHORITY_KEY: "https://authority.example.com",
-        ConfigurationKeys.IGNORE_SSL_ERRORS_KEY: "1",
+        ConfigurationKeys.DISABLE_SSL_ERRORS_KEY: "1",
     }
     return mock_config
 

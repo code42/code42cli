@@ -39,7 +39,7 @@ def get_profile():
     profile.authority_url = profile_values.get(ConfigurationKeys.AUTHORITY_KEY)
     profile.username = profile_values.get(ConfigurationKeys.USERNAME_KEY)
 
-    config_ignore_ssl_errors = profile_values.get(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
+    config_ignore_ssl_errors = profile_values.get(ConfigurationKeys.DISABLE_SSL_ERRORS_KEY)
     profile.ignore_ssl_errors = bool(int(config_ignore_ssl_errors))
     return profile
 
@@ -61,7 +61,8 @@ def show_profile(*args):
 
 def set_profile(args):
     """Sets the current profile using command line arguments."""
-    config.mark_as_set()
+    if _set_has_args(args):
+        config.mark_as_set()
 
     if args.c42_authority_url is not None:
         config.set_authority_url(args.c42_authority_url)
@@ -71,8 +72,12 @@ def set_profile(args):
         config.set_username(args.c42_username)
         print("'Code42 username' updated.".format(args.c42_username))
 
-    if args.ignore_ssl_errors is not None:
-        config.set_ignore_ssl_errors(args.ignore_ssl_errors)
+    if args.disable_ssl_errors is not None and not args.enable_ssl_errors:
+        config.set_ignore_ssl_errors(args.disable_ssl_errors)
+        print("'Ignore SSL errors' updated.".format(args.ignore_ssl_errors))
+
+    if args.enable_ssl_errors is not None:
+        config.set_ignore_ssl_errors(args.enable_ssl_errors)
         print("'Ignore SSL errors' updated.".format(args.ignore_ssl_errors))
 
     # Must happen after setting password
@@ -89,7 +94,8 @@ def _add_set_command_args(parser):
     _add_authority_arg(parser)
     _add_username_arg(parser)
     _add_password_arg(parser)
-    _add_ignore_ssl_errors_arg(parser)
+    _add_disable_ssl_errors_arg(parser)
+    _add_enable_ssl_errors_arg(parser)
     _add_show_arg(parser)
 
 
@@ -123,12 +129,22 @@ def _add_password_arg(parser):
     )
 
 
-def _add_ignore_ssl_errors_arg(parser):
+def _add_disable_ssl_errors_arg(parser):
     parser.add_argument(
-        "--ignore-ssl-errors",
-        action="store",
-        dest=ConfigurationKeys.IGNORE_SSL_ERRORS_KEY,
-        choices=["true", "false"],
+        "--disable-ssl-errors",
+        action="store_true",
+        default=None,
+        dest=ConfigurationKeys.DISABLE_SSL_ERRORS_KEY,
+        help="Do not validate the SSL certificates of Code42 servers.",
+    )
+
+
+def _add_enable_ssl_errors_arg(parser):
+    parser.add_argument(
+        "--enable-ssl-errors",
+        action="store_true",
+        default=None,
+        dest=ConfigurationKeys.ENABLE_SSL_ERRORS_KEY,
         help="Do not validate the SSL certificates of Code42 servers.",
     )
 
@@ -139,6 +155,15 @@ def _add_show_arg(parser):
         action="store_true",
         dest="show",
         help="Whether to show the profile after setting it.",
+    )
+
+
+def _set_has_args(args):
+    return (
+        args.c42_authority_url is not None
+        or args.c4_username is not None
+        or args.disable_ssl_errors
+        or args.enable_ssl_errors is not None
     )
 
 
