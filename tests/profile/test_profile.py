@@ -36,10 +36,27 @@ def password_setter(mocker):
 
 
 @pytest.fixture
+def password_getter(mocker):
+    return mocker.patch("c42sec.profile._password.get_password")
+
+
+@pytest.fixture
 def profile_not_set_state(mocker):
     profile_verifier = mocker.patch("c42sec.profile._config.profile_has_been_set")
     profile_verifier.return_value = False
     return profile_verifier
+
+
+@pytest.fixture
+def profile_is_set_state(mocker):
+    profile_verifier = mocker.patch("c42sec.profile._config.profile_has_been_set")
+    profile_verifier.return_value = True
+    return profile_verifier
+
+
+@pytest.fixture
+def getpass_function(mocker):
+    return mocker.patch("c42sec.profile.profile.getpass")
 
 
 def test_init_adds_profile_subcommand_to_choices():
@@ -77,7 +94,8 @@ def test_get_profile_returns_object_from_config_file(config_file):
     )
 
 
-def test_set_profile_when_given_username_sets_username(username_setter):
+def test_set_profile_when_given_username_sets_username(username_setter, password_getter):
+    password_getter.return_value = "Something"  # Needed or else it prompts getpass
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "-u", "a.new.user@example.com"])
     profile.set_profile(namespace)
@@ -124,6 +142,28 @@ def test_set_profile_when_is_first_time_and_given_authority_url_but_not_given_us
     assert authority_url_setter.call_args is None
 
 
+def test_set_profile_when_is_first_time_and_given_both_authority_and_username_sets_username(
+    profile_not_set_state, username_setter, password_getter
+):
+    parser = _get_profile_parser()
+    namespace = parser.parse_args(
+        ["set", "-s", "https://wwww.new.authority.example.com", "-u", "user"]
+    )
+    profile.set_profile(namespace)
+    username_setter.assert_called_once_with("user")
+
+
+def test_set_profile_when_is_first_time_and_given_both_authority_and_username_sets_authority_url(
+    profile_not_set_state, authority_url_setter, password_getter
+):
+    parser = _get_profile_parser()
+    namespace = parser.parse_args(
+        ["set", "-s", "https://wwww.new.authority.example.com", "-u", "user"]
+    )
+    profile.set_profile(namespace)
+    authority_url_setter.assert_called_once_with("https://wwww.new.authority.example.com")
+
+
 def test_set_profile_when_given_authority_url_sets_authority_url(authority_url_setter):
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "-s", "https://wwww.new.authority.example.com"])
@@ -131,26 +171,42 @@ def test_set_profile_when_given_authority_url_sets_authority_url(authority_url_s
     authority_url_setter.assert_called_once_with("https://wwww.new.authority.example.com")
 
 
-def test_set_profile_when_given_enable_ssl_errors_sets_ignore_ssl_errors_to_true(ignore_ssl_errors_setter):
+def test_set_profile_when_given_enable_ssl_errors_sets_ignore_ssl_errors_to_true(
+    ignore_ssl_errors_setter
+):
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "--enable-ssl-errors"])
     profile.set_profile(namespace)
     ignore_ssl_errors_setter.assert_called_once_with(False)
 
 
-def test_set_profile_when_given_disable_ssl_errors_sets_ignore_ssl_errors_to_false(ignore_ssl_errors_setter):
+def test_set_profile_when_given_disable_ssl_errors_sets_ignore_ssl_errors_to_false(
+    ignore_ssl_errors_setter
+):
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "--disable-ssl-errors"])
     profile.set_profile(namespace)
     ignore_ssl_errors_setter.assert_called_once_with(True)
 
 
-def test_set_profile_when_given_password_sets_password_returned_from_getpass(mocker, password_setter):
-    getpass_function = mocker.patch("c42sec.profile.profile.getpass")
+def test_set_profile_when_given_password_sets_password_returned_from_getpass(
+    getpass_function, password_setter
+):
     getpass_function.return_value = "a New p@55w0rd"
-
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "-p"])
+    profile.set_profile(namespace)
+    password_setter.assert_called_once_with("a New p@55w0rd")
+
+
+def test_set_profile_when_given_username_but_username_does_not_have_stored_password_and_not_given_pflag_and_profile_is_set_sets_password_returned_from_getpass(
+    mocker, getpass_function, password_setter, profile_is_set_state
+):
+    password_getter = mocker.patch("c42sec.profile._password.get_password")
+    password_getter.return_value = None
+    getpass_function.return_value = "a New p@55w0rd"
+    parser = _get_profile_parser()
+    namespace = parser.parse_args(["set", "-u", "a.new.user@example.com"])
     profile.set_profile(namespace)
     password_setter.assert_called_once_with("a New p@55w0rd")
 

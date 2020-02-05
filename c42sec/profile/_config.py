@@ -39,7 +39,8 @@ def profile_has_been_set():
     config_file_path = get_config_file_path()
     parser.read(config_file_path)
     settings = parser[ConfigurationKeys.INTERNAL_SECTION]
-    return settings.getboolean(ConfigurationKeys.HAS_SET_PROFILE_KEY)
+    is_set = settings.getboolean(ConfigurationKeys.HAS_SET_PROFILE_KEY)
+    return is_set
 
 
 def get_username():
