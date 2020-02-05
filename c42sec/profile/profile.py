@@ -40,8 +40,8 @@ def get_profile():
     profile.authority_url = profile_values.get(ConfigurationKeys.AUTHORITY_KEY)
     profile.username = profile_values.get(ConfigurationKeys.USERNAME_KEY)
 
-    config_ignore_ssl_errors = profile_values.get(ConfigurationKeys.DISABLE_SSL_ERRORS_KEY)
-    profile.ignore_ssl_errors = bool(int(config_ignore_ssl_errors))
+    config_ignore_ssl_errors = profile_values.get(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
+    profile.ignore_ssl_errors = config_ignore_ssl_errors == "True"
     return profile
 
 
@@ -120,7 +120,7 @@ def _add_disable_ssl_errors_arg(parser):
         "--disable-ssl-errors",
         action="store_true",
         default=None,
-        dest=ConfigurationKeys.DISABLE_SSL_ERRORS_KEY,
+        dest="disable_ssl_errors",
         help="Do not validate the SSL certificates of Code42 servers.",
     )
 
@@ -130,7 +130,7 @@ def _add_enable_ssl_errors_arg(parser):
         "--enable-ssl-errors",
         action="store_true",
         default=None,
-        dest=ConfigurationKeys.ENABLE_SSL_ERRORS_KEY,
+        dest="enable_ssl_errors",
         help="Do not validate the SSL certificates of Code42 servers.",
     )
 
