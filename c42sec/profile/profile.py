@@ -142,23 +142,19 @@ def _set_has_args(args):
 def _try_set_authority_url(args):
     if args.c42_authority_url is not None:
         config.set_authority_url(args.c42_authority_url)
-        print("'Code42 authority URL' updated.")
 
 
 def _try_set_username(args):
     if args.c42_username is not None:
         config.set_username(args.c42_username)
-        print("'Code42 username' updated.")
 
 
 def _try_set_ignore_ssl_errors(args):
     if args.disable_ssl_errors is not None and not args.enable_ssl_errors:
         config.set_ignore_ssl_errors(True)
-        print("'Ignore SSL errors' updated.")
 
     if args.enable_ssl_errors is not None:
         config.set_ignore_ssl_errors(False)
-        print("'Ignore SSL errors' updated.")
 
 
 def _try_set_password(args):
@@ -166,6 +162,9 @@ def _try_set_password(args):
     if args.do_set_c42_password:
         password.set_password()
         print("'Code42 Password' updated.")
+
+    # This will prompt use for password if it does not exist for the current user name.
+    password.get_password()
 
 
 def _verify_args_for_initial_profile_set(args):

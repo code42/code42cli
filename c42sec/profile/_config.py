@@ -31,7 +31,7 @@ def mark_as_set():
     parser.read(config_file_path)
     settings = parser[ConfigurationKeys.INTERNAL_SECTION]
     settings[ConfigurationKeys.HAS_SET_PROFILE_KEY] = "True"
-    _save(parser)
+    _save(parser, ConfigurationKeys.HAS_SET_PROFILE_KEY)
 
 
 def profile_has_been_set():
@@ -46,21 +46,21 @@ def set_username(new_username):
     parser = ConfigParser()
     profile = _get_config_profile_from_parser(parser)
     profile[ConfigurationKeys.USERNAME_KEY] = new_username
-    _save(parser)
+    _save(parser, ConfigurationKeys.USERNAME_KEY)
 
 
 def set_authority_url(new_url):
     parser = ConfigParser()
     profile = _get_config_profile_from_parser(parser)
     profile[ConfigurationKeys.AUTHORITY_KEY] = new_url
-    _save(parser)
+    _save(parser, ConfigurationKeys.AUTHORITY_KEY)
 
 
 def set_ignore_ssl_errors(new_value):
     parser = ConfigParser()
     profile = _get_config_profile_from_parser(parser)
     profile[ConfigurationKeys.IGNORE_SSL_ERRORS_KEY] = str(new_value)
-    _save(parser)
+    _save(parser, ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
 
 
 def _get_config_file_path():
@@ -83,7 +83,7 @@ def _create_new_config_file(path):
     config_parser = ConfigParser()
     config_parser = _create_user_section(config_parser)
     config_parser = _create_internal_section(config_parser)
-    _save(config_parser, path)
+    _save(config_parser, None, path)
 
 
 def _create_user_section(parser):
@@ -104,6 +104,8 @@ def _create_internal_section(parser):
     return parser
 
 
-def _save(parser, path=None):
+def _save(parser, key=None, path=None):
     path = _get_config_file_path() if path is None else path
     util.open_file(path, "w+", lambda f: parser.write(f))
+    if key is not None:
+        print("'{}' has been successfully updated".format(key))

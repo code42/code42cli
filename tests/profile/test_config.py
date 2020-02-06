@@ -61,16 +61,18 @@ def assert_save_was_called(open_file_function):
     assert call_args[0][0] == "some/pathconfig.cfg" and call_args[0][1] == "w+"
 
 
-def test_get_config_profile_when_file_exists_but_profile_not_set_exits(
+def test_get_config_profile_when_file_exists_but_profile_does_not_exist_exits(
     path_exists, non_existent_profile, mock_project_path
 ):
+    # It is expected to exit because the user must set their profile before they can see it.
     with pytest.raises(SystemExit):
         config.get_config_profile()
 
 
-def test_get_config_profile_when_file_exists_but_profile_is_set_does_not_exit(
+def test_get_config_profile_when_file_exists_and_profile_is_set_does_not_exit(
     path_exists, existent_profile, mock_project_path
 ):
+    # Presumably, it shows the profile instead of exiting.
     assert config.get_config_profile()
 
 
@@ -80,6 +82,7 @@ def test_get_config_profile_when_path_does_not_exist_saves_changes(
     with pytest.raises(SystemExit):
         config.get_config_profile()
 
+    # It saves because it is writing default values to the config file
     assert_save_was_called(open_file_function)
 
 
