@@ -62,7 +62,7 @@ def set_profile(args):
     """Sets the current profile using command line arguments."""
     if not _verify_args_for_initial_profile_set(args):
         exit(1)
-    else:
+    elif not config.profile_has_been_set():
         config.mark_as_set()
 
     _try_set_authority_url(args)

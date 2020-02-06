@@ -65,7 +65,7 @@ def set_ignore_ssl_errors(new_value):
 
 
 def get_config_file_path():
-    path = "{}/config.cfg".format(get_user_project_path())
+    path = "{}config.cfg".format(get_user_project_path())
     if not os.path.exists(path):
         _create_new_config_file(path)
 
