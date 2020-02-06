@@ -15,9 +15,19 @@ def config_profile(mocker):
 
 @pytest.fixture
 def config_parser(mocker):
-    mocker.patch("configparser.ConfigParser.__setitem__")
-    mocker.patch("configparser.ConfigParser.add_section")
-    mocker.patch("configparser.ConfigParser.read")
-    mock_init = mocker.patch("configparser.ConfigParser.__init__")
-    mock_init.return_value = None
-    return mock_init
+    mocks = ConfigParserMocks()
+    mocks.initializer = mocker.patch("configparser.ConfigParser.__init__")
+    mocks.item_setter = mocker.patch("configparser.ConfigParser.__setitem__")
+    mocks.item_getter = mocker.patch("configparser.ConfigParser.__getitem__")
+    mocks.section_adder = mocker.patch("configparser.ConfigParser.add_section")
+    mocks.reader = mocker.patch("configparser.ConfigParser.read")
+    mocks.initializer.return_value = None
+    return mocks
+
+
+class ConfigParserMocks(object):
+    initializer = None
+    item_setter = None
+    item_getter = None
+    section_adder = None
+    reader = None

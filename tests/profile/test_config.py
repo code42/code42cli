@@ -21,18 +21,15 @@ def path_does_not_exist(path_exists_function):
 
 
 @pytest.fixture
-def config_section_getter(mocker):
-    return mocker.patch("configparser.ConfigParser.__getitem__")
+def non_existent_profile(mocker, config_parser):
+    config_parser.item_getter.return_value = create_config_profile(mocker, False)
+    return config_parser
 
 
 @pytest.fixture
-def non_existent_profile(mocker, config_section_getter, config_parser):
-    config_section_getter.return_value = create_config_profile(mocker, False)
-
-
-@pytest.fixture
-def existent_profile(mocker, config_section_getter, config_parser):
-    config_section_getter.return_value = create_config_profile(mocker, True)
+def existent_profile(mocker, config_parser):
+    config_parser.item_getter.return_value = create_config_profile(mocker, True)
+    return config_parser
 
 
 @pytest.fixture
@@ -55,6 +52,7 @@ def create_config_profile(mocker, is_set):
     bool_getter = mocker.MagicMock()
     bool_getter.return_value = is_set
     config_profile.getboolean = bool_getter
+    config_profile.__setitem__ = mocker.MagicMock()
     return config_profile
 
 
