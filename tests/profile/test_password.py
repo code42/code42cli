@@ -35,6 +35,13 @@ def test_get_password_when_password_is_none_returns_password_from_getpass(
     assert password.get_password() == "test password"
 
 
+def test_get_password_when_password_is_not_none_returns_password(
+    keyring_password_getter, config_profile, getpass_function
+):
+    keyring_password_getter.return_value = "already stored password 123"
+    assert password.get_password() == "already stored password 123"
+
+
 def test_set_password_uses_expected_service_name_username_and_password(
     keyring_password_setter, config_profile, getpass_function
 ):

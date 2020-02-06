@@ -44,14 +44,9 @@ def get_profile():
 def show_profile(*args):
     """Prints the current profile to stdout."""
     profile = config.get_config_profile()
-    print("")
-    print("Profile:")
-
+    print("\nProfile:")
     for key in profile:
         print("\t* {} = {}".format(key, profile[key]))
-
-    if password.get_password() is not None:
-        print("\t* A password exists for this profile.")
 
     print("")
 

@@ -15,6 +15,8 @@ def get_password():
     if password is None:
         return set_password()
 
+    return password
+
 
 def set_password():
     password = getpass()
