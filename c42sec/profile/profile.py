@@ -48,8 +48,8 @@ def show_profile(*args):
     for key in profile:
         print("\t* {} = {}".format(key, profile[key]))
 
-    # Should never be None
-    if password.get_password() is not None:
+    # Don't prompt here because it may be confusing from a UX perspective
+    if password.get_password(prompt_if_not_exists=False) is not None:
         print("\t* A password is set.")
 
     print("")

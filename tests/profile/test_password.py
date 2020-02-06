@@ -42,6 +42,13 @@ def test_get_password_when_password_is_not_none_returns_password(
     assert password.get_password() == "already stored password 123"
 
 
+def test_get_password_when_password_is_none_and_told_to_not_prompt_if_not_exists_returns_none(
+    keyring_password_getter, config_profile, getpass_function
+):
+    keyring_password_getter.return_value = None
+    assert password.get_password(prompt_if_not_exists=False) is None
+
+
 def test_set_password_uses_expected_service_name_username_and_password(
     keyring_password_setter, config_profile, getpass_function
 ):
