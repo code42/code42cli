@@ -1,5 +1,3 @@
-from getpass import getpass
-
 import c42sec.profile._config as config
 import c42sec.profile._password as password
 from c42sec.profile._config import ConfigurationKeys
@@ -170,11 +168,8 @@ def _try_set_ignore_ssl_errors(args):
 
 def _try_set_password(args):
     # Must happen after setting username
-    if args.do_set_c42_password or (
-        password.get_password() is None and args.c42_username is not None
-    ):
-        user_password = getpass()
-        password.set_password(user_password)
+    if args.do_set_c42_password:
+        password.set_password()
         print("'Code42 Password' updated.")
 
 

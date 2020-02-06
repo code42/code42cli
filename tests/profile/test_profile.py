@@ -47,11 +47,6 @@ def profile_is_set_state(mocker):
     return profile_verifier
 
 
-@pytest.fixture
-def getpass_function(mocker):
-    return mocker.patch("c42sec.profile.profile.getpass")
-
-
 def test_init_adds_profile_subcommand_to_choices(config_parser):
     subcommand_parser = ArgumentParser().add_subparsers()
     profile.init(subcommand_parser)
@@ -90,7 +85,6 @@ def test_get_profile_returns_object_from_config_file(config_parser, config_profi
 def test_set_profile_when_given_username_sets_username(
     config_parser, username_setter, password_getter, profile_is_set_state
 ):
-    password_getter.return_value = "Something"  # Needed or else it prompts getpass
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "-u", "a.new.user@example.com"])
     profile.set_profile(namespace)
@@ -212,30 +206,11 @@ def test_set_profile_when_is_first_time_and_given_both_authority_and_username_ma
     mark_as_set_function.assert_called_once_with()
 
 
-def test_set_profile_when_given_password_sets_password_returned_from_getpass(
-    config_parser, getpass_function, password_setter, profile_is_set_state
-):
-    getpass_function.return_value = "a New p@55w0rd"
+def test_set_profile_when_given_password_sets_password(config_parser, password_setter, profile_is_set_state):
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "-p"])
     profile.set_profile(namespace)
-    password_setter.assert_called_once_with("a New p@55w0rd")
-
-
-def test_set_profile_when_given_username_but_username_does_not_have_stored_password_and_not_given_pflag_and_profile_is_set_sets_password_returned_from_getpass(
-    config_parser,
-    getpass_function,
-    password_setter,
-    password_getter,
-    profile_is_set_state,
-    username_setter,
-):
-    password_getter.return_value = None
-    getpass_function.return_value = "a New p@55w0rd"
-    parser = _get_profile_parser()
-    namespace = parser.parse_args(["set", "-u", "a.new.user@example.com"])
-    profile.set_profile(namespace)
-    password_setter.assert_called_once_with("a New p@55w0rd")
+    assert len(password_setter.call_args) > 0
 
 
 def _get_profile_parser():

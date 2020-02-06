@@ -1,4 +1,5 @@
 import keyring
+from getpass import getpass
 import c42sec.profile._config as config
 from c42sec.profile._config import ConfigurationKeys
 
@@ -10,14 +11,18 @@ def get_password():
     profile = config.get_config_profile()
     service_name = _get_service_name(profile)
     username = _get_username(profile)
-    return keyring.get_password(service_name, username)
+    password = keyring.get_password(service_name, username)
+    if password is None:
+        return set_password()
 
 
-def set_password(password):
+def set_password():
+    password = getpass()
     profile = config.get_config_profile()
     service_name = _get_service_name(profile)
     username = _get_username(profile)
     keyring.set_password(service_name, username, password)
+    return password
 
 
 def _get_service_name(profile):
