@@ -165,7 +165,6 @@ def _try_set_password(args):
     # Must happen after setting username
     if args.do_set_c42_password:
         password.set_password()
-        print("'Code42 Password' updated.")
 
     # This will prompt use for password if it does not exist for the current user name.
     password.get_password()

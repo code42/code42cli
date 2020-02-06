@@ -24,6 +24,7 @@ def set_password():
     service_name = _get_service_name(profile)
     username = _get_username(profile)
     keyring.set_password(service_name, username, password)
+    print("'Code42 Password' updated.")
     return password
 
 
