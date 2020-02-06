@@ -11,3 +11,13 @@ def config_profile(mocker):
         ConfigurationKeys.IGNORE_SSL_ERRORS_KEY: "True",
     }
     return mock_config
+
+
+@pytest.fixture
+def config_parser(mocker):
+    mocker.patch("configparser.ConfigParser.__setitem__")
+    mocker.patch("configparser.ConfigParser.add_section")
+    mocker.patch("configparser.ConfigParser.read")
+    mock_init = mocker.patch("configparser.ConfigParser.__init__")
+    mock_init.return_value = None
+    return mock_init

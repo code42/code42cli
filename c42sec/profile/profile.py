@@ -170,14 +170,18 @@ def _try_set_ignore_ssl_errors(args):
 
 def _try_set_password(args):
     # Must happen after setting username
-    if args.do_set_c42_password or (password.get_password() is None and args.c42_username is not None):
+    if args.do_set_c42_password or (
+        password.get_password() is None and args.c42_username is not None
+    ):
         user_password = getpass()
         password.set_password(user_password)
         print("'Code42 Password' updated.")
 
 
 def _verify_args_for_initial_profile_set(args):
-    if not config.profile_has_been_set() and (args.c42_username is None or args.c42_authority_url is None):
+    if not config.profile_has_been_set() and (
+        args.c42_username is None or args.c42_authority_url is None
+    ):
         if args.c42_username is None:
             print_error("ERROR: Missing username argument.")
 

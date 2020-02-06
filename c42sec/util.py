@@ -21,6 +21,11 @@ def get_user_project_path(subdir=""):
     return user_project_path
 
 
+def open_file(file_path, mode, action):
+    with open(file_path, mode) as f:
+        action(f)
+
+
 def print_error(error_text):
     print("\033[91m{}\033[0m".format(error_text))
 

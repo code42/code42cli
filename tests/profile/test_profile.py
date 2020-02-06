@@ -4,13 +4,6 @@ from c42sec.profile import profile
 
 
 @pytest.fixture
-def config_parser(mocker):
-    mock_init = mocker.patch("configparser.ConfigParser.__init__")
-    mock_init.return_value = None
-    return mock_init
-
-
-@pytest.fixture
 def username_setter(mocker):
     return mocker.patch("c42sec.profile._config.set_username")
 
@@ -172,7 +165,12 @@ def test_set_profile_when_is_first_time_and_given_authority_url_but_not_given_us
 
 
 def test_set_profile_when_is_first_time_and_given_both_authority_and_username_sets_username(
-    config_parser, profile_not_set_state, username_setter, authority_url_setter, password_getter, mark_as_set_function
+    config_parser,
+    profile_not_set_state,
+    username_setter,
+    authority_url_setter,
+    password_getter,
+    mark_as_set_function,
 ):
     parser = _get_profile_parser()
     namespace = parser.parse_args(
@@ -183,7 +181,12 @@ def test_set_profile_when_is_first_time_and_given_both_authority_and_username_se
 
 
 def test_set_profile_when_is_first_time_and_given_both_authority_and_username_sets_authority_url(
-    config_parser, profile_not_set_state, username_setter, authority_url_setter, password_getter, mark_as_set_function
+    config_parser,
+    profile_not_set_state,
+    username_setter,
+    authority_url_setter,
+    password_getter,
+    mark_as_set_function,
 ):
     parser = _get_profile_parser()
     namespace = parser.parse_args(
@@ -194,7 +197,12 @@ def test_set_profile_when_is_first_time_and_given_both_authority_and_username_se
 
 
 def test_set_profile_when_is_first_time_and_given_both_authority_and_username_marks_as_set(
-    config_parser, profile_not_set_state, username_setter, authority_url_setter, password_getter, mark_as_set_function
+    config_parser,
+    profile_not_set_state,
+    username_setter,
+    authority_url_setter,
+    password_getter,
+    mark_as_set_function,
 ):
     parser = _get_profile_parser()
     namespace = parser.parse_args(
@@ -205,7 +213,7 @@ def test_set_profile_when_is_first_time_and_given_both_authority_and_username_ma
 
 
 def test_set_profile_when_given_password_sets_password_returned_from_getpass(
-    config_parser, getpass_function, password_setter
+    config_parser, getpass_function, password_setter, profile_is_set_state
 ):
     getpass_function.return_value = "a New p@55w0rd"
     parser = _get_profile_parser()
@@ -215,7 +223,12 @@ def test_set_profile_when_given_password_sets_password_returned_from_getpass(
 
 
 def test_set_profile_when_given_username_but_username_does_not_have_stored_password_and_not_given_pflag_and_profile_is_set_sets_password_returned_from_getpass(
-    config_parser, getpass_function, password_setter, password_getter, profile_is_set_state, username_setter
+    config_parser,
+    getpass_function,
+    password_setter,
+    password_getter,
+    profile_is_set_state,
+    username_setter,
 ):
     password_getter.return_value = None
     getpass_function.return_value = "a New p@55w0rd"

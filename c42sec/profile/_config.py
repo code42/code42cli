@@ -1,6 +1,6 @@
 import os
+import c42sec.util as util
 from configparser import ConfigParser
-from c42sec.util import get_user_project_path, print_error, print_bold
 
 
 class ConfigurationKeys(object):
@@ -15,10 +15,10 @@ class ConfigurationKeys(object):
 def get_config_profile():
     parser = ConfigParser()
     if not profile_has_been_set():
-        print_error("ERROR: Profile is not set.")
+        util.print_error("ERROR: Profile is not set.")
         print("")
         print("To set, use: ")
-        print_bold("\tc42sec profile set -s <authority-URL> -u <username>")
+        util.print_bold("\tc42sec profile set -s <authority-URL> -u <username>")
         print("")
         exit(1)
 
@@ -27,7 +27,7 @@ def get_config_profile():
 
 def mark_as_set():
     parser = ConfigParser()
-    config_file_path = get_config_file_path()
+    config_file_path = _get_config_file_path()
     parser.read(config_file_path)
     settings = parser[ConfigurationKeys.INTERNAL_SECTION]
     settings[ConfigurationKeys.HAS_SET_PROFILE_KEY] = "True"
@@ -36,11 +36,10 @@ def mark_as_set():
 
 def profile_has_been_set():
     parser = ConfigParser()
-    config_file_path = get_config_file_path()
+    config_file_path = _get_config_file_path()
     parser.read(config_file_path)
     settings = parser[ConfigurationKeys.INTERNAL_SECTION]
-    is_set = settings.getboolean(ConfigurationKeys.HAS_SET_PROFILE_KEY)
-    return is_set
+    return settings.getboolean(ConfigurationKeys.HAS_SET_PROFILE_KEY)
 
 
 def set_username(new_username):
@@ -64,8 +63,8 @@ def set_ignore_ssl_errors(new_value):
     _save(parser)
 
 
-def get_config_file_path():
-    path = "{}config.cfg".format(get_user_project_path())
+def _get_config_file_path():
+    path = "{}config.cfg".format(util.get_user_project_path())
     if not os.path.exists(path):
         _create_new_config_file(path)
 
@@ -73,7 +72,7 @@ def get_config_file_path():
 
 
 def _get_config_profile_from_parser(parser):
-    config_file_path = get_config_file_path()
+    config_file_path = _get_config_file_path()
     parser.read(config_file_path)
     config = parser[ConfigurationKeys.USER_SECTION]
     config.ignore_ssl_errors = config.getboolean(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
@@ -106,6 +105,5 @@ def _create_internal_section(parser):
 
 
 def _save(parser, path=None):
-    path = get_config_file_path() if path is None else path
-    with open(path, "w+") as config_file:
-        parser.write(config_file)
+    path = _get_config_file_path() if path is None else path
+    util.open_file(path, "w+", lambda f: parser.write(f))
