@@ -35,7 +35,7 @@ def existent_profile(mocker, config_parser):
 @pytest.fixture
 def mock_project_path(mocker):
     project_path_getter = mocker.patch("c42sec.util.get_user_project_path")
-    project_path_getter.return_value = "some/path"
+    project_path_getter.return_value = "some/path/"
     return project_path_getter
 
 
@@ -58,7 +58,7 @@ def create_config_profile(mocker, is_set):
 
 def assert_save_was_called(open_file_function):
     call_args = open_file_function.call_args
-    assert call_args[0][0] == "some/pathconfig.cfg" and call_args[0][1] == "w+"
+    assert call_args[0][0] == "some/path/config.cfg" and call_args[0][1] == "w+"
 
 
 def test_get_config_profile_when_file_exists_but_profile_does_not_exist_exits(
