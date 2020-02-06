@@ -175,10 +175,10 @@ def _verify_args_for_initial_profile_set(args):
         args.c42_username is None or args.c42_authority_url is None
     ):
         if args.c42_username is None:
-            print_error("ERROR: Missing username argument.")
+            print_error("Missing username argument.")
 
         if args.c42_authority_url is None:
-            print_error("ERROR: Missing Code42 Authority URL argument.")
+            print_error("Missing Code42 Authority URL argument.")
 
         return False
 

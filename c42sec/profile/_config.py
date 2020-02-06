@@ -15,7 +15,7 @@ class ConfigurationKeys(object):
 def get_config_profile():
     parser = ConfigParser()
     if not profile_has_been_set():
-        util.print_error("ERROR: Profile is not set.")
+        util.print_error("Profile is not set.")
         print("")
         print("To set, use: ")
         util.print_bold("\tc42sec profile set -s <authority-URL> -u <username>")
