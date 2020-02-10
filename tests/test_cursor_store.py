@@ -1,5 +1,14 @@
 from os import path
-from c42seceventcli.common.cursor_store import SecurityEventCursorStore
+
+import pytest
+from c42sec.cursor_store import SecurityEventCursorStore
+
+MOCK_TEST_DB_PATH = "test_path.db"
+
+
+@pytest.fixture
+def sqlite_connection(mocker):
+    return mocker.patch("sqlite3.connect")
 
 
 class TestSecurityEventCursorStore(object):
@@ -7,7 +16,7 @@ class TestSecurityEventCursorStore(object):
         self, sqlite_connection
     ):
         home_dir = path.expanduser("~")
-        expected_path = path.join(home_dir, ".c42seceventcli/db")
+        expected_path = path.join(home_dir, ".c42sec/db")
         expected_db_name = "TEST"
         expected_db_file_path = "{0}/{1}.db".format(expected_path, expected_db_name)
         SecurityEventCursorStore(expected_db_name)
