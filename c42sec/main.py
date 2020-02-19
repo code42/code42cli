@@ -1,4 +1,7 @@
+from __future__ import print_function
 from argparse import ArgumentParser
+
+from c42sec.compat import str
 from c42sec.profile import profile
 from c42sec.send_to import send_to
 from c42sec.write_to import write_to

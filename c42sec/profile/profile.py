@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import c42sec.profile._config as config
 import c42sec.profile._password as password
 from c42sec.profile._config import ConfigurationKeys

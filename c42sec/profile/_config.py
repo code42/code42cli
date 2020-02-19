@@ -1,4 +1,7 @@
+from __future__ import print_function
 import os
+
+from c42sec.compat import str
 import c42sec.util as util
 from configparser import ConfigParser
 
