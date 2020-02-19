@@ -1,3 +1,11 @@
+class OutputFormat(object):
+    CEF = "CEF"
+    JSON = "JSON"
+
+    def __iter__(self):
+        return iter([self.CEF, self.JSON])
+
+
 def add_args(parser):
     _add_begin_date_arg(parser)
     _add_end_date_arg(parser)
@@ -43,9 +51,9 @@ def _add_output_format_arg(parser):
     parser.add_argument(
         "-f",
         "--format",
-        dest="open_format",
+        dest="format",
         action="store",
-        choices=["CEF", "JSON"],
+        choices=list(OutputFormat()),
         help="The format used for outputting events.",
     )
 

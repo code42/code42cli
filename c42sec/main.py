@@ -2,7 +2,7 @@ from __future__ import print_function
 from argparse import ArgumentParser
 
 from c42sec._internal.compat import str
-from c42sec.subcommands import profile, send_to, write_to
+from c42sec import send_to, write_to, profile
 
 
 def main():
