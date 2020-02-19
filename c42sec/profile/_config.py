@@ -65,7 +65,7 @@ def set_ignore_ssl_errors(new_value):
 
 def _get_config_file_path():
     path = "{}config.cfg".format(util.get_user_project_path())
-    if not os.path.exists(path):
+    if not os.path.exists(path) or not _verify_config_file(path):
         _create_new_config_file(path)
 
     return path
@@ -109,3 +109,11 @@ def _save(parser, key=None, path=None):
     util.open_file(path, "w+", lambda f: parser.write(f))
     if key is not None:
         print("'{}' has been successfully updated".format(key))
+
+
+def _verify_config_file(path):
+    keys = ConfigurationKeys
+    config_parser = ConfigParser()
+    config_parser.read(path)
+    sections = config_parser.sections()
+    return keys.USER_SECTION in sections and keys.INTERNAL_SECTION in sections
