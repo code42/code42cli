@@ -12,8 +12,8 @@ def _add_advanced_query(parser):
         action="store",
         dest="advanced_query",
         help="A raw JSON file event query. "
-             "Useful for when the provided query parameters do not satisfy your requirements."
-             "WARNING: Using advanced queries ignores all other query parameters.",
+        "Useful for when the provided query parameters do not satisfy your requirements."
+        "WARNING: Using advanced queries ignores all other query parameters.",
     )
 
 
