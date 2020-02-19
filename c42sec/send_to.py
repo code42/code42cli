@@ -34,4 +34,3 @@ def _add_protocol_arg(parser):
         choices=["TCP", "UDP"],
         help="Protocol used to send logs to server. Ignored if destination type is not 'server'.",
     )
-å
