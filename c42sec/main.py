@@ -1,18 +1,15 @@
 from __future__ import print_function
 from argparse import ArgumentParser
 
-from c42sec.compat import str
-from c42sec.profile import profile
-from c42sec.send_to import send_to
-from c42sec.write_to import write_to
+from c42sec._internal.compat import str
+from c42sec.subcommands import profile, send_to, write_to
 
 
 def main():
     c42sec_arg_parser = ArgumentParser()
     subcommand_parser = c42sec_arg_parser.add_subparsers()
     _init_subcommands(subcommand_parser)
-    args = c42sec_arg_parser.parse_args()
-    _call(args, c42sec_arg_parser.print_help)
+    _call_subcommand(c42sec_arg_parser)
 
 
 def _init_subcommands(subcommand_parser):
@@ -21,13 +18,14 @@ def _init_subcommands(subcommand_parser):
     write_to.init(subcommand_parser)
 
 
-def _call(args, print_help):
+def _call_subcommand(arg_parser):
     """Call provided subcommand with args."""
     try:
+        args = arg_parser.parse_args()
         args.func(args)
     except AttributeError as err:
         if str(err) == "'Namespace' object has no attribute 'func'":
-            print_help()
+            arg_parser.print_help()
         else:
             print(err)
 

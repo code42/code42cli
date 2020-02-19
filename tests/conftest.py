@@ -1,10 +1,11 @@
 import pytest
-from c42sec.profile._config import ConfigurationKeys
+
+from c42sec._internal.profile.config import ConfigurationKeys
 
 
 @pytest.fixture
 def config_profile(mocker):
-    mock_config = mocker.patch("c42sec.profile._config.get_config_profile")
+    mock_config = mocker.patch("c42sec._internal.profile.config.get_config_profile")
     mock_config.return_value = {
         ConfigurationKeys.USERNAME_KEY: "test.username",
         ConfigurationKeys.AUTHORITY_KEY: "https://authority.example.com",
@@ -21,6 +22,7 @@ def config_parser(mocker):
     mocks.item_getter = mocker.patch("configparser.ConfigParser.__getitem__")
     mocks.section_adder = mocker.patch("configparser.ConfigParser.add_section")
     mocks.reader = mocker.patch("configparser.ConfigParser.read")
+    mocks.sections = mocker.patch("configparser.ConfigParser.sections")
     mocks.initializer.return_value = None
     return mocks
 
@@ -31,3 +33,4 @@ class ConfigParserMocks(object):
     item_getter = None
     section_adder = None
     reader = None
+    sections = None

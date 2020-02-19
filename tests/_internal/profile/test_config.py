@@ -1,6 +1,7 @@
+from __future__ import with_statement
 import pytest
 
-import c42sec.profile._config as config
+import c42sec._internal.profile.config as config
 
 
 @pytest.fixture
@@ -49,6 +50,7 @@ def open_file_function(mocker):
 
 def create_config_profile(mocker, is_set):
     config_profile = mocker.MagicMock()
+    config_profile.getboolean.return_value = is_set
     bool_getter = mocker.MagicMock()
     bool_getter.return_value = is_set
     config_profile.getboolean = bool_getter
@@ -62,7 +64,7 @@ def assert_save_was_called(open_file_function):
 
 
 def test_get_config_profile_when_file_exists_but_profile_does_not_exist_exits(
-    path_exists, non_existent_profile, mock_project_path
+    path_exists, non_existent_profile, mock_project_path, open_file_function
 ):
     # It is expected to exit because the user must set their profile before they can see it.
     with pytest.raises(SystemExit):
@@ -70,7 +72,7 @@ def test_get_config_profile_when_file_exists_but_profile_does_not_exist_exits(
 
 
 def test_get_config_profile_when_file_exists_and_profile_is_set_does_not_exit(
-    path_exists, existent_profile, mock_project_path
+    path_exists, existent_profile, mock_project_path, open_file_function
 ):
     # Presumably, it shows the profile instead of exiting.
     assert config.get_config_profile()

@@ -1,8 +1,8 @@
 from __future__ import print_function
 
-import c42sec.profile._config as config
-import c42sec.profile._password as password
-from c42sec.profile._config import ConfigurationKeys
+import c42sec._internal.profile.config as config
+import c42sec._internal.profile.password as password
+from c42sec._internal.profile.config import ConfigurationKeys
 from c42sec.util import print_error
 
 
@@ -24,12 +24,12 @@ def init(subcommand_parser):
     parser_profile.set_defaults(func=show_profile)
     profile_subparsers = parser_profile.add_subparsers()
 
-    parser_show = profile_subparsers.add_parser("show")
-    parser_set = profile_subparsers.add_parser("set")
+    parser_for_show_command = profile_subparsers.add_parser("show")
+    parser_for_set_command = profile_subparsers.add_parser("set")
 
-    parser_show.set_defaults(func=show_profile)
-    parser_set.set_defaults(func=set_profile)
-    _add_set_command_args(parser_set)
+    parser_for_show_command.set_defaults(func=show_profile)
+    parser_for_set_command.set_defaults(func=set_profile)
+    _add_args_to_set_command(parser_for_set_command)
 
 
 def get_profile():
@@ -73,13 +73,13 @@ def set_profile(args):
         show_profile()
 
 
-def _add_set_command_args(parser):
-    _add_authority_arg(parser)
-    _add_username_arg(parser)
-    _add_password_arg(parser)
-    _add_disable_ssl_errors_arg(parser)
-    _add_enable_ssl_errors_arg(parser)
-    _add_show_arg(parser)
+def _add_args_to_set_command(parser_for_set_command):
+    _add_authority_arg(parser_for_set_command)
+    _add_username_arg(parser_for_set_command)
+    _add_password_arg(parser_for_set_command)
+    _add_disable_ssl_errors_arg(parser_for_set_command)
+    _add_enable_ssl_errors_arg(parser_for_set_command)
+    _add_show_arg(parser_for_set_command)
 
 
 def _add_authority_arg(parser):

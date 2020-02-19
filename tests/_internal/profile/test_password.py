@@ -1,5 +1,5 @@
 import pytest
-import c42sec.profile._password as password
+import c42sec._internal.profile.password as password
 
 
 @pytest.fixture
@@ -14,7 +14,7 @@ def keyring_password_setter(mocker):
 
 @pytest.fixture
 def getpass_function(mocker):
-    return mocker.patch("c42sec.profile._password.getpass")
+    return mocker.patch("c42sec._internal.profile.password.getpass")
 
 
 def test_get_password_uses_expected_service_name_and_username(

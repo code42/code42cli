@@ -1,8 +1,9 @@
 from __future__ import print_function
 import keyring
 from getpass import getpass
-import c42sec.profile._config as config
-from c42sec.profile._config import ConfigurationKeys
+
+import c42sec._internal.profile.config as config
+from c42sec._internal.profile.config import ConfigurationKeys
 
 
 _ROOT_SERVICE_NAME = u"c42sec"
