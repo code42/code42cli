@@ -1,6 +1,6 @@
 from c42sec._internal.logger_factory import get_logger_for_syslog
 from c42sec._internal.args import add_args
-from c42sec.destinations import output_to_destination
+from c42sec.base_output import output_to_destination
 
 
 def init(subcommand_parser):
@@ -34,3 +34,4 @@ def _add_protocol_arg(parser):
         choices=["TCP", "UDP"],
         help="Protocol used to send logs to server. Ignored if destination type is not 'server'.",
     )
+å

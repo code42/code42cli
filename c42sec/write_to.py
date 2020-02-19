@@ -1,6 +1,6 @@
 from c42sec._internal.logger_factory import get_logger_for_file
 from c42sec._internal.args import add_args
-from c42sec.destinations import output_to_destination
+from c42sec.base_output import output_to_destination
 
 
 def init(subcommand_parser):
