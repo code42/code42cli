@@ -1,6 +1,7 @@
 class OutputFormat(object):
     CEF = "CEF"
     JSON = "JSON"
+
     def __iter__(self):
         return iter([self.CEF, self.JSON])
 
@@ -12,6 +13,7 @@ class ExposureType(object):
     CLOUD_STORAGE = u"CloudStorage"
     REMOVABLE_MEDIA = u"RemovableMedia"
     IS_PUBLIC = u"IsPublic"
+
     def __iter__(self):
         return iter(
             [
@@ -28,5 +30,6 @@ class ExposureType(object):
 class ServerProtocol(object):
     TCP = "TCP"
     UDP = "UDP"
+
     def __iter__(self):
         return iter([self.TCP, self.UDP])

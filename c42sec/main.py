@@ -6,7 +6,6 @@ from c42sec._internal.arguments import add_all_arguments_to_parser
 from c42sec.subcommands import clear_checkpoint, print_out, profile, send_to, write_to
 
 
-
 def main():
     c42sec_arg_parser = ArgumentParser()
     subcommand_parser = c42sec_arg_parser.add_subparsers()

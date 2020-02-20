@@ -56,6 +56,3 @@ def test_extract_when_is_advanced_query_uses_only_the_extract_raw_method(
     extract(mock_logger, mock_namespace_args)
     mock_extractor.extract_raw.assert_called_once_with("some complex json")
     assert mock_extractor.extract.call_count == 0
-
-
-
