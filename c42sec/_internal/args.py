@@ -7,11 +7,13 @@ class OutputFormat(object):
 
 
 def add_args(parser):
+    _add_advanced_query(parser)
     _add_begin_date_arg(parser)
     _add_end_date_arg(parser)
-    _add_incremental_arg(parser)
     _add_output_format_arg(parser)
-    _add_advanced_query(parser)
+    _add_incremental_arg(parser)
+    _add_exposure_types_arg(parser)
+    _add_debug_args(parser)
 
 
 def _add_advanced_query(parser):
@@ -65,4 +67,29 @@ def _add_incremental_arg(parser):
         dest="is_incremental",
         action="store_true",
         help="Only get events that were not previously retrieved.",
+    )
+
+
+def _add_exposure_types_arg(parser):
+    parser.add_argument(
+        "-t",
+        "--types",
+        nargs="*",
+        action="store",
+        dest="exposure_types",
+        choices=[
+            u"SharedViaLink",
+            u"SharedToDomain",
+            u"ApplicationRead",
+            u"CloudStorage",
+            u"RemovableMedia",
+            u"IsPublic",
+        ],
+        help="To limit extracted events to those with given exposure types.",
+    )
+
+
+def _add_debug_args(parser):
+    parser.add_argument(
+        "-d", "--debug", dest="is_debug_mode", action="store_true", help="Turn on Debug logging."
     )

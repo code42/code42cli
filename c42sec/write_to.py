@@ -17,7 +17,5 @@ def write_to(args):
 
 def _add_filename_subcommand(parser):
     parser.add_argument(
-        action="store",
-        dest="filename",
-        help="The name of the local file to send output to.",
+        action="store", dest="filename", help="The name of the local file to send output to."
     )

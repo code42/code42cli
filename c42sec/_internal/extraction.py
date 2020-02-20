@@ -2,10 +2,12 @@ from __future__ import print_function
 import json
 from datetime import datetime, timedelta
 
+from py42.sdk import SDK
+from py42 import debug_level
+from py42 import settings
 from c42secevents.common import FileEventHandlers
 from c42secevents.extractors import AEDEventExtractor
 from c42secevents.common import convert_datetime_to_timestamp
-from py42.sdk import SDK
 
 from c42sec._internal.logger_factory import get_error_logger
 from c42sec.profile import get_profile
@@ -14,10 +16,9 @@ from c42sec.profile import get_profile
 def extract_to_destination(output_logger, args):
     handlers = _create_event_handlers_for_logging_output(output_logger)
     profile = get_profile()
-    code42 = SDK.create_using_local_account(profile.authority_url, profile.username, profile.get_password())
-    min_timestamp = _parse_min_timestamp(args.begin_date) if args.begin_date else None
-    max_timestamp = _parse_timestamp(args.end_date) if args.end_date else None
-    AEDEventExtractor(code42, handlers).extract(initial_min_timestamp=min_timestamp, max_timestamp=max_timestamp)
+    code42 = _get_sdk(profile, args.is_debug_mode)
+    extractor = AEDEventExtractor(code42, handlers)
+    _extract(extractor, args)
 
 
 def _create_event_handlers_for_logging_output(output_logger):
@@ -33,6 +34,15 @@ def _create_event_handlers_for_logging_output(output_logger):
 
     handlers.handle_response = handle_response
     return handlers
+
+
+def _get_sdk(profile, is_debug_mode):
+    code42 = SDK.create_using_local_account(
+        profile.authority_url, profile.username, profile.get_password()
+    )
+    if is_debug_mode:
+        settings.debug_level = debug_level.DEBUG
+    return code42
 
 
 def _parse_min_timestamp(begin_date):
@@ -58,3 +68,17 @@ def _parse_timestamp(input_string):
             raise ValueError("input must be a positive integer or a date in YYYY-MM-DD format.")
 
     return convert_datetime_to_timestamp(time)
+
+
+def _extract(extractor, args):
+    if not args.advanced_query:
+        min_timestamp = _parse_min_timestamp(args.begin_date) if args.begin_date else None
+        max_timestamp = _parse_timestamp(args.end_date) if args.end_date else None
+        extractor.extract(
+            initial_min_timestamp=min_timestamp,
+            max_timestamp=max_timestamp,
+            exposure_types=args.exposure_types,
+        )
+    else:
+        # TODO: Pass in advanced query once is supported
+        extractor.extract()
