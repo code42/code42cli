@@ -1,11 +1,7 @@
 from os import path
 
 import pytest
-<<<<<<< HEAD:tests/_internal/test_cursor_store.py
 from c42sec._internal.cursor_store import SecurityEventCursorStore
-=======
-from c42sec.cursor_store import SecurityEventCursorStore
->>>>>>> master:tests/test_cursor_store.py
 
 MOCK_TEST_DB_PATH = "test_path.db"
 
