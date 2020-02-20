@@ -28,10 +28,11 @@ def _call_subcommand(arg_parser):
         args = arg_parser.parse_args()
         args.func(args)
     except AttributeError as err:
-        if str(err) == "'Namespace' object has no attribute 'func'":
+        err_message = str(err)
+        if err_message == "'Namespace' object has no attribute 'func'":
             arg_parser.print_help()
         else:
-            print(err)
+            print(err_message)
 
 
 if __name__ == "__main__":
