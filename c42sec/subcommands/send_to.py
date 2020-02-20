@@ -1,4 +1,4 @@
-from c42sec._internal.logger_factory import get_logger_for_syslog
+from c42sec._internal.logger_factory import get_logger_for_server
 from c42sec._internal.arguments import add_all_arguments_to_parser
 from c42sec._internal.extraction import extract
 from c42sec._internal.options import ServerProtocol
@@ -13,7 +13,7 @@ def init(subcommand_parser):
 
 
 def send_to(args):
-    logger = get_logger_for_syslog(args.server, args.protocol, args.format)
+    logger = get_logger_for_server(args.server, args.protocol, args.format)
     extract(logger, args)
 
 

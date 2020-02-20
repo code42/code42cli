@@ -15,7 +15,7 @@ def get_logger_for_stdout(output_format):
     return _init_logger(logger, handler, output_format)
 
 
-def get_logger_for_syslog(hostname, protocol, output_format):
+def get_logger_for_server(hostname, protocol, output_format):
     logger = logging.getLogger("c42sec_syslog")
     handler = NoPrioritySysLogHandler(hostname, protocol=protocol)
     return _init_logger(logger, handler, output_format)
