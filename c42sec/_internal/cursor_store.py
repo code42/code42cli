@@ -1,9 +1,6 @@
 from __future__ import with_statement
 import sqlite3
-<<<<<<< HEAD:c42sec/_internal/cursor_store.py
 
-=======
->>>>>>> master:c42sec/cursor_store.py
 from c42sec.util import get_user_project_path
 
 _INSERTION_TIMESTAMP_FIELD_NAME = u"insertionTimestamp"
