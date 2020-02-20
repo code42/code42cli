@@ -111,7 +111,7 @@ def test_set_username_saves(shared_config_mocks):
 
 
 def test_set_authority_url_saves(shared_config_mocks):
-    config.set_authority_url("new url")
+    config.set_authority_url("New url")
     assert_save_was_called(shared_config_mocks.open_function)
 
 
