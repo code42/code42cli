@@ -71,10 +71,10 @@ def test_init_adds_parser_that_can_parse_set_command(config_parser):
     )
 
 
-def test_get_profile_returns_object_from_config_file(config_parser, config_profile):
+def test_get_profile_returns_object_from_config_profile(config_parser, config_profile):
     user = profile.get_profile()
 
-    # Values from config_file fixture
+    # Values from config_profile fixture
     assert (
         user.username == "test.username"
         and user.authority_url == "https://authority.example.com"

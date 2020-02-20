@@ -14,12 +14,12 @@ from c42sec._internal.logger_factory import get_error_logger
 from c42sec.subcommands.profile import get_profile
 
 
-def extract_to_destination(output_logger, args):
+def extract(output_logger, args):
     handlers = _create_event_handlers(output_logger, args.is_incremental)
     profile = get_profile()
-    code42 = _get_sdk(profile, args.is_debug_mode)
-    extractor = AEDEventExtractor(code42, handlers)
-    _extract(extractor, args)
+    sdk = _get_sdk(profile, args.is_debug_mode)
+    extractor = AEDEventExtractor(sdk, handlers)
+    _call_extract(extractor, args)
 
 
 def _create_event_handlers(output_logger, is_incremental):
@@ -75,7 +75,7 @@ def _parse_timestamp(input_string):
     return convert_datetime_to_timestamp(time)
 
 
-def _extract(extractor, args):
+def _call_extract(extractor, args):
     if not args.advanced_query:
         min_timestamp = _parse_min_timestamp(args.begin_date) if args.begin_date else None
         max_timestamp = _parse_timestamp(args.end_date) if args.end_date else None

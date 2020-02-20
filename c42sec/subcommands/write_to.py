@@ -1,6 +1,6 @@
 from c42sec._internal.logger_factory import get_logger_for_file
 from c42sec._internal.arguments import add_args
-from c42sec._internal.extraction import extract_to_destination
+from c42sec._internal.extraction import extract
 
 
 def init(subcommand_parser):
@@ -12,7 +12,7 @@ def init(subcommand_parser):
 
 def write_to(args):
     logger = get_logger_for_file(args.filename, args.format)
-    extract_to_destination(logger, args)
+    extract(logger, args)
 
 
 def _add_filename_subcommand(parser):

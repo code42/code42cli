@@ -1,6 +1,6 @@
 from c42sec._internal.logger_factory import get_logger_for_stdout
 from c42sec._internal.arguments import add_args
-from c42sec._internal.extraction import extract_to_destination
+from c42sec._internal.extraction import extract
 
 
 def init(subcommand_parser):
@@ -11,4 +11,4 @@ def init(subcommand_parser):
 
 def print_out(args):
     logger = get_logger_for_stdout(args.format)
-    extract_to_destination(logger, args)
+    extract(logger, args)
