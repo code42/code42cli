@@ -27,7 +27,6 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - Renamed and moved top-level `-r` flag. Use `-i` on one of these subcommands: `write-to`. `send-to`, `print`.
 - Moved query arguments to individual subcommands `write-to`. `send-to`, `print`.
 
-
 ## 0.1.1 - 2019-10-29
 
 ### Fixed

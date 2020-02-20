@@ -2,7 +2,6 @@ from __future__ import print_function, with_statement
 import sys
 from os import path, makedirs
 
-from c42sec._internal.options import OutputFormat
 
 def get_input(prompt):
     if sys.version_info >= (3, 0):
