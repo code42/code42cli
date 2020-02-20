@@ -85,5 +85,4 @@ def _extract(extractor, args):
             exposure_types=args.exposure_types,
         )
     else:
-        # TODO: Pass in advanced query once is supported
-        extractor.extract()
+        extractor.extract_raw(args.advanced_query)
