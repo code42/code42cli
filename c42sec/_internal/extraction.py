@@ -9,6 +9,7 @@ from c42secevents.common import FileEventHandlers
 from c42secevents.extractors import AEDEventExtractor
 from c42secevents.common import convert_datetime_to_timestamp
 
+from c42sec.util import print_error
 from c42sec._internal.cursor_store import AEDCursorStore
 from c42sec._internal.logger_factory import get_error_logger
 from c42sec.subcommands.profile import get_profile
@@ -76,7 +77,7 @@ def _parse_timestamp(input_string):
 
 
 def _call_extract(extractor, args):
-    if not args.advanced_query:
+    if not _determine_if_advanced_query(args):
         min_timestamp = _parse_min_timestamp(args.begin_date) if args.begin_date else None
         max_timestamp = _parse_timestamp(args.end_date) if args.end_date else None
         extractor.extract(
@@ -86,3 +87,18 @@ def _call_extract(extractor, args):
         )
     else:
         extractor.extract_raw(args.advanced_query)
+
+
+def _determine_if_advanced_query(args):
+    if args.advanced_query is not None:
+        if args.begin_date is not None:
+            print_error("Cannot use advanced query with --begin")
+            exit(1)
+        if args.end_date is not None:
+            print_error("Cannot use advanced query with --end")
+            exit(1)
+        if args.exposure_types is not None:
+            print_error("Cannot use advanced query with --types")
+            exit(1)
+        return True
+    return False
