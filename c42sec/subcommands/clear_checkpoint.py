@@ -8,3 +8,7 @@ def init(subcommand_parser):
 
 def clear_checkpoint(*args):
     AEDCursorStore().reset()
+
+
+if __name__ == "__main__":
+    clear_checkpoint()

@@ -6,6 +6,27 @@ class OutputFormat(object):
         return iter([self.CEF, self.JSON])
 
 
+class ExposureType(object):
+    SHARED_VIA_LINK = u"SharedViaLink"
+    SHARED_TO_DOMAIN = u"SharedToDomain"
+    APPLICATION_READ = u"ApplicationRead"
+    CLOUD_STORAGE = u"CloudStorage"
+    REMOVABLE_MEDIA = u"RemovableMedia"
+    IS_PUBLIC = u"IsPublic"
+
+    def __iter__(self):
+        return iter(
+            [
+                self.SHARED_VIA_LINK,
+                self.SHARED_TO_DOMAIN,
+                self.APPLICATION_READ,
+                self.CLOUD_STORAGE,
+                self.REMOVABLE_MEDIA,
+                self.IS_PUBLIC,
+            ]
+        )
+
+
 def add_args(parser):
     _add_advanced_query(parser)
     _add_begin_date_arg(parser)
@@ -77,14 +98,7 @@ def _add_exposure_types_arg(parser):
         nargs="*",
         action="store",
         dest="exposure_types",
-        choices=[
-            u"SharedViaLink",
-            u"SharedToDomain",
-            u"ApplicationRead",
-            u"CloudStorage",
-            u"RemovableMedia",
-            u"IsPublic",
-        ],
+        choices=list(ExposureType()),
         help="To limit extracted events to those with given exposure types.",
     )
 
