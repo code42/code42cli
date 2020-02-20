@@ -1,4 +1,4 @@
-from c42sec._internal.arg_options_enums import ExposureType, OutputFormat
+from c42sec._internal.options import ExposureType, OutputFormat
 
 
 def add_args(parser):

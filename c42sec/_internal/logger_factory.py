@@ -5,7 +5,7 @@ from logging.handlers import RotatingFileHandler
 from c42secevents.logging.formatters import AEDDictToJSONFormatter, AEDDictToCEFFormatter
 from c42secevents.logging.handlers import NoPrioritySysLogHandler
 
-from c42sec._internal.arg_options_enums import OutputFormat
+from c42sec._internal.options import OutputFormat
 from c42sec.util import get_user_project_path
 
 
