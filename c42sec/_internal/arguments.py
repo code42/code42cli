@@ -1,7 +1,7 @@
 from c42sec._internal.options import ExposureType, OutputFormat
 
 
-def add_args(parser):
+def add_all_arguments_to_parser(parser):
     _add_advanced_query(parser)
     _add_begin_date_arg(parser)
     _add_end_date_arg(parser)

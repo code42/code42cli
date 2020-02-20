@@ -2,7 +2,7 @@ from __future__ import print_function
 from argparse import ArgumentParser
 
 from c42sec._internal.compat import str
-from c42sec._internal.arguments import add_args
+from c42sec._internal.arguments import add_all_arguments_to_parser
 from c42sec.subcommands import clear_checkpoint, print_out, profile, send_to, write_to
 
 
@@ -12,7 +12,7 @@ def main():
     subcommand_parser = c42sec_arg_parser.add_subparsers()
     _init_subcommands(subcommand_parser)
     c42sec_arg_parser.set_defaults(func=print_out.print_out)
-    add_args(c42sec_arg_parser)
+    add_all_arguments_to_parser(c42sec_arg_parser)
     _call_subcommand(c42sec_arg_parser)
 
 
