@@ -11,6 +11,12 @@ class SharedConfigMocks(object):
     get_project_path_function = None
     config_parser = None
 
+    def setup_config_file_as_existent(self):
+        self.path_exists_function.return_value = True
+
+    def setup_config_file_as_non_existent(self):
+        self.path_exists_function.return_value = False
+
     def setup_as_existent_profile(self):
         self.config_parser.item_getter.return_value = self._create_config_profile(is_set=True)
 
@@ -56,10 +62,7 @@ def assert_save_was_called(open_file_function):
 
 
 def test_get_config_profile_when_file_exists_but_profile_does_not_exist_exits(shared_config_mocks):
-    # File does indeed exist:
-    shared_config_mocks.path_exists_function.return_value = True
-
-    # Profile is not yet set:
+    shared_config_mocks.setup_config_file_as_existent()
     shared_config_mocks.setup_as_non_existent_profile()
 
     # It is expected to exit because the user must set their profile before they can see it.
@@ -68,10 +71,7 @@ def test_get_config_profile_when_file_exists_but_profile_does_not_exist_exits(sh
 
 
 def test_get_config_profile_when_file_exists_and_profile_is_set_does_not_exit(shared_config_mocks):
-    # File does indeed exist:
-    shared_config_mocks.path_exists_function.return_value = True
-
-    # Profile is indeed set:
+    shared_config_mocks.setup_config_file_as_existent()
     shared_config_mocks.setup_as_existent_profile()
 
     # Presumably, it shows the profile instead of exiting.
@@ -79,10 +79,7 @@ def test_get_config_profile_when_file_exists_and_profile_is_set_does_not_exit(sh
 
 
 def test_get_config_profile_when_file_does_not_exist_saves_changes(shared_config_mocks):
-    # File does indeed exist:
-    shared_config_mocks.path_exists_function.return_value = False
-
-    # Profile is not yet set:
+    shared_config_mocks.setup_as_non_existent_profile()
     shared_config_mocks.setup_as_non_existent_profile()
 
     with pytest.raises(SystemExit):
