@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 from c42sec._internal.compat import str
 from c42sec._internal.args import add_args
-from c42sec import profile, print_stdout, send_to, write_to, clear_checkpoint
+from c42sec.subcommands import clear_checkpoint, print_stdout, profile, send_to, write_to
 
 
 def main():

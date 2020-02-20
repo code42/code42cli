@@ -11,7 +11,7 @@ from c42secevents.common import convert_datetime_to_timestamp
 
 from c42sec._internal.cursor_store import AEDCursorStore
 from c42sec._internal.logger_factory import get_error_logger
-from c42sec.profile import get_profile
+from c42sec.subcommands.profile import get_profile
 
 
 def extract_to_destination(output_logger, args):

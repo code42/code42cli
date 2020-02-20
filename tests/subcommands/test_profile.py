@@ -1,6 +1,6 @@
 import pytest
 from argparse import ArgumentParser
-from c42sec import profile
+from c42sec.subcommands import profile
 
 
 @pytest.fixture
