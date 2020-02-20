@@ -9,22 +9,27 @@ from c42secevents.common import FileEventHandlers
 from c42secevents.extractors import AEDEventExtractor
 from c42secevents.common import convert_datetime_to_timestamp
 
+from c42sec._internal.cursor_store import AEDCursorStore
 from c42sec._internal.logger_factory import get_error_logger
 from c42sec.profile import get_profile
 
 
 def extract_to_destination(output_logger, args):
-    handlers = _create_event_handlers_for_logging_output(output_logger)
+    handlers = _create_event_handlers(output_logger, args.is_incremental)
     profile = get_profile()
     code42 = _get_sdk(profile, args.is_debug_mode)
     extractor = AEDEventExtractor(code42, handlers)
     _extract(extractor, args)
 
 
-def _create_event_handlers_for_logging_output(output_logger):
+def _create_event_handlers(output_logger, is_incremental):
     handlers = FileEventHandlers()
     error_logger = get_error_logger()
     handlers.handle_error = error_logger.error
+    if is_incremental:
+        store = AEDCursorStore()
+        handlers.record_cursor_position = store.replace_stored_insertion_timestamp
+        handlers.get_cursor_position = store.get_stored_insertion_timestamp
 
     def handle_response(response):
         response_dict = json.loads(response.text)
