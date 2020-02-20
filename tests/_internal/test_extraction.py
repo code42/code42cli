@@ -1,5 +1,6 @@
 import pytest
 from argparse import Namespace
+from datetime import datetime, timedelta
 
 from c42sec._internal.extraction import extract
 
@@ -56,3 +57,76 @@ def test_extract_when_is_advanced_query_uses_only_the_extract_raw_method(
     extract(mock_logger, mock_namespace_args)
     mock_extractor.extract_raw.assert_called_once_with("some complex json")
     assert mock_extractor.extract.call_count == 0
+
+
+def test_extract_when_is_advanced_query_and_has_begin_date_exits(
+    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+):
+    mock_namespace_args.advanced_query = "some complex json"
+    mock_namespace_args.begin_date = "begin date"
+    with pytest.raises(SystemExit):
+        extract(mock_logger, mock_namespace_args)
+
+
+def test_extract_when_is_advanced_query_and_has_end_date_exits(
+    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+):
+    mock_namespace_args.advanced_query = "some complex json"
+    mock_namespace_args.end_date = "end date"
+    with pytest.raises(SystemExit):
+        extract(mock_logger, mock_namespace_args)
+
+
+def test_extract_when_is_advanced_query_and_has_exposure_types_exits(
+    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+):
+    mock_namespace_args.advanced_query = "some complex json"
+    mock_namespace_args.exposure_types = "exposure"
+    with pytest.raises(SystemExit):
+        extract(mock_logger, mock_namespace_args)
+
+
+def test_extract_when_is_not_advanced_query_uses_only_extract_method(
+    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+):
+    extract(mock_logger, mock_namespace_args)
+    assert mock_extractor.extract.call_count == 1
+    assert mock_extractor.extract_raw.call_count == 0
+
+
+def test_extract_when_given_begin_date_uses_expected_begin_timestamp(
+    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+):
+    mock_namespace_args.begin_date = "2020-08-04"
+    extract(mock_logger, mock_namespace_args)
+    assert mock_extractor.extract.call_args[1]["initial_min_timestamp"] == 1596499200.0
+
+
+def test_extract_when_given_begin_date_as_seconds_ago_uses_expected_begin_timestamp(
+    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+):
+    mock_namespace_args.begin_date = "600"
+    extract(mock_logger, mock_namespace_args)
+    expected_time = (datetime.utcnow() - timedelta(seconds=600))
+    expected_timestamp = (expected_time - datetime.utcfromtimestamp(0)).total_seconds()
+    actual_timestamp = mock_extractor.extract.call_args[1]["initial_min_timestamp"]
+    assert pytest.approx(expected_timestamp, actual_timestamp)
+
+
+def test_extract_when_given_end_date_uses_expected_begin_timestamp(
+    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+):
+    mock_namespace_args.end_date = "2020-08-04"
+    extract(mock_logger, mock_namespace_args)
+    assert mock_extractor.extract.call_args[1]["max_timestamp"] == 1596499200.0
+
+
+def test_extract_when_given_end_date_as_seconds_ago_uses_expected_begin_timestamp(
+    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+):
+    mock_namespace_args.end_date = "600"
+    extract(mock_logger, mock_namespace_args)
+    expected_time = (datetime.utcnow() - timedelta(seconds=600))
+    expected_timestamp = (expected_time - datetime.utcfromtimestamp(0)).total_seconds()
+    actual_timestamp = mock_extractor.extract.call_args[1]["max_timestamp"]
+    assert pytest.approx(expected_timestamp, actual_timestamp)
