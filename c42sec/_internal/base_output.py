@@ -1,5 +1,4 @@
 import json
-
 from c42secevents.common import FileEventHandlers
 from c42secevents.extractors import AEDEventExtractor
 from py42.sdk import SDK

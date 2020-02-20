@@ -2,7 +2,7 @@ from __future__ import print_function
 from argparse import ArgumentParser
 
 from c42sec._internal.compat import str
-from c42sec import send_to, write_to, profile
+from c42sec import profile, print_stdout, send_to, write_to
 
 
 def main():
@@ -16,6 +16,7 @@ def _init_subcommands(subcommand_parser):
     profile.init(subcommand_parser)
     send_to.init(subcommand_parser)
     write_to.init(subcommand_parser)
+    print_stdout.init(subcommand_parser)
 
 
 def _call_subcommand(arg_parser):

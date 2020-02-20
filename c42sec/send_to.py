@@ -1,6 +1,6 @@
 from c42sec._internal.logger_factory import get_logger_for_syslog
 from c42sec._internal.args import add_args
-from c42sec.base_output import output_to_destination
+from c42sec._internal.base_output import output_to_destination
 
 
 def init(subcommand_parser):
@@ -28,6 +28,7 @@ def _add_server_arg(parser):
 
 def _add_protocol_arg(parser):
     parser.add_argument(
+        "-p",
         "--protocol",
         action="store",
         dest="protocol",
