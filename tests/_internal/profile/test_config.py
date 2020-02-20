@@ -79,7 +79,7 @@ def test_get_config_profile_when_file_exists_and_profile_is_set_does_not_exit(sh
 
 
 def test_get_config_profile_when_file_does_not_exist_saves_changes(shared_config_mocks):
-    shared_config_mocks.setup_non_existing_profile()
+    shared_config_mocks.setup_non_existing_config_file()
     shared_config_mocks.setup_non_existing_profile()
 
     with pytest.raises(SystemExit):
