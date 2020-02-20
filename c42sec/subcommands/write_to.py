@@ -1,5 +1,5 @@
 from c42sec._internal.logger_factory import get_logger_for_file
-from c42sec._internal.args import add_args
+from c42sec._internal.arguments import add_args
 from c42sec._internal.extraction import extract_to_destination
 
 

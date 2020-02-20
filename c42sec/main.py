@@ -2,15 +2,15 @@ from __future__ import print_function
 from argparse import ArgumentParser
 
 from c42sec._internal.compat import str
-from c42sec._internal.args import add_args
-from c42sec.subcommands import clear_checkpoint, print_stdout, profile, send_to, write_to
+from c42sec._internal.arguments import add_args
+from c42sec.subcommands import clear_checkpoint, print_out, profile, send_to, write_to
 
 
 def main():
     c42sec_arg_parser = ArgumentParser()
     subcommand_parser = c42sec_arg_parser.add_subparsers()
     _init_subcommands(subcommand_parser)
-    c42sec_arg_parser.set_defaults(func=print_stdout.print_out)
+    c42sec_arg_parser.set_defaults(func=print_out.print_out)
     add_args(c42sec_arg_parser)
     _call_subcommand(c42sec_arg_parser)
 
@@ -19,7 +19,7 @@ def _init_subcommands(subcommand_parser):
     profile.init(subcommand_parser)
     send_to.init(subcommand_parser)
     write_to.init(subcommand_parser)
-    print_stdout.init(subcommand_parser)
+    print_out.init(subcommand_parser)
     clear_checkpoint.init(subcommand_parser)
 
 

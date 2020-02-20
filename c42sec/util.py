@@ -1,10 +1,8 @@
 from __future__ import print_function, with_statement
 import sys
 from os import path, makedirs
-from argparse import Namespace
 
-from c42sec._internal.args import OutputFormat
-
+from c42sec._internal.arg_options_enums import OutputFormat
 
 def get_input(prompt):
     if sys.version_info >= (3, 0):

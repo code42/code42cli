@@ -4,6 +4,8 @@ from logging.handlers import RotatingFileHandler
 
 from c42secevents.logging.formatters import AEDDictToJSONFormatter, AEDDictToCEFFormatter
 from c42secevents.logging.handlers import NoPrioritySysLogHandler
+
+from c42sec._internal.arg_options_enums import OutputFormat
 from c42sec.util import get_user_project_path
 
 
@@ -45,7 +47,7 @@ def _init_logger(logger, handler, output_format):
 
 
 def _get_formatter(output_format):
-    if output_format == "JSON":
+    if output_format == OutputFormat.JSON:
         return AEDDictToJSONFormatter()
-    elif output_format == "CEF":
+    elif output_format == OutputFormat.CEF:
         return AEDDictToCEFFormatter()

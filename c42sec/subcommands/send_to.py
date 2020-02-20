@@ -1,6 +1,7 @@
 from c42sec._internal.logger_factory import get_logger_for_syslog
-from c42sec._internal.args import add_args
+from c42sec._internal.arguments import add_args
 from c42sec._internal.extraction import extract_to_destination
+from c42sec._internal.arg_options_enums import ServerProtocol
 
 
 def init(subcommand_parser):
@@ -32,6 +33,7 @@ def _add_protocol_arg(parser):
         "--protocol",
         action="store",
         dest="protocol",
-        choices=["TCP", "UDP"],
+        choices=list(ServerProtocol()),
+        default=ServerProtocol.TCP,
         help="Protocol used to send logs to server. Ignored if destination type is not 'server'.",
     )
