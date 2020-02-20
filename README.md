@@ -32,6 +32,42 @@ To ignore SSL errors, do:
 c42sec profile set --ignore-ssl-errors true
 ```
 
+To print events to STDOUT, do:
+```bash
+c42sec print
+```
+
+Configure your output format with the `-f` flag:
+
+```bash
+c42sec print -f CEF
+```
+
+To write events to a file, do:
+```bash
+c42sec write-to -f filename
+```
+
+To send events to a server, such as syslog, do:
+```bash
+c42sec send-to https://syslog.company.com
+```
+
+To only get events that you have not previously gotten, use the `-i` flag:
+```bash
+c42sec send-to https://syslog.company.com -i
+```
+
+To use an advanced query (raw JSON), use the `--advanced-query` flag:
+```bash
+c42sec send-to https://syslog.company.com --advanced-query 
+```
+
+Note: You cannot use begin date (`-b`), end date (`-e`), or any other query parameters when using an advanced query.
+
+To learn more about any of the subcommands and their accepted arguments, add the `-h` flag.
+
+
 # Known Issues
 
 Only the first 10,000 of each set of events containing the exact same insertion timestamp is reported.
