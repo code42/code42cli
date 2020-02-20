@@ -18,13 +18,7 @@ def send_to(args):
 
 
 def _add_server_arg(parser):
-    parser.add_argument(
-        "-s",
-        "--server",
-        action="store",
-        dest="server",
-        help="The server address to send output to.",
-    )
+    parser.add_argument(action="store", dest="server", help="The server address to send output to.")
 
 
 def _add_protocol_arg(parser):

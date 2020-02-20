@@ -45,7 +45,7 @@ c42sec print -f CEF
 
 To write events to a file, do:
 ```bash
-c42sec write-to -f filename
+c42sec write-to filename.txt
 ```
 
 To send events to a server, such as syslog, do:
