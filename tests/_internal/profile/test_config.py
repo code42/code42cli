@@ -11,16 +11,16 @@ class SharedConfigMocks(object):
     get_project_path_function = None
     config_parser = None
 
-    def setup_config_file_as_existent(self):
+    def setup_existing_config_file(self):
         self.path_exists_function.return_value = True
 
-    def setup_config_file_as_non_existent(self):
+    def setup_non_existing_config_file(self):
         self.path_exists_function.return_value = False
 
-    def setup_as_existent_profile(self):
+    def setup_existing_profile(self):
         self.config_parser.item_getter.return_value = self._create_config_profile(is_set=True)
 
-    def setup_as_non_existent_profile(self):
+    def setup_non_existing_profile(self):
         self.config_parser.item_getter.return_value = self._create_config_profile(is_set=False)
 
     def _create_config_profile(self, is_set):
@@ -62,8 +62,8 @@ def assert_save_was_called(open_file_function):
 
 
 def test_get_config_profile_when_file_exists_but_profile_does_not_exist_exits(shared_config_mocks):
-    shared_config_mocks.setup_config_file_as_existent()
-    shared_config_mocks.setup_as_non_existent_profile()
+    shared_config_mocks.setup_existing_config_file()
+    shared_config_mocks.setup_non_existing_profile()
 
     # It is expected to exit because the user must set their profile before they can see it.
     with pytest.raises(SystemExit):
@@ -71,16 +71,16 @@ def test_get_config_profile_when_file_exists_but_profile_does_not_exist_exits(sh
 
 
 def test_get_config_profile_when_file_exists_and_profile_is_set_does_not_exit(shared_config_mocks):
-    shared_config_mocks.setup_config_file_as_existent()
-    shared_config_mocks.setup_as_existent_profile()
+    shared_config_mocks.setup_existing_config_file()
+    shared_config_mocks.setup_existing_profile()
 
     # Presumably, it shows the profile instead of exiting.
     assert config.get_config_profile()
 
 
 def test_get_config_profile_when_file_does_not_exist_saves_changes(shared_config_mocks):
-    shared_config_mocks.setup_as_non_existent_profile()
-    shared_config_mocks.setup_as_non_existent_profile()
+    shared_config_mocks.setup_non_existing_profile()
+    shared_config_mocks.setup_non_existing_profile()
 
     with pytest.raises(SystemExit):
         config.get_config_profile()
@@ -90,18 +90,18 @@ def test_get_config_profile_when_file_does_not_exist_saves_changes(shared_config
 
 
 def test_mark_as_set_saves_changes(shared_config_mocks):
-    shared_config_mocks.setup_as_existent_profile()
+    shared_config_mocks.setup_existing_profile()
     config.mark_as_set()
     assert_save_was_called(shared_config_mocks.open_function)
 
 
 def test_profile_has_been_set_when_is_set_returns_true(shared_config_mocks):
-    shared_config_mocks.setup_as_existent_profile()
+    shared_config_mocks.setup_existing_profile()
     assert config.profile_has_been_set()
 
 
 def test_profile_has_been_set_when_is_not_set_returns_false(shared_config_mocks):
-    shared_config_mocks.setup_as_non_existent_profile()
+    shared_config_mocks.setup_non_existing_profile()
     assert not config.profile_has_been_set()
 
 
