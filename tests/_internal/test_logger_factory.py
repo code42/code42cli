@@ -171,7 +171,9 @@ def test_get_logger_for_server_when_called_twice_maintains_single_handler(syslog
     assert len(logger.handlers) == 1
 
 
-def test_get_logger_for_server_when_called_second_time_with_different_format_replaces_handler_formatter(syslog_handler):
+def test_get_logger_for_server_when_called_second_time_with_different_format_replaces_handler_formatter(
+    syslog_handler
+):
     _ = factory.get_logger_for_server("https://syslog.com", "TCP", "JSON")
     logger = factory.get_logger_for_server("https://syslog.com", "TCP", "CEF")
     assert type(logger.handlers[0].formatter) == AEDDictToCEFFormatter
