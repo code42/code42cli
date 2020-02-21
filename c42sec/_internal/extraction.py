@@ -80,6 +80,7 @@ def _call_extract(extractor, args):
     if not _determine_if_advanced_query(args):
         min_timestamp = _parse_min_timestamp(args.begin_date) if args.begin_date else None
         max_timestamp = _parse_timestamp(args.end_date) if args.end_date else None
+        _verify_timestamp_order(min_timestamp, max_timestamp)
         extractor.extract(
             initial_min_timestamp=min_timestamp,
             max_timestamp=max_timestamp,
@@ -102,3 +103,12 @@ def _determine_if_advanced_query(args):
             exit(1)
         return True
     return False
+
+
+def _verify_timestamp_order(begin_timestamp, end_timestamp):
+    if begin_timestamp is None or end_timestamp is None:
+        return
+
+    if begin_timestamp >= end_timestamp:
+        print_error("Begin date cannot be after end date")
+        exit(1)
