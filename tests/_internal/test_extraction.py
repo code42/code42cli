@@ -38,18 +38,6 @@ def mock_extractor(mocker):
     return mock
 
 
-@pytest.fixture
-def mock_namespace_args(mocker):
-    mock = mocker.MagicMock(spec=Namespace)
-    mock.is_incremental = None
-    mock.advanced_query = None
-    mock.is_debug_mode = None
-    mock.begin_date = None
-    mock.end_date = None
-    mock.exposure_types = None
-    return mock
-
-
 def get_test_date_str(days_ago):
     now = datetime.utcnow()
     days_ago_date = now - timedelta(days=days_ago)
@@ -67,106 +55,106 @@ def get_timestamp_from_seconds_ago(seconds_ago):
 
 
 def test_extract_when_is_advanced_query_uses_only_the_extract_raw_method(
-    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+    mock_42, mock_logger, mock_error_logger, namespace, mock_extractor
 ):
-    mock_namespace_args.advanced_query = "some complex json"
-    extract(mock_logger, mock_namespace_args)
+    namespace.advanced_query = "some complex json"
+    extract(mock_logger, namespace)
     mock_extractor.extract_raw.assert_called_once_with("some complex json")
     assert mock_extractor.extract.call_count == 0
 
 
 def test_extract_when_is_advanced_query_and_has_begin_date_exits(
-    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+    mock_42, mock_logger, mock_error_logger, namespace, mock_extractor
 ):
-    mock_namespace_args.advanced_query = "some complex json"
-    mock_namespace_args.begin_date = "begin date"
+    namespace.advanced_query = "some complex json"
+    namespace.begin_date = "begin date"
     with pytest.raises(SystemExit):
-        extract(mock_logger, mock_namespace_args)
+        extract(mock_logger, namespace)
 
 
 def test_extract_when_is_advanced_query_and_has_end_date_exits(
-    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+    mock_42, mock_logger, mock_error_logger, namespace, mock_extractor
 ):
-    mock_namespace_args.advanced_query = "some complex json"
-    mock_namespace_args.end_date = "end date"
+    namespace.advanced_query = "some complex json"
+    namespace.end_date = "end date"
     with pytest.raises(SystemExit):
-        extract(mock_logger, mock_namespace_args)
+        extract(mock_logger, namespace)
 
 
 def test_extract_when_is_advanced_query_and_has_exposure_types_exits(
-    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+    mock_42, mock_logger, mock_error_logger, namespace, mock_extractor
 ):
-    mock_namespace_args.advanced_query = "some complex json"
-    mock_namespace_args.exposure_types = "exposure"
+    namespace.advanced_query = "some complex json"
+    namespace.exposure_types = "exposure"
     with pytest.raises(SystemExit):
-        extract(mock_logger, mock_namespace_args)
+        extract(mock_logger, namespace)
 
 
 def test_extract_when_is_not_advanced_query_uses_only_extract_method(
-    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+    mock_42, mock_logger, mock_error_logger, namespace, mock_extractor
 ):
-    extract(mock_logger, mock_namespace_args)
+    extract(mock_logger, namespace)
     assert mock_extractor.extract.call_count == 1
     assert mock_extractor.extract_raw.call_count == 0
 
 
 def test_extract_passed_through_given_exposure_types(
-    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+    mock_42, mock_logger, mock_error_logger, namespace, mock_extractor
 ):
-    mock_namespace_args.exposure_types = ["exposure"]
-    extract(mock_logger, mock_namespace_args)
+    namespace.exposure_types = ["exposure"]
+    extract(mock_logger, namespace)
     assert mock_extractor.extract.call_args[1]["exposure_types"] == ["exposure"]
 
 
 def test_extract_when_given_begin_date_uses_expected_begin_timestamp(
-    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+    mock_42, mock_logger, mock_error_logger, namespace, mock_extractor
 ):
     test_begin_date_str = get_test_date_str(days_ago=89)
-    mock_namespace_args.begin_date = test_begin_date_str
-    extract(mock_logger, mock_namespace_args)
+    namespace.begin_date = test_begin_date_str
+    extract(mock_logger, namespace)
     expected_begin_timestamp = get_timestamp_from_date_str(test_begin_date_str)
     actual_begin_timestamp = mock_extractor.extract.call_args[1]["initial_min_timestamp"]
     assert actual_begin_timestamp == expected_begin_timestamp
 
 
 def test_extract_when_given_begin_date_as_seconds_ago_uses_expected_begin_timestamp(
-    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+    mock_42, mock_logger, mock_error_logger, namespace, mock_extractor
 ):
-    mock_namespace_args.begin_date = "600"
-    extract(mock_logger, mock_namespace_args)
+    namespace.begin_date = "600"
+    extract(mock_logger, namespace)
     expected_timestamp = get_timestamp_from_seconds_ago(600)
     actual_timestamp = mock_extractor.extract.call_args[1]["initial_min_timestamp"]
     assert pytest.approx(expected_timestamp, actual_timestamp)
 
 
 def test_extract_when_given_end_date_uses_expected_begin_timestamp(
-    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+    mock_42, mock_logger, mock_error_logger, namespace, mock_extractor
 ):
     test_end_date_str = get_test_date_str(days_ago=10)
-    mock_namespace_args.end_date = test_end_date_str
-    extract(mock_logger, mock_namespace_args)
+    namespace.end_date = test_end_date_str
+    extract(mock_logger, namespace)
     expected_end_timestamp = get_timestamp_from_date_str(test_end_date_str)
     actual_end_timestamp = mock_extractor.extract.call_args[1]["max_timestamp"]
     assert actual_end_timestamp == expected_end_timestamp
 
 
 def test_extract_when_given_end_date_as_seconds_ago_uses_expected_begin_timestamp(
-    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+    mock_42, mock_logger, mock_error_logger, namespace, mock_extractor
 ):
-    mock_namespace_args.end_date = "600"
-    extract(mock_logger, mock_namespace_args)
+    namespace.end_date = "600"
+    extract(mock_logger, namespace)
     expected_timestamp = get_timestamp_from_seconds_ago(600)
     actual_timestamp = mock_extractor.extract.call_args[1]["max_timestamp"]
     assert pytest.approx(expected_timestamp, actual_timestamp)
 
 
 def test_extract_when_using_both_min_and_max_dates_uses_expected_timestamps(
-    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+    mock_42, mock_logger, mock_error_logger, namespace, mock_extractor
 ):
     test_begin_date_str = get_test_date_str(days_ago=89)
-    mock_namespace_args.begin_date = test_begin_date_str
-    mock_namespace_args.end_date = "600"
-    extract(mock_logger, mock_namespace_args)
+    namespace.begin_date = test_begin_date_str
+    namespace.end_date = "600"
+    extract(mock_logger, namespace)
 
     expected_begin_timestamp = get_timestamp_from_date_str(test_begin_date_str)
     expected_end_timestamp = get_timestamp_from_seconds_ago(600)
@@ -178,17 +166,17 @@ def test_extract_when_using_both_min_and_max_dates_uses_expected_timestamps(
 
 
 def test_extract_when_given_min_timestamp_more_than_ninety_days_back_causes_exit(
-    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+    mock_42, mock_logger, mock_error_logger, namespace, mock_extractor
 ):
-    mock_namespace_args.begin_date = get_test_date_str(days_ago=91)
+    namespace.begin_date = get_test_date_str(days_ago=91)
     with pytest.raises(SystemExit):
-        extract(mock_logger, mock_namespace_args)
+        extract(mock_logger, namespace)
 
 
 def test_extract_when_end_date_is_before_begin_date_causes_exit(
-    mock_42, mock_logger, mock_error_logger, mock_namespace_args, mock_extractor
+    mock_42, mock_logger, mock_error_logger, namespace, mock_extractor
 ):
-    mock_namespace_args.begin_date = get_test_date_str(days_ago=5)
-    mock_namespace_args.end_date = get_test_date_str(days_ago=6)
+    namespace.begin_date = get_test_date_str(days_ago=5)
+    namespace.end_date = get_test_date_str(days_ago=6)
     with pytest.raises(SystemExit):
-        extract(mock_logger, mock_namespace_args)
+        extract(mock_logger, namespace)

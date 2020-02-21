@@ -1,4 +1,5 @@
 import pytest
+from argparse import Namespace
 
 from c42sec._internal.profile.config import ConfigurationKeys
 
@@ -25,6 +26,18 @@ def config_parser(mocker):
     mocks.sections = mocker.patch("configparser.ConfigParser.sections")
     mocks.initializer.return_value = None
     return mocks
+
+
+@pytest.fixture
+def namespace(mocker):
+    mock = mocker.MagicMock(spec=Namespace)
+    mock.is_incremental = None
+    mock.advanced_query = None
+    mock.is_debug_mode = None
+    mock.begin_date = None
+    mock.end_date = None
+    mock.exposure_types = None
+    return mock
 
 
 class ConfigParserMocks(object):

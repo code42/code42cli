@@ -128,7 +128,7 @@ def _add_enable_ssl_errors_arg(parser):
         action="store_true",
         default=None,
         dest="enable_ssl_errors",
-        help="Do not validate the SSL certificates of Code42 servers.",
+        help="Do validate the SSL certificates of Code42 servers.",
     )
 
 

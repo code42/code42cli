@@ -1,10 +1,7 @@
-from logging.handlers import RotatingFileHandler
-
 import pytest
 import logging
 
 from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
-
 import c42sec._internal.logger_factory as factory
 
 
