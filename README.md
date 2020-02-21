@@ -1,8 +1,7 @@
 # c42sec
 
-The c42seceventcli AED module contains a CLI tool for extracting AED events as well as an optional state manager 
-for recording timestamps. The state manager records timestamps so that on future runs,
-you only extract events you did not previously extract.
+`c42sec` is a CLI tool for extracting AED events. 
+Additionally, `c42sec` can record a checkpoint so that you only get events you have not previously gotten.
 
 ## Requirements
 
@@ -18,29 +17,39 @@ $ python setup.py install
 
 ## Usage
 
-First, set your profile
-
+First, set your profile:
 ```bash
-c42sec profile set -s https://example.authority.com -u security.admin@example.com -p
+c42sec profile set -s https://example.authority.com -u security.admin@example.com
 ```
+Your profile contains the necessary properties for logging into Code42 servers.
+You will prompted for a password if there is not one saved for your current username/authority URL combination.
 
-`-p` will prompt for your password securely. If your username does not have a password stored, you will be prompted anyway.
+To explicitly set your password, use `-p`:
+```bash
+c42sec profile set -p
+```
+You will be securely prompted to input your password.
+Your password is not stored in plain-text, and is not shown when you do `c42sec profile show`.
+However, `c42sec profile show` will confirm that there is a password set for your profile.
 
 To ignore SSL errors, do:
-
 ```bash
-c42sec profile set --ignore-ssl-errors true
+c42sec profile set --disable-ssl-errors
 ```
+
+To re-enable SSL errors, do:
+```bash
+c42sec profile set --enable-ssl-errors
+```
+
+Next, you can query for events and send them to three possible destination types
+* STDOUT
+* A file
+* A server, such as SysLog
 
 To print events to STDOUT, do:
 ```bash
 c42sec print
-```
-
-Configure your output format with the `-f` flag:
-
-```bash
-c42sec print -f CEF
 ```
 
 To write events to a file, do:
@@ -48,24 +57,20 @@ To write events to a file, do:
 c42sec write-to filename.txt
 ```
 
-To send events to a server, such as syslog, do:
+To send events to a server, do:
 ```bash
-c42sec send-to https://syslog.company.com
+c42sec send-to https://syslog.company.com -p TCP
 ```
 
-To only get events that you have not previously gotten, use the `-i` flag:
-```bash
-c42sec send-to https://syslog.company.com -i
-```
+Each destination-type subcommand shares query parameters
+* `-t` (exposure types)
+* `-b` (begin date)
+* `-e` (end date)
+* `--advanced-query` (raw JSON query)
 
-To use an advanced query (raw JSON), use the `--advanced-query` flag:
-```bash
-c42sec send-to https://syslog.company.com --advanced-query 
-```
+Note that you cannot use other query parameters if you use `--advanced-query`.
 
-Note: You cannot use begin date (`-b`), end date (`-e`), or any other query parameters when using an advanced query.
-
-To learn more about any of the subcommands and their accepted arguments, add the `-h` flag.
+To learn more about acceptable arguments, add the `-h` flag to `c42sec` or and of the destination-type subcommands.
 
 
 # Known Issues
