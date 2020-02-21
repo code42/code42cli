@@ -30,24 +30,25 @@ def get_logger_for_file(filename, output_format):
 def get_error_logger():
     log_path = get_user_project_path("log")
     log_path = "{0}/c42sec_errors.log".format(log_path)
-    logger = logging.getLogger("c42sec_error_logger".format())
+    logger = logging.getLogger("c42sec_error_logger")
     formatter = logging.Formatter("%(asctime)s %(message)s")
     handler = RotatingFileHandler(log_path, maxBytes=250000000)
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    return logger
+    return _apply_logger_dependencies(logger, handler, formatter)
 
 
 def _init_logger(logger, handler, output_format):
     formatter = _get_formatter(output_format)
+    logger.setLevel(logging.INFO)
+    return _apply_logger_dependencies(logger, handler, formatter)
+
+
+def _apply_logger_dependencies(logger, handler, formatter):
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
     return logger
 
 
 def _get_formatter(output_format):
-    if output_format == OutputFormat.JSON:
-        return AEDDictToJSONFormatter()
-    elif output_format == OutputFormat.CEF:
-        return AEDDictToCEFFormatter()
+    return (
+        AEDDictToJSONFormatter() if output_format == OutputFormat.JSON else AEDDictToCEFFormatter()
+    )

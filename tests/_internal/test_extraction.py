@@ -52,7 +52,7 @@ def mock_namespace_args(mocker):
 
 def get_test_date_str(days_ago):
     now = datetime.utcnow()
-    days_ago_date = (now - timedelta(days=days_ago))
+    days_ago_date = now - timedelta(days=days_ago)
     return days_ago_date.strftime("%Y-%m-%d")
 
 
