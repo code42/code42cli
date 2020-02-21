@@ -1,4 +1,3 @@
-from __future__ import print_function
 from argparse import ArgumentParser
 
 from c42sec._internal.arguments import add_all_arguments_to_parser
