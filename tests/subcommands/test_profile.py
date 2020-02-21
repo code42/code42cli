@@ -64,9 +64,7 @@ def test_init_adds_parser_that_can_parse_set_command(config_parser):
     subcommand_parser = ArgumentParser().add_subparsers()
     profile.init(subcommand_parser)
     profile_parser = subcommand_parser.choices.get("profile")
-
-    # Commands that require a value will fail here if not provided
-    assert profile_parser.parse_args(
+    profile_parser.parse_args(
         ["set", "-s", "server-arg", "-p", "-u", "username-arg", "--enable-ssl-errors"]
     )
 

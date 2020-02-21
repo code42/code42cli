@@ -1,6 +1,7 @@
 import pytest
+from argparse import ArgumentParser
 
-from c42sec.subcommands.print_out import print_out
+import c42sec.subcommands.print_out as printer
 
 
 @pytest.fixture
@@ -13,9 +14,32 @@ def extractor(mocker):
     return mocker.patch("c42sec.subcommands.print_out.extract")
 
 
+def test_init_adds_parser_that_can_parse_supported_args(config_parser):
+    subcommand_parser = ArgumentParser().add_subparsers()
+    printer.init(subcommand_parser)
+    print_parser = subcommand_parser.choices.get("print")
+    print_parser.parse_args(
+        [
+            "-t",
+            "SharedToDomain",
+            "ApplicationRead",
+            "CloudStorage",
+            "RemovableMedia",
+            "IsPublic",
+            "-f",
+            "JSON",
+            "-d",
+            "-b",
+            "600",
+            "-e",
+            "2020-02-02",
+        ]
+    )
+
+
 def test_print_out_uses_logger_for_stdout(namespace, logger_factory, extractor):
     namespace.format = "CEF"
-    print_out(namespace)
+    printer.print_out(namespace)
     logger_factory.assert_called_once_with("CEF")
 
 
@@ -25,5 +49,5 @@ def test_print_out_calls_extract_with_expected_arguments(
     namespace.format = "CEF"
     logger = mocker.MagicMock()
     logger_factory.return_value = logger
-    print_out(namespace)
+    printer.print_out(namespace)
     extractor.assert_called_once_with(logger, namespace)

@@ -1,6 +1,6 @@
 import pytest
-
-from c42sec.subcommands.write_to import write_to
+from argparse import ArgumentParser
+from c42sec.subcommands import write_to as writer
 
 
 @pytest.fixture
@@ -20,8 +20,57 @@ def extractor(mocker):
     return mocker.patch("c42sec.subcommands.write_to.extract")
 
 
+def test_init_adds_parser_that_can_parse_supported_args(config_parser):
+    subcommand_parser = ArgumentParser().add_subparsers()
+    writer.init(subcommand_parser)
+    write_parser = subcommand_parser.choices.get("write-to")
+    write_parser.parse_args(
+        [
+            "out.txt",
+            "-t",
+            "SharedToDomain",
+            "ApplicationRead",
+            "CloudStorage",
+            "RemovableMedia",
+            "IsPublic",
+            "-f",
+            "JSON",
+            "-d",
+            "-b",
+            "600",
+            "-e",
+            "2020-02-02",
+        ]
+    )
+
+
+def test_init_adds_parser_when_not_given_filename_causes_system_exit(config_parser):
+    subcommand_parser = ArgumentParser().add_subparsers()
+    writer.init(subcommand_parser)
+    write_parser = subcommand_parser.choices.get("write-to")
+    with pytest.raises(SystemExit):
+        write_parser.parse_args(
+            [
+                "-t",
+                "SharedToDomain",
+                "ApplicationRead",
+                "CloudStorage",
+                "RemovableMedia",
+                "IsPublic",
+                "-f",
+                "JSON",
+                "-d",
+                "-b",
+                "600",
+                "-e",
+                "2020-02-02",
+            ]
+        )
+
+
+
 def test_write_to_uses_logger_for_file(file_namespace, logger_factory, extractor):
-    write_to(file_namespace)
+    writer.write_to(file_namespace)
     logger_factory.assert_called_once_with("out.txt", "CEF")
 
 
@@ -30,5 +79,5 @@ def test_write_to_calls_extract_with_expected_arguments(
 ):
     logger = mocker.MagicMock()
     logger_factory.return_value = logger
-    write_to(file_namespace)
+    writer.write_to(file_namespace)
     extractor.assert_called_once_with(logger, file_namespace)

@@ -1,7 +1,6 @@
 from __future__ import print_function
 from argparse import ArgumentParser
 
-from c42sec._internal.compat import str
 from c42sec._internal.arguments import add_all_arguments_to_parser
 from c42sec.subcommands import clear_checkpoint, print_out, profile, send_to, write_to
 
@@ -25,15 +24,8 @@ def _init_subcommands(subcommand_parser):
 
 def _call_subcommand(arg_parser):
     """Call provided subcommand with args."""
-    try:
-        args = arg_parser.parse_args()
-        args.func(args)
-    except AttributeError as err:
-        err_message = str(err)
-        if err_message == "'Namespace' object has no attribute 'func'":
-            arg_parser.print_help()
-        else:
-            print(err_message)
+    args = arg_parser.parse_args()
+    args.func(args)
 
 
 if __name__ == "__main__":
