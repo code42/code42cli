@@ -14,7 +14,7 @@ class C42SecProfile(object):
 
 
 def init(subcommand_parser):
-    """Sets up the `profile` command with `show` and `set` subcommands.
+    """Sets up the `profile` subcommand with `show` and `set` subcommands.
             `show` will print the current profile while `set` will modify profile properties.
             Use `-h` after any subcommand for usage.
         Args:

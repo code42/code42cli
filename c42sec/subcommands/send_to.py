@@ -5,6 +5,11 @@ from c42sec._internal.options import ServerProtocol
 
 
 def init(subcommand_parser):
+    """Sets up the `send-to` subcommand for sending logs to a server, such as SysLog.
+            Use `-h` after any subcommand for usage.
+        Args:
+            subcommand_parser: The subparsers group created by the parent parser
+    """
     parser = subcommand_parser.add_parser("send-to")
     parser.set_defaults(func=send_to)
     _add_server_arg(parser)
@@ -13,6 +18,7 @@ def init(subcommand_parser):
 
 
 def send_to(args):
+    """Activates 'send-to' command. It gets security events and logs them to the given server."""
     logger = get_logger_for_server(args.server, args.protocol, args.format)
     extract(logger, args)
 

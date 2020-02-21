@@ -68,7 +68,6 @@ def test_init_adds_parser_when_not_given_filename_causes_system_exit(config_pars
         )
 
 
-
 def test_write_to_uses_logger_for_file(file_namespace, logger_factory, extractor):
     writer.write_to(file_namespace)
     logger_factory.assert_called_once_with("out.txt", "CEF")
