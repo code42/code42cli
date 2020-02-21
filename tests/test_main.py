@@ -9,8 +9,8 @@ def profile(mocker):
 
 
 @pytest.fixture
-def cursor_clearer(mocker):
-    return mocker.patch("c42sec.subcommands.clear_cursor.init")
+def checkpoint_clearer(mocker):
+    return mocker.patch("c42sec.subcommands.clear_checkpoint.init")
 
 
 @pytest.fixture
@@ -38,9 +38,9 @@ def test_main_inits_profile(profile, arg_parser):
     assert profile.call_count == 1
 
 
-def test_main_inits_clear_cursor(cursor_clearer, arg_parser):
+def test_main_inits_clear_cursor(checkpoint_clearer, arg_parser):
     main()
-    assert cursor_clearer.call_count == 1
+    assert checkpoint_clearer.call_count == 1
 
 
 def test_main_inits_print(printer, arg_parser):
