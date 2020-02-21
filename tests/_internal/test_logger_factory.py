@@ -52,6 +52,13 @@ def rotating_file_handler(mocker):
     return mock
 
 
+@pytest.fixture
+def syslog_handler(mocker):
+    mock = mocker.patch("logging.handlers.SysLogHandler.__init__")
+    mock.return_value = None
+    return mock
+
+
 def test_get_logger_for_stdout_has_info_level(mock_get_logger_function, stream_handler):
     logger = factory.get_logger_for_stdout("CEF")
     assert logger.setLevel.call_args[0][0] == logging.INFO
@@ -74,6 +81,18 @@ def test_get_logger_for_stdout_when_given_json_format_uses_json_formatter(
 def test_get_logger_for_stdout_uses_stream_handler(mock_get_logger_function, stream_handler):
     logger = factory.get_logger_for_stdout("JSON")
     assert logger.addHandler.call_args[0][0] == stream_handler
+
+
+def test_get_logger_for_stdout_when_called_twice_maintains_single_handler():
+    _ = factory.get_logger_for_stdout("CEF")
+    logger = factory.get_logger_for_stdout("CEF")
+    assert len(logger.handlers) == 1
+
+
+def test_get_logger_for_stdout_when_called_second_time_with_different_format_replaces_handler_formatter():
+    _ = factory.get_logger_for_stdout("JSON")
+    logger = factory.get_logger_for_stdout("CEF")
+    assert type(logger.handlers[0].formatter) == AEDDictToCEFFormatter
 
 
 def test_get_logger_for_file_has_info_level(mock_get_logger_function, file_handler):
@@ -100,6 +119,26 @@ def test_get_logger_for_file_uses_file_handler(mock_get_logger_function, file_ha
     assert logger.addHandler.call_args[0][0] == file_handler
 
 
+def test_get_logger_for_file_when_called_twice_maintains_single_handler():
+    _ = factory.get_logger_for_file("test.out", "CEF")
+    logger = factory.get_logger_for_file("test.out", "CEF")
+    assert len(logger.handlers) == 1
+
+
+def test_get_logger_for_file_when_called_second_time_with_different_format_replaces_handler_formatter():
+    _ = factory.get_logger_for_file("test.out", "JSON")
+    logger = factory.get_logger_for_file("test.out", "CEF")
+    assert type(logger.handlers[0].formatter) == AEDDictToCEFFormatter
+
+
+def test_get_logger_for_file_when_called_second_time_with_different_filename_replaces_filename():
+    _ = factory.get_logger_for_file("test1.out", "JSON")
+    logger = factory.get_logger_for_file("test2.out", "CEF")
+    handler = logger.handlers[0]
+    actual = handler.baseFilename[-9:]
+    assert actual == "test2.out"
+
+
 def test_get_logger_for_server_has_info_level(mock_get_logger_function, no_priority_syslog_handler):
     logger = factory.get_logger_for_server("https://www.syslog.company.com", "TCP", "CEF")
     assert logger.setLevel.call_args[0][0] == logging.INFO
@@ -124,6 +163,18 @@ def test_get_logger_for_server_uses_no_priority_syslog_handler(
 ):
     logger = factory.get_logger_for_server("https://www.syslog.company.com", "TCP", "JSON")
     assert logger.addHandler.call_args[0][0] == no_priority_syslog_handler
+
+
+def test_get_logger_for_server_when_called_twice_maintains_single_handler(syslog_handler):
+    _ = factory.get_logger_for_server("https://syslog.com", "TCP", "CEF")
+    logger = factory.get_logger_for_server("https://syslog.com", "TCP", "CEF")
+    assert len(logger.handlers) == 1
+
+
+def test_get_logger_for_server_when_called_second_time_with_different_format_replaces_handler_formatter(syslog_handler):
+    _ = factory.get_logger_for_server("https://syslog.com", "TCP", "JSON")
+    logger = factory.get_logger_for_server("https://syslog.com", "TCP", "CEF")
+    assert type(logger.handlers[0].formatter) == AEDDictToCEFFormatter
 
 
 def test_get_error_logger_uses_rotating_file_handler(

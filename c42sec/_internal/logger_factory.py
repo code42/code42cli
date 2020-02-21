@@ -15,15 +15,15 @@ def get_logger_for_stdout(output_format):
     return _init_logger(logger, handler, output_format)
 
 
-def get_logger_for_server(hostname, protocol, output_format):
-    logger = logging.getLogger("c42sec_syslog")
-    handler = NoPrioritySysLogHandler(hostname, protocol=protocol)
-    return _init_logger(logger, handler, output_format)
-
-
 def get_logger_for_file(filename, output_format):
     logger = logging.getLogger("c42sec_file")
     handler = logging.FileHandler(filename)
+    return _init_logger(logger, handler, output_format)
+
+
+def get_logger_for_server(hostname, protocol, output_format):
+    logger = logging.getLogger("c42sec_syslog")
+    handler = NoPrioritySysLogHandler(hostname, protocol=protocol)
     return _init_logger(logger, handler, output_format)
 
 
@@ -44,6 +44,7 @@ def _init_logger(logger, handler, output_format):
 
 def _apply_logger_dependencies(logger, handler, formatter):
     handler.setFormatter(formatter)
+    logger.handlers.clear()
     logger.addHandler(handler)
     return logger
 
