@@ -1,6 +1,6 @@
 import pytest
 
-from c42sec.main import main
+from c42sec import main
 
 
 @pytest.fixture
