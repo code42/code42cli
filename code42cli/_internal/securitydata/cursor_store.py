@@ -3,7 +3,7 @@ import sqlite3
 
 from code42cli.util import get_user_project_path
 
-_INSERTION_TIMESTAMP_FIELD_NAME = u"insertionTimestamp"
+_INSERTION_TIMESTAMP_FIELD_NAME = "insertionTimestamp"
 
 
 class SecurityEventCursorStore(object):

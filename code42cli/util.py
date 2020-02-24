@@ -4,6 +4,7 @@ from os import path, makedirs
 
 
 def get_input(prompt):
+    """Uses correct input function based on Python version."""
     if sys.version_info >= (3, 0):
         return input(prompt)
     else:
@@ -23,11 +24,13 @@ def get_user_project_path(subdir=""):
 
 
 def open_file(file_path, mode, action):
+    """Wrapper for opening files, useful for testing purposes."""
     with open(file_path, mode) as f:
         action(f)
 
 
 def print_error(error_text):
+    """Prints red text."""
     print("\033[91mERROR: {}\033[0m".format(error_text))
 
 

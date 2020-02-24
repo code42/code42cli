@@ -10,6 +10,7 @@ _ROOT_SERVICE_NAME = u"code42cli"
 
 
 def get_password(prompt_if_not_exists=True):
+    """Gets your currently stored password for your username / authority URL combo."""
     profile = config.get_config_profile()
     service_name = _get_service_name(profile)
     username = _get_username(profile)
@@ -21,6 +22,7 @@ def get_password(prompt_if_not_exists=True):
 
 
 def set_password():
+    """Prompts and sets your password for your username / authority URL combo."""
     password = getpass()
     profile = config.get_config_profile()
     service_name = _get_service_name(profile)
