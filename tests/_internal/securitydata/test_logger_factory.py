@@ -1,7 +1,7 @@
 import pytest
 import logging
 from logging.handlers import RotatingFileHandler
-from c42eventextractor.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
+from c42eventextractor.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter, AEDDictToRawJSONFormatter
 
 import code42cli._internal.securitydata.logger_factory as factory
 
@@ -29,6 +29,11 @@ def test_get_logger_for_stdout_when_given_json_format_uses_json_formatter():
     assert type(logger.handlers[0].formatter) == AEDDictToJSONFormatter
 
 
+def test_get_logger_for_stdout_when_given_raw_json_format_uses_raw_json_formatter():
+    logger = factory.get_logger_for_stdout("RAW-JSON")
+    assert type(logger.handlers[0].formatter) == AEDDictToRawJSONFormatter
+
+
 def test_get_logger_for_stdout_when_called_twice_has_only_one_handler():
     _ = factory.get_logger_for_stdout("CEF")
     logger = factory.get_logger_for_stdout("CEF")
@@ -53,6 +58,11 @@ def test_get_logger_for_file_when_given_cef_format_uses_cef_formatter():
 def test_get_logger_for_file_when_given_json_format_uses_json_formatter():
     logger = factory.get_logger_for_file("Test.out", "JSON")
     assert type(logger.handlers[0].formatter) == AEDDictToJSONFormatter
+
+
+def test_get_logger_for_file_when_given_raw_json_format_uses_raw_json_formatter():
+    logger = factory.get_logger_for_file("Test.out", "RAW-JSON")
+    assert type(logger.handlers[0].formatter) == AEDDictToRawJSONFormatter
 
 
 def test_get_logger_for_file_when_called_twice_has_only_one_handler():
@@ -82,12 +92,20 @@ def test_get_logger_for_server_when_given_cef_format_uses_cef_formatter(no_prior
     assert type(no_priority_syslog_handler.setFormatter.call_args[0][0]) == AEDDictToCEFFormatter
 
 
-def test_get_logger_for_server_when_given_cef_format_uses_json_formatter(
+def test_get_logger_for_server_when_given_json_format_uses_json_formatter(
     no_priority_syslog_handler
 ):
-    factory.get_logger_for_server("https://example.com", "TCP", "CEF").handlers = []
+    factory.get_logger_for_server("https://example.com", "TCP", "JSON").handlers = []
     _ = factory.get_logger_for_server("https://example.com", "TCP", "JSON")
     assert type(no_priority_syslog_handler.setFormatter.call_args[0][0]) == AEDDictToJSONFormatter
+
+
+def test_get_logger_for_server_when_given_raw_json_format_uses_raw_json_formatter(
+    no_priority_syslog_handler
+):
+    factory.get_logger_for_server("https://example.com", "TCP", "RAW-JSON").handlers = []
+    _ = factory.get_logger_for_server("https://example.com", "TCP", "RAW-JSON")
+    assert type(no_priority_syslog_handler.setFormatter.call_args[0][0]) == AEDDictToRawJSONFormatter
 
 
 def test_get_logger_for_server_when_called_twice_only_has_one_handler(no_priority_syslog_handler):
