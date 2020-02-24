@@ -10,7 +10,7 @@ from c42sec.util import get_user_project_path
 
 
 def get_logger_for_stdout(output_format):
-    logger = logging.getLogger("c42sec_stdout_{0}".format(output_format))
+    logger = logging.getLogger("c42sec_stdout_{0}".format(output_format.lower()))
     if len(logger.handlers) > 0:
         return logger
 
@@ -19,7 +19,7 @@ def get_logger_for_stdout(output_format):
 
 
 def get_logger_for_file(filename, output_format):
-    logger = logging.getLogger("c42sec_file_{0}".format(output_format))
+    logger = logging.getLogger("c42sec_file_{0}".format(output_format.lower()))
     if len(logger.handlers) > 0:
         return logger
 
@@ -28,7 +28,7 @@ def get_logger_for_file(filename, output_format):
 
 
 def get_logger_for_server(hostname, protocol, output_format):
-    logger = logging.getLogger("c42sec_syslog_{0}".format(output_format))
+    logger = logging.getLogger("c42sec_syslog_{0}".format(output_format.lower()))
     if len(logger.handlers) > 0:
         return logger
 
