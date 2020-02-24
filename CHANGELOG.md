@@ -10,28 +10,36 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ## Unreleased
 
 ### Removed
+
 - Removed config file settings and `-c` CLI arg. Use `code42 profile set`.
 - Removed `--clear-password` CLI argument. Use `code42 profile set -p`. You will be prompted.
-- Removed top-level destination args. Use subcommands `write-to`. `send-to`, `print`.
+- Removed top-level destination args. Use subcommands `write-to`. `send-to`, `print` off of `code42 security data`.
 
 ### Added
+
 - Added ability to view your profile: `code42 profile show`.
-- Added `write-to` subcommand that outputs to a file.
-- Added `send-to` subcommand that outputs to a server.
-- Added `print` subcommand that outputs to STDOUT.
-- Added `clear-cursor` subcommand that removes the stored cursor for 'incremental' mode.
+- Added `securitydata` subcommands:
+    - Use `code42 securitydata write-to` to output to a file.
+    - Use `code42 securitydata send-to` to output to a server.
+    - Use `code42 securitydata print` to outputs to STDOUT.
+    - Use `code42 securitydata clear-cursor` to remove the stored cursor for 'incremental' mode.
+- Added support for raw JSON queries via `c42sec securitydata [subcommand] --advanced-query [JSON]`.
 
 ### Changed
-- Renamed `c42aed` to `code42`.
+
+- Renamed base command `c42aed` to `code42`.
 - Moved CLI arguments `-s`, `-u`, and `--ignore-ssl-errors` to `code42 profile set` command.
-- Renamed and moved top-level `-r` flag. Use `-i` on one of these subcommands: `write-to`. `send-to`, `print`.
-- Moved query arguments to individual subcommands `write-to`. `send-to`, `print`.
+- Renamed and moved top-level `-r` flag. 
+    - Use `-i` on one of these `securitydata` subcommands `write-to`. `send-to`, `print`.
+- Moved query arguments to individual `securitydata` subcommands `write-to`. `send-to`, `print`.
 
 ## 0.1.1 - 2019-10-29
 
 ### Fixed
+
 - Issue where IOError message was inaccurate when using the wrong port for server destinations.
 
 ### Added
+
 - Error handling for all socket errors.
 - Error handling for IOError 'connection refused'.
