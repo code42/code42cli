@@ -1,48 +1,48 @@
 import pytest
 from argparse import ArgumentParser
-from code42cli.subcommands import profile
+from code42cli.subcommands.profile import profile
 
 
 @pytest.fixture
 def username_setter(mocker):
-    return mocker.patch("code42cli._internal.profile.config.set_username")
+    return mocker.patch("code42cli.subcommands.profile.config.set_username")
 
 
 @pytest.fixture
 def mark_as_set_function(mocker):
-    return mocker.patch("code42cli._internal.profile.config.mark_as_set")
+    return mocker.patch("code42cli.subcommands.profile.config.mark_as_set")
 
 
 @pytest.fixture
 def authority_url_setter(mocker):
-    return mocker.patch("code42cli._internal.profile.config.set_authority_url")
+    return mocker.patch("code42cli.subcommands.profile.config.set_authority_url")
 
 
 @pytest.fixture
 def ignore_ssl_errors_setter(mocker):
-    return mocker.patch("code42cli._internal.profile.config.set_ignore_ssl_errors")
+    return mocker.patch("code42cli.subcommands.profile.config.set_ignore_ssl_errors")
 
 
 @pytest.fixture
 def password_setter(mocker):
-    return mocker.patch("code42cli._internal.profile.password.set_password")
+    return mocker.patch("code42cli.subcommands.profile.password.set_password")
 
 
 @pytest.fixture
 def password_getter(mocker):
-    return mocker.patch("code42cli._internal.profile.password.get_password")
+    return mocker.patch("code42cli.subcommands.profile.password.get_password")
 
 
 @pytest.fixture
 def profile_not_set_state(mocker):
-    profile_verifier = mocker.patch("code42cli._internal.profile.config.profile_has_been_set")
+    profile_verifier = mocker.patch("code42cli.subcommands.profile.config.profile_has_been_set")
     profile_verifier.return_value = False
     return profile_verifier
 
 
 @pytest.fixture
 def profile_is_set_state(mocker):
-    profile_verifier = mocker.patch("code42cli._internal.profile.config.profile_has_been_set")
+    profile_verifier = mocker.patch("code42cli.subcommands.profile.config.profile_has_been_set")
     profile_verifier.return_value = True
     return profile_verifier
 

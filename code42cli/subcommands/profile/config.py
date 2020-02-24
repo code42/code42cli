@@ -2,7 +2,7 @@ from __future__ import print_function
 import os
 from configparser import ConfigParser
 
-from code42cli._internal.compat import str
+from code42cli.compat import str
 import code42cli.util as util
 
 

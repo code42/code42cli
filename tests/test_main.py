@@ -5,27 +5,27 @@ from code42cli import main
 
 @pytest.fixture
 def profile(mocker):
-    return mocker.patch("code42cli.subcommands.profile.init")
+    return mocker.patch("code42cli.subcommands.profile.profile.init")
 
 
 @pytest.fixture
 def checkpoint_clearer(mocker):
-    return mocker.patch("code42cli.subcommands.securitydata.clear_checkpoint.init")
+    return mocker.patch("code42cli.subcommands.securitydata.subcommands.clear_checkpoint.init")
 
 
 @pytest.fixture
 def printer(mocker):
-    return mocker.patch("code42cli.subcommands.securitydata.print_out.init")
+    return mocker.patch("code42cli.subcommands.securitydata.subcommands.print_out.init")
 
 
 @pytest.fixture
 def writer(mocker):
-    return mocker.patch("code42cli.subcommands.securitydata.write_to.init")
+    return mocker.patch("code42cli.subcommands.securitydata.subcommands.write_to.init")
 
 
 @pytest.fixture
 def sender(mocker):
-    return mocker.patch("code42cli.subcommands.securitydata.send_to.init")
+    return mocker.patch("code42cli.subcommands.securitydata.subcommands.send_to.init")
 
 
 @pytest.fixture(autouse=True)

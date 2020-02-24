@@ -1,33 +1,32 @@
 import pytest
 from argparse import ArgumentParser
-from code42cli.subcommands.securitydata import send_to as sender
+from code42cli.subcommands.securitydata.subcommands import write_to as writer
 
 
 @pytest.fixture
-def server_namespace(namespace):
-    namespace.server = "https://www.syslog.example.com"
-    namespace.protocol = "TCP"
+def file_namespace(namespace):
+    namespace.filename = "out.txt"
     namespace.format = "CEF"
     return namespace
 
 
 @pytest.fixture
 def logger_factory(mocker):
-    return mocker.patch("code42cli.subcommands.securitydata.send_to.get_logger_for_server")
+    return mocker.patch("code42cli.subcommands.securitydata.subcommands.write_to.get_logger_for_file")
 
 
 @pytest.fixture
 def extractor(mocker):
-    return mocker.patch("code42cli.subcommands.securitydata.send_to.extract")
+    return mocker.patch("code42cli.subcommands.securitydata.subcommands.write_to.extract")
 
 
 def test_init_adds_parser_that_can_parse_supported_args(config_parser):
     subcommand_parser = ArgumentParser().add_subparsers()
-    sender.init(subcommand_parser)
-    send_parser = subcommand_parser.choices.get("send-to")
-    send_parser.parse_args(
+    writer.init(subcommand_parser)
+    write_parser = subcommand_parser.choices.get("write-to")
+    write_parser.parse_args(
         [
-            "https://www.syslog.com",
+            "out.txt",
             "-t",
             "SharedToDomain",
             "ApplicationRead",
@@ -45,12 +44,12 @@ def test_init_adds_parser_that_can_parse_supported_args(config_parser):
     )
 
 
-def test_init_adds_parser_when_not_given_server_causes_system_exit(config_parser):
+def test_init_adds_parser_when_not_given_filename_causes_system_exit(config_parser):
     subcommand_parser = ArgumentParser().add_subparsers()
-    sender.init(subcommand_parser)
-    send_parser = subcommand_parser.choices.get("send-to")
+    writer.init(subcommand_parser)
+    write_parser = subcommand_parser.choices.get("write-to")
     with pytest.raises(SystemExit):
-        send_parser.parse_args(
+        write_parser.parse_args(
             [
                 "-t",
                 "SharedToDomain",
@@ -69,15 +68,15 @@ def test_init_adds_parser_when_not_given_server_causes_system_exit(config_parser
         )
 
 
-def test_send_to_uses_logger_for_server(server_namespace, logger_factory, extractor):
-    sender.send_to(server_namespace)
-    logger_factory.assert_called_once_with("https://www.syslog.example.com", "TCP", "CEF")
+def test_write_to_uses_logger_for_file(file_namespace, logger_factory, extractor):
+    writer.write_to(file_namespace)
+    logger_factory.assert_called_once_with("out.txt", "CEF")
 
 
-def test_send_to_calls_extract_with_expected_arguments(
-    mocker, server_namespace, logger_factory, extractor
+def test_write_to_calls_extract_with_expected_arguments(
+    mocker, file_namespace, logger_factory, extractor
 ):
     logger = mocker.MagicMock()
     logger_factory.return_value = logger
-    sender.send_to(server_namespace)
-    extractor.assert_called_once_with(logger, server_namespace)
+    writer.write_to(file_namespace)
+    extractor.assert_called_once_with(logger, file_namespace)

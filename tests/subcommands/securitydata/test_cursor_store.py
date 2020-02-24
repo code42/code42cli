@@ -1,7 +1,7 @@
 import pytest
 from os import path
 
-from code42cli._internal.securitydata.cursor_store import SecurityEventCursorStore
+from code42cli.subcommands.securitydata.cursor_store import SecurityEventCursorStore
 
 
 class TestSecurityEventCursorStore(object):
