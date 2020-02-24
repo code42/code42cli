@@ -28,32 +28,32 @@ def sender(mocker):
     return mocker.patch("c42sec.subcommands.send_to.init")
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def arg_parser(mocker):
     return mocker.patch("argparse.ArgumentParser.parse_args")
 
 
-def test_main_inits_profile(profile, arg_parser):
+def test_main_inits_profile(profile):
     main()
     assert profile.call_count == 1
 
 
-def test_main_inits_clear_cursor(checkpoint_clearer, arg_parser):
+def test_main_inits_clear_cursor(checkpoint_clearer):
     main()
     assert checkpoint_clearer.call_count == 1
 
 
-def test_main_inits_print(printer, arg_parser):
+def test_main_inits_print(printer):
     main()
     assert printer.call_count == 1
 
 
-def test_main_inits_write_to(writer, arg_parser):
+def test_main_inits_write_to(writer):
     main()
     assert writer.call_count == 1
 
 
-def test_main_inits_send_to(sender, arg_parser):
+def test_main_inits_send_to(sender):
     main()
     assert sender.call_count == 1
 
