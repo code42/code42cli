@@ -12,7 +12,9 @@ def file_namespace(namespace):
 
 @pytest.fixture
 def logger_factory(mocker):
-    return mocker.patch("code42cli.subcommands.securitydata.subcommands.write_to.get_logger_for_file")
+    return mocker.patch(
+        "code42cli.subcommands.securitydata.subcommands.write_to.get_logger_for_file"
+    )
 
 
 @pytest.fixture

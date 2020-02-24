@@ -6,7 +6,9 @@ import code42cli.subcommands.securitydata.subcommands.print_out as printer
 
 @pytest.fixture
 def logger_factory(mocker):
-    return mocker.patch("code42cli.subcommands.securitydata.subcommands.print_out.get_logger_for_stdout")
+    return mocker.patch(
+        "code42cli.subcommands.securitydata.subcommands.print_out.get_logger_for_stdout"
+    )
 
 
 @pytest.fixture

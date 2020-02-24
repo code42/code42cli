@@ -10,7 +10,9 @@ def cursor_store(mocker):
     )
     mock_init.return_value = None
     mock = mocker.MagicMock()
-    mock_new = mocker.patch("code42cli.subcommands.securitydata.cursor_store.AEDCursorStore.__new__")
+    mock_new = mocker.patch(
+        "code42cli.subcommands.securitydata.cursor_store.AEDCursorStore.__new__"
+    )
     mock_new.return_value = mock
     return mock
 

@@ -13,7 +13,9 @@ def server_namespace(namespace):
 
 @pytest.fixture
 def logger_factory(mocker):
-    return mocker.patch("code42cli.subcommands.securitydata.subcommands.send_to.get_logger_for_server")
+    return mocker.patch(
+        "code42cli.subcommands.securitydata.subcommands.send_to.get_logger_for_server"
+    )
 
 
 @pytest.fixture

@@ -1,7 +1,11 @@
 import pytest
 import logging
 from logging.handlers import RotatingFileHandler
-from c42eventextractor.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter, AEDDictToRawJSONFormatter
+from c42eventextractor.logging.formatters import (
+    AEDDictToCEFFormatter,
+    AEDDictToJSONFormatter,
+    AEDDictToRawJSONFormatter,
+)
 
 import code42cli.subcommands.securitydata.logger_factory as factory
 
@@ -105,7 +109,9 @@ def test_get_logger_for_server_when_given_raw_json_format_uses_raw_json_formatte
 ):
     factory.get_logger_for_server("https://example.com", "TCP", "RAW-JSON").handlers = []
     _ = factory.get_logger_for_server("https://example.com", "TCP", "RAW-JSON")
-    assert type(no_priority_syslog_handler.setFormatter.call_args[0][0]) == AEDDictToRawJSONFormatter
+    assert (
+        type(no_priority_syslog_handler.setFormatter.call_args[0][0]) == AEDDictToRawJSONFormatter
+    )
 
 
 def test_get_logger_for_server_when_called_twice_only_has_one_handler(no_priority_syslog_handler):
