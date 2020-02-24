@@ -7,7 +7,7 @@ def init(subcommand_parser):
     """Sets up the `write-to` subcommand for writing logs to a file.
             Use `-h` after any subcommand for usage.
         Args:
-            subcommand_parser: The subparsers group created by the parent parser
+            subcommand_parser: The subparsers group created by the parent parser.
     """
     parser = subcommand_parser.add_parser("write-to")
     parser.set_defaults(func=write_to)

@@ -18,7 +18,7 @@ def init(subcommand_parser):
             `show` will print the current profile while `set` will modify profile properties.
             Use `-h` after any subcommand for usage.
         Args:
-            subcommand_parser: The subparsers group created by the parent parser
+            subcommand_parser: The subparsers group created by the parent parser.
     """
     parser_profile = subcommand_parser.add_parser("profile")
     parser_profile.set_defaults(func=show_profile)
@@ -34,7 +34,7 @@ def init(subcommand_parser):
 
 def get_profile():
     # type: () -> C42SecProfile
-    """Returns the current profile object"""
+    """Returns the current profile object."""
     profile_values = config.get_config_profile()
     profile = C42SecProfile()
     profile.authority_url = profile_values.get(ConfigurationKeys.AUTHORITY_KEY)
@@ -44,7 +44,7 @@ def get_profile():
 
 
 def show_profile(*args):
-    """Prints the current profile to stdout."""
+    """Prints the current profile to STDOUT."""
     profile = config.get_config_profile()
     print("\nProfile:")
     for key in profile:
