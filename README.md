@@ -1,7 +1,8 @@
-# code42
+# The Code42 CLI
 
-`code42` is a CLI tool for extracting AED events. 
-Additionally, `code42` can record a checkpoint so that you only get events you have not previously gotten.
+Use the `code42` command to interact with your Code42 environment.
+`code42 securitydata` is a CLI tool for extracting AED events. 
+Additionally, `code42 securitydata` can record a checkpoint so that you only get events you have not previously gotten.
 
 ## Requirements
 
@@ -49,17 +50,17 @@ Next, you can query for events and send them to three possible destination types
 
 To print events to STDOUT, do:
 ```bash
-code42 print
+code42 securitydata print
 ```
 
 To write events to a file, do:
 ```bash
-code42 write-to filename.txt
+code42 securitydata write-to filename.txt
 ```
 
 To send events to a server, do:
 ```bash
-code42 send-to https://syslog.company.com -p TCP
+code42 securitydata send-to https://syslog.company.com -p TCP
 ```
 
 Each destination-type subcommand shares query parameters
