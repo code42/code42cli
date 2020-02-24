@@ -1,3 +1,4 @@
+from py42.sdk import SDK
 import pytest
 import logging
 
@@ -81,7 +82,9 @@ def test_get_logger_for_server_when_given_cef_format_uses_cef_formatter(no_prior
     assert type(no_priority_syslog_handler.setFormatter.call_args[0][0]) == AEDDictToCEFFormatter
 
 
-def test_get_logger_for_server_when_given_cef_format_uses_json_formatter(no_priority_syslog_handler):
+def test_get_logger_for_server_when_given_cef_format_uses_json_formatter(
+    no_priority_syslog_handler
+):
     factory.get_logger_for_server("https://example.com", "TCP", "CEF").handlers = []
     _ = factory.get_logger_for_server("https://example.com", "TCP", "JSON")
     assert type(no_priority_syslog_handler.setFormatter.call_args[0][0]) == AEDDictToJSONFormatter

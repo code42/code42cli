@@ -16,5 +16,3 @@ def cursor_store(mocker):
 def test_clear_checkpoint_calls_cursor_store_reset(cursor_store):
     clear_checkpoint()
     assert cursor_store.reset.call_count == 1
-
-

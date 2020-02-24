@@ -23,7 +23,7 @@ def get_logger_for_file(filename, output_format):
     if len(logger.handlers) > 0:
         return logger
 
-    handler = logging.FileHandler(filename)
+    handler = logging.FileHandler(filename, delay=True)
     return _init_logger(logger, handler, output_format)
 
 
