@@ -67,6 +67,6 @@ def _get_formatter(output_format):
     if output_format == OutputFormat.JSON:
         return AEDDictToJSONFormatter()
     elif output_format == OutputFormat.CEF:
-        return AEDDictToCEFFormatter
+        return AEDDictToCEFFormatter()
     else:
-        return AEDDictToRawJSONFormatter
+        return AEDDictToRawJSONFormatter()

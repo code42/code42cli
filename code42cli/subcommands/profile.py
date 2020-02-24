@@ -6,7 +6,7 @@ from code42cli._internal.profile.config import ConfigurationKeys
 from code42cli.util import print_error
 
 
-class code42Profile(object):
+class Code42Profile(object):
     authority_url = ""
     username = ""
     ignore_ssl_errors = False
@@ -33,10 +33,10 @@ def init(subcommand_parser):
 
 
 def get_profile():
-    # type: () -> code42Profile
+    # type: () -> Code42Profile
     """Returns the current profile object."""
     profile_values = config.get_config_profile()
-    profile = code42Profile()
+    profile = Code42Profile()
     profile.authority_url = profile_values.get(ConfigurationKeys.AUTHORITY_KEY)
     profile.username = profile_values.get(ConfigurationKeys.USERNAME_KEY)
     profile.ignore_ssl_errors = profile_values.get(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
