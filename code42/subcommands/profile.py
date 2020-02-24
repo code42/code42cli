@@ -1,12 +1,12 @@
 from __future__ import print_function
 
-import c42sec._internal.profile.config as config
-import c42sec._internal.profile.password as password
-from c42sec._internal.profile.config import ConfigurationKeys
-from c42sec.util import print_error
+import code42._internal.profile.config as config
+import code42._internal.profile.password as password
+from code42._internal.profile.config import ConfigurationKeys
+from code42.util import print_error
 
 
-class C42SecProfile(object):
+class code42Profile(object):
     authority_url = ""
     username = ""
     ignore_ssl_errors = False
@@ -33,10 +33,10 @@ def init(subcommand_parser):
 
 
 def get_profile():
-    # type: () -> C42SecProfile
+    # type: () -> code42Profile
     """Returns the current profile object."""
     profile_values = config.get_config_profile()
-    profile = C42SecProfile()
+    profile = code42Profile()
     profile.authority_url = profile_values.get(ConfigurationKeys.AUTHORITY_KEY)
     profile.username = profile_values.get(ConfigurationKeys.USERNAME_KEY)
     profile.ignore_ssl_errors = profile_values.get(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)

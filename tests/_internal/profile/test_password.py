@@ -1,5 +1,5 @@
 import pytest
-import c42sec._internal.profile.password as password
+import code42._internal.profile.password as password
 
 
 @pytest.fixture
@@ -14,7 +14,7 @@ def keyring_password_setter(mocker):
 
 @pytest.fixture
 def getpass_function(mocker):
-    return mocker.patch("c42sec._internal.profile.password.getpass")
+    return mocker.patch("code42._internal.profile.password.getpass")
 
 
 def test_get_password_uses_expected_service_name_and_username(
@@ -22,7 +22,7 @@ def test_get_password_uses_expected_service_name_and_username(
 ):
     password.get_password()
     # See conftest.config_profile
-    expected_service_name = "c42sec::https://authority.example.com"
+    expected_service_name = "code42::https://authority.example.com"
     expected_username = "test.username"
     keyring_password_getter.assert_called_once_with(expected_service_name, expected_username)
 
@@ -55,7 +55,7 @@ def test_set_password_uses_expected_service_name_username_and_password(
     getpass_function.return_value = "test password"
     password.set_password()
     # See conftest.config_profile
-    expected_service_name = "c42sec::https://authority.example.com"
+    expected_service_name = "code42::https://authority.example.com"
     expected_username = "test.username"
     keyring_password_setter.assert_called_once_with(
         expected_service_name, expected_username, "test password"

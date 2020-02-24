@@ -1,7 +1,7 @@
-# c42sec
+# code42
 
-`c42sec` is a CLI tool for extracting AED events. 
-Additionally, `c42sec` can record a checkpoint so that you only get events you have not previously gotten.
+`code42` is a CLI tool for extracting AED events. 
+Additionally, `code42` can record a checkpoint so that you only get events you have not previously gotten.
 
 ## Requirements
 
@@ -9,7 +9,7 @@ Additionally, `c42sec` can record a checkpoint so that you only get events you h
 - Code42 Server 6.8.x+
 
 ## Installation
-Install `c42sec` using:
+Install `code42` using:
 
 ```bash
 $ python setup.py install
@@ -19,27 +19,27 @@ $ python setup.py install
 
 First, set your profile:
 ```bash
-c42sec profile set -s https://example.authority.com -u security.admin@example.com
+code42 profile set -s https://example.authority.com -u security.admin@example.com
 ```
 Your profile contains the necessary properties for logging into Code42 servers.
 You will prompted for a password if there is not one saved for your current username/authority URL combination.
 
 To explicitly set your password, use `-p`:
 ```bash
-c42sec profile set -p
+code42 profile set -p
 ```
 You will be securely prompted to input your password.
-Your password is not stored in plain-text, and is not shown when you do `c42sec profile show`.
-However, `c42sec profile show` will confirm that there is a password set for your profile.
+Your password is not stored in plain-text, and is not shown when you do `code42 profile show`.
+However, `code42 profile show` will confirm that there is a password set for your profile.
 
 To ignore SSL errors, do:
 ```bash
-c42sec profile set --disable-ssl-errors
+code42 profile set --disable-ssl-errors
 ```
 
 To re-enable SSL errors, do:
 ```bash
-c42sec profile set --enable-ssl-errors
+code42 profile set --enable-ssl-errors
 ```
 
 Next, you can query for events and send them to three possible destination types
@@ -49,17 +49,17 @@ Next, you can query for events and send them to three possible destination types
 
 To print events to STDOUT, do:
 ```bash
-c42sec print
+code42 print
 ```
 
 To write events to a file, do:
 ```bash
-c42sec write-to filename.txt
+code42 write-to filename.txt
 ```
 
 To send events to a server, do:
 ```bash
-c42sec send-to https://syslog.company.com -p TCP
+code42 send-to https://syslog.company.com -p TCP
 ```
 
 Each destination-type subcommand shares query parameters
@@ -70,7 +70,7 @@ Each destination-type subcommand shares query parameters
 
 Note that you cannot use other query parameters if you use `--advanced-query`.
 
-To learn more about acceptable arguments, add the `-h` flag to `c42sec` or and of the destination-type subcommands.
+To learn more about acceptable arguments, add the `-h` flag to `code42` or and of the destination-type subcommands.
 
 
 # Known Issues

@@ -5,12 +5,12 @@ from logging.handlers import RotatingFileHandler
 from c42secevents.logging.formatters import AEDDictToJSONFormatter, AEDDictToCEFFormatter
 from c42secevents.logging.handlers import NoPrioritySysLogHandler
 
-from c42sec._internal.options import OutputFormat
-from c42sec.util import get_user_project_path
+from code42._internal.securitydata.options import OutputFormat
+from code42.util import get_user_project_path
 
 
 def get_logger_for_stdout(output_format):
-    logger = logging.getLogger("c42sec_stdout_{0}".format(output_format.lower()))
+    logger = logging.getLogger("code42_stdout_{0}".format(output_format.lower()))
     if len(logger.handlers) > 0:
         return logger
 
@@ -19,7 +19,7 @@ def get_logger_for_stdout(output_format):
 
 
 def get_logger_for_file(filename, output_format):
-    logger = logging.getLogger("c42sec_file_{0}".format(output_format.lower()))
+    logger = logging.getLogger("code42_file_{0}".format(output_format.lower()))
     if len(logger.handlers) > 0:
         return logger
 
@@ -28,7 +28,7 @@ def get_logger_for_file(filename, output_format):
 
 
 def get_logger_for_server(hostname, protocol, output_format):
-    logger = logging.getLogger("c42sec_syslog_{0}".format(output_format.lower()))
+    logger = logging.getLogger("code42_syslog_{0}".format(output_format.lower()))
     if len(logger.handlers) > 0:
         return logger
 
@@ -38,8 +38,8 @@ def get_logger_for_server(hostname, protocol, output_format):
 
 def get_error_logger():
     log_path = get_user_project_path("log")
-    log_path = "{0}/c42sec_errors.log".format(log_path)
-    logger = logging.getLogger("c42sec_error_logger")
+    log_path = "{0}/code42_errors.log".format(log_path)
+    logger = logging.getLogger("code42_error_logger")
     if len(logger.handlers) > 0:
         return logger
 

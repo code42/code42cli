@@ -1,8 +1,8 @@
 from __future__ import print_function
 import os
 
-from c42sec._internal.compat import str
-import c42sec.util as util
+from code42._internal.compat import str
+import code42.util as util
 from configparser import ConfigParser
 
 
@@ -21,7 +21,7 @@ def get_config_profile():
         util.print_error("Profile is not set.")
         print("")
         print("To set, use: ")
-        util.print_bold("\tc42sec profile set -s <authority-URL> -u <username>")
+        util.print_bold("\tcode42 profile set -s <authority-URL> -u <username>")
         print("")
         exit(1)
 

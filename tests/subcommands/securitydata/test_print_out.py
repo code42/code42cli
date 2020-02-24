@@ -1,17 +1,17 @@
 import pytest
 from argparse import ArgumentParser
 
-import c42sec.subcommands.print_out as printer
+import code42.subcommands.securitydata.print_out as printer
 
 
 @pytest.fixture
 def logger_factory(mocker):
-    return mocker.patch("c42sec.subcommands.print_out.get_logger_for_stdout")
+    return mocker.patch("code42.subcommands.securitydata.print_out.get_logger_for_stdout")
 
 
 @pytest.fixture
 def extractor(mocker):
-    return mocker.patch("c42sec.subcommands.print_out.extract")
+    return mocker.patch("code42.subcommands.securitydata.print_out.extract")
 
 
 def test_init_adds_parser_that_can_parse_supported_args(config_parser):

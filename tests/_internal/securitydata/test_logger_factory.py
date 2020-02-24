@@ -1,9 +1,8 @@
-from py42.sdk import SDK
 import pytest
 import logging
 
 from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
-import c42sec._internal.logger_factory as factory
+import code42._internal.securitydata.logger_factory as factory
 
 
 @pytest.fixture

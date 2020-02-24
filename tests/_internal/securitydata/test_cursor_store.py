@@ -1,7 +1,7 @@
 from os import path
 
 import pytest
-from c42sec._internal.cursor_store import SecurityEventCursorStore
+from code42._internal.securitydata.cursor_store import SecurityEventCursorStore
 
 
 class TestSecurityEventCursorStore(object):
@@ -13,7 +13,7 @@ class TestSecurityEventCursorStore(object):
         self, sqlite_connection
     ):
         home_dir = path.expanduser("~")
-        expected_path = path.join(home_dir, ".c42sec/db")
+        expected_path = path.join(home_dir, ".code42/db")
         expected_db_name = "TEST"
         expected_db_file_path = "{0}/{1}.db".format(expected_path, expected_db_name)
         SecurityEventCursorStore(expected_db_name)

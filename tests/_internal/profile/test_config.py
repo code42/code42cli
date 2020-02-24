@@ -1,7 +1,7 @@
 from __future__ import with_statement
 import pytest
 
-import c42sec._internal.profile.config as config
+import code42._internal.profile.config as config
 
 
 class SharedConfigMocks(object):
@@ -36,11 +36,11 @@ class SharedConfigMocks(object):
 @pytest.fixture
 def shared_config_mocks(mocker, config_parser):
     # Project path
-    get_project_path_function = mocker.patch("c42sec.util.get_user_project_path")
+    get_project_path_function = mocker.patch("code42.util.get_user_project_path")
     get_project_path_function.return_value = "some/path/"
 
     # Opening files
-    open_file_function = mocker.patch("c42sec.util.open_file")
+    open_file_function = mocker.patch("code42.util.open_file")
     new_file = mocker.MagicMock()
     open_file_function.return_value = new_file
 

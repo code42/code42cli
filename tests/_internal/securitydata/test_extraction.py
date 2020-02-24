@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime, timedelta
 
-from c42sec._internal.extraction import extract
+from code42._internal.securitydata.extraction import extract
 
 
 @pytest.fixture(autouse=True)
@@ -19,7 +19,7 @@ def logger(mocker):
 
 @pytest.fixture(autouse=True)
 def error_logger(mocker):
-    return mocker.patch("c42sec._internal.logger_factory")
+    return mocker.patch("code42._internal.securitydata.logger_factory")
 
 
 @pytest.fixture

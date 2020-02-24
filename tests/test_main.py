@@ -1,31 +1,31 @@
 import pytest
 
-from c42sec import main
+from code42 import main
 
 
 @pytest.fixture
 def profile(mocker):
-    return mocker.patch("c42sec.subcommands.profile.init")
+    return mocker.patch("code42.subcommands.profile.init")
 
 
 @pytest.fixture
 def checkpoint_clearer(mocker):
-    return mocker.patch("c42sec.subcommands.clear_checkpoint.init")
+    return mocker.patch("code42.subcommands.securitydata.clear_checkpoint.init")
 
 
 @pytest.fixture
 def printer(mocker):
-    return mocker.patch("c42sec.subcommands.print_out.init")
+    return mocker.patch("code42.subcommands.securitydata.print_out.init")
 
 
 @pytest.fixture
 def writer(mocker):
-    return mocker.patch("c42sec.subcommands.write_to.init")
+    return mocker.patch("code42.subcommands.securitydata.write_to.init")
 
 
 @pytest.fixture
 def sender(mocker):
-    return mocker.patch("c42sec.subcommands.send_to.init")
+    return mocker.patch("code42.subcommands.securitydata.send_to.init")
 
 
 @pytest.fixture(autouse=True)

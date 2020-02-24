@@ -2,11 +2,11 @@ from __future__ import print_function
 import keyring
 from getpass import getpass
 
-import c42sec._internal.profile.config as config
-from c42sec._internal.profile.config import ConfigurationKeys
+import code42._internal.profile.config as config
+from code42._internal.profile.config import ConfigurationKeys
 
 
-_ROOT_SERVICE_NAME = u"c42sec"
+_ROOT_SERVICE_NAME = u"code42"
 
 
 def get_password(prompt_if_not_exists=True):
