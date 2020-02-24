@@ -76,27 +76,32 @@ def test_get_logger_for_server_has_info_level(no_priority_syslog_handler):
 
 
 def test_get_logger_for_server_when_given_cef_format_uses_cef_formatter(no_priority_syslog_handler):
+    factory.get_logger_for_server("https://example.com", "TCP", "CEF").handlers = []
     _ = factory.get_logger_for_server("https://example.com", "TCP", "CEF")
     assert type(no_priority_syslog_handler.setFormatter.call_args[0][0]) == AEDDictToCEFFormatter
 
 
 def test_get_logger_for_server_when_given_cef_format_uses_json_formatter(no_priority_syslog_handler):
+    factory.get_logger_for_server("https://example.com", "TCP", "CEF").handlers = []
     _ = factory.get_logger_for_server("https://example.com", "TCP", "JSON")
     assert type(no_priority_syslog_handler.setFormatter.call_args[0][0]) == AEDDictToJSONFormatter
 
 
 def test_get_logger_for_server_when_called_twice_only_has_one_handler(no_priority_syslog_handler):
+    factory.get_logger_for_server("https://example.com", "TCP", "CEF").handlers = []
     _ = factory.get_logger_for_server("https://example.com", "TCP", "JSON")
     logger = factory.get_logger_for_server("https://example.com", "TCP", "CEF")
     assert len(logger.handlers) == 1
 
 
 def test_get_logger_for_server_uses_no_priority_syslog_handler(no_priority_syslog_handler):
+    factory.get_logger_for_server("https://example.com", "TCP", "CEF").handlers = []
     logger = factory.get_logger_for_server("https://example.com", "TCP", "CEF")
     assert logger.handlers[0] == no_priority_syslog_handler
 
 
 def test_get_logger_for_server_uses_given_host_and_protocol(mocker):
+    factory.get_logger_for_server("https://example.com", "TCP", "CEF").handlers = []
     mock_init = mocker.patch("c42secevents.logging.handlers.NoPrioritySysLogHandler.__init__")
     mock_init.return_value = None
     _ = factory.get_logger_for_server("https://example.com", "TCP", "CEF")

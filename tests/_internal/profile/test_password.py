@@ -2,17 +2,17 @@ import pytest
 import c42sec._internal.profile.password as password
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def keyring_password_getter(mocker):
     return mocker.patch("keyring.get_password")
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def keyring_password_setter(mocker):
     return mocker.patch("keyring.set_password")
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def getpass_function(mocker):
     return mocker.patch("c42sec._internal.profile.password.getpass")
 
