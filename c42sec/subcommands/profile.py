@@ -108,7 +108,7 @@ def _add_password_arg(parser):
         "--password",
         action="store_true",
         dest="do_set_c42_password",
-        help="The password for the Code42 API user. " "Passwords are not stored in plain text.",
+        help="The password for the Code42 API user. Passwords are not stored in plain text.",
     )
 
 
@@ -164,11 +164,10 @@ def _try_set_ignore_ssl_errors(args):
 
 
 def _try_set_password(args):
-    # Must happen after setting username
     if args.do_set_c42_password:
         password.set_password()
 
-    # This will prompt use for password if it does not exist for the current user name.
+    # Prompt for password if it does not exist for the current username / authority host address combo.
     password.get_password()
 
 
@@ -178,12 +177,9 @@ def _verify_args_for_initial_profile_set(args):
     ):
         if args.c42_username is None:
             print_error("Missing username argument.")
-
         if args.c42_authority_url is None:
             print_error("Missing Code42 Authority URL argument.")
-
         return False
-
     return True
 
 
