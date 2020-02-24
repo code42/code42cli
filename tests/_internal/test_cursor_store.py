@@ -3,15 +3,12 @@ from os import path
 import pytest
 from c42sec._internal.cursor_store import SecurityEventCursorStore
 
-MOCK_TEST_DB_PATH = "test_path.db"
-
-
-@pytest.fixture
-def sqlite_connection(mocker):
-    return mocker.patch("sqlite3.connect")
-
 
 class TestSecurityEventCursorStore(object):
+    @pytest.fixture
+    def sqlite_connection(self, mocker):
+        return mocker.patch("sqlite3.connect")
+
     def test_init_cursor_store_when_not_given_db_file_path_uses_expected_path_with_db_table_name_as_db_file_name(
         self, sqlite_connection
     ):
@@ -22,8 +19,7 @@ class TestSecurityEventCursorStore(object):
         SecurityEventCursorStore(expected_db_name)
         sqlite_connection.assert_called_once_with(expected_db_file_path)
 
-    def test_init_cursor_store_when_given_db_file_path_uses_given_path(self, mocker):
-        mock_connect_function = mocker.patch("sqlite3.connect")
+    def test_init_cursor_store_when_given_db_file_path_uses_given_path(self, sqlite_connection):
         expected_db_file_path = "Hey, look, I'm a file path..."
         SecurityEventCursorStore("test", expected_db_file_path)
-        mock_connect_function.assert_called_once_with(expected_db_file_path)
+        sqlite_connection.assert_called_once_with(expected_db_file_path)
