@@ -1,9 +1,8 @@
-from logging.handlers import RotatingFileHandler
-
 import pytest
 import logging
-
+from logging.handlers import RotatingFileHandler
 from c42eventextractor.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
+
 import code42cli._internal.securitydata.logger_factory as factory
 
 

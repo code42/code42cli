@@ -1,9 +1,9 @@
 from __future__ import print_function
 import os
+from configparser import ConfigParser
 
 from code42cli._internal.compat import str
 import code42cli.util as util
-from configparser import ConfigParser
 
 
 class ConfigurationKeys(object):

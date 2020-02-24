@@ -1,4 +1,5 @@
 import pytest
+
 import code42cli._internal.profile.password as password
 
 

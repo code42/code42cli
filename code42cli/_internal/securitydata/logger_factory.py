@@ -1,7 +1,6 @@
 import sys
 import logging
 from logging.handlers import RotatingFileHandler
-
 from c42eventextractor.logging.formatters import AEDDictToJSONFormatter, AEDDictToCEFFormatter
 from c42eventextractor.logging.handlers import NoPrioritySysLogHandler
 
