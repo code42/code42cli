@@ -1,7 +1,11 @@
 import sys
 import logging
 from logging.handlers import RotatingFileHandler
-from c42eventextractor.logging.formatters import AEDDictToJSONFormatter, AEDDictToCEFFormatter
+from c42eventextractor.logging.formatters import (
+    AEDDictToJSONFormatter,
+    AEDDictToCEFFormatter,
+    AEDDictToRawJSONFormatter,
+)
 from c42eventextractor.logging.handlers import NoPrioritySysLogHandler
 
 from code42cli._internal.securitydata.options import OutputFormat
@@ -60,6 +64,9 @@ def _apply_logger_dependencies(logger, handler, formatter):
 
 
 def _get_formatter(output_format):
-    return (
-        AEDDictToJSONFormatter() if output_format == OutputFormat.JSON else AEDDictToCEFFormatter()
-    )
+    if output_format == OutputFormat.JSON:
+        return AEDDictToJSONFormatter()
+    elif output_format == OutputFormat.CEF:
+        return AEDDictToCEFFormatter
+    else:
+        return AEDDictToRawJSONFormatter

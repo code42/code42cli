@@ -1,9 +1,10 @@
 class OutputFormat(object):
     CEF = "CEF"
     JSON = "JSON"
+    RAW = "RAW-JSON"
 
     def __iter__(self):
-        return iter([self.CEF, self.JSON])
+        return iter([self.CEF, self.JSON, self.RAW])
 
 
 class ExposureType(object):
