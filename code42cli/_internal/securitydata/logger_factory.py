@@ -2,8 +2,8 @@ import sys
 import logging
 from logging.handlers import RotatingFileHandler
 
-from c42secevents.logging.formatters import AEDDictToJSONFormatter, AEDDictToCEFFormatter
-from c42secevents.logging.handlers import NoPrioritySysLogHandler
+from c42eventextractor.logging.formatters import AEDDictToJSONFormatter, AEDDictToCEFFormatter
+from c42eventextractor.logging.handlers import NoPrioritySysLogHandler
 
 from code42cli._internal.securitydata.options import OutputFormat
 from code42cli.util import get_user_project_path

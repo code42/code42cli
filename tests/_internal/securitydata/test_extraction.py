@@ -24,7 +24,7 @@ def error_logger(mocker):
 
 @pytest.fixture
 def cursor_store(mocker):
-    mock = mocker.patch("c42secevents.extractors.AEDCursorStore.__init__")
+    mock = mocker.patch("c42eventextractor.extractors.AEDCursorStore.__init__")
     mock.return_value = None
     return mock
 
@@ -32,8 +32,8 @@ def cursor_store(mocker):
 @pytest.fixture(autouse=True)
 def extractor(mocker):
     mock = mocker.MagicMock()
-    mock.extract_raw = mocker.patch("c42secevents.extractors.AEDEventExtractor.extract_raw")
-    mock.extract = mocker.patch("c42secevents.extractors.AEDEventExtractor.extract")
+    mock.extract_raw = mocker.patch("c42eventextractor.extractors.AEDEventExtractor.extract_raw")
+    mock.extract = mocker.patch("c42eventextractor.extractors.AEDEventExtractor.extract")
     return mock
 
 

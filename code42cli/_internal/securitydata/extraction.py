@@ -5,9 +5,9 @@ from datetime import datetime, timedelta
 from py42.sdk import SDK
 from py42 import debug_level
 from py42 import settings
-from c42secevents.common import FileEventHandlers
-from c42secevents.extractors import AEDEventExtractor
-from c42secevents.common import convert_datetime_to_timestamp
+from c42eventextractor.common import FileEventHandlers
+from c42eventextractor.extractors import AEDEventExtractor
+from c42eventextractor.common import convert_datetime_to_timestamp
 
 from code42cli.util import print_error
 from code42cli._internal.securitydata.cursor_store import AEDCursorStore

@@ -3,14 +3,14 @@ from logging.handlers import RotatingFileHandler
 import pytest
 import logging
 
-from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
+from c42eventextractor.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
 import code42cli._internal.securitydata.logger_factory as factory
 
 
 @pytest.fixture
 def no_priority_syslog_handler(mocker):
     mock_no_priority_syslog_handler = mocker.MagicMock()
-    mock_new = mocker.patch("c42secevents.logging.handlers.NoPrioritySysLogHandler.__new__")
+    mock_new = mocker.patch("c42eventextractor.logging.handlers.NoPrioritySysLogHandler.__new__")
     mock_new.return_value = mock_no_priority_syslog_handler
     return mock_no_priority_syslog_handler
 
@@ -106,7 +106,7 @@ def test_get_logger_for_server_uses_no_priority_syslog_handler(no_priority_syslo
 
 @pytest.mark.filterwarnings("ignore:object()")
 def test_get_logger_for_server_uses_given_host_and_protocol(mocker):
-    mock_init = mocker.patch("c42secevents.logging.handlers.NoPrioritySysLogHandler.__init__")
+    mock_init = mocker.patch("c42eventextractor.logging.handlers.NoPrioritySysLogHandler.__init__")
     mock_init.return_value = None
     factory.get_logger_for_server("https://example.com", "TCP", "CEF").handlers = []
     _ = factory.get_logger_for_server("https://example.com", "TCP", "CEF")
