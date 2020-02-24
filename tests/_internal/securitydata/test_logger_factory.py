@@ -104,12 +104,14 @@ def test_get_logger_for_server_uses_no_priority_syslog_handler(no_priority_syslo
     assert logger.handlers[0] == no_priority_syslog_handler
 
 
+@pytest.mark.filterwarnings("ignore:object()")
 def test_get_logger_for_server_uses_given_host_and_protocol(mocker):
-    factory.get_logger_for_server("https://example.com", "TCP", "CEF").handlers = []
     mock_init = mocker.patch("c42secevents.logging.handlers.NoPrioritySysLogHandler.__init__")
     mock_init.return_value = None
+    factory.get_logger_for_server("https://example.com", "TCP", "CEF").handlers = []
     _ = factory.get_logger_for_server("https://example.com", "TCP", "CEF")
-    mock_init.assert_called_once_with("https://example.com", protocol="TCP")
+    assert mock_init.call_args[0][0] == "https://example.com"
+    assert mock_init.call_args[1]["protocol"] == "TCP"
 
 
 def test_get_error_logger_when_called_twice_only_sets_handler_once():
