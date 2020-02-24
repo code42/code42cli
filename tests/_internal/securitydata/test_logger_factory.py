@@ -1,3 +1,5 @@
+from logging.handlers import RotatingFileHandler
+
 import pytest
 import logging
 
@@ -108,3 +110,14 @@ def test_get_logger_for_server_uses_given_host_and_protocol(mocker):
     mock_init.return_value = None
     _ = factory.get_logger_for_server("https://example.com", "TCP", "CEF")
     mock_init.assert_called_once_with("https://example.com", protocol="TCP")
+
+
+def test_get_error_logger_when_called_twice_only_sets_handler_once():
+    _ = factory.get_error_logger()
+    logger = factory.get_error_logger()
+    assert len(logger.handlers) == 1
+
+
+def test_get_error_logger_uses_rotating_file_handler():
+    logger = factory.get_error_logger()
+    assert type(logger.handlers[0]) == RotatingFileHandler
