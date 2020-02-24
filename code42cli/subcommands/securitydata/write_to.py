@@ -1,6 +1,6 @@
-from code42._internal.securitydata.logger_factory import get_logger_for_file
-from code42._internal.securitydata.arguments import add_all_arguments_to_parser
-from code42._internal.securitydata.extraction import extract
+from code42cli._internal.securitydata.logger_factory import get_logger_for_file
+from code42cli._internal.securitydata.arguments import add_all_arguments_to_parser
+from code42cli._internal.securitydata.extraction import extract
 
 
 def init(subcommand_parser):

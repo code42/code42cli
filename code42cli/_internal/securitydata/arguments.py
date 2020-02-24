@@ -1,4 +1,4 @@
-from code42._internal.securitydata.options import ExposureType, OutputFormat
+from code42cli._internal.securitydata.options import ExposureType, OutputFormat
 
 
 def add_all_arguments_to_parser(parser):

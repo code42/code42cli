@@ -5,8 +5,8 @@ from logging.handlers import RotatingFileHandler
 from c42secevents.logging.formatters import AEDDictToJSONFormatter, AEDDictToCEFFormatter
 from c42secevents.logging.handlers import NoPrioritySysLogHandler
 
-from code42._internal.securitydata.options import OutputFormat
-from code42.util import get_user_project_path
+from code42cli._internal.securitydata.options import OutputFormat
+from code42cli.util import get_user_project_path
 
 
 def get_logger_for_stdout(output_format):

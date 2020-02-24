@@ -2,7 +2,7 @@ import pytest
 import logging
 
 from c42secevents.logging.formatters import AEDDictToCEFFormatter, AEDDictToJSONFormatter
-import code42._internal.securitydata.logger_factory as factory
+import code42cli._internal.securitydata.logger_factory as factory
 
 
 @pytest.fixture

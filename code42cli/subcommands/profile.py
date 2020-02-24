@@ -1,9 +1,9 @@
 from __future__ import print_function
 
-import code42._internal.profile.config as config
-import code42._internal.profile.password as password
-from code42._internal.profile.config import ConfigurationKeys
-from code42.util import print_error
+import code42cli._internal.profile.config as config
+import code42cli._internal.profile.password as password
+from code42cli._internal.profile.config import ConfigurationKeys
+from code42cli.util import print_error
 
 
 class code42Profile(object):

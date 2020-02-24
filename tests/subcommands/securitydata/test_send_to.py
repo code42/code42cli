@@ -1,6 +1,6 @@
 import pytest
 from argparse import ArgumentParser
-from code42.subcommands.securitydata import send_to as sender
+from code42cli.subcommands.securitydata import send_to as sender
 
 
 @pytest.fixture
@@ -13,12 +13,12 @@ def server_namespace(namespace):
 
 @pytest.fixture
 def logger_factory(mocker):
-    return mocker.patch("code42.subcommands.securitydata.send_to.get_logger_for_server")
+    return mocker.patch("code42cli.subcommands.securitydata.send_to.get_logger_for_server")
 
 
 @pytest.fixture
 def extractor(mocker):
-    return mocker.patch("code42.subcommands.securitydata.send_to.extract")
+    return mocker.patch("code42cli.subcommands.securitydata.send_to.extract")
 
 
 def test_init_adds_parser_that_can_parse_supported_args(config_parser):

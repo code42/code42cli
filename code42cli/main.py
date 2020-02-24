@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 
-from code42.subcommands import profile
-import code42.subcommands.securitydata.main as securitydata
+from code42cli.subcommands import profile
+import code42cli.subcommands.securitydata.main as securitydata
 
 
 def main():
