@@ -14,7 +14,7 @@ with open(path.join(here, "README.md"), "r", "utf-8") as f:
 setup(
     name="code42cli",
     version=about["__version__"],
-    description="The office command line tool for interacting with Code42",
+    description="The official command line tool for interacting with Code42",
     long_description=readme,
     long_description_content_type="text/markdown",
     packages=find_packages("src"),
