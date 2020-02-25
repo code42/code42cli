@@ -1,11 +1,11 @@
 import pytest
 from argparse import ArgumentParser
 
-from tests.securitydata.conftest import _SUBCOMMANDS_PATH
+from tests.securitydata.conftest import SUBCOMMANDS_PATH
 from code42cli.securitydata.subcommands import write_to as writer
 
 
-_WRITE_PATH = "{0}.write_to".format(_SUBCOMMANDS_PATH)
+_WRITE_PATH = "{0}.write_to".format(SUBCOMMANDS_PATH)
 
 
 @pytest.fixture

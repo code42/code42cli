@@ -1,11 +1,11 @@
 import pytest
 from argparse import ArgumentParser
 
-from tests.securitydata.conftest import _SUBCOMMANDS_PATH
+from tests.securitydata.conftest import SUBCOMMANDS_PATH
 from code42cli.securitydata.subcommands import send_to as sender
 
 
-_SEND_PATH = "{0}.send_to".format(_SUBCOMMANDS_PATH)
+_SEND_PATH = "{0}.send_to".format(SUBCOMMANDS_PATH)
 
 
 @pytest.fixture
