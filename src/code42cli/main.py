@@ -6,6 +6,7 @@ import code42cli.securitydata.main as securitydata
 
 def main():
     code42_arg_parser = ArgumentParser()
+    _add_debug_args(code42_arg_parser)
     subcommand_parser = code42_arg_parser.add_subparsers()
     profile.init(subcommand_parser)
     securitydata.init_subcommand(subcommand_parser)
@@ -21,3 +22,9 @@ def _call_subcommand(parser):
             parser.print_help()
             return
         raise ex
+
+
+def _add_debug_args(parser):
+    parser.add_argument(
+        "-d", "--debug", dest="is_debug_mode", action="store_true", help="Turn on Debug logging."
+    )

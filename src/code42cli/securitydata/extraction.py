@@ -91,22 +91,16 @@ def _call_extract(extractor, args):
 
 def _determine_if_advanced_query(args):
     if args.advanced_query is not None:
-
-        for arg in vars(args):
-            if arg in ["-b"]:
-                print("ERROR")
-                exit(1)
-
-        # if args.begin_date is not None:
-        #     print_error("Cannot use advanced query with --begin")
-        #     exit(1)
-        # if args.end_date is not None:
-        #     print_error("Cannot use advanced query with --end")
-        #     exit(1)
-        # if args.exposure_types is not None:
-        #     print_error("Cannot use advanced query with --types")
-        #     exit(1)
-        # return True
+        if args.begin_date is not None:
+            print_error("Cannot use advanced query with --begin")
+            exit(1)
+        if args.end_date is not None:
+            print_error("Cannot use advanced query with --end")
+            exit(1)
+        if args.exposure_types is not None:
+            print_error("Cannot use advanced query with --types")
+            exit(1)
+        return True
     return False
 
 

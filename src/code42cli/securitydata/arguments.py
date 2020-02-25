@@ -8,7 +8,6 @@ def add_all_arguments_to_parser(parser):
     _add_output_format_arg(parser)
     _add_incremental_arg(parser)
     _add_exposure_types_arg(parser)
-    _add_debug_args(parser)
 
 
 def _add_advanced_query(parser):
@@ -78,7 +77,3 @@ def _add_exposure_types_arg(parser):
     )
 
 
-def _add_debug_args(parser):
-    parser.add_argument(
-        "-d", "--debug", dest="is_debug_mode", action="store_true", help="Turn on Debug logging."
-    )
