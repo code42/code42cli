@@ -1,6 +1,7 @@
 import pytest
 from datetime import datetime, timedelta
 
+from .conftest import _ROOT_PATH
 from code42cli.securitydata.extraction import extract
 
 
@@ -19,7 +20,7 @@ def logger(mocker):
 
 @pytest.fixture(autouse=True)
 def error_logger(mocker):
-    return mocker.patch("code42cli.securitydata.logger_factory")
+    return mocker.patch("{0}.logger_factory".format(_ROOT_PATH))
 
 
 @pytest.fixture

@@ -1,22 +1,21 @@
 import pytest
 from argparse import ArgumentParser
 
-from .conftest import get_subcommands_root_path
+from tests.securitydata.conftest import _SUBCOMMANDS_PATH
 import code42cli.securitydata.subcommands.print_out as printer
 
 
-def get_patch_path():
-    return "{0}.print_out".format(get_subcommands_root_path())
+_PRINT_PATH = "{0}.print_out".format(_SUBCOMMANDS_PATH)
 
 
 @pytest.fixture
 def logger_factory(mocker):
-    return mocker.patch("{0}.get_logger_for_stdout".format(get_patch_path()))
+    return mocker.patch("{0}.get_logger_for_stdout".format(_PRINT_PATH))
 
 
 @pytest.fixture
 def extractor(mocker):
-    return mocker.patch("{0}.extract".format(get_patch_path()))
+    return mocker.patch("{0}.extract".format(_PRINT_PATH))
 
 
 def test_init_adds_parser_that_can_parse_supported_args(config_parser):

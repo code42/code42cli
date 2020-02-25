@@ -10,10 +10,13 @@ from c42eventextractor.logging.formatters import (
 import code42cli.securitydata.logger_factory as factory
 
 
+_SYSLOG_HANDLER_PATH = "c42eventextractor.logging.handlers.NoPrioritySysLogHandler"
+
+
 @pytest.fixture
 def no_priority_syslog_handler(mocker):
     mock_no_priority_syslog_handler = mocker.MagicMock()
-    mock_new = mocker.patch("c42eventextractor.logging.handlers.NoPrioritySysLogHandler.__new__")
+    mock_new = mocker.patch("{0}.__new__".format(_SYSLOG_HANDLER_PATH))
     mock_new.return_value = mock_no_priority_syslog_handler
     return mock_no_priority_syslog_handler
 
@@ -129,7 +132,7 @@ def test_get_logger_for_server_uses_no_priority_syslog_handler(no_priority_syslo
 
 @pytest.mark.filterwarnings("ignore:object()")
 def test_get_logger_for_server_uses_given_host_and_protocol(mocker):
-    mock_init = mocker.patch("c42eventextractor.logging.handlers.NoPrioritySysLogHandler.__init__")
+    mock_init = mocker.patch("{0}.__init__".format(_SYSLOG_HANDLER_PATH))
     mock_init.return_value = None
     factory.get_logger_for_server("https://example.com", "TCP", "CEF").handlers = []
     _ = factory.get_logger_for_server("https://example.com", "TCP", "CEF")

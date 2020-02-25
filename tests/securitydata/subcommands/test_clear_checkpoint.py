@@ -1,19 +1,18 @@
 import pytest
 
-from .conftest import get_root_path
+from tests.securitydata.conftest import _ROOT_PATH
 from code42cli.securitydata.subcommands import clear_checkpoint as clearer
 
 
-def get_patch_path():
-    return "{0}.cursor_store".format(get_root_path())
+_CURSOR_STORE_PATH = "{0}.cursor_store".format(_ROOT_PATH)
 
 
 @pytest.fixture
 def cursor_store(mocker):
-    mock_init = mocker.patch("{0}.AEDCursorStore.__init__".format(get_patch_path()))
+    mock_init = mocker.patch("{0}.AEDCursorStore.__init__".format(_CURSOR_STORE_PATH))
     mock_init.return_value = None
     mock = mocker.MagicMock()
-    mock_new = mocker.patch("{0}.AEDCursorStore.__new__".format(get_patch_path()))
+    mock_new = mocker.patch("{0}.AEDCursorStore.__new__".format(_CURSOR_STORE_PATH))
     mock_new.return_value = mock
     return mock
 
