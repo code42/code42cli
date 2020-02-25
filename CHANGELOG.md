@@ -32,7 +32,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - Moved CLI arguments `-s`, `-u`, and `--ignore-ssl-errors` to `code42 profile set` command.
 - Renamed and moved top-level `-r` flag. 
     - Use `-i` on one of these `securitydata` subcommands `write-to`. `send-to`, `print`.
-- Moved query arguments to individual `securitydata` subcommands `write-to`. `send-to`, `print`.
+- Moved search arguments to individual `securitydata` subcommands `write-to`. `send-to`, `print`.
 
 ## 0.1.1 - 2019-10-29
 

@@ -9,5 +9,15 @@ def main():
     subcommand_parser = code42_arg_parser.add_subparsers()
     profile.init(subcommand_parser)
     securitydata.init_subcommand(subcommand_parser)
-    args = code42_arg_parser.parse_args()
-    args.func(args)
+    _call_subcommand(code42_arg_parser)
+
+
+def _call_subcommand(parser):
+    try:
+        args = parser.parse_args()
+        args.func(args)
+    except AttributeError as ex:
+        if str(ex) == "'Namespace' object has no attribute 'func'":
+            parser.print_help()
+            return
+        raise ex
