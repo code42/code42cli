@@ -10,7 +10,7 @@ Additionally, `code42 securitydata` can record a checkpoint so that you only get
 - Code42 Server 6.8.x+
 
 ## Installation
-Install `code42` using:
+Install the `code42` CLI using:
 
 ```bash
 $ python setup.py install

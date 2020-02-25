@@ -17,6 +17,13 @@ _SYSLOG_HANDLER_PATH = "c42eventextractor.logging.handlers.NoPrioritySysLogHandl
 def no_priority_syslog_handler(mocker):
     mock_no_priority_syslog_handler = mocker.MagicMock()
     mock_new = mocker.patch("{0}.__new__".format(_SYSLOG_HANDLER_PATH))
+
+    def set_mock(_, hostname, protocol):
+        mock_no_priority_syslog_handler.hostname.return_value = hostname
+        mock_no_priority_syslog_handler.protocol.return_value = protocol
+        return mock_no_priority_syslog_handler
+
+    mock_new.side_effect = set_mock
     mock_new.return_value = mock_no_priority_syslog_handler
     return mock_no_priority_syslog_handler
 
@@ -130,14 +137,11 @@ def test_get_logger_for_server_uses_no_priority_syslog_handler(no_priority_syslo
     assert logger.handlers[0] == no_priority_syslog_handler
 
 
-@pytest.mark.filterwarnings("ignore:object()")
-def test_get_logger_for_server_uses_given_host_and_protocol(mocker):
-    mock_init = mocker.patch("{0}.__init__".format(_SYSLOG_HANDLER_PATH))
-    mock_init.return_value = None
+def test_get_logger_for_server_uses_given_host_and_protocol(no_priority_syslog_handler):
     factory.get_logger_for_server("https://example.com", "TCP", "CEF").handlers = []
     _ = factory.get_logger_for_server("https://example.com", "TCP", "CEF")
-    assert mock_init.call_args[0][0] == "https://example.com"
-    assert mock_init.call_args[1]["protocol"] == "TCP"
+    assert no_priority_syslog_handler.hostname.return_value == "https://example.com"
+    assert no_priority_syslog_handler.protocol.return_value == "TCP"
 
 
 def test_get_error_logger_when_called_twice_only_sets_handler_once():
