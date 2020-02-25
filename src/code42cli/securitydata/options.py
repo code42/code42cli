@@ -8,12 +8,12 @@ class OutputFormat(object):
 
 
 class ExposureType(object):
-    SHARED_VIA_LINK = u"SharedViaLink"
-    SHARED_TO_DOMAIN = u"SharedToDomain"
-    APPLICATION_READ = u"ApplicationRead"
-    CLOUD_STORAGE = u"CloudStorage"
-    REMOVABLE_MEDIA = u"RemovableMedia"
-    IS_PUBLIC = u"IsPublic"
+    SHARED_VIA_LINK = "SharedViaLink"
+    SHARED_TO_DOMAIN = "SharedToDomain"
+    APPLICATION_READ = "ApplicationRead"
+    CLOUD_STORAGE = "CloudStorage"
+    REMOVABLE_MEDIA = "RemovableMedia"
+    IS_PUBLIC = "IsPublic"
 
     def __iter__(self):
         return iter(

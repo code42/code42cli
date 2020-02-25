@@ -16,7 +16,7 @@ def _add_output_format_arg(parser):
         "--format",
         dest="format",
         action="store",
-        choices=list(OutputFormat()),
+        choices=OutputFormat(),
         default=OutputFormat.JSON,
         help="The format used for outputting events.",
     )

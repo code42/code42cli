@@ -97,6 +97,8 @@ def _determine_if_advanced_query(args):
         for key in given_args:
             val = given_args[key]
             if not _verify_compatibility_with_advanced_query(key, val):
+                print(key)
+                print(val)
                 print_error("You cannot use --advanced-query with additional search args.")
                 exit(1)
         return True
@@ -106,7 +108,8 @@ def _determine_if_advanced_query(args):
 def _verify_compatibility_with_advanced_query(key, val):
     if val is not None:
         is_other_search_arg = key in SearchArguments() and key != SearchArguments.ADVANCED_QUERY
-        return not is_other_search_arg and key != IS_INCREMENTAL_KEY
+        is_incremental = key == IS_INCREMENTAL_KEY and val
+        return not is_other_search_arg and not is_incremental
     return True
 
 
