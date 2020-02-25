@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-## Unreleased
+## 0.2.0 - 2020-02-25
 
 ### Removed
 
@@ -30,7 +30,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Renamed base command `c42aed` to `code42`.
 - Moved CLI arguments `-s`, `-u`, and `--ignore-ssl-errors` to `code42 profile set` command.
-- Renamed and moved top-level `-r` flag. 
+- Renamed and moved top-level `-r` flag.
     - Use `-i` on one of these `securitydata` subcommands `write-to`. `send-to`, `print`.
 - Moved search arguments to individual `securitydata` subcommands `write-to`. `send-to`, `print`.
 
