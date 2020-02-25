@@ -96,7 +96,9 @@ def test_extract_when_is_advanced_query_and_has_incremental_mode_exits(logger, n
         extract(logger, namespace)
 
 
-def test_extract_when_is_advanced_query_and_has_incremental_mode_set_to_false_does_not_exit(logger, namespace):
+def test_extract_when_is_advanced_query_and_has_incremental_mode_set_to_false_does_not_exit(
+    logger, namespace
+):
     namespace.advanced_query = "some complex json"
     namespace.is_incremental = False
     extract(logger, namespace)
