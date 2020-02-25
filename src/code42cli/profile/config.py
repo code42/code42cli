@@ -1,6 +1,9 @@
+from __future__ import print_function
 import os
-import c42sec.util as util
 from configparser import ConfigParser
+
+from code42cli.compat import str
+import code42cli.util as util
 
 
 class ConfigurationKeys(object):
@@ -18,7 +21,7 @@ def get_config_profile():
         util.print_error("Profile is not set.")
         print("")
         print("To set, use: ")
-        util.print_bold("\tc42sec profile set -s <authority-URL> -u <username>")
+        util.print_bold("\tcode42cli profile set -s <authority-URL> -u <username>")
         print("")
         exit(1)
 
@@ -65,7 +68,7 @@ def set_ignore_ssl_errors(new_value):
 
 def _get_config_file_path():
     path = "{}config.cfg".format(util.get_user_project_path())
-    if not os.path.exists(path):
+    if not os.path.exists(path) or not _verify_config_file(path):
         _create_new_config_file(path)
 
     return path
@@ -109,3 +112,11 @@ def _save(parser, key=None, path=None):
     util.open_file(path, "w+", lambda f: parser.write(f))
     if key is not None:
         print("'{}' has been successfully updated".format(key))
+
+
+def _verify_config_file(path):
+    keys = ConfigurationKeys
+    config_parser = ConfigParser()
+    config_parser.read(path)
+    sections = config_parser.sections()
+    return keys.USER_SECTION in sections and keys.INTERNAL_SECTION in sections

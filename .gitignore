@@ -1,8 +1,11 @@
 # Test config file
 *config.cfg
 
+.DS_Store
+
 # IDE files
 .idea/
+.vscode
 
 # Database files
 *.db

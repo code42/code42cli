@@ -1,8 +1,8 @@
-# c42sec
+# The Code42 CLI
 
-The c42seceventcli AED module contains a CLI tool for extracting AED events as well as an optional state manager 
-for recording timestamps. The state manager records timestamps so that on future runs,
-you only extract events you did not previously extract.
+Use the `code42` command to interact with your Code42 environment.
+`code42 securitydata` is a CLI tool for extracting AED events. 
+Additionally, `code42 securitydata` can record a checkpoint so that you only get events you have not previously gotten.
 
 ## Requirements
 
@@ -10,7 +10,7 @@ you only extract events you did not previously extract.
 - Code42 Server 6.8.x+
 
 ## Installation
-Install `c42sec` using:
+Install the `code42` CLI using:
 
 ```bash
 $ python setup.py install
@@ -18,19 +18,61 @@ $ python setup.py install
 
 ## Usage
 
-First, set your profile
-
+First, set your profile:
 ```bash
-c42sec profile set -s https://example.authority.com -u security.admin@example.com -p
+code42 profile set -s https://example.authority.com -u security.admin@example.com
 ```
+Your profile contains the necessary properties for logging into Code42 servers.
+You will prompted for a password if there is not one saved for your current username/authority URL combination.
 
-`-p` will prompt for your password securely. If your username does not have a password stored, you will be prompted anyway.
+To explicitly set your password, use `-p`:
+```bash
+code42 profile set -p
+```
+You will be securely prompted to input your password.
+Your password is not stored in plain-text, and is not shown when you do `code42 profile show`.
+However, `code42 profile show` will confirm that there is a password set for your profile.
 
 To ignore SSL errors, do:
-
 ```bash
-c42sec profile set --ignore-ssl-errors true
+code42 profile set --disable-ssl-errors
 ```
+
+To re-enable SSL errors, do:
+```bash
+code42 profile set --enable-ssl-errors
+```
+
+Next, you can query for events and send them to three possible destination types
+* stdout
+* A file
+* A server, such as SysLog
+
+To print events to stdout, do:
+```bash
+code42 securitydata print
+```
+
+To write events to a file, do:
+```bash
+code42 securitydata write-to filename.txt
+```
+
+To send events to a server, do:
+```bash
+code42 securitydata send-to https://syslog.company.com -p TCP
+```
+
+Each destination-type subcommand shares query parameters
+* `-t` (exposure types)
+* `-b` (begin date)
+* `-e` (end date)
+* `--advanced-query` (raw JSON query)
+
+Note that you cannot use other query parameters if you use `--advanced-query`.
+
+To learn more about acceptable arguments, add the `-h` flag to `code42` or and of the destination-type subcommands.
+
 
 # Known Issues
 

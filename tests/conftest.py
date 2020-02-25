@@ -1,10 +1,12 @@
 import pytest
-from c42sec.profile._config import ConfigurationKeys
+from argparse import Namespace
+
+from code42cli.profile.config import ConfigurationKeys
 
 
 @pytest.fixture
 def config_profile(mocker):
-    mock_config = mocker.patch("c42sec.profile._config.get_config_profile")
+    mock_config = mocker.patch("code42cli.profile.config.get_config_profile")
     mock_config.return_value = {
         ConfigurationKeys.USERNAME_KEY: "test.username",
         ConfigurationKeys.AUTHORITY_KEY: "https://authority.example.com",
@@ -21,8 +23,21 @@ def config_parser(mocker):
     mocks.item_getter = mocker.patch("configparser.ConfigParser.__getitem__")
     mocks.section_adder = mocker.patch("configparser.ConfigParser.add_section")
     mocks.reader = mocker.patch("configparser.ConfigParser.read")
+    mocks.sections = mocker.patch("configparser.ConfigParser.sections")
     mocks.initializer.return_value = None
     return mocks
+
+
+@pytest.fixture
+def namespace(mocker):
+    mock = mocker.MagicMock(spec=Namespace)
+    mock.is_incremental = None
+    mock.advanced_query = None
+    mock.is_debug_mode = None
+    mock.begin_date = None
+    mock.end_date = None
+    mock.exposure_types = None
+    return mock
 
 
 class ConfigParserMocks(object):
@@ -31,3 +46,4 @@ class ConfigParserMocks(object):
     item_getter = None
     section_adder = None
     reader = None
+    sections = None

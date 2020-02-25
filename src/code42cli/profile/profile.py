@@ -1,10 +1,12 @@
-import c42sec.profile._config as config
-import c42sec.profile._password as password
-from c42sec.profile._config import ConfigurationKeys
-from c42sec.util import print_error
+from __future__ import print_function
+
+import code42cli.profile.config as config
+import code42cli.profile.password as password
+from code42cli.profile.config import ConfigurationKeys
+from code42cli.util import print_error
 
 
-class C42SecProfile(object):
+class Code42Profile(object):
     authority_url = ""
     username = ""
     ignore_ssl_errors = False
@@ -12,29 +14,29 @@ class C42SecProfile(object):
 
 
 def init(subcommand_parser):
-    """Sets up the `profile` command with `show` and `set` subcommands.
+    """Sets up the `profile` subcommand with `show` and `set` subcommands.
             `show` will print the current profile while `set` will modify profile properties.
             Use `-h` after any subcommand for usage.
         Args:
-            subcommand_parser: The subparsers group created by the parent parser
+            subcommand_parser: The subparsers group created by the parent parser.
     """
     parser_profile = subcommand_parser.add_parser("profile")
     parser_profile.set_defaults(func=show_profile)
     profile_subparsers = parser_profile.add_subparsers()
 
-    parser_show = profile_subparsers.add_parser("show")
-    parser_set = profile_subparsers.add_parser("set")
+    parser_for_show_command = profile_subparsers.add_parser("show")
+    parser_for_set_command = profile_subparsers.add_parser("set")
 
-    parser_show.set_defaults(func=show_profile)
-    parser_set.set_defaults(func=set_profile)
-    _add_set_command_args(parser_set)
+    parser_for_show_command.set_defaults(func=show_profile)
+    parser_for_set_command.set_defaults(func=set_profile)
+    _add_args_to_set_command(parser_for_set_command)
 
 
 def get_profile():
-    # type: () -> C42SecProfile
-    """Returns the current profile object"""
+    # type: () -> Code42Profile
+    """Returns the current profile object."""
     profile_values = config.get_config_profile()
-    profile = C42SecProfile()
+    profile = Code42Profile()
     profile.authority_url = profile_values.get(ConfigurationKeys.AUTHORITY_KEY)
     profile.username = profile_values.get(ConfigurationKeys.USERNAME_KEY)
     profile.ignore_ssl_errors = profile_values.get(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
@@ -71,13 +73,13 @@ def set_profile(args):
         show_profile()
 
 
-def _add_set_command_args(parser):
-    _add_authority_arg(parser)
-    _add_username_arg(parser)
-    _add_password_arg(parser)
-    _add_disable_ssl_errors_arg(parser)
-    _add_enable_ssl_errors_arg(parser)
-    _add_show_arg(parser)
+def _add_args_to_set_command(parser_for_set_command):
+    _add_authority_arg(parser_for_set_command)
+    _add_username_arg(parser_for_set_command)
+    _add_password_arg(parser_for_set_command)
+    _add_disable_ssl_errors_arg(parser_for_set_command)
+    _add_enable_ssl_errors_arg(parser_for_set_command)
+    _add_show_arg(parser_for_set_command)
 
 
 def _add_authority_arg(parser):
@@ -106,7 +108,7 @@ def _add_password_arg(parser):
         "--password",
         action="store_true",
         dest="do_set_c42_password",
-        help="The password for the Code42 API user. " "Passwords are not stored in plain text.",
+        help="The password for the Code42 API user. Passwords are not stored in plain text.",
     )
 
 
@@ -126,7 +128,7 @@ def _add_enable_ssl_errors_arg(parser):
         action="store_true",
         default=None,
         dest="enable_ssl_errors",
-        help="Do not validate the SSL certificates of Code42 servers.",
+        help="Do validate the SSL certificates of Code42 servers.",
     )
 
 
@@ -162,11 +164,10 @@ def _try_set_ignore_ssl_errors(args):
 
 
 def _try_set_password(args):
-    # Must happen after setting username
     if args.do_set_c42_password:
         password.set_password()
 
-    # This will prompt use for password if it does not exist for the current user name.
+    # Prompt for password if it does not exist for the current username / authority host address combo.
     password.get_password()
 
 
@@ -176,12 +177,9 @@ def _verify_args_for_initial_profile_set(args):
     ):
         if args.c42_username is None:
             print_error("Missing username argument.")
-
         if args.c42_authority_url is None:
             print_error("Missing Code42 Authority URL argument.")
-
         return False
-
     return True
 
 
