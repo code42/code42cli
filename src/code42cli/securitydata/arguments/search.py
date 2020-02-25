@@ -55,7 +55,7 @@ def _add_exposure_types_arg(parser):
     parser.add_argument(
         "-t",
         "--types",
-        nargs=len(ExposureType()),
+        nargs="*",
         action="store",
         dest=SearchArguments.EXPOSURE_TYPES,
         choices=ExposureType(),
