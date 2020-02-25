@@ -29,12 +29,12 @@ It requires python 3.6 to run, so be sure to have a python 3.6 executable of som
 
 ## Changes
 
-Document all notable consumer-affecting changes in CHANGELOG.md per principles and guidelines at 
+Document all notable consumer-affecting changes in CHANGELOG.md per principles and guidelines at
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Tests
 
-We use [tox](https://tox.readthedocs.io/en/latest/#) to run the 
+We use [tox](https://tox.readthedocs.io/en/latest/#) to run the
 [pytest](https://docs.pytest.org/) test framework on Python 2.7, 3.5, 3.6, and 3.7.
 
 To run all tests, run this at the root of the repo:

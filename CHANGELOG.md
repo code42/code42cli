@@ -1,4 +1,5 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -23,7 +24,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - Use `code42 securitydata send-to` to output to a server.
     - Use `code42 securitydata print` to outputs to STDOUT.
     - Use `code42 securitydata clear-cursor` to remove the stored cursor for 'incremental' mode.
-- Added support for raw JSON queries via `c42sec securitydata [subcommand] --advanced-query [JSON]`.
+- Added support for raw JSON queries via `code42 securitydata [subcommand] --advanced-query [JSON]`.
 
 ### Changed
 
