@@ -55,9 +55,10 @@ def _add_exposure_types_arg(parser):
     parser.add_argument(
         "-t",
         "--types",
-        nargs="*",
+        nargs=len(ExposureType()),
         action="store",
         dest=SearchArguments.EXPOSURE_TYPES,
         choices=ExposureType(),
+        metavar=tuple(ExposureType()),
         help="Limits extracted events to those with given exposure types.",
     )

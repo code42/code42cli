@@ -16,8 +16,13 @@ class ExposureType(object):
     IS_PUBLIC = "IsPublic"
 
     def __iter__(self):
-        return iter(
-            [
+        return iter(self._as_list())
+
+    def __len__(self):
+        return len(self._as_list())
+
+    def _as_list(self):
+        return [
                 self.SHARED_VIA_LINK,
                 self.SHARED_TO_DOMAIN,
                 self.APPLICATION_READ,
@@ -25,7 +30,6 @@ class ExposureType(object):
                 self.REMOVABLE_MEDIA,
                 self.IS_PUBLIC,
             ]
-        )
 
 
 class ServerProtocol(object):
