@@ -8,7 +8,7 @@ def keyring_password_getter(mocker):
     return mocker.patch("keyring.get_password")
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def keyring_password_setter(mocker):
     return mocker.patch("keyring.set_password")
 
@@ -37,7 +37,7 @@ def test_get_password_when_password_is_none_returns_password_from_getpass(
 
 
 def test_get_password_when_password_is_not_none_returns_password(
-    keyring_password_getter, config_profile
+    keyring_password_getter, config_profile, keyring_password_setter
 ):
     keyring_password_getter.return_value = "already stored password 123"
     assert password.get_password() == "already stored password 123"
