@@ -8,7 +8,7 @@ from c42eventextractor.logging.formatters import (
 )
 from c42eventextractor.logging.handlers import NoPrioritySysLogHandler
 
-from code42cli.subcommands.securitydata.options import OutputFormat
+from code42cli.securitydata.options import OutputFormat
 from code42cli.util import get_user_project_path
 
 

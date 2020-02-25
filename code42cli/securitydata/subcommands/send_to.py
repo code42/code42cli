@@ -1,7 +1,7 @@
-from code42cli.subcommands.securitydata.logger_factory import get_logger_for_server
-from code42cli.subcommands.securitydata.arguments import add_all_arguments_to_parser
-from code42cli.subcommands.securitydata.extraction import extract
-from code42cli.subcommands.securitydata.options import ServerProtocol
+from code42cli.securitydata.logger_factory import get_logger_for_server
+from code42cli.securitydata.arguments import add_all_arguments_to_parser
+from code42cli.securitydata.extraction import extract
+from code42cli.securitydata.options import ServerProtocol
 
 
 def init(subcommand_parser):

@@ -9,9 +9,9 @@ from c42eventextractor.extractors import AEDEventExtractor
 from c42eventextractor.common import convert_datetime_to_timestamp
 
 from code42cli.util import print_error
-from code42cli.subcommands.securitydata.cursor_store import AEDCursorStore
-from code42cli.subcommands.securitydata.logger_factory import get_error_logger
-from code42cli.subcommands.profile.profile import get_profile
+from code42cli.securitydata.cursor_store import AEDCursorStore
+from code42cli.securitydata.logger_factory import get_error_logger
+from code42cli.profile.profile import get_profile
 
 
 def extract(output_logger, args):

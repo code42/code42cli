@@ -1,12 +1,12 @@
 import pytest
 from argparse import Namespace
 
-from code42cli.subcommands.profile.config import ConfigurationKeys
+from code42cli.profile.config import ConfigurationKeys
 
 
 @pytest.fixture
 def config_profile(mocker):
-    mock_config = mocker.patch("code42cli.subcommands.profile.config.get_config_profile")
+    mock_config = mocker.patch("code42cli.profile.config.get_config_profile")
     mock_config.return_value = {
         ConfigurationKeys.USERNAME_KEY: "test.username",
         ConfigurationKeys.AUTHORITY_KEY: "https://authority.example.com",

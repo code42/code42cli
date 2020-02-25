@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime, timedelta
 
-from code42cli.subcommands.securitydata.extraction import extract
+from code42cli.securitydata.extraction import extract
 
 
 @pytest.fixture(autouse=True)
@@ -19,7 +19,7 @@ def logger(mocker):
 
 @pytest.fixture(autouse=True)
 def error_logger(mocker):
-    return mocker.patch("code42cli.subcommands.securitydata.logger_factory")
+    return mocker.patch("code42cli.securitydata.logger_factory")
 
 
 @pytest.fixture
@@ -39,7 +39,7 @@ def extractor(mocker):
 
 @pytest.fixture(autouse=True)
 def profile(mocker):
-    mocker.patch("code42cli.subcommands.securitydata.extraction.get_profile")
+    mocker.patch("code42cli.securitydata.extraction.get_profile")
 
 
 def get_test_date_str(days_ago):

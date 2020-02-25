@@ -1,7 +1,7 @@
 from __future__ import with_statement
 import pytest
 
-import code42cli.subcommands.profile.config as config
+import code42cli.profile.config as config
 
 
 class SharedConfigMocks(object):

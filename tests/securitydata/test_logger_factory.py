@@ -7,7 +7,7 @@ from c42eventextractor.logging.formatters import (
     AEDDictToRawJSONFormatter,
 )
 
-import code42cli.subcommands.securitydata.logger_factory as factory
+import code42cli.securitydata.logger_factory as factory
 
 
 @pytest.fixture

@@ -1,8 +1,8 @@
 from __future__ import print_function
 
-import code42cli.subcommands.profile.config as config
-import code42cli.subcommands.profile.password as password
-from code42cli.subcommands.profile.config import ConfigurationKeys
+import code42cli.profile.config as config
+import code42cli.profile.password as password
+from code42cli.profile.config import ConfigurationKeys
 from code42cli.util import print_error
 
 

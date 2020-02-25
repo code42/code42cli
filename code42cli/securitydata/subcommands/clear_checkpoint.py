@@ -1,4 +1,4 @@
-from code42cli.subcommands.securitydata.cursor_store import AEDCursorStore
+from code42cli.securitydata.cursor_store import AEDCursorStore
 
 
 def init(subcommand_parser):
