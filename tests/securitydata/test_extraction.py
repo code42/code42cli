@@ -1,6 +1,7 @@
 import pytest
 from datetime import datetime, timedelta
 
+from code42cli.securitydata.options import ExposureType
 from .conftest import ROOT_PATH
 from code42cli.securitydata.extraction import extract
 
@@ -84,7 +85,7 @@ def test_extract_when_is_advanced_query_and_has_end_date_exits(logger, namespace
 
 def test_extract_when_is_advanced_query_and_has_exposure_types_exits(logger, namespace):
     namespace.advanced_query = "some complex json"
-    namespace.exposure_types = "exposure"
+    namespace.exposure_types = [ExposureType.SHARED_TO_DOMAIN]
     with pytest.raises(SystemExit):
         extract(logger, namespace)
 
@@ -111,9 +112,17 @@ def test_extract_when_is_not_advanced_query_uses_only_extract_method(logger, ext
 
 
 def test_extract_passed_through_given_exposure_types(logger, error_logger, namespace, extractor):
-    namespace.exposure_types = ["exposure"]
+    namespace.exposure_types = [
+        ExposureType.IS_PUBLIC,
+        ExposureType.CLOUD_STORAGE,
+        ExposureType.APPLICATION_READ,
+    ]
     extract(logger, namespace)
-    assert extractor.extract.call_args[1]["exposure_types"] == ["exposure"]
+    assert extractor.extract.call_args[1]["exposure_types"] == [
+        ExposureType.IS_PUBLIC,
+        ExposureType.CLOUD_STORAGE,
+        ExposureType.APPLICATION_READ,
+    ]
 
 
 def test_extract_when_given_begin_date_uses_expected_begin_timestamp(
@@ -188,5 +197,17 @@ def test_extract_when_end_date_is_before_begin_date_causes_exit(
 ):
     namespace.begin_date = get_test_date_str(days_ago=5)
     namespace.end_date = get_test_date_str(days_ago=6)
+    with pytest.raises(SystemExit):
+        extract(logger, namespace)
+
+
+def test_extract_when_given_invalid_exposure_type_causes_exit(
+    logger, error_logger, namespace, extractor
+):
+    namespace.exposure_types = [
+        ExposureType.APPLICATION_READ,
+        "SomethingElseThatIsNotSupported",
+        ExposureType.IS_PUBLIC,
+    ]
     with pytest.raises(SystemExit):
         extract(logger, namespace)

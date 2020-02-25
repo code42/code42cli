@@ -8,6 +8,7 @@ from c42eventextractor.common import FileEventHandlers
 from c42eventextractor.extractors import AEDEventExtractor
 from c42eventextractor.common import convert_datetime_to_timestamp
 
+from code42cli.securitydata.options import ExposureType
 from code42cli.util import print_error
 from code42cli.securitydata.cursor_store import AEDCursorStore
 from code42cli.securitydata.logger_factory import get_error_logger
@@ -81,6 +82,7 @@ def _call_extract(extractor, args):
     if not _determine_if_advanced_query(args):
         min_timestamp = _parse_min_timestamp(args.begin_date) if args.begin_date else None
         max_timestamp = _parse_timestamp(args.end_date) if args.end_date else None
+        _verify_exposure_types(args.exposure_types)
         _verify_timestamp_order(min_timestamp, max_timestamp)
         extractor.extract(
             initial_min_timestamp=min_timestamp,
@@ -111,6 +113,16 @@ def _verify_compatibility_with_advanced_query(key, val):
         is_incremental = key == IS_INCREMENTAL_KEY and val
         return not is_other_search_arg and not is_incremental
     return True
+
+
+def _verify_exposure_types(exposure_types):
+    if exposure_types is None:
+        return
+    options = list(ExposureType())
+    for exposure_type in exposure_types:
+        if exposure_type not in options:
+            print_error("'{0}' is not a valid exposure type.".format(exposure_type))
+            exit(1)
 
 
 def _verify_timestamp_order(begin_timestamp, end_timestamp):

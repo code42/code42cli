@@ -23,13 +23,13 @@ class ExposureType(object):
 
     def _as_list(self):
         return [
-                self.SHARED_VIA_LINK,
-                self.SHARED_TO_DOMAIN,
-                self.APPLICATION_READ,
-                self.CLOUD_STORAGE,
-                self.REMOVABLE_MEDIA,
-                self.IS_PUBLIC,
-            ]
+            self.SHARED_VIA_LINK,
+            self.SHARED_TO_DOMAIN,
+            self.APPLICATION_READ,
+            self.CLOUD_STORAGE,
+            self.REMOVABLE_MEDIA,
+            self.IS_PUBLIC,
+        ]
 
 
 class ServerProtocol(object):
