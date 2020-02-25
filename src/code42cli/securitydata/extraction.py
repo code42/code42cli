@@ -12,6 +12,7 @@ from code42cli.util import print_error
 from code42cli.securitydata.cursor_store import AEDCursorStore
 from code42cli.securitydata.logger_factory import get_error_logger
 from code42cli.profile.profile import get_profile
+from code42cli.securitydata.arguments.search import SearchArguments
 
 
 def extract(output_logger, args):
@@ -91,15 +92,13 @@ def _call_extract(extractor, args):
 
 def _determine_if_advanced_query(args):
     if args.advanced_query is not None:
-        if args.begin_date is not None:
-            print_error("Cannot use advanced query with --begin")
-            exit(1)
-        if args.end_date is not None:
-            print_error("Cannot use advanced query with --end")
-            exit(1)
-        if args.exposure_types is not None:
-            print_error("Cannot use advanced query with --types")
-            exit(1)
+        search_args = SearchArguments()
+        given_args = vars(args)
+        for key in given_args:
+            val = given_args[key]
+            if val is not None and key in search_args and key != SearchArguments.ADVANCED_QUERY:
+                print_error("You cannot use --advanced-query with additional search args.")
+                exit(1)
         return True
     return False
 

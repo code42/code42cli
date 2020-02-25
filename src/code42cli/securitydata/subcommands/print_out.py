@@ -1,5 +1,6 @@
 from code42cli.securitydata.logger_factory import get_logger_for_stdout
-from code42cli.securitydata.arguments import add_all_arguments_to_parser
+from code42cli.securitydata.arguments import search as search_args
+from code42cli.securitydata.arguments import main as main_args
 from code42cli.securitydata.extraction import extract
 
 
@@ -11,10 +12,11 @@ def init(subcommand_parser):
     """
     parser = subcommand_parser.add_parser("print")
     parser.set_defaults(func=print_out)
-    add_all_arguments_to_parser(parser)
+    search_args.add_arguments_to_parser(parser)
+    main_args.add_arguments_to_parser(parser)
 
 
 def print_out(args):
-    """Activates 'print' command. It gets security events and prints them to STDOUT."""
+    """Activates 'print' command. It gets security events and prints them to stdout."""
     logger = get_logger_for_stdout(args.format)
     extract(logger, args)

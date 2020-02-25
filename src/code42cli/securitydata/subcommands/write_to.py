@@ -1,5 +1,6 @@
 from code42cli.securitydata.logger_factory import get_logger_for_file
-from code42cli.securitydata.arguments import add_all_arguments_to_parser
+from code42cli.securitydata.arguments import main as main_args
+from code42cli.securitydata.arguments import search as search_args
 from code42cli.securitydata.extraction import extract
 
 
@@ -12,7 +13,8 @@ def init(subcommand_parser):
     parser = subcommand_parser.add_parser("write-to")
     parser.set_defaults(func=write_to)
     _add_filename_subcommand(parser)
-    add_all_arguments_to_parser(parser)
+    search_args.add_arguments_to_parser(parser)
+    main_args.add_arguments_to_parser(parser)
 
 
 def write_to(args):

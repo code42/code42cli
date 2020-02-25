@@ -1,5 +1,6 @@
 from code42cli.securitydata.logger_factory import get_logger_for_server
-from code42cli.securitydata.arguments import add_all_arguments_to_parser
+from code42cli.securitydata.arguments import main as main_args
+from code42cli.securitydata.arguments import search as search_args
 from code42cli.securitydata.extraction import extract
 from code42cli.securitydata.options import ServerProtocol
 
@@ -14,7 +15,8 @@ def init(subcommand_parser):
     parser.set_defaults(func=send_to)
     _add_server_arg(parser)
     _add_protocol_arg(parser)
-    add_all_arguments_to_parser(parser)
+    search_args.add_arguments_to_parser(parser)
+    main_args.add_arguments_to_parser(parser)
 
 
 def send_to(args):

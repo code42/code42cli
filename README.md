@@ -44,11 +44,11 @@ code42 profile set --enable-ssl-errors
 ```
 
 Next, you can query for events and send them to three possible destination types
-* STDOUT
+* stdout
 * A file
 * A server, such as SysLog
 
-To print events to STDOUT, do:
+To print events to stdout, do:
 ```bash
 code42 securitydata print
 ```

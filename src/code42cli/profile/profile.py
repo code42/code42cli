@@ -44,7 +44,7 @@ def get_profile():
 
 
 def show_profile(*args):
-    """Prints the current profile to STDOUT."""
+    """Prints the current profile to stdout."""
     profile = config.get_config_profile()
     print("\nProfile:")
     for key in profile:

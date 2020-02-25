@@ -1,8 +1,4 @@
-from code42cli.securitydata.subcommands import (
-    clear_checkpoint,
-    print_out,
-    write_to,
-)
+from code42cli.securitydata.subcommands import clear_checkpoint, print_out, write_to
 from code42cli.securitydata.subcommands import send_to
 
 

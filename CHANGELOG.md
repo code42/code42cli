@@ -22,7 +22,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - Added `securitydata` subcommands:
     - Use `code42 securitydata write-to` to output to a file.
     - Use `code42 securitydata send-to` to output to a server.
-    - Use `code42 securitydata print` to outputs to STDOUT.
+    - Use `code42 securitydata print` to outputs to stdout.
     - Use `code42 securitydata clear-cursor` to remove the stored cursor for 'incremental' mode.
 - Added support for raw JSON queries via `code42 securitydata [subcommand] --advanced-query [JSON]`.
 
