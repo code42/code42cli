@@ -1,6 +1,9 @@
 from code42cli.securitydata.options import OutputFormat
 
 
+IS_INCREMENTAL_KEY = "is_incremental"
+
+
 def add_arguments_to_parser(parser):
     _add_output_format_arg(parser)
     _add_incremental_arg(parser)
@@ -23,7 +26,7 @@ def _add_incremental_arg(parser):
     parser.add_argument(
         "-i",
         "--incremental",
-        dest="is_incremental",
+        dest=IS_INCREMENTAL_KEY,
         action="store_true",
         help="Only get events that were not previously retrieved.",
     )

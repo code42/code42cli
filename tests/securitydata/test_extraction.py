@@ -89,6 +89,13 @@ def test_extract_when_is_advanced_query_and_has_exposure_types_exits(logger, nam
         extract(logger, namespace)
 
 
+def test_extract_when_is_advanced_query_and_has_incremental_mode_exits(logger, namespace):
+    namespace.advanced_query = "some complex json"
+    namespace.is_incremental = True
+    with pytest.raises(SystemExit):
+        extract(logger, namespace)
+
+
 def test_extract_when_is_not_advanced_query_uses_only_extract_method(logger, extractor, namespace):
     extract(logger, namespace)
     assert extractor.extract.call_count == 1

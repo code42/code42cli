@@ -13,6 +13,7 @@ from code42cli.securitydata.cursor_store import AEDCursorStore
 from code42cli.securitydata.logger_factory import get_error_logger
 from code42cli.profile.profile import get_profile
 from code42cli.securitydata.arguments.search import SearchArguments
+from code42cli.securitydata.arguments.main import IS_INCREMENTAL_KEY
 
 
 def extract(output_logger, args):
@@ -92,15 +93,21 @@ def _call_extract(extractor, args):
 
 def _determine_if_advanced_query(args):
     if args.advanced_query is not None:
-        search_args = SearchArguments()
         given_args = vars(args)
         for key in given_args:
             val = given_args[key]
-            if val is not None and key in search_args and key != SearchArguments.ADVANCED_QUERY:
+            if not _verify_compatibility_with_advanced_query(key, val):
                 print_error("You cannot use --advanced-query with additional search args.")
                 exit(1)
         return True
     return False
+
+
+def _verify_compatibility_with_advanced_query(key, val):
+    if val is not None:
+        is_other_search_arg = key in SearchArguments() and key != SearchArguments.ADVANCED_QUERY
+        return not is_other_search_arg and key != IS_INCREMENTAL_KEY
+    return True
 
 
 def _verify_timestamp_order(begin_timestamp, end_timestamp):
