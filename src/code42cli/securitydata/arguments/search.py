@@ -59,5 +59,5 @@ def _add_exposure_types_arg(parser):
         action="store",
         dest=SearchArguments.EXPOSURE_TYPES,
         choices=ExposureType(),
-        help="To limit extracted events to those with given exposure types.",
+        help="Limits extracted events to those with given exposure types.",
     )
