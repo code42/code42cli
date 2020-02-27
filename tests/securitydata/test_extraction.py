@@ -34,7 +34,7 @@ def cursor_store(mocker):
 @pytest.fixture(autouse=True)
 def extractor(mocker):
     mock = mocker.MagicMock()
-    mock.search_file_events = mocker.patch("c42eventextractor.extractors.AEDEventExtractor.search_file_events")
+    mock.extract_raw = mocker.patch("c42eventextractor.extractors.AEDEventExtractor.extract_raw")
     mock.extract = mocker.patch("c42eventextractor.extractors.AEDEventExtractor.extract")
     return mock
 
@@ -60,12 +60,12 @@ def get_timestamp_from_seconds_ago(seconds_ago):
     return (date - datetime.utcfromtimestamp(0)).total_seconds()
 
 
-def test_extract_when_is_advanced_query_uses_only_the_search_file_events_method(
+def test_extract_when_is_advanced_query_uses_only_the_extract_raw(
     logger, namespace, extractor
 ):
     namespace.advanced_query = "some complex json"
     extract(logger, namespace)
-    extractor.search_file_events.assert_called_once_with("some complex json")
+    extractor.extract_raw.assert_called_once_with("some complex json")
     assert extractor.extract.call_count == 0
 
 
@@ -108,7 +108,7 @@ def test_extract_when_is_advanced_query_and_has_incremental_mode_set_to_false_do
 def test_extract_when_is_not_advanced_query_uses_only_extract_method(logger, extractor, namespace):
     extract(logger, namespace)
     assert extractor.extract.call_count == 1
-    assert extractor.search_file_events.call_count == 0
+    assert extractor.extract_raw.call_count == 0
 
 
 def test_extract_passed_through_given_exposure_types(logger, error_logger, namespace, extractor):
