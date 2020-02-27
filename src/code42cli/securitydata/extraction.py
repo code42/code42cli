@@ -90,7 +90,7 @@ def _call_extract(extractor, args):
             exposure_types=args.exposure_types,
         )
     else:
-        extractor.extract_raw(args.advanced_query)
+        extractor.search_file_events(args.advanced_query)
 
 
 def _determine_if_advanced_query(args):
