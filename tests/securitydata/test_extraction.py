@@ -60,9 +60,7 @@ def get_timestamp_from_seconds_ago(seconds_ago):
     return (date - datetime.utcfromtimestamp(0)).total_seconds()
 
 
-def test_extract_when_is_advanced_query_uses_only_the_extract_raw(
-    logger, namespace, extractor
-):
+def test_extract_when_is_advanced_query_uses_only_the_extract_raw(logger, namespace, extractor):
     namespace.advanced_query = "some complex json"
     extract(logger, namespace)
     extractor.extract_raw.assert_called_once_with("some complex json")
