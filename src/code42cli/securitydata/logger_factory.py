@@ -6,7 +6,7 @@ from c42eventextractor.logging.formatters import (
     AEDDictToCEFFormatter,
     AEDDictToRawJSONFormatter,
 )
-from c42eventextractor.logging.handlers import LazyNoPrioritySysLogHandler
+from c42eventextractor.logging.handlers import NoPrioritySysLogHandlerWrapper
 
 from code42cli.compat import str
 from code42cli.securitydata.options import OutputFormat
@@ -36,7 +36,7 @@ def get_logger_for_server(hostname, protocol, output_format):
     if _logger_has_handlers(logger):
         return logger
 
-    handler = LazyNoPrioritySysLogHandler(hostname, protocol=protocol)
+    handler = NoPrioritySysLogHandlerWrapper(hostname, protocol=protocol).handler
     return _init_logger(logger, handler, output_format)
 
 
