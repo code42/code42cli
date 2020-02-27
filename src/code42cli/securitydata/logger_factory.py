@@ -6,10 +6,11 @@ from c42eventextractor.logging.formatters import (
     AEDDictToCEFFormatter,
     AEDDictToRawJSONFormatter,
 )
-from c42eventextractor.logging.handlers import NoPrioritySysLogHandler
+from c42eventextractor.logging.handlers import LazyNoPrioritySysLogHandler
 
+from code42cli.compat import str
 from code42cli.securitydata.options import OutputFormat
-from code42cli.util import get_user_project_path
+from code42cli.util import get_user_project_path, print_error
 
 
 def get_logger_for_stdout(output_format):
@@ -35,7 +36,7 @@ def get_logger_for_server(hostname, protocol, output_format):
     if _logger_has_handlers(logger):
         return logger
 
-    handler = NoPrioritySysLogHandler(hostname, protocol=protocol)
+    handler = LazyNoPrioritySysLogHandler(hostname, protocol=protocol)
     return _init_logger(logger, handler, output_format)
 
 
@@ -62,8 +63,12 @@ def _init_logger(logger, handler, output_format):
 
 
 def _apply_logger_dependencies(logger, handler, formatter):
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
+    try:
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+    except Exception as ex:
+        print_error(str(ex))
+        exit(1)
     return logger
 
 
