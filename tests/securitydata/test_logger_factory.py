@@ -13,6 +13,8 @@ import code42cli.securitydata.logger_factory as factory
 @pytest.fixture
 def no_priority_syslog_handler(mocker):
     mock = mocker.patch("c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper.handler")
+
+    # Set handlers to empty list so it gets initialized each test
     factory.get_logger_for_server("https://example.com", "TCP", "CEF").handlers = []
     return mock
 
