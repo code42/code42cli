@@ -7,7 +7,7 @@ from code42cli.util import print_error
 _DEFAULT_LOOK_BACK_DAYS = 60
 
 
-def parse_event_timestamp_filter_group(begin_date_str, end_date_str):
+def create_event_timestamp_range(begin_date_str=None, end_date_str=None):
     min_timestamp = _parse_min_timestamp(begin_date_str)
     max_timestamp = _parse_max_timestamp(end_date_str)
     _verify_timestamp_order(min_timestamp, max_timestamp)

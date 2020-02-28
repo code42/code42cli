@@ -82,7 +82,7 @@ def _verify_compatibility_with_advanced_query(key, val):
 
 
 def _get_event_timestamp_filter(args):
-    return date_helper.parse_event_timestamp_filter_group(args.begin_date, args.end_date)
+    return date_helper.create_event_timestamp_range(args.begin_date, args.end_date)
 
 
 def _verify_exposure_types(exposure_types):
