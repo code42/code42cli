@@ -3,8 +3,8 @@ import json
 from py42.sdk import SDK
 from py42 import debug_level
 from py42 import settings
-from c42eventextractor.common import FileEventHandlers
-from c42eventextractor.extractors import AEDEventExtractor
+from c42eventextractor import FileEventHandlers
+from c42eventextractor.extractors import FileEventExtractor
 
 from code42cli.securitydata.options import ExposureType
 from code42cli.util import print_error
@@ -20,7 +20,7 @@ def extract(output_logger, args):
     handlers = _create_event_handlers(output_logger, args.is_incremental)
     profile = get_profile()
     sdk = _get_sdk(profile, args.is_debug_mode)
-    extractor = AEDEventExtractor(sdk, handlers)
+    extractor = FileEventExtractor(sdk, handlers)
     _call_extract(extractor, args)
 
 
@@ -54,15 +54,11 @@ def _get_sdk(profile, is_debug_mode):
 
 def _call_extract(extractor, args):
     if not _determine_if_advanced_query(args):
-        min_ts, max_ts = date_helper.parse_timestamps(args)
+        event_timestamp_filter_group = _get_event_timestamp_filter(args)
         _verify_exposure_types(args.exposure_types)
-        extractor.extract(
-            initial_min_timestamp=min_ts,
-            max_timestamp=max_ts,
-            exposure_types=args.exposure_types,
-        )
+        extractor.extract(args.exposure_types, event_timestamp_filter_group)
     else:
-        extractor.extract_raw(args.advanced_query)
+        extractor.extract_advanced(args.advanced_query)
 
 
 def _determine_if_advanced_query(args):
@@ -83,6 +79,10 @@ def _verify_compatibility_with_advanced_query(key, val):
         is_incremental = key == IS_INCREMENTAL_KEY and val
         return not is_other_search_arg and not is_incremental
     return True
+
+
+def _get_event_timestamp_filter(args):
+    return date_helper.parse_event_timestamp_filter_group(args.begin_date, args.end_date)
 
 
 def _verify_exposure_types(exposure_types):

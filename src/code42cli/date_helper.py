@@ -1,14 +1,35 @@
 from datetime import datetime, timedelta
 from c42eventextractor.common import convert_datetime_to_timestamp
+from py42.sdk.file_event_query.event_query import EventTimestamp
 
 from code42cli.util import print_error
 
+_DEFAULT_LOOK_BACK_DAYS = 60
 
-def parse_timestamps(args):
-    min_timestamp = _parse_min_timestamp(args.begin_date) if args.begin_date else None
-    max_timestamp = _parse_timestamp(args.end_date) if args.end_date else None
+
+def parse_event_timestamp_filter_group(begin_date_str, end_date_str):
+    min_timestamp = _parse_min_timestamp(begin_date_str)
+    max_timestamp = _parse_max_timestamp(end_date_str)
     _verify_timestamp_order(min_timestamp, max_timestamp)
-    return min_timestamp, max_timestamp
+    return EventTimestamp.in_range(min_timestamp, max_timestamp)
+
+
+def _parse_min_timestamp(begin_date_str):
+    if begin_date_str is None:
+        return _get_default_min_timestamp()
+    min_timestamp = _parse_timestamp(begin_date_str)
+    boundary_date = datetime.utcnow() - timedelta(days=90)
+    boundary = convert_datetime_to_timestamp(boundary_date)
+    if min_timestamp and min_timestamp < boundary:
+        print("Argument '--begin' must be within 90 days.")
+        exit(1)
+    return min_timestamp
+
+
+def _parse_max_timestamp(end_date_str):
+    if end_date_str is None:
+        return _get_default_max_timestamp()
+    return _parse_timestamp(end_date_str)
 
 
 def _verify_timestamp_order(min_timestamp, max_timestamp):
@@ -17,16 +38,6 @@ def _verify_timestamp_order(min_timestamp, max_timestamp):
     if min_timestamp >= max_timestamp:
         print_error("Begin date cannot be after end date")
         exit(1)
-
-
-def _parse_min_timestamp(begin_date):
-    min_timestamp = _parse_timestamp(begin_date)
-    boundary_date = datetime.utcnow() - timedelta(days=90)
-    boundary = convert_datetime_to_timestamp(boundary_date)
-    if min_timestamp and min_timestamp < boundary:
-        print("Argument '--begin' must be within 90 days.")
-        exit(1)
-    return min_timestamp
 
 
 def _parse_timestamp(date_str):
@@ -43,3 +54,13 @@ def _parse_timestamp(date_str):
 
     return convert_datetime_to_timestamp(time)
 
+
+def _get_default_min_timestamp():
+    now = datetime.utcnow()
+    start_day = timedelta(days=_DEFAULT_LOOK_BACK_DAYS)
+    days_ago = now - start_day
+    return convert_datetime_to_timestamp(days_ago)
+
+
+def _get_default_max_timestamp():
+    return convert_datetime_to_timestamp(datetime.utcnow())

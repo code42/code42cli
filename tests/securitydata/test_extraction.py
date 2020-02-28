@@ -1,4 +1,5 @@
 import pytest
+import json
 from datetime import datetime, timedelta
 
 from code42cli.securitydata.options import ExposureType
@@ -24,18 +25,13 @@ def error_logger(mocker):
     return mocker.patch("{0}.logger_factory".format(ROOT_PATH))
 
 
-@pytest.fixture
-def cursor_store(mocker):
-    mock = mocker.patch("c42eventextractor.extractors.AEDCursorStore.__init__")
-    mock.return_value = None
-    return mock
-
-
 @pytest.fixture(autouse=True)
 def extractor(mocker):
     mock = mocker.MagicMock()
-    mock.extract_raw = mocker.patch("c42eventextractor.extractors.AEDEventExtractor.extract_raw")
-    mock.extract = mocker.patch("c42eventextractor.extractors.AEDEventExtractor.extract")
+    mock.extract_advanced = mocker.patch(
+        "c42eventextractor.extractors.FileEventExtractor.extract_advanced"
+    )
+    mock.extract = mocker.patch("c42eventextractor.extractors.FileEventExtractor.extract")
     return mock
 
 
@@ -50,20 +46,38 @@ def get_test_date_str(days_ago):
     return days_ago_date.strftime("%Y-%m-%d")
 
 
-def get_timestamp_from_date_str(date_str):
-    date = datetime.strptime(date_str, "%Y-%m-%d")
-    return (date - datetime.utcfromtimestamp(0)).total_seconds()
+def get_date_from_minutes_ago(minutes_ago):
+    return datetime.utcnow() - timedelta(minutes=minutes_ago)
 
 
-def get_timestamp_from_seconds_ago(seconds_ago):
-    date = datetime.utcnow() - timedelta(seconds=seconds_ago)
-    return (date - datetime.utcfromtimestamp(0)).total_seconds()
+def get_min_date_str_from_call_args(extract_call_args):
+    return json.loads(str(extract_call_args[0][1]))["filters"][0]["value"]
 
 
-def test_extract_when_is_advanced_query_uses_only_the_extract_raw(logger, namespace, extractor):
+def get_max_date_str_from_call_args(extract_call_args):
+    return json.loads(str(extract_call_args[0][1]))["filters"][1]["value"]
+
+
+def get_min_date_from_call_args(extract_call_args):
+    date_str = get_min_date_str_from_call_args(extract_call_args)
+    return convert_str_to_date(date_str)
+
+
+def get_max_date_from_call_args(extract_call_args):
+    date_str = get_max_date_str_from_call_args(extract_call_args)
+    return convert_str_to_date(date_str)
+
+
+def convert_str_to_date(date_str):
+    return datetime.strptime(date_str, u"%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+def test_extract_when_is_advanced_query_uses_only_the_extract_advanced(
+    logger, namespace, extractor
+):
     namespace.advanced_query = "some complex json"
     extract(logger, namespace)
-    extractor.extract_raw.assert_called_once_with("some complex json")
+    extractor.extract_advanced.assert_called_once_with("some complex json")
     assert extractor.extract.call_count == 0
 
 
@@ -116,43 +130,41 @@ def test_extract_passed_through_given_exposure_types(logger, error_logger, names
         ExposureType.APPLICATION_READ,
     ]
     extract(logger, namespace)
-    assert extractor.extract.call_args[1]["exposure_types"] == [
+    assert extractor.extract.call_args[0][0] == [
         ExposureType.IS_PUBLIC,
         ExposureType.CLOUD_STORAGE,
         ExposureType.APPLICATION_READ,
     ]
 
 
-def test_extract_when_given_begin_date_uses_expected_begin_timestamp(
+def test_extract_when_given_begin_date_uses_expected_query(
     logger, error_logger, namespace, extractor
 ):
-    test_begin_date_str = get_test_date_str(days_ago=89)
-    namespace.begin_date = test_begin_date_str
+    namespace.begin_date = get_test_date_str(days_ago=89)
     extract(logger, namespace)
-    expected_begin_timestamp = get_timestamp_from_date_str(test_begin_date_str)
-    actual_begin_timestamp = extractor.extract.call_args[1]["initial_min_timestamp"]
-    assert actual_begin_timestamp == expected_begin_timestamp
+    actual = get_min_date_str_from_call_args(extractor.extract.call_args)
+    expected = "{0}T00:00:00.000Z".format(namespace.begin_date)
+    assert actual == expected
 
 
-def test_extract_when_given_begin_date_as_seconds_ago_uses_expected_begin_timestamp(
+def test_extract_when_given_begin_date_as_seconds_ago_uses_expected_query(
     logger, error_logger, namespace, extractor
 ):
     namespace.begin_date = "600"
     extract(logger, namespace)
-    expected_timestamp = get_timestamp_from_seconds_ago(600)
-    actual_timestamp = extractor.extract.call_args[1]["initial_min_timestamp"]
-    assert pytest.approx(expected_timestamp, actual_timestamp)
+    actual = get_min_date_from_call_args(extractor.extract.call_args)
+    expected = get_date_from_minutes_ago(int(namespace.begin_date))
+    assert (expected - actual).total_seconds() < 0.1
 
 
-def test_extract_when_given_end_date_uses_expected_begin_timestamp(
+def test_extract_when_given_end_date_uses_expected_query(
     logger, error_logger, namespace, extractor
 ):
-    test_end_date_str = get_test_date_str(days_ago=10)
-    namespace.end_date = test_end_date_str
+    namespace.end_date = get_test_date_str(days_ago=10)
     extract(logger, namespace)
-    expected_end_timestamp = get_timestamp_from_date_str(test_end_date_str)
-    actual_end_timestamp = extractor.extract.call_args[1]["max_timestamp"]
-    assert actual_end_timestamp == expected_end_timestamp
+    actual = get_max_date_str_from_call_args(extractor.extract.call_args)
+    expected = "{0}T00:00:00.000Z".format(namespace.end_date)
+    assert actual == expected
 
 
 def test_extract_when_given_end_date_as_seconds_ago_uses_expected_begin_timestamp(
@@ -160,26 +172,25 @@ def test_extract_when_given_end_date_as_seconds_ago_uses_expected_begin_timestam
 ):
     namespace.end_date = "600"
     extract(logger, namespace)
-    expected_timestamp = get_timestamp_from_seconds_ago(600)
-    actual_timestamp = extractor.extract.call_args[1]["max_timestamp"]
-    assert pytest.approx(expected_timestamp, actual_timestamp)
+    actual = get_max_date_from_call_args(extractor.extract.call_args)
+    expected = get_date_from_minutes_ago(int(namespace.end_date))
+    assert (expected - actual).total_seconds() < 0.1
 
 
 def test_extract_when_using_both_min_and_max_dates_uses_expected_timestamps(
     logger, error_logger, namespace, extractor
 ):
-    test_begin_date_str = get_test_date_str(days_ago=89)
-    namespace.begin_date = test_begin_date_str
+    namespace.begin_date = get_test_date_str(days_ago=89)
     namespace.end_date = "600"
     extract(logger, namespace)
 
-    expected_begin_timestamp = get_timestamp_from_date_str(test_begin_date_str)
-    expected_end_timestamp = get_timestamp_from_seconds_ago(600)
-    actual_begin_timestamp = extractor.extract.call_args[1]["initial_min_timestamp"]
-    actual_end_timestamp = extractor.extract.call_args[1]["max_timestamp"]
+    actual_begin_timestamp = get_min_date_str_from_call_args(extractor.extract.call_args)
+    actual_end_timestamp = get_max_date_from_call_args(extractor.extract.call_args)
+    expected_begin_timestamp = "{0}T00:00:00.000Z".format(namespace.begin_date)
+    expected_end_timestamp = get_date_from_minutes_ago(int(namespace.end_date))
 
     assert actual_begin_timestamp == expected_begin_timestamp
-    assert pytest.approx(expected_end_timestamp, actual_end_timestamp)
+    assert (expected_end_timestamp - actual_end_timestamp).total_seconds() < 0.1
 
 
 def test_extract_when_given_min_timestamp_more_than_ninety_days_back_causes_exit(

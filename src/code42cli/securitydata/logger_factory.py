@@ -2,9 +2,9 @@ import sys
 import logging
 from logging.handlers import RotatingFileHandler
 from c42eventextractor.logging.formatters import (
-    AEDDictToJSONFormatter,
-    AEDDictToCEFFormatter,
-    AEDDictToRawJSONFormatter,
+    FileEventDictToJSONFormatter,
+    FileEventDictToCEFFormatter,
+    FileEventDictToRawJSONFormatter,
 )
 from c42eventextractor.logging.handlers import NoPrioritySysLogHandlerWrapper
 
@@ -74,8 +74,8 @@ def _apply_logger_dependencies(logger, handler, formatter):
 
 def _get_formatter(output_format):
     if output_format == OutputFormat.JSON:
-        return AEDDictToJSONFormatter()
+        return FileEventDictToJSONFormatter()
     elif output_format == OutputFormat.CEF:
-        return AEDDictToCEFFormatter()
+        return FileEventDictToCEFFormatter()
     else:
-        return AEDDictToRawJSONFormatter()
+        return FileEventDictToRawJSONFormatter()
