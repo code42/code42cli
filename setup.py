@@ -20,7 +20,7 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4",
-    install_requires=["c42eventextractor==0.1.3", "keyring==18.0.1","py42==0.5.1"],
+    install_requires=["c42eventextractor==0.2.0", "keyring==18.0.1","py42==0.5.1"],
     license="MIT",
     include_package_data=True,
     zip_safe=False,
