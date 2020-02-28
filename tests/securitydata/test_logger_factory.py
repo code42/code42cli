@@ -93,7 +93,9 @@ def test_get_logger_for_server_has_info_level(no_priority_syslog_handler):
 
 def test_get_logger_for_server_when_given_cef_format_uses_cef_formatter(no_priority_syslog_handler):
     _ = factory.get_logger_for_server("https://example.com", "TCP", "CEF")
-    assert type(no_priority_syslog_handler.setFormatter.call_args[0][0]) == FileEventDictToCEFFormatter
+    assert (
+        type(no_priority_syslog_handler.setFormatter.call_args[0][0]) == FileEventDictToCEFFormatter
+    )
 
 
 def test_get_logger_for_server_when_given_json_format_uses_json_formatter(
@@ -101,7 +103,10 @@ def test_get_logger_for_server_when_given_json_format_uses_json_formatter(
 ):
     factory.get_logger_for_server("https://example.com", "TCP", "JSON").handlers = []
     _ = factory.get_logger_for_server("https://example.com", "TCP", "JSON")
-    assert type(no_priority_syslog_handler.setFormatter.call_args[0][0]) == FileEventDictToJSONFormatter
+    assert (
+        type(no_priority_syslog_handler.setFormatter.call_args[0][0])
+        == FileEventDictToJSONFormatter
+    )
 
 
 def test_get_logger_for_server_when_given_raw_json_format_uses_raw_json_formatter(
@@ -110,7 +115,8 @@ def test_get_logger_for_server_when_given_raw_json_format_uses_raw_json_formatte
     factory.get_logger_for_server("https://example.com", "TCP", "RAW-JSON").handlers = []
     _ = factory.get_logger_for_server("https://example.com", "TCP", "RAW-JSON")
     assert (
-        type(no_priority_syslog_handler.setFormatter.call_args[0][0]) == FileEventDictToRawJSONFormatter
+        type(no_priority_syslog_handler.setFormatter.call_args[0][0])
+        == FileEventDictToRawJSONFormatter
     )
 
 
