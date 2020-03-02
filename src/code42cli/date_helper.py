@@ -48,7 +48,9 @@ def _parse_timestamp(date_tuple):
             date_format = "%Y-%m-%d" if len(date_tuple) == 1 else "%Y-%m-%d %H:%M:%S"
             time = datetime.strptime(date_str, date_format)
     except ValueError:
-        raise ValueError("input must be a positive integer or a date in YYYY-MM-DD format.")
+        raise ValueError(
+            "input must be a positive integer or a date in YYYY-MM-DD or YYYY-MM-DD HH:MM:SS format."
+        )
 
     return convert_datetime_to_timestamp(time)
 
