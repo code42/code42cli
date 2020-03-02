@@ -78,7 +78,7 @@ def _add_exposure_types_arg(parser):
         nargs=u"+",
         action=u"store",
         dest=SearchArguments.EXPOSURE_TYPES,
-        help=u"Limits extracted events to those with given exposure types. "
+        help=u"Limits events to those with given exposure types. "
         u"Available choices={0}".format(list(ExposureType())),
     )
 
@@ -88,7 +88,7 @@ def _add_username_arg(parser):
         u"--c42username",
         action=u"store",
         dest=SearchArguments.C42USERNAME,
-        help=u"Limits events to endpoint events for the given Code42 username.",
+        help=u"Limits events to endpoint events for this Code42 username.",
     )
 
 
@@ -97,7 +97,7 @@ def _add_actor_arg(parser):
         u"--actor",
         action=u"store",
         dest=SearchArguments.ACTOR,
-        help=u"Limits events to only those enacted by the given actor.",
+        help=u"Limits events to only those enacted by this actor.",
     )
 
 
@@ -106,7 +106,7 @@ def _add_md5_arg(parser):
         u"--md5",
         action=u"store",
         dest=SearchArguments.MD5,
-        help=u"Limits events to only those where the file hash is the given MD5 hash.",
+        help=u"Limits events to file events where the file has this MD5 hash.",
     )
 
 
@@ -115,7 +115,7 @@ def _add_sha256_arg(parser):
         u"--sha256",
         action=u"store",
         dest=SearchArguments.SHA256,
-        help=u"Limits events to only those where the file hash is the given SHA256 hash.",
+        help=u"Limits events to file events where the file has this SHA256 hash.",
     )
 
 
@@ -124,7 +124,7 @@ def _add_source_arg(parser):
         u"--source",
         action=u"store",
         dest=SearchArguments.SOURCE,
-        help="Limits events for the given source. Example=Gmail.",
+        help="Limits events to only those with this source. Example=Gmail.",
     )
 
 
@@ -133,7 +133,7 @@ def _add_filename_arg(parser):
         u"--filename",
         action=u"store",
         dest=SearchArguments.FILENAME,
-        help="Limits events to file events with given name.",
+        help="Limits events to file events where the file has this name.",
     )
 
 
@@ -142,7 +142,7 @@ def _add_filepath_arg(parser):
         u"--filepath",
         action=u"store",
         dest=SearchArguments.FILEPATH,
-        help=u"Limits events to file events at the given path.",
+        help=u"Limits events to file events where the file is located at this path.",
     )
 
 
@@ -151,8 +151,7 @@ def _add_process_owner_arg(parser):
         u"--processOwner",
         action=u"store",
         dest=SearchArguments.PROCESS_OWNER,
-        help=u"Limits events to be exposure events where the process owner for the source of "
-        u"the exposure matches the given arg.",
+        help=u"Limits events to exposure events where this user owns the process behind the exposure.",
     )
 
 
@@ -161,6 +160,5 @@ def _add_tab_url_arg(parser):
         u"--tabURL",
         action=u"store",
         dest=SearchArguments.TAB_URL,
-        help="Limits events to be exposure events where the URL of the tab uses in "
-        "the exposure matches the given arg.",
+        help="Limits events to be exposure events with this destination tab URL.",
     )
