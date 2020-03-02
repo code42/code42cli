@@ -65,6 +65,10 @@ def get_filter_value_from_json(json, filter_index):
     return json_module.loads(str(json))["filters"][filter_index]["value"]
 
 
+def get_filter_term_from_json(json, filter_index):
+    return json_module.loads(str(json))["filters"][filter_index]["term"]
+
+
 def parse_date_from_filter_value(json, filter_index):
     date_str = get_filter_value_from_json(json, filter_index)
     return convert_str_to_date(date_str)

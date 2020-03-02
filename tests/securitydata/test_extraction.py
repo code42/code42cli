@@ -6,6 +6,7 @@ from code42cli.securitydata.extraction import extract
 from .conftest import ROOT_PATH
 from ..conftest import (
     get_filter_value_from_json,
+    get_filter_term_from_json,
     parse_date_from_filter_value,
     get_test_date,
     get_test_date_str,
@@ -294,6 +295,17 @@ def test_extract_when_given_include_non_exposure_does_not_include_exposure_type_
     ExposureType.exists = mocker.MagicMock()
     extract(logger, namespace)
     assert not ExposureType.exists.call_count
+
+
+def test_extract_when_not_given_include_non_exposure_does_not_include_exposure_type_exists(
+    logger, namespace, extractor
+):
+    namespace.include_non_exposure_events = False
+    extract(logger, namespace)
+    actual_value = get_filter_value_from_json(extractor.extract.call_args[0][2], filter_index=0)
+    actual_term = get_filter_term_from_json(extractor.extract.call_args[0][2], filter_index=0)
+    assert actual_term == "exposure"
+    assert actual_value is None  # For exists(), the value is None
 
 
 def test_extract_when_given_multiple_search_args_uses_expected_filters(
