@@ -142,7 +142,8 @@ def _add_process_owner_arg(parser):
         u"--processOwner",
         action=u"store",
         dest=SearchArguments.PROCESS_OWNER,
-        help=u"Limits events to be exposure events where the process owner for the source of the exposure matches the given arg.",
+        help=u"Limits events to be exposure events where the process owner for the source of "
+        u"the exposure matches the given arg.",
     )
 
 
@@ -151,5 +152,6 @@ def _add_tab_url_arg(parser):
         u"--tabURL",
         action=u"store",
         dest=SearchArguments.TAB_URL,
-        help="Limits events to be exposure events where the URL of the tab uses in the exposure matches the given arg."
+        help="Limits events to be exposure events where the URL of the tab uses in "
+        "the exposure matches the given arg.",
     )
