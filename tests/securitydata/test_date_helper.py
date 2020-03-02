@@ -1,8 +1,8 @@
 import pytest
 from datetime import datetime
 
-from code42cli.date_helper import create_event_timestamp_range
-from .conftest import (
+from code42cli.securitydata.date_helper import create_event_timestamp_range
+from ..conftest import (
     get_first_filter_value_from_json,
     get_second_filter_value_from_json,
     parse_date_from_first_filter_value,
