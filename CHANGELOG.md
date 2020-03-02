@@ -23,6 +23,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `--filepath`
     - `--processOwner`
     - `--tabURL`
+    - `--include-non-exposure`
 
 ## 0.2.0 - 2020-02-25
 

@@ -1,7 +1,7 @@
 # The Code42 CLI
 
 Use the `code42` command to interact with your Code42 environment.
-`code42 securitydata` is a CLI tool for extracting AED events. 
+`code42 securitydata` is a CLI tool for extracting AED events.
 Additionally, `code42 securitydata` can record a checkpoint so that you only get events you have not previously gotten.
 
 ## Requirements
@@ -67,6 +67,16 @@ Each destination-type subcommand shares query parameters
 * `-t` (exposure types)
 * `-b` (begin date)
 * `-e` (end date)
+* `--c42username`
+* `--actor`
+* `--md5`
+* `--sha256`
+* `--source`
+* `--filename`
+* `--filepath`
+* `--processOwner`
+* `--tabURL`
+* `--include-non-exposure` (does not work with `-t`)
 * `--advanced-query` (raw JSON query)
 
 Note that you cannot use other query parameters if you use `--advanced-query`.
