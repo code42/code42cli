@@ -32,7 +32,7 @@ class SearchArguments(object):
     FILEPATH = u"filepath"
     PROCESS_OWNER = u"process_owner"
     TAB_URL = u"tab_url"
-    DO_GET_ALL_EVENT_TYPES = u"do_get_all_event_types"
+    INCLUDE_NON_EXPOSURE_EVENTS = u"include_non_exposure_events"
 
     def __iter__(self):
         return iter(
@@ -50,7 +50,7 @@ class SearchArguments(object):
                 self.FILEPATH,
                 self.PROCESS_OWNER,
                 self.TAB_URL,
-                self.DO_GET_ALL_EVENT_TYPES,
+                self.INCLUDE_NON_EXPOSURE_EVENTS,
             ]
         )
 
@@ -188,6 +188,6 @@ def _add_include_non_exposure_arg(parser):
     parser.add_argument(
         u"--include-non-exposure",
         action=u"store_true",
-        dest=SearchArguments.DO_GET_ALL_EVENT_TYPES,
+        dest=SearchArguments.INCLUDE_NON_EXPOSURE_EVENTS,
         help=u"Get all events including non-exposure events.",
     )

@@ -48,6 +48,7 @@ def namespace(mocker):
     mock.filepath = None
     mock.process_owner = None
     mock.tab_url = None
+    mock.include_non_exposure_events = None
     return mock
 
 

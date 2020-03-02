@@ -274,6 +274,28 @@ def test_extract_when_given_tab_url_uses_process_tab_url_filter(logger, namespac
     assert actual == namespace.tab_url
 
 
+def test_extract_when_given_exposure_types_uses_exposure_type_is_in_filter(
+    logger, namespace, extractor
+):
+    namespace.exposure_types = ["ApplicationRead", "RemovableMedia", "CloudStorage"]
+    extract(logger, namespace)
+    first = get_filter_value_from_json(extractor.extract.call_args[0][2], filter_index=0)
+    second = get_filter_value_from_json(extractor.extract.call_args[0][2], filter_index=1)
+    third = get_filter_value_from_json(extractor.extract.call_args[0][2], filter_index=2)
+    assert first == namespace.exposure_types[0]
+    assert second == namespace.exposure_types[1]
+    assert third == namespace.exposure_types[2]
+
+
+def test_extract_when_given_include_non_exposure_does_not_include_exposure_type_exists(
+    mocker, logger, namespace, extractor
+):
+    namespace.include_non_exposure_events = True
+    ExposureType.exists = mocker.MagicMock()
+    extract(logger, namespace)
+    assert not ExposureType.exists.call_count
+
+
 def test_extract_when_given_multiple_search_args_uses_expected_filters(
     logger, namespace, extractor
 ):
@@ -289,3 +311,12 @@ def test_extract_when_given_multiple_search_args_uses_expected_filters(
     assert actual_filepath == namespace.filepath
     assert actual_process_owner == namespace.process_owner
     assert actual_tab_url == namespace.tab_url
+
+
+def test_extract_when_given_include_non_exposure_and_exposure_types_causes_exit(
+    logger, namespace, extractor
+):
+    namespace.exposure_types = ["ApplicationRead", "RemovableMedia", "CloudStorage"]
+    namespace.include_non_exposure_events = True
+    with pytest.raises(SystemExit):
+        extract(logger, namespace)

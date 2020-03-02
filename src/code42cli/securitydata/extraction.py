@@ -8,16 +8,16 @@ from c42eventextractor.extractors import FileEventExtractor
 from py42.sdk.file_event_query.cloud_query import Actor
 from py42.sdk.file_event_query.device_query import DeviceUsername
 from py42.sdk.file_event_query.event_query import Source
-from py42.sdk.file_event_query.exposure_query import ProcessOwner, TabURL
+from py42.sdk.file_event_query.exposure_query import ExposureType, ProcessOwner, TabURL
 from py42.sdk.file_event_query.file_query import MD5, SHA256, FileName, FilePath
 
 from code42cli.compat import str
-from code42cli.securitydata.options import ExposureType
 from code42cli.util import print_error
+from code42cli.profile.profile import get_profile
+from code42cli.securitydata.options import ExposureType as ExposureTypeOptions
 from code42cli.securitydata import date_helper as date_helper
 from code42cli.securitydata.cursor_store import AEDCursorStore
 from code42cli.securitydata.logger_factory import get_error_logger
-from code42cli.profile.profile import get_profile
 from code42cli.securitydata.arguments.search import SearchArguments
 from code42cli.securitydata.arguments.main import IS_INCREMENTAL_KEY
 
@@ -98,7 +98,7 @@ def _get_event_timestamp_filter(args):
 def _verify_exposure_types(exposure_types):
     if exposure_types is None:
         return
-    options = list(ExposureType())
+    options = list(ExposureTypeOptions())
     for exposure_type in exposure_types:
         if exposure_type not in options:
             print_error(u"'{0}' is not a valid exposure type.".format(exposure_type))
@@ -125,4 +125,17 @@ def _create_filters(args):
         filters.append(ProcessOwner.eq(args.process_owner))
     if args.tab_url:
         filters.append(TabURL.eq(args.tab_url))
+    exposure_filter = _create_exposure_type_filter(args)
+    if exposure_filter:
+        filters.append(exposure_filter)
     return filters
+
+
+def _create_exposure_type_filter(args):
+    if args.include_non_exposure_events and args.exposure_types:
+        print_error(u"Cannot use exposure types with `--include-non-exposure`.")
+        exit(1)
+    if args.exposure_types:
+        return ExposureType.is_in(args.exposure_types)
+    if not args.include_non_exposure_events:
+        return ExposureType.exists()
