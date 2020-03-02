@@ -37,7 +37,7 @@ def _add_begin_date_arg(parser):
         action="store",
         dest=SearchArguments.BEGIN_DATE,
         help="The beginning of the date range in which to look for events, "
-        "in YYYY-MM-DD UTC format OR a number (number of minutes ago).",
+        "in YYYY-MM-DD (UTC), YYYY-MM-DD HH:MM:SS (UTC+24-hr time), format OR a number (number of minutes ago).",
     )
 
 
@@ -49,7 +49,7 @@ def _add_end_date_arg(parser):
         action="store",
         dest=SearchArguments.END_DATE,
         help="The end of the date range in which to look for events, "
-        "in YYYY-MM-DD UTC format OR a number (number of minutes ago).",
+        "in YYYY-MM-DD (UTC), YYYY-MM-DD HH:MM:SS (UTC+24-hr time), format OR a number (number of minutes ago).",
     )
 
 
