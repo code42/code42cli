@@ -41,7 +41,7 @@ def test_create_event_timestamp_range_when_given_begin_with_time_builds_expected
 
 
 def test_create_event_timestamp_range_when_given_begin_as_minutes_ago_builds_expected_query():
-    ts_range = create_event_timestamp_range("600")
+    ts_range = create_event_timestamp_range(("600",))
     actual = parse_date_from_first_filter_value(ts_range)
     expected = get_date_from_minutes_ago(600)
     assert (expected - actual).total_seconds() < 0.1
