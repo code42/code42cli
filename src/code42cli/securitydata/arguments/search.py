@@ -33,7 +33,23 @@ class SearchArguments(object):
     TAB_URL = u"tab_url"
 
     def __iter__(self):
-        return iter([self.ADVANCED_QUERY, self.BEGIN_DATE, self.END_DATE, self.EXPOSURE_TYPES])
+        return iter(
+            [
+                self.ADVANCED_QUERY,
+                self.BEGIN_DATE,
+                self.END_DATE,
+                self.EXPOSURE_TYPES,
+                self.C42USERNAME,
+                self.ACTOR,
+                self.MD5,
+                self.SHA256,
+                self.SOURCE,
+                self.FILENAME,
+                self.FILEPATH,
+                self.PROCESS_OWNER,
+                self.TAB_URL,
+            ]
+        )
 
 
 def _add_advanced_query(parser):
