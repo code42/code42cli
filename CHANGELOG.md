@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## Unreleased
+
+### Added
+
+- Begin and end date now support specifying time: `code42 securitydata print -b 2020-02-02 12:00:00`.
+
 ## 0.2.0 - 2020-02-25
 
 ### Removed
