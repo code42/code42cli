@@ -3,6 +3,7 @@ from c42eventextractor.common import convert_datetime_to_timestamp
 from py42.sdk.file_event_query.event_query import EventTimestamp
 
 _DEFAULT_LOOK_BACK_DAYS = 60
+_MAX_LOOK_BACK_DAYS = 90
 
 
 def create_event_timestamp_range(begin_date_str=None, end_date_str=None):
@@ -16,7 +17,7 @@ def _parse_min_timestamp(begin_date_str):
     if begin_date_str is None:
         return _get_default_min_timestamp()
     min_timestamp = _parse_timestamp(begin_date_str)
-    boundary_date = datetime.utcnow() - timedelta(days=90)
+    boundary_date = datetime.utcnow() - timedelta(days=_MAX_LOOK_BACK_DAYS)
     boundary = convert_datetime_to_timestamp(boundary_date)
     if min_timestamp and min_timestamp < boundary:
         raise ValueError("'Begin date' must be within 90 days.")
