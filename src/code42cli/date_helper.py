@@ -53,7 +53,7 @@ def _join_date_tuple(date_tuple):
         return None
     date_str = date_tuple[0]
     if len(date_tuple) == 1:
-        return date_tuple[0]
+        return date_str
     if len(date_tuple) == 2:
         date_str = "{0} {1}".format(date_str, date_tuple[1])
     else:
