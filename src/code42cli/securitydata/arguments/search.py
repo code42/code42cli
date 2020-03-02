@@ -6,6 +6,15 @@ def add_arguments_to_parser(parser):
     _add_begin_date_arg(parser)
     _add_end_date_arg(parser)
     _add_exposure_types_arg(parser)
+    _add_username_arg(parser)
+    _add_actor_arg(parser)
+    _add_md5_arg(parser)
+    _add_sha256_arg(parser)
+    _add_source_arg(parser)
+    _add_filename_arg(parser)
+    _add_filepath_arg(parser)
+    _add_process_owner_arg(parser)
+    _add_tab_url_arg(parser)
 
 
 class SearchArguments(object):
