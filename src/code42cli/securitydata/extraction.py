@@ -6,6 +6,7 @@ from py42 import settings
 from c42eventextractor import FileEventHandlers
 from c42eventextractor.extractors import FileEventExtractor
 
+from code42cli.compat import str
 from code42cli.securitydata.options import ExposureType
 from code42cli.util import print_error
 from code42cli import date_helper as date_helper
