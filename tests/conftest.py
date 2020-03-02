@@ -1,4 +1,6 @@
 import pytest
+import json as json_module
+from datetime import datetime, timedelta
 from argparse import Namespace
 
 from code42cli.profile.config import ConfigurationKeys
@@ -47,3 +49,34 @@ class ConfigParserMocks(object):
     section_adder = None
     reader = None
     sections = None
+
+
+def get_first_filter_value_from_json(json):
+    return json_module.loads(str(json))["filters"][0]["value"]
+
+
+def get_second_filter_value_from_json(json):
+    return json_module.loads(str(json))["filters"][1]["value"]
+
+
+def parse_date_from_first_filter_value(json):
+    date_str = get_first_filter_value_from_json(json)
+    return convert_str_to_date(date_str)
+
+
+def parse_date_from_second_filter_value(json):
+    date_str = get_second_filter_value_from_json(json)
+    return convert_str_to_date(date_str)
+
+
+def convert_str_to_date(date_str):
+    return datetime.strptime(date_str, u"%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+def get_test_date(days_ago):
+    now = datetime.utcnow()
+    return now - timedelta(days=days_ago)
+
+
+def get_test_date_str(days_ago):
+    return get_test_date(days_ago).strftime("%Y-%m-%d")

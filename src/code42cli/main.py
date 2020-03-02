@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 
+from code42cli.compat import str
 from code42cli.profile import profile
 import code42cli.securitydata.main as securitydata
 
