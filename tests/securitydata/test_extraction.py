@@ -209,3 +209,19 @@ def test_extract_when_given_invalid_exposure_type_causes_exit(
     ]
     with pytest.raises(SystemExit):
         extract(logger, namespace)
+
+
+def test_extract_when_given_begin_date_with_len_3_causes_exit(
+    logger, error_logger, namespace, extractor
+):
+    namespace.begin_date = (get_test_date_str(days_ago=5), "12:00:00", "+600")
+    with pytest.raises(SystemExit):
+        extract(logger, namespace)
+
+
+def test_extract_when_given_end_date_with_len_3_causes_exit(
+    logger, error_logger, namespace, extractor
+):
+    namespace.end_date = (get_test_date_str(days_ago=5), "12:00:00", "+600")
+    with pytest.raises(SystemExit):
+        extract(logger, namespace)

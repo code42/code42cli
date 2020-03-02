@@ -84,3 +84,9 @@ def test_create_event_timestamp_when_end_is_before_begin_causes_value_error():
 def test_create_event_timestamp_when_given_minutes_ago_and_time_raises_value_error():
     with pytest.raises(ValueError):
         create_event_timestamp_range("600", "12:00:00")
+
+
+def test_create_event_timestamp_when_given_three_date_args_raises_value_error():
+    begin_date_tuple = (get_test_date_str(days_ago=5), "12:00:00", "end_date=12:00:00")
+    with pytest.raises(ValueError):
+        create_event_timestamp_range(begin_date_tuple)
