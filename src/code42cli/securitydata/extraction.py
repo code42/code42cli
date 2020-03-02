@@ -5,6 +5,11 @@ from py42 import debug_level
 from py42 import settings
 from c42eventextractor import FileEventHandlers
 from c42eventextractor.extractors import FileEventExtractor
+from py42.sdk.file_event_query.cloud_query import Actor
+from py42.sdk.file_event_query.device_query import DeviceUsername
+from py42.sdk.file_event_query.event_query import Source
+from py42.sdk.file_event_query.exposure_query import ProcessOwner, TabURL
+from py42.sdk.file_event_query.file_query import MD5, SHA256, FileName, FilePath
 
 from code42cli.compat import str
 from code42cli.securitydata.options import ExposureType
@@ -57,7 +62,7 @@ def _call_extract(extractor, args):
     if not _determine_if_advanced_query(args):
         event_timestamp_filter_group = _get_event_timestamp_filter(args)
         _verify_exposure_types(args.exposure_types)
-        extractor.extract(args.exposure_types, event_timestamp_filter_group)
+        extractor.extract(args.exposure_types, event_timestamp_filter_group, *_create_filters(args))
     else:
         extractor.extract_advanced(args.advanced_query)
 
@@ -98,3 +103,26 @@ def _verify_exposure_types(exposure_types):
         if exposure_type not in options:
             print_error(u"'{0}' is not a valid exposure type.".format(exposure_type))
             exit(1)
+
+
+def _create_filters(args):
+    filters = []
+    if args.c42username:
+        filters.append(DeviceUsername.eq(args.c42username))
+    if args.actor:
+        filters.append(Actor.eq(args.actor))
+    if args.md5:
+        filters.append(MD5.eq(args.md5))
+    if args.sha256:
+        filters.append(SHA256.eq(args.sha256))
+    if args.source:
+        filters.append(Source.eq(args.source))
+    if args.filename:
+        filters.append(FileName.eq(args.filename))
+    if args.filepath:
+        filters.append(FilePath.eq(args.filenpath))
+    if args.process_owner:
+        filters.append(ProcessOwner.eq(args.process_owner))
+    if args.tab_url:
+        filters.append(TabURL.eq(args.tab_url))
+    return filters

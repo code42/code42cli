@@ -121,7 +121,7 @@ def _add_sha256_arg(parser):
 
 def _add_source_arg(parser):
     parser.add_argument(
-        u"--actor",
+        u"--source",
         action=u"store",
         dest=SearchArguments.SOURCE,
         help="Limits events for the given source. Example=Gmail.",

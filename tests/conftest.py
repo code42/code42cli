@@ -39,6 +39,15 @@ def namespace(mocker):
     mock.begin_date = None
     mock.end_date = None
     mock.exposure_types = None
+    mock.c42username = None
+    mock.actor = None
+    mock.md5 = None
+    mock.sha256 = None
+    mock.source = None
+    mock.filename = None
+    mock.filepath = None
+    mock.process_owner = None
+    mock.tab_url = None
     return mock
 
 
