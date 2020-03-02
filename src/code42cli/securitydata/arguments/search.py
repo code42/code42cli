@@ -15,6 +15,7 @@ def add_arguments_to_parser(parser):
     _add_filepath_arg(parser)
     _add_process_owner_arg(parser)
     _add_tab_url_arg(parser)
+    _add_include_non_exposure_arg(parser)
 
 
 class SearchArguments(object):
@@ -31,6 +32,7 @@ class SearchArguments(object):
     FILEPATH = u"filepath"
     PROCESS_OWNER = u"process_owner"
     TAB_URL = u"tab_url"
+    DO_GET_ALL_EVENT_TYPES = u"do_get_all_event_types"
 
     def __iter__(self):
         return iter(
@@ -48,6 +50,7 @@ class SearchArguments(object):
                 self.FILEPATH,
                 self.PROCESS_OWNER,
                 self.TAB_URL,
+                self.DO_GET_ALL_EVENT_TYPES,
             ]
         )
 
@@ -140,7 +143,7 @@ def _add_source_arg(parser):
         u"--source",
         action=u"store",
         dest=SearchArguments.SOURCE,
-        help="Limits events to only those from this source. Example=Gmail.",
+        help=u"Limits events to only those from this source. Example=Gmail.",
     )
 
 
@@ -149,7 +152,7 @@ def _add_filename_arg(parser):
         u"--filename",
         action=u"store",
         dest=SearchArguments.FILENAME,
-        help="Limits events to file events where the file has this name.",
+        help=u"Limits events to file events where the file has this name.",
     )
 
 
@@ -177,5 +180,14 @@ def _add_tab_url_arg(parser):
         u"--tabURL",
         action=u"store",
         dest=SearchArguments.TAB_URL,
-        help="Limits events to be exposure events with this destination tab URL.",
+        help=u"Limits events to be exposure events with this destination tab URL.",
+    )
+
+
+def _add_include_non_exposure_arg(parser):
+    parser.add_argument(
+        u"--include-non-exposure",
+        action=u"store_true",
+        dest=SearchArguments.DO_GET_ALL_EVENT_TYPES,
+        help=u"Get all events including non-exposure events.",
     )

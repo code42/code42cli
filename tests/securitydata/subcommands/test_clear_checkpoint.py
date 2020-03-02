@@ -1,6 +1,6 @@
 import pytest
 
-from tests.securitydata.conftest import ROOT_PATH
+from ..conftest import ROOT_PATH
 from code42cli.securitydata.subcommands import clear_checkpoint as clearer
 
 

@@ -1,7 +1,8 @@
 import pytest
 from argparse import ArgumentParser
 
-from tests.securitydata.conftest import SUBCOMMANDS_PATH
+from ..conftest import SUBCOMMANDS_PATH
+from .conftest import ACCEPTABLE_ARGS
 from code42cli.securitydata.subcommands import send_to as sender
 
 
@@ -30,42 +31,8 @@ def test_init_adds_parser_that_can_parse_supported_args(config_parser):
     subcommand_parser = ArgumentParser().add_subparsers()
     sender.init(subcommand_parser)
     send_parser = subcommand_parser.choices.get("send-to")
-    send_parser.parse_args(
-        [
-            "https://www.syslog.com",
-            "-t",
-            "SharedToDomain",
-            "ApplicationRead",
-            "CloudStorage",
-            "RemovableMedia",
-            "IsPublic",
-            "-f",
-            "JSON",
-            "-d",
-            "-b",
-            "600",
-            "-e",
-            "2020-02-02",
-            "--c42username",
-            "test.testerson",
-            "--actor",
-            "test.testerson",
-            "--md5",
-            "098f6bcd4621d373cade4e832627b4f6",
-            "--sha256",
-            "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-            "--source",
-            "Gmail",
-            "--filename",
-            "file.txt",
-            "--filepath",
-            "/path/to/file.txt",
-            "--processOwner",
-            "test.testerson",
-            "--tabURL",
-            "https://example.com"
-        ]
-    )
+    args = ["https://www.syslog.com", "-p", "UDP"] + ACCEPTABLE_ARGS
+    send_parser.parse_args(args)
 
 
 def test_init_adds_parser_when_not_given_server_causes_system_exit(config_parser):
