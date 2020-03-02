@@ -290,7 +290,6 @@ def test_extract_when_given_include_non_exposure_does_not_include_exposure_type_
     assert not ExposureType.exists.call_count
 
 
-
 def test_extract_when_not_given_include_non_exposure_includes_exposure_type_exists(
     logger, namespace, extractor
 ):
