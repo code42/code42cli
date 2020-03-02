@@ -104,7 +104,7 @@ def _add_username_arg(parser):
         u"--c42username",
         action=u"store",
         dest=SearchArguments.C42USERNAME,
-        help=u"Limits events to endpoint events for this Code42 username.",
+        help=u"Limits events to endpoint events for this user.",
     )
 
 
@@ -140,7 +140,7 @@ def _add_source_arg(parser):
         u"--source",
         action=u"store",
         dest=SearchArguments.SOURCE,
-        help="Limits events to only those with this source. Example=Gmail.",
+        help="Limits events to only those from this source. Example=Gmail.",
     )
 
 
@@ -167,7 +167,8 @@ def _add_process_owner_arg(parser):
         u"--processOwner",
         action=u"store",
         dest=SearchArguments.PROCESS_OWNER,
-        help=u"Limits events to exposure events where this user owns the process behind the exposure.",
+        help=u"Limits events to exposure events where this user "
+        u"owns the process behind the exposure.",
     )
 
 
