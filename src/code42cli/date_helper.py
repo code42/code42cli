@@ -39,7 +39,7 @@ def _verify_timestamp_order(min_timestamp, max_timestamp):
 
 def _parse_timestamp(date_tuple):
     try:
-        if date_tuple and date_tuple[0].isdigit():
+        if date_tuple and date_tuple[0].isdigit() and len(date_tuple) == 1:
             date_str = date_tuple[0]
             now = datetime.utcnow()
             time = now - timedelta(minutes=int(date_str))

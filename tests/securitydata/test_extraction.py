@@ -230,3 +230,19 @@ def test_extract_when_given_invalid_exposure_type_causes_exit(
     ]
     with pytest.raises(SystemExit):
         extract(logger, namespace)
+
+
+def test_extract_when_given_time_and_minutes_ago_begin_date_causes_system_exit(
+    logger, error_logger, namespace, extractor
+):
+    namespace.begin_date = ("600", "12:51:00")
+    with pytest.raises(SystemExit):
+        extract(logger, namespace)
+
+
+def test_extract_when_given_time_and_minutes_ago_end_date_causes_system_exit(
+    logger, error_logger, namespace, extractor
+):
+    namespace.end_date = ("600", "12:51:00")
+    with pytest.raises(SystemExit):
+        extract(logger, namespace)
