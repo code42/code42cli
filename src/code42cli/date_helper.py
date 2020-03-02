@@ -39,19 +39,13 @@ def _verify_timestamp_order(min_timestamp, max_timestamp):
 
 def _parse_timestamp(date_tuple):
     try:
-        if date_tuple and date_tuple[0].isdigit() and len(date_tuple) == 1:
-            date_str = date_tuple[0]
-            now = datetime.utcnow()
-            time = now - timedelta(minutes=int(date_str))
-        else:
-            date_str = _join_date_tuple(date_tuple)
-            date_format = "%Y-%m-%d" if len(date_tuple) == 1 else "%Y-%m-%d %H:%M:%S"
-            time = datetime.strptime(date_str, date_format)
+        date_str = _join_date_tuple(date_tuple)
+        date_format = "%Y-%m-%d" if len(date_tuple) == 1 else "%Y-%m-%d %H:%M:%S"
+        time = datetime.strptime(date_str, date_format)
     except ValueError:
         raise ValueError(
-            "input must be a positive integer or a date in YYYY-MM-DD or YYYY-MM-DD HH:MM:SS format."
+            "input must be a date in YYYY-MM-DD or YYYY-MM-DD HH:MM:SS format."
         )
-
     return convert_datetime_to_timestamp(time)
 
 

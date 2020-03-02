@@ -51,10 +51,6 @@ class ConfigParserMocks(object):
     sections = None
 
 
-def get_date_from_minutes_ago(minutes_ago):
-    return datetime.utcnow() - timedelta(minutes=minutes_ago)
-
-
 def get_first_filter_value_from_json(json):
     return json_module.loads(str(json))["filters"][0]["value"]
 

@@ -7,7 +7,6 @@ from .conftest import (
     get_second_filter_value_from_json,
     parse_date_from_first_filter_value,
     parse_date_from_second_filter_value,
-    get_date_from_minutes_ago,
     get_test_date,
     get_test_date_str,
 )
@@ -40,13 +39,6 @@ def test_create_event_timestamp_range_when_given_begin_with_time_builds_expected
     assert actual == expected
 
 
-def test_create_event_timestamp_range_when_given_begin_as_minutes_ago_builds_expected_query():
-    ts_range = create_event_timestamp_range(("600",))
-    actual = parse_date_from_first_filter_value(ts_range)
-    expected = get_date_from_minutes_ago(600)
-    assert (expected - actual).total_seconds() < 0.1
-
-
 def test_create_event_timestamp_range_when_given_end_builds_expected_query():
     end_date_tuple = (get_test_date_str(days_ago=10),)
     ts_range = create_event_timestamp_range(None, end_date_tuple)
@@ -64,22 +56,16 @@ def test_create_event_timestamp_range_when_given_end_with_time_builds_expected_q
     assert actual == expected
 
 
-def test_create_event_timestamp_range_when_given_end_as_seconds_ago_builds_expected_query():
-    ts_range = create_event_timestamp_range(None, ("600",))
-    actual = parse_date_from_second_filter_value(ts_range)
-    expected = get_date_from_minutes_ago(600)
-    assert (expected - actual).total_seconds() < 0.1
-
-
 def test_create_event_timestamp_range_when_given_both_begin_and_end_builds_expected_query():
-    being_date_tuple = (get_test_date_str(days_ago=89),)
-    ts_range = create_event_timestamp_range(being_date_tuple, ("600",))
+    begin_date_tuple = (get_test_date_str(days_ago=89),)
+    end_date_tuple = (get_test_date_str(days_ago=55), "12:00:00")
+    ts_range = create_event_timestamp_range(begin_date_tuple, end_date_tuple)
     actual_begin = get_first_filter_value_from_json(ts_range)
-    actual_end = parse_date_from_second_filter_value(ts_range)
-    expected_begin = "{0}T00:00:00.000Z".format(being_date_tuple[0])
-    expected_end = get_date_from_minutes_ago(600)
+    actual_end = get_second_filter_value_from_json(ts_range)
+    expected_begin = "{0}T00:00:00.000Z".format(begin_date_tuple[0])
+    expected_end = "{0}T{1}.000Z".format(end_date_tuple[0], end_date_tuple[1])
     assert actual_begin == expected_begin
-    assert (expected_end - actual_end).total_seconds() < 0.1
+    assert actual_end == expected_end
 
 
 def test_create_event_timestamp_range_when_begin_more_than_ninety_days_back_causes_value_error():
