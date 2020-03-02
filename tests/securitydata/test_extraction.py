@@ -96,7 +96,7 @@ def test_extract_when_is_not_advanced_query_uses_only_extract_method(logger, ext
     assert extractor.extract_raw.call_count == 0
 
 
-def test_extract_passed_through_given_exposure_types(logger, error_logger, namespace, extractor):
+def test_extract_passed_through_given_exposure_types(logger, namespace, extractor):
     namespace.exposure_types = [
         ExposureType.IS_PUBLIC,
         ExposureType.CLOUD_STORAGE,
@@ -110,9 +110,7 @@ def test_extract_passed_through_given_exposure_types(logger, error_logger, names
     ]
 
 
-def test_extract_when_not_given_begin_or_end_dates_uses_default_query(
-    logger, error_logger, namespace, extractor
-):
+def test_extract_when_not_given_begin_or_end_dates_uses_default_query(logger, namespace, extractor):
     namespace.begin_date = None
     namespace.end_date = None
     extract(logger, namespace)
@@ -124,9 +122,7 @@ def test_extract_when_not_given_begin_or_end_dates_uses_default_query(
     assert (expected_end - actual_end).total_seconds() < 0.1
 
 
-def test_extract_when_given_begin_date_uses_expected_query(
-    logger, error_logger, namespace, extractor
-):
+def test_extract_when_given_begin_date_uses_expected_query(logger, namespace, extractor):
     namespace.begin_date = (get_test_date_str(days_ago=89),)
     extract(logger, namespace)
     actual = get_filter_value_from_json(extractor.extract.call_args[0][1], filter_index=0)
@@ -134,9 +130,7 @@ def test_extract_when_given_begin_date_uses_expected_query(
     assert actual == expected
 
 
-def test_extract_when_given_begin_date_and_time_uses_expected_query(
-    logger, error_logger, namespace, extractor
-):
+def test_extract_when_given_begin_date_and_time_uses_expected_query(logger, namespace, extractor):
     namespace.begin_date = (get_test_date_str(days_ago=89), "15:33:02")
     extract(logger, namespace)
     actual = get_filter_value_from_json(extractor.extract.call_args[0][1], filter_index=0)
@@ -144,9 +138,7 @@ def test_extract_when_given_begin_date_and_time_uses_expected_query(
     assert actual == expected
 
 
-def test_extract_when_given_end_date_uses_expected_query(
-    logger, error_logger, namespace, extractor
-):
+def test_extract_when_given_end_date_uses_expected_query(logger, namespace, extractor):
     namespace.end_date = (get_test_date_str(days_ago=10),)
     extract(logger, namespace)
     actual = get_filter_value_from_json(extractor.extract.call_args[0][1], filter_index=1)
@@ -154,9 +146,7 @@ def test_extract_when_given_end_date_uses_expected_query(
     assert actual == expected
 
 
-def test_extract_when_given_end_date_and_time_uses_expected_query(
-    logger, error_logger, namespace, extractor
-):
+def test_extract_when_given_end_date_and_time_uses_expected_query(logger, namespace, extractor):
     namespace.end_date = (get_test_date_str(days_ago=10), "12:00:11")
     extract(logger, namespace)
     actual = get_filter_value_from_json(extractor.extract.call_args[0][1], filter_index=1)
@@ -165,7 +155,7 @@ def test_extract_when_given_end_date_and_time_uses_expected_query(
 
 
 def test_extract_when_using_both_min_and_max_dates_uses_expected_timestamps(
-    logger, error_logger, namespace, extractor
+    logger, namespace, extractor
 ):
     namespace.begin_date = (get_test_date_str(days_ago=89),)
     namespace.end_date = (get_test_date_str(days_ago=55), "13:44:44")
@@ -185,25 +175,21 @@ def test_extract_when_using_both_min_and_max_dates_uses_expected_timestamps(
 
 
 def test_extract_when_given_min_timestamp_more_than_ninety_days_back_causes_exit(
-    logger, error_logger, namespace, extractor
+    logger, namespace, extractor
 ):
     namespace.begin_date = (get_test_date_str(days_ago=91), "12:51:00")
     with pytest.raises(SystemExit):
         extract(logger, namespace)
 
 
-def test_extract_when_end_date_is_before_begin_date_causes_exit(
-    logger, error_logger, namespace, extractor
-):
+def test_extract_when_end_date_is_before_begin_date_causes_exit(logger, namespace, extractor):
     namespace.begin_date = (get_test_date_str(days_ago=5),)
     namespace.end_date = (get_test_date_str(days_ago=6),)
     with pytest.raises(SystemExit):
         extract(logger, namespace)
 
 
-def test_extract_when_given_invalid_exposure_type_causes_exit(
-    logger, error_logger, namespace, extractor
-):
+def test_extract_when_given_invalid_exposure_type_causes_exit(logger, namespace, extractor):
     namespace.exposure_types = [
         ExposureType.APPLICATION_READ,
         "SomethingElseThatIsNotSupported",
@@ -213,17 +199,93 @@ def test_extract_when_given_invalid_exposure_type_causes_exit(
         extract(logger, namespace)
 
 
-def test_extract_when_given_begin_date_with_len_3_causes_exit(
-    logger, error_logger, namespace, extractor
-):
+def test_extract_when_given_begin_date_with_len_3_causes_exit(logger, namespace, extractor):
     namespace.begin_date = (get_test_date_str(days_ago=5), "12:00:00", "+600")
     with pytest.raises(SystemExit):
         extract(logger, namespace)
 
 
-def test_extract_when_given_end_date_with_len_3_causes_exit(
-    logger, error_logger, namespace, extractor
-):
+def test_extract_when_given_end_date_with_len_3_causes_exit(logger, namespace, extractor):
     namespace.end_date = (get_test_date_str(days_ago=5), "12:00:00", "+600")
     with pytest.raises(SystemExit):
         extract(logger, namespace)
+
+
+def test_extract_when_given_username_uses_username_filter(logger, namespace, extractor):
+    namespace.c42username = "test.testerson@example.com"
+    extract(logger, namespace)
+    actual = get_filter_value_from_json(extractor.extract.call_args[0][2], filter_index=0)
+    assert actual == namespace.c42username
+
+
+def test_extract_when_given_actor_uses_actor_filter(logger, namespace, extractor):
+    namespace.actor = "test.testerson"
+    extract(logger, namespace)
+    actual = get_filter_value_from_json(extractor.extract.call_args[0][2], filter_index=0)
+    assert actual == namespace.actor
+
+
+def test_extract_when_given_md5_uses_md5_filter(logger, namespace, extractor):
+    namespace.md5 = "098f6bcd4621d373cade4e832627b4f6"
+    extract(logger, namespace)
+    actual = get_filter_value_from_json(extractor.extract.call_args[0][2], filter_index=0)
+    assert actual == namespace.md5
+
+
+def test_extract_when_given_sha256_uses_sha256_filter(logger, namespace, extractor):
+    namespace.sha256 = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    extract(logger, namespace)
+    actual = get_filter_value_from_json(extractor.extract.call_args[0][2], filter_index=0)
+    assert actual == namespace.sha256
+
+
+def test_extract_when_given_source_uses_source_filter(logger, namespace, extractor):
+    namespace.source = "Gmail"
+    extract(logger, namespace)
+    actual = get_filter_value_from_json(extractor.extract.call_args[0][2], filter_index=0)
+    assert actual == namespace.source
+
+
+def test_extract_when_given_filename_uses_filename_filter(logger, namespace, extractor):
+    namespace.filename = "file.txt"
+    extract(logger, namespace)
+    actual = get_filter_value_from_json(extractor.extract.call_args[0][2], filter_index=0)
+    assert actual == namespace.filename
+
+
+def test_extract_when_given_filepath_uses_filepath_filter(logger, namespace, extractor):
+    namespace.filepath = "/path/to/file.txt"
+    extract(logger, namespace)
+    actual = get_filter_value_from_json(extractor.extract.call_args[0][2], filter_index=0)
+    assert actual == namespace.filepath
+
+
+def test_extract_when_given_process_owner_uses_process_owner_filter(logger, namespace, extractor):
+    namespace.process_owner = "test.testerson"
+    extract(logger, namespace)
+    actual = get_filter_value_from_json(extractor.extract.call_args[0][2], filter_index=0)
+    assert actual == namespace.process_owner
+
+
+def test_extract_when_given_tab_url_uses_process_tab_url_filter(logger, namespace, extractor):
+    namespace.tab_url = "https://www.example.com"
+    extract(logger, namespace)
+    actual = get_filter_value_from_json(extractor.extract.call_args[0][2], filter_index=0)
+    assert actual == namespace.tab_url
+
+
+def test_extract_when_given_multiple_search_args_uses_expected_filters(
+    logger, namespace, extractor
+):
+    namespace.filepath = "/path/to/file.txt"
+    namespace.process_owner = "test.testerson"
+    namespace.tab_url = "https://www.example.com"
+    extract(logger, namespace)
+    actual_filepath = get_filter_value_from_json(extractor.extract.call_args[0][2], filter_index=0)
+    actual_process_owner = get_filter_value_from_json(
+        extractor.extract.call_args[0][3], filter_index=0
+    )
+    actual_tab_url = get_filter_value_from_json(extractor.extract.call_args[0][4], filter_index=0)
+    assert actual_filepath == namespace.filepath
+    assert actual_process_owner == namespace.process_owner
+    assert actual_tab_url == namespace.tab_url

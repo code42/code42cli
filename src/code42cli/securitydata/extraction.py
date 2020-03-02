@@ -120,7 +120,7 @@ def _create_filters(args):
     if args.filename:
         filters.append(FileName.eq(args.filename))
     if args.filepath:
-        filters.append(FilePath.eq(args.filenpath))
+        filters.append(FilePath.eq(args.filepath))
     if args.process_owner:
         filters.append(ProcessOwner.eq(args.process_owner))
     if args.tab_url:
