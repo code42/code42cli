@@ -57,7 +57,7 @@ def test_create_event_timestamp_range_when_given_end_builds_expected_query():
 
 def test_create_event_timestamp_range_when_given_end_with_time_builds_expected_query():
     time_str = "11:22:43"
-    end_date_tuple = (get_test_date_str(days_ago=10),time_str)
+    end_date_tuple = (get_test_date_str(days_ago=10), time_str)
     ts_range = create_event_timestamp_range(None, end_date_tuple)
     actual = get_second_filter_value_from_json(ts_range)
     expected = "{0}T{1}.000Z".format(end_date_tuple[0], time_str)

@@ -167,7 +167,6 @@ def test_extract_when_given_end_date_uses_expected_query(
     assert actual == expected
 
 
-
 def test_extract_when_given_end_date_and_time_uses_expected_query(
     logger, error_logger, namespace, extractor
 ):
