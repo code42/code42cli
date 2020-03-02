@@ -81,9 +81,79 @@ def test_extract_when_is_advanced_query_and_has_exposure_types_exits(logger, nam
         extract(logger, namespace)
 
 
+def test_extract_when_is_advanced_query_and_has_username_exists(logger, namespace):
+    namespace.advanced_query = "some complex json"
+    namespace.c42username = "Someone"
+    with pytest.raises(SystemExit):
+        extract(logger, namespace)
+
+
+def test_extract_when_is_advanced_query_and_has_actor_exists(logger, namespace):
+    namespace.advanced_query = "some complex json"
+    namespace.actor = "Someone"
+    with pytest.raises(SystemExit):
+        extract(logger, namespace)
+
+
+def test_extract_when_is_advanced_query_and_has_md5_exists(logger, namespace):
+    namespace.advanced_query = "some complex json"
+    namespace.md5 = "098f6bcd4621d373cade4e832627b4f6"
+    with pytest.raises(SystemExit):
+        extract(logger, namespace)
+
+
+def test_extract_when_is_advanced_query_and_has_sha256_exists(logger, namespace):
+    namespace.advanced_query = "some complex json"
+    namespace.sha256 = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    with pytest.raises(SystemExit):
+        extract(logger, namespace)
+
+
+def test_extract_when_is_advanced_query_and_has_source_exists(logger, namespace):
+    namespace.advanced_query = "some complex json"
+    namespace.source = "Gmail"
+    with pytest.raises(SystemExit):
+        extract(logger, namespace)
+
+
+def test_extract_when_is_advanced_query_and_has_filename_exists(logger, namespace):
+    namespace.advanced_query = "some complex json"
+    namespace.filename = "test.out"
+    with pytest.raises(SystemExit):
+        extract(logger, namespace)
+
+
+def test_extract_when_is_advanced_query_and_has_filepath_exists(logger, namespace):
+    namespace.advanced_query = "some complex json"
+    namespace.filepath = "path/to/file"
+    with pytest.raises(SystemExit):
+        extract(logger, namespace)
+
+
+def test_extract_when_is_advanced_query_and_has_process_owner_exists(logger, namespace):
+    namespace.advanced_query = "some complex json"
+    namespace.process_owner = "someone"
+    with pytest.raises(SystemExit):
+        extract(logger, namespace)
+
+
+def test_extract_when_is_advanced_query_and_has_tab_url_exists(logger, namespace):
+    namespace.advanced_query = "some complex json"
+    namespace.tab_url = "https://www.example.com"
+    with pytest.raises(SystemExit):
+        extract(logger, namespace)
+
+
 def test_extract_when_is_advanced_query_and_has_incremental_mode_exits(logger, namespace):
     namespace.advanced_query = "some complex json"
     namespace.is_incremental = True
+    with pytest.raises(SystemExit):
+        extract(logger, namespace)
+
+
+def test_extract_when_is_advanced_query_and_has_include_non_exposure_exits(logger, namespace):
+    namespace.advanced_query = "some complex json"
+    namespace.include_non_exposure_events = True
     with pytest.raises(SystemExit):
         extract(logger, namespace)
 
