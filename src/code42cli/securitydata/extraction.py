@@ -68,7 +68,7 @@ def _determine_if_advanced_query(args):
         for key in given_args:
             val = given_args[key]
             if not _verify_compatibility_with_advanced_query(key, val):
-                print_error("You cannot use --advanced-query with additional search args.")
+                print_error(u"You cannot use --advanced-query with additional search args.")
                 exit(1)
         return True
     return False
@@ -96,5 +96,5 @@ def _verify_exposure_types(exposure_types):
     options = list(ExposureType())
     for exposure_type in exposure_types:
         if exposure_type not in options:
-            print_error("'{0}' is not a valid exposure type.".format(exposure_type))
+            print_error(u"'{0}' is not a valid exposure type.".format(exposure_type))
             exit(1)
