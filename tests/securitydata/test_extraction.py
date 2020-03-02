@@ -290,20 +290,13 @@ def test_extract_when_given_include_non_exposure_does_not_include_exposure_type_
     assert not ExposureType.exists.call_count
 
 
-#
-# def test_extract_when_not_given_include_non_exposure_includes_exposure_type_exists(
-#     logger, namespace, extractor
-# ):
-#     namespace.include_non_exposure_events = False
-#     extract(logger, namespace)
-#     actual_value = get_filter_value_from_json(extractor.extract.call_args[0][2], filter_index=0)
-#     actual_term = get_filter_term_from_json(extractor.extract.call_args[0][2], filter_index=0)
-#
-#
-#     #assert str(extractor.extract.call_args[0][2]) == str(ExposureType.exists())
-#
-#     assert actual_term == "exposure"
-#     assert actual_value is None  # For exists(), the value is None
+
+def test_extract_when_not_given_include_non_exposure_includes_exposure_type_exists(
+    logger, namespace, extractor
+):
+    namespace.include_non_exposure_events = False
+    extract(logger, namespace)
+    assert str(extractor.extract.call_args[0][2]) == str(ExposureType.exists())
 
 
 def test_extract_when_given_multiple_search_args_uses_expected_filters(
