@@ -33,7 +33,9 @@ def _add_begin_date_arg(parser):
     parser.add_argument(
         "-b",
         "--begin",
+        nargs="+",
         action="store",
+        type=tuple,
         dest=SearchArguments.BEGIN_DATE,
         help="The beginning of the date range in which to look for events, "
         "in YYYY-MM-DD UTC format OR a number (number of minutes ago).",
@@ -44,7 +46,9 @@ def _add_end_date_arg(parser):
     parser.add_argument(
         "-e",
         "--end",
+        nargs="+",
         action="store",
+        type=tuple,
         dest=SearchArguments.END_DATE,
         help="The end of the date range in which to look for events, "
         "in YYYY-MM-DD UTC format OR a number (number of minutes ago).",

@@ -130,54 +130,75 @@ def test_extract_when_not_given_begin_or_end_dates_uses_default_query(
 def test_extract_when_given_begin_date_uses_expected_query(
     logger, error_logger, namespace, extractor
 ):
-    namespace.begin_date = get_test_date_str(days_ago=89)
+    namespace.begin_date = (get_test_date_str(days_ago=89),)
     extract(logger, namespace)
     actual = get_first_filter_value_from_json(extractor.extract.call_args[0][1])
-    expected = "{0}T00:00:00.000Z".format(namespace.begin_date)
+    expected = "{0}T00:00:00.000Z".format(namespace.begin_date[0])
+    assert actual == expected
+
+
+def test_extract_when_given_begin_date_and_time_uses_expected_query(
+    logger, error_logger, namespace, extractor
+):
+    namespace.begin_date = (get_test_date_str(days_ago=89), "15:33:02")
+    extract(logger, namespace)
+    actual = get_first_filter_value_from_json(extractor.extract.call_args[0][1])
+    expected = "{0}T{1}.000Z".format(namespace.begin_date[0], namespace.begin_date[1])
     assert actual == expected
 
 
 def test_extract_when_given_begin_date_as_minutes_ago_uses_expected_query(
     logger, error_logger, namespace, extractor
 ):
-    namespace.begin_date = "600"
+    namespace.begin_date = ("600",)
     extract(logger, namespace)
     actual = parse_date_from_first_filter_value(extractor.extract.call_args[0][1])
-    expected = get_date_from_minutes_ago(int(namespace.begin_date))
+    expected = get_date_from_minutes_ago(int(namespace.begin_date[0]))
     assert (expected - actual).total_seconds() < 0.1
 
 
 def test_extract_when_given_end_date_uses_expected_query(
     logger, error_logger, namespace, extractor
 ):
-    namespace.end_date = get_test_date_str(days_ago=10)
+    namespace.end_date = (get_test_date_str(days_ago=10),)
     extract(logger, namespace)
     actual = get_second_filter_value_from_json(extractor.extract.call_args[0][1])
-    expected = "{0}T00:00:00.000Z".format(namespace.end_date)
+    expected = "{0}T00:00:00.000Z".format(namespace.end_date[0])
+    assert actual == expected
+
+
+
+def test_extract_when_given_end_date_and_time_uses_expected_query(
+    logger, error_logger, namespace, extractor
+):
+    namespace.end_date = (get_test_date_str(days_ago=10), "12:00:11")
+    extract(logger, namespace)
+    actual = get_second_filter_value_from_json(extractor.extract.call_args[0][1])
+    expected = "{0}T{1}.000Z".format(namespace.end_date[0], namespace.end_date[1])
     assert actual == expected
 
 
 def test_extract_when_given_end_date_as_minutes_ago_uses_expected_begin_timestamp(
     logger, error_logger, namespace, extractor
 ):
-    namespace.end_date = "600"
+    namespace.end_date = ("600",)
     extract(logger, namespace)
     actual = parse_date_from_second_filter_value(extractor.extract.call_args[0][1])
-    expected = get_date_from_minutes_ago(int(namespace.end_date))
+    expected = get_date_from_minutes_ago(int(namespace.end_date[0]))
     assert (expected - actual).total_seconds() < 0.1
 
 
 def test_extract_when_using_both_min_and_max_dates_uses_expected_timestamps(
     logger, error_logger, namespace, extractor
 ):
-    namespace.begin_date = get_test_date_str(days_ago=89)
-    namespace.end_date = "600"
+    namespace.begin_date = (get_test_date_str(days_ago=89),)
+    namespace.end_date = ("600",)
     extract(logger, namespace)
 
     actual_begin_timestamp = get_first_filter_value_from_json(extractor.extract.call_args[0][1])
     actual_end_timestamp = parse_date_from_second_filter_value(extractor.extract.call_args[0][1])
-    expected_begin_timestamp = "{0}T00:00:00.000Z".format(namespace.begin_date)
-    expected_end_timestamp = get_date_from_minutes_ago(int(namespace.end_date))
+    expected_begin_timestamp = "{0}T00:00:00.000Z".format(namespace.begin_date[0])
+    expected_end_timestamp = get_date_from_minutes_ago(int(namespace.end_date[0]))
 
     assert actual_begin_timestamp == expected_begin_timestamp
     assert (expected_end_timestamp - actual_end_timestamp).total_seconds() < 0.1
@@ -186,7 +207,7 @@ def test_extract_when_using_both_min_and_max_dates_uses_expected_timestamps(
 def test_extract_when_given_min_timestamp_more_than_ninety_days_back_causes_exit(
     logger, error_logger, namespace, extractor
 ):
-    namespace.begin_date = get_test_date_str(days_ago=91)
+    namespace.begin_date = (get_test_date_str(days_ago=91), "12:51:00")
     with pytest.raises(SystemExit):
         extract(logger, namespace)
 
@@ -194,8 +215,8 @@ def test_extract_when_given_min_timestamp_more_than_ninety_days_back_causes_exit
 def test_extract_when_end_date_is_before_begin_date_causes_exit(
     logger, error_logger, namespace, extractor
 ):
-    namespace.begin_date = get_test_date_str(days_ago=5)
-    namespace.end_date = get_test_date_str(days_ago=6)
+    namespace.begin_date = (get_test_date_str(days_ago=5),)
+    namespace.end_date = (get_test_date_str(days_ago=6),)
     with pytest.raises(SystemExit):
         extract(logger, namespace)
 
