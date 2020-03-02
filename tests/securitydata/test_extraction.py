@@ -5,10 +5,8 @@ from code42cli.securitydata.options import ExposureType
 from code42cli.securitydata.extraction import extract
 from .conftest import ROOT_PATH
 from ..conftest import (
-    get_first_filter_value_from_json,
-    get_second_filter_value_from_json,
-    parse_date_from_first_filter_value,
-    parse_date_from_second_filter_value,
+    get_filter_value_from_json,
+    parse_date_from_filter_value,
     get_test_date,
     get_test_date_str,
 )
@@ -118,8 +116,8 @@ def test_extract_when_not_given_begin_or_end_dates_uses_default_query(
     namespace.begin_date = None
     namespace.end_date = None
     extract(logger, namespace)
-    actual_begin = parse_date_from_first_filter_value(extractor.extract.call_args[0][1])
-    actual_end = parse_date_from_second_filter_value(extractor.extract.call_args[0][1])
+    actual_begin = parse_date_from_filter_value(extractor.extract.call_args[0][1], filter_index=0)
+    actual_end = parse_date_from_filter_value(extractor.extract.call_args[0][1], filter_index=1)
     expected_begin = get_test_date(days_ago=60)
     expected_end = datetime.utcnow()
     assert (expected_begin - actual_begin).total_seconds() < 0.1
@@ -131,7 +129,7 @@ def test_extract_when_given_begin_date_uses_expected_query(
 ):
     namespace.begin_date = (get_test_date_str(days_ago=89),)
     extract(logger, namespace)
-    actual = get_first_filter_value_from_json(extractor.extract.call_args[0][1])
+    actual = get_filter_value_from_json(extractor.extract.call_args[0][1], filter_index=0)
     expected = "{0}T00:00:00.000Z".format(namespace.begin_date[0])
     assert actual == expected
 
@@ -141,7 +139,7 @@ def test_extract_when_given_begin_date_and_time_uses_expected_query(
 ):
     namespace.begin_date = (get_test_date_str(days_ago=89), "15:33:02")
     extract(logger, namespace)
-    actual = get_first_filter_value_from_json(extractor.extract.call_args[0][1])
+    actual = get_filter_value_from_json(extractor.extract.call_args[0][1], filter_index=0)
     expected = "{0}T{1}.000Z".format(namespace.begin_date[0], namespace.begin_date[1])
     assert actual == expected
 
@@ -151,7 +149,7 @@ def test_extract_when_given_end_date_uses_expected_query(
 ):
     namespace.end_date = (get_test_date_str(days_ago=10),)
     extract(logger, namespace)
-    actual = get_second_filter_value_from_json(extractor.extract.call_args[0][1])
+    actual = get_filter_value_from_json(extractor.extract.call_args[0][1], filter_index=1)
     expected = "{0}T00:00:00.000Z".format(namespace.end_date[0])
     assert actual == expected
 
@@ -161,7 +159,7 @@ def test_extract_when_given_end_date_and_time_uses_expected_query(
 ):
     namespace.end_date = (get_test_date_str(days_ago=10), "12:00:11")
     extract(logger, namespace)
-    actual = get_second_filter_value_from_json(extractor.extract.call_args[0][1])
+    actual = get_filter_value_from_json(extractor.extract.call_args[0][1], filter_index=1)
     expected = "{0}T{1}.000Z".format(namespace.end_date[0], namespace.end_date[1])
     assert actual == expected
 
@@ -173,8 +171,12 @@ def test_extract_when_using_both_min_and_max_dates_uses_expected_timestamps(
     namespace.end_date = (get_test_date_str(days_ago=55), "13:44:44")
     extract(logger, namespace)
 
-    actual_begin_timestamp = get_first_filter_value_from_json(extractor.extract.call_args[0][1])
-    actual_end_timestamp = get_second_filter_value_from_json(extractor.extract.call_args[0][1])
+    actual_begin_timestamp = get_filter_value_from_json(
+        extractor.extract.call_args[0][1], filter_index=0
+    )
+    actual_end_timestamp = get_filter_value_from_json(
+        extractor.extract.call_args[0][1], filter_index=1
+    )
     expected_begin_timestamp = "{0}T00:00:00.000Z".format(namespace.begin_date[0])
     expected_end_timestamp = "{0}T{1}.000Z".format(namespace.end_date[0], namespace.end_date[1])
 
