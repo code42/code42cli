@@ -103,10 +103,8 @@ def test_get_logger_for_server_when_given_json_format_uses_json_formatter(
 ):
     factory.get_logger_for_server("https://example.com", "TCP", "JSON").handlers = []
     _ = factory.get_logger_for_server("https://example.com", "TCP", "JSON")
-    assert (
-        type(no_priority_syslog_handler.setFormatter.call_args[0][0])
-        == FileEventDictToJSONFormatter
-    )
+    actual = type(no_priority_syslog_handler.setFormatter.call_args[0][0])
+    assert actual == FileEventDictToJSONFormatter
 
 
 def test_get_logger_for_server_when_given_raw_json_format_uses_raw_json_formatter(
@@ -114,10 +112,8 @@ def test_get_logger_for_server_when_given_raw_json_format_uses_raw_json_formatte
 ):
     factory.get_logger_for_server("https://example.com", "TCP", "RAW-JSON").handlers = []
     _ = factory.get_logger_for_server("https://example.com", "TCP", "RAW-JSON")
-    assert (
-        type(no_priority_syslog_handler.setFormatter.call_args[0][0])
-        == FileEventDictToRawJSONFormatter
-    )
+    actual = type(no_priority_syslog_handler.setFormatter.call_args[0][0])
+    assert actual == FileEventDictToRawJSONFormatter
 
 
 def test_get_logger_for_server_when_called_twice_only_has_one_handler(no_priority_syslog_handler):
