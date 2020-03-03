@@ -8,6 +8,15 @@ _FORMAT_VALUE_ERROR_MESSAGE = u"input must be a date in YYYY-MM-DD or YYYY-MM-DD
 
 
 def create_event_timestamp_range(begin_date=None, end_date=None):
+    """Creates a `py42.sdk.file_event_query.event_query.EventTimestamp.in_range` filter
+            using the provided dates.  If begin_date is None, it uses a date that is 60 days back.
+            If end_date is None, it uses the current UTC time.
+
+        Args:
+            begin_date: The begin date for the range. If None, defaults to 60 days back from the current UTC time.
+            end_date: The end date for the range. If None, defaults to the current time.
+
+    """
     min_timestamp = _parse_min_timestamp(begin_date)
     max_timestamp = _parse_max_timestamp(end_date)
     _verify_timestamp_order(min_timestamp, max_timestamp)

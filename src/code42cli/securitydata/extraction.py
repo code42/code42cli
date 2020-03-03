@@ -23,6 +23,16 @@ from code42cli.securitydata.arguments.main import IS_INCREMENTAL_KEY
 
 
 def extract(output_logger, args):
+    """Extracts file events using the given command-line arguments.
+
+        Args:
+            output_logger: The logger specified by which subcommand you use. For example,
+                print: uses a logger that streams to stdout.
+                write-to: uses a logger that logs to a file.
+                send-to: uses a logger that sends logs to a server.
+            args:
+                Command line args used to build up file event query filters.
+    """
     handlers = _create_event_handlers(output_logger, args.is_incremental)
     profile = get_profile()
     sdk = _get_sdk(profile, args.is_debug_mode)

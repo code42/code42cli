@@ -14,7 +14,12 @@ from code42cli.util import get_user_project_path, print_error
 
 
 def get_logger_for_stdout(output_format):
-    logger = logging.getLogger("code42_stdout_{0}".format(output_format.lower()))
+    """Gets the stdout logger for the given format.
+
+        Args:
+            output_format: CEF, JSON, or RAW_JSON. Each type results in a different logger instance.
+    """
+    logger = logging.getLogger(u"code42_stdout_{0}".format(output_format.lower()))
     if _logger_has_handlers(logger):
         return logger
 
@@ -23,7 +28,13 @@ def get_logger_for_stdout(output_format):
 
 
 def get_logger_for_file(filename, output_format):
-    logger = logging.getLogger("code42_file_{0}".format(output_format.lower()))
+    """Gets the logger that logs to a file for the given format.
+
+        Args:
+            filename: The name of the file to write logs to.
+            output_format: CEF, JSON, or RAW_JSON. Each type results in a different logger instance.
+    """
+    logger = logging.getLogger(u"code42_file_{0}".format(output_format.lower()))
     if _logger_has_handlers(logger):
         return logger
 
@@ -32,7 +43,14 @@ def get_logger_for_file(filename, output_format):
 
 
 def get_logger_for_server(hostname, protocol, output_format):
-    logger = logging.getLogger("code42_syslog_{0}".format(output_format.lower()))
+    """Gets the logger that sends logs to a server for the given format.
+
+        Args:
+            hostname: The hostname of the server.
+            protocol: The transfer protocol for sending logs.
+            output_format: CEF, JSON, or RAW_JSON. Each type results in a different logger instance.
+    """
+    logger = logging.getLogger(u"code42_syslog_{0}".format(output_format.lower()))
     if _logger_has_handlers(logger):
         return logger
 
@@ -41,13 +59,14 @@ def get_logger_for_server(hostname, protocol, output_format):
 
 
 def get_error_logger():
-    log_path = get_user_project_path("log")
-    log_path = "{0}/code42_errors.log".format(log_path)
-    logger = logging.getLogger("code42_error_logger")
+    """Gets the logger where exceptions are logged."""
+    log_path = get_user_project_path(u"log")
+    log_path = u"{0}/code42_errors.log".format(log_path)
+    logger = logging.getLogger(u"code42_error_logger")
     if _logger_has_handlers(logger):
         return logger
 
-    formatter = logging.Formatter("%(asctime)s %(message)s")
+    formatter = logging.Formatter(u"%(asctime)s %(message)s")
     handler = RotatingFileHandler(log_path, maxBytes=250000000)
     return _apply_logger_dependencies(logger, handler, formatter)
 
