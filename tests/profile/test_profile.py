@@ -42,6 +42,20 @@ def profile_not_set_state(mocker):
     return profile_verifier
 
 
+class TestCode42Profile(object):
+    def test_get_password_when_is_none_returns_password_from_getpass(self, mocker, password_getter):
+        password_getter.return_value = None
+        mock_getpass = mocker.patch("code42cli.profile.password.get_password_from_prompt")
+        mock_getpass.return_value = "Test Password"
+        actual = profile.Code42Profile().get_password()
+        assert actual == "Test Password"
+
+    def test_get_password_return_password_from_password_get_password(self, password_getter):
+        password_getter.return_value = "Test Password"
+        actual = profile.Code42Profile().get_password()
+        assert actual == "Test Password"
+
+
 @pytest.fixture
 def profile_is_set_state(mocker):
     profile_verifier = mocker.patch("code42cli.profile.config.profile_has_been_set")

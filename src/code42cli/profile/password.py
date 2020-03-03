@@ -29,6 +29,10 @@ def set_password_from_prompt():
     return password
 
 
+def get_password_from_prompt():
+    return getpass()
+
+
 def _get_service_name(profile):
     authority_url = profile[ConfigurationKeys.AUTHORITY_KEY]
     return "{}::{}".format(_ROOT_SERVICE_NAME, authority_url)
