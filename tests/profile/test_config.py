@@ -94,7 +94,7 @@ def test_get_config_profile_when_file_does_not_exist_saves_changes(shared_config
         config.get_config_profile()
 
     # It saves because it is writing default values to the config file
-    assert_save_was_called(shared_config_mocks.open_function)
+    assert save_was_called(shared_config_mocks.open_function)
 
 
 def test_profile_has_been_set_when_is_set_returns_true(shared_config_mocks):

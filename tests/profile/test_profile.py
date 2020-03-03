@@ -8,9 +8,9 @@ def username_setter(mocker):
     return mocker.patch("code42cli.profile.config.set_username")
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def mark_as_set_function(mocker):
-    return mocker.patch("code42cli.profile.config.mark_as_set")
+    return mocker.patch("code42cli.profile.config.mark_as_set_if_complete")
 
 
 @pytest.fixture
@@ -37,8 +37,6 @@ def password_getter(mocker):
 def profile_not_set_state(mocker):
     profile_verifier = mocker.patch("code42cli.profile.config.profile_has_been_set")
     profile_verifier.return_value = False
-    mock = mocker.patch("code42cli.profile.config.profile_can_be_set")
-    mock.return_value = True
     return profile_verifier
 
 
@@ -60,8 +58,6 @@ class TestCode42Profile(object):
 def profile_is_set_state(mocker):
     profile_verifier = mocker.patch("code42cli.profile.config.profile_has_been_set")
     profile_verifier.return_value = True
-    mock = mocker.patch("code42cli.profile.config.profile_can_be_set")
-    mock.return_value = False
     return profile_verifier
 
 
@@ -179,7 +175,7 @@ def test_set_profile_when_is_first_time_and_given_both_authority_and_username_ma
     mark_as_set_function.assert_called_once_with()
 
 
-def test_set_profile_when_given_password_sets_password(
+def test_set_profile_when_given_set_password_arg_sets_password(
     config_parser, password_setter, profile_is_set_state
 ):
     parser = _get_profile_parser()

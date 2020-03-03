@@ -16,6 +16,7 @@ class ConfigurationKeys(object):
 
 
 def get_config_profile():
+    """Get your config file profile"""
     parser = ConfigParser()
     if not profile_has_been_set():
         util.print_error(u"Profile has not completed setup.")
@@ -86,7 +87,6 @@ def _get_config_profile_from_parser(parser):
     parser.read(config_file_path)
     parser.read(config_file_path)
     config = parser[ConfigurationKeys.USER_SECTION]
-    config.ignore_ssl_errors = config.getboolean(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
     return config
 
 
