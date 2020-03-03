@@ -89,6 +89,16 @@ def test_get_config_profile_when_file_does_not_exist_saves_changes(shared_config
     assert_save_was_called(shared_config_mocks.open_function)
 
 
+def test_profile_has_been_set_when_is_set_returns_true(shared_config_mocks):
+    shared_config_mocks.setup_existing_profile()
+    assert config.profile_has_been_set()
+
+
+def test_profile_has_been_set_when_is_not_set_returns_false(shared_config_mocks):
+    shared_config_mocks.setup_non_existing_profile()
+    assert not config.profile_has_been_set()
+
+
 def test_profile_can_be_set_when_profile_is_not_set_returns_true(shared_config_mocks):
     shared_config_mocks.setup_non_existing_profile()
     assert config.profile_can_be_set()
@@ -103,16 +113,6 @@ def test_mark_as_set_saves_changes(shared_config_mocks):
     shared_config_mocks.setup_existing_profile()
     config.mark_as_set()
     assert_save_was_called(shared_config_mocks.open_function)
-
-
-def test_profile_has_been_set_when_is_set_returns_true(shared_config_mocks):
-    shared_config_mocks.setup_existing_profile()
-    assert config.profile_has_been_set()
-
-
-def test_profile_has_been_set_when_is_not_set_returns_false(shared_config_mocks):
-    shared_config_mocks.setup_non_existing_profile()
-    assert not config.profile_has_been_set()
 
 
 def test_set_username_saves(shared_config_mocks):

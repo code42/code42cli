@@ -28,15 +28,6 @@ def get_config_profile():
     return _get_config_profile_from_parser(parser)
 
 
-def mark_as_set():
-    parser = ConfigParser()
-    config_file_path = _get_config_file_path()
-    parser.read(config_file_path)
-    settings = parser[ConfigurationKeys.INTERNAL_SECTION]
-    settings[ConfigurationKeys.HAS_SET_PROFILE_KEY] = u"True"
-    _save(parser, ConfigurationKeys.HAS_SET_PROFILE_KEY)
-
-
 def profile_has_been_set():
     parser = ConfigParser()
     config_file_path = _get_config_file_path()
@@ -51,6 +42,15 @@ def profile_can_be_set():
     username = profile[ConfigurationKeys.USERNAME_KEY]
     authority = profile[ConfigurationKeys.AUTHORITY_KEY]
     return username != u"null" and authority != u"null" and not profile_has_been_set()
+
+
+def mark_as_set():
+    parser = ConfigParser()
+    config_file_path = _get_config_file_path()
+    parser.read(config_file_path)
+    settings = parser[ConfigurationKeys.INTERNAL_SECTION]
+    settings[ConfigurationKeys.HAS_SET_PROFILE_KEY] = u"True"
+    _save(parser, ConfigurationKeys.HAS_SET_PROFILE_KEY)
 
 
 def set_username(new_username):
