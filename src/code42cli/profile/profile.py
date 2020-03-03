@@ -66,8 +66,7 @@ def set_profile(args):
     _try_set_username(args)
     _try_set_ignore_ssl_errors(args)
     _try_set_password(args)
-    if config.profile_can_be_set():
-        config.mark_as_set()
+    config.mark_as_set_if_complete()
     if args.show:
         show_profile()
 

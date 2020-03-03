@@ -13,6 +13,11 @@ class SharedConfigMocks(object):
 
     def setup_existing_config_file(self):
         self.path_exists_function.return_value = True
+        sections = self.mocker.patch("configparser.ConfigParser.sections")
+        sections.return_value = [
+            config.ConfigurationKeys.INTERNAL_SECTION,
+            config.ConfigurationKeys.USER_SECTION,
+        ]
 
     def setup_non_existing_config_file(self):
         self.path_exists_function.return_value = False
@@ -56,9 +61,12 @@ def shared_config_mocks(mocker, config_parser):
     return mocks
 
 
-def assert_save_was_called(open_file_function):
+def save_was_called(open_file_function):
     call_args = open_file_function.call_args
-    assert call_args[0][0] == "some/path/config.cfg" and call_args[0][1] == "w+"
+    try:
+        return call_args[0][0] == "some/path/config.cfg" and call_args[0][1] == "w+"
+    except:
+        return False
 
 
 def test_get_config_profile_when_file_exists_but_profile_does_not_exist_exits(shared_config_mocks):
@@ -99,32 +107,32 @@ def test_profile_has_been_set_when_is_not_set_returns_false(shared_config_mocks)
     assert not config.profile_has_been_set()
 
 
-def test_profile_can_be_set_when_profile_is_not_set_returns_true(shared_config_mocks):
-    shared_config_mocks.setup_non_existing_profile()
-    assert config.profile_can_be_set()
-
-
-def test_profile_can_be_set_when_profile_is_set_returns_false(shared_config_mocks):
+def test_mark_as_set_if_complete_when_profile_is_set_but_not_marked_in_config_file_saves(
+    shared_config_mocks
+):
     shared_config_mocks.setup_existing_profile()
-    assert not config.profile_can_be_set()
+    shared_config_mocks.setup_non_existing_config_file()
+    config.mark_as_set_if_complete()
+    assert save_was_called(shared_config_mocks.open_function)
 
 
-def test_mark_as_set_saves_changes(shared_config_mocks):
+def test_mark_as_set_if_already_set_and_marked_in_config_file_does_not_save(shared_config_mocks):
     shared_config_mocks.setup_existing_profile()
-    config.mark_as_set()
-    assert_save_was_called(shared_config_mocks.open_function)
+    shared_config_mocks.setup_existing_config_file()
+    config.mark_as_set_if_complete()
+    assert not save_was_called(shared_config_mocks.open_function)
 
 
 def test_set_username_saves(shared_config_mocks):
     config.set_username("New user")
-    assert_save_was_called(shared_config_mocks.open_function)
+    assert save_was_called(shared_config_mocks.open_function)
 
 
 def test_set_authority_url_saves(shared_config_mocks):
     config.set_authority_url("New url")
-    assert_save_was_called(shared_config_mocks.open_function)
+    assert save_was_called(shared_config_mocks.open_function)
 
 
 def test_set_ignore_ssl_errors_saves(shared_config_mocks):
     config.set_ignore_ssl_errors(True)
-    assert_save_was_called(shared_config_mocks.open_function)
+    assert save_was_called(shared_config_mocks.open_function)
