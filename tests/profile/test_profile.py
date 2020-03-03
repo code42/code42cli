@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 from code42cli.profile import profile
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def username_setter(mocker):
     return mocker.patch("code42cli.profile.config.set_username")
 
@@ -13,12 +13,12 @@ def mark_as_set_function(mocker):
     return mocker.patch("code42cli.profile.config.mark_as_set_if_complete")
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def authority_url_setter(mocker):
     return mocker.patch("code42cli.profile.config.set_authority_url")
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def ignore_ssl_errors_setter(mocker):
     return mocker.patch("code42cli.profile.config.set_ignore_ssl_errors")
 
@@ -38,6 +38,12 @@ def profile_not_set_state(mocker):
     profile_verifier = mocker.patch("code42cli.profile.config.profile_has_been_set")
     profile_verifier.return_value = False
     return profile_verifier
+
+
+def _get_profile_parser():
+    subcommand_parser = ArgumentParser().add_subparsers()
+    profile.init(subcommand_parser)
+    return subcommand_parser.choices.get("profile")
 
 
 class TestCode42Profile(object):
@@ -85,7 +91,6 @@ def test_init_adds_parser_that_can_parse_set_command(config_parser):
 
 def test_get_profile_returns_object_from_config_profile(config_parser, config_profile):
     user = profile.get_profile()
-
     # Values from config_profile fixture
     assert (
         user.username == "test.username"
@@ -130,31 +135,29 @@ def test_set_profile_when_given_disable_ssl_errors_sets_ignore_ssl_errors_to_fal
     ignore_ssl_errors_setter.assert_called_once_with(True)
 
 
-def test_set_profile_when_is_first_time_and_given_both_authority_and_username_sets_username(
+def test_set_profile_when_is_first_time_and_given_username_sets_username(
     config_parser,
     profile_not_set_state,
     username_setter,
-    authority_url_setter,
     mark_as_set_function,
 ):
     parser = _get_profile_parser()
     namespace = parser.parse_args(
-        ["set", "-s", "https://wwww.new.authority.example.com", "-u", "user"]
+        ["set", "-u", "user"]
     )
     profile.set_profile(namespace)
     username_setter.assert_called_once_with("user")
 
 
-def test_set_profile_when_is_first_time_and_given_both_authority_and_username_sets_authority_url(
+def test_set_profile_when_is_first_time_and_given_authority_sets_authority_url(
     config_parser,
     profile_not_set_state,
-    username_setter,
     authority_url_setter,
     mark_as_set_function,
 ):
     parser = _get_profile_parser()
     namespace = parser.parse_args(
-        ["set", "-s", "https://wwww.new.authority.example.com", "-u", "user"]
+        ["set", "-s", "https://wwww.new.authority.example.com"]
     )
     profile.set_profile(namespace)
     authority_url_setter.assert_called_once_with("https://wwww.new.authority.example.com")
@@ -163,8 +166,6 @@ def test_set_profile_when_is_first_time_and_given_both_authority_and_username_se
 def test_set_profile_calls_marks_as_set_if_complete(
     config_parser,
     profile_not_set_state,
-    username_setter,
-    authority_url_setter,
     mark_as_set_function,
 ):
     parser = _get_profile_parser()
@@ -182,9 +183,3 @@ def test_set_profile_when_given_set_password_arg_sets_password(
     namespace = parser.parse_args(["set", "--set-password"])
     profile.set_profile(namespace)
     assert password_setter.call_count
-
-
-def _get_profile_parser():
-    subcommand_parser = ArgumentParser().add_subparsers()
-    profile.init(subcommand_parser)
-    return subcommand_parser.choices.get("profile")
