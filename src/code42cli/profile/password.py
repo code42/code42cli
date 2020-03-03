@@ -9,15 +9,12 @@ from code42cli.profile.config import ConfigurationKeys
 _ROOT_SERVICE_NAME = u"code42cli"
 
 
-def get_password(prompt_if_not_exists=True):
+def get_password():
     """Gets your currently stored password for your username / authority URL combo."""
     profile = config.get_config_profile()
     service_name = _get_service_name(profile)
     username = _get_username(profile)
     password = keyring.get_password(service_name, username)
-    if password is None and prompt_if_not_exists:
-        return set_password_from_prompt()
-
     return password
 
 

@@ -28,14 +28,6 @@ def test_get_password_uses_expected_service_name_and_username(
     keyring_password_getter.assert_called_once_with(expected_service_name, expected_username)
 
 
-def test_get_password_when_password_is_none_returns_password_from_getpass(
-    keyring_password_getter, config_profile, getpass_function
-):
-    keyring_password_getter.return_value = None
-    getpass_function.return_value = "test password"
-    assert password.get_password() == "test password"
-
-
 def test_get_password_when_password_is_not_none_returns_password(
     keyring_password_getter, config_profile, keyring_password_setter
 ):
@@ -47,7 +39,7 @@ def test_get_password_when_password_is_none_and_told_to_not_prompt_if_not_exists
     keyring_password_getter, config_profile
 ):
     keyring_password_getter.return_value = None
-    assert password.get_password(prompt_if_not_exists=False) is None
+    assert password.get_password() is None
 
 
 def test_set_password_uses_expected_service_name_username_and_password(
