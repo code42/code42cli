@@ -54,7 +54,7 @@ def test_set_password_uses_expected_service_name_username_and_password(
     keyring_password_setter, config_profile, getpass_function
 ):
     getpass_function.return_value = "test password"
-    password.set_password()
+    password.set_password_from_prompt()
     # See conftest.config_profile
     expected_service_name = "code42cli::https://authority.example.com"
     expected_username = "test.username"

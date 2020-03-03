@@ -16,12 +16,12 @@ def get_password(prompt_if_not_exists=True):
     username = _get_username(profile)
     password = keyring.get_password(service_name, username)
     if password is None and prompt_if_not_exists:
-        return set_password()
+        return set_password_from_prompt()
 
     return password
 
 
-def set_password():
+def set_password_from_prompt():
     """Prompts and sets your password for your username / authority URL combo."""
     password = getpass()
     profile = config.get_config_profile()

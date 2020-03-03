@@ -165,7 +165,7 @@ def _try_set_ignore_ssl_errors(args):
 
 def _try_set_password(args):
     if args.do_set_c42_password:
-        password.set_password()
+        password.set_password_from_prompt()
 
     # Prompt for password if it does not exist for the current username / authority host address combo.
     password.get_password()

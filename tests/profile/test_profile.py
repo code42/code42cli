@@ -25,7 +25,7 @@ def ignore_ssl_errors_setter(mocker):
 
 @pytest.fixture
 def password_setter(mocker):
-    return mocker.patch("code42cli.profile.password.set_password")
+    return mocker.patch("code42cli.profile.password.set_password_from_prompt")
 
 
 @pytest.fixture
