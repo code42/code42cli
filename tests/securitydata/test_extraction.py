@@ -378,6 +378,7 @@ def test_extract_when_given_include_non_exposure_and_exposure_types_causes_exit(
 def test_extract_when_creating_sdk_throws_causes_exit(logger, extractor, namespace, mock_42):
     def side_effect():
         raise Exception()
+
     mock_42.side_effect = side_effect
     with pytest.raises(SystemExit):
         extract(logger, namespace)

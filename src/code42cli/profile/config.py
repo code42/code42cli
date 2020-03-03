@@ -30,13 +30,12 @@ def get_config_profile():
 
 
 def profile_has_been_set():
-    """Whether you have, at one point in time, set your username and authority server URL"""
+    """Whether you have, at one point in time, set your username and authority server URL."""
     parser = ConfigParser()
     config_file_path = _get_config_file_path()
     parser.read(config_file_path)
     settings = parser[ConfigurationKeys.INTERNAL_SECTION]
-    is_set = settings.getboolean(ConfigurationKeys.HAS_SET_PROFILE_KEY)
-    return is_set
+    return settings.getboolean(ConfigurationKeys.HAS_SET_PROFILE_KEY)
 
 
 def mark_as_set_if_complete():

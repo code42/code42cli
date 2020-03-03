@@ -54,7 +54,6 @@ def show_profile(*args):
     for key in profile:
         print("\t* {} = {}".format(key, profile[key]))
 
-    # Don't prompt here because it may be confusing from a UX perspective
     if password.get_password() is not None:
         print("\t* A password is set.")
     print("")

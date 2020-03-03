@@ -123,29 +123,68 @@ def _verify_exposure_types(exposure_types):
 
 def _create_filters(args):
     filters = [_get_event_timestamp_filter(args)]
+    _try_append_device_username_filter(filters, args)
+    _try_append_actor_filter(filters, args)
+    _try_append_md5_filter(filters, args)
+    _try_append_sha256_filter(filters, args)
+    _try_append_source_filter(filters, args)
+    _try_append_filename_filter(filters, args)
+    _try_append_filepath_filter(filters, args)
+    _try_append_process_owner_filter(filters, args)
+    _try_append_tab_url_filter(filters, args)
+    _try_append_exposure_types_filter(filters, args)
+    return filters
+
+
+def _try_append_device_username_filter(filters, args):
     if args.c42username:
         filters.append(DeviceUsername.eq(args.c42username))
+
+
+def _try_append_actor_filter(filters, args):
     if args.actor:
         filters.append(Actor.eq(args.actor))
+
+
+def _try_append_md5_filter(filters, args):
     if args.md5:
         filters.append(MD5.eq(args.md5))
+
+
+def _try_append_sha256_filter(filters, args):
     if args.sha256:
         filters.append(SHA256.eq(args.sha256))
+
+
+def _try_append_source_filter(filters, args):
     if args.source:
         filters.append(Source.eq(args.source))
+
+
+def _try_append_filename_filter(filters, args):
     if args.filename:
         filters.append(FileName.eq(args.filename))
+
+
+def _try_append_filepath_filter(filters, args):
     if args.filepath:
         filters.append(FilePath.eq(args.filepath))
+
+
+def _try_append_process_owner_filter(filters, args):
     if args.process_owner:
         filters.append(ProcessOwner.eq(args.process_owner))
+
+
+def _try_append_tab_url_filter(filters, args):
     if args.tab_url:
         filters.append(TabURL.eq(args.tab_url))
+
+
+def _try_append_exposure_types_filter(filters, args):
     exposure_filter = _create_exposure_type_filter(args)
     if exposure_filter:
         filters.append(exposure_filter)
-
-    return filters
 
 
 def _create_exposure_type_filter(args):
