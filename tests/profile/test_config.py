@@ -116,7 +116,9 @@ def test_mark_as_set_if_complete_when_profile_is_set_but_not_marked_in_config_fi
     assert save_was_called(shared_config_mocks.open_function)
 
 
-def test_mark_as_set_if_already_set_and_marked_in_config_file_does_not_save(shared_config_mocks):
+def test_mark_as_set_if_complete_when_already_set_and_marked_in_config_file_does_not_save(
+    shared_config_mocks
+):
     shared_config_mocks.setup_existing_profile()
     shared_config_mocks.setup_existing_config_file()
     config.mark_as_set_if_complete()
