@@ -66,9 +66,9 @@ def _get_sdk(profile, is_debug_mode):
 
 def _call_extract(extractor, args):
     if not _determine_if_advanced_query(args):
-        event_timestamp_filter_group = _get_event_timestamp_filter(args)
         _verify_exposure_types(args.exposure_types)
-        extractor.extract(args.exposure_types, event_timestamp_filter_group, *_create_filters(args))
+        filters = _create_filters(args)
+        extractor.extract(*filters)
     else:
         extractor.extract_advanced(args.advanced_query)
 
@@ -112,7 +112,7 @@ def _verify_exposure_types(exposure_types):
 
 
 def _create_filters(args):
-    filters = []
+    filters = [_get_event_timestamp_filter(args)]
     if args.c42username:
         filters.append(DeviceUsername.eq(args.c42username))
     if args.actor:
@@ -134,6 +134,7 @@ def _create_filters(args):
     exposure_filter = _create_exposure_type_filter(args)
     if exposure_filter:
         filters.append(exposure_filter)
+
     return filters
 
 
