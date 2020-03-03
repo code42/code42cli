@@ -45,6 +45,14 @@ def profile_has_been_set():
     return settings.getboolean(ConfigurationKeys.HAS_SET_PROFILE_KEY)
 
 
+def profile_can_be_set():
+    parser = ConfigParser()
+    profile = _get_config_profile_from_parser(parser)
+    username = profile[ConfigurationKeys.USERNAME_KEY]
+    authority = profile[ConfigurationKeys.AUTHORITY_KEY]
+    return username != u"null" and authority != u"null" and not profile_has_been_set()
+
+
 def set_username(new_username):
     parser = ConfigParser()
     profile = _get_config_profile_from_parser(parser)
@@ -64,14 +72,6 @@ def set_ignore_ssl_errors(new_value):
     profile = _get_config_profile_from_parser(parser)
     profile[ConfigurationKeys.IGNORE_SSL_ERRORS_KEY] = str(new_value)
     _save(parser, ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
-
-
-def profile_can_be_set():
-    parser = ConfigParser()
-    profile = _get_config_profile_from_parser(parser)
-    username = profile[ConfigurationKeys.USERNAME_KEY]
-    authority = profile[ConfigurationKeys.AUTHORITY_KEY]
-    return username != u"null" and authority != u"null" and not profile_has_been_set()
 
 
 def _get_config_profile_from_parser(parser):

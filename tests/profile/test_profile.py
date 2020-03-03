@@ -165,7 +165,9 @@ def test_set_profile_when_is_first_time_and_given_both_authority_and_username_ma
     mark_as_set_function.assert_called_once_with()
 
 
-def test_set_profile_when_given_password_sets_password(config_parser, password_setter, profile_is_set_state):
+def test_set_profile_when_given_password_sets_password(
+    config_parser, password_setter, profile_is_set_state
+):
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "-p"])
     profile.set_profile(namespace)
