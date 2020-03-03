@@ -3,7 +3,6 @@ from __future__ import print_function
 import code42cli.profile.config as config
 import code42cli.profile.password as password
 from code42cli.profile.config import ConfigurationKeys
-from code42cli.util import print_error
 
 
 class Code42Profile(object):
@@ -33,7 +32,6 @@ def init(subcommand_parser):
 
 
 def get_profile():
-    # type: () -> Code42Profile
     """Returns the current profile object."""
     profile_values = config.get_config_profile()
     profile = Code42Profile()
@@ -59,16 +57,12 @@ def show_profile(*args):
 
 def set_profile(args):
     """Sets the current profile using command line arguments."""
-    if not _verify_args_for_initial_profile_set(args):
-        exit(1)
-    elif not config.profile_has_been_set():
-        config.mark_as_set()
-
     _try_set_authority_url(args)
     _try_set_username(args)
     _try_set_ignore_ssl_errors(args)
     _try_set_password(args)
-
+    if config.profile_has_been_set():
+        config.mark_as_set()
     if args.show:
         show_profile()
 
@@ -166,21 +160,6 @@ def _try_set_ignore_ssl_errors(args):
 def _try_set_password(args):
     if args.do_set_c42_password:
         password.set_password_from_prompt()
-
-    # Prompt for password if it does not exist for the current username / authority host address combo.
-    password.get_password()
-
-
-def _verify_args_for_initial_profile_set(args):
-    if not config.profile_has_been_set() and (
-        args.c42_username is None or args.c42_authority_url is None
-    ):
-        if args.c42_username is None:
-            print_error("Missing username argument.")
-        if args.c42_authority_url is None:
-            print_error("Missing Code42 Authority URL argument.")
-        return False
-    return True
 
 
 if __name__ == "__main__":

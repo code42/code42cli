@@ -18,7 +18,7 @@ class ConfigurationKeys(object):
 def get_config_profile():
     parser = ConfigParser()
     if not profile_has_been_set():
-        util.print_error("Profile is not set.")
+        util.print_error("Profile has not completed setup.")
         print("")
         print("To set, use: ")
         util.print_bold("\tcode42 profile set -s <authority-URL> -u <username>")
@@ -76,6 +76,7 @@ def _get_config_file_path():
 
 def _get_config_profile_from_parser(parser):
     config_file_path = _get_config_file_path()
+    parser.read(config_file_path)
     parser.read(config_file_path)
     config = parser[ConfigurationKeys.USER_SECTION]
     config.ignore_ssl_errors = config.getboolean(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
