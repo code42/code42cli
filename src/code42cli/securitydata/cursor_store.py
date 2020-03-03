@@ -10,7 +10,6 @@ class SecurityEventCursorStore(object):
     _PRIMARY_KEY_COLUMN_NAME = "cursor_id"
 
     def __init__(self, db_table_name, db_file_path=None):
-        # type: (str, str) -> None
         self._table_name = db_table_name
         if db_file_path is None:
             db_path = get_user_project_path("db")
@@ -19,7 +18,6 @@ class SecurityEventCursorStore(object):
         self._connection = sqlite3.connect(db_file_path)
 
     def _get(self, columns, primary_key):
-        # type: (str, any) -> list
         query = "SELECT {0} FROM {1} WHERE {2}=?"
         query = query.format(columns, self._table_name, self._PRIMARY_KEY_COLUMN_NAME)
         with self._connection as conn:
@@ -28,7 +26,6 @@ class SecurityEventCursorStore(object):
             return cursor.fetchall()
 
     def _set(self, column_name, new_value, primary_key):
-        # type: (str, any, any) -> None
         query = "UPDATE {0} SET {1}=? WHERE {2}=?".format(
             self._table_name, column_name, self._PRIMARY_KEY_COLUMN_NAME
         )

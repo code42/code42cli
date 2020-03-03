@@ -50,12 +50,18 @@ def _create_event_handlers(output_logger, is_incremental):
 
 
 def _get_sdk(profile, is_debug_mode):
-    code42 = SDK.create_using_local_account(
-        profile.authority_url, profile.username, profile.get_password()
-    )
     if is_debug_mode:
         settings.debug_level = debug_level.DEBUG
-    return code42
+    try:
+        return SDK.create_using_local_account(
+            profile.authority_url, profile.username, profile.get_password()
+        )
+    except:
+        print_error(
+            u"Invalid credentials or host address. "
+            u"Verify your profile is set up correctly and that you are supplying the correct password."
+        )
+        exit(1)
 
 
 def _call_extract(extractor, args):

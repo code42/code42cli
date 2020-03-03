@@ -9,7 +9,14 @@ class Code42Profile(object):
     authority_url = ""
     username = ""
     ignore_ssl_errors = False
-    get_password = password.get_password
+
+    @staticmethod
+    def get_password():
+        pwd = password.get_password()
+        if not pwd:
+            pwd = password.set_password_from_prompt()
+        return pwd
+
 
 
 def init(subcommand_parser):
