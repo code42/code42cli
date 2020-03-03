@@ -6,8 +6,8 @@ from code42cli.profile.config import ConfigurationKeys
 
 
 class Code42Profile(object):
-    authority_url = ""
-    username = ""
+    authority_url = u""
+    username = u""
     ignore_ssl_errors = False
 
     @staticmethod
@@ -25,12 +25,12 @@ def init(subcommand_parser):
         Args:
             subcommand_parser: The subparsers group created by the parent parser.
     """
-    parser_profile = subcommand_parser.add_parser("profile")
+    parser_profile = subcommand_parser.add_parser(u"profile")
     parser_profile.set_defaults(func=show_profile)
     profile_subparsers = parser_profile.add_subparsers()
 
-    parser_for_show_command = profile_subparsers.add_parser("show")
-    parser_for_set_command = profile_subparsers.add_parser("set")
+    parser_for_show_command = profile_subparsers.add_parser(u"show")
+    parser_for_set_command = profile_subparsers.add_parser(u"set")
 
     parser_for_show_command.set_defaults(func=show_profile)
     parser_for_set_command.set_defaults(func=set_profile)
@@ -50,13 +50,13 @@ def get_profile():
 def show_profile(*args):
     """Prints the current profile to stdout."""
     profile = config.get_config_profile()
-    print("\nProfile:")
+    print(u"\nProfile:")
     for key in profile:
-        print("\t* {} = {}".format(key, profile[key]))
+        print(u"\t* {} = {}".format(key, profile[key]))
 
     if password.get_password() is not None:
-        print("\t* A password is set.")
-    print("")
+        print(u"\t* A password is set.")
+    print(u"")
 
 
 def set_profile(args):
@@ -81,60 +81,60 @@ def _add_args_to_set_command(parser_for_set_command):
 
 def _add_authority_arg(parser):
     parser.add_argument(
-        "-s",
-        "--server",
-        action="store",
+        u"-s",
+        u"--server",
+        action=u"store",
         dest=ConfigurationKeys.AUTHORITY_KEY,
-        help="The full scheme, url and port of the Code42 server.",
+        help=u"The full scheme, url and port of the Code42 server.",
     )
 
 
 def _add_username_arg(parser):
     parser.add_argument(
-        "-u",
-        "--username",
-        action="store",
+        u"-u",
+        u"--username",
+        action=u"store",
         dest=ConfigurationKeys.USERNAME_KEY,
-        help="The username of the Code42 API user.",
+        help=u"The username of the Code42 API user.",
     )
 
 
 def _add_password_arg(parser):
     parser.add_argument(
-        "--set-password",
-        action="store_true",
-        dest="do_set_c42_password",
-        help="Prompts and stores your Code42 API user password. "
-        "Passwords are not stored in plain text.",
+        u"--set-password",
+        action=u"store_true",
+        dest=u"do_set_c42_password",
+        help=u"Prompts and stores your Code42 API user password. "
+        u"Passwords are not stored in plain text.",
     )
 
 
 def _add_disable_ssl_errors_arg(parser):
     parser.add_argument(
-        "--disable-ssl-errors",
-        action="store_true",
+        u"--disable-ssl-errors",
+        action=u"store_true",
         default=None,
-        dest="disable_ssl_errors",
-        help="Do not validate the SSL certificates of Code42 servers.",
+        dest=u"disable_ssl_errors",
+        help=u"Do not validate the SSL certificates of Code42 servers.",
     )
 
 
 def _add_enable_ssl_errors_arg(parser):
     parser.add_argument(
-        "--enable-ssl-errors",
-        action="store_true",
+        u"--enable-ssl-errors",
+        action=u"store_true",
         default=None,
-        dest="enable_ssl_errors",
-        help="Do validate the SSL certificates of Code42 servers.",
+        dest=u"enable_ssl_errors",
+        help=u"Do validate the SSL certificates of Code42 servers.",
     )
 
 
 def _add_show_arg(parser):
     parser.add_argument(
-        "--show",
-        action="store_true",
-        dest="show",
-        help="Whether to show the profile after setting it.",
+        u"--show",
+        action=u"store_true",
+        dest=u"show",
+        help=u"Whether to show the profile after setting it.",
     )
 
 
