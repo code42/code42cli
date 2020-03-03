@@ -160,7 +160,7 @@ def test_set_profile_when_is_first_time_and_given_both_authority_and_username_se
     authority_url_setter.assert_called_once_with("https://wwww.new.authority.example.com")
 
 
-def test_set_profile_when_is_first_time_and_given_both_authority_and_username_marks_as_set(
+def test_set_profile_calls_marks_as_set_if_complete(
     config_parser,
     profile_not_set_state,
     username_setter,
@@ -172,7 +172,7 @@ def test_set_profile_when_is_first_time_and_given_both_authority_and_username_ma
         ["set", "-s", "https://wwww.new.authority.example.com", "-u", "user"]
     )
     profile.set_profile(namespace)
-    mark_as_set_function.assert_called_once_with()
+    assert mark_as_set_function.call_count
 
 
 def test_set_profile_when_given_set_password_arg_sets_password(
@@ -181,7 +181,7 @@ def test_set_profile_when_given_set_password_arg_sets_password(
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "--set-password"])
     profile.set_profile(namespace)
-    assert len(password_setter.call_args) > 0
+    assert password_setter.call_count
 
 
 def _get_profile_parser():
