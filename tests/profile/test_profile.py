@@ -23,12 +23,12 @@ def ignore_ssl_errors_setter(mocker):
     return mocker.patch("code42cli.profile.config.set_ignore_ssl_errors")
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def password_setter(mocker):
     return mocker.patch("code42cli.profile.password.set_password_from_prompt")
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def password_getter(mocker):
     return mocker.patch("code42cli.profile.password.get_password")
 
@@ -37,6 +37,8 @@ def password_getter(mocker):
 def profile_not_set_state(mocker):
     profile_verifier = mocker.patch("code42cli.profile.config.profile_has_been_set")
     profile_verifier.return_value = False
+    mock = mocker.patch("code42cli.profile.config.profile_can_be_set")
+    mock.return_value = True
     return profile_verifier
 
 
@@ -44,6 +46,8 @@ def profile_not_set_state(mocker):
 def profile_is_set_state(mocker):
     profile_verifier = mocker.patch("code42cli.profile.config.profile_has_been_set")
     profile_verifier.return_value = True
+    mock = mocker.patch("code42cli.profile.config.profile_can_be_set")
+    mock.return_value = False
     return profile_verifier
 
 
@@ -81,7 +85,7 @@ def test_get_profile_returns_object_from_config_profile(config_parser, config_pr
 
 
 def test_set_profile_when_given_username_sets_username(
-    config_parser, username_setter, password_getter, profile_is_set_state
+    config_parser, username_setter, profile_is_set_state
 ):
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "-u", "a.new.user@example.com"])
@@ -90,7 +94,7 @@ def test_set_profile_when_given_username_sets_username(
 
 
 def test_set_profile_when_given_authority_url_sets_authority_url(
-    config_parser, authority_url_setter, profile_is_set_state, password_getter
+    config_parser, authority_url_setter, profile_is_set_state
 ):
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "-s", "https://wwww.new.authority.example.com"])
@@ -99,7 +103,7 @@ def test_set_profile_when_given_authority_url_sets_authority_url(
 
 
 def test_set_profile_when_given_enable_ssl_errors_sets_ignore_ssl_errors_to_true(
-    config_parser, ignore_ssl_errors_setter, profile_is_set_state, password_getter
+    config_parser, ignore_ssl_errors_setter, profile_is_set_state
 ):
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "--enable-ssl-errors"])
@@ -108,7 +112,7 @@ def test_set_profile_when_given_enable_ssl_errors_sets_ignore_ssl_errors_to_true
 
 
 def test_set_profile_when_given_disable_ssl_errors_sets_ignore_ssl_errors_to_false(
-    config_parser, ignore_ssl_errors_setter, profile_is_set_state, password_getter
+    config_parser, ignore_ssl_errors_setter, profile_is_set_state
 ):
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "--disable-ssl-errors"])
@@ -116,52 +120,11 @@ def test_set_profile_when_given_disable_ssl_errors_sets_ignore_ssl_errors_to_fal
     ignore_ssl_errors_setter.assert_called_once_with(True)
 
 
-def test_set_profile_when_is_first_time_and_given_username_but_not_given_authority_url_fails(
-    username_setter, profile_not_set_state
-):
-    parser = _get_profile_parser()
-    namespace = parser.parse_args(["set", "-u", "a.new.user@example.com"])
-    with pytest.raises(SystemExit):
-        profile.set_profile(namespace)
-
-
-def test_set_profile_when_is_first_time_and_given_username_but_not_given_authority_url_does_not_set(
-    config_parser, username_setter, profile_not_set_state
-):
-    parser = _get_profile_parser()
-    namespace = parser.parse_args(["set", "-u", "a.new.user@example.com"])
-    with pytest.raises(SystemExit):
-        profile.set_profile(namespace)
-
-    assert username_setter.call_args is None
-
-
-def test_set_profile_when_is_first_time_and_given_authority_url_but_not_given_username_fails(
-    config_parser, authority_url_setter, profile_not_set_state
-):
-    parser = _get_profile_parser()
-    namespace = parser.parse_args(["set", "-s", "https://wwww.new.authority.example.com"])
-    with pytest.raises(SystemExit):
-        profile.set_profile(namespace)
-
-
-def test_set_profile_when_is_first_time_and_given_authority_url_but_not_given_username_does_not_set(
-    config_parser, authority_url_setter, profile_not_set_state
-):
-    parser = _get_profile_parser()
-    namespace = parser.parse_args(["set", "-s", "https://wwww.new.authority.example.com"])
-    with pytest.raises(SystemExit):
-        profile.set_profile(namespace)
-
-    assert authority_url_setter.call_args is None
-
-
 def test_set_profile_when_is_first_time_and_given_both_authority_and_username_sets_username(
     config_parser,
     profile_not_set_state,
     username_setter,
     authority_url_setter,
-    password_getter,
     mark_as_set_function,
 ):
     parser = _get_profile_parser()
@@ -177,7 +140,6 @@ def test_set_profile_when_is_first_time_and_given_both_authority_and_username_se
     profile_not_set_state,
     username_setter,
     authority_url_setter,
-    password_getter,
     mark_as_set_function,
 ):
     parser = _get_profile_parser()
@@ -193,7 +155,6 @@ def test_set_profile_when_is_first_time_and_given_both_authority_and_username_ma
     profile_not_set_state,
     username_setter,
     authority_url_setter,
-    password_getter,
     mark_as_set_function,
 ):
     parser = _get_profile_parser()
@@ -204,9 +165,7 @@ def test_set_profile_when_is_first_time_and_given_both_authority_and_username_ma
     mark_as_set_function.assert_called_once_with()
 
 
-def test_set_profile_when_given_password_sets_password(
-    config_parser, password_setter, password_getter, profile_is_set_state
-):
+def test_set_profile_when_given_password_sets_password(config_parser, password_setter, profile_is_set_state):
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "-p"])
     profile.set_profile(namespace)

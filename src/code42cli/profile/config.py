@@ -18,11 +18,11 @@ class ConfigurationKeys(object):
 def get_config_profile():
     parser = ConfigParser()
     if not profile_has_been_set():
-        util.print_error("Profile has not completed setup.")
-        print("")
-        print("To set, use: ")
-        util.print_bold("\tcode42 profile set -s <authority-URL> -u <username>")
-        print("")
+        util.print_error(u"Profile has not completed setup.")
+        print(u"")
+        print(u"To set, use: ")
+        util.print_bold(u"\tcode42 profile set -s <authority-URL> -u <username>")
+        print(u"")
         exit(1)
 
     return _get_config_profile_from_parser(parser)
@@ -33,7 +33,7 @@ def mark_as_set():
     config_file_path = _get_config_file_path()
     parser.read(config_file_path)
     settings = parser[ConfigurationKeys.INTERNAL_SECTION]
-    settings[ConfigurationKeys.HAS_SET_PROFILE_KEY] = "True"
+    settings[ConfigurationKeys.HAS_SET_PROFILE_KEY] = u"True"
     _save(parser, ConfigurationKeys.HAS_SET_PROFILE_KEY)
 
 
@@ -66,12 +66,12 @@ def set_ignore_ssl_errors(new_value):
     _save(parser, ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
 
 
-def _get_config_file_path():
-    path = "{}config.cfg".format(util.get_user_project_path())
-    if not os.path.exists(path) or not _verify_config_file(path):
-        _create_new_config_file(path)
-
-    return path
+def profile_can_be_set():
+    parser = ConfigParser()
+    profile = _get_config_profile_from_parser(parser)
+    username = profile[ConfigurationKeys.USERNAME_KEY]
+    authority = profile[ConfigurationKeys.AUTHORITY_KEY]
+    return username != u"null" and authority != u"null" and not profile_has_been_set()
 
 
 def _get_config_profile_from_parser(parser):
@@ -81,6 +81,14 @@ def _get_config_profile_from_parser(parser):
     config = parser[ConfigurationKeys.USER_SECTION]
     config.ignore_ssl_errors = config.getboolean(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
     return config
+
+
+def _get_config_file_path():
+    path = u"{}config.cfg".format(util.get_user_project_path())
+    if not os.path.exists(path) or not _verify_config_file(path):
+        _create_new_config_file(path)
+
+    return path
 
 
 def _create_new_config_file(path):
@@ -94,9 +102,9 @@ def _create_user_section(parser):
     keys = ConfigurationKeys
     parser.add_section(keys.USER_SECTION)
     parser[keys.USER_SECTION] = {}
-    parser[keys.USER_SECTION][keys.AUTHORITY_KEY] = "null"
-    parser[keys.USER_SECTION][keys.USERNAME_KEY] = "null"
-    parser[keys.USER_SECTION][keys.IGNORE_SSL_ERRORS_KEY] = "False"
+    parser[keys.USER_SECTION][keys.AUTHORITY_KEY] = u"null"
+    parser[keys.USER_SECTION][keys.USERNAME_KEY] = u"null"
+    parser[keys.USER_SECTION][keys.IGNORE_SSL_ERRORS_KEY] = u"False"
     return parser
 
 
@@ -104,15 +112,18 @@ def _create_internal_section(parser):
     keys = ConfigurationKeys
     parser.add_section(keys.INTERNAL_SECTION)
     parser[keys.INTERNAL_SECTION] = {}
-    parser[keys.INTERNAL_SECTION][keys.HAS_SET_PROFILE_KEY] = "False"
+    parser[keys.INTERNAL_SECTION][keys.HAS_SET_PROFILE_KEY] = u"False"
     return parser
 
 
 def _save(parser, key=None, path=None):
     path = _get_config_file_path() if path is None else path
-    util.open_file(path, "w+", lambda f: parser.write(f))
+    util.open_file(path, u"w+", lambda f: parser.write(f))
     if key is not None:
-        print("'{}' has been successfully updated".format(key))
+        if key == ConfigurationKeys.HAS_SET_PROFILE_KEY:
+            print(u"You have completed setting up your profile!")
+        else:
+            print(u"'{}' has been successfully updated".format(key))
 
 
 def _verify_config_file(path):
