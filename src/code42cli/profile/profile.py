@@ -1,4 +1,5 @@
 from __future__ import print_function
+from getpass import getpass
 
 import code42cli.profile.config as config
 import code42cli.profile.password as password
@@ -14,7 +15,7 @@ class Code42Profile(object):
     def get_password():
         pwd = password.get_password()
         if not pwd:
-            pwd = password.set_password_from_prompt()
+            pwd = getpass()
         return pwd
 
 

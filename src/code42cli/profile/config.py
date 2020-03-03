@@ -87,7 +87,6 @@ def _get_config_file_path():
     path = u"{}config.cfg".format(util.get_user_project_path())
     if not os.path.exists(path) or not _verify_config_file(path):
         _create_new_config_file(path)
-
     return path
 
 
