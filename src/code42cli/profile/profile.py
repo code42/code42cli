@@ -51,7 +51,6 @@ def show_profile(*args):
     # Don't prompt here because it may be confusing from a UX perspective
     if password.get_password() is not None:
         print("\t* A password is set.")
-
     print("")
 
 
@@ -98,11 +97,11 @@ def _add_username_arg(parser):
 
 def _add_password_arg(parser):
     parser.add_argument(
-        "-p",
-        "--password",
+        "--set-password",
         action="store_true",
         dest="do_set_c42_password",
-        help="The password for the Code42 API user. Passwords are not stored in plain text.",
+        help="Prompts and stores your Code42 API user password. "
+        "Passwords are not stored in plain text.",
     )
 
 
