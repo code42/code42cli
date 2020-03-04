@@ -30,7 +30,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - It is no longer required to store your password in your profile,
     and you will be prompted to enter your password at runtime if you don't.
 - You will be asked if you would like to set a password after using `code42cli profile set`.
-- Begin date is now required for `code42 securitdata print`, `code42 securitdata write-to`, and `code42 securitdata send-to`.
+- Begin date is now required for `securitydata` `print`, `write-to`, and `send-to` commands.
 
 ### Removed
 
