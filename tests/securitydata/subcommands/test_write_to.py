@@ -11,7 +11,7 @@ _WRITE_PATH = "{0}.write_to".format(SUBCOMMANDS_NAMESPACE)
 
 @pytest.fixture
 def file_namespace(namespace):
-    namespace.filename = "out.txt"
+    namespace.output_file = "out.txt"
     namespace.format = "CEF"
     return namespace
 
