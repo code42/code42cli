@@ -25,7 +25,7 @@ def set_password_from_prompt():
     service_name = _get_service_name(profile)
     username = _get_username(profile)
     keyring.set_password(service_name, username, password)
-    print("'Code42 Password' updated.")
+    print(u"'Code42 Password' updated.")
     return password
 
 
@@ -35,7 +35,7 @@ def get_password_from_prompt():
 
 def _get_service_name(profile):
     authority_url = profile[ConfigurationKeys.AUTHORITY_KEY]
-    return "{}::{}".format(_ROOT_SERVICE_NAME, authority_url)
+    return u"{}::{}".format(_ROOT_SERVICE_NAME, authority_url)
 
 
 def _get_username(profile):
