@@ -1,2 +1,2 @@
-ROOT_PATH = "code42cli.securitydata"
-SUBCOMMANDS_PATH = "{0}.subcommands".format(ROOT_PATH)
+SECURITYDATA_NAMESPACE = "code42cli.securitydata"
+SUBCOMMANDS_NAMESPACE = "{0}.subcommands".format(SECURITYDATA_NAMESPACE)

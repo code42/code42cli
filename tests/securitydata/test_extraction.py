@@ -9,7 +9,7 @@ from py42.sdk.file_event_query.file_query import FilePath, FileName, SHA256, MD5
 
 from code42cli.securitydata.options import ExposureType as ExposureTypeOptions
 from code42cli.securitydata.extraction import extract
-from .conftest import ROOT_PATH
+from .conftest import SECURITYDATA_NAMESPACE
 from ..conftest import (
     get_filter_value_from_json,
     parse_date_from_filter_value,
@@ -33,7 +33,7 @@ def logger(mocker):
 
 @pytest.fixture(autouse=True)
 def error_logger(mocker):
-    return mocker.patch("{0}.logger_factory".format(ROOT_PATH))
+    return mocker.patch("{0}.logger_factory".format(SECURITYDATA_NAMESPACE))
 
 
 @pytest.fixture(autouse=True)

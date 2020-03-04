@@ -1,10 +1,10 @@
 import pytest
 
-from ..conftest import ROOT_PATH
+from ..conftest import SECURITYDATA_NAMESPACE
 from code42cli.securitydata.subcommands import clear_checkpoint as clearer
 
 
-_CURSOR_STORE_PATH = "{0}.cursor_store".format(ROOT_PATH)
+_CURSOR_STORE_PATH = "{0}.cursor_store".format(SECURITYDATA_NAMESPACE)
 
 
 @pytest.fixture
