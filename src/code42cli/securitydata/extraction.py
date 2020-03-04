@@ -111,8 +111,10 @@ def _verify_exposure_types(exposure_types):
             exit(1)
 
 
-def _handle_result():
-    if is_interactive() and _EXCEPTIONS_OCCURRED:
+def _handle_result(args):
+    if args.silence_result_status:
+        return
+    if not  is_interactive() and _EXCEPTIONS_OCCURRED:
         print_error("There were errors when running the last command.")
     else:
         print("Command succeeded")

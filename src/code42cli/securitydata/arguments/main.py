@@ -7,7 +7,7 @@ IS_INCREMENTAL_KEY = "is_incremental"
 def add_arguments_to_parser(parser):
     _add_output_format_arg(parser)
     _add_incremental_arg(parser)
-    _add_debug_args(parser)
+    _add_debug_arg(parser)
 
 
 def _add_output_format_arg(parser):
