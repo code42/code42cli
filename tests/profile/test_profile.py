@@ -134,7 +134,33 @@ def test_set_profile_calls_marks_as_set_if_complete(config_parser, mark_as_set_f
     assert mark_as_set_function.call_count
 
 
+def test_set_profile_when_told_to_store_password_prompts_for_storing_password(
+    mocker, input_function
+):
+    input_function.return_value = "y"
+    mock_set_password_function = mocker.patch("code42cli.profile.password.set_password_from_prompt")
+    parser = _get_profile_parser()
+    namespace = parser.parse_args(
+        ["set", "-s", "https://wwww.new.authority.example.com", "-u", "user"]
+    )
+    profile.set_profile(namespace)
+    assert mock_set_password_function.call_count
+
+
+def test_set_profile_when_told_not_to_store_password_prompts_for_storing_password(
+    mocker, input_function
+):
+    input_function.return_value = "n"
+    mock_set_password_function = mocker.patch("code42cli.profile.password.set_password_from_prompt")
+    parser = _get_profile_parser()
+    namespace = parser.parse_args(
+        ["set", "-s", "https://wwww.new.authority.example.com", "-u", "user"]
+    )
+    profile.set_profile(namespace)
+    assert not mock_set_password_function.call_count
+
+
 def test_prompt_for_password_reset_calls_password_set_password_from_prompt(mocker):
-    mock_function = mocker.patch("code42cli.profile.password.set_password_from_prompt")
+    mock_set_password_function = mocker.patch("code42cli.profile.password.set_password_from_prompt")
     profile.prompt_for_password_reset()
-    assert mock_function.call_count
+    assert mock_set_password_function.call_count
