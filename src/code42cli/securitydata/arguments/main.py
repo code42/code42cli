@@ -32,7 +32,7 @@ def _add_incremental_arg(parser):
     )
 
 
-def _add_debug_args(parser):
+def _add_debug_arg(parser):
     parser.add_argument(
         u"-d",
         u"--debug",
