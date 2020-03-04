@@ -37,3 +37,7 @@ def print_error(error_text):
 
 def print_bold(bold_text):
     print("\033[1m{}\033[0m".format(bold_text))
+
+
+def is_interactive():
+    return sys.stdin.isatty()

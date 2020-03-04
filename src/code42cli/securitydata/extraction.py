@@ -12,7 +12,7 @@ from py42.sdk.file_event_query.exposure_query import ExposureType, ProcessOwner,
 from py42.sdk.file_event_query.file_query import MD5, SHA256, FileName, FilePath
 
 from code42cli.compat import str
-from code42cli.util import print_error, print_bold
+from code42cli.util import print_error, print_bold, is_interactive
 from code42cli.profile.profile import get_profile
 from code42cli.securitydata.options import ExposureType as ExposureTypeOptions
 from code42cli.securitydata import date_helper as date_helper
@@ -20,6 +20,9 @@ from code42cli.securitydata.cursor_store import AEDCursorStore
 from code42cli.securitydata.logger_factory import get_error_logger
 from code42cli.securitydata.arguments.search import SearchArguments
 from code42cli.securitydata.arguments.main import IS_INCREMENTAL_KEY
+
+
+_EXCEPTIONS_OCCURRED = False
 
 
 def extract(output_logger, args):
@@ -38,12 +41,20 @@ def extract(output_logger, args):
     sdk = _get_sdk(profile, args.is_debug_mode)
     extractor = FileEventExtractor(sdk, handlers)
     _call_extract(extractor, args)
+    _handle_result()
 
 
 def _create_event_handlers(output_logger, is_incremental):
     handlers = FileEventHandlers()
     error_logger = get_error_logger()
-    handlers.handle_error = error_logger.error
+
+    def handle_error(exception):
+        error_logger.error(exception)
+        global _EXCEPTIONS_OCCURRED
+        _EXCEPTIONS_OCCURRED = True
+
+    handlers.handle_error = handle_error
+
     if is_incremental:
         store = AEDCursorStore()
         handlers.record_cursor_position = store.replace_stored_insertion_timestamp
@@ -116,7 +127,7 @@ def _verify_begin_date(begin_date):
     if not begin_date:
         print_error(u"'begin date' is required.")
         print(u"")
-        print(u"Try using  '-b' or '--begin'. Use `-h` for more info.")
+        print_bold(u"Try using  '-b' or '--begin'. Use `-h` for more info.")
         print(u"")
         exit(1)
 
@@ -129,6 +140,11 @@ def _verify_exposure_types(exposure_types):
         if exposure_type not in options:
             print_error(u"'{0}' is not a valid exposure type.".format(exposure_type))
             exit(1)
+
+
+def _handle_result():
+    if is_interactive() and _EXCEPTIONS_OCCURRED:
+        print_error(u"View exceptions that occurred at [HOME]/.code42cli/log/code42_errors.")
 
 
 def _create_filters(args):

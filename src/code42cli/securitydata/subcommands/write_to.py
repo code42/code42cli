@@ -10,7 +10,7 @@ def init(subcommand_parser):
         Args:
             subcommand_parser: The subparsers group created by the parent parser.
     """
-    parser = subcommand_parser.add_parser("write-to")
+    parser = subcommand_parser.add_parser(u"write-to")
     parser.set_defaults(func=write_to)
     _add_filename_subcommand(parser)
     search_args.add_arguments_to_parser(parser)
@@ -19,11 +19,11 @@ def init(subcommand_parser):
 
 def write_to(args):
     """Activates 'write-to' command. It gets security events and writes them to the given file."""
-    logger = get_logger_for_file(args.filename, args.format)
+    logger = get_logger_for_file(args.output_file, args.format)
     extract(logger, args)
 
 
 def _add_filename_subcommand(parser):
     parser.add_argument(
-        action="store", dest="filename", help="The name of the local file to send output to."
+        action=u"store", dest=u"output_file", help=u"The name of the local file to send output to."
     )
