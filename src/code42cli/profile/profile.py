@@ -67,8 +67,6 @@ def set_profile(args):
     _try_set_username(args)
     _try_set_ignore_ssl_errors(args)
     config.mark_as_set_if_complete()
-    if args.show:
-        show_profile()
 
 
 def prompt_for_password_reset(*args):
@@ -81,7 +79,6 @@ def _add_args_to_set_command(parser_for_set_command):
     _add_username_arg(parser_for_set_command)
     _add_disable_ssl_errors_arg(parser_for_set_command)
     _add_enable_ssl_errors_arg(parser_for_set_command)
-    _add_show_arg(parser_for_set_command)
 
 
 def _add_authority_arg(parser):
@@ -121,15 +118,6 @@ def _add_enable_ssl_errors_arg(parser):
         default=None,
         dest=u"enable_ssl_errors",
         help=u"Do validate the SSL certificates of Code42 servers.",
-    )
-
-
-def _add_show_arg(parser):
-    parser.add_argument(
-        u"--show",
-        action=u"store_true",
-        dest=u"show",
-        help=u"Whether to show the profile after setting it.",
     )
 
 
