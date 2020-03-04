@@ -17,9 +17,7 @@ from ..conftest import (
 
 @pytest.fixture(autouse=True)
 def mock_42(mocker):
-    mock = mocker.patch("py42.sdk.SDK.create_using_local_account")
-    mock.return_value = mocker.MagicMock()
-    return mock
+    return mocker.patch("py42.sdk.SDK.create_using_local_account")
 
 
 @pytest.fixture
