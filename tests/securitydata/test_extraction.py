@@ -166,7 +166,9 @@ def test_extract_when_is_advanced_query_and_has_incremental_mode_set_to_false_do
     extract(logger, namespace)
 
 
-def test_extract_when_is_not_advanced_query_uses_only_extract_method(logger, extractor, namespace_with_begin):
+def test_extract_when_is_not_advanced_query_uses_only_extract_method(
+    logger, extractor, namespace_with_begin
+):
     extract(logger, namespace_with_begin)
     assert extractor.extract.call_count == 1
     assert extractor.extract_raw.call_count == 0
@@ -203,11 +205,15 @@ def test_extract_when_given_end_date_uses_expected_query(logger, namespace_with_
     assert actual == expected
 
 
-def test_extract_when_given_end_date_and_time_uses_expected_query(logger, namespace_with_begin, extractor):
+def test_extract_when_given_end_date_and_time_uses_expected_query(
+    logger, namespace_with_begin, extractor
+):
     namespace_with_begin.end_date = (get_test_date_str(days_ago=10), "12:00:11")
     extract(logger, namespace_with_begin)
     actual = get_filter_value_from_json(extractor.extract.call_args[0][0], filter_index=1)
-    expected = "{0}T{1}.000Z".format(namespace_with_begin.end_date[0], namespace_with_begin.end_date[1])
+    expected = "{0}T{1}.000Z".format(
+        namespace_with_begin.end_date[0], namespace_with_begin.end_date[1]
+    )
     assert actual == expected
 
 
@@ -262,7 +268,9 @@ def test_extract_when_given_begin_date_with_len_3_causes_exit(logger, namespace,
         extract(logger, namespace)
 
 
-def test_extract_when_given_end_date_with_len_3_causes_exit(logger, namespace_with_begin, extractor):
+def test_extract_when_given_end_date_with_len_3_causes_exit(
+    logger, namespace_with_begin, extractor
+):
     namespace_with_begin.end_date = (get_test_date_str(days_ago=5), "12:00:00", "+600")
     with pytest.raises(SystemExit):
         extract(logger, namespace_with_begin)
@@ -271,7 +279,9 @@ def test_extract_when_given_end_date_with_len_3_causes_exit(logger, namespace_wi
 def test_extract_when_given_username_uses_username_filter(logger, namespace_with_begin, extractor):
     namespace_with_begin.c42username = "test.testerson@example.com"
     extract(logger, namespace_with_begin)
-    assert str(extractor.extract.call_args[0][1]) == str(DeviceUsername.eq(namespace_with_begin.c42username))
+    assert str(extractor.extract.call_args[0][1]) == str(
+        DeviceUsername.eq(namespace_with_begin.c42username)
+    )
 
 
 def test_extract_when_given_actor_uses_actor_filter(logger, namespace_with_begin, extractor):
@@ -310,13 +320,19 @@ def test_extract_when_given_filepath_uses_filepath_filter(logger, namespace_with
     assert str(extractor.extract.call_args[0][1]) == str(FilePath.eq(namespace_with_begin.filepath))
 
 
-def test_extract_when_given_process_owner_uses_process_owner_filter(logger, namespace_with_begin, extractor):
+def test_extract_when_given_process_owner_uses_process_owner_filter(
+    logger, namespace_with_begin, extractor
+):
     namespace_with_begin.process_owner = "test.testerson"
     extract(logger, namespace_with_begin)
-    assert str(extractor.extract.call_args[0][1]) == str(ProcessOwner.eq(namespace_with_begin.process_owner))
+    assert str(extractor.extract.call_args[0][1]) == str(
+        ProcessOwner.eq(namespace_with_begin.process_owner)
+    )
 
 
-def test_extract_when_given_tab_url_uses_process_tab_url_filter(logger, namespace_with_begin, extractor):
+def test_extract_when_given_tab_url_uses_process_tab_url_filter(
+    logger, namespace_with_begin, extractor
+):
     namespace_with_begin.tab_url = "https://www.example.com"
     extract(logger, namespace_with_begin)
     assert str(extractor.extract.call_args[0][1]) == str(TabURL.eq(namespace_with_begin.tab_url))
