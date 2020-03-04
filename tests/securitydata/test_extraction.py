@@ -395,47 +395,55 @@ def test_extract_when_creating_sdk_throws_causes_exit(logger, extractor, namespa
 
 
 def test_extract_when_global_variable_is_true_and_is_interactive_prints_error(
-    mocker, logger, error_logger, namespace, extractor
+    mocker, logger, error_logger, namespace_with_begin, extractor
 ):
     mock_error_printer = mocker.patch("code42cli.securitydata.extraction.print_error")
     mock_is_interactive_function = mocker.patch("code42cli.securitydata.extraction.is_interactive")
     mock_is_interactive_function.return_value = True
     extraction_module._EXCEPTIONS_OCCURRED = True
-    extraction_module.extract(logger, namespace)
+    extraction_module.extract(logger, namespace_with_begin)
     assert mock_error_printer.call_count
 
 
 def test_extract_when_global_variable_is_true_and_not_is_interactive_does_not_print_error(
-    mocker, logger, error_logger, namespace, extractor
+    mocker, logger, error_logger, namespace_with_begin, extractor
 ):
     mock_error_printer = mocker.patch("code42cli.securitydata.extraction.print_error")
     mock_is_interactive_function = mocker.patch("code42cli.securitydata.extraction.is_interactive")
     mock_is_interactive_function.return_value = False
     extraction_module._EXCEPTIONS_OCCURRED = True
-    extraction_module.extract(logger, namespace)
+    extraction_module.extract(logger, namespace_with_begin)
     assert not mock_error_printer.call_count
 
 
 def test_extract_when_global_variable_is_false_and_is_interactive_does_not_print_error(
-    mocker, logger, error_logger, namespace, extractor
+    mocker, logger, error_logger, namespace_with_begin, extractor
 ):
     mock_error_printer = mocker.patch("code42cli.securitydata.extraction.print_error")
     mock_is_interactive_function = mocker.patch("code42cli.securitydata.extraction.is_interactive")
     mock_is_interactive_function.return_value = True
     extraction_module._EXCEPTIONS_OCCURRED = False
-    extraction_module.extract(logger, namespace)
+    extraction_module.extract(logger, namespace_with_begin)
     assert not mock_error_printer.call_count
 
 
 def test_when_sdk_raises_exception_global_variable_gets_set(
-    mocker, logger, error_logger, namespace, mock_42
+    mocker, logger, error_logger, namespace_with_begin, mock_42
 ):
+    extraction_module._EXCEPTIONS_OCCURRED = False
     mock_sdk = mocker.MagicMock()
+
+    # For ease
+    mock = mocker.patch("code42cli.securitydata.extraction.is_interactive")
+    mock.return_value = False
 
     def sdk_side_effect(self, *args):
         raise Exception()
 
     mock_sdk.security.search_file_events.side_effect = sdk_side_effect
     mock_42.return_value = mock_sdk
-    extraction_module.extract(logger, namespace)
+
+    mocker.patch("c42eventextractor.extractors.FileEventExtractor._verify_compatibility_of_filter_groups")
+
+    extraction_module.extract(logger, namespace_with_begin)
     assert extraction_module._EXCEPTIONS_OCCURRED

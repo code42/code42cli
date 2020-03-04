@@ -12,7 +12,6 @@ from py42.sdk.file_event_query.exposure_query import ExposureType, ProcessOwner,
 from py42.sdk.file_event_query.file_query import MD5, SHA256, FileName, FilePath
 
 from code42cli.compat import str
-from code42cli.securitydata.options import ExposureType
 from code42cli.util import print_error, print_bold, is_interactive
 from code42cli.profile.profile import get_profile
 from code42cli.securitydata.options import ExposureType as ExposureTypeOptions
@@ -128,7 +127,7 @@ def _verify_begin_date(begin_date):
     if not begin_date:
         print_error(u"'begin date' is required.")
         print(u"")
-        print(u"Try using  '-b' or '--begin'. Use `-h` for more info.")
+        print_bold(u"Try using  '-b' or '--begin'. Use `-h` for more info.")
         print(u"")
         exit(1)
 
