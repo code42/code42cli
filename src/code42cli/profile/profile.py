@@ -68,7 +68,7 @@ def set_profile(args):
     _try_set_username(args)
     _try_set_ignore_ssl_errors(args)
     config.mark_as_set_if_complete()
-    _ask_if_they_would_like_to_set_their_password()
+    _prompt_for_allow_password_set()
 
 
 def prompt_for_password_reset(*args):
@@ -145,7 +145,7 @@ def _try_set_ignore_ssl_errors(args):
         config.set_ignore_ssl_errors(False)
 
 
-def _ask_if_they_would_like_to_set_their_password():
+def _prompt_for_allow_password_set():
     answer = get_input(u"Would you like to set a password? (y/n): ")
     if answer.lower() == u"y":
         prompt_for_password_reset()
