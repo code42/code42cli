@@ -30,6 +30,10 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - It is no longer required to store your password in your profile,
     and you will be prompted to enter your password at runtime if you don't.
 
+### Removed
+
+- Removed `--show` flag from `code42 profile set` command. Just use `code42 profile show`.
+
 ## 0.2.0 - 2020-02-25
 
 ### Removed
