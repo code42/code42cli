@@ -6,6 +6,9 @@ from code42cli.compat import str
 import code42cli.util as util
 
 
+_DEFAULT_VALUE = u"__DEFAULT__"
+
+
 class ConfigurationKeys(object):
     USER_SECTION = u"Code42"
     AUTHORITY_KEY = u"c42_authority_url"
@@ -78,7 +81,7 @@ def _profile_can_be_set():
     profile = _get_config_profile_from_parser(parser)
     username = profile[ConfigurationKeys.USERNAME_KEY]
     authority = profile[ConfigurationKeys.AUTHORITY_KEY]
-    return username != u"null" and authority != u"null" and not profile_has_been_set()
+    return username != _DEFAULT_VALUE and authority != _DEFAULT_VALUE and not profile_has_been_set()
 
 
 def _get_config_profile_from_parser(parser):
@@ -107,8 +110,8 @@ def _create_user_section(parser):
     keys = ConfigurationKeys
     parser.add_section(keys.USER_SECTION)
     parser[keys.USER_SECTION] = {}
-    parser[keys.USER_SECTION][keys.AUTHORITY_KEY] = u"null"
-    parser[keys.USER_SECTION][keys.USERNAME_KEY] = u"null"
+    parser[keys.USER_SECTION][keys.AUTHORITY_KEY] = _DEFAULT_VALUE
+    parser[keys.USER_SECTION][keys.USERNAME_KEY] = _DEFAULT_VALUE
     parser[keys.USER_SECTION][keys.IGNORE_SSL_ERRORS_KEY] = u"False"
     return parser
 
