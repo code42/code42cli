@@ -8,7 +8,7 @@ from c42eventextractor.extractors import FileEventExtractor
 
 from code42cli.compat import str
 from code42cli.securitydata.options import ExposureType
-from code42cli.util import print_error
+from code42cli.util import print_error, is_interactive
 from code42cli import date_helper as date_helper
 from code42cli.securitydata.cursor_store import AEDCursorStore
 from code42cli.securitydata.logger_factory import get_error_logger
@@ -112,7 +112,7 @@ def _verify_exposure_types(exposure_types):
 
 
 def _handle_result():
-    if _EXCEPTIONS_OCCURRED:
+    if is_interactive() and  _EXCEPTIONS_OCCURRED:
         print_error("There were errors when running the last command.")
     else:
         print("Command succeeded")
