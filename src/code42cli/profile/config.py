@@ -87,7 +87,6 @@ def _profile_can_be_set():
 def _get_config_profile_from_parser(parser):
     config_file_path = _get_config_file_path()
     parser.read(config_file_path)
-    parser.read(config_file_path)
     config = parser[ConfigurationKeys.USER_SECTION]
     return config
 
