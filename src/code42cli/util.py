@@ -5,10 +5,11 @@ from os import path, makedirs
 
 def get_input(prompt):
     """Uses correct input function based on Python version."""
+    # pylint: disable=undefined-variable
     if sys.version_info >= (3, 0):
-        return input(prompt)
+        return input(prompt) 
     else:
-        return raw_input(prompt)
+        return raw_input(prompt) 
 
 
 def get_user_project_path(subdir=""):
