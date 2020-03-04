@@ -13,6 +13,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Added
 
 - Begin and end date now support specifying time: `code42 securitydata print -b 2020-02-02 12:00:00`.
+- If running interactively and errors occur, you will be told them at the end of `code42 securitydata` commands.
 
 ## 0.2.0 - 2020-02-25
 
