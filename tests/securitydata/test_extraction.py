@@ -33,7 +33,7 @@ def error_logger(mocker):
     return mocker.patch("{0}.logger_factory".format(ROOT_PATH))
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def extractor(mocker):
     mock = mocker.MagicMock()
     mock.extract_advanced = mocker.patch(
@@ -228,11 +228,10 @@ def test_extract_when_given_end_date_with_len_3_causes_exit(
         extract(logger, namespace)
 
 
-def test_extract_global_variable_set_print_error(
+def test_extract_when_global_variable_is_true_prints_error(
     mocker, logger, error_logger, namespace, extractor
 ):
     mock_error_printer = mocker.patch("code42cli.securitydata.extraction.print_error")
     extraction_module._EXCEPTIONS_OCCURRED = True
     extract(logger, namespace)
     assert mock_error_printer.call_count
-
