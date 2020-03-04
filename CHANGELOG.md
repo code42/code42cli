@@ -27,7 +27,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Changed
 
-- It is no longer required to store your password in your profile, and you will be prompted at runtime if you don't.
+- It is no longer required to store your password in your profile,
+    and you will be prompted to enter your password at runtime if you don't.
 
 ## 0.2.0 - 2020-02-25
 
