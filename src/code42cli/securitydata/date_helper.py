@@ -7,7 +7,7 @@ _MAX_LOOK_BACK_DAYS = 90
 _FORMAT_VALUE_ERROR_MESSAGE = u"input must be a date in YYYY-MM-DD or YYYY-MM-DD HH:MM:SS format."
 
 
-def create_event_timestamp_range(begin_date=None, end_date=None):
+def create_event_timestamp_range(begin_date, end_date=None):
     """Creates a `py42.sdk.file_event_query.event_query.EventTimestamp.in_range` filter
             using the provided dates.  If begin_date is None, it uses a date that is 60 days back.
             If end_date is None, it uses the current UTC time.
@@ -24,8 +24,6 @@ def create_event_timestamp_range(begin_date=None, end_date=None):
 
 
 def _parse_min_timestamp(begin_date_str):
-    if not begin_date_str:
-        return _get_default_min_timestamp()
     min_timestamp = _parse_timestamp(begin_date_str)
     boundary_date = datetime.utcnow() - timedelta(days=_MAX_LOOK_BACK_DAYS)
     boundary = convert_datetime_to_timestamp(boundary_date)
@@ -68,13 +66,6 @@ def _join_date_tuple(date_tuple):
     else:
         raise ValueError(_FORMAT_VALUE_ERROR_MESSAGE)
     return date_str
-
-
-def _get_default_min_timestamp():
-    now = datetime.utcnow()
-    start_day = timedelta(days=_DEFAULT_LOOK_BACK_DAYS)
-    days_ago = now - start_day
-    return convert_datetime_to_timestamp(days_ago)
 
 
 def _get_default_max_timestamp():

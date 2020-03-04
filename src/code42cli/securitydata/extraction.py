@@ -12,7 +12,7 @@ from py42.sdk.file_event_query.exposure_query import ExposureType, ProcessOwner,
 from py42.sdk.file_event_query.file_query import MD5, SHA256, FileName, FilePath
 
 from code42cli.compat import str
-from code42cli.util import print_error
+from code42cli.util import print_error, print_bold
 from code42cli.profile.profile import get_profile
 from code42cli.securitydata.options import ExposureType as ExposureTypeOptions
 from code42cli.securitydata import date_helper as date_helper
@@ -76,6 +76,7 @@ def _get_sdk(profile, is_debug_mode):
 
 def _call_extract(extractor, args):
     if not _determine_if_advanced_query(args):
+        _verify_begin_date(args.begin_date)
         _verify_exposure_types(args.exposure_types)
         filters = _create_filters(args)
         extractor.extract(*filters)
@@ -108,6 +109,15 @@ def _get_event_timestamp_filter(args):
         return date_helper.create_event_timestamp_range(args.begin_date, args.end_date)
     except ValueError as ex:
         print_error(str(ex))
+        exit(1)
+
+
+def _verify_begin_date(begin_date):
+    if not begin_date:
+        print_error(u"'begin date' is required.")
+        print(u"")
+        print(u"Try using  '-b' or '--begin'. Use `-h` for more info.")
+        print(u"")
         exit(1)
 
 

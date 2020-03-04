@@ -1,27 +1,16 @@
 import pytest
-from datetime import datetime
 
 from code42cli.securitydata.date_helper import create_event_timestamp_range
-from ..conftest import (
-    get_filter_value_from_json,
-    parse_date_from_filter_value,
-    get_test_date,
-    get_test_date_str,
+from .conftest import (
+    begin_date_tuple,
+    begin_date_tuple_with_time,
+    end_date_tuple,
+    end_date_tuple_with_time,
 )
+from ..conftest import get_filter_value_from_json, get_test_date_str
 
 
-def test_create_event_timestamp_range_when_given_no_args_creates_range_from_sixty_days_back_to_now():
-    ts_range = create_event_timestamp_range()
-    actual_begin = parse_date_from_filter_value(ts_range, filter_index=0)
-    actual_end = parse_date_from_filter_value(ts_range, filter_index=1)
-    expected_begin = get_test_date(days_ago=60)
-    expected_end = datetime.utcnow()
-    assert (expected_begin - actual_begin).total_seconds() < 0.1
-    assert (expected_end - actual_end).total_seconds() < 0.1
-
-
-def test_create_event_timestamp_range_when_given_begin_builds_expected_query():
-    begin_date_tuple = (get_test_date_str(days_ago=89),)
+def test_create_event_timestamp_range_builds_expected_query():
     ts_range = create_event_timestamp_range(begin_date_tuple)
     actual = get_filter_value_from_json(ts_range, filter_index=0)
     expected = "{0}T00:00:00.000Z".format(begin_date_tuple[0])
@@ -29,39 +18,32 @@ def test_create_event_timestamp_range_when_given_begin_builds_expected_query():
 
 
 def test_create_event_timestamp_range_when_given_begin_with_time_builds_expected_query():
-    time_str = "3:12:33"
-    begin_date_tuple = (get_test_date_str(days_ago=89), time_str)
-    ts_range = create_event_timestamp_range(begin_date_tuple)
+    ts_range = create_event_timestamp_range(begin_date_tuple_with_time)
     actual = get_filter_value_from_json(ts_range, filter_index=0)
-    expected = "{0}T0{1}.000Z".format(begin_date_tuple[0], time_str)
+    expected = "{0}T0{1}.000Z".format(begin_date_tuple_with_time[0], begin_date_tuple_with_time[1])
     assert actual == expected
 
 
 def test_create_event_timestamp_range_when_given_end_builds_expected_query():
-    end_date_tuple = (get_test_date_str(days_ago=10),)
-    ts_range = create_event_timestamp_range(None, end_date_tuple)
+    ts_range = create_event_timestamp_range(begin_date_tuple, end_date_tuple)
     actual = get_filter_value_from_json(ts_range, filter_index=1)
     expected = "{0}T00:00:00.000Z".format(end_date_tuple[0])
     assert actual == expected
 
 
 def test_create_event_timestamp_range_when_given_end_with_time_builds_expected_query():
-    time_str = "11:22:43"
-    end_date_tuple = (get_test_date_str(days_ago=10), time_str)
-    ts_range = create_event_timestamp_range(None, end_date_tuple)
+    ts_range = create_event_timestamp_range(begin_date_tuple, end_date_tuple_with_time)
     actual = get_filter_value_from_json(ts_range, filter_index=1)
-    expected = "{0}T{1}.000Z".format(end_date_tuple[0], time_str)
+    expected = "{0}T{1}.000Z".format(end_date_tuple_with_time[0], end_date_tuple_with_time[1])
     assert actual == expected
 
 
 def test_create_event_timestamp_range_when_given_both_begin_and_end_builds_expected_query():
-    begin_date_tuple = (get_test_date_str(days_ago=89),)
-    end_date_tuple = (get_test_date_str(days_ago=55), "12:00:00")
-    ts_range = create_event_timestamp_range(begin_date_tuple, end_date_tuple)
+    ts_range = create_event_timestamp_range(begin_date_tuple, end_date_tuple_with_time)
     actual_begin = get_filter_value_from_json(ts_range, filter_index=0)
     actual_end = get_filter_value_from_json(ts_range, filter_index=1)
     expected_begin = "{0}T00:00:00.000Z".format(begin_date_tuple[0])
-    expected_end = "{0}T{1}.000Z".format(end_date_tuple[0], end_date_tuple[1])
+    expected_end = "{0}T{1}.000Z".format(end_date_tuple_with_time[0], end_date_tuple_with_time[1])
     assert actual_begin == expected_begin
     assert actual_end == expected_end
 
