@@ -70,6 +70,7 @@ def _add_begin_date_arg(parser):
     parser.add_argument(
         u"-b",
         u"--begin",
+        required=True,
         nargs=u"+",
         action=u"store",
         dest=SearchArguments.BEGIN_DATE,
