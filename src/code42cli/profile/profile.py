@@ -101,7 +101,7 @@ def _add_username_arg(parser):
 
 def _add_password_arg(parser):
     parser.add_argument(
-        u"--set-password",
+        u"--save-password",
         action=u"store_true",
         dest=u"do_set_c42_password",
         help=u"Prompts and stores your Code42 API user password. "

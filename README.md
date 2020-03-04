@@ -24,9 +24,9 @@ code42 profile set -s https://example.authority.com -u security.admin@example.co
 ```
 Your profile contains the necessary properties for logging into Code42 servers.
 
-(Optional) To set your password, use `--set-password`:
+(Optional) To set your password, use `--save-password`:
 ```bash
-code42 profile set --set-password
+code42 profile set --save-password
 ```
 You will be securely prompted to input your password.
 Your password is not stored in plain-text, and is not shown when you do `code42 profile show`.

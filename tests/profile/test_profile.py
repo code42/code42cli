@@ -71,7 +71,7 @@ def test_init_adds_parser_that_can_parse_set_command(config_parser):
     profile.init(subcommand_parser)
     profile_parser = subcommand_parser.choices.get("profile")
     profile_parser.parse_args(
-        ["set", "-s", "server-arg", "--set-password", "-u", "username-arg", "--enable-ssl-errors"]
+        ["set", "-s", "server-arg", "--save-password", "-u", "username-arg", "--enable-ssl-errors"]
     )
 
 
@@ -128,8 +128,8 @@ def test_set_profile_calls_marks_as_set_if_complete(config_parser, mark_as_set_f
     assert mark_as_set_function.call_count
 
 
-def test_set_profile_when_given_set_password_arg_sets_password(config_parser, password_setter):
+def test_set_profile_when_given_save_password_arg_sets_password(config_parser, password_setter):
     parser = _get_profile_parser()
-    namespace = parser.parse_args(["set", "--set-password"])
+    namespace = parser.parse_args(["set", "--save-password"])
     profile.set_profile(namespace)
     assert password_setter.call_count
