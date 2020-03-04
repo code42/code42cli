@@ -1,5 +1,7 @@
 import sys
 import logging
+from threading import Lock
+
 from logging.handlers import RotatingFileHandler
 from c42eventextractor.logging.formatters import (
     FileEventDictToJSONFormatter,
@@ -12,6 +14,7 @@ from code42cli.compat import str
 from code42cli.securitydata.options import OutputFormat
 from code42cli.util import get_user_project_path, print_error
 
+_logger_deps_lock = Lock()
 
 def get_logger_for_stdout(output_format):
     """Gets the stdout logger for the given format.
@@ -23,8 +26,11 @@ def get_logger_for_stdout(output_format):
     if _logger_has_handlers(logger):
         return logger
 
-    handler = logging.StreamHandler(sys.stdout)
-    return _init_logger(logger, handler, output_format)
+    with _logger_deps_lock:
+        if not _logger_has_handlers(logger):
+            handler = logging.StreamHandler(sys.stdout)
+            return _init_logger(logger, handler, output_format)
+    return logger
 
 
 def get_logger_for_file(filename, output_format):
@@ -38,8 +44,11 @@ def get_logger_for_file(filename, output_format):
     if _logger_has_handlers(logger):
         return logger
 
-    handler = logging.FileHandler(filename, delay=True)
-    return _init_logger(logger, handler, output_format)
+    with _logger_deps_lock:
+        if not _logger_has_handlers(logger):
+            handler = logging.FileHandler(filename, delay=True)
+            return _init_logger(logger, handler, output_format)
+    return logger
 
 
 def get_logger_for_server(hostname, protocol, output_format):
@@ -54,8 +63,11 @@ def get_logger_for_server(hostname, protocol, output_format):
     if _logger_has_handlers(logger):
         return logger
 
-    handler = NoPrioritySysLogHandlerWrapper(hostname, protocol=protocol).handler
-    return _init_logger(logger, handler, output_format)
+    with _logger_deps_lock:
+        if not _logger_has_handlers(logger):
+            handler = NoPrioritySysLogHandlerWrapper(hostname, protocol=protocol).handler
+            return _init_logger(logger, handler, output_format)
+    return logger
 
 
 def get_error_logger():
@@ -66,9 +78,12 @@ def get_error_logger():
     if _logger_has_handlers(logger):
         return logger
 
-    formatter = logging.Formatter(u"%(asctime)s %(message)s")
-    handler = RotatingFileHandler(log_path, maxBytes=250000000)
-    return _apply_logger_dependencies(logger, handler, formatter)
+    with _logger_deps_lock:
+        if not _logger_has_handlers(logger):
+            formatter = logging.Formatter(u"%(asctime)s %(message)s")
+            handler = RotatingFileHandler(log_path, maxBytes=250000000)
+            return _apply_logger_dependencies(logger, handler, formatter)
+    return logger
 
 
 def _logger_has_handlers(logger):
