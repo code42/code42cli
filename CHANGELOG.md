@@ -8,11 +8,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-## Unreleased
+## 0.3.0 - 2020-03-04
 
 ### Added
 
 - Begin and end date now support specifying time: `code42 securitydata print -b 2020-02-02 12:00:00`.
+- New search arguments for `print`, `write-to`, and `send-to`:
+    - `--c42username`
+    - `--actor`
+    - `--md5`
+    - `--sha256`
+    - `--source`
+    - `--filename`
+    - `--filepath`
+    - `--processOwner`
+    - `--tabURL`
+    - `--include-non-exposure`
+
+### Changed
+
+- It is no longer required to store your password in your profile,
+    and you will be prompted to enter your password at runtime if you don't.
+- You will be asked if you would like to set a password after using `code42cli profile set`.
+- Begin date is now required for `securitydata` `print`, `write-to`, and `send-to` commands.
+
+### Removed
+
+- Removed `--show` flag from `code42 profile set` command. Just use `code42 profile show`.
 
 ## 0.2.0 - 2020-02-25
 

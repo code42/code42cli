@@ -1,7 +1,7 @@
 # The Code42 CLI
 
 Use the `code42` command to interact with your Code42 environment.
-`code42 securitydata` is a CLI tool for extracting AED events. 
+`code42 securitydata` is a CLI tool for extracting AED events.
 Additionally, `code42 securitydata` can record a checkpoint so that you only get events you have not previously gotten.
 
 ## Requirements
@@ -23,15 +23,11 @@ First, set your profile:
 code42 profile set -s https://example.authority.com -u security.admin@example.com
 ```
 Your profile contains the necessary properties for logging into Code42 servers.
-You will prompted for a password if there is not one saved for your current username/authority URL combination.
-
-To explicitly set your password, use `-p`:
-```bash
-code42 profile set -p
-```
-You will be securely prompted to input your password.
+After running this `code42 profile set`, you will be prompted about storing a password.
+If you agree, you will be securely prompted to input your password.
 Your password is not stored in plain-text, and is not shown when you do `code42 profile show`.
 However, `code42 profile show` will confirm that there is a password set for your profile.
+If you do not set a password, you will be securely prompted to enter a password each time you run a command.
 
 To ignore SSL errors, do:
 ```bash
@@ -67,6 +63,16 @@ Each destination-type subcommand shares query parameters
 * `-t` (exposure types)
 * `-b` (begin date)
 * `-e` (end date)
+* `--c42username`
+* `--actor`
+* `--md5`
+* `--sha256`
+* `--source`
+* `--filename`
+* `--filepath`
+* `--processOwner`
+* `--tabURL`
+* `--include-non-exposure` (does not work with `-t`)
 * `--advanced-query` (raw JSON query)
 
 Note that you cannot use other query parameters if you use `--advanced-query`.

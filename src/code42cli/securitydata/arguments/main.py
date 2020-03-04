@@ -1,38 +1,42 @@
 from code42cli.securitydata.options import OutputFormat
 
 
-IS_INCREMENTAL_KEY = "is_incremental"
+IS_INCREMENTAL_KEY = u"is_incremental"
 
 
 def add_arguments_to_parser(parser):
     _add_output_format_arg(parser)
     _add_incremental_arg(parser)
-    _add_debug_args(parser)
+    _add_debug_arg(parser)
 
 
 def _add_output_format_arg(parser):
     parser.add_argument(
-        "-f",
-        "--format",
-        dest="format",
-        action="store",
+        u"-f",
+        u"--format",
+        dest=u"format",
+        action=u"store",
         choices=OutputFormat(),
         default=OutputFormat.JSON,
-        help="The format used for outputting events.",
+        help=u"The format used for outputting events.",
     )
 
 
 def _add_incremental_arg(parser):
     parser.add_argument(
-        "-i",
-        "--incremental",
+        u"-i",
+        u"--incremental",
         dest=IS_INCREMENTAL_KEY,
-        action="store_true",
-        help="Only get events that were not previously retrieved.",
+        action=u"store_true",
+        help=u"Only get events that were not previously retrieved.",
     )
 
 
-def _add_debug_args(parser):
+def _add_debug_arg(parser):
     parser.add_argument(
-        "-d", "--debug", dest="is_debug_mode", action="store_true", help="Turn on Debug logging."
+        u"-d",
+        u"--debug",
+        dest=u"is_debug_mode",
+        action=u"store_true",
+        help=u"Turn on Debug logging.",
     )

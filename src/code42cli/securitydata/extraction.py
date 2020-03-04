@@ -5,19 +5,34 @@ from py42 import debug_level
 from py42 import settings
 from c42eventextractor import FileEventHandlers
 from c42eventextractor.extractors import FileEventExtractor
+from py42.sdk.file_event_query.cloud_query import Actor
+from py42.sdk.file_event_query.device_query import DeviceUsername
+from py42.sdk.file_event_query.event_query import Source
+from py42.sdk.file_event_query.exposure_query import ExposureType, ProcessOwner, TabURL
+from py42.sdk.file_event_query.file_query import MD5, SHA256, FileName, FilePath
 
 from code42cli.compat import str
-from code42cli.securitydata.options import ExposureType
-from code42cli.util import print_error
-from code42cli import date_helper as date_helper
+from code42cli.util import print_error, print_bold
+from code42cli.profile.profile import get_profile
+from code42cli.securitydata.options import ExposureType as ExposureTypeOptions
+from code42cli.securitydata import date_helper as date_helper
 from code42cli.securitydata.cursor_store import AEDCursorStore
 from code42cli.securitydata.logger_factory import get_error_logger
-from code42cli.profile.profile import get_profile
 from code42cli.securitydata.arguments.search import SearchArguments
 from code42cli.securitydata.arguments.main import IS_INCREMENTAL_KEY
 
 
 def extract(output_logger, args):
+    """Extracts file events using the given command-line arguments.
+
+        Args:
+            output_logger: The logger specified by which subcommand you use. For example,
+                print: uses a logger that streams to stdout.
+                write-to: uses a logger that logs to a file.
+                send-to: uses a logger that sends logs to a server.
+            args:
+                Command line args used to build up file event query filters.
+    """
     handlers = _create_event_handlers(output_logger, args.is_incremental)
     profile = get_profile()
     sdk = _get_sdk(profile, args.is_debug_mode)
@@ -45,19 +60,26 @@ def _create_event_handlers(output_logger, is_incremental):
 
 
 def _get_sdk(profile, is_debug_mode):
-    code42 = SDK.create_using_local_account(
-        profile.authority_url, profile.username, profile.get_password()
-    )
     if is_debug_mode:
         settings.debug_level = debug_level.DEBUG
-    return code42
+    try:
+        return SDK.create_using_local_account(
+            profile.authority_url, profile.username, profile.get_password()
+        )
+    except:
+        print_error(
+            u"Invalid credentials or host address. "
+            u"Verify your profile is set up correctly and that you are supplying the correct password."
+        )
+        exit(1)
 
 
 def _call_extract(extractor, args):
     if not _determine_if_advanced_query(args):
-        event_timestamp_filter_group = _get_event_timestamp_filter(args)
+        _verify_begin_date(args.begin_date)
         _verify_exposure_types(args.exposure_types)
-        extractor.extract(args.exposure_types, event_timestamp_filter_group)
+        filters = _create_filters(args)
+        extractor.extract(*filters)
     else:
         extractor.extract_advanced(args.advanced_query)
 
@@ -90,11 +112,51 @@ def _get_event_timestamp_filter(args):
         exit(1)
 
 
+def _verify_begin_date(begin_date):
+    if not begin_date:
+        print_error(u"'begin date' is required.")
+        print(u"")
+        print(u"Try using  '-b' or '--begin'. Use `-h` for more info.")
+        print(u"")
+        exit(1)
+
+
 def _verify_exposure_types(exposure_types):
     if exposure_types is None:
         return
-    options = list(ExposureType())
+    options = list(ExposureTypeOptions())
     for exposure_type in exposure_types:
         if exposure_type not in options:
             print_error(u"'{0}' is not a valid exposure type.".format(exposure_type))
             exit(1)
+
+
+def _create_filters(args):
+    filters = [_get_event_timestamp_filter(args)]
+    not args.c42username or filters.append(DeviceUsername.eq(args.c42username))
+    not args.actor or filters.append(Actor.eq(args.actor))
+    not args.md5 or filters.append(MD5.eq(args.md5))
+    not args.sha256 or filters.append(SHA256.eq(args.sha256))
+    not args.source or filters.append(Source.eq(args.source))
+    not args.filename or filters.append(FileName.eq(args.filename))
+    not args.filepath or filters.append(FilePath.eq(args.filepath))
+    not args.process_owner or filters.append(ProcessOwner.eq(args.process_owner))
+    not args.tab_url or filters.append(TabURL.eq(args.tab_url))
+    _try_append_exposure_types_filter(filters, args)
+    return filters
+
+
+def _try_append_exposure_types_filter(filters, args):
+    exposure_filter = _create_exposure_type_filter(args)
+    if exposure_filter:
+        filters.append(exposure_filter)
+
+
+def _create_exposure_type_filter(args):
+    if args.include_non_exposure_events and args.exposure_types:
+        print_error(u"Cannot use exposure types with `--include-non-exposure`.")
+        exit(1)
+    if args.exposure_types:
+        return ExposureType.is_in(args.exposure_types)
+    if not args.include_non_exposure_events:
+        return ExposureType.exists()
