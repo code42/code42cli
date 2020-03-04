@@ -239,15 +239,14 @@ def test_extract_when_global_variable_is_true_prints_error(
 
 
 def test_when_sdk_raises_exception_global_variable_gets_set(
-    mocker, logger, error_logger, namespace
+    mocker, logger, error_logger, namespace, mock_42
 ):
-    mock_sdk_factory = mocker.patch("py42.sdk.SDK.create_using_local_account")
     mock_sdk = mocker.MagicMock()
 
     def sdk_side_effect(self, *args):
         raise Exception()
 
     mock_sdk.security.search_file_events.side_effect = sdk_side_effect
-    mock_sdk_factory.return_value = mock_sdk
+    mock_42.return_value = mock_sdk
     extract(logger, namespace)
     assert extraction_module._EXCEPTIONS_OCCURRED
