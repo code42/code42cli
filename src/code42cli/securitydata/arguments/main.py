@@ -32,7 +32,17 @@ def _add_incremental_arg(parser):
     )
 
 
-def _add_debug_args(parser):
+def _add_debug_arg(parser):
     parser.add_argument(
         "-d", "--debug", dest="is_debug_mode", action="store_true", help="Turn on Debug logging."
+    )
+
+
+def _add_silence_result_status_arg(parser):
+    parser.add_argument(
+        "--silence-result-status",
+        dest="silence_result_status",
+        action="store_true",
+        help="Whether to silence the outcome status. "
+        "This is useful when piping output into other commands.",
     )
