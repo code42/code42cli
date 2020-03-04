@@ -112,5 +112,5 @@ def _verify_exposure_types(exposure_types):
 
 
 def _handle_result():
-    if not is_interactive() and _EXCEPTIONS_OCCURRED:
+    if is_interactive() and _EXCEPTIONS_OCCURRED:
         print_error(u"View exceptions that occurred at [HOME]/.code42cli/log/code42_errors.")

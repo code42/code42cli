@@ -229,13 +229,37 @@ def test_extract_when_given_end_date_with_len_3_causes_exit(
         extract(logger, namespace)
 
 
-def test_extract_when_global_variable_is_true_prints_error(
+def test_extract_when_global_variable_is_true_and_is_interactive_prints_error(
     mocker, logger, error_logger, namespace, extractor
 ):
     mock_error_printer = mocker.patch("code42cli.securitydata.extraction.print_error")
+    mock_is_interactive_function = mocker.patch("code42cli.securitydata.extraction.is_interactive")
+    mock_is_interactive_function.return_value = True
     extraction_module._EXCEPTIONS_OCCURRED = True
     extract(logger, namespace)
     assert mock_error_printer.call_count
+
+
+def test_extract_when_global_variable_is_true_and_not_is_interactive_does_not_print_error(
+    mocker, logger, error_logger, namespace, extractor
+):
+    mock_error_printer = mocker.patch("code42cli.securitydata.extraction.print_error")
+    mock_is_interactive_function = mocker.patch("code42cli.securitydata.extraction.is_interactive")
+    mock_is_interactive_function.return_value = False
+    extraction_module._EXCEPTIONS_OCCURRED = True
+    extract(logger, namespace)
+    assert not mock_error_printer.call_count
+
+
+def test_extract_when_global_variable_is_false_and_is_interactive_does_not_print_error(
+    mocker, logger, error_logger, namespace, extractor
+):
+    mock_error_printer = mocker.patch("code42cli.securitydata.extraction.print_error")
+    mock_is_interactive_function = mocker.patch("code42cli.securitydata.extraction.is_interactive")
+    mock_is_interactive_function.return_value = True
+    extraction_module._EXCEPTIONS_OCCURRED = False
+    extract(logger, namespace)
+    assert not mock_error_printer.call_count
 
 
 def test_when_sdk_raises_exception_global_variable_gets_set(
