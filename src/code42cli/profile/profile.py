@@ -3,6 +3,7 @@ from __future__ import print_function
 import code42cli.profile.config as config
 import code42cli.profile.password as password
 from code42cli.profile.config import ConfigurationKeys
+from code42cli.util import get_input
 
 
 class Code42Profile(object):
@@ -67,6 +68,8 @@ def set_profile(args):
     _try_set_username(args)
     _try_set_ignore_ssl_errors(args)
     config.mark_as_set_if_complete()
+    _ask_if_they_would_like_to_set_their_password()
+
 
 
 def prompt_for_password_reset(*args):
@@ -141,6 +144,12 @@ def _try_set_ignore_ssl_errors(args):
 
     if args.enable_ssl_errors is not None:
         config.set_ignore_ssl_errors(False)
+
+
+def _ask_if_they_would_like_to_set_their_password():
+    answer = get_input(u"Would you like to set a password? (y/n): ")
+    if answer == u"y":
+        prompt_for_password_reset()
 
 
 if __name__ == "__main__":
