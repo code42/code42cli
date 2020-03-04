@@ -443,7 +443,9 @@ def test_when_sdk_raises_exception_global_variable_gets_set(
     mock_sdk.security.search_file_events.side_effect = sdk_side_effect
     mock_42.return_value = mock_sdk
 
-    mocker.patch("c42eventextractor.extractors.FileEventExtractor._verify_compatibility_of_filter_groups")
+    mocker.patch(
+        "c42eventextractor.extractors.FileEventExtractor._verify_compatibility_of_filter_groups"
+    )
 
     extraction_module.extract(logger, namespace_with_begin)
     assert extraction_module._EXCEPTIONS_OCCURRED
