@@ -147,6 +147,20 @@ def test_set_profile_when_told_to_store_password_prompts_for_storing_password(
     assert mock_set_password_function.call_count
 
 
+
+def test_set_profile_when_told_to_store_password_using_capital_y_prompts_for_storing_password(
+    mocker, input_function
+):
+    input_function.return_value = "Y"
+    mock_set_password_function = mocker.patch("code42cli.profile.password.set_password_from_prompt")
+    parser = _get_profile_parser()
+    namespace = parser.parse_args(
+        ["set", "-s", "https://wwww.new.authority.example.com", "-u", "user"]
+    )
+    profile.set_profile(namespace)
+    assert mock_set_password_function.call_count
+
+
 def test_set_profile_when_told_not_to_store_password_prompts_for_storing_password(
     mocker, input_function
 ):

@@ -147,7 +147,7 @@ def _try_set_ignore_ssl_errors(args):
 
 def _ask_if_they_would_like_to_set_their_password():
     answer = get_input(u"Would you like to set a password? (y/n): ")
-    if answer == u"y":
+    if answer.lower() == u"y":
         prompt_for_password_reset()
 
 
