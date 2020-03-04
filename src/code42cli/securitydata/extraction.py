@@ -17,18 +17,29 @@ from code42cli.securitydata.arguments.search import SearchArguments
 from code42cli.securitydata.arguments.main import IS_INCREMENTAL_KEY
 
 
+_EXCEPTIONS_OCCURRED = False
+
+
 def extract(output_logger, args):
     handlers = _create_event_handlers(output_logger, args.is_incremental)
     profile = get_profile()
     sdk = _get_sdk(profile, args.is_debug_mode)
     extractor = FileEventExtractor(sdk, handlers)
     _call_extract(extractor, args)
+    _handle_result()
 
 
 def _create_event_handlers(output_logger, is_incremental):
     handlers = FileEventHandlers()
     error_logger = get_error_logger()
-    handlers.handle_error = error_logger.error
+
+    def handle_error(exception):
+        error_logger.error(exception)
+        global _EXCEPTIONS_OCCURRED
+        _EXCEPTIONS_OCCURRED = True
+
+    handlers.handle_error = handle_error
+
     if is_incremental:
         store = AEDCursorStore()
         handlers.record_cursor_position = store.replace_stored_insertion_timestamp
@@ -98,3 +109,10 @@ def _verify_exposure_types(exposure_types):
         if exposure_type not in options:
             print_error(u"'{0}' is not a valid exposure type.".format(exposure_type))
             exit(1)
+
+
+def _handle_result():
+    if _EXCEPTIONS_OCCURRED:
+        print_error("There were errors when running the last command.")
+    else:
+        print("Command succeeded")
