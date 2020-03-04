@@ -126,3 +126,9 @@ def test_set_profile_calls_marks_as_set_if_complete(config_parser, mark_as_set_f
     )
     profile.set_profile(namespace)
     assert mark_as_set_function.call_count
+
+
+def test_prompt_for_password_reset_calls_password_set_password_from_prompt(mocker):
+    mock_function = mocker.patch("code42cli.profile.password.set_password_from_prompt")
+    profile.prompt_for_password_reset()
+    assert mock_function.call_count

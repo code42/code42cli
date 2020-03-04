@@ -31,9 +31,11 @@ def init(subcommand_parser):
 
     parser_for_show_command = profile_subparsers.add_parser(u"show")
     parser_for_set_command = profile_subparsers.add_parser(u"set")
+    parser_for_reset_password = profile_subparsers.add_parser(u"reset-pw")
 
     parser_for_show_command.set_defaults(func=show_profile)
     parser_for_set_command.set_defaults(func=set_profile)
+    parser_for_reset_password.set_defaults(func=prompt_for_password_reset)
     _add_args_to_set_command(parser_for_set_command)
 
 
@@ -67,6 +69,11 @@ def set_profile(args):
     config.mark_as_set_if_complete()
     if args.show:
         show_profile()
+
+
+def prompt_for_password_reset(*args):
+    """Securely prompts for your password and then stores it using keyring."""
+    password.set_password_from_prompt()
 
 
 def _add_args_to_set_command(parser_for_set_command):
