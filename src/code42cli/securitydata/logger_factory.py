@@ -16,6 +16,7 @@ from code42cli.util import get_user_project_path, print_error
 
 _logger_deps_lock = Lock()
 
+
 def get_logger_for_stdout(output_format):
     """Gets the stdout logger for the given format.
 

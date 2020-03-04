@@ -1,36 +1,42 @@
 import pytest
 from argparse import ArgumentParser
 from code42cli.profile import profile
+from .conftest import CONFIG_NAMESPACE, PASSWORD_NAMESPACE, PROFILE_NAMESPACE
 
 
 @pytest.fixture(autouse=True)
 def username_setter(mocker):
-    return mocker.patch("code42cli.profile.config.set_username")
+    return mocker.patch("{0}.set_username".format(CONFIG_NAMESPACE))
 
 
 @pytest.fixture(autouse=True)
 def mark_as_set_function(mocker):
-    return mocker.patch("code42cli.profile.config.mark_as_set_if_complete")
+    return mocker.patch("{0}.mark_as_set_if_complete".format(CONFIG_NAMESPACE))
 
 
 @pytest.fixture(autouse=True)
 def authority_url_setter(mocker):
-    return mocker.patch("code42cli.profile.config.set_authority_url")
+    return mocker.patch("{0}.set_authority_url".format(CONFIG_NAMESPACE))
 
 
 @pytest.fixture(autouse=True)
 def ignore_ssl_errors_setter(mocker):
-    return mocker.patch("code42cli.profile.config.set_ignore_ssl_errors")
+    return mocker.patch("{0}.set_ignore_ssl_errors".format(CONFIG_NAMESPACE))
 
 
 @pytest.fixture(autouse=True)
 def password_setter(mocker):
-    return mocker.patch("code42cli.profile.password.set_password_from_prompt")
+    return mocker.patch("{0}.set_password_from_prompt".format(PASSWORD_NAMESPACE))
 
 
 @pytest.fixture(autouse=True)
 def password_getter(mocker):
-    return mocker.patch("code42cli.profile.password.get_password")
+    return mocker.patch("{0}.get_password".format(PASSWORD_NAMESPACE))
+
+
+@pytest.fixture(autouse=True)
+def input_function(mocker):
+    return mocker.patch("{0}.profile.get_input".format(PROFILE_NAMESPACE))
 
 
 def _get_profile_parser():
@@ -42,7 +48,7 @@ def _get_profile_parser():
 class TestCode42Profile(object):
     def test_get_password_when_is_none_returns_password_from_getpass(self, mocker, password_getter):
         password_getter.return_value = None
-        mock_getpass = mocker.patch("code42cli.profile.password.get_password_from_prompt")
+        mock_getpass = mocker.patch("{0}.get_password_from_prompt".format(PASSWORD_NAMESPACE))
         mock_getpass.return_value = "Test Password"
         actual = profile.Code42Profile().get_password()
         assert actual == "Test Password"

@@ -71,7 +71,6 @@ def set_profile(args):
     _ask_if_they_would_like_to_set_their_password()
 
 
-
 def prompt_for_password_reset(*args):
     """Securely prompts for your password and then stores it using keyring."""
     password.set_password_from_prompt()
