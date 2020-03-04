@@ -26,7 +26,7 @@ def extract(output_logger, args):
     sdk = _get_sdk(profile, args.is_debug_mode)
     extractor = FileEventExtractor(sdk, handlers)
     _call_extract(extractor, args)
-    _handle_result()
+    _handle_result(args)
 
 
 def _create_event_handlers(output_logger, is_incremental):
