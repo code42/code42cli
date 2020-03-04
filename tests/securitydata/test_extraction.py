@@ -1,6 +1,7 @@
 import pytest
 from datetime import datetime
 
+import code42cli.securitydata.extraction as extraction_module
 from code42cli.securitydata.options import ExposureType
 from code42cli.securitydata.extraction import extract
 from .conftest import ROOT_PATH
@@ -225,3 +226,13 @@ def test_extract_when_given_end_date_with_len_3_causes_exit(
     namespace.end_date = (get_test_date_str(days_ago=5), "12:00:00", "+600")
     with pytest.raises(SystemExit):
         extract(logger, namespace)
+
+
+def test_extract_global_variable_set_print_error(
+    mocker, logger, error_logger, namespace, extractor
+):
+    mock_error_printer = mocker.patch("code42cli.securitydata.extraction.print_error")
+    extraction_module._EXCEPTIONS_OCCURRED = True
+    extract(logger, namespace)
+    assert mock_error_printer.call_count
+
