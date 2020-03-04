@@ -1,11 +1,12 @@
 import pytest
 from argparse import ArgumentParser
 
-from tests.securitydata.conftest import SUBCOMMANDS_PATH
+from ..conftest import SUBCOMMANDS_NAMESPACE
+from .conftest import ACCEPTABLE_ARGS
 import code42cli.securitydata.subcommands.print_out as printer
 
 
-_PRINT_PATH = "{0}.print_out".format(SUBCOMMANDS_PATH)
+_PRINT_PATH = "{0}.print_out".format(SUBCOMMANDS_NAMESPACE)
 
 
 @pytest.fixture
@@ -22,23 +23,7 @@ def test_init_adds_parser_that_can_parse_supported_args(config_parser):
     subcommand_parser = ArgumentParser().add_subparsers()
     printer.init(subcommand_parser)
     print_parser = subcommand_parser.choices.get("print")
-    print_parser.parse_args(
-        [
-            "-t",
-            "SharedToDomain",
-            "ApplicationRead",
-            "CloudStorage",
-            "RemovableMedia",
-            "IsPublic",
-            "-f",
-            "JSON",
-            "-d",
-            "-b",
-            "600",
-            "-e",
-            "2020-02-02",
-        ]
-    )
+    print_parser.parse_args(ACCEPTABLE_ARGS)
 
 
 def test_print_out_uses_logger_for_stdout(namespace, logger_factory, extractor):

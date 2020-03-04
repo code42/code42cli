@@ -10,10 +10,10 @@ def main():
     subcommand_parser = code42_arg_parser.add_subparsers()
     profile.init(subcommand_parser)
     securitydata.init_subcommand(subcommand_parser)
-    _call_subcommand(code42_arg_parser)
+    _run(code42_arg_parser)
 
 
-def _call_subcommand(parser):
+def _run(parser):
     try:
         args = parser.parse_args()
         args.func(args)

@@ -39,6 +39,16 @@ def namespace(mocker):
     mock.begin_date = None
     mock.end_date = None
     mock.exposure_types = None
+    mock.c42username = None
+    mock.actor = None
+    mock.md5 = None
+    mock.sha256 = None
+    mock.source = None
+    mock.filename = None
+    mock.filepath = None
+    mock.process_owner = None
+    mock.tab_url = None
+    mock.include_non_exposure_events = None
     return mock
 
 
@@ -51,21 +61,12 @@ class ConfigParserMocks(object):
     sections = None
 
 
-def get_first_filter_value_from_json(json):
-    return json_module.loads(str(json))["filters"][0]["value"]
+def get_filter_value_from_json(json, filter_index):
+    return json_module.loads(str(json))["filters"][filter_index]["value"]
 
 
-def get_second_filter_value_from_json(json):
-    return json_module.loads(str(json))["filters"][1]["value"]
-
-
-def parse_date_from_first_filter_value(json):
-    date_str = get_first_filter_value_from_json(json)
-    return convert_str_to_date(date_str)
-
-
-def parse_date_from_second_filter_value(json):
-    date_str = get_second_filter_value_from_json(json)
+def parse_date_from_filter_value(json, filter_index):
+    date_str = get_filter_value_from_json(json, filter_index)
     return convert_str_to_date(date_str)
 
 

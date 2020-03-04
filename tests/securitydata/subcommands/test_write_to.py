@@ -1,11 +1,12 @@
 import pytest
 from argparse import ArgumentParser
 
-from tests.securitydata.conftest import SUBCOMMANDS_PATH
+from ..conftest import SUBCOMMANDS_NAMESPACE
+from .conftest import ACCEPTABLE_ARGS
 from code42cli.securitydata.subcommands import write_to as writer
 
 
-_WRITE_PATH = "{0}.write_to".format(SUBCOMMANDS_PATH)
+_WRITE_PATH = "{0}.write_to".format(SUBCOMMANDS_NAMESPACE)
 
 
 @pytest.fixture
@@ -29,24 +30,8 @@ def test_init_adds_parser_that_can_parse_supported_args(config_parser):
     subcommand_parser = ArgumentParser().add_subparsers()
     writer.init(subcommand_parser)
     write_parser = subcommand_parser.choices.get("write-to")
-    write_parser.parse_args(
-        [
-            "out.txt",
-            "-t",
-            "SharedToDomain",
-            "ApplicationRead",
-            "CloudStorage",
-            "RemovableMedia",
-            "IsPublic",
-            "-f",
-            "JSON",
-            "-d",
-            "-b",
-            "600",
-            "-e",
-            "2020-02-02",
-        ]
-    )
+    args = ["out.txt"] + ACCEPTABLE_ARGS
+    write_parser.parse_args(args)
 
 
 def test_init_adds_parser_when_not_given_filename_causes_system_exit(config_parser):
