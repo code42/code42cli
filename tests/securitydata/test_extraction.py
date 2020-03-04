@@ -18,6 +18,7 @@ from ..conftest import (
 @pytest.fixture(autouse=True)
 def mock_42(mocker):
     mock = mocker.patch("py42.sdk.SDK.create_using_local_account")
+    mock.return_value = mocker.MagicMock()
     return mock
 
 
@@ -235,3 +236,18 @@ def test_extract_when_global_variable_is_true_prints_error(
     extraction_module._EXCEPTIONS_OCCURRED = True
     extract(logger, namespace)
     assert mock_error_printer.call_count
+
+
+def test_when_sdk_raises_exception_global_variable_gets_set(
+    mocker, logger, error_logger, namespace
+):
+    mock_sdk_factory = mocker.patch("py42.sdk.SDK.create_using_local_account")
+    mock_sdk = mocker.MagicMock()
+
+    def sdk_side_effect(self, *args):
+        raise Exception()
+
+    mock_sdk.security.search_file_events.side_effect = sdk_side_effect
+    mock_sdk_factory.return_value = mock_sdk
+    extract(logger, namespace)
+    assert extraction_module._EXCEPTIONS_OCCURRED
