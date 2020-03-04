@@ -114,7 +114,7 @@ def _verify_exposure_types(exposure_types):
 def _handle_result(args):
     if args.silence_result_status:
         return
-    if not  is_interactive() and _EXCEPTIONS_OCCURRED:
+    if not is_interactive() and _EXCEPTIONS_OCCURRED:
         print_error("View exceptions that occurred at [HOME]/.code42cli/log/code42_errors.")
     else:
         print("Command succeeded with no errors.")
