@@ -1,6 +1,6 @@
 import pytest
 
-from code42cli import main
+from code42cli.main import main
 
 
 @pytest.fixture
