@@ -1,10 +1,11 @@
 from __future__ import print_function
-import keyring
+
 from getpass import getpass
+
+import keyring
 
 import code42cli.profile.config as config
 from code42cli.profile.config import ConfigurationKeys
-
 
 _ROOT_SERVICE_NAME = u"code42cli"
 

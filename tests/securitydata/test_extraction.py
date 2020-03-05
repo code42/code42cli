@@ -26,7 +26,7 @@ def logger(mocker):
 
 @pytest.fixture(autouse=True)
 def error_logger(mocker):
-    return mocker.patch("{0}.logger_factory".format(SECURITYDATA_NAMESPACE))
+    return mocker.patch("{0}.extraction.get_error_logger".format(SECURITYDATA_NAMESPACE))
 
 
 @pytest.fixture

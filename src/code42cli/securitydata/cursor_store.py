@@ -1,4 +1,5 @@
 from __future__ import with_statement
+
 import sqlite3
 
 from code42cli.util import get_user_project_path

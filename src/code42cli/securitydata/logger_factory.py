@@ -1,8 +1,8 @@
-import sys
 import logging
+import sys
+from logging.handlers import RotatingFileHandler
 from threading import Lock
 
-from logging.handlers import RotatingFileHandler
 from c42eventextractor.logging.formatters import (
     FileEventDictToJSONFormatter,
     FileEventDictToCEFFormatter,

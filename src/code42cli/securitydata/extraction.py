@@ -1,10 +1,12 @@
 from __future__ import print_function
+
 import json
-from py42.sdk import SDK
-from py42 import debug_level
-from py42 import settings
+
 from c42eventextractor import FileEventHandlers
 from c42eventextractor.extractors import FileEventExtractor
+from py42 import debug_level
+from py42 import settings
+from py42.sdk import SDK
 from py42.sdk.file_event_query.cloud_query import Actor
 from py42.sdk.file_event_query.device_query import DeviceUsername
 from py42.sdk.file_event_query.event_query import Source
@@ -12,15 +14,14 @@ from py42.sdk.file_event_query.exposure_query import ExposureType, ProcessOwner,
 from py42.sdk.file_event_query.file_query import MD5, SHA256, FileName, FilePath
 
 from code42cli.compat import str
-from code42cli.util import print_error, print_bold, is_interactive
 from code42cli.profile.profile import get_profile
-from code42cli.securitydata.options import ExposureType as ExposureTypeOptions
 from code42cli.securitydata import date_helper as date_helper
+from code42cli.securitydata.arguments.main import IS_INCREMENTAL_KEY
+from code42cli.securitydata.arguments.search import SearchArguments
 from code42cli.securitydata.cursor_store import AEDCursorStore
 from code42cli.securitydata.logger_factory import get_error_logger
-from code42cli.securitydata.arguments.search import SearchArguments
-from code42cli.securitydata.arguments.main import IS_INCREMENTAL_KEY
-
+from code42cli.securitydata.options import ExposureType as ExposureTypeOptions
+from code42cli.util import print_error, print_bold, is_interactive
 
 _EXCEPTIONS_OCCURRED = False
 

@@ -1,7 +1,7 @@
-from code42cli.securitydata.logger_factory import get_logger_for_stdout
-from code42cli.securitydata.arguments import search as search_args
 from code42cli.securitydata.arguments import main as main_args
+from code42cli.securitydata.arguments import search as search_args
 from code42cli.securitydata.extraction import extract
+from code42cli.securitydata.logger_factory import get_logger_for_stdout
 
 
 def init(subcommand_parser):

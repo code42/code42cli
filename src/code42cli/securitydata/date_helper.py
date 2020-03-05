@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+
 from c42eventextractor.common import convert_datetime_to_timestamp
 from py42.sdk.file_event_query.event_query import EventTimestamp
 
