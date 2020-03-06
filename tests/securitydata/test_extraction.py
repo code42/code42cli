@@ -274,7 +274,9 @@ def test_when_given_begin_date_past_90_days_and_is_incremental_and_a_stored_curs
     assert not filter_term_is_in_call_args(extractor, EventTimestamp._term)
 
 
-def test_when_not_given_begin_date_and_is_incremental_but_no_stored_checkpoint_exists_causes_exit(mocker, logger, namespace, extractor):
+def test_when_not_given_begin_date_and_is_incremental_but_no_stored_checkpoint_exists_causes_exit(
+    mocker, logger, namespace, extractor
+):
     namespace.begin_date = None
     namespace.is_incremental = True
     mock_checkpoint = mocker.patch(

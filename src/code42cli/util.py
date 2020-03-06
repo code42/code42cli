@@ -1,6 +1,7 @@
 from __future__ import print_function, with_statement
 
 import sys
+import re
 from os import path, makedirs
 
 
@@ -42,3 +43,14 @@ def print_bold(bold_text):
 
 def is_interactive():
     return sys.stdin.isatty()
+
+
+def get_url_parts(url_str):
+    regex = u"(?:http.*://)?(?P<host>[^:/ ]+).?(?P<port>[0-9]*).*"
+    parts = re.search(regex, url_str)
+    port = parts.group(u"port")
+    if port == u"" or not port.isdigit():
+        port = None
+    else:
+        port = int(port)
+    return parts.group(u"host"), port

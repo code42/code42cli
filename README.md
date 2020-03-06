@@ -56,7 +56,7 @@ code42 securitydata write-to filename.txt
 
 To send events to a server, do:
 ```bash
-code42 securitydata send-to https://syslog.company.com -p TCP
+code42 securitydata send-to syslog.company.com -p TCP
 ```
 
 Each destination-type subcommand shares query parameters

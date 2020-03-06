@@ -127,14 +127,29 @@ def test_get_logger_for_server_uses_no_priority_syslog_handler(no_priority_syslo
     assert logger.handlers[0] == no_priority_syslog_handler
 
 
-def test_get_logger_for_server_uses_given_host_and_protocol(mocker, no_priority_syslog_handler):
+def test_get_logger_for_server_constructs_handler_with_expected_args(
+    mocker, no_priority_syslog_handler
+):
     no_priority_syslog_handler_wrapper = mocker.patch(
         "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper.__init__"
     )
     no_priority_syslog_handler_wrapper.return_value = None
     _ = factory.get_logger_for_server("https://example.com", "TCP", "CEF")
     no_priority_syslog_handler_wrapper.assert_called_once_with(
-        "https://example.com", protocol="TCP"
+        "example.com", port=514, protocol="TCP"
+    )
+
+
+def test_get_logger_for_server_when_hostname_includes_port_constructs_handler_with_expected_args(
+    mocker, no_priority_syslog_handler
+):
+    no_priority_syslog_handler_wrapper = mocker.patch(
+        "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper.__init__"
+    )
+    no_priority_syslog_handler_wrapper.return_value = None
+    _ = factory.get_logger_for_server("https://example.com:999", "TCP", "CEF")
+    no_priority_syslog_handler_wrapper.assert_called_once_with(
+        "example.com", port=999, protocol="TCP"
     )
 
 
