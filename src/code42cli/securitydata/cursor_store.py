@@ -7,7 +7,7 @@ from code42cli.util import get_user_project_path
 _INSERTION_TIMESTAMP_FIELD_NAME = u"insertionTimestamp"
 
 
-class SecurityEventCursorStore(object):
+class BaseCursorStore(object):
     _PRIMARY_KEY_COLUMN_NAME = u"cursor_id"
 
     def __init__(self, db_table_name, db_file_path=None):
@@ -52,11 +52,11 @@ class SecurityEventCursorStore(object):
                 return int(query_result[0]) <= 0
 
 
-class AEDCursorStore(SecurityEventCursorStore):
+class FileEventCursorStore(BaseCursorStore):
     _PRIMARY_KEY = 1
 
     def __init__(self, db_file_path=None):
-        super(AEDCursorStore, self).__init__(u"aed_checkpoint", db_file_path)
+        super(FileEventCursorStore, self).__init__(u"aed_checkpoint", db_file_path)
         if self._is_empty():
             self._init_table()
 
