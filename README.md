@@ -50,6 +50,13 @@ To print events to stdout, do:
 code42 securitydata print -b 2020-02-02
 ```
 
+Note that `-b` or `--begin` is usually required.
+To specify a time, do:
+
+```bash
+code42 securitydata print -b 2020-02-02 12:51
+```
+
 To write events to a file, do:
 ```bash
 code42 securitydata write-to filename.txt -b 2020-02-02
