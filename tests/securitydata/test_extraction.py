@@ -50,10 +50,10 @@ def namespace_with_begin(namespace):
     return namespace
 
 
-def filter_term_is_in_call_args(extractor, query_filter):
+def filter_term_is_in_call_args(extractor, term):
     arg_filters = extractor.extract.call_args[0]
     for f in arg_filters:
-        if str(query_filter) == str(f):
+        if term in str(f):
             return True
     return False
 
@@ -270,13 +270,21 @@ def test_when_given_begin_date_past_90_days_and_is_incremental_and_a_stored_curs
     )
     mock_checkpoint.return_value = 22624624
     extraction_module.extract(logger, namespace)
-
     assert not filter_term_is_in_call_args(extractor, EventTimestamp._term)
 
 
-def test_when_not_given_begin_date_and_is_incremental_but_no_stored_checkpoint_exists_causes_exit(
-    mocker, logger, namespace, extractor
-):
+def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_begin_date(mocker, logger, namespace, extractor):
+    namespace.begin_date = (get_test_date_str(days_ago=1),)
+    namespace.is_incremental = False
+    mock_checkpoint = mocker.patch(
+        "code42cli.securitydata.cursor_store.FileEventCursorStore.get_stored_insertion_timestamp"
+    )
+    mock_checkpoint.return_value = 22624624
+    extraction_module.extract(logger, namespace)
+    assert filter_term_is_in_call_args(extractor, EventTimestamp._term)
+
+
+def test_when_not_given_begin_date_and_is_incremental_but_no_stored_checkpoint_exists_causes_exit(mocker, logger, namespace, extractor):
     namespace.begin_date = None
     namespace.is_incremental = True
     mock_checkpoint = mocker.patch(
