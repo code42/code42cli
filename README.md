@@ -65,7 +65,7 @@ To only get events you did not get previously for the same query, use interactiv
 code42 securitydata send-to syslog.company.com -i
 ```
 
-Note that begin date is not required on subsequent interactive runs for the same query, and it will be ignored if provided.
+Note that begin date will be ignored if provided on subsequent queries using `-i`.
 
 
 Each destination-type subcommand shares query parameters
