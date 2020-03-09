@@ -17,7 +17,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Changed
 
 - Begin dates are no longer required for subsequent interactive `securitydata` commands.
-- When provided, begin dates are now ignored on subsequent interactive `securitydata` commands
+- When provided, begin dates are now ignored on subsequent interactive `securitydata` commands.
 
 ## 0.3.0 - 2020-03-04
 

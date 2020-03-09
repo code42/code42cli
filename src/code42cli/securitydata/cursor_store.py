@@ -56,7 +56,7 @@ class FileEventCursorStore(BaseCursorStore):
     _PRIMARY_KEY = 1
 
     def __init__(self, db_file_path=None):
-        super(FileEventCursorStore, self).__init__(u"aed_checkpoint", db_file_path)
+        super(FileEventCursorStore, self).__init__(u"file_event_checkpoint", db_file_path)
         if self._is_empty():
             self._init_table()
 
