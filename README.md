@@ -67,7 +67,7 @@ To send events to a server, do:
 code42 securitydata send-to syslog.company.com -p TCP -b 2020-02-02
 ```
 
-To only get events you did not get previously for the same query, use interactive mode with the `-i` flag:
+To only get events you did not get previously for the same query, use incremental mode with the `-i` flag:
 ```bash
 code42 securitydata send-to syslog.company.com -i
 ```
