@@ -1,13 +1,12 @@
 import pytest
-
 from py42.sdk.alert_query import Actor
 from py42.sdk.file_event_query.device_query import DeviceUsername
 from py42.sdk.file_event_query.event_query import Source, EventTimestamp
 from py42.sdk.file_event_query.exposure_query import ExposureType, ProcessOwner, TabURL
 from py42.sdk.file_event_query.file_query import FilePath, FileName, SHA256, MD5
 
-from code42cli.securitydata.options import ExposureType as ExposureTypeOptions
 import code42cli.securitydata.extraction as extraction_module
+from code42cli.securitydata.options import ExposureType as ExposureTypeOptions
 from .conftest import SECURITYDATA_NAMESPACE, begin_date_tuple
 from ..conftest import get_filter_value_from_json, get_test_date_str
 

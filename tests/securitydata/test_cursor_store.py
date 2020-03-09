@@ -1,7 +1,8 @@
-import pytest
 from os import path
 
+import pytest
 from c42eventextractor.extractors import INSERTION_TIMESTAMP_FIELD_NAME
+
 from code42cli.securitydata.cursor_store import BaseCursorStore, FileEventCursorStore
 
 

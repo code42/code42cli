@@ -1,10 +1,10 @@
-import pytest
 from argparse import ArgumentParser
 
-from ..conftest import SUBCOMMANDS_NAMESPACE
-from .conftest import ACCEPTABLE_ARGS
-from code42cli.securitydata.subcommands import write_to as writer
+import pytest
 
+from code42cli.securitydata.subcommands import write_to as writer
+from .conftest import ACCEPTABLE_ARGS
+from ..conftest import SUBCOMMANDS_NAMESPACE
 
 _WRITE_PATH = "{0}.write_to".format(SUBCOMMANDS_NAMESPACE)
 

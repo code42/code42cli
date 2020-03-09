@@ -1,7 +1,8 @@
-import pytest
 import json as json_module
-from datetime import datetime, timedelta
 from argparse import Namespace
+from datetime import datetime, timedelta
+
+import pytest
 
 from code42cli.profile.config import ConfigurationKeys
 

@@ -1,8 +1,7 @@
 import pytest
 
-from ..conftest import SECURITYDATA_NAMESPACE
 from code42cli.securitydata.subcommands import clear_checkpoint as clearer
-
+from ..conftest import SECURITYDATA_NAMESPACE
 
 _CURSOR_STORE_PATH = "{0}.cursor_store".format(SECURITYDATA_NAMESPACE)
 
