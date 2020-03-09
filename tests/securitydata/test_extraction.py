@@ -280,6 +280,10 @@ def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_b
     )
     mock_checkpoint.return_value = 22624624
     extraction_module.extract(logger, namespace)
+
+    actual_ts = get_filter_value_from_json(extractor.extract.call_args[0][0], filter_index=0)
+    expected_ts = "{0}T00:00:00.000Z".format(namespace.begin_date[0])
+    assert actual_ts == expected_ts
     assert filter_term_is_in_call_args(extractor, EventTimestamp._term)
 
 
