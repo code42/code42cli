@@ -10,7 +10,7 @@ _DEFAULT_VALUE = u"__DEFAULT__"
 
 
 class ConfigurationKeys(object):
-    USER_SECTION = u"Code42"
+    PROFILE_SECTION_PREFIX = u"Code42"
     AUTHORITY_KEY = u"c42_authority_url"
     USERNAME_KEY = u"c42_username"
     IGNORE_SSL_ERRORS_KEY = u"ignore-ssl-errors"
@@ -87,7 +87,7 @@ def _profile_can_be_set():
 def _get_config_profile_from_parser(parser):
     config_file_path = _get_config_file_path()
     parser.read(config_file_path)
-    config = parser[ConfigurationKeys.USER_SECTION]
+    config = parser[ConfigurationKeys.PROFILE_SECTION_PREFIX]
     return config
 
 
@@ -107,11 +107,11 @@ def _create_new_config_file(path):
 
 def _create_user_section(parser):
     keys = ConfigurationKeys
-    parser.add_section(keys.USER_SECTION)
-    parser[keys.USER_SECTION] = {}
-    parser[keys.USER_SECTION][keys.AUTHORITY_KEY] = _DEFAULT_VALUE
-    parser[keys.USER_SECTION][keys.USERNAME_KEY] = _DEFAULT_VALUE
-    parser[keys.USER_SECTION][keys.IGNORE_SSL_ERRORS_KEY] = u"False"
+    parser.add_section(keys.PROFILE_SECTION_PREFIX)
+    parser[keys.PROFILE_SECTION_PREFIX] = {}
+    parser[keys.PROFILE_SECTION_PREFIX][keys.AUTHORITY_KEY] = _DEFAULT_VALUE
+    parser[keys.PROFILE_SECTION_PREFIX][keys.USERNAME_KEY] = _DEFAULT_VALUE
+    parser[keys.PROFILE_SECTION_PREFIX][keys.IGNORE_SSL_ERRORS_KEY] = u"False"
     return parser
 
 
@@ -138,4 +138,4 @@ def _verify_config_file(path):
     config_parser = ConfigParser()
     config_parser.read(path)
     sections = config_parser.sections()
-    return keys.USER_SECTION in sections and keys.INTERNAL_SECTION in sections
+    return keys.PROFILE_SECTION_PREFIX in sections and keys.INTERNAL_SECTION in sections

@@ -16,7 +16,7 @@ class SharedConfigMocks(object):
         sections = self.mocker.patch("configparser.ConfigParser.sections")
         sections.return_value = [
             config.ConfigurationKeys.INTERNAL_SECTION,
-            config.ConfigurationKeys.USER_SECTION,
+            config.ConfigurationKeys.PROFILE_SECTION_PREFIX,
         ]
 
     def setup_non_existing_config_file(self):
