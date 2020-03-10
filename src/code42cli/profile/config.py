@@ -15,7 +15,7 @@ class ConfigurationKeys(object):
     USERNAME_KEY = u"c42_username"
     IGNORE_SSL_ERRORS_KEY = u"ignore-ssl-errors"
     INTERNAL_SECTION = u"Internal"
-    HAS_SET_PROFILE_KEY = u"default_profile_is_complete"
+    DEFAULT_PROFILE_IS_COMPLETE = u"default_profile_is_complete"
     DEFAULT_PROFILE = u"default_profile"
 
 
@@ -77,15 +77,21 @@ def write_ignore_ssl_errors(new_value, profile_name=None):
 
 
 def _try_mark_setup_as_complete(profile_name):
+    keys = ConfigurationKeys
     profile_name = profile_name or _get_default_profile_name()
     if not _setup_ready_for_completion(profile_name):
         return
     parser = ConfigParser()
     config_file_path = _get_config_file_path(profile_name)
     parser.read(config_file_path)
-    settings = parser[ConfigurationKeys.INTERNAL_SECTION]
-    settings[ConfigurationKeys.HAS_SET_PROFILE_KEY] = str(True)
-    _save(parser, profile_name, ConfigurationKeys.HAS_SET_PROFILE_KEY)
+    settings = parser[keys.INTERNAL_SECTION]
+    settings[keys.DEFAULT_PROFILE_IS_COMPLETE] = str(True)
+
+    default_profile = parser[keys.INTERNAL_SECTION].get(keys.DEFAULT_PROFILE)
+    if default_profile is None or default_profile is DEFAULT_VALUE:
+        parser[keys.INTERNAL_SECTION][keys.DEFAULT_PROFILE] = profile_name
+
+    _save(parser, profile_name, keys.DEFAULT_PROFILE_IS_COMPLETE)
 
 
 def _get_default_profile_name():
@@ -109,7 +115,7 @@ def _profile_has_been_set():
     config_file_path = _get_config_file_path()
     parser.read(config_file_path)
     settings = parser[ConfigurationKeys.INTERNAL_SECTION]
-    return settings.getboolean(ConfigurationKeys.HAS_SET_PROFILE_KEY)
+    return settings.getboolean(ConfigurationKeys.DEFAULT_PROFILE_IS_COMPLETE)
 
 
 def _get_profile_from_parser(parser, profile_name):
@@ -128,7 +134,7 @@ def _save(parser, profile_name, key=None, path=None):
     path = _get_config_file_path(profile_name) if path is None else path
     util.open_file(path, u"w+", lambda f: parser.write(f))
     if key is not None:
-        if key == ConfigurationKeys.HAS_SET_PROFILE_KEY:
+        if key == ConfigurationKeys.DEFAULT_PROFILE_IS_COMPLETE:
             print(u"You have completed setting up your profile!")
         else:
             print(u"'{}' has been successfully updated".format(key))
@@ -154,12 +160,13 @@ def _create_internal_section(parser):
     keys = ConfigurationKeys
     parser.add_section(keys.INTERNAL_SECTION)
     parser[keys.INTERNAL_SECTION] = {}
-    parser[keys.INTERNAL_SECTION][keys.HAS_SET_PROFILE_KEY] = str(False)
+    parser[keys.INTERNAL_SECTION][keys.DEFAULT_PROFILE_IS_COMPLETE] = str(False)
     parser[keys.INTERNAL_SECTION][keys.DEFAULT_PROFILE] = DEFAULT_VALUE
     return parser
 
 
 def _create_profile_section(parser, profile_name):
+    print("TEST")
     keys = ConfigurationKeys
     parser.add_section(profile_name)
     parser[profile_name] = {}
