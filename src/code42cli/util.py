@@ -46,11 +46,13 @@ def is_interactive():
 
 
 def get_url_parts(url_str):
-    regex = u"(?:http.*://)?(?P<host>[^:/ ]+).?(?P<port>[0-9]*).*"
-    parts = re.search(regex, url_str)
-    port = parts.group(u"port")
-    if port == u"" or not port.isdigit():
-        port = None
-    else:
-        port = int(port)
-    return parts.group(u"host"), port
+    parts = url_str.split(u":")
+    if parts[0] == u"http" or parts[0] == u"https":
+        parts = parts[1:]
+        parts[0] = parts[0][2:]
+
+    port = None
+    if len(parts) > 1 and parts[1] != u"" and parts[1].isdigit():
+        port = int(parts[1])
+
+    return parts[0], port
