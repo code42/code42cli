@@ -75,7 +75,7 @@ def test_get_config_profile_when_file_exists_but_profile_does_not_exist_exits(sh
 
     # It is expected to exit because the user must set their profile before they can see it.
     with pytest.raises(SystemExit):
-        config.get_config_profile()
+        config.get_profile_section()
 
 
 def test_get_config_profile_when_file_exists_and_profile_is_set_does_not_exit(shared_config_mocks):
@@ -83,7 +83,7 @@ def test_get_config_profile_when_file_exists_and_profile_is_set_does_not_exit(sh
     shared_config_mocks.setup_existing_profile()
 
     # Presumably, it shows the profile instead of exiting.
-    assert config.get_config_profile()
+    assert config.get_profile_section()
 
 
 def test_get_config_profile_when_file_does_not_exist_saves_changes(shared_config_mocks):
@@ -91,7 +91,7 @@ def test_get_config_profile_when_file_does_not_exist_saves_changes(shared_config
     shared_config_mocks.setup_non_existing_profile()
 
     with pytest.raises(SystemExit):
-        config.get_config_profile()
+        config.get_profile_section()
 
     # It saves because it is writing default values to the config file
     assert save_was_called(shared_config_mocks.open_function)
@@ -126,15 +126,15 @@ def test_mark_as_set_if_complete_when_already_set_and_marked_in_config_file_does
 
 
 def test_set_username_saves(shared_config_mocks):
-    config.set_username("New user")
+    config.write_username("New user")
     assert save_was_called(shared_config_mocks.open_function)
 
 
 def test_set_authority_url_saves(shared_config_mocks):
-    config.set_authority_url("New url")
+    config.write_authority_url("New url")
     assert save_was_called(shared_config_mocks.open_function)
 
 
 def test_set_ignore_ssl_errors_saves(shared_config_mocks):
-    config.set_ignore_ssl_errors(True)
+    config.write_ignore_ssl_errors(True)
     assert save_was_called(shared_config_mocks.open_function)

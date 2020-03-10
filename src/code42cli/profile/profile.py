@@ -8,12 +8,11 @@ from code42cli.util import get_input, print_error, print_set_profile_help, print
 
 
 class Code42Profile(object):
-    authority_url = None
-    username = None
-    ignore_ssl_errors = False
-
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, profile_section):
+        self.name = profile_section.name
+        self.authority_url = profile_section.get(ConfigurationKeys.AUTHORITY_KEY)
+        self.username = profile_section.get(ConfigurationKeys.USERNAME_KEY)
+        self.ignore_ssl_errors = profile_section.get(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
 
     def get_password(self):
         pwd = password.get_password(self.name)
@@ -21,9 +20,8 @@ class Code42Profile(object):
             pwd = password.get_password_from_prompt()
         return pwd
 
-    def __repr__(self):
-        profile_str = u"{0} - {1} - {2}"
-        profile_str.format(self.name, self.username, self.authority_url)
+    def __str__(self):
+        return u"{0}: Username={1}, Authority URL={2}".format(self.name, self.username, self.authority_url)
 
 
 def init(subcommand_parser):
@@ -49,19 +47,15 @@ def init(subcommand_parser):
     _add_args_to_set_command(parser_for_set)
 
 
-def get_profile():
+def get_profile(profile_name=None):
     """Returns the current profile object."""
-    profile_values = config.get_config_profile()
-    profile = Code42Profile(profile_values.name)
-    profile.authority_url = profile_values.get(ConfigurationKeys.AUTHORITY_KEY)
-    profile.username = profile_values.get(ConfigurationKeys.USERNAME_KEY)
-    profile.ignore_ssl_errors = profile_values.get(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
-    return profile
+    profile_section = config.get_profile_section(profile_name)
+    return Code42Profile(profile_section)
 
 
 def show_profile(args):
     """Prints the current profile to stdout."""
-    profile = config.get_config_profile(args.profile_name)
+    profile = config.get_profile_section(args.profile_name)
     print(u"\n{0}:".format(profile.name))
     for key in profile:
         print(u"\t* {} = {}".format(key, profile[key]))
@@ -82,10 +76,10 @@ def set_profile(args):
 
 def list_available_profiles(*args):
     """Lists all profiles that exist for this OS user."""
-    profiles = config.get_all_profile_names()
-    if profiles:
-        for profile in profiles:
-            print(profile)
+    profile_sections = config.get_all_profile_sections()
+    if profile_sections:
+        for section in profile_sections:
+            print(Code42Profile(section))
     else:
         print_no_existing_profile_message()
 
@@ -107,7 +101,7 @@ def _missing_default_profile(args):
 
 
 def _default_profile_exists():
-    profile_name = config.get_default_profile_name()
+    profile_name = config._get_default_profile_name()
     return profile_name is not None and profile_name != config.DEFAULT_VALUE
 
 
@@ -174,20 +168,20 @@ def _set_has_args(args):
 
 def _try_set_authority_url(args):
     if args.c42_authority_url is not None:
-        config.set_authority_url(args.c42_authority_url, args.profile_name)
+        config.write_authority_url(args.c42_authority_url, args.profile_name)
 
 
 def _try_set_username(args):
     if args.c42_username is not None:
-        config.set_username(args.c42_username, args.profile_name)
+        config.write_username(args.c42_username, args.profile_name)
 
 
 def _try_set_ignore_ssl_errors(args):
     if args.disable_ssl_errors is not None and not args.enable_ssl_errors:
-        config.set_ignore_ssl_errors(True, args.profile_name)
+        config.write_ignore_ssl_errors(True, args.profile_name)
 
     if args.enable_ssl_errors is not None:
-        config.set_ignore_ssl_errors(False, args.profile_name)
+        config.write_ignore_ssl_errors(False, args.profile_name)
 
 
 def _prompt_for_allow_password_set(args):

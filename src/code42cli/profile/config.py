@@ -19,7 +19,7 @@ class ConfigurationKeys(object):
     DEFAULT_PROFILE = u"default_profile"
 
 
-def get_config_profile(profile_name=None):
+def get_profile_section(profile_name=None):
     """Gets the config file variables for the given name.
 
         Args:
@@ -27,7 +27,7 @@ def get_config_profile(profile_name=None):
             If None, uses the default profile name.
     """
     parser = ConfigParser()
-    available_profiles = get_all_profile_names()
+    available_profiles = _get_all_profile_names()
     if len(available_profiles) == 0:
         util.print_no_existing_profile_message()
         exit(1)
@@ -37,28 +37,21 @@ def get_config_profile(profile_name=None):
         exit(1)
 
     if not profile_name:
-        profile_name = get_default_profile_name()
+        profile_name = _get_default_profile_name()
 
     return _get_profile_from_parser(parser, profile_name)
 
 
-def get_default_profile_name():
-    parser = ConfigParser()
-    _attach_config_file_to_profile(parser)
-    return parser[ConfigurationKeys.INTERNAL_SECTION][ConfigurationKeys.DEFAULT_PROFILE]
+def get_all_profile_sections():
+    names = _get_all_profile_names()
+    profiles = []
+    for name in names:
+        profiles.append(get_profile_section(name))
+    return profiles
 
 
-def get_all_profile_names():
-    parser = ConfigParser()
-    _attach_config_file_to_profile(parser)
-    sections = list(parser.sections())
-    if ConfigurationKeys.INTERNAL_SECTION in sections:
-        sections.remove(ConfigurationKeys.INTERNAL_SECTION)
-    return sections
-
-
-def set_username(new_username, profile_name=None):
-    profile_name = profile_name or get_default_profile_name()
+def write_username(new_username, profile_name=None):
+    profile_name = profile_name or _get_default_profile_name()
     parser = ConfigParser()
     profile = _get_profile_from_parser(parser, profile_name)
     profile[ConfigurationKeys.USERNAME_KEY] = new_username
@@ -66,8 +59,8 @@ def set_username(new_username, profile_name=None):
     _try_mark_setup_as_complete(profile_name)
 
 
-def set_authority_url(new_url, profile_name=None):
-    profile_name = profile_name or get_default_profile_name()
+def write_authority_url(new_url, profile_name=None):
+    profile_name = profile_name or _get_default_profile_name()
     parser = ConfigParser()
     profile = _get_profile_from_parser(parser, profile_name)
     profile[ConfigurationKeys.AUTHORITY_KEY] = new_url
@@ -75,8 +68,8 @@ def set_authority_url(new_url, profile_name=None):
     _try_mark_setup_as_complete(profile_name)
 
 
-def set_ignore_ssl_errors(new_value, profile_name=None):
-    profile_name = profile_name or get_default_profile_name()
+def write_ignore_ssl_errors(new_value, profile_name=None):
+    profile_name = profile_name or _get_default_profile_name()
     parser = ConfigParser()
     profile = _get_profile_from_parser(parser, profile_name)
     profile[ConfigurationKeys.IGNORE_SSL_ERRORS_KEY] = str(new_value)
@@ -84,7 +77,7 @@ def set_ignore_ssl_errors(new_value, profile_name=None):
 
 
 def _try_mark_setup_as_complete(profile_name):
-    profile_name = profile_name or get_default_profile_name()
+    profile_name = profile_name or _get_default_profile_name()
     if not _setup_ready_for_completion(profile_name):
         return
     parser = ConfigParser()
@@ -93,6 +86,12 @@ def _try_mark_setup_as_complete(profile_name):
     settings = parser[ConfigurationKeys.INTERNAL_SECTION]
     settings[ConfigurationKeys.HAS_SET_PROFILE_KEY] = str(True)
     _save(parser, profile_name, ConfigurationKeys.HAS_SET_PROFILE_KEY)
+
+
+def _get_default_profile_name():
+    parser = ConfigParser()
+    _attach_config_file_to_profile(parser)
+    return parser[ConfigurationKeys.INTERNAL_SECTION][ConfigurationKeys.DEFAULT_PROFILE]
 
 
 def _setup_ready_for_completion(profile_name):
@@ -172,6 +171,15 @@ def _create_profile_section(parser, profile_name):
     if default_profile is None or default_profile is DEFAULT_VALUE:
         parser[keys.INTERNAL_SECTION][keys.DEFAULT_PROFILE] = profile_name
     return parser
+
+
+def _get_all_profile_names():
+    parser = ConfigParser()
+    _attach_config_file_to_profile(parser)
+    sections = list(parser.sections())
+    if ConfigurationKeys.INTERNAL_SECTION in sections:
+        sections.remove(ConfigurationKeys.INTERNAL_SECTION)
+    return sections
 
 
 def _print_profile_not_exists_message(profile_name):
