@@ -56,8 +56,7 @@ To specify a time, do:
 ```bash
 code42 securitydata print -b 2020-02-02 12:51
 ```
-
-Note that begin date will be ignored if provided on subsequent queries using `-i`.
+Begin date will be ignored if provided on subsequent queries using `-i`.
 
 To write events to a file, do:
 ```bash
@@ -73,7 +72,7 @@ To only get events that Code42 previously did not observe since you last recorde
 ```bash
 code42 securitydata send-to syslog.company.com -i
 ```
-Note that this only is guaranteed if you do not change your query.
+This is only guaranteed if you did not change your query.
 
 
 Each destination-type subcommand shares query parameters
@@ -92,8 +91,7 @@ Each destination-type subcommand shares query parameters
 * `--include-non-exposure` (does not work with `-t`)
 * `--advanced-query` (raw JSON query)
 
-Note that you cannot use other query parameters if you use `--advanced-query`.
-
+You cannot use other query parameters if you use `--advanced-query`.
 To learn more about acceptable arguments, add the `-h` flag to `code42` or and of the destination-type subcommands.
 
 
