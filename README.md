@@ -20,10 +20,13 @@ $ python setup.py install
 
 First, set your profile:
 ```bash
-code42 profile set -s https://example.authority.com -u security.admin@example.com
+code42 profile set --profile MY_FIRST_PROFILE -s https://example.authority.com -u security.admin@example.com
 ```
+The `--profile` flag is required the first time and it takes a name.
+On subsequent uses of `set`, not specifying the profile will set the default profile.
+
 Your profile contains the necessary properties for logging into Code42 servers.
-After running this `code42 profile set`, you will be prompted about storing a password.
+After running `code42 profile set`, you will be prompted about storing a password.
 If you agree, you will be securely prompted to input your password.
 Your password is not stored in plain-text, and is not shown when you do `code42 profile show`.
 However, `code42 profile show` will confirm that there is a password set for your profile.
@@ -37,6 +40,16 @@ code42 profile set --disable-ssl-errors
 To re-enable SSL errors, do:
 ```bash
 code42 profile set --enable-ssl-errors
+```
+
+You can add multiple profiles with different names and the change the default profile with the `use` command:
+```bash
+code42 profile use MY_SECOND_PROFILE
+```
+
+To see all your profiles, do:
+```bash
+code42 profile list
 ```
 
 Next, you can query for events and send them to three possible destination types
