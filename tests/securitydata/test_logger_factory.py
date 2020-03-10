@@ -16,7 +16,7 @@ def no_priority_syslog_handler(mocker):
     mock = mocker.patch("c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper.handler")
 
     # Set handlers to empty list so it gets initialized each test
-    factory.get_logger_for_server("https://example.com", "TCP", "CEF").handlers = []
+    factory.get_logger_for_server("example.com", "TCP", "CEF").handlers = []
     return mock
 
 
@@ -88,12 +88,12 @@ def test_get_logger_for_file_uses_given_file_name():
 
 
 def test_get_logger_for_server_has_info_level(no_priority_syslog_handler):
-    logger = factory.get_logger_for_server("https://example.com", "TCP", "CEF")
+    logger = factory.get_logger_for_server("example.com", "TCP", "CEF")
     assert logger.level == logging.INFO
 
 
 def test_get_logger_for_server_when_given_cef_format_uses_cef_formatter(no_priority_syslog_handler):
-    _ = factory.get_logger_for_server("https://example.com", "TCP", "CEF")
+    _ = factory.get_logger_for_server("example.com", "TCP", "CEF")
     assert (
         type(no_priority_syslog_handler.setFormatter.call_args[0][0]) == FileEventDictToCEFFormatter
     )
@@ -102,8 +102,8 @@ def test_get_logger_for_server_when_given_cef_format_uses_cef_formatter(no_prior
 def test_get_logger_for_server_when_given_json_format_uses_json_formatter(
     no_priority_syslog_handler
 ):
-    factory.get_logger_for_server("https://example.com", "TCP", "JSON").handlers = []
-    _ = factory.get_logger_for_server("https://example.com", "TCP", "JSON")
+    factory.get_logger_for_server("example.com", "TCP", "JSON").handlers = []
+    _ = factory.get_logger_for_server("example.com", "TCP", "JSON")
     actual = type(no_priority_syslog_handler.setFormatter.call_args[0][0])
     assert actual == FileEventDictToJSONFormatter
 
@@ -111,20 +111,20 @@ def test_get_logger_for_server_when_given_json_format_uses_json_formatter(
 def test_get_logger_for_server_when_given_raw_json_format_uses_raw_json_formatter(
     no_priority_syslog_handler
 ):
-    factory.get_logger_for_server("https://example.com", "TCP", "RAW-JSON").handlers = []
-    _ = factory.get_logger_for_server("https://example.com", "TCP", "RAW-JSON")
+    factory.get_logger_for_server("example.com", "TCP", "RAW-JSON").handlers = []
+    _ = factory.get_logger_for_server("example.com", "TCP", "RAW-JSON")
     actual = type(no_priority_syslog_handler.setFormatter.call_args[0][0])
     assert actual == FileEventDictToRawJSONFormatter
 
 
 def test_get_logger_for_server_when_called_twice_only_has_one_handler(no_priority_syslog_handler):
-    _ = factory.get_logger_for_server("https://example.com", "TCP", "JSON")
-    logger = factory.get_logger_for_server("https://example.com", "TCP", "CEF")
+    _ = factory.get_logger_for_server("example.com", "TCP", "JSON")
+    logger = factory.get_logger_for_server("example.com", "TCP", "CEF")
     assert len(logger.handlers) == 1
 
 
 def test_get_logger_for_server_uses_no_priority_syslog_handler(no_priority_syslog_handler):
-    logger = factory.get_logger_for_server("https://example.com", "TCP", "CEF")
+    logger = factory.get_logger_for_server("example.com", "TCP", "CEF")
     assert logger.handlers[0] == no_priority_syslog_handler
 
 
@@ -135,7 +135,7 @@ def test_get_logger_for_server_constructs_handler_with_expected_args(
         "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper.__init__"
     )
     no_priority_syslog_handler_wrapper.return_value = None
-    _ = factory.get_logger_for_server("https://example.com", "TCP", "CEF")
+    _ = factory.get_logger_for_server("example.com", "TCP", "CEF")
     no_priority_syslog_handler_wrapper.assert_called_once_with(
         "example.com", port=514, protocol="TCP"
     )
@@ -148,7 +148,7 @@ def test_get_logger_for_server_when_hostname_includes_port_constructs_handler_wi
         "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper.__init__"
     )
     no_priority_syslog_handler_wrapper.return_value = None
-    _ = factory.get_logger_for_server("https://example.com:999", "TCP", "CEF")
+    _ = factory.get_logger_for_server("example.com:999", "TCP", "CEF")
     no_priority_syslog_handler_wrapper.assert_called_once_with(
         "example.com", port=999, protocol="TCP"
     )
