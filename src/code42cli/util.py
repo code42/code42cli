@@ -47,12 +47,8 @@ def is_interactive():
 
 
 def get_url_parts(url_str):
-    url_parts = urlparse(url_str)
-    host = url_parts.hostname
-    port = int(url_parts.port) if url_parts.port else None
-    if not host:
-        parts = url_parts.path.split(u":")
-        host = parts[0]
-        if len(parts) > 1:
-            port = int(parts[1])
-    return host, port
+    parts = url_str.split(u":")
+    port = None
+    if len(parts) > 1 and parts[1] != u"":
+        port = int(parts[1])
+    return parts[0], port
