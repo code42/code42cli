@@ -52,7 +52,7 @@ def get_url_parts(url_str):
         parts[0] = parts[0][2:]
 
     port = None
-    if len(parts) > 1 and parts[1] != u"" and parts[1].isdigit():
+    if len(parts) > 1 and parts[1] != u"":
         port = int(parts[1])
 
     return parts[0], port
