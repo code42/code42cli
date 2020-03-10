@@ -24,7 +24,7 @@ def get_profile(profile_name=None):
 
         Args:
             profile_name: The name of the profile to get variables for.
-            If None, uses the default profile name.
+            If None, uses the default profile.
     """
     parser = ConfigParser()
     available_profiles = _get_all_profile_names()
