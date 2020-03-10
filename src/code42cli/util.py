@@ -1,8 +1,9 @@
 from __future__ import print_function, with_statement
 
-import re
 import sys
 from os import path, makedirs
+
+from code42cli.compat import urlparse
 
 
 def get_input(prompt):
@@ -46,13 +47,12 @@ def is_interactive():
 
 
 def get_url_parts(url_str):
-    parts = url_str.split(u":")
-    if parts[0] == u"http" or parts[0] == u"https":
-        parts = parts[1:]
-        parts[0] = parts[0][2:]
-
-    port = None
-    if len(parts) > 1 and parts[1] != u"":
-        port = int(parts[1])
-
-    return parts[0], port
+    url_parts = urlparse(url_str)
+    host = url_parts.hostname
+    port = int(url_parts.port) if url_parts.port else None
+    if not host:
+        parts = url_parts.path.split(u":")
+        host = parts[0]
+        if len(parts) > 1:
+            port = int(parts[1])
+    return host, port

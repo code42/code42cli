@@ -272,7 +272,9 @@ def test_when_given_begin_date_past_90_days_and_is_incremental_and_a_stored_curs
     assert not filter_term_is_in_call_args(extractor, EventTimestamp._term)
 
 
-def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_begin_date(mocker, logger, namespace, extractor):
+def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_begin_date(
+    mocker, logger, namespace, extractor
+):
     namespace.begin_date = (get_test_date_str(days_ago=1),)
     namespace.is_incremental = False
     mock_checkpoint = mocker.patch(
@@ -287,7 +289,9 @@ def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_b
     assert filter_term_is_in_call_args(extractor, EventTimestamp._term)
 
 
-def test_when_not_given_begin_date_and_is_incremental_but_no_stored_checkpoint_exists_causes_exit(mocker, logger, namespace, extractor):
+def test_when_not_given_begin_date_and_is_incremental_but_no_stored_checkpoint_exists_causes_exit(
+    mocker, logger, namespace, extractor
+):
     namespace.begin_date = None
     namespace.is_incremental = True
     mock_checkpoint = mocker.patch(
