@@ -2,7 +2,7 @@
 
 Use the `code42` command to interact with your Code42 environment.
 `code42 securitydata` is a CLI tool for extracting AED events.
-Additionally, `code42 securitydata` can record a checkpoint so that you only get events you have not previously gotten
+Additionally, you can choose to only get events that Code42 previously did not observe since you last recorded a checkpoint
 (provided you do not change your query).
 
 ## Requirements
@@ -57,6 +57,8 @@ To specify a time, do:
 code42 securitydata print -b 2020-02-02 12:51
 ```
 
+Note that begin date will be ignored if provided on subsequent queries using `-i`.
+
 To write events to a file, do:
 ```bash
 code42 securitydata write-to filename.txt -b 2020-02-02
@@ -67,12 +69,11 @@ To send events to a server, do:
 code42 securitydata send-to syslog.company.com -p TCP -b 2020-02-02
 ```
 
-To only get events you did not get previously for the same query, use incremental mode with the `-i` flag:
+To only get events that Code42 previously did not observe since you last recorded a checkpoint, use the `-i` flag.
 ```bash
 code42 securitydata send-to syslog.company.com -i
 ```
-
-Note that begin date will be ignored if provided on subsequent queries using `-i`.
+Note that this only is guaranteed if you do not change your query.
 
 
 Each destination-type subcommand shares query parameters
