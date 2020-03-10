@@ -20,7 +20,7 @@ class ConfigurationKeys(object):
 
 
 def get_profile(profile_name=None):
-    """Gets the config file variables for the given name.
+    """Gets the config file variables for the given profile name.
 
         Args:
             profile_name: The name of the profile to get variables for.
