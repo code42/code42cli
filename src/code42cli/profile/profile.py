@@ -45,13 +45,17 @@ def init(subcommand_parser):
     parser_for_set = profile_subparsers.add_parser(u"set")
     parser_for_reset_password = profile_subparsers.add_parser(u"reset-pw")
     parser_for_list = profile_subparsers.add_parser(u"list")
+    parser_for_use = profile_subparsers.add_parser(u"use")
 
     parser_for_show.set_defaults(func=show_profile)
     parser_for_set.set_defaults(func=set_profile)
     parser_for_reset_password.set_defaults(func=prompt_for_password_reset)
     parser_for_list.set_defaults(func=list_profiles)
-    _add_args_to_show_command(parser_for_show)
+    parser_for_use.set_defaults(func=use_profile)
+
+    main_args.add_profile_name_arg(parser_for_show)
     _add_args_to_set_command(parser_for_set)
+    _add_positional_profile_arg(parser_for_use)
 
 
 def get_profile(profile_name=None):
@@ -81,6 +85,11 @@ def set_profile(args):
     _prompt_for_allow_password_set(args)
 
 
+def prompt_for_password_reset(args):
+    """Securely prompts for your password and then stores it using keyring."""
+    password.set_password_from_prompt(args.profile_name)
+
+
 def list_profiles(*args):
     """Lists all profiles that exist for this OS user."""
     profile_sections = config.get_all_profiles()
@@ -91,13 +100,8 @@ def list_profiles(*args):
         print_no_existing_profile_message()
 
 
-def prompt_for_password_reset(args):
-    """Securely prompts for your password and then stores it using keyring."""
-    password.set_password_from_prompt(args.profile_name)
-
-
-def _add_args_to_show_command(parser_for_show):
-    main_args.add_profile_name_arg(parser_for_show)
+def use_profile(args):
+    config.change_default_profile(args.profile_name)
 
 
 def _add_args_to_set_command(parser_for_set):
@@ -106,6 +110,12 @@ def _add_args_to_set_command(parser_for_set):
     _add_username_arg(parser_for_set)
     _add_disable_ssl_errors_arg(parser_for_set)
     _add_enable_ssl_errors_arg(parser_for_set)
+
+
+def _add_positional_profile_arg(parser):
+    parser.add_argument(
+        action=u"store", dest=main_args.PROFILE_NAME_KEY, help=main_args.PROFILE_HELP_MESSAGE
+    )
 
 
 def _add_authority_arg(parser):

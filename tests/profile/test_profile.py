@@ -76,7 +76,7 @@ def test_init_adds_parser_that_can_parse_show_command(config_parser):
     subcommand_parser = ArgumentParser().add_subparsers()
     profile.init(subcommand_parser)
     profile_parser = subcommand_parser.choices.get("profile")
-    assert profile_parser.parse_args(["show"])
+    assert profile_parser.parse_args(["show", "--profile", "name"])
 
 
 def test_init_adds_parser_that_can_parse_set_command(config_parser):
@@ -86,6 +86,20 @@ def test_init_adds_parser_that_can_parse_set_command(config_parser):
     profile_parser.parse_args(
         ["set", "-s", "server-arg", "-u", "username-arg", "--enable-ssl-errors"]
     )
+
+
+def test_init_add_parser_that_can_parse_list_command():
+    subcommand_parser = ArgumentParser().add_subparsers()
+    profile.init(subcommand_parser)
+    profile_parser = subcommand_parser.choices.get("profile")
+    assert profile_parser.parse_args(["list"])
+
+
+def test_init_add_parser_that_can_parse_use_command():
+    subcommand_parser = ArgumentParser().add_subparsers()
+    profile.init(subcommand_parser)
+    profile_parser = subcommand_parser.choices.get("profile")
+    assert profile_parser.parse_args(["use", "name"])
 
 
 def test_get_profile_returns_object_from_config_profile(config_parser, config_profile):

@@ -34,6 +34,7 @@ def get_profile(profile_name=None):
 
     if profile_name and profile_name not in available_profiles:
         _print_profile_not_exists_message(profile_name)
+        util.print_set_profile_help()
         exit(1)
 
     if not profile_name:
@@ -76,6 +77,14 @@ def write_ignore_ssl_errors(new_value, profile_name=None):
     _save(parser, profile_name, ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
 
 
+def change_default_profile(profile_name):
+    if profile_name not in _get_all_profile_names():
+        _print_profile_not_exists_message(profile_name)
+        exit(1)
+    internal_section = _get_internal_section()
+    internal_section[ConfigurationKeys.DEFAULT_PROFILE] = profile_name
+
+
 def _get_all_profile_names():
     parser = ConfigParser()
     _attach_config_file_to_profile(parser)
@@ -116,14 +125,18 @@ def _create_internal_section(parser):
 
 
 def _get_default_profile_name():
+    internal_section = _get_internal_section()
+    return internal_section[ConfigurationKeys.DEFAULT_PROFILE]
+
+
+def _get_internal_section():
     parser = ConfigParser()
     _attach_config_file_to_profile(parser)
-    return parser[ConfigurationKeys.INTERNAL_SECTION][ConfigurationKeys.DEFAULT_PROFILE]
+    return parser[ConfigurationKeys.INTERNAL_SECTION]
 
 
 def _print_profile_not_exists_message(profile_name):
     util.print_error(u"Profile '{0}' does not exist.".format(profile_name))
-    util.print_set_profile_help()
 
 
 def _get_profile_from_parser(parser, profile_name):
