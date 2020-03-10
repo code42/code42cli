@@ -46,7 +46,7 @@ def test_get_all_profile_ignores_internal_section(mocker):
     profile_names = [_DEFAULT_PROFILE_NAME, "profile 1", "profile 2"]
     sections = mocker.patch("configparser.ConfigParser.sections")
     sections.return_value = profile_names + [config.ConfigurationKeys.INTERNAL_SECTION]
-    mock_get_profile = mocker.patch("code42cli.profile.config.get_profile_section")
+    mock_get_profile = mocker.patch("code42cli.profile.config.get_profile")
     config.get_all_profiles()
     assert mock_get_profile.call_count == 3
 
@@ -55,7 +55,7 @@ def test_get_all_profile_returns_profiles_for_each_section(mocker):
     profile_names = [_DEFAULT_PROFILE_NAME, "profile 1", "profile 2"]
     sections = mocker.patch("configparser.ConfigParser.sections")
     sections.return_value = profile_names + [config.ConfigurationKeys.INTERNAL_SECTION]
-    mock_get_profile = mocker.patch("code42cli.profile.config.get_profile_section")
+    mock_get_profile = mocker.patch("code42cli.profile.config.get_profile")
     config.get_all_profiles()
     assert mock_get_profile.call_args_list[0][0][0] == _DEFAULT_PROFILE_NAME
     assert mock_get_profile.call_args_list[1][0][0] == "profile 1"
