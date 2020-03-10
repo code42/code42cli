@@ -7,7 +7,6 @@ IS_INCREMENTAL_KEY = u"is_incremental"
 def add_arguments_to_parser(parser):
     _add_output_format_arg(parser)
     _add_incremental_arg(parser)
-    _add_debug_arg(parser)
 
 
 def _add_output_format_arg(parser):
@@ -29,14 +28,4 @@ def _add_incremental_arg(parser):
         dest=IS_INCREMENTAL_KEY,
         action=u"store_true",
         help=u"Only get events that were not previously retrieved.",
-    )
-
-
-def _add_debug_arg(parser):
-    parser.add_argument(
-        u"-d",
-        u"--debug",
-        dest=u"is_debug_mode",
-        action=u"store_true",
-        help=u"Turn on Debug logging.",
     )

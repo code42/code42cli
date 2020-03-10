@@ -112,7 +112,7 @@ def test_mark_as_set_if_complete_when_profile_is_set_but_not_marked_in_config_fi
 ):
     shared_config_mocks.setup_existing_profile()
     shared_config_mocks.setup_non_existing_config_file()
-    config.mark_as_set_if_complete()
+    config._try_mark_setup_as_complete()
     assert save_was_called(shared_config_mocks.open_function)
 
 
@@ -121,7 +121,7 @@ def test_mark_as_set_if_complete_when_already_set_and_marked_in_config_file_does
 ):
     shared_config_mocks.setup_existing_profile()
     shared_config_mocks.setup_existing_config_file()
-    config.mark_as_set_if_complete()
+    config._try_mark_setup_as_complete()
     assert not save_was_called(shared_config_mocks.open_function)
 
 

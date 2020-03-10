@@ -1,8 +1,8 @@
 # The Code42 CLI
 
 Use the `code42` command to interact with your Code42 environment.
-`code42 securitydata` is a CLI tool for extracting AED events.
-Additionally, `code42 securitydata` can record a checkpoint so that you only get events you have not previously gotten.
+`code42 securitydata` is a CLI tool for extracting file events.
+Additionally, you can choose to only get events that Code42 previously did not observe since you last recorded a checkpoint.
 
 ## Requirements
 
