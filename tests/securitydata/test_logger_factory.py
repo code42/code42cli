@@ -1,6 +1,7 @@
-import pytest
 import logging
 from logging.handlers import RotatingFileHandler
+
+import pytest
 from c42eventextractor.logging.formatters import (
     FileEventDictToCEFFormatter,
     FileEventDictToJSONFormatter,

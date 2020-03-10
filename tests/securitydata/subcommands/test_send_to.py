@@ -1,10 +1,10 @@
-import pytest
 from argparse import ArgumentParser
 
-from ..conftest import SUBCOMMANDS_NAMESPACE
-from .conftest import ACCEPTABLE_ARGS
-from code42cli.securitydata.subcommands import send_to as sender
+import pytest
 
+from code42cli.securitydata.subcommands import send_to as sender
+from .conftest import ACCEPTABLE_ARGS
+from ..conftest import SUBCOMMANDS_NAMESPACE
 
 _SEND_PATH = "{0}.send_to".format(SUBCOMMANDS_NAMESPACE)
 

@@ -28,7 +28,7 @@ def get_profile(profile_name=None):
     """
     parser = ConfigParser()
     available_profiles = _get_all_profile_names()
-    if len(available_profiles) == 0:
+    if not len(available_profiles):
         util.print_no_existing_profile_message()
         exit(1)
 
@@ -128,7 +128,7 @@ def _print_profile_not_exists_message(profile_name):
 
 def _get_profile_from_parser(parser, profile_name):
     _attach_config_file_to_profile(parser, profile_name)
-    if profile_name not in parser.sections():
+    if profile_name not in parser.sections() and profile_name != DEFAULT_VALUE:
         _create_profile_section(parser, profile_name)
 
     return parser[profile_name]

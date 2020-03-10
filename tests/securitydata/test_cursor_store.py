@@ -1,5 +1,6 @@
-import pytest
 from os import path
+
+import pytest
 
 from code42cli.securitydata.cursor_store import SecurityEventCursorStore
 

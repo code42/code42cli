@@ -4,7 +4,6 @@ import pytest
 
 import code42cli.profile.config as config
 
-
 _DEFAULT_PROFILE_NAME = "Default Profile"
 
 

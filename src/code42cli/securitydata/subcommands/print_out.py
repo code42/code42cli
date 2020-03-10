@@ -1,6 +1,6 @@
+import code42cli.arguments as main_args
 from code42cli.securitydata.arguments import main as securitydata_main_args
 from code42cli.securitydata.arguments import search as search_args
-import code42cli.arguments as main_args
 from code42cli.securitydata.extraction import extract
 from code42cli.securitydata.logger_factory import get_logger_for_stdout
 

@@ -1,10 +1,10 @@
-import pytest
 from argparse import ArgumentParser
 
-from ..conftest import SUBCOMMANDS_NAMESPACE
-from .conftest import ACCEPTABLE_ARGS
-import code42cli.securitydata.subcommands.print_out as printer
+import pytest
 
+import code42cli.securitydata.subcommands.print_out as printer
+from .conftest import ACCEPTABLE_ARGS
+from ..conftest import SUBCOMMANDS_NAMESPACE
 
 _PRINT_PATH = "{0}.print_out".format(SUBCOMMANDS_NAMESPACE)
 

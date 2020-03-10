@@ -1,5 +1,7 @@
-import pytest
 from argparse import ArgumentParser
+
+import pytest
+
 from code42cli.profile import profile
 from .conftest import CONFIG_NAMESPACE, PASSWORD_NAMESPACE, PROFILE_NAMESPACE
 
@@ -96,14 +98,18 @@ def test_get_profile_returns_object_from_config_profile(config_parser, config_pr
     )
 
 
-def test_set_profile_when_given_username_sets_username(config_parser, username_setter, config_profile):
+def test_set_profile_when_given_username_sets_username(
+    config_parser, username_setter, config_profile
+):
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "-u", "a.new.user@example.com"])
     profile.set_profile(namespace)
     username_setter.assert_called_once_with("a.new.user@example.com", None)
 
 
-def test_set_profile_when_given_username_and_profile_sets_username(config_parser, username_setter, config_profile):
+def test_set_profile_when_given_username_and_profile_sets_username(
+    config_parser, username_setter, config_profile
+):
     parser = _get_profile_parser()
     namespace = parser.parse_args(
         ["set", "--profile", "profile_name", "-u", "a.new.user@example.com"]
@@ -125,9 +131,13 @@ def test_set_profile_when_given_authority_and_profile_url_sets_authority_url(
     config_parser, authority_url_setter, config_profile
 ):
     parser = _get_profile_parser()
-    namespace = parser.parse_args(["set", "--profile", "profile_name", "-s", "https://wwww.new.authority.example.com"])
+    namespace = parser.parse_args(
+        ["set", "--profile", "profile_name", "-s", "https://wwww.new.authority.example.com"]
+    )
     profile.set_profile(namespace)
-    authority_url_setter.assert_called_once_with("https://wwww.new.authority.example.com", "profile_name")
+    authority_url_setter.assert_called_once_with(
+        "https://wwww.new.authority.example.com", "profile_name"
+    )
 
 
 def test_set_profile_when_given_authority_url_and_profile_sets_authority_url(
