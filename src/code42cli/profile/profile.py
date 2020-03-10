@@ -4,7 +4,12 @@ import code42cli.arguments as main_args
 import code42cli.profile.config as config
 import code42cli.profile.password as password
 from code42cli.profile.config import ConfigurationKeys
-from code42cli.util import get_input, print_error, print_set_profile_help, print_no_existing_profile_message
+from code42cli.util import (
+    get_input,
+    print_error,
+    print_set_profile_help,
+    print_no_existing_profile_message,
+)
 
 
 class Code42Profile(object):
@@ -21,7 +26,9 @@ class Code42Profile(object):
         return pwd
 
     def __str__(self):
-        return u"{0}: Username={1}, Authority URL={2}".format(self.name, self.username, self.authority_url)
+        return u"{0}: Username={1}, Authority URL={2}".format(
+            self.name, self.username, self.authority_url
+        )
 
 
 def init(subcommand_parser):
@@ -42,7 +49,7 @@ def init(subcommand_parser):
     parser_for_show.set_defaults(func=show_profile)
     parser_for_set.set_defaults(func=set_profile)
     parser_for_reset_password.set_defaults(func=prompt_for_password_reset)
-    parser_for_list.set_defaults(func=list_available_profiles)
+    parser_for_list.set_defaults(func=list_profiles)
     _add_args_to_show_command(parser_for_show)
     _add_args_to_set_command(parser_for_set)
 
@@ -74,7 +81,7 @@ def set_profile(args):
     _prompt_for_allow_password_set(args)
 
 
-def list_available_profiles(*args):
+def list_profiles(*args):
     """Lists all profiles that exist for this OS user."""
     profile_sections = config.get_all_profile_sections()
     if profile_sections:
@@ -96,7 +103,9 @@ def _verify_args_for_set(args):
 
 
 def _missing_default_profile(args):
-    profile_name_arg_is_none = args.profile_name is None or args.profile_name == config.DEFAULT_VALUE
+    profile_name_arg_is_none = (
+        args.profile_name is None or args.profile_name == config.DEFAULT_VALUE
+    )
     return profile_name_arg_is_none and not _default_profile_exists()
 
 
