@@ -1,140 +1,87 @@
 from __future__ import with_statement
+
 import pytest
 
 import code42cli.profile.config as config
 
 
-class SharedConfigMocks(object):
-    mocker = None
-    open_function = None
-    path_exists_function = None
-    get_project_path_function = None
-    config_parser = None
+_DEFAULT_PROFILE_NAME = "Default Profile"
 
-    def setup_existing_config_file(self):
-        self.path_exists_function.return_value = True
-        sections = self.mocker.patch("configparser.ConfigParser.sections")
-        sections.return_value = [
-            config.ConfigurationKeys.INTERNAL_SECTION,
-            config.ConfigurationKeys.PROFILE_SECTION_PREFIX,
-        ]
 
-    def setup_non_existing_config_file(self):
-        self.path_exists_function.return_value = False
-
-    def setup_existing_profile(self):
-        self.config_parser.item_getter.return_value = self._create_config_profile(is_set=True)
-
-    def setup_non_existing_profile(self):
-        self.config_parser.item_getter.return_value = self._create_config_profile(is_set=False)
-
-    def _create_config_profile(self, is_set):
-        config_profile = self.mocker.MagicMock()
-        config_profile.getboolean.return_value = is_set
-        bool_getter = self.mocker.MagicMock()
-        bool_getter.return_value = is_set
-        config_profile.getboolean = bool_getter
-        config_profile.__setitem__ = self.mocker.MagicMock()
-        return config_profile
+@pytest.fixture(autouse=True)
+def reader(mocker):
+    mocker.patch("configparser.ConfigParser.read")
 
 
 @pytest.fixture
-def shared_config_mocks(mocker, config_parser):
-    # Project path
-    get_project_path_function = mocker.patch("code42cli.util.get_user_project_path")
-    get_project_path_function.return_value = "some/path/"
-
-    # Opening files
-    open_file_function = mocker.patch("code42cli.util.open_file")
-    new_file = mocker.MagicMock()
-    open_file_function.return_value = new_file
-
-    # Path exists
-    path_exists_function = mocker.patch("os.path.exists")
-
-    mocks = SharedConfigMocks()
-    mocks.mocker = mocker
-    mocks.open_function = open_file_function
-    mocks.path_exists_function = path_exists_function
-    mocks.get_project_path_function = get_project_path_function
-    mocks.config_parser = config_parser
-    return mocks
+def default_profile_name(mocker):
+    default_name = mocker.patch("code42cli.profile.config._get_default_profile_name")
+    default_name.return_value = _DEFAULT_PROFILE_NAME
 
 
-def save_was_called(open_file_function):
-    call_args = open_file_function.call_args
-    try:
-        return call_args[0][0] == "some/path/config.cfg" and call_args[0][1] == "w+"
-    except:
-        return False
-
-
-def test_get_config_profile_when_file_exists_but_profile_does_not_exist_exits(shared_config_mocks):
-    shared_config_mocks.setup_existing_config_file()
-    shared_config_mocks.setup_non_existing_profile()
-
-    # It is expected to exit because the user must set their profile before they can see it.
+def test_get_profile_when_there_are_no_sections_causes_exit(mocker):
+    sections = mocker.patch("configparser.ConfigParser.sections")
+    sections.return_value = []
     with pytest.raises(SystemExit):
-        config.get_profile_section()
+        config.get_profile()
 
 
-def test_get_config_profile_when_file_exists_and_profile_is_set_does_not_exit(shared_config_mocks):
-    shared_config_mocks.setup_existing_config_file()
-    shared_config_mocks.setup_existing_profile()
-
-    # Presumably, it shows the profile instead of exiting.
-    assert config.get_profile_section()
-
-
-def test_get_config_profile_when_file_does_not_exist_saves_changes(shared_config_mocks):
-    shared_config_mocks.setup_non_existing_config_file()
-    shared_config_mocks.setup_non_existing_profile()
-
-    with pytest.raises(SystemExit):
-        config.get_profile_section()
-
-    # It saves because it is writing default values to the config file
-    assert save_was_called(shared_config_mocks.open_function)
+def test_get_profile_when_not_given_name_uses_default(mocker, default_profile_name):
+    sections = mocker.patch("configparser.ConfigParser.sections")
+    sections.return_value = [_DEFAULT_PROFILE_NAME, config.ConfigurationKeys.INTERNAL_SECTION]
+    mock_getter = mocker.patch("code42cli.profile.config._get_profile_from_parser")
+    config.get_profile()
+    assert mock_getter.call_args[0][1] == _DEFAULT_PROFILE_NAME
 
 
-def test_profile_has_been_set_when_is_set_returns_true(shared_config_mocks):
-    shared_config_mocks.setup_existing_profile()
-    assert config.profile_has_been_set()
+def test_get_profile_uses_given_name(mocker):
+    sections = mocker.patch("configparser.ConfigParser.sections")
+    sections.return_value = ["profile 1"]
+    mock_getter = mocker.patch("code42cli.profile.config._get_profile_from_parser")
+    config.get_profile("profile 1")
+    assert mock_getter.call_args[0][1] == "profile 1"
 
 
-def test_profile_has_been_set_when_is_not_set_returns_false(shared_config_mocks):
-    shared_config_mocks.setup_non_existing_profile()
-    assert not config.profile_has_been_set()
+def test_get_all_profile_ignores_internal_section(mocker):
+    profile_names = [_DEFAULT_PROFILE_NAME, "profile 1", "profile 2"]
+    sections = mocker.patch("configparser.ConfigParser.sections")
+    sections.return_value = profile_names + [config.ConfigurationKeys.INTERNAL_SECTION]
+    mock_get_profile = mocker.patch("code42cli.profile.config.get_profile_section")
+    config.get_all_profiles()
+    assert mock_get_profile.call_count == 3
 
 
-def test_mark_as_set_if_complete_when_profile_is_set_but_not_marked_in_config_file_saves(
-    shared_config_mocks
+def test_get_all_profile_returns_profiles_for_each_section(mocker):
+    profile_names = [_DEFAULT_PROFILE_NAME, "profile 1", "profile 2"]
+    sections = mocker.patch("configparser.ConfigParser.sections")
+    sections.return_value = profile_names + [config.ConfigurationKeys.INTERNAL_SECTION]
+    mock_get_profile = mocker.patch("code42cli.profile.config.get_profile_section")
+    config.get_all_profiles()
+    assert mock_get_profile.call_args_list[0][0][0] == _DEFAULT_PROFILE_NAME
+    assert mock_get_profile.call_args_list[1][0][0] == "profile 1"
+    assert mock_get_profile.call_args_list[2][0][0] == "profile 2"
+
+
+def test_write_username_uses_default_profile_name_when_not_provided(mocker, default_profile_name):
+    mock_getter = mocker.patch("code42cli.profile.config._get_profile_from_parser")
+    mocker.patch("code42cli.profile.config._try_mark_setup_as_complete")
+    config.write_username("test")
+    assert mock_getter.call_args[0][1] == _DEFAULT_PROFILE_NAME
+
+
+def test_write_authority_url_uses_default_profile_name_when_not_provided(
+    mocker, default_profile_name
 ):
-    shared_config_mocks.setup_existing_profile()
-    shared_config_mocks.setup_non_existing_config_file()
-    config._try_mark_setup_as_complete()
-    assert save_was_called(shared_config_mocks.open_function)
+    mock_getter = mocker.patch("code42cli.profile.config._get_profile_from_parser")
+    mocker.patch("code42cli.profile.config._try_mark_setup_as_complete")
+    config.write_authority_url("test")
+    assert mock_getter.call_args[0][1] == _DEFAULT_PROFILE_NAME
 
 
-def test_mark_as_set_if_complete_when_already_set_and_marked_in_config_file_does_not_save(
-    shared_config_mocks
+def test_write_ignore_ssl_errors_uses_default_profile_name_when_not_provided(
+    mocker, default_profile_name
 ):
-    shared_config_mocks.setup_existing_profile()
-    shared_config_mocks.setup_existing_config_file()
-    config._try_mark_setup_as_complete()
-    assert not save_was_called(shared_config_mocks.open_function)
-
-
-def test_set_username_saves(shared_config_mocks):
-    config.write_username("New user")
-    assert save_was_called(shared_config_mocks.open_function)
-
-
-def test_set_authority_url_saves(shared_config_mocks):
-    config.write_authority_url("New url")
-    assert save_was_called(shared_config_mocks.open_function)
-
-
-def test_set_ignore_ssl_errors_saves(shared_config_mocks):
+    mock_getter = mocker.patch("code42cli.profile.config._get_profile_from_parser")
+    mocker.patch("code42cli.profile.config._try_mark_setup_as_complete")
     config.write_ignore_ssl_errors(True)
-    assert save_was_called(shared_config_mocks.open_function)
+    assert mock_getter.call_args[0][1] == _DEFAULT_PROFILE_NAME

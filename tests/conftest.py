@@ -8,12 +8,24 @@ from code42cli.profile.config import ConfigurationKeys
 
 @pytest.fixture
 def config_profile(mocker):
-    mock_config = mocker.patch("code42cli.profile.config.get_config_profile")
-    mock_config.return_value = {
+    mock_config = mocker.patch("code42cli.profile.config.get_profile")
+
+    model_dict = {
         ConfigurationKeys.USERNAME_KEY: "test.username",
         ConfigurationKeys.AUTHORITY_KEY: "https://authority.example.com",
         ConfigurationKeys.IGNORE_SSL_ERRORS_KEY: "True",
     }
+
+    class MockConfig(object):
+        name = "PROFILE NAME"
+
+        def __getitem__(self, item):
+            return model_dict[item]
+
+        def get(self, item):
+            return model_dict.get(item)
+
+    mock_config.return_value = MockConfig()
     return mock_config
 
 

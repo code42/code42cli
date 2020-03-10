@@ -56,13 +56,13 @@ def init(subcommand_parser):
 
 def get_profile(profile_name=None):
     """Returns the current profile object."""
-    profile_section = config.get_profile_section(profile_name)
+    profile_section = config.get_profile(profile_name)
     return Code42Profile(profile_section)
 
 
 def show_profile(args):
     """Prints the current profile to stdout."""
-    profile = config.get_profile_section(args.profile_name)
+    profile = config.get_profile(args.profile_name)
     print(u"\n{0}:".format(profile.name))
     for key in profile:
         print(u"\t* {} = {}".format(key, profile[key]))
@@ -83,35 +83,12 @@ def set_profile(args):
 
 def list_profiles(*args):
     """Lists all profiles that exist for this OS user."""
-    profile_sections = config.get_all_profile_sections()
+    profile_sections = config.get_all_profiles()
     if profile_sections:
         for section in profile_sections:
             print(Code42Profile(section))
     else:
         print_no_existing_profile_message()
-
-
-def _verify_args_for_set(args):
-    if _missing_default_profile(args):
-        print_error("Must supply a name when setting your profile for the first time.")
-        print_set_profile_help()
-        exit(1)
-    if not args.c42_username and not args.c42_authority_url:
-        print_error(u"Missing username and authority url.")
-        print_set_profile_help()
-        exit(1)
-
-
-def _missing_default_profile(args):
-    profile_name_arg_is_none = (
-        args.profile_name is None or args.profile_name == config.DEFAULT_VALUE
-    )
-    return profile_name_arg_is_none and not _default_profile_exists()
-
-
-def _default_profile_exists():
-    profile_name = config._get_default_profile_name()
-    return profile_name is not None and profile_name != config.DEFAULT_VALUE
 
 
 def prompt_for_password_reset(args):
@@ -171,8 +148,22 @@ def _add_enable_ssl_errors_arg(parser):
     )
 
 
-def _set_has_args(args):
-    return args.c42_authority_url is not None or args.c42_username is not None
+def _verify_args_for_set(args):
+    if _missing_default_profile(args):
+        print_error("Must supply a name when setting your profile for the first time.")
+        print_set_profile_help()
+        exit(1)
+
+    profile = config.get_profile(args.profile_name)
+    if (
+        not profile.get(ConfigurationKeys.USERNAME_KEY)
+        and not profile.get(ConfigurationKeys.AUTHORITY_KEY)
+        and not args.c42_username
+        and not args.c42_authority_url
+    ):
+        print_error(u"Missing username and authority url.")
+        print_set_profile_help()
+        exit(1)
 
 
 def _try_set_authority_url(args):
@@ -191,6 +182,18 @@ def _try_set_ignore_ssl_errors(args):
 
     if args.enable_ssl_errors is not None:
         config.write_ignore_ssl_errors(False, args.profile_name)
+
+
+def _missing_default_profile(args):
+    profile_name_arg_is_none = (
+        args.profile_name is None or args.profile_name == config.DEFAULT_VALUE
+    )
+    return profile_name_arg_is_none and not _default_profile_exists()
+
+
+def _default_profile_exists():
+    profile_name = config.get_profile().name
+    return profile_name is not None and profile_name != config.DEFAULT_VALUE
 
 
 def _prompt_for_allow_password_set(args):
