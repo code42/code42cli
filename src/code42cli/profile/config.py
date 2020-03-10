@@ -27,9 +27,9 @@ def get_config_profile(profile_name=None):
             If None, uses the default profile name.
     """
     parser = ConfigParser()
-    available_profiles = get_all_saved_profiles()
+    available_profiles = get_all_profile_names()
     if len(available_profiles) == 0:
-        _print_no_existing_profiles_message()
+        util.print_no_existing_profile_message()
         exit(1)
 
     if profile_name and profile_name not in available_profiles:
@@ -48,7 +48,7 @@ def get_default_profile_name():
     return parser[ConfigurationKeys.INTERNAL_SECTION][ConfigurationKeys.DEFAULT_PROFILE]
 
 
-def get_all_saved_profiles():
+def get_all_profile_names():
     parser = ConfigParser()
     _attach_config_file_to_profile(parser)
     sections = list(parser.sections())
@@ -167,14 +167,11 @@ def _create_profile_section(parser, profile_name):
     parser[profile_name][keys.AUTHORITY_KEY] = DEFAULT_VALUE
     parser[profile_name][keys.USERNAME_KEY] = DEFAULT_VALUE
     parser[profile_name][keys.IGNORE_SSL_ERRORS_KEY] = str(False)
-    if parser[keys.INTERNAL_SECTION].get(keys.DEFAULT_PROFILE) is not None:
+
+    default_profile = parser[keys.INTERNAL_SECTION].get(keys.DEFAULT_PROFILE)
+    if default_profile is None or default_profile is DEFAULT_VALUE:
         parser[keys.INTERNAL_SECTION][keys.DEFAULT_PROFILE] = profile_name
     return parser
-
-
-def _print_no_existing_profiles_message():
-    util.print_error(u"No existing profile.")
-    util.print_set_profile_help()
 
 
 def _print_profile_not_exists_message(profile_name):

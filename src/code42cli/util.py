@@ -44,6 +44,11 @@ def is_interactive():
     return sys.stdin.isatty()
 
 
+def print_no_existing_profile_message():
+    print_error(u"No existing profile.")
+    print_set_profile_help()
+
+
 def print_set_profile_help():
     print(u"")
     print(u"To add a profile, use: ")

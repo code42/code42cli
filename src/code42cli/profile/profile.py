@@ -4,7 +4,7 @@ import code42cli.arguments as main_args
 import code42cli.profile.config as config
 import code42cli.profile.password as password
 from code42cli.profile.config import ConfigurationKeys
-from code42cli.util import get_input, print_error, print_set_profile_help
+from code42cli.util import get_input, print_error, print_set_profile_help, print_no_existing_profile_message
 
 
 class Code42Profile(object):
@@ -20,6 +20,10 @@ class Code42Profile(object):
         if not pwd:
             pwd = password.get_password_from_prompt()
         return pwd
+
+    def __repr__(self):
+        profile_str = u"{0} - {1} - {2}"
+        profile_str.format(self.name, self.username, self.authority_url)
 
 
 def init(subcommand_parser):
@@ -76,8 +80,18 @@ def set_profile(args):
     _prompt_for_allow_password_set(args)
 
 
+def list_available_profiles(*args):
+    """Lists all profiles that exist for this OS user."""
+    profiles = config.get_all_profile_names()
+    if profiles:
+        for profile in profiles:
+            print(profile)
+    else:
+        print_no_existing_profile_message()
+
+
 def _verify_args_for_set(args):
-    if not args.profile_name or args.profile_name == config.DEFAULT_VALUE:
+    if _missing_default_profile(args):
         print_error("Must supply a name when setting your profile for the first time.")
         print_set_profile_help()
         exit(1)
@@ -87,15 +101,19 @@ def _verify_args_for_set(args):
         exit(1)
 
 
+def _missing_default_profile(args):
+    profile_name_arg_is_none = args.profile_name is None or args.profile_name == config.DEFAULT_VALUE
+    return profile_name_arg_is_none and not _default_profile_exists()
+
+
+def _default_profile_exists():
+    profile_name = config.get_default_profile_name()
+    return profile_name is not None and profile_name != config.DEFAULT_VALUE
+
+
 def prompt_for_password_reset(args):
     """Securely prompts for your password and then stores it using keyring."""
     password.set_password_from_prompt(args.profile_name)
-
-
-def list_available_profiles(*args):
-    """Lists all profiles that exist for this OS user."""
-    profiles = config.get_all_saved_profiles()
-    print(profiles)
 
 
 def _add_args_to_show_command(parser_for_show):
