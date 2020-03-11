@@ -12,7 +12,7 @@ from c42eventextractor.logging.handlers import NoPrioritySysLogHandlerWrapper
 
 from code42cli.compat import str
 from code42cli.securitydata.options import OutputFormat
-from code42cli.util import get_user_project_path, print_error
+from code42cli.util import get_user_project_path, print_error, get_url_parts
 
 _logger_deps_lock = Lock()
 
@@ -56,7 +56,7 @@ def get_logger_for_server(hostname, protocol, output_format):
     """Gets the logger that sends logs to a server for the given format.
 
         Args:
-            hostname: The hostname of the server.
+            hostname: The hostname of the server. It may include the port.
             protocol: The transfer protocol for sending logs.
             output_format: CEF, JSON, or RAW_JSON. Each type results in a different logger instance.
     """
@@ -66,7 +66,11 @@ def get_logger_for_server(hostname, protocol, output_format):
 
     with _logger_deps_lock:
         if not _logger_has_handlers(logger):
-            handler = NoPrioritySysLogHandlerWrapper(hostname, protocol=protocol).handler
+            url_parts = get_url_parts(hostname)
+            port = url_parts[1] or 514
+            handler = NoPrioritySysLogHandlerWrapper(
+                url_parts[0], port=port, protocol=protocol
+            ).handler
             return _init_logger(logger, handler, output_format)
     return logger
 

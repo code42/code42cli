@@ -27,15 +27,6 @@ def namespace(mocker):
     return mock
 
 
-class ConfigParserMocks(object):
-    initializer = None
-    item_setter = None
-    item_getter = None
-    section_adder = None
-    reader = None
-    sections = None
-
-
 def get_filter_value_from_json(json, filter_index):
     return json_module.loads(str(json))["filters"][filter_index]["value"]
 

@@ -1,6 +1,6 @@
-from configparser import ConfigParser
-
+from __future__ import with_statement
 import pytest
+from configparser import ConfigParser
 
 from code42cli.profile.config import ConfigAccessor
 

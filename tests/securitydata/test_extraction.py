@@ -1,7 +1,7 @@
 import pytest
 from py42.sdk.alert_query import Actor
 from py42.sdk.file_event_query.device_query import DeviceUsername
-from py42.sdk.file_event_query.event_query import Source
+from py42.sdk.file_event_query.event_query import Source, EventTimestamp
 from py42.sdk.file_event_query.exposure_query import ExposureType, ProcessOwner, TabURL
 from py42.sdk.file_event_query.file_query import FilePath, FileName, SHA256, MD5
 
@@ -47,6 +47,14 @@ def profile(mocker):
 def namespace_with_begin(namespace):
     namespace.begin_date = begin_date_tuple
     return namespace
+
+
+def filter_term_is_in_call_args(extractor, term):
+    arg_filters = extractor.extract.call_args[0]
+    for f in arg_filters:
+        if term in str(f):
+            return True
+    return False
 
 
 def test_extract_when_is_advanced_query_uses_only_the_extract_advanced(
@@ -235,9 +243,10 @@ def test_extract_when_using_both_min_and_max_dates_uses_expected_timestamps(
     assert actual_end_timestamp == expected_end_timestamp
 
 
-def test_extract_when_given_min_timestamp_more_than_ninety_days_back_causes_exit(
+def test_extract_when_given_min_timestamp_more_than_ninety_days_back_in_ad_hoc_mode_causes_exit(
     logger, namespace, extractor
 ):
+    namespace.is_incremental = False
     namespace.begin_date = (get_test_date_str(days_ago=91), "12:51:00")
     with pytest.raises(SystemExit):
         extraction_module.extract(logger, namespace)
@@ -246,6 +255,49 @@ def test_extract_when_given_min_timestamp_more_than_ninety_days_back_causes_exit
 def test_extract_when_end_date_is_before_begin_date_causes_exit(logger, namespace, extractor):
     namespace.begin_date = (get_test_date_str(days_ago=5),)
     namespace.end_date = (get_test_date_str(days_ago=6),)
+    with pytest.raises(SystemExit):
+        extraction_module.extract(logger, namespace)
+
+
+def test_when_given_begin_date_past_90_days_and_is_incremental_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
+    mocker, logger, namespace, extractor
+):
+    namespace.begin_date = "2019-01-01"
+    namespace.is_incremental = True
+    mock_checkpoint = mocker.patch(
+        "code42cli.securitydata.cursor_store.FileEventCursorStore.get_stored_insertion_timestamp"
+    )
+    mock_checkpoint.return_value = 22624624
+    extraction_module.extract(logger, namespace)
+    assert not filter_term_is_in_call_args(extractor, EventTimestamp._term)
+
+
+def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_begin_date(
+    mocker, logger, namespace, extractor
+):
+    namespace.begin_date = (get_test_date_str(days_ago=1),)
+    namespace.is_incremental = False
+    mock_checkpoint = mocker.patch(
+        "code42cli.securitydata.cursor_store.FileEventCursorStore.get_stored_insertion_timestamp"
+    )
+    mock_checkpoint.return_value = 22624624
+    extraction_module.extract(logger, namespace)
+
+    actual_ts = get_filter_value_from_json(extractor.extract.call_args[0][0], filter_index=0)
+    expected_ts = "{0}T00:00:00.000Z".format(namespace.begin_date[0])
+    assert actual_ts == expected_ts
+    assert filter_term_is_in_call_args(extractor, EventTimestamp._term)
+
+
+def test_when_not_given_begin_date_and_is_incremental_but_no_stored_checkpoint_exists_causes_exit(
+    mocker, logger, namespace, extractor
+):
+    namespace.begin_date = None
+    namespace.is_incremental = True
+    mock_checkpoint = mocker.patch(
+        "code42cli.securitydata.cursor_store.FileEventCursorStore.get_stored_insertion_timestamp"
+    )
+    mock_checkpoint.return_value = None
     with pytest.raises(SystemExit):
         extraction_module.extract(logger, namespace)
 
@@ -394,7 +446,7 @@ def test_extract_when_creating_sdk_throws_causes_exit(logger, extractor, namespa
 
 
 def test_extract_when_global_variable_is_true_and_is_interactive_prints_error(
-    mocker, logger, error_logger, namespace_with_begin, extractor
+    mocker, logger, namespace_with_begin, extractor
 ):
     mock_error_printer = mocker.patch("code42cli.securitydata.extraction.print_error")
     mock_is_interactive_function = mocker.patch("code42cli.securitydata.extraction.is_interactive")
@@ -405,7 +457,7 @@ def test_extract_when_global_variable_is_true_and_is_interactive_prints_error(
 
 
 def test_extract_when_global_variable_is_true_and_not_is_interactive_does_not_print_error(
-    mocker, logger, error_logger, namespace_with_begin, extractor
+    mocker, logger, namespace_with_begin, extractor
 ):
     mock_error_printer = mocker.patch("code42cli.securitydata.extraction.print_error")
     mock_is_interactive_function = mocker.patch("code42cli.securitydata.extraction.is_interactive")
@@ -416,7 +468,7 @@ def test_extract_when_global_variable_is_true_and_not_is_interactive_does_not_pr
 
 
 def test_extract_when_global_variable_is_false_and_is_interactive_does_not_print_error(
-    mocker, logger, error_logger, namespace_with_begin, extractor
+    mocker, logger, namespace_with_begin, extractor
 ):
     mock_error_printer = mocker.patch("code42cli.securitydata.extraction.print_error")
     mock_is_interactive_function = mocker.patch("code42cli.securitydata.extraction.is_interactive")
@@ -427,7 +479,7 @@ def test_extract_when_global_variable_is_false_and_is_interactive_does_not_print
 
 
 def test_when_sdk_raises_exception_global_variable_gets_set(
-    mocker, logger, error_logger, namespace_with_begin, mock_42
+    mocker, logger, namespace_with_begin, mock_42
 ):
     extraction_module._EXCEPTIONS_OCCURRED = False
     mock_sdk = mocker.MagicMock()

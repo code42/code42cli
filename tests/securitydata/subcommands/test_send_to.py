@@ -11,7 +11,7 @@ _SEND_PATH = "{0}.send_to".format(SUBCOMMANDS_NAMESPACE)
 
 @pytest.fixture
 def server_namespace(namespace):
-    namespace.server = "https://www.syslog.example.com"
+    namespace.server = "www.syslog.example.com"
     namespace.protocol = "TCP"
     namespace.format = "CEF"
     return namespace
@@ -61,7 +61,7 @@ def test_init_adds_parser_when_not_given_server_causes_system_exit():
 
 def test_send_to_uses_logger_for_server(server_namespace, logger_factory, extractor):
     sender.send_to(server_namespace)
-    logger_factory.assert_called_once_with("https://www.syslog.example.com", "TCP", "CEF")
+    logger_factory.assert_called_once_with("www.syslog.example.com", "TCP", "CEF")
 
 
 def test_send_to_calls_extract_with_expected_arguments(

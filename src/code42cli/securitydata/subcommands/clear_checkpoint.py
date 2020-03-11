@@ -1,4 +1,4 @@
-from code42cli.securitydata.cursor_store import AEDCursorStore
+from code42cli.securitydata.cursor_store import FileEventCursorStore
 
 
 def init(subcommand_parser):
@@ -15,7 +15,7 @@ def clear_checkpoint(*args):
         To use, run `code42 clear-checkpoint`.
         This affects `incremental` mode by causing it to behave like it has never been run before.
     """
-    AEDCursorStore().reset()
+    FileEventCursorStore().reset()
 
 
 if __name__ == "__main__":
