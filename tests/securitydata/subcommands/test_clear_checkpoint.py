@@ -15,6 +15,7 @@ def cursor_store(mocker):
     mock_new.return_value = mock
     return mock
 
+
 @pytest.fixture
 def profile(mocker):
     class MockProfile(object):
@@ -22,12 +23,16 @@ def profile(mocker):
         def name(self):
             return "AlreadySetProfileName"
 
-    mock = mocker.patch("{0}.subcommands.clear_checkpoint.get_profile".format(SECURITYDATA_NAMESPACE))
+    mock = mocker.patch(
+        "{0}.subcommands.clear_checkpoint.get_profile".format(SECURITYDATA_NAMESPACE)
+    )
     mock.return_value = MockProfile()
     return mock
 
 
-def test_clear_checkpoint_when_given_profile_name_calls_cursor_store_resets(cursor_store, namespace):
+def test_clear_checkpoint_when_given_profile_name_calls_cursor_store_resets(
+    cursor_store, namespace
+):
     namespace.profile_name = "Test"
     clearer.clear_checkpoint(namespace)
     assert cursor_store.reset.call_count == 1

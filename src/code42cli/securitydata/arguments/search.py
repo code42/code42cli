@@ -23,15 +23,15 @@ class SearchArguments(object):
     BEGIN_DATE = u"begin_date"
     END_DATE = u"end_date"
     EXPOSURE_TYPES = u"exposure_types"
-    C42USERNAME = u"c42username"
-    ACTOR = u"actor"
-    MD5 = u"md5"
-    SHA256 = u"sha256"
-    SOURCE = u"source"
-    FILENAME = u"filename"
-    FILEPATH = u"filepath"
-    PROCESS_OWNER = u"process_owner"
-    TAB_URL = u"tab_url"
+    C42USERNAME = u"c42usernames"
+    ACTOR = u"actors"
+    MD5 = u"md5_hashes"
+    SHA256 = u"sha256_hashes"
+    SOURCE = u"sources"
+    FILENAME = u"filenames"
+    FILEPATH = u"filepaths"
+    PROCESS_OWNER = u"process_owners"
+    TAB_URL = u"tab_urls"
     INCLUDE_NON_EXPOSURE_EVENTS = u"include_non_exposure_events"
 
     def __iter__(self):
@@ -105,72 +105,80 @@ def _add_exposure_types_arg(parser):
 def _add_username_arg(parser):
     parser.add_argument(
         u"--c42username",
+        nargs=u"+",
         action=u"store",
         dest=SearchArguments.C42USERNAME,
-        help=u"Limits events to endpoint events for this user.",
+        help=u"Limits events to endpoint events for these users.",
     )
 
 
 def _add_actor_arg(parser):
     parser.add_argument(
         u"--actor",
+        nargs=u"+",
         action=u"store",
         dest=SearchArguments.ACTOR,
-        help=u"Limits events to only those enacted by this actor.",
+        help=u"Limits events to only those enacted by these actors.",
     )
 
 
 def _add_md5_arg(parser):
     parser.add_argument(
         u"--md5",
+        nargs=u"+",
         action=u"store",
         dest=SearchArguments.MD5,
-        help=u"Limits events to file events where the file has this MD5 hash.",
+        help=u"Limits events to file events where the file has one of these MD5 hashes.",
     )
 
 
 def _add_sha256_arg(parser):
     parser.add_argument(
         u"--sha256",
+        nargs=u"+",
         action=u"store",
         dest=SearchArguments.SHA256,
-        help=u"Limits events to file events where the file has this SHA256 hash.",
+        help=u"Limits events to file events where the file has one of these SHA256 hashes.",
     )
 
 
 def _add_source_arg(parser):
     parser.add_argument(
         u"--source",
+        nargs=u"+",
         action=u"store",
         dest=SearchArguments.SOURCE,
-        help=u"Limits events to only those from this source. Example=Gmail.",
+        help=u"Limits events to only those from one of these sources. Example=Gmail.",
     )
 
 
 def _add_filename_arg(parser):
     parser.add_argument(
         u"--filename",
+        nargs=u"+",
         action=u"store",
         dest=SearchArguments.FILENAME,
-        help=u"Limits events to file events where the file has this name.",
+        help=u"Limits events to file events where the file has one of these names.",
     )
 
 
 def _add_filepath_arg(parser):
     parser.add_argument(
         u"--filepath",
+        nargs=u"+",
         action=u"store",
         dest=SearchArguments.FILEPATH,
-        help=u"Limits events to file events where the file is located at this path.",
+        help=u"Limits events to file events where the file is located at one of these paths.",
     )
 
 
 def _add_process_owner_arg(parser):
     parser.add_argument(
         u"--processOwner",
+        nargs=u"+",
         action=u"store",
         dest=SearchArguments.PROCESS_OWNER,
-        help=u"Limits events to exposure events where this user "
+        help=u"Limits events to exposure events where one of these users "
         u"owns the process behind the exposure.",
     )
 
@@ -178,9 +186,10 @@ def _add_process_owner_arg(parser):
 def _add_tab_url_arg(parser):
     parser.add_argument(
         u"--tabURL",
+        nargs=u"+",
         action=u"store",
         dest=SearchArguments.TAB_URL,
-        help=u"Limits events to be exposure events with this destination tab URL.",
+        help=u"Limits events to be exposure events with one of these destination tab URLs.",
     )
 
 

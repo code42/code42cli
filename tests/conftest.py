@@ -15,15 +15,15 @@ def namespace(mocker):
     mock.begin_date = None
     mock.end_date = None
     mock.exposure_types = None
-    mock.c42username = None
-    mock.actor = None
-    mock.md5 = None
-    mock.sha256 = None
-    mock.source = None
-    mock.filename = None
-    mock.filepath = None
-    mock.process_owner = None
-    mock.tab_url = None
+    mock.c42usernames = None
+    mock.actors = None
+    mock.md5_hashes = None
+    mock.sha256_hashes = None
+    mock.sources = None
+    mock.filenames = None
+    mock.filepaths = None
+    mock.process_owners = None
+    mock.tab_urls = None
     mock.include_non_exposure_events = None
     return mock
 

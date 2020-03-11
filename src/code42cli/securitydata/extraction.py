@@ -80,10 +80,9 @@ def _get_sdk(profile, is_debug_mode):
     if is_debug_mode:
         settings.debug_level = debug_level.DEBUG
     try:
-        return SDK.create_using_local_account(
-            profile.authority_url, profile.username, profile.get_password()
-        )
-    except:
+        password = profile.get_password()
+        return SDK.create_using_local_account(profile.authority_url, profile.username, password)
+    except Exception:
         print_error(
             u"Invalid credentials or host address. "
             u"Verify your profile is set up correctly and that you are supplying the correct password."
@@ -170,15 +169,15 @@ def _create_filters(args):
     if event_timestamp_filter:
         filters.append(event_timestamp_filter)
 
-    not args.c42username or filters.append(DeviceUsername.eq(args.c42username))
-    not args.actor or filters.append(Actor.eq(args.actor))
-    not args.md5 or filters.append(MD5.eq(args.md5))
-    not args.sha256 or filters.append(SHA256.eq(args.sha256))
-    not args.source or filters.append(Source.eq(args.source))
-    not args.filename or filters.append(FileName.eq(args.filename))
-    not args.filepath or filters.append(FilePath.eq(args.filepath))
-    not args.process_owner or filters.append(ProcessOwner.eq(args.process_owner))
-    not args.tab_url or filters.append(TabURL.eq(args.tab_url))
+    not args.c42usernames or filters.append(DeviceUsername.is_in(args.c42usernames))
+    not args.actors or filters.append(Actor.is_in(args.actors))
+    not args.md5_hashes or filters.append(MD5.is_in(args.md5_hashes))
+    not args.sha256_hashes or filters.append(SHA256.is_in(args.sha256_hashes))
+    not args.sources or filters.append(Source.is_in(args.sources))
+    not args.filenames or filters.append(FileName.is_in(args.filenames))
+    not args.filepaths or filters.append(FilePath.is_in(args.filepaths))
+    not args.process_owners or filters.append(ProcessOwner.is_in(args.process_owners))
+    not args.tab_urls or filters.append(TabURL.is_in(args.tab_urls))
     _try_append_exposure_types_filter(filters, args)
     return filters
 

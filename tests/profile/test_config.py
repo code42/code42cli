@@ -9,6 +9,7 @@ from code42cli.profile.config import ConfigAccessor
 def mock_config_parser(mocker):
     return mocker.MagicMock(sepc=ConfigParser)
 
+
 @pytest.fixture(autouse=True)
 def mock_saver(mocker):
     return mocker.patch("code42cli.util.open_file")
@@ -143,7 +144,9 @@ class TestConfigAccessor(object):
         accessor.switch_default_profile("ProfileB")
         assert mock_internal[ConfigAccessor.DEFAULT_PROFILE] == "ProfileB"
 
-    def test_create_profile_if_not_exists_when_given_default_name_does_not_create(self, mock_config_parser):
+    def test_create_profile_if_not_exists_when_given_default_name_does_not_create(
+        self, mock_config_parser
+    ):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
         accessor = ConfigAccessor(mock_config_parser)
         with pytest.raises(Exception):

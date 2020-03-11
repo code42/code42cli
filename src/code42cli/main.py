@@ -22,3 +22,7 @@ def _run(parser):
             parser.print_help()
             return
         raise ex
+
+
+if __name__ == "__main__":
+    main()
