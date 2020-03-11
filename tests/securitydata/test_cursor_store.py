@@ -1,13 +1,7 @@
 from os import path
-import pytest
 
 from c42eventextractor.extractors import INSERTION_TIMESTAMP_FIELD_NAME
 from code42cli.securitydata.cursor_store import BaseCursorStore, FileEventCursorStore
-
-
-@pytest.fixture
-def sqlite_connection(mocker):
-    return mocker.patch("sqlite3.connect")
 
 
 class TestBaseCursorStore(object):
