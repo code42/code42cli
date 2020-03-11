@@ -53,16 +53,15 @@ class BaseCursorStore(object):
 
 
 class FileEventCursorStore(BaseCursorStore):
-    _PRIMARY_KEY = 1
-
-    def __init__(self, db_file_path=None):
-        super(FileEventCursorStore, self).__init__(u"aed_checkpoint", db_file_path)
+    def __init__(self, profile_name, db_file_path=None):
+        self._primary_key = profile_name
+        super(FileEventCursorStore, self).__init__(u"file_event_checkpoints", db_file_path)
         if self._is_empty():
             self._init_table()
 
     def get_stored_insertion_timestamp(self):
         """Gets the last stored insertion timestamp."""
-        rows = self._get(_INSERTION_TIMESTAMP_FIELD_NAME, self._PRIMARY_KEY)
+        rows = self._get(_INSERTION_TIMESTAMP_FIELD_NAME, self._primary_key)
         if rows and rows[0]:
             return rows[0][0]
 
@@ -71,7 +70,7 @@ class FileEventCursorStore(BaseCursorStore):
         self._set(
             column_name=_INSERTION_TIMESTAMP_FIELD_NAME,
             new_value=new_insertion_timestamp,
-            primary_key=self._PRIMARY_KEY,
+            primary_key=self._primary_key,
         )
 
     def reset(self):
@@ -84,4 +83,4 @@ class FileEventCursorStore(BaseCursorStore):
         insert_query = u"INSERT INTO {0} VALUES(?, null)".format(self._table_name)
         with self._connection as conn:
             conn.execute(create_table_query)
-            conn.execute(insert_query, (self._PRIMARY_KEY,))
+            conn.execute(insert_query, (self._primary_key,))

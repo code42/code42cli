@@ -8,6 +8,7 @@ import pytest
 @pytest.fixture
 def namespace(mocker):
     mock = mocker.MagicMock(spec=Namespace)
+    mock.profile_name = None
     mock.is_incremental = None
     mock.advanced_query = None
     mock.is_debug_mode = None

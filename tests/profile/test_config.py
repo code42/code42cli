@@ -9,6 +9,10 @@ from code42cli.profile.config import ConfigAccessor
 def mock_config_parser(mocker):
     return mocker.MagicMock(sepc=ConfigParser)
 
+@pytest.fixture(autouse=True)
+def mock_saver(mocker):
+    return mocker.patch("code42cli.util.open_file")
+
 
 def create_mock_profile_object(name, authority=None, username=None):
     authority = authority or ConfigAccessor.DEFAULT_VALUE

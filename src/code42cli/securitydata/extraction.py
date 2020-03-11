@@ -37,18 +37,18 @@ def extract(output_logger, args):
             args:
                 Command line args used to build up file event query filters.
     """
-    store = _create_cursor_store(args)
+    profile = get_profile(args.profile_name)
+    store = _create_cursor_store(args, profile)
     handlers = _create_event_handlers(output_logger, store)
-    profile = get_profile()
     sdk = _get_sdk(profile, args.is_debug_mode)
     extractor = FileEventExtractor(sdk, handlers)
     _call_extract(extractor, store, args)
     _handle_result()
 
 
-def _create_cursor_store(args):
+def _create_cursor_store(args, profile):
     if args.is_incremental:
-        return FileEventCursorStore()
+        return FileEventCursorStore(profile.name)
 
 
 def _create_event_handlers(output_logger, cursor_store):

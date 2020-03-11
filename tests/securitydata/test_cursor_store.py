@@ -35,7 +35,7 @@ class TestFileEventCursorStore(object):
         store.reset()
         with store._connection as conn:
             actual = conn.execute.call_args_list[0][0][0]
-            expected = "DROP TABLE aed_checkpoint"
+            expected = "DROP TABLE file_event_checkpoints"
             assert actual == expected
 
     def test_reset_executes_expected_create_table_query(self, sqlite_connection):
@@ -43,7 +43,7 @@ class TestFileEventCursorStore(object):
         store.reset()
         with store._connection as conn:
             actual = conn.execute.call_args_list[1][0][0]
-            expected = "CREATE TABLE aed_checkpoint (cursor_id, insertionTimestamp)"
+            expected = "CREATE TABLE file_event_checkpoints (cursor_id, insertionTimestamp)"
             assert actual == expected
 
     def test_reset_executes_expected_insert_query(self, sqlite_connection):
@@ -52,7 +52,7 @@ class TestFileEventCursorStore(object):
         store.reset()
         with store._connection as conn:
             actual = conn.execute.call_args[0][0]
-            expected = "INSERT INTO aed_checkpoint VALUES(?, null)"
+            expected = "INSERT INTO file_event_checkpoints VALUES(?, null)"
             assert actual == expected
 
     def test_reset_executes_query_with_expected_primary_key(self, sqlite_connection):
@@ -61,14 +61,14 @@ class TestFileEventCursorStore(object):
         store.reset()
         with store._connection as conn:
             actual = conn.execute.call_args[0][1][0]
-            expected = store._PRIMARY_KEY
+            expected = store._primary_key
             assert actual == expected
 
     def test_get_stored_insertion_timestamp_executes_expected_select_query(self, sqlite_connection):
         store = FileEventCursorStore(self.MOCK_TEST_DB_PATH)
         store.get_stored_insertion_timestamp()
         with store._connection as conn:
-            expected = "SELECT {0} FROM aed_checkpoint WHERE cursor_id=?".format(
+            expected = "SELECT {0} FROM file_event_checkpoints WHERE cursor_id=?".format(
                 INSERTION_TIMESTAMP_FIELD_NAME
             )
             actual = conn.cursor().execute.call_args[0][0]
@@ -81,7 +81,7 @@ class TestFileEventCursorStore(object):
         store.get_stored_insertion_timestamp()
         with store._connection as conn:
             actual = conn.cursor().execute.call_args[0][1][0]
-            expected = store._PRIMARY_KEY
+            expected = store._primary_key
             assert actual == expected
 
     def test_replace_stored_insertion_timestamp_executes_expected_update_query(
@@ -90,7 +90,7 @@ class TestFileEventCursorStore(object):
         store = FileEventCursorStore(self.MOCK_TEST_DB_PATH)
         store.replace_stored_insertion_timestamp(123)
         with store._connection as conn:
-            expected = "UPDATE aed_checkpoint SET {0}=? WHERE cursor_id=?".format(
+            expected = "UPDATE file_event_checkpoints SET {0}=? WHERE cursor_id=?".format(
                 INSERTION_TIMESTAMP_FIELD_NAME
             )
             actual = conn.execute.call_args[0][0]

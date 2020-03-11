@@ -1,4 +1,6 @@
 from code42cli.securitydata.cursor_store import FileEventCursorStore
+from code42cli.arguments import add_profile_name_arg
+from code42cli.profile.profile import get_profile
 
 
 def init(subcommand_parser):
@@ -7,16 +9,14 @@ def init(subcommand_parser):
             subcommand_parser: The subparsers group created by the parent parser.
     """
     parser = subcommand_parser.add_parser("clear-checkpoint")
+    add_profile_name_arg(parser)
     parser.set_defaults(func=clear_checkpoint)
 
 
-def clear_checkpoint(*args):
+def clear_checkpoint(args):
     """Removes the stored checkpoint that keeps track of the last event you got.
         To use, run `code42 clear-checkpoint`.
         This affects `incremental` mode by causing it to behave like it has never been run before.
     """
-    FileEventCursorStore().reset()
-
-
-if __name__ == "__main__":
-    clear_checkpoint()
+    profile_name = args.profile_name or get_profile().name
+    FileEventCursorStore(profile_name).reset()

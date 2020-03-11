@@ -3,8 +3,6 @@ from __future__ import print_function, with_statement
 import sys
 from os import path, makedirs
 
-from code42cli.compat import urlparse
-
 
 def get_input(prompt):
     """Uses correct input function based on Python version."""
