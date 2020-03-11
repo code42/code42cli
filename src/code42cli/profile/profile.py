@@ -124,7 +124,10 @@ def list_profiles(*args):
 
 def use_profile(args):
     accessor = get_config_accessor()
-    accessor.switch_default_profile(args.profile_name)
+    try:
+        accessor.switch_default_profile(args.profile_name)
+    except Exception as ex:
+        print_error(ex)
 
 
 def _add_args_to_set_command(parser_for_set):

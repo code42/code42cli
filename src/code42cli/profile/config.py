@@ -60,6 +60,7 @@ class ConfigAccessor(object):
         if self.get_profile(new_default_name) is None:
             raise Exception("Profile does not exist.")
         self.internal[self.DEFAULT_PROFILE] = new_default_name
+        self._save()
 
     def set_authority_url(self, new_value, profile_name=None):
         profile = self.get_profile(profile_name)
