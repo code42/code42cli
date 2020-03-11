@@ -10,7 +10,6 @@ from ..conftest import SUBCOMMANDS_NAMESPACE
 _PRINT_PATH = "{0}.print_out".format(SUBCOMMANDS_NAMESPACE)
 
 
-
 @pytest.fixture
 def config_accessor(mocker):
     mock = mocker.MagicMock(spec=ConfigAccessor)

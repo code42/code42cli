@@ -31,23 +31,21 @@ class ConfigAccessor(object):
     def internal(self):
         return self.parser[self._INTERNAL_SECTION]
 
-    @property
-    def default_profile_name(self):
-        return self.internal[self.DEFAULT_PROFILE]
-
-    def get_profile_names(self):
-        names = list(self.parser.sections())
-        names.remove(self._INTERNAL_SECTION)
-        return names
-
     def has_setup_default_profile(self):
-        return not len(self.get_profile_names())
+        return not len(self._get_profile_names())
 
     def get_profile(self, name=None):
-        name = name or self.default_profile_name
-        if name not in self.parser.sections() and name != self.DEFAULT_VALUE:
+        name = name or self._default_profile_name
+        if name not in self.parser.sections() or name == self.DEFAULT_VALUE:
             raise Exception("Profile does not exist.")
         return self.parser[name]
+
+    def get_all_profiles(self):
+        profiles = []
+        names = self._get_profile_names()
+        for name in names:
+            profiles.append(self.get_profile(name))
+        return profiles
 
     def create_profile(self, name):
         self._create_profile_section(name)
@@ -55,31 +53,33 @@ class ConfigAccessor(object):
     def switch_default_profile(self, new_default_name):
         if self.get_profile(new_default_name) is None:
             raise Exception("Profile does not exist.")
-        self.internal[self.DEFAULT_VALUE] = new_default_name
+        self.internal[self.DEFAULT_PROFILE] = new_default_name
 
     def set_authority_url(self, new_value, profile_name=None):
         profile = self.get_profile(profile_name)
         profile[self.AUTHORITY_KEY] = new_value
         self._save()
-        self._try_complete_setup()
+        self._try_complete_setup(profile)
 
     def set_username(self, new_value, profile_name=None):
         profile = self.get_profile(profile_name)
         profile[self.USERNAME_KEY] = new_value
         self._save()
-        self._try_complete_setup()
+        self._try_complete_setup(profile)
 
     def set_ignore_ssl_errors(self, new_value, profile_name=None):
         profile = self.get_profile(profile_name)
         profile[self.IGNORE_SSL_ERRORS_KEY] = str(new_value)
         self._save()
 
-    def get_all_profiles(self):
-        profiles = []
-        names = self.get_profile_names()
-        for name in names:
-            profiles.append(self.get_profile(name))
-        return profiles
+    @property
+    def _default_profile_name(self):
+        return self.internal[self.DEFAULT_PROFILE]
+
+    def _get_profile_names(self):
+        names = list(self.parser.sections())
+        names.remove(self._INTERNAL_SECTION)
+        return names
 
     def _create_internal_section(self):
         self.parser.add_section(self._INTERNAL_SECTION)
@@ -100,16 +100,12 @@ class ConfigAccessor(object):
     def _save(self):
         util.open_file(self.path, u"w+", lambda f: self.parser.write(f))
 
-    def _try_complete_setup(self):
+    def _try_complete_setup(self, profile):
         if self.internal.getboolean(self.DEFAULT_PROFILE_IS_COMPLETE):
             return
 
-        default_profile = get_profile()
-        if not default_profile:
-            return
-
-        authority = default_profile.get(self.AUTHORITY_KEY)
-        username = default_profile.get(self.USERNAME_KEY)
+        authority = profile.get(self.AUTHORITY_KEY)
+        username = profile.get(self.USERNAME_KEY)
 
         authority_valid = authority is not None and authority != self.DEFAULT_VALUE
         username_valid = username is not None and username != self.DEFAULT_VALUE
@@ -119,7 +115,7 @@ class ConfigAccessor(object):
 
         self.internal[self.DEFAULT_PROFILE_IS_COMPLETE] = str(True)
         if self.internal[self.DEFAULT_PROFILE] == self.DEFAULT_VALUE:
-            self.internal[self.DEFAULT_PROFILE] = default_profile.name
+            self.internal[self.DEFAULT_PROFILE] = profile.name
 
         self._save()
 

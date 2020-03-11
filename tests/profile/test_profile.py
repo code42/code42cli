@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+
 import pytest
 
 from code42cli.profile import profile
@@ -146,7 +147,9 @@ def test_set_profile_when_given_disable_ssl_errors_sets_ignore_ssl_errors_to_tru
     assert config_accessor.set_ignore_ssl_errors.call_args[0][0] == True
 
 
-def test_set_profile_when_given_disable_ssl_errors_and_profile_name_sets_ignore_ssl_errors_to_true_for_profile(config_accessor):
+def test_set_profile_when_given_disable_ssl_errors_and_profile_name_sets_ignore_ssl_errors_to_true_for_profile(
+    config_accessor
+):
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "--profile", "profileA", "--disable-ssl-errors"])
     profile.set_profile(namespace)
@@ -154,13 +157,15 @@ def test_set_profile_when_given_disable_ssl_errors_and_profile_name_sets_ignore_
     assert config_accessor.set_ignore_ssl_errors.call_args[0][1] == "profileA"
 
 
-def test_set_profile_when_to_store_password_prompts_for_storing_password(mocker, config_accessor, input_function):
+def test_set_profile_when_to_store_password_prompts_for_storing_password(
+    mocker, config_accessor, input_function
+):
     input_function.return_value = "y"
     mock_set_password_function = mocker.patch("code42cli.profile.password.set_password_from_prompt")
     parser = _get_profile_parser()
     namespace = parser.parse_args(
-             ["set", "-s", "https://wwww.new.authority.example.com", "-u", "user"]
-         )
+        ["set", "-s", "https://wwww.new.authority.example.com", "-u", "user"]
+    )
     profile.set_profile(namespace)
     assert mock_set_password_function.call_count
 

@@ -4,8 +4,8 @@ import code42cli.profile.password as password
 from code42cli.profile.config import ConfigAccessor
 from .conftest import PASSWORD_NAMESPACE
 
-
 _USERNAME = "test.username"
+
 
 @pytest.fixture
 def config_accessor(mocker):
