@@ -87,6 +87,11 @@ code42 securitydata send-to syslog.company.com -i
 ```
 This is only guaranteed if you did not change your query.
 
+You can also use wildcard for queries, but note, they must be in quotes:
+```bash
+code42 securitydata print --actor "*"
+```
+
 
 Each destination-type subcommand shares query parameters
 * `-t` (exposure types)
