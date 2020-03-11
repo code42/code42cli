@@ -2,7 +2,8 @@
 
 Use the `code42` command to interact with your Code42 environment.
 `code42 securitydata` is a CLI tool for extracting AED events.
-Additionally, `code42 securitydata` can record a checkpoint so that you only get events you have not previously gotten.
+Additionally, you can choose to only get events that Code42 previously did not observe since you last recorded a checkpoint
+(provided you do not change your query).
 
 ## Requirements
 
@@ -46,18 +47,33 @@ Next, you can query for events and send them to three possible destination types
 
 To print events to stdout, do:
 ```bash
-code42 securitydata print
+code42 securitydata print -b 2020-02-02
 ```
+
+Note that `-b` or `--begin` is usually required.
+To specify a time, do:
+
+```bash
+code42 securitydata print -b 2020-02-02 12:51
+```
+Begin date will be ignored if provided on subsequent queries using `-i`.
 
 To write events to a file, do:
 ```bash
-code42 securitydata write-to filename.txt
+code42 securitydata write-to filename.txt -b 2020-02-02
 ```
 
 To send events to a server, do:
 ```bash
-code42 securitydata send-to https://syslog.company.com -p TCP
+code42 securitydata send-to syslog.company.com -p TCP -b 2020-02-02
 ```
+
+To only get events that Code42 previously did not observe since you last recorded a checkpoint, use the `-i` flag.
+```bash
+code42 securitydata send-to syslog.company.com -i
+```
+This is only guaranteed if you did not change your query.
+
 
 Each destination-type subcommand shares query parameters
 * `-t` (exposure types)
@@ -75,8 +91,7 @@ Each destination-type subcommand shares query parameters
 * `--include-non-exposure` (does not work with `-t`)
 * `--advanced-query` (raw JSON query)
 
-Note that you cannot use other query parameters if you use `--advanced-query`.
-
+You cannot use other query parameters if you use `--advanced-query`.
 To learn more about acceptable arguments, add the `-h` flag to `code42` or and of the destination-type subcommands.
 
 

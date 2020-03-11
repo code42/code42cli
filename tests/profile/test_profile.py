@@ -1,5 +1,7 @@
-import pytest
 from argparse import ArgumentParser
+
+import pytest
+
 from code42cli.profile import profile
 from .conftest import CONFIG_NAMESPACE, PASSWORD_NAMESPACE, PROFILE_NAMESPACE
 

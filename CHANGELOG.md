@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## Unreleased
+
+### Fixed
+
+- Fixed bug where port attached to `securitydata send-to` command was not properly applied.
+
+### Changed
+
+- Begin dates are no longer required for subsequent interactive `securitydata` commands.
+- When provided, begin dates are now ignored on subsequent interactive `securitydata` commands.
+
 ## 0.3.0 - 2020-03-04
 
 ### Added

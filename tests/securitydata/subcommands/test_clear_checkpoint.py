@@ -1,18 +1,17 @@
 import pytest
 
-from ..conftest import SECURITYDATA_NAMESPACE
 from code42cli.securitydata.subcommands import clear_checkpoint as clearer
-
+from ..conftest import SECURITYDATA_NAMESPACE
 
 _CURSOR_STORE_PATH = "{0}.cursor_store".format(SECURITYDATA_NAMESPACE)
 
 
 @pytest.fixture
 def cursor_store(mocker):
-    mock_init = mocker.patch("{0}.AEDCursorStore.__init__".format(_CURSOR_STORE_PATH))
+    mock_init = mocker.patch("{0}.FileEventCursorStore.__init__".format(_CURSOR_STORE_PATH))
     mock_init.return_value = None
     mock = mocker.MagicMock()
-    mock_new = mocker.patch("{0}.AEDCursorStore.__new__".format(_CURSOR_STORE_PATH))
+    mock_new = mocker.patch("{0}.FileEventCursorStore.__new__".format(_CURSOR_STORE_PATH))
     mock_new.return_value = mock
     return mock
 

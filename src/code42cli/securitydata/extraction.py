@@ -18,7 +18,7 @@ from code42cli.profile.profile import get_profile
 from code42cli.securitydata import date_helper as date_helper
 from code42cli.securitydata.arguments.main import IS_INCREMENTAL_KEY
 from code42cli.securitydata.arguments.search import SearchArguments
-from code42cli.securitydata.cursor_store import AEDCursorStore
+from code42cli.securitydata.cursor_store import FileEventCursorStore
 from code42cli.securitydata.logger_factory import get_error_logger
 from code42cli.securitydata.options import ExposureType as ExposureTypeOptions
 from code42cli.util import print_error, print_bold, is_interactive
@@ -37,15 +37,21 @@ def extract(output_logger, args):
             args:
                 Command line args used to build up file event query filters.
     """
-    handlers = _create_event_handlers(output_logger, args.is_incremental)
+    store = _create_cursor_store(args)
+    handlers = _create_event_handlers(output_logger, store)
     profile = get_profile()
     sdk = _get_sdk(profile, args.is_debug_mode)
     extractor = FileEventExtractor(sdk, handlers)
-    _call_extract(extractor, args)
+    _call_extract(extractor, store, args)
     _handle_result()
 
 
-def _create_event_handlers(output_logger, is_incremental):
+def _create_cursor_store(args):
+    if args.is_incremental:
+        return FileEventCursorStore()
+
+
+def _create_event_handlers(output_logger, cursor_store):
     handlers = FileEventHandlers()
     error_logger = get_error_logger()
 
@@ -56,10 +62,9 @@ def _create_event_handlers(output_logger, is_incremental):
 
     handlers.handle_error = handle_error
 
-    if is_incremental:
-        store = AEDCursorStore()
-        handlers.record_cursor_position = store.replace_stored_insertion_timestamp
-        handlers.get_cursor_position = store.get_stored_insertion_timestamp
+    if cursor_store:
+        handlers.record_cursor_position = cursor_store.replace_stored_insertion_timestamp
+        handlers.get_cursor_position = cursor_store.get_stored_insertion_timestamp
 
     def handle_response(response):
         response_dict = json.loads(response.text)
@@ -86,9 +91,9 @@ def _get_sdk(profile, is_debug_mode):
         exit(1)
 
 
-def _call_extract(extractor, args):
+def _call_extract(extractor, cursor_store, args):
     if not _determine_if_advanced_query(args):
-        _verify_begin_date(args.begin_date)
+        _verify_begin_date_requirements(args, cursor_store)
         _verify_exposure_types(args.exposure_types)
         filters = _create_filters(args)
         extractor.extract(*filters)
@@ -116,21 +121,24 @@ def _verify_compatibility_with_advanced_query(key, val):
     return True
 
 
-def _get_event_timestamp_filter(args):
-    try:
-        return date_helper.create_event_timestamp_range(args.begin_date, args.end_date)
-    except ValueError as ex:
-        print_error(str(ex))
-        exit(1)
-
-
-def _verify_begin_date(begin_date):
-    if not begin_date:
+def _verify_begin_date_requirements(args, cursor_store):
+    if _begin_date_is_required(args, cursor_store) and not args.begin_date:
         print_error(u"'begin date' is required.")
         print(u"")
         print_bold(u"Try using  '-b' or '--begin'. Use `-h` for more info.")
         print(u"")
         exit(1)
+
+
+def _begin_date_is_required(args, cursor_store):
+    if not args.is_incremental:
+        return True
+    required = cursor_store is not None and cursor_store.get_stored_insertion_timestamp() is None
+
+    # Ignore begin date when is incremental mode, it is not required, and it was passed an argument.
+    if not required and args.begin_date:
+        args.begin_date = None
+    return required
 
 
 def _verify_exposure_types(exposure_types):
@@ -143,13 +151,25 @@ def _verify_exposure_types(exposure_types):
             exit(1)
 
 
+def _get_event_timestamp_filter(args):
+    try:
+        return date_helper.create_event_timestamp_filter(args.begin_date, args.end_date)
+    except ValueError as ex:
+        print_error(str(ex))
+        exit(1)
+
+
 def _handle_result():
     if is_interactive() and _EXCEPTIONS_OCCURRED:
         print_error(u"View exceptions that occurred at [HOME]/.code42cli/log/code42_errors.")
 
 
 def _create_filters(args):
-    filters = [_get_event_timestamp_filter(args)]
+    filters = []
+    event_timestamp_filter = _get_event_timestamp_filter(args)
+    if event_timestamp_filter:
+        filters.append(event_timestamp_filter)
+
     not args.c42username or filters.append(DeviceUsername.eq(args.c42username))
     not args.actor or filters.append(Actor.eq(args.actor))
     not args.md5 or filters.append(MD5.eq(args.md5))
