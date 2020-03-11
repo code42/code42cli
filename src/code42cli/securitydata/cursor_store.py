@@ -33,6 +33,17 @@ class BaseCursorStore(object):
         with self._connection as conn:
             conn.execute(query, (new_value, primary_key))
 
+    def _row_exists(self, primary_key):
+        query = u"SELECT * FROM {0} WHERE {1}=?"
+        query = query.format(self._table_name, self._PRIMARY_KEY_COLUMN_NAME)
+        with self._connection as conn:
+            cursor = conn.cursor()
+            cursor.execute(query, (primary_key,))
+            query_result = cursor.fetchone()
+            if query_result:
+                return True
+            return False
+
     def _drop_table(self):
         drop_query = u"DROP TABLE {0}".format(self._table_name)
         with self._connection as conn:
@@ -58,6 +69,8 @@ class FileEventCursorStore(BaseCursorStore):
         super(FileEventCursorStore, self).__init__(u"file_event_checkpoints", db_file_path)
         if self._is_empty():
             self._init_table()
+        if not self._row_exists(self._primary_key):
+            self._insert_blank_row()
 
     def get_stored_insertion_timestamp(self):
         """Gets the last stored insertion timestamp."""
@@ -76,11 +89,15 @@ class FileEventCursorStore(BaseCursorStore):
     def reset(self):
         self._drop_table()
         self._init_table()
+        self._insert_blank_row()
 
     def _init_table(self):
         columns = u"{0}, {1}".format(self._PRIMARY_KEY_COLUMN_NAME, _INSERTION_TIMESTAMP_FIELD_NAME)
         create_table_query = u"CREATE TABLE {0} ({1})".format(self._table_name, columns)
-        insert_query = u"INSERT INTO {0} VALUES(?, null)".format(self._table_name)
         with self._connection as conn:
             conn.execute(create_table_query)
+
+    def _insert_blank_row(self):
+        insert_query = u"INSERT INTO {0} VALUES(?, null)".format(self._table_name)
+        with self._connection as conn:
             conn.execute(insert_query, (self._primary_key,))
