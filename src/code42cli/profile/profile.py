@@ -26,13 +26,13 @@ def init(subcommand_parser):
         Args:
             subcommand_parser: The subparsers group created by the parent parser.
     """
-    parser_profile = subcommand_parser.add_parser(u"profile")
+    parser_profile = subcommand_parser.add_parser("profile")
     parser_profile.set_defaults(func=show_profile)
     profile_subparsers = parser_profile.add_subparsers()
 
-    parser_for_show_command = profile_subparsers.add_parser(u"show")
-    parser_for_set_command = profile_subparsers.add_parser(u"set")
-    parser_for_reset_password = profile_subparsers.add_parser(u"reset-pw")
+    parser_for_show_command = profile_subparsers.add_parser("show")
+    parser_for_set_command = profile_subparsers.add_parser("set")
+    parser_for_reset_password = profile_subparsers.add_parser("reset-pw")
 
     parser_for_show_command.set_defaults(func=show_profile)
     parser_for_set_command.set_defaults(func=set_profile)

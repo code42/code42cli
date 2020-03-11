@@ -10,7 +10,7 @@ def init(subcommand_parser):
         Args:
             subcommand_parser: The subparsers group created by the parent parser.
     """
-    parser = subcommand_parser.add_parser(u"write-to")
+    parser = subcommand_parser.add_parser("write-to")
     parser.set_defaults(func=write_to)
     _add_filename_subcommand(parser)
     search_args.add_arguments_to_parser(parser)
