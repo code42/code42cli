@@ -3,22 +3,16 @@ from argparse import ArgumentParser
 import pytest
 
 from code42cli.profile import profile
+from code42cli.profile.config import ConfigAccessor
 from .conftest import CONFIG_NAMESPACE, PASSWORD_NAMESPACE, PROFILE_NAMESPACE
 
 
-@pytest.fixture(autouse=True)
-def username_setter(mocker):
-    return mocker.patch("{0}.write_username".format(CONFIG_NAMESPACE))
-
-
-@pytest.fixture(autouse=True)
-def authority_url_setter(mocker):
-    return mocker.patch("{0}.write_authority_url".format(CONFIG_NAMESPACE))
-
-
-@pytest.fixture(autouse=True)
-def ignore_ssl_errors_setter(mocker):
-    return mocker.patch("{0}.write_ignore_ssl_errors".format(CONFIG_NAMESPACE))
+@pytest.fixture
+def config_accessor(mocker):
+    mock = mocker.MagicMock(spec=ConfigAccessor)
+    factory = mocker.patch("{0}.profile.get_config_accessor".format(PROFILE_NAMESPACE))
+    factory.return_value = mock
+    return mock
 
 
 @pytest.fixture(autouse=True)
@@ -102,14 +96,11 @@ def test_init_add_parser_that_can_parse_use_command():
     assert profile_parser.parse_args(["use", "name"])
 
 
-def test_get_profile_returns_object_from_config_profile(config_parser, config_profile):
+def test_get_profile_returns_object_from_config_profile(mocker, config_accessor):
+    expected = mocker.MagicMock()
+    config_accessor.get_profile.return_value = expected
     user = profile.get_profile()
-    # Values from config_profile fixture
-    assert (
-        user.username == "test.username"
-        and user.authority_url == "https://authority.example.com"
-        and user.ignore_ssl_errors
-    )
+    assert user._profile == expected
 
 
 def test_set_profile_when_given_username_sets_username(

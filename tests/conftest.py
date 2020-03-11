@@ -12,9 +12,9 @@ def config_profile(mocker):
     mock_config = mocker.patch("code42cli.profile.config.get_profile")
 
     model_dict = {
-        CCo.USERNAME_KEY: "test.username",
-        ConfigurationKeys.AUTHORITY_KEY: "https://authority.example.com",
-        ConfigurationKeys.IGNORE_SSL_ERRORS_KEY: "True",
+        ConfigAccessor.USERNAME_KEY: "test.username",
+        ConfigAccessor.AUTHORITY_KEY: "https://authority.example.com",
+        ConfigAccessor.IGNORE_SSL_ERRORS_KEY: "True",
     }
 
     class MockConfig(object):
