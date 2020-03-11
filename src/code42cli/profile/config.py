@@ -32,7 +32,7 @@ class ConfigAccessor(object):
 
     def get_profile(self, name=None):
         """Returns the profile with the given name.
-        If not given a name, returns the default profile.
+        If name is None, returns the default profile.
         If the name does not exist or there is no existing profile, it will throw an exception.
         """
         name = name or self._default_profile_name
@@ -49,7 +49,7 @@ class ConfigAccessor(object):
         return profiles
 
     def create_profile_if_not_exists(self, name):
-        """Create a new profile if one does not already exist for that name."""
+        """Creates a new profile if one does not already exist for that name."""
         try:
             self.get_profile(name)
         except Exception as ex:
@@ -67,7 +67,7 @@ class ConfigAccessor(object):
 
     def set_authority_url(self, new_value, profile_name=None):
         """Sets 'authority URL' for a given profile.
-        Uses the default profile if not given a name.
+        Uses the default profile if name is None.
         """
         profile = self.get_profile(profile_name)
         profile[self.AUTHORITY_KEY] = new_value
@@ -83,7 +83,7 @@ class ConfigAccessor(object):
 
     def set_ignore_ssl_errors(self, new_value, profile_name=None):
         """Sets 'ignore_ssl_errors' for a given profile.
-        Uses the default profile if not given a name.
+        Uses the default profile if name is None.
         """
         profile = self.get_profile(profile_name)
         profile[self.IGNORE_SSL_ERRORS_KEY] = str(new_value)
