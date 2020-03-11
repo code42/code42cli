@@ -10,7 +10,6 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
-<<<<<<< HEAD
 ### Added
 
 - Support for multiple profiles
@@ -18,7 +17,6 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - `code42 profile use` for changing the default profile.
 - `code42 profile list` for listing all the available profiles.
 
-=======
 ### Fixed
 
 - Fixed bug where port attached to `securitydata send-to` command was not properly applied.
@@ -27,7 +25,6 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Begin dates are no longer required for subsequent interactive `securitydata` commands.
 - When provided, begin dates are now ignored on subsequent interactive `securitydata` commands.
->>>>>>> master
 
 ## 0.3.0 - 2020-03-04
 
