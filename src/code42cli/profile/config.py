@@ -6,8 +6,6 @@ from configparser import ConfigParser
 import code42cli.util as util
 from code42cli.compat import str
 
-_PROFILE_ENV_VAR_NAME = u"CODE42CLI_PROFILE"
-
 
 class ConfigAccessor(object):
     DEFAULT_VALUE = u"__DEFAULT__"
