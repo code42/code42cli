@@ -113,6 +113,9 @@ def _determine_if_advanced_query(args):
 
 
 def _verify_compatibility_with_advanced_query(key, val):
+    if key == SearchArguments.INCLUDE_NON_EXPOSURE_EVENTS and not val:
+        return True
+
     if val is not None:
         is_other_search_arg = key in SearchArguments() and key != SearchArguments.ADVANCED_QUERY
         is_incremental = key == IS_INCREMENTAL_KEY and val
