@@ -52,7 +52,7 @@ def create_internal_object(is_complete, default_profile_name=None):
             internal_dict[key] = value
 
         def getboolean(self, *args):
-            return False
+            return is_complete
 
     return InternalObject()
 
@@ -104,6 +104,26 @@ class TestConfigAccessor(object):
         assert mock_internal[ConfigAccessor.DEFAULT_PROFILE] == "ProfileA"
         assert mock_internal[ConfigAccessor.DEFAULT_PROFILE_IS_COMPLETE]
 
+    def test_set_username_does_not_mark_as_complete_if_not_have_authority(self, mock_config_parser):
+        mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
+        accessor = ConfigAccessor(mock_config_parser)
+        mock_profile = create_mock_profile_object("ProfileA", None, None)
+        mock_internal = create_internal_object(False)
+        setup_parser_one_profile(mock_profile, mock_internal, mock_config_parser)
+        accessor.set_username("TestUser", "ProfileA")
+        assert mock_internal[ConfigAccessor.DEFAULT_PROFILE] == ConfigAccessor.DEFAULT_VALUE
+        assert not mock_internal[ConfigAccessor.DEFAULT_PROFILE_IS_COMPLETE]
+
+    def test_set_username_saves(self, mock_config_parser, mock_saver):
+        mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
+        accessor = ConfigAccessor(mock_config_parser)
+        mock_profile = create_mock_profile_object("ProfileA", "example.com", "console.com")
+        mock_internal = create_internal_object(True, "ProfileA")
+        setup_parser_one_profile(mock_profile, mock_internal, mock_config_parser)
+        accessor.set_username("TestUser", "ProfileA")
+        assert mock_saver.call_count == 1
+
+
     def test_set_authority_marks_as_complete_if_ready(self, mock_config_parser):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
         accessor = ConfigAccessor(mock_config_parser)
@@ -114,7 +134,7 @@ class TestConfigAccessor(object):
         assert mock_internal[ConfigAccessor.DEFAULT_PROFILE] == "ProfileA"
         assert mock_internal[ConfigAccessor.DEFAULT_PROFILE_IS_COMPLETE]
 
-    def test_set_authority_does_not_mark_as_complete_if_not_ready(self, mock_config_parser):
+    def test_set_authority_does_not_mark_as_complete_if_not_have_username(self, mock_config_parser):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
         accessor = ConfigAccessor(mock_config_parser)
         mock_profile = create_mock_profile_object("ProfileA", None, None)
@@ -123,6 +143,15 @@ class TestConfigAccessor(object):
         accessor.set_authority_url("new url", "ProfileA")
         assert mock_internal[ConfigAccessor.DEFAULT_PROFILE] == ConfigAccessor.DEFAULT_VALUE
         assert not mock_internal[ConfigAccessor.DEFAULT_PROFILE_IS_COMPLETE]
+
+    def test_set_authority_saves(self, mock_config_parser, mock_saver):
+        mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
+        accessor = ConfigAccessor(mock_config_parser)
+        mock_profile = create_mock_profile_object("ProfileA", None, None)
+        mock_internal = create_internal_object(False)
+        setup_parser_one_profile(mock_profile, mock_internal, mock_config_parser)
+        accessor.set_authority_url("new url", "ProfileA")
+        assert mock_saver.call_count == 1
 
     def test_switch_default_profile_switches_internal_value(self, mock_config_parser):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA", "ProfileB"]
@@ -144,6 +173,26 @@ class TestConfigAccessor(object):
         accessor.switch_default_profile("ProfileB")
         assert mock_internal[ConfigAccessor.DEFAULT_PROFILE] == "ProfileB"
 
+    def test_switch_default_profile_saveS(self, mock_config_parser, mock_saver):
+        mock_config_parser.sections.return_value = ["Internal", "ProfileA", "ProfileB"]
+        accessor = ConfigAccessor(mock_config_parser)
+        mock_profile_a = create_mock_profile_object("ProfileA", "test", "test")
+        mock_profile_b = create_mock_profile_object("ProfileB", "test", "test")
+
+        mock_internal = create_internal_object(True, "ProfileA")
+
+        def side_effect(item):
+            if item == "ProfileA":
+                return mock_profile_a
+            elif item == "ProfileB":
+                return mock_profile_b
+            elif item == "Internal":
+                return mock_internal
+
+        mock_config_parser.__getitem__.side_effect = side_effect
+        accessor.switch_default_profile("ProfileB")
+        assert mock_saver.call_count == 1
+
     def test_create_profile_if_not_exists_when_given_default_name_does_not_create(
         self, mock_config_parser
     ):
@@ -151,3 +200,4 @@ class TestConfigAccessor(object):
         accessor = ConfigAccessor(mock_config_parser)
         with pytest.raises(Exception):
             accessor.create_profile_if_not_exists(ConfigAccessor.DEFAULT_VALUE)
+
