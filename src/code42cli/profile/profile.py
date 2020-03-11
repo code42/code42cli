@@ -67,6 +67,7 @@ def init(subcommand_parser):
     parser_for_use.set_defaults(func=use_profile)
 
     main_args.add_profile_name_arg(parser_for_show)
+    main_args.add_profile_name_arg(parser_for_reset_password)
     _add_args_to_set_command(parser_for_set)
     _add_positional_profile_arg(parser_for_use)
 
