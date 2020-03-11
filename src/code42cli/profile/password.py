@@ -4,7 +4,7 @@ from getpass import getpass
 
 import keyring
 
-from code42cli.profile.config import get_config_accessor
+from code42cli.profile.config import get_config_accessor, ConfigAccessor
 
 _ROOT_SERVICE_NAME = u"code42cli"
 
@@ -40,4 +40,4 @@ def _get_service_name(profile_name):
 
 
 def _get_username(profile):
-    return profile[ConfigurationKeys.USERNAME_KEY]
+    return profile[ConfigAccessor.USERNAME_KEY]

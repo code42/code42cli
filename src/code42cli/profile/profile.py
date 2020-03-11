@@ -94,8 +94,8 @@ def set_profile(args):
     _verify_args_for_set(args)
     accessor = get_config_accessor()
     _try_set_authority_url(args, accessor)
-    _try_set_username(args)
-    _try_set_ignore_ssl_errors(args)
+    _try_set_username(args, accessor)
+    _try_set_ignore_ssl_errors(args, accessor)
     _prompt_for_allow_password_set(args)
 
 

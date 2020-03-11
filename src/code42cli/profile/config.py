@@ -53,7 +53,7 @@ class ConfigAccessor(object):
         self._create_profile_section(name)
 
     def switch_default_profile(self, new_default_name):
-        if get_profile(new_default_name) is None:
+        if self.get_profile(new_default_name) is None:
             raise Exception("Profile does not exist.")
         self.internal[self.DEFAULT_VALUE] = new_default_name
 

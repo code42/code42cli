@@ -26,7 +26,7 @@ def extractor(mocker):
     return mocker.patch("{0}.extract".format(_WRITE_PATH))
 
 
-def test_init_adds_parser_that_can_parse_supported_args(config_parser):
+def test_init_adds_parser_that_can_parse_supported_args():
     subcommand_parser = ArgumentParser().add_subparsers()
     writer.init(subcommand_parser)
     write_parser = subcommand_parser.choices.get("write-to")
@@ -34,7 +34,7 @@ def test_init_adds_parser_that_can_parse_supported_args(config_parser):
     write_parser.parse_args(args)
 
 
-def test_init_adds_parser_when_not_given_filename_causes_system_exit(config_parser):
+def test_init_adds_parser_when_not_given_filename_causes_system_exit():
     subcommand_parser = ArgumentParser().add_subparsers()
     writer.init(subcommand_parser)
     write_parser = subcommand_parser.choices.get("write-to")

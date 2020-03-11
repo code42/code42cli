@@ -1,10 +1,9 @@
 from argparse import ArgumentParser
-
 import pytest
 
 from code42cli.profile import profile
 from code42cli.profile.config import ConfigAccessor
-from .conftest import CONFIG_NAMESPACE, PASSWORD_NAMESPACE, PROFILE_NAMESPACE
+from .conftest import PASSWORD_NAMESPACE, PROFILE_NAMESPACE
 
 
 @pytest.fixture
@@ -60,20 +59,20 @@ class TestCode42Profile(object):
         assert actual == "Test Password"
 
 
-def test_init_adds_profile_subcommand_to_choices(config_parser):
+def test_init_adds_profile_subcommand_to_choices(config_accessor):
     subcommand_parser = ArgumentParser().add_subparsers()
     profile.init(subcommand_parser)
     assert subcommand_parser.choices.get("profile")
 
 
-def test_init_adds_parser_that_can_parse_show_command(config_parser):
+def test_init_adds_parser_that_can_parse_show_command(config_accessor):
     subcommand_parser = ArgumentParser().add_subparsers()
     profile.init(subcommand_parser)
     profile_parser = subcommand_parser.choices.get("profile")
     assert profile_parser.parse_args(["show", "--profile", "name"])
 
 
-def test_init_adds_parser_that_can_parse_set_command(config_parser):
+def test_init_adds_parser_that_can_parse_set_command(config_accessor):
     subcommand_parser = ArgumentParser().add_subparsers()
     profile.init(subcommand_parser)
     profile_parser = subcommand_parser.choices.get("profile")
@@ -103,112 +102,71 @@ def test_get_profile_returns_object_from_config_profile(mocker, config_accessor)
     assert user._profile == expected
 
 
-def test_set_profile_when_given_username_sets_username(
-    config_parser, username_setter, config_profile
-):
+def test_set_profile_when_given_username_sets_username(config_accessor):
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "-u", "a.new.user@example.com"])
     profile.set_profile(namespace)
-    username_setter.assert_called_once_with("a.new.user@example.com", None)
+    assert config_accessor.set_username.call_args[0][0] == "a.new.user@example.com"
 
 
-def test_set_profile_when_given_username_and_profile_sets_username(
-    config_parser, username_setter, config_profile
-):
+def test_set_profile_when_given_profile_name_sets_username_for_profile(config_accessor):
     parser = _get_profile_parser()
-    namespace = parser.parse_args(
-        ["set", "--profile", "profile_name", "-u", "a.new.user@example.com"]
-    )
+    namespace = parser.parse_args(["set", "--profile", "profileA", "-u", "a.new.user@example.com"])
     profile.set_profile(namespace)
-    username_setter.assert_called_once_with("a.new.user@example.com", "profile_name")
+    assert config_accessor.set_username.call_args[0][0] == "a.new.user@example.com"
+    assert config_accessor.set_username.call_args[0][1] == "profileA"
 
 
-def test_set_profile_when_given_authority_url_sets_authority_url(
-    config_parser, authority_url_setter, config_profile
-):
+def test_set_profile_when_given_authority_sets_authority(config_accessor):
     parser = _get_profile_parser()
-    namespace = parser.parse_args(["set", "-s", "https://wwww.new.authority.example.com"])
+    namespace = parser.parse_args(["set", "-s", "example.com"])
     profile.set_profile(namespace)
-    authority_url_setter.assert_called_once_with("https://wwww.new.authority.example.com", None)
+    assert config_accessor.set_authority_url.call_args[0][0] == "example.com"
 
 
-def test_set_profile_when_given_authority_and_profile_url_sets_authority_url(
-    config_parser, authority_url_setter, config_profile
-):
+def test_set_profile_when_given_profile_name_sets_authority_for_profile(config_accessor):
     parser = _get_profile_parser()
-    namespace = parser.parse_args(
-        ["set", "--profile", "profile_name", "-s", "https://wwww.new.authority.example.com"]
-    )
+    namespace = parser.parse_args(["set", "--profile", "profileA", "-s", "example.com"])
     profile.set_profile(namespace)
-    authority_url_setter.assert_called_once_with(
-        "https://wwww.new.authority.example.com", "profile_name"
-    )
+    assert config_accessor.set_authority_url.call_args[0][0] == "example.com"
+    assert config_accessor.set_authority_url.call_args[0][1] == "profileA"
 
 
-def test_set_profile_when_given_authority_url_and_profile_sets_authority_url(
-    config_parser, authority_url_setter, config_profile
-):
-    parser = _get_profile_parser()
-    namespace = parser.parse_args(
-        ["set", "--profile", "profile_name", "-s", "https://wwww.new.authority.example.com"]
-    )
-    profile.set_profile(namespace)
-    authority_url_setter.assert_called_once_with(
-        "https://wwww.new.authority.example.com", "profile_name"
-    )
-
-
-def test_set_profile_when_given_enable_ssl_errors_sets_ignore_ssl_errors_to_true(
-    config_parser, ignore_ssl_errors_setter, config_profile
-):
+def test_set_profile_when_given_enable_ssl_errors_sets_ignore_ssl_errors_to_true(config_accessor):
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "--enable-ssl-errors"])
     profile.set_profile(namespace)
-    ignore_ssl_errors_setter.assert_called_once_with(False, None)
+    assert config_accessor.set_ignore_ssl_errors.call_args[0][0] == False
 
 
-def test_set_profile_when_given_enable_ssl_errors_and_profile_sets_ignore_ssl_errors_to_true(
-    config_parser, ignore_ssl_errors_setter, config_profile
-):
-    parser = _get_profile_parser()
-    namespace = parser.parse_args(["set", "--profile", "profile_name", "--enable-ssl-errors"])
-    profile.set_profile(namespace)
-    ignore_ssl_errors_setter.assert_called_once_with(False, "profile_name")
-
-
-def test_set_profile_when_given_disable_ssl_errors_sets_ignore_ssl_errors_to_false(
-    config_parser, ignore_ssl_errors_setter, config_profile
-):
+def test_set_profile_when_given_disable_ssl_errors_sets_ignore_ssl_errors_to_true(config_accessor):
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "--disable-ssl-errors"])
     profile.set_profile(namespace)
-    ignore_ssl_errors_setter.assert_called_once_with(True, None)
+    assert config_accessor.set_ignore_ssl_errors.call_args[0][0] == True
 
 
-def test_set_profile_when_given_disable_ssl_errors_and_profile_name_sets_ignore_ssl_errors_to_false(
-    config_parser, ignore_ssl_errors_setter, config_profile
-):
+def test_set_profile_when_given_disable_ssl_errors_and_profile_name_sets_ignore_ssl_errors_to_true_for_profile(config_accessor):
     parser = _get_profile_parser()
-    namespace = parser.parse_args(["set", "--profile", "profile_name", "--disable-ssl-errors"])
+    namespace = parser.parse_args(["set", "--profile", "profileA", "--disable-ssl-errors"])
     profile.set_profile(namespace)
-    ignore_ssl_errors_setter.assert_called_once_with(True, "profile_name")
+    assert config_accessor.set_ignore_ssl_errors.call_args[0][0] == True
+    assert config_accessor.set_ignore_ssl_errors.call_args[0][1] == "profileA"
 
 
-def test_set_profile_when_told_to_store_password_prompts_for_storing_password(
-    mocker, input_function, config_profile
-):
+def test_set_profile_when_to_store_password_prompts_for_storing_password(mocker, config_accessor, input_function):
     input_function.return_value = "y"
     mock_set_password_function = mocker.patch("code42cli.profile.password.set_password_from_prompt")
     parser = _get_profile_parser()
     namespace = parser.parse_args(
-        ["set", "-s", "https://wwww.new.authority.example.com", "-u", "user"]
-    )
+             ["set", "-s", "https://wwww.new.authority.example.com", "-u", "user"]
+         )
     profile.set_profile(namespace)
     assert mock_set_password_function.call_count
 
 
 def test_set_profile_when_told_to_store_password_using_capital_y_prompts_for_storing_password(
-    mocker, input_function, config_profile
+    mocker, config_accessor, input_function
 ):
     input_function.return_value = "Y"
     mock_set_password_function = mocker.patch("code42cli.profile.password.set_password_from_prompt")
@@ -221,7 +179,7 @@ def test_set_profile_when_told_to_store_password_using_capital_y_prompts_for_sto
 
 
 def test_set_profile_when_told_not_to_store_password_prompts_for_storing_password(
-    mocker, input_function, config_profile
+    mocker, config_accessor, input_function
 ):
     input_function.return_value = "n"
     mock_set_password_function = mocker.patch("code42cli.profile.password.set_password_from_prompt")

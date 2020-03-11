@@ -4,44 +4,6 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from code42cli.profile.config import ConfigAccessor
-
-
-@pytest.fixture
-def config_profile(mocker):
-    mock_config = mocker.patch("code42cli.profile.config.get_profile")
-
-    model_dict = {
-        ConfigAccessor.USERNAME_KEY: "test.username",
-        ConfigAccessor.AUTHORITY_KEY: "https://authority.example.com",
-        ConfigAccessor.IGNORE_SSL_ERRORS_KEY: "True",
-    }
-
-    class MockConfig(object):
-        name = "PROFILE NAME"
-
-        def __getitem__(self, item):
-            return model_dict[item]
-
-        def get(self, item):
-            return model_dict.get(item)
-
-    mock_config.return_value = MockConfig()
-    return mock_config
-
-
-@pytest.fixture
-def config_parser(mocker):
-    mocks = ConfigParserMocks()
-    mocks.initializer = mocker.patch("configparser.ConfigParser.__init__")
-    mocks.item_setter = mocker.patch("configparser.ConfigParser.__setitem__")
-    mocks.item_getter = mocker.patch("configparser.ConfigParser.__getitem__")
-    mocks.section_adder = mocker.patch("configparser.ConfigParser.add_section")
-    mocks.reader = mocker.patch("configparser.ConfigParser.read")
-    mocks.sections = mocker.patch("configparser.ConfigParser.sections")
-    mocks.initializer.return_value = None
-    return mocks
-
 
 @pytest.fixture
 def namespace(mocker):
