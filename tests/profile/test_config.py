@@ -10,7 +10,7 @@ def mock_config_parser(mocker):
     return mocker.MagicMock(sepc=ConfigParser)
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def mock_saver(mocker):
     return mocker.patch("code42cli.util.open_file")
 
@@ -68,25 +68,25 @@ def setup_parser_one_profile(profile, internal, parser):
 
 
 class TestConfigAccessor(object):
-    def test_get_profile_when_profile_does_not_exist_raises(self, mock_config_parser):
+    def test_get_profile_when_profile_does_not_exist_raises(self, mock_config_parser, mock_saver):
         mock_config_parser.sections.return_value = ["Internal"]
         accessor = ConfigAccessor(mock_config_parser)
         with pytest.raises(Exception):
             accessor.get_profile("Profile Name that does not exist")
 
-    def test_get_profile_when_profile_has_default_name_raises(self, mock_config_parser):
+    def test_get_profile_when_profile_has_default_name_raises(self, mock_config_parser, mock_saver):
         mock_config_parser.sections.return_value = ["Internal"]
         accessor = ConfigAccessor(mock_config_parser)
         with pytest.raises(Exception):
             accessor.get_profile("__DEFAULT__")
 
-    def test_get_profile_returns_expected_profile(self, mock_config_parser):
+    def test_get_profile_returns_expected_profile(self, mock_config_parser, mock_saver):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
         accessor = ConfigAccessor(mock_config_parser)
         accessor.get_profile("ProfileA")
         assert mock_config_parser.__getitem__.call_args[0][0] == "ProfileA"
 
-    def test_get_all_profiles_excludes_internal_section(self, mock_config_parser):
+    def test_get_all_profiles_excludes_internal_section(self, mock_config_parser, mock_saver):
         mock_config_parser.sections.return_value = ["ProfileA", "Internal", "ProfileB"]
         accessor = ConfigAccessor(mock_config_parser)
         profiles = accessor.get_all_profiles()
@@ -94,7 +94,7 @@ class TestConfigAccessor(object):
             if p.name == "Internal":
                 assert False
 
-    def test_set_username_marks_as_complete_if_ready(self, mock_config_parser):
+    def test_set_username_marks_as_complete_if_ready(self, mock_config_parser, mock_saver):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
         accessor = ConfigAccessor(mock_config_parser)
         mock_profile = create_mock_profile_object("ProfileA", "example.com", None)
@@ -104,7 +104,9 @@ class TestConfigAccessor(object):
         assert mock_internal[ConfigAccessor.DEFAULT_PROFILE] == "ProfileA"
         assert mock_internal[ConfigAccessor.DEFAULT_PROFILE_IS_COMPLETE]
 
-    def test_set_username_does_not_mark_as_complete_if_not_have_authority(self, mock_config_parser):
+    def test_set_username_does_not_mark_as_complete_if_not_have_authority(
+        self, mock_config_parser, mock_saver
+    ):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
         accessor = ConfigAccessor(mock_config_parser)
         mock_profile = create_mock_profile_object("ProfileA", None, None)
@@ -121,10 +123,9 @@ class TestConfigAccessor(object):
         mock_internal = create_internal_object(True, "ProfileA")
         setup_parser_one_profile(mock_profile, mock_internal, mock_config_parser)
         accessor.set_username("TestUser", "ProfileA")
-        assert mock_saver.call_count == 1
+        assert mock_saver.call_count
 
-
-    def test_set_authority_marks_as_complete_if_ready(self, mock_config_parser):
+    def test_set_authority_marks_as_complete_if_ready(self, mock_config_parser, mock_saver):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
         accessor = ConfigAccessor(mock_config_parser)
         mock_profile = create_mock_profile_object("ProfileA", None, "test.testerson")
@@ -134,7 +135,9 @@ class TestConfigAccessor(object):
         assert mock_internal[ConfigAccessor.DEFAULT_PROFILE] == "ProfileA"
         assert mock_internal[ConfigAccessor.DEFAULT_PROFILE_IS_COMPLETE]
 
-    def test_set_authority_does_not_mark_as_complete_if_not_have_username(self, mock_config_parser):
+    def test_set_authority_does_not_mark_as_complete_if_not_have_username(
+        self, mock_config_parser, mock_saver
+    ):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
         accessor = ConfigAccessor(mock_config_parser)
         mock_profile = create_mock_profile_object("ProfileA", None, None)
@@ -148,12 +151,12 @@ class TestConfigAccessor(object):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
         accessor = ConfigAccessor(mock_config_parser)
         mock_profile = create_mock_profile_object("ProfileA", None, None)
-        mock_internal = create_internal_object(False)
+        mock_internal = create_internal_object(True, "ProfileA")
         setup_parser_one_profile(mock_profile, mock_internal, mock_config_parser)
         accessor.set_authority_url("new url", "ProfileA")
         assert mock_saver.call_count == 1
 
-    def test_switch_default_profile_switches_internal_value(self, mock_config_parser):
+    def test_switch_default_profile_switches_internal_value(self, mock_config_parser, mock_saver):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA", "ProfileB"]
         accessor = ConfigAccessor(mock_config_parser)
         mock_profile_a = create_mock_profile_object("ProfileA", "test", "test")
@@ -173,7 +176,7 @@ class TestConfigAccessor(object):
         accessor.switch_default_profile("ProfileB")
         assert mock_internal[ConfigAccessor.DEFAULT_PROFILE] == "ProfileB"
 
-    def test_switch_default_profile_saveS(self, mock_config_parser, mock_saver):
+    def test_switch_default_profile_saves(self, mock_config_parser, mock_saver):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA", "ProfileB"]
         accessor = ConfigAccessor(mock_config_parser)
         mock_profile_a = create_mock_profile_object("ProfileA", "test", "test")
@@ -194,10 +197,9 @@ class TestConfigAccessor(object):
         assert mock_saver.call_count == 1
 
     def test_create_profile_if_not_exists_when_given_default_name_does_not_create(
-        self, mock_config_parser
+        self, mock_config_parser, mock_saver
     ):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
         accessor = ConfigAccessor(mock_config_parser)
         with pytest.raises(Exception):
             accessor.create_profile_if_not_exists(ConfigAccessor.DEFAULT_VALUE)
-

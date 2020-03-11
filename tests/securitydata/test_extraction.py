@@ -164,7 +164,9 @@ def test_extract_when_is_advanced_query_and_has_include_non_exposure_exits(logge
         extraction_module.extract(logger, namespace)
 
 
-def test_extract_when_is_advanced_query_and_include_non_exposure_is_false_does_not_exit(logger, namespace):
+def test_extract_when_is_advanced_query_and_include_non_exposure_is_false_does_not_exit(
+    logger, namespace
+):
     namespace.include_non_exposure_events = False
     namespace.advanced_query = "some complex json"
     extraction_module.extract(logger, namespace)
@@ -353,9 +355,13 @@ def test_extract_when_given_md5_uses_md5_filter(logger, namespace_with_begin, ex
 
 
 def test_extract_when_given_sha256_uses_sha256_filter(logger, namespace_with_begin, extractor):
-    namespace_with_begin.sha256_hashes = ["9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"]
+    namespace_with_begin.sha256_hashes = [
+        "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    ]
     extraction_module.extract(logger, namespace_with_begin)
-    assert str(extractor.extract.call_args[0][1]) == str(SHA256.is_in(namespace_with_begin.sha256_hashes))
+    assert str(extractor.extract.call_args[0][1]) == str(
+        SHA256.is_in(namespace_with_begin.sha256_hashes)
+    )
 
 
 def test_extract_when_given_source_uses_source_filter(logger, namespace_with_begin, extractor):
@@ -367,13 +373,17 @@ def test_extract_when_given_source_uses_source_filter(logger, namespace_with_beg
 def test_extract_when_given_filename_uses_filename_filter(logger, namespace_with_begin, extractor):
     namespace_with_begin.filenames = ["file.txt", "txt.file"]
     extraction_module.extract(logger, namespace_with_begin)
-    assert str(extractor.extract.call_args[0][1]) == str(FileName.is_in(namespace_with_begin.filenames))
+    assert str(extractor.extract.call_args[0][1]) == str(
+        FileName.is_in(namespace_with_begin.filenames)
+    )
 
 
 def test_extract_when_given_filepath_uses_filepath_filter(logger, namespace_with_begin, extractor):
     namespace_with_begin.filepaths = ["/path/to/file.txt", "path2"]
     extraction_module.extract(logger, namespace_with_begin)
-    assert str(extractor.extract.call_args[0][1]) == str(FilePath.is_in(namespace_with_begin.filepaths))
+    assert str(extractor.extract.call_args[0][1]) == str(
+        FilePath.is_in(namespace_with_begin.filepaths)
+    )
 
 
 def test_extract_when_given_process_owner_uses_process_owner_filter(
@@ -391,7 +401,9 @@ def test_extract_when_given_tab_url_uses_process_tab_url_filter(
 ):
     namespace_with_begin.tab_urls = ["https://www.example.com"]
     extraction_module.extract(logger, namespace_with_begin)
-    assert str(extractor.extract.call_args[0][1]) == str(TabURL.is_in(namespace_with_begin.tab_urls))
+    assert str(extractor.extract.call_args[0][1]) == str(
+        TabURL.is_in(namespace_with_begin.tab_urls)
+    )
 
 
 def test_extract_when_given_exposure_types_uses_exposure_type_is_in_filter(
@@ -428,9 +440,15 @@ def test_extract_when_given_multiple_search_args_uses_expected_filters(
     namespace_with_begin.process_owners = ["test.testerson", "flag.flagerson"]
     namespace_with_begin.tab_urls = ["https://www.example.com"]
     extraction_module.extract(logger, namespace_with_begin)
-    assert str(extractor.extract.call_args[0][1]) == str(FilePath.is_in(namespace_with_begin.filepaths))
-    assert str(extractor.extract.call_args[0][2]) == str(ProcessOwner.is_in(namespace_with_begin.process_owners))
-    assert str(extractor.extract.call_args[0][3]) == str(TabURL.is_in(namespace_with_begin.tab_urls))
+    assert str(extractor.extract.call_args[0][1]) == str(
+        FilePath.is_in(namespace_with_begin.filepaths)
+    )
+    assert str(extractor.extract.call_args[0][2]) == str(
+        ProcessOwner.is_in(namespace_with_begin.process_owners)
+    )
+    assert str(extractor.extract.call_args[0][3]) == str(
+        TabURL.is_in(namespace_with_begin.tab_urls)
+    )
 
 
 def test_extract_when_given_include_non_exposure_and_exposure_types_causes_exit(
