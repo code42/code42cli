@@ -70,7 +70,7 @@ class FileEventCursorStore(BaseCursorStore):
         if self._is_empty():
             self._init_table()
         if not self._row_exists(self._primary_key):
-            self._insert_blank_row()
+            self._insert_new_row()
 
     def get_stored_insertion_timestamp(self):
         """Gets the last stored insertion timestamp."""
@@ -89,7 +89,7 @@ class FileEventCursorStore(BaseCursorStore):
     def reset(self):
         self._drop_table()
         self._init_table()
-        self._insert_blank_row()
+        self._insert_new_row()
 
     def _init_table(self):
         columns = u"{0}, {1}".format(self._PRIMARY_KEY_COLUMN_NAME, _INSERTION_TIMESTAMP_FIELD_NAME)
@@ -97,7 +97,7 @@ class FileEventCursorStore(BaseCursorStore):
         with self._connection as conn:
             conn.execute(create_table_query)
 
-    def _insert_blank_row(self):
+    def _insert_new_row(self):
         insert_query = u"INSERT INTO {0} VALUES(?, null)".format(self._table_name)
         with self._connection as conn:
             conn.execute(insert_query, (self._primary_key,))
