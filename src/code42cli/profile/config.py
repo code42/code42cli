@@ -51,21 +51,21 @@ def get_all_profiles():
     return profiles
 
 
-def write_username(new_username, profile_name=None):
-    profile_name = profile_name or _get_default_profile_name()
-    parser = ConfigParser()
-    profile = _get_profile_from_parser(parser, profile_name)
-    profile[ConfigurationKeys.USERNAME_KEY] = new_username
-    _save(parser, profile_name, ConfigurationKeys.USERNAME_KEY)
-    _try_mark_setup_as_complete(profile_name)
-
-
 def write_authority_url(new_url, profile_name=None):
     profile_name = profile_name or _get_default_profile_name()
     parser = ConfigParser()
     profile = _get_profile_from_parser(parser, profile_name)
     profile[ConfigurationKeys.AUTHORITY_KEY] = new_url
     _save(parser, profile_name, ConfigurationKeys.AUTHORITY_KEY)
+    _try_mark_setup_as_complete(profile_name)
+
+
+def write_username(new_username, profile_name=None):
+    profile_name = profile_name or _get_default_profile_name()
+    parser = ConfigParser()
+    profile = _get_profile_from_parser(parser, profile_name)
+    profile[ConfigurationKeys.USERNAME_KEY] = new_username
+    _save(parser, profile_name, ConfigurationKeys.USERNAME_KEY)
     _try_mark_setup_as_complete(profile_name)
 
 
@@ -115,15 +115,6 @@ def _create_new_config_file(path, profile_name):
     _save(config_parser, profile_name, None, path)
 
 
-def _create_internal_section(parser):
-    keys = ConfigurationKeys
-    parser.add_section(keys.INTERNAL_SECTION)
-    parser[keys.INTERNAL_SECTION] = {}
-    parser[keys.INTERNAL_SECTION][keys.DEFAULT_PROFILE_IS_COMPLETE] = str(False)
-    parser[keys.INTERNAL_SECTION][keys.DEFAULT_PROFILE] = DEFAULT_VALUE
-    return parser
-
-
 def _get_default_profile_name():
     internal_section = _get_internal_section()
     return internal_section[ConfigurationKeys.DEFAULT_PROFILE]
@@ -132,7 +123,20 @@ def _get_default_profile_name():
 def _get_internal_section():
     parser = ConfigParser()
     _attach_config_file_to_profile(parser)
-    return parser[ConfigurationKeys.INTERNAL_SECTION]
+    try:
+        return parser[ConfigurationKeys.INTERNAL_SECTION]
+    except KeyError:
+        _create_internal_section(parser)
+        return parser[ConfigurationKeys.INTERNAL_SECTION]
+
+
+def _create_internal_section(parser):
+    keys = ConfigurationKeys
+    parser.add_section(keys.INTERNAL_SECTION)
+    parser[keys.INTERNAL_SECTION] = {}
+    parser[keys.INTERNAL_SECTION][keys.DEFAULT_PROFILE_IS_COMPLETE] = str(False)
+    parser[keys.INTERNAL_SECTION][keys.DEFAULT_PROFILE] = DEFAULT_VALUE
+    return parser
 
 
 def _print_profile_not_exists_message(profile_name):
@@ -154,10 +158,10 @@ def _create_profile_section(parser, profile_name):
     parser[profile_name][keys.AUTHORITY_KEY] = DEFAULT_VALUE
     parser[profile_name][keys.USERNAME_KEY] = DEFAULT_VALUE
     parser[profile_name][keys.IGNORE_SSL_ERRORS_KEY] = str(False)
-
-    default_profile = parser[keys.INTERNAL_SECTION].get(keys.DEFAULT_PROFILE)
+    internal_section = _get_internal_section()
+    default_profile = internal_section.get(keys.DEFAULT_PROFILE)
     if default_profile is None or default_profile is DEFAULT_VALUE:
-        parser[keys.INTERNAL_SECTION][keys.DEFAULT_PROFILE] = profile_name
+        internal_section[keys.DEFAULT_PROFILE] = profile_name
     return parser
 
 
@@ -169,12 +173,12 @@ def _try_mark_setup_as_complete(profile_name):
     parser = ConfigParser()
     config_file_path = _get_config_file_path(profile_name)
     parser.read(config_file_path)
-    settings = parser[keys.INTERNAL_SECTION]
-    settings[keys.DEFAULT_PROFILE_IS_COMPLETE] = str(True)
 
-    default_profile = parser[keys.INTERNAL_SECTION].get(keys.DEFAULT_PROFILE)
+    internal_section = _get_internal_section()
+    internal_section[keys.DEFAULT_PROFILE_IS_COMPLETE] = str(True)
+    default_profile = internal_section.get(keys.DEFAULT_PROFILE)
     if default_profile is None or default_profile is DEFAULT_VALUE:
-        parser[keys.INTERNAL_SECTION][keys.DEFAULT_PROFILE] = profile_name
+        internal_section[keys.DEFAULT_PROFILE] = profile_name
 
     _save(parser, profile_name, keys.DEFAULT_PROFILE_IS_COMPLETE)
 
@@ -193,8 +197,8 @@ def _default_profile_exists():
     parser = ConfigParser()
     config_file_path = _get_config_file_path()
     parser.read(config_file_path)
-    settings = parser[ConfigurationKeys.INTERNAL_SECTION]
-    return settings.getboolean(ConfigurationKeys.DEFAULT_PROFILE_IS_COMPLETE)
+    internal_section = _get_internal_section()
+    return internal_section.getboolean(ConfigurationKeys.DEFAULT_PROFILE_IS_COMPLETE)
 
 
 def _save(parser, profile_name, key=None, path=None):

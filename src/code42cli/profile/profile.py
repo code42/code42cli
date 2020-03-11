@@ -78,6 +78,7 @@ def show_profile(args):
 
 def set_profile(args):
     """Sets the current profile using command line arguments."""
+
     _verify_args_for_set(args)
     _try_set_authority_url(args)
     _try_set_username(args)
@@ -164,13 +165,15 @@ def _verify_args_for_set(args):
         print_set_profile_help()
         exit(1)
 
-    profile = config.get_profile(args.profile_name)
-    if (
-        not profile.get(ConfigurationKeys.USERNAME_KEY)
-        and not profile.get(ConfigurationKeys.AUTHORITY_KEY)
-        and not args.c42_username
-        and not args.c42_authority_url
-    ):
+    missing_values = not args.c42_username and not args.c42_authority_url
+    if missing_values:
+        try:
+            profile = config.get_profile(args.profile_name)
+            missing_values = not profile.get(ConfigurationKeys.USERNAME_KEY) and not profile.get(ConfigurationKeys.AUTHORITY_KEY)
+        except SystemExit:
+            missing_values = False
+
+    if missing_values:
         print_error(u"Missing username and authority url.")
         print_set_profile_help()
         exit(1)
