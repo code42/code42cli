@@ -188,7 +188,7 @@ def _add_enable_ssl_errors_arg(parser):
 
 def _verify_args_for_set(args):
     if _missing_default_profile(args):
-        print_error("Must supply a name when setting your profile for the first time.")
+        print_error(u"Must supply a name when setting your profile for the first time.")
         print_set_profile_help()
         exit(1)
 
