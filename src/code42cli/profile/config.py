@@ -27,18 +27,21 @@ class ConfigAccessor(object):
 
     @property
     def internal(self):
+        """The internal section of the config file."""
         return self.parser[self._INTERNAL_SECTION]
 
-    def has_setup_default_profile(self):
-        return not len(self._get_profile_names())
-
     def get_profile(self, name=None):
+        """Returns the profile with the given name.
+        If not given a name, returns the default profile.
+        If the name does not exist or there is no existing profile, it will throw an exception.
+        """
         name = name or self._default_profile_name
         if name not in self.parser.sections() or name == self.DEFAULT_VALUE:
             raise Exception("Profile does not exist.")
         return self.parser[name]
 
     def get_all_profiles(self):
+        """Returns all the available profiles."""
         profiles = []
         names = self._get_profile_names()
         for name in names:
@@ -46,6 +49,7 @@ class ConfigAccessor(object):
         return profiles
 
     def create_profile_if_not_exists(self, name):
+        """Create a new profile if one does not already exist for that name."""
         try:
             self.get_profile(name)
         except Exception as ex:
@@ -55,24 +59,32 @@ class ConfigAccessor(object):
                 raise ex
 
     def switch_default_profile(self, new_default_name):
+        """Changes what is marked as the default profile in the internal section."""
         if self.get_profile(new_default_name) is None:
             raise Exception("Profile does not exist.")
         self.internal[self.DEFAULT_PROFILE] = new_default_name
         self._save()
 
     def set_authority_url(self, new_value, profile_name=None):
+        """Sets 'authority URL' for a given profile.
+        Uses the default profile if not given a name.
+        """
         profile = self.get_profile(profile_name)
         profile[self.AUTHORITY_KEY] = new_value
         self._save()
         self._try_complete_setup(profile)
 
     def set_username(self, new_value, profile_name=None):
+        """Sets 'username' for a given profile. Uses the default profile if not given a name."""
         profile = self.get_profile(profile_name)
         profile[self.USERNAME_KEY] = new_value
         self._save()
         self._try_complete_setup(profile)
 
     def set_ignore_ssl_errors(self, new_value, profile_name=None):
+        """Sets 'ignore_ssl_errors' for a given profile.
+        Uses the default profile if not given a name.
+        """
         profile = self.get_profile(profile_name)
         profile[self.IGNORE_SSL_ERRORS_KEY] = str(new_value)
         self._save()
@@ -126,4 +138,5 @@ class ConfigAccessor(object):
 
 
 def get_config_accessor():
+    """Create a ConfigAccessor with a ConfigParser as its parser."""
     return ConfigAccessor(ConfigParser())
