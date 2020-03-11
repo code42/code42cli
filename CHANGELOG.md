@@ -12,10 +12,10 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
-- Support for multiple profiles
-- a `--profile` flag for specifying which profile to use. Works for `securitydata` commands and `profile show` and `profile set`.
-- `code42 profile use` for changing the default profile.
-- `code42 profile list` for listing all the available profiles.
+- Support for multiple profiles:
+    - Optional `--profile` flag for `securitydata`, `profile show`, `profile set`.
+    - `code42 profile use` for changing the default profile.
+    - `code42 profile list` for listing all the available profiles.
 
 ### Fixed
 
