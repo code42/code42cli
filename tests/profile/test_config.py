@@ -12,9 +12,7 @@ def mock_config_parser(mocker):
 
 @pytest.fixture(autouse=True)
 def mock_saver(mocker):
-    mock = mocker.patch("code42cli.util.open_file")
-    mock.call_count = 0
-    return mock
+    return mocker.patch("code42cli.util.open_file")
 
 
 def create_mock_profile_object(name, authority=None, username=None):
@@ -152,7 +150,7 @@ class TestConfigAccessor(object):
         mock_internal = create_internal_object(True, "ProfileA")
         setup_parser_one_profile(mock_profile, mock_internal, mock_config_parser)
         accessor.set_authority_url("new url", "ProfileA")
-        assert mock_saver.call_count == 1
+        assert mock_saver.call_count
 
     def test_switch_default_profile_switches_internal_value(self, mock_config_parser):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA", "ProfileB"]
@@ -192,7 +190,7 @@ class TestConfigAccessor(object):
 
         mock_config_parser.__getitem__.side_effect = side_effect
         accessor.switch_default_profile("ProfileB")
-        assert mock_saver.call_count == 1
+        assert mock_saver.call_count
 
     def test_create_profile_if_not_exists_when_given_default_name_does_not_create(
         self, mock_config_parser
