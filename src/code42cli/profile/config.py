@@ -9,7 +9,7 @@ from code42cli.compat import str
 _PROFILE_ENV_VAR_NAME = u"CODE42CLI_PROFILE"
 
 
-class ConfigParserAccessor(object):
+class ConfigAccessor(object):
     DEFAULT_VALUE = u"__DEFAULT__"
     AUTHORITY_KEY = u"c42_authority_url"
     USERNAME_KEY = u"c42_username"
@@ -46,8 +46,16 @@ class ConfigParserAccessor(object):
     def get_profile(self, name=None):
         name = name or self.default_profile_name
         if name not in self.parser.sections() and name != self.DEFAULT_VALUE:
-            return None
+            raise Exception("Profile does not exist.")
         return self.parser[name]
+
+    def create_profile(self, name):
+        self._create_profile_section(name)
+
+    def switch_default_profile(self, new_default_name):
+        if get_profile(new_default_name) is None:
+            raise Exception("Profile does not exist.")
+        self.internal[self.DEFAULT_VALUE] = new_default_name
 
     def set_authority_url(self, new_value, profile_name=None):
         profile = self.get_profile(profile_name)
@@ -90,8 +98,7 @@ class ConfigParserAccessor(object):
             self.internal[self.DEFAULT_PROFILE] = name
 
     def _save(self):
-        path = _get_config_file_path()
-        util.open_file(path, u"w+", lambda f: self.parser.write(f))
+        util.open_file(self.path, u"w+", lambda f: self.parser.write(f))
 
     def _try_complete_setup(self):
         if self.internal.getboolean(self.DEFAULT_PROFILE_IS_COMPLETE):
@@ -117,59 +124,5 @@ class ConfigParserAccessor(object):
         self._save()
 
 
-def _get_parser_accessor():
-    return ConfigParserAccessor(ConfigParser())
-
-
-def get_profile(profile_name=None):
-    accessor = _get_parser_accessor()
-    if not accessor.has_setup_default_profile:
-        util.print_no_existing_profile_message()
-        exit(1)
-
-    profile = accessor.get_profile(profile_name)
-    if not profile:
-        util.print_no_existing_profile_message()
-        exit(1)
-
-    return profile
-
-
-def write_authority_url(new_url, profile_name=None):
-    accessor = _get_parser_accessor()
-    accessor.set_authority_url(new_url, profile_name)
-    _log_key_save(ConfigParserAccessor.AUTHORITY_KEY)
-
-
-def write_username(new_username, profile_name=None):
-    accessor = _get_parser_accessor()
-    accessor.set_username(new_username, profile_name)
-    _log_key_save(ConfigParserAccessor.USERNAME_KEY)
-
-
-def write_ignore_ssl_errors(new_value, profile_name=None):
-    accessor = _get_parser_accessor()
-    accessor.set_ignore_ssl_errors(new_value, profile_name)
-    _log_key_save(ConfigParserAccessor.USERNAME_KEY)
-
-
-
-
-
-def change_default_profile(profile_name):
-    if profile_name not in _get_all_profile_names():
-        _print_profile_not_exists_message(profile_name)
-        exit(1)
-    internal_section = _get_internal_section()
-    internal_section[ConfigurationKeys.DEFAULT_PROFILE] = profile_name
-
-def _print_profile_not_exists_message(profile_name):
-    util.print_error(u"Profile '{0}' does not exist.".format(profile_name))
-
-
-def _log_key_save(key):
-    if key == ConfigParserAccessor.DEFAULT_PROFILE_IS_COMPLETE:
-        print(u"You have completed setting up your profile!")
-    else:
-        print(u"'{}' has been successfully updated".format(key))
-
+def get_config_accessor():
+    return ConfigAccessor(ConfigParser())
