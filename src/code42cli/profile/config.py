@@ -47,8 +47,14 @@ class ConfigAccessor(object):
             profiles.append(self.get_profile(name))
         return profiles
 
-    def create_profile(self, name):
-        self._create_profile_section(name)
+    def create_profile_if_not_exists(self, name):
+        try:
+            self.get_profile(name)
+        except Exception as ex:
+            if name is not None and name != self.DEFAULT_VALUE:
+                self._create_profile_section(name)
+            else:
+                raise ex
 
     def switch_default_profile(self, new_default_name):
         if self.get_profile(new_default_name) is None:

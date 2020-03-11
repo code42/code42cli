@@ -13,10 +13,7 @@ def mock_config_parser(mocker):
 def create_mock_profile_object(name, authority=None, username=None):
     authority = authority or ConfigAccessor.DEFAULT_VALUE
     username = username or ConfigAccessor.DEFAULT_VALUE
-    profile_dict = {
-        ConfigAccessor.AUTHORITY_KEY: authority,
-        ConfigAccessor.USERNAME_KEY: username,
-    }
+    profile_dict = {ConfigAccessor.AUTHORITY_KEY: authority, ConfigAccessor.USERNAME_KEY: username}
 
     class ProfileObject(object):
         def __getitem__(self, item):
@@ -65,7 +62,6 @@ def setup_parser_one_profile(profile, internal, parser):
     parser.__getitem__.side_effect = side_effect
 
 
-
 class TestConfigAccessor(object):
     def test_get_profile_when_profile_does_not_exist_raises(self, mock_config_parser):
         mock_config_parser.sections.return_value = ["Internal"]
@@ -102,7 +98,6 @@ class TestConfigAccessor(object):
         accessor.set_username("TestUser", "ProfileA")
         assert mock_internal[ConfigAccessor.DEFAULT_PROFILE] == "ProfileA"
         assert mock_internal[ConfigAccessor.DEFAULT_PROFILE_IS_COMPLETE]
-
 
     def test_set_authority_marks_as_complete_if_ready(self, mock_config_parser):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
@@ -143,3 +138,9 @@ class TestConfigAccessor(object):
         mock_config_parser.__getitem__.side_effect = side_effect
         accessor.switch_default_profile("ProfileB")
         assert mock_internal[ConfigAccessor.DEFAULT_PROFILE] == "ProfileB"
+
+    def test_create_profile_if_not_exists_when_given_default_name_does_not_create(self, mock_config_parser):
+        mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
+        accessor = ConfigAccessor(mock_config_parser)
+        with pytest.raises(Exception):
+            accessor.create_profile_if_not_exists(ConfigAccessor.DEFAULT_VALUE)

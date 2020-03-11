@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import code42cli.arguments as main_args
 import code42cli.profile.password as password
+from code42cli.compat import str
 from code42cli.profile.config import get_config_accessor, ConfigAccessor
 from code42cli.util import (
     get_input,
@@ -73,17 +74,21 @@ def init(subcommand_parser):
 def get_profile(profile_name=None):
     """Returns the current profile object."""
     accessor = get_config_accessor()
-    profile = accessor.get_profile(profile_name)
-    return Code42Profile(profile)
+    try:
+        profile = accessor.get_profile(profile_name)
+        return Code42Profile(profile)
+    except Exception as ex:
+        print_error(str(ex))
+        exit(1)
 
 
 def show_profile(args):
     """Prints the current profile to stdout."""
     profile = get_profile(args.profile_name)
     print(u"\n{0}:".format(profile.name))
-    for key in profile:
-        print(u"\t* {} = {}".format(key, profile[key]))
-
+    print(u"\t* {0} = {1}".format(ConfigAccessor.USERNAME_KEY, profile.username))
+    print(u"\t* {0} = {1}".format(ConfigAccessor.AUTHORITY_KEY, profile.authority_url))
+    print(u"\t* {0} = {1}".format(ConfigAccessor.IGNORE_SSL_ERRORS_KEY, profile.ignore_ssl_error))
     if password.get_password(args.profile_name) is not None:
         print(u"\t* A password is set.")
     print(u"")
@@ -93,6 +98,7 @@ def set_profile(args):
     """Sets the current profile using command line arguments."""
     _verify_args_for_set(args)
     accessor = get_config_accessor()
+    accessor.create_profile_if_not_exists(args.profile_name)
     _try_set_authority_url(args, accessor)
     _try_set_username(args, accessor)
     _try_set_ignore_ssl_errors(args, accessor)
@@ -221,8 +227,12 @@ def _missing_default_profile(args):
 
 
 def _default_profile_exists():
-    profile_name = get_profile().name
-    return profile_name and profile_name != ConfigAccessor.DEFAULT_VALUE
+    try:
+        accessor = get_config_accessor()
+        profile = Code42Profile(accessor.get_profile())
+        return profile.name and profile.name != ConfigAccessor.DEFAULT_VALUE
+    except Exception:
+        return False
 
 
 def _prompt_for_allow_password_set(args):

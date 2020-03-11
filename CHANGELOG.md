@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## Unreleased
+
+### Added
+
+- Support for multiple profiles
+- a `--profile` flag for specifying which profile to use. Works for `securitydata` commands and `profile show` and `profile set`.
+- `code42 profile use` for changing the default profile.
+- `code42 profile list` for listing all the available profiles.
+
+
 ## 0.3.0 - 2020-03-04
 
 ### Added
