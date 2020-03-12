@@ -84,7 +84,7 @@ def get_profile(profile_name=None):
 
 
 def show_profile(args):
-    """Prints the current profile to stdout."""
+    """Prints the given profile to stdout."""
     profile = get_profile(args.profile_name)
     print(u"\n{0}:".format(profile.name))
     print(u"\t* {0} = {1}".format(ConfigAccessor.USERNAME_KEY, profile.username))
@@ -96,7 +96,7 @@ def show_profile(args):
 
 
 def set_profile(args):
-    """Sets the current profile using command line arguments."""
+    """Sets the given profile using command line arguments."""
     _verify_args_for_set(args)
     accessor = get_config_accessor()
     accessor.create_profile_if_not_exists(args.profile_name)
