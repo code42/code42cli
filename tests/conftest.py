@@ -53,6 +53,7 @@ class MockSection(object):
 def create_mock_profile(name=None):
     profile_section = MockSection(name)
     profile = Code42Profile(profile_section)
+
     def mock_get_password():
         return "Test Password"
 

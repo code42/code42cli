@@ -31,6 +31,7 @@ def create_internal_object(is_complete, default_profile_name=None):
         ConfigAccessor.DEFAULT_PROFILE_IS_COMPLETE: is_complete,
     }
     internal_section = MockSection("Internal", internal_dict)
+
     def getboolean(*args):
         return is_complete
 
@@ -78,7 +79,7 @@ class TestConfigAccessor(object):
     def test_set_username_marks_as_complete_if_ready(self, mock_config_parser):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
         accessor = ConfigAccessor(mock_config_parser)
-        mock_profile = create_mock_profile_object("ProfileA", "www.xample.com", None)
+        mock_profile = create_mock_profile_object("ProfileA", "www.example.com", None)
         mock_internal = create_internal_object(False)
         setup_parser_one_profile(mock_profile, mock_internal, mock_config_parser)
         accessor.set_username("TestUser", "ProfileA")

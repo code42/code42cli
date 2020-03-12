@@ -11,6 +11,7 @@ from .conftest import create_mock_profile
 def mock_sdk_factory(mocker):
     return mocker.patch("py42.sdk.SDK.create_using_local_account")
 
+
 @pytest.fixture
 def error_sdk_factory(mocker, mock_sdk_factory):
     def side_effect():
