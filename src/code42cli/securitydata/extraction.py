@@ -39,10 +39,11 @@ def extract(output_logger, args):
     """
     profile = get_profile(args.profile_name)
     store = _create_cursor_store(args, profile)
+    filters = _get_filters(args, store)
     handlers = _create_event_handlers(output_logger, store)
     sdk = _get_sdk(profile, args.is_debug_mode)
     extractor = FileEventExtractor(sdk, handlers)
-    _call_extract(extractor, store, args)
+    _call_extract(extractor, filters, args)
     _handle_result()
 
 
@@ -90,11 +91,17 @@ def _get_sdk(profile, is_debug_mode):
         exit(1)
 
 
-def _call_extract(extractor, cursor_store, args):
+def _get_filters(args, cursor_store):
     if not _determine_if_advanced_query(args):
         _verify_begin_date_requirements(args, cursor_store)
         _verify_exposure_types(args.exposure_types)
-        filters = _create_filters(args)
+        return _create_filters(args)
+    else:
+        return args.advanced_query
+
+
+def _call_extract(extractor, filters, args):
+    if not _determine_if_advanced_query(args):
         extractor.extract(*filters)
     else:
         extractor.extract_advanced(args.advanced_query)
