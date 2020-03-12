@@ -91,7 +91,8 @@ def show_profile(args):
     print(u"\t* {0} = {1}".format(ConfigAccessor.USERNAME_KEY, profile.username))
     print(u"\t* {0} = {1}".format(ConfigAccessor.AUTHORITY_KEY, profile.authority_url))
     print(u"\t* {0} = {1}".format(ConfigAccessor.IGNORE_SSL_ERRORS_KEY, profile.ignore_ssl_error))
-    if password.get_password(args.profile_name) is not None:
+    profile_name = profile.name
+    if password.get_password(profile_name) is not None:
         print(u"\t* A password is set.")
     print(u"")
 
@@ -109,7 +110,8 @@ def set_profile(args):
 
 def prompt_for_password_reset(args):
     """Securely prompts for your password and then stores it using keyring."""
-    password.set_password_from_prompt(args.profile_name)
+    profile_name = get_profile(args.profile_name).name
+    password.set_password_from_prompt(profile_name)
 
 
 def list_profiles(*args):
