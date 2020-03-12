@@ -27,7 +27,7 @@ def get_user_project_path(subdir=""):
 
 def open_file(file_path, mode, action):
     """Wrapper for opening files, useful for testing purposes."""
-    with open(file_path, mode) as f:
+    with open(file_path, mode, encoding="utf-8") as f:
         action(f)
 
 
