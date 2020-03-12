@@ -74,6 +74,12 @@ code42 securitydata print -b 2020-02-02 12:51
 ```
 Begin date will be ignored if provided on subsequent queries using `-i`.
 
+Use different format with `-f`:
+```bash
+code42 securitydata print -b 2020-02-02 -f CEF
+```
+The available formats are CEF, JSON, and RAW-JSON.
+
 To write events to a file, do:
 ```bash
 code42 securitydata write-to filename.txt -b 2020-02-02
@@ -92,7 +98,7 @@ This is only guaranteed if you did not change your query.
 
 To send events to a server using a specific profile, do:
 ```bash
-code42 securitydata send-to --profile PROFILE_FOR_RECURRING_JOB syslog.company.com -b 2020-02-02 -i
+code42 securitydata send-to --profile PROFILE_FOR_RECURRING_JOB syslog.company.com -b 2020-02-02 -f CEF -i
 ```
 
 You can also use wildcard for queries, but note, if they are not in quotes, you may get unexpected behavior.
