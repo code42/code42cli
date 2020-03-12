@@ -169,9 +169,7 @@ def _handle_result():
 def _create_filters(args):
     filters = []
     event_timestamp_filter = _get_event_timestamp_filter(args)
-    if event_timestamp_filter:
-        filters.append(event_timestamp_filter)
-
+    not event_timestamp_filter or filters.append(event_timestamp_filter)
     not args.c42usernames or filters.append(DeviceUsername.is_in(args.c42usernames))
     not args.actors or filters.append(Actor.is_in(args.actors))
     not args.md5_hashes or filters.append(MD5.is_in(args.md5_hashes))

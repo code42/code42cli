@@ -24,7 +24,9 @@ class TestBaseCursorStore(object):
 class TestFileEventCursorStore(object):
     MOCK_TEST_DB_NAME = "test_path.db"
 
-    def test_init_when_called_twice_with_different_profile_names_creates_two_rows(self, mocker, sqlite_connection):
+    def test_init_when_called_twice_with_different_profile_names_creates_two_rows(
+        self, mocker, sqlite_connection
+    ):
         mock = mocker.patch("code42cli.securitydata.cursor_store.FileEventCursorStore._row_exists")
         mock.return_value = False
         spy = mocker.spy(FileEventCursorStore, "_insert_new_row")

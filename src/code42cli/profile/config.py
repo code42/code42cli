@@ -121,11 +121,11 @@ class ConfigAccessor(object):
         if self._internal.getboolean(self.DEFAULT_PROFILE_IS_COMPLETE):
             return
 
-        authority = profile.get(self.AUTHORITY_KEY)
-        username = profile.get(self.USERNAME_KEY)
+        authority = profile.get(self.AUTHORITY_KEY).strip()
+        username = profile.get(self.USERNAME_KEY).strip()
 
-        authority_valid = authority is not None and authority != self.DEFAULT_VALUE
-        username_valid = username is not None and username != self.DEFAULT_VALUE
+        authority_valid = authority and authority != self.DEFAULT_VALUE
+        username_valid = username and username != self.DEFAULT_VALUE
 
         if not authority_valid or not username_valid:
             return
