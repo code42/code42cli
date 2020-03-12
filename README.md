@@ -33,6 +33,11 @@ Your password is not stored in plain-text, and is not shown when you do `code42 
 However, `code42 profile show` will confirm that there is a password set for your profile.
 If you do not set a password, you will be securely prompted to enter a password each time you run a command.
 
+Use `--profile` to show a profile other than the default one:
+```bash
+code42 profile show --profile MY_OTHER_PROFILE
+```
+
 To ignore SSL errors, do:
 ```bash
 code42 profile set --disable-ssl-errors
@@ -47,6 +52,8 @@ You can add multiple profiles with different names and the change the default pr
 ```bash
 code42 profile use MY_SECOND_PROFILE
 ```
+When the `--profile` flag is available on other commands, such as those in `securitydata`,
+it will use that profile instead of the default one.
 
 To see all your profiles, do:
 ```bash
@@ -87,7 +94,12 @@ code42 securitydata send-to syslog.company.com -i
 ```
 This is only guaranteed if you did not change your query.
 
-You can also use wildcard for queries, but note, they must be in quotes:
+To send events to a server using a specific profile, do:
+```bash
+code42 securitydata send-to --profile PROFILE_FOR_RECURRING_JOB syslog.company.com -b 2020-02-02 -i
+```
+
+You can also use wildcard for queries, but note, if they are not in quotes, you may get unexpected behavior.
 ```bash
 code42 securitydata print --actor "*"
 ```
