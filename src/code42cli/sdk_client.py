@@ -8,7 +8,7 @@ def create_sdk(profile, is_debug_mode):
     if is_debug_mode:
         settings.debug_level = debug_level.DEBUG
     try:
-        password = profile.get_password()
+        password = profile.get_stored_password()
         return SDK.create_using_local_account(profile.authority_url, profile.username, password)
     except Exception:
         print_error(

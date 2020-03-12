@@ -17,12 +17,12 @@ def config_accessor(mocker):
 
 @pytest.fixture(autouse=True)
 def password_setter(mocker):
-    return mocker.patch("{0}.set_password_from_prompt".format(PASSWORD_NAMESPACE))
+    return mocker.patch("{0}.set_password".format(PASSWORD_NAMESPACE))
 
 
 @pytest.fixture(autouse=True)
 def password_getter(mocker):
-    return mocker.patch("{0}.get_password".format(PASSWORD_NAMESPACE))
+    return mocker.patch("{0}.get_stored_password".format(PASSWORD_NAMESPACE))
 
 
 @pytest.fixture(autouse=True)
@@ -36,14 +36,21 @@ def _get_profile_parser():
     return subcommand_parser.choices.get("profile")
 
 
-def create_profile():
+def create_section():
     class MockSection(object):
         name = "TEST"
+
+        def __getitem__(self, item):
+            return "item"
 
         def get(*args):
             pass
 
-    return profile.Code42Profile(MockSection())
+    return MockSection()
+
+
+def create_profile():
+    return profile.Code42Profile(create_section())
 
 
 class TestCode42Profile(object):
@@ -66,19 +73,44 @@ def test_init_adds_profile_subcommand_to_choices(config_accessor):
     assert subcommand_parser.choices.get("profile")
 
 
-def test_init_adds_parser_that_can_parse_show_command(config_accessor):
+def test_init_adds_parser_that_can_parse_show_command_without_profile(config_accessor):
+    subcommand_parser = ArgumentParser().add_subparsers()
+    profile.init(subcommand_parser)
+    profile_parser = subcommand_parser.choices.get("profile")
+    assert profile_parser.parse_args(["show"])
+
+
+def test_init_adds_parser_that_can_parse_show_command_with_profile(config_accessor):
     subcommand_parser = ArgumentParser().add_subparsers()
     profile.init(subcommand_parser)
     profile_parser = subcommand_parser.choices.get("profile")
     assert profile_parser.parse_args(["show", "--profile", "name"])
 
 
-def test_init_adds_parser_that_can_parse_set_command(config_accessor):
+def test_init_adds_parser_that_can_parse_set_command_without_profile(config_accessor):
     subcommand_parser = ArgumentParser().add_subparsers()
     profile.init(subcommand_parser)
     profile_parser = subcommand_parser.choices.get("profile")
     profile_parser.parse_args(
         ["set", "-s", "server-arg", "-u", "username-arg", "--enable-ssl-errors"]
+    )
+
+
+def test_init_adds_parser_that_can_parse_set_command_with_profile(config_accessor):
+    subcommand_parser = ArgumentParser().add_subparsers()
+    profile.init(subcommand_parser)
+    profile_parser = subcommand_parser.choices.get("profile")
+    profile_parser.parse_args(
+        [
+            "set",
+            "--profile",
+            "ProfileName",
+            "-s",
+            "server-arg",
+            "-u",
+            "username-arg",
+            "--enable-ssl-errors",
+        ]
     )
 
 
@@ -129,8 +161,7 @@ def test_set_profile_when_given_profile_name_sets_authority_for_profile(config_a
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "--profile", "profileA", "-s", "example.com"])
     profile.set_profile(namespace)
-    assert config_accessor.set_authority_url.call_args[0][0] == "example.com"
-    assert config_accessor.set_authority_url.call_args[0][1] == "profileA"
+    assert config_accessor.set_authority_url.call_args[0] == ("example.com", "profileA")
 
 
 def test_set_profile_when_given_enable_ssl_errors_sets_ignore_ssl_errors_to_true(config_accessor):
@@ -153,8 +184,7 @@ def test_set_profile_when_given_disable_ssl_errors_and_profile_name_sets_ignore_
     parser = _get_profile_parser()
     namespace = parser.parse_args(["set", "--profile", "profileA", "--disable-ssl-errors"])
     profile.set_profile(namespace)
-    assert config_accessor.set_ignore_ssl_errors.call_args[0][0] == True
-    assert config_accessor.set_ignore_ssl_errors.call_args[0][1] == "profileA"
+    assert config_accessor.set_ignore_ssl_errors.call_args[0] == (True, "profileA")
 
 
 def test_set_profile_when_to_store_password_prompts_for_storing_password(
@@ -173,12 +203,13 @@ def test_set_profile_when_to_store_password_prompts_for_storing_password(
     assert mock_set_password_function.call_count
 
 
-def test_set_profile_when_told_not_to_store_password_prompts_for_storing_password(
+def test_set_profile_when_told_not_to_store_password_does_not_prompt_for_storing_password(
     mocker, config_accessor, input_function
 ):
     input_function.return_value = "n"
-    mock_set_password_function = mocker.patch("code42cli.profile.password.set_password_from_prompt")
+    mocker.patch("code42cli.profile.password.get_password_from_prompt")
     parser = _get_profile_parser()
+    mock_set_password_function = mocker.patch("code42cli.profile.password.set_password")
     namespace = parser.parse_args(
         ["set", "-s", "https://wwww.new.authority.example.com", "-u", "user"]
     )
@@ -201,14 +232,31 @@ def test_set_profile_when_told_to_store_password_but_connection_fails_exits(
         profile.set_profile(namespace)
 
 
-def test_prompt_for_password_reset_when_connection_fails_does_not_reset_password(mocker, config_accessor, input_function):
+def test_prompt_for_password_reset_when_connection_fails_does_not_reset_password(
+    mocker, config_accessor, input_function
+):
     mock_successful_connection = mocker.patch("code42cli.profile.profile.test_connection")
     mock_successful_connection.return_value = False
     input_function.return_value = "y"
     mocker.patch("code42cli.profile.password.get_password_from_prompt")
     parser = _get_profile_parser()
-    namespace = parser.parse_args(
-        ["reset-pw", "--profile", "Test"]
-    )
+    namespace = parser.parse_args(["reset-pw", "--profile", "Test"])
     with pytest.raises(SystemExit):
         profile.prompt_for_password_reset(namespace)
+
+
+def test_prompt_for_password_when_not_given_profile_name_calls_set_password_with_default_profile(
+    mocker, config_accessor, input_function
+):
+    default_profile = create_section()
+    config_accessor.get_profile.return_value = default_profile
+    mock_successful_connection = mocker.patch("code42cli.profile.profile.test_connection")
+    mock_successful_connection.return_value = True
+    input_function.return_value = "y"
+    password_prompt = mocker.patch("code42cli.profile.password.get_password_from_prompt")
+    password_prompt.return_value = "new password"
+    parser = _get_profile_parser()
+    namespace = parser.parse_args(["reset-pw"])
+    mock_set_password_function = mocker.patch("code42cli.profile.password.set_password")
+    profile.prompt_for_password_reset(namespace)
+    mock_set_password_function.assert_called_once_with(default_profile.name, "new password")

@@ -34,7 +34,7 @@ class Code42Profile(object):
         return self._profile[ConfigAccessor.IGNORE_SSL_ERRORS_KEY]
 
     def get_password(self):
-        pwd = password.get_password(self.name)
+        pwd = password.get_stored_password(self.name)
         if not pwd:
             pwd = password.get_password_from_prompt()
         return pwd
@@ -93,7 +93,7 @@ def show_profile(args):
     print(u"\t* {0} = {1}".format(ConfigAccessor.AUTHORITY_KEY, profile.authority_url))
     print(u"\t* {0} = {1}".format(ConfigAccessor.IGNORE_SSL_ERRORS_KEY, profile.ignore_ssl_error))
     profile_name = profile.name
-    if password.get_password(profile_name) is not None:
+    if password.get_stored_password(profile_name) is not None:
         print(u"\t* A password is set.")
     print(u"")
 
@@ -114,7 +114,9 @@ def prompt_for_password_reset(args):
     profile = get_profile(args.profile_name)
     new_password = password.get_password_from_prompt()
     if not test_connection(profile.username, profile.authority_url, new_password):
-        print_error("Failure to save password. Can't validate username, password, or authority URL.")
+        print_error(
+            "Failure to save password. Can't validate username, password, or authority URL."
+        )
         exit(1)
     password.set_password(profile.name, new_password)
 
