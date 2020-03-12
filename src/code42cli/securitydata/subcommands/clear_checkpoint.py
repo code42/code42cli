@@ -1,6 +1,6 @@
-from code42cli.securitydata.cursor_store import FileEventCursorStore
 from code42cli.arguments import add_profile_name_arg
 from code42cli.profile.profile import get_profile
+from code42cli.securitydata.cursor_store import FileEventCursorStore
 
 
 def init(subcommand_parser):
