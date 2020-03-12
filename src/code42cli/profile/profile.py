@@ -10,7 +10,7 @@ from code42cli.util import (
     print_set_profile_help,
     print_no_existing_profile_message,
 )
-from code42cli.sdk_client import test_connection
+from code42cli.sdk_client import validate_connection
 
 
 class Code42Profile(object):
@@ -113,7 +113,7 @@ def prompt_for_password_reset(args):
     """Securely prompts for your password and then stores it using keyring."""
     profile = get_profile(args.profile_name)
     new_password = password.get_password_from_prompt()
-    if not test_connection(profile.username, new_password, profile.authority_url):
+    if not validate_connection(profile.authority_url, profile.username, new_password):
         print_error(
             "Failure to save password. Can't validate username, password, or authority URL."
         )

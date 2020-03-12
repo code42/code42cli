@@ -5,6 +5,7 @@ import pytest
 from code42cli.profile import profile
 from code42cli.profile.config import ConfigAccessor
 from .conftest import PASSWORD_NAMESPACE, PROFILE_NAMESPACE
+from ..conftest import MockSection, create_mock_profile
 
 
 @pytest.fixture
@@ -36,34 +37,17 @@ def _get_profile_parser():
     return subcommand_parser.choices.get("profile")
 
 
-def create_section():
-    class MockSection(object):
-        name = "TEST"
-
-        def __getitem__(self, item):
-            return "item"
-
-        def get(*args):
-            pass
-
-    return MockSection()
-
-
-def create_profile():
-    return profile.Code42Profile(create_section())
-
-
 class TestCode42Profile(object):
     def test_get_password_when_is_none_returns_password_from_getpass(self, mocker, password_getter):
         password_getter.return_value = None
         mock_getpass = mocker.patch("{0}.get_password_from_prompt".format(PASSWORD_NAMESPACE))
         mock_getpass.return_value = "Test Password"
-        actual = create_profile().get_password()
+        actual = create_mock_profile().get_password()
         assert actual == "Test Password"
 
     def test_get_password_return_password_from_password_get_password(self, password_getter):
         password_getter.return_value = "Test Password"
-        actual = create_profile().get_password()
+        actual = create_mock_profile().get_password()
         assert actual == "Test Password"
 
 
@@ -190,7 +174,7 @@ def test_set_profile_when_given_disable_ssl_errors_and_profile_name_sets_ignore_
 def test_set_profile_when_to_store_password_prompts_for_storing_password(
     mocker, config_accessor, input_function
 ):
-    mock_successful_connection = mocker.patch("code42cli.profile.profile.test_connection")
+    mock_successful_connection = mocker.patch("code42cli.profile.profile.validate_connection")
     mock_successful_connection.return_value = True
     input_function.return_value = "y"
     mocker.patch("code42cli.profile.password.get_password_from_prompt")
@@ -220,7 +204,7 @@ def test_set_profile_when_told_not_to_store_password_does_not_prompt_for_storing
 def test_set_profile_when_told_to_store_password_but_connection_fails_exits(
     mocker, config_accessor, input_function
 ):
-    mock_successful_connection = mocker.patch("code42cli.profile.profile.test_connection")
+    mock_successful_connection = mocker.patch("code42cli.profile.profile.validate_connection")
     mock_successful_connection.return_value = False
     input_function.return_value = "y"
     mocker.patch("code42cli.profile.password.get_password_from_prompt")
@@ -235,7 +219,7 @@ def test_set_profile_when_told_to_store_password_but_connection_fails_exits(
 def test_prompt_for_password_reset_when_connection_fails_does_not_reset_password(
     mocker, config_accessor, input_function
 ):
-    mock_successful_connection = mocker.patch("code42cli.profile.profile.test_connection")
+    mock_successful_connection = mocker.patch("code42cli.profile.profile.validate_connection")
     mock_successful_connection.return_value = False
     input_function.return_value = "y"
     mocker.patch("code42cli.profile.password.get_password_from_prompt")
@@ -248,9 +232,9 @@ def test_prompt_for_password_reset_when_connection_fails_does_not_reset_password
 def test_prompt_for_password_when_not_given_profile_name_calls_set_password_with_default_profile(
     mocker, config_accessor, input_function
 ):
-    default_profile = create_section()
+    default_profile = MockSection()
     config_accessor.get_profile.return_value = default_profile
-    mock_successful_connection = mocker.patch("code42cli.profile.profile.test_connection")
+    mock_successful_connection = mocker.patch("code42cli.profile.profile.validate_connection")
     mock_successful_connection.return_value = True
     input_function.return_value = "y"
     password_prompt = mocker.patch("code42cli.profile.password.get_password_from_prompt")

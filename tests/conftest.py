@@ -4,6 +4,9 @@ from datetime import datetime, timedelta
 
 import pytest
 
+from code42cli.profile.config import ConfigAccessor
+from code42cli.profile.profile import Code42Profile
+
 
 @pytest.fixture
 def namespace(mocker):
@@ -26,6 +29,32 @@ def namespace(mocker):
     mock.tab_urls = None
     mock.include_non_exposure_events = None
     return mock
+
+
+class MockSection(object):
+    def __init__(self, name="Test Profile Name"):
+        self.name = name
+        self.values_dict = {
+            ConfigAccessor.AUTHORITY_KEY: None,
+            ConfigAccessor.USERNAME_KEY: None,
+            ConfigAccessor.IGNORE_SSL_ERRORS_KEY: False,
+        }
+
+    def __getitem__(self, item):
+        return self.values_dict[item]
+
+    def get(self, item):
+        return self.values_dict.get(item)
+
+
+def create_mock_profile():
+    profile_section = MockSection()
+    profile = Code42Profile(profile_section)
+    def mock_get_password():
+        return "Test Password"
+
+    profile.get_password = mock_get_password
+    return profile
 
 
 def get_filter_value_from_json(json, filter_index):
