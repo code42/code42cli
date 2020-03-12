@@ -8,7 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-## Unreleased
+## 0.4.0 - 2020-03-12
+
+### Added
+
+- Support for multiple profiles:
+    - Optional `--profile` flag for:
+        - `securitydata write-to`, `print`, and `send-to`,
+        - `profile show`, `set`, and `reset-pw`.
+    - `code42 profile use` command for changing the default profile.
+    - `code42 profile list` command for listing all the available profiles.
+- The following search args can now take multiple values:
+    - `--c42username`,
+    - `--actor`,
+    - `--md5`,
+    - `--sha256`,
+    - `--filename`,
+    - `--filepath`,
+    - `--processOwner`,
+    - `--tabURL`
 
 ### Fixed
 
@@ -18,6 +36,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Begin dates are no longer required for subsequent interactive `securitydata` commands.
 - When provided, begin dates are now ignored on subsequent interactive `securitydata` commands.
+- `--profile` arg is now required the first time setting up a profile.
 
 ## 0.3.0 - 2020-03-04
 

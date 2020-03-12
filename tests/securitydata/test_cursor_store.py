@@ -1,14 +1,8 @@
 from os import path
 
-import pytest
 from c42eventextractor.extractors import INSERTION_TIMESTAMP_FIELD_NAME
 
 from code42cli.securitydata.cursor_store import BaseCursorStore, FileEventCursorStore
-
-
-@pytest.fixture
-def sqlite_connection(mocker):
-    return mocker.patch("sqlite3.connect")
 
 
 class TestBaseCursorStore(object):
@@ -29,47 +23,23 @@ class TestBaseCursorStore(object):
 
 
 class TestFileEventCursorStore(object):
-    MOCK_TEST_DB_PATH = "test_path.db"
+    MOCK_TEST_DB_NAME = "test_path.db"
 
-    def test_reset_executes_expected_drop_table_query(self, sqlite_connection):
-        store = FileEventCursorStore(self.MOCK_TEST_DB_PATH)
-        store.reset()
-        with store._connection as conn:
-            actual = conn.execute.call_args_list[0][0][0]
-            expected = "DROP TABLE aed_checkpoint"
-            assert actual == expected
-
-    def test_reset_executes_expected_create_table_query(self, sqlite_connection):
-        store = FileEventCursorStore(self.MOCK_TEST_DB_PATH)
-        store.reset()
-        with store._connection as conn:
-            actual = conn.execute.call_args_list[1][0][0]
-            expected = "CREATE TABLE aed_checkpoint (cursor_id, insertionTimestamp)"
-            assert actual == expected
-
-    def test_reset_executes_expected_insert_query(self, sqlite_connection):
-        store = FileEventCursorStore(self.MOCK_TEST_DB_PATH)
-        store._connection = sqlite_connection
-        store.reset()
-        with store._connection as conn:
-            actual = conn.execute.call_args[0][0]
-            expected = "INSERT INTO aed_checkpoint VALUES(?, null)"
-            assert actual == expected
-
-    def test_reset_executes_query_with_expected_primary_key(self, sqlite_connection):
-        store = FileEventCursorStore(self.MOCK_TEST_DB_PATH)
-        store._connection = sqlite_connection
-        store.reset()
-        with store._connection as conn:
-            actual = conn.execute.call_args[0][1][0]
-            expected = store._PRIMARY_KEY
-            assert actual == expected
+    def test_init_when_called_twice_with_different_profile_names_creates_two_rows(
+        self, mocker, sqlite_connection
+    ):
+        mock = mocker.patch("code42cli.securitydata.cursor_store.FileEventCursorStore._row_exists")
+        mock.return_value = False
+        spy = mocker.spy(FileEventCursorStore, "_insert_new_row")
+        FileEventCursorStore("Profile A", self.MOCK_TEST_DB_NAME)
+        FileEventCursorStore("Profile B", self.MOCK_TEST_DB_NAME)
+        assert spy.call_count == 2
 
     def test_get_stored_insertion_timestamp_executes_expected_select_query(self, sqlite_connection):
-        store = FileEventCursorStore(self.MOCK_TEST_DB_PATH)
+        store = FileEventCursorStore("Profile", self.MOCK_TEST_DB_NAME)
         store.get_stored_insertion_timestamp()
         with store._connection as conn:
-            expected = "SELECT {0} FROM aed_checkpoint WHERE cursor_id=?".format(
+            expected = "SELECT {0} FROM file_event_checkpoints WHERE cursor_id=?".format(
                 INSERTION_TIMESTAMP_FIELD_NAME
             )
             actual = conn.cursor().execute.call_args[0][0]
@@ -78,20 +48,20 @@ class TestFileEventCursorStore(object):
     def test_get_stored_insertion_timestamp_executes_query_with_expected_primary_key(
         self, sqlite_connection
     ):
-        store = FileEventCursorStore(self.MOCK_TEST_DB_PATH)
+        store = FileEventCursorStore("Profile", self.MOCK_TEST_DB_NAME)
         store.get_stored_insertion_timestamp()
         with store._connection as conn:
             actual = conn.cursor().execute.call_args[0][1][0]
-            expected = store._PRIMARY_KEY
+            expected = store._primary_key
             assert actual == expected
 
     def test_replace_stored_insertion_timestamp_executes_expected_update_query(
         self, sqlite_connection
     ):
-        store = FileEventCursorStore(self.MOCK_TEST_DB_PATH)
+        store = FileEventCursorStore("Profile", self.MOCK_TEST_DB_NAME)
         store.replace_stored_insertion_timestamp(123)
         with store._connection as conn:
-            expected = "UPDATE aed_checkpoint SET {0}=? WHERE cursor_id=?".format(
+            expected = "UPDATE file_event_checkpoints SET {0}=? WHERE cursor_id=?".format(
                 INSERTION_TIMESTAMP_FIELD_NAME
             )
             actual = conn.execute.call_args[0][0]
@@ -100,7 +70,7 @@ class TestFileEventCursorStore(object):
     def test_replace_stored_insertion_timestamp_executes_query_with_expected_primary_key(
         self, sqlite_connection
     ):
-        store = FileEventCursorStore(self.MOCK_TEST_DB_PATH)
+        store = FileEventCursorStore("Profile", self.MOCK_TEST_DB_NAME)
         new_insertion_timestamp = 123
         store.replace_stored_insertion_timestamp(new_insertion_timestamp)
         with store._connection as conn:

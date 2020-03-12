@@ -27,7 +27,7 @@ def extractor(mocker):
     return mocker.patch("{0}.extract".format(_SEND_PATH))
 
 
-def test_init_adds_parser_that_can_parse_supported_args(config_parser):
+def test_init_adds_parser_that_can_parse_supported_args():
     subcommand_parser = ArgumentParser().add_subparsers()
     sender.init(subcommand_parser)
     send_parser = subcommand_parser.choices.get("send-to")
@@ -35,7 +35,7 @@ def test_init_adds_parser_that_can_parse_supported_args(config_parser):
     send_parser.parse_args(args)
 
 
-def test_init_adds_parser_when_not_given_server_causes_system_exit(config_parser):
+def test_init_adds_parser_when_not_given_server_causes_system_exit():
     subcommand_parser = ArgumentParser().add_subparsers()
     sender.init(subcommand_parser)
     send_parser = subcommand_parser.choices.get("send-to")

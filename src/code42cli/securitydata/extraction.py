@@ -37,68 +37,28 @@ def extract(output_logger, args):
             args:
                 Command line args used to build up file event query filters.
     """
-    store = _create_cursor_store(args)
+    profile = get_profile(args.profile_name)
+    store = _create_cursor_store(args, profile)
+    filters = _get_filters(args, store)
     handlers = _create_event_handlers(output_logger, store)
-    profile = get_profile()
     sdk = _get_sdk(profile, args.is_debug_mode)
     extractor = FileEventExtractor(sdk, handlers)
-    _call_extract(extractor, store, args)
+    _call_extract(extractor, filters, args)
     _handle_result()
 
 
-def _create_cursor_store(args):
+def _create_cursor_store(args, profile):
     if args.is_incremental:
-        return FileEventCursorStore()
+        return FileEventCursorStore(profile.name)
 
 
-def _create_event_handlers(output_logger, cursor_store):
-    handlers = FileEventHandlers()
-    error_logger = get_error_logger()
-
-    def handle_error(exception):
-        error_logger.error(exception)
-        global _EXCEPTIONS_OCCURRED
-        _EXCEPTIONS_OCCURRED = True
-
-    handlers.handle_error = handle_error
-
-    if cursor_store:
-        handlers.record_cursor_position = cursor_store.replace_stored_insertion_timestamp
-        handlers.get_cursor_position = cursor_store.get_stored_insertion_timestamp
-
-    def handle_response(response):
-        response_dict = json.loads(response.text)
-        events = response_dict.get(u"fileEvents")
-        for event in events:
-            output_logger.info(event)
-
-    handlers.handle_response = handle_response
-    return handlers
-
-
-def _get_sdk(profile, is_debug_mode):
-    if is_debug_mode:
-        settings.debug_level = debug_level.DEBUG
-    try:
-        return SDK.create_using_local_account(
-            profile.authority_url, profile.username, profile.get_password()
-        )
-    except:
-        print_error(
-            u"Invalid credentials or host address. "
-            u"Verify your profile is set up correctly and that you are supplying the correct password."
-        )
-        exit(1)
-
-
-def _call_extract(extractor, cursor_store, args):
+def _get_filters(args, cursor_store):
     if not _determine_if_advanced_query(args):
         _verify_begin_date_requirements(args, cursor_store)
         _verify_exposure_types(args.exposure_types)
-        filters = _create_filters(args)
-        extractor.extract(*filters)
+        return _create_filters(args)
     else:
-        extractor.extract_advanced(args.advanced_query)
+        return args.advanced_query
 
 
 def _determine_if_advanced_query(args):
@@ -111,14 +71,6 @@ def _determine_if_advanced_query(args):
                 exit(1)
         return True
     return False
-
-
-def _verify_compatibility_with_advanced_query(key, val):
-    if val is not None:
-        is_other_search_arg = key in SearchArguments() and key != SearchArguments.ADVANCED_QUERY
-        is_incremental = key == IS_INCREMENTAL_KEY and val
-        return not is_other_search_arg and not is_incremental
-    return True
 
 
 def _verify_begin_date_requirements(args, cursor_store):
@@ -151,6 +103,23 @@ def _verify_exposure_types(exposure_types):
             exit(1)
 
 
+def _create_filters(args):
+    filters = []
+    event_timestamp_filter = _get_event_timestamp_filter(args)
+    not event_timestamp_filter or filters.append(event_timestamp_filter)
+    not args.c42usernames or filters.append(DeviceUsername.is_in(args.c42usernames))
+    not args.actors or filters.append(Actor.is_in(args.actors))
+    not args.md5_hashes or filters.append(MD5.is_in(args.md5_hashes))
+    not args.sha256_hashes or filters.append(SHA256.is_in(args.sha256_hashes))
+    not args.sources or filters.append(Source.is_in(args.sources))
+    not args.filenames or filters.append(FileName.is_in(args.filenames))
+    not args.filepaths or filters.append(FilePath.is_in(args.filepaths))
+    not args.process_owners or filters.append(ProcessOwner.is_in(args.process_owners))
+    not args.tab_urls or filters.append(TabURL.is_in(args.tab_urls))
+    _try_append_exposure_types_filter(filters, args)
+    return filters
+
+
 def _get_event_timestamp_filter(args):
     try:
         return date_helper.create_event_timestamp_filter(args.begin_date, args.end_date)
@@ -159,28 +128,66 @@ def _get_event_timestamp_filter(args):
         exit(1)
 
 
+def _create_event_handlers(output_logger, cursor_store):
+    handlers = FileEventHandlers()
+    error_logger = get_error_logger()
+
+    def handle_error(exception):
+        error_logger.error(exception)
+        global _EXCEPTIONS_OCCURRED
+        _EXCEPTIONS_OCCURRED = True
+
+    handlers.handle_error = handle_error
+
+    if cursor_store:
+        handlers.record_cursor_position = cursor_store.replace_stored_insertion_timestamp
+        handlers.get_cursor_position = cursor_store.get_stored_insertion_timestamp
+
+    def handle_response(response):
+        response_dict = json.loads(response.text)
+        events = response_dict.get(u"fileEvents")
+        for event in events:
+            output_logger.info(event)
+
+    handlers.handle_response = handle_response
+    return handlers
+
+
+def _get_sdk(profile, is_debug_mode):
+    if is_debug_mode:
+        settings.debug_level = debug_level.DEBUG
+    try:
+        password = profile.get_password()
+        return SDK.create_using_local_account(profile.authority_url, profile.username, password)
+    except Exception:
+        print_error(
+            u"Invalid credentials or host address. "
+            u"Verify your profile is set up correctly and that you are supplying the correct password."
+        )
+        exit(1)
+
+
+def _call_extract(extractor, filters, args):
+    if args.advanced_query:
+        extractor.extract_advanced(args.advanced_query)
+    else:
+        extractor.extract(*filters)
+
+
+def _verify_compatibility_with_advanced_query(key, val):
+    if key == SearchArguments.INCLUDE_NON_EXPOSURE_EVENTS and not val:
+        return True
+
+    if val is not None:
+        is_other_search_arg = key in SearchArguments() and key != SearchArguments.ADVANCED_QUERY
+        is_incremental = key == IS_INCREMENTAL_KEY and val
+        return not is_other_search_arg and not is_incremental
+    return True
+
+
 def _handle_result():
     if is_interactive() and _EXCEPTIONS_OCCURRED:
         print_error(u"View exceptions that occurred at [HOME]/.code42cli/log/code42_errors.")
-
-
-def _create_filters(args):
-    filters = []
-    event_timestamp_filter = _get_event_timestamp_filter(args)
-    if event_timestamp_filter:
-        filters.append(event_timestamp_filter)
-
-    not args.c42username or filters.append(DeviceUsername.eq(args.c42username))
-    not args.actor or filters.append(Actor.eq(args.actor))
-    not args.md5 or filters.append(MD5.eq(args.md5))
-    not args.sha256 or filters.append(SHA256.eq(args.sha256))
-    not args.source or filters.append(Source.eq(args.source))
-    not args.filename or filters.append(FileName.eq(args.filename))
-    not args.filepath or filters.append(FilePath.eq(args.filepath))
-    not args.process_owner or filters.append(ProcessOwner.eq(args.process_owner))
-    not args.tab_url or filters.append(TabURL.eq(args.tab_url))
-    _try_append_exposure_types_filter(filters, args)
-    return filters
 
 
 def _try_append_exposure_types_filter(filters, args):

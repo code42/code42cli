@@ -1,22 +1,47 @@
 from __future__ import print_function
 
-import code42cli.profile.config as config
+import code42cli.arguments as main_args
 import code42cli.profile.password as password
-from code42cli.profile.config import ConfigurationKeys
-from code42cli.util import get_input
+from code42cli.compat import str
+from code42cli.profile.config import get_config_accessor, ConfigAccessor
+from code42cli.util import (
+    get_input,
+    print_error,
+    print_set_profile_help,
+    print_no_existing_profile_message,
+)
 
 
 class Code42Profile(object):
-    authority_url = u""
-    username = u""
-    ignore_ssl_errors = False
+    def __init__(self, profile):
+        self._profile = profile
 
-    @staticmethod
-    def get_password():
-        pwd = password.get_password()
+    @property
+    def name(self):
+        return self._profile.name
+
+    @property
+    def authority_url(self):
+        return self._profile[ConfigAccessor.AUTHORITY_KEY]
+
+    @property
+    def username(self):
+        return self._profile[ConfigAccessor.USERNAME_KEY]
+
+    @property
+    def ignore_ssl_error(self):
+        return self._profile[ConfigAccessor.IGNORE_SSL_ERRORS_KEY]
+
+    def get_password(self):
+        pwd = password.get_password(self.name)
         if not pwd:
             pwd = password.get_password_from_prompt()
         return pwd
+
+    def __str__(self):
+        return u"{0}: Username={1}, Authority URL={2}".format(
+            self.name, self.username, self.authority_url
+        )
 
 
 def init(subcommand_parser):
@@ -26,61 +51,101 @@ def init(subcommand_parser):
         Args:
             subcommand_parser: The subparsers group created by the parent parser.
     """
-    parser_profile = subcommand_parser.add_parser("profile")
-    parser_profile.set_defaults(func=show_profile)
+    parser_profile = subcommand_parser.add_parser(u"profile")
     profile_subparsers = parser_profile.add_subparsers()
 
-    parser_for_show_command = profile_subparsers.add_parser("show")
-    parser_for_set_command = profile_subparsers.add_parser("set")
-    parser_for_reset_password = profile_subparsers.add_parser("reset-pw")
+    parser_for_show = profile_subparsers.add_parser(u"show")
+    parser_for_set = profile_subparsers.add_parser(u"set")
+    parser_for_reset_password = profile_subparsers.add_parser(u"reset-pw")
+    parser_for_list = profile_subparsers.add_parser(u"list")
+    parser_for_use = profile_subparsers.add_parser(u"use")
 
-    parser_for_show_command.set_defaults(func=show_profile)
-    parser_for_set_command.set_defaults(func=set_profile)
+    parser_for_show.set_defaults(func=show_profile)
+    parser_for_set.set_defaults(func=set_profile)
     parser_for_reset_password.set_defaults(func=prompt_for_password_reset)
-    _add_args_to_set_command(parser_for_set_command)
+    parser_for_list.set_defaults(func=list_profiles)
+    parser_for_use.set_defaults(func=use_profile)
+
+    main_args.add_profile_name_arg(parser_for_show)
+    main_args.add_profile_name_arg(parser_for_reset_password)
+    _add_args_to_set_command(parser_for_set)
+    _add_positional_profile_arg(parser_for_use)
 
 
-def get_profile():
-    """Returns the current profile object."""
-    profile_values = config.get_config_profile()
-    profile = Code42Profile()
-    profile.authority_url = profile_values.get(ConfigurationKeys.AUTHORITY_KEY)
-    profile.username = profile_values.get(ConfigurationKeys.USERNAME_KEY)
-    profile.ignore_ssl_errors = profile_values.get(ConfigurationKeys.IGNORE_SSL_ERRORS_KEY)
-    return profile
+def get_profile(profile_name=None):
+    """Returns the profile for the given name."""
+    accessor = get_config_accessor()
+    try:
+        profile = accessor.get_profile(profile_name)
+        return Code42Profile(profile)
+    except Exception as ex:
+        print_error(str(ex))
+        print_set_profile_help()
+        exit(1)
 
 
-def show_profile(*args):
-    """Prints the current profile to stdout."""
-    profile = config.get_config_profile()
-    print(u"\nProfile:")
-    for key in profile:
-        print(u"\t* {} = {}".format(key, profile[key]))
-
-    if password.get_password() is not None:
+def show_profile(args):
+    """Prints the given profile to stdout."""
+    profile = get_profile(args.profile_name)
+    print(u"\n{0}:".format(profile.name))
+    print(u"\t* {0} = {1}".format(ConfigAccessor.USERNAME_KEY, profile.username))
+    print(u"\t* {0} = {1}".format(ConfigAccessor.AUTHORITY_KEY, profile.authority_url))
+    print(u"\t* {0} = {1}".format(ConfigAccessor.IGNORE_SSL_ERRORS_KEY, profile.ignore_ssl_error))
+    if password.get_password(args.profile_name) is not None:
         print(u"\t* A password is set.")
     print(u"")
 
 
 def set_profile(args):
-    """Sets the current profile using command line arguments."""
-    _try_set_authority_url(args)
-    _try_set_username(args)
-    _try_set_ignore_ssl_errors(args)
-    config.mark_as_set_if_complete()
-    _prompt_for_allow_password_set()
+    """Sets the given profile using command line arguments."""
+    _verify_args_for_set(args)
+    accessor = get_config_accessor()
+    accessor.create_profile_if_not_exists(args.profile_name)
+    _try_set_authority_url(args, accessor)
+    _try_set_username(args, accessor)
+    _try_set_ignore_ssl_errors(args, accessor)
+    _prompt_for_allow_password_set(args)
 
 
-def prompt_for_password_reset(*args):
+def prompt_for_password_reset(args):
     """Securely prompts for your password and then stores it using keyring."""
-    password.set_password_from_prompt()
+    password.set_password_from_prompt(args.profile_name)
 
 
-def _add_args_to_set_command(parser_for_set_command):
-    _add_authority_arg(parser_for_set_command)
-    _add_username_arg(parser_for_set_command)
-    _add_disable_ssl_errors_arg(parser_for_set_command)
-    _add_enable_ssl_errors_arg(parser_for_set_command)
+def list_profiles(*args):
+    """Lists all profiles that exist for this OS user."""
+    accessor = get_config_accessor()
+    profiles = accessor.get_all_profiles()
+    if not profiles:
+        print_no_existing_profile_message()
+        return
+    for profile in profiles:
+        profile = Code42Profile(profile)
+        print(profile)
+
+
+def use_profile(args):
+    """Changes the default profile to the given one."""
+    accessor = get_config_accessor()
+    try:
+        accessor.switch_default_profile(args.profile_name)
+    except Exception as ex:
+        print_error(ex)
+        exit(1)
+
+
+def _add_args_to_set_command(parser_for_set):
+    main_args.add_profile_name_arg(parser_for_set)
+    _add_authority_arg(parser_for_set)
+    _add_username_arg(parser_for_set)
+    _add_disable_ssl_errors_arg(parser_for_set)
+    _add_enable_ssl_errors_arg(parser_for_set)
+
+
+def _add_positional_profile_arg(parser):
+    parser.add_argument(
+        action=u"store", dest=main_args.PROFILE_NAME_KEY, help=main_args.PROFILE_HELP_MESSAGE
+    )
 
 
 def _add_authority_arg(parser):
@@ -88,7 +153,7 @@ def _add_authority_arg(parser):
         u"-s",
         u"--server",
         action=u"store",
-        dest=ConfigurationKeys.AUTHORITY_KEY,
+        dest=ConfigAccessor.AUTHORITY_KEY,
         help=u"The full scheme, url and port of the Code42 server.",
     )
 
@@ -98,7 +163,7 @@ def _add_username_arg(parser):
         u"-u",
         u"--username",
         action=u"store",
-        dest=ConfigurationKeys.USERNAME_KEY,
+        dest=ConfigAccessor.USERNAME_KEY,
         help=u"The username of the Code42 API user.",
     )
 
@@ -109,7 +174,8 @@ def _add_disable_ssl_errors_arg(parser):
         action=u"store_true",
         default=None,
         dest=u"disable_ssl_errors",
-        help=u"Do not validate the SSL certificates of Code42 servers.",
+        help=u"For development purposes, do not validate the SSL certificates of Code42 servers."
+        u"This is not recommended unless it is required.",
     )
 
 
@@ -123,33 +189,68 @@ def _add_enable_ssl_errors_arg(parser):
     )
 
 
-def _set_has_args(args):
-    return args.c42_authority_url is not None or args.c42_username is not None
+def _verify_args_for_set(args):
+    if _missing_default_profile(args):
+        print_error(u"Must supply a name when setting your profile for the first time.")
+        print_set_profile_help()
+        exit(1)
+
+    missing_values = not args.c42_username and not args.c42_authority_url
+    if missing_values:
+        try:
+            profile = get_profile(args.profile_name)
+            missing_values = not profile.username and not profile.authority_url
+        except SystemExit:
+            missing_values = True
+
+    if missing_values:
+        print_error(u"Missing username and authority url.")
+        print_set_profile_help()
+        exit(1)
 
 
-def _try_set_authority_url(args):
+def _try_set_authority_url(args, accessor):
     if args.c42_authority_url is not None:
-        config.set_authority_url(args.c42_authority_url)
+        accessor.set_authority_url(args.c42_authority_url, args.profile_name)
 
 
-def _try_set_username(args):
+def _try_set_username(args, accessor):
     if args.c42_username is not None:
-        config.set_username(args.c42_username)
+        accessor.set_username(args.c42_username, args.profile_name)
 
 
-def _try_set_ignore_ssl_errors(args):
+def _try_set_ignore_ssl_errors(args, accessor):
     if args.disable_ssl_errors is not None and not args.enable_ssl_errors:
-        config.set_ignore_ssl_errors(True)
+        accessor.set_ignore_ssl_errors(True, args.profile_name)
 
     if args.enable_ssl_errors is not None:
-        config.set_ignore_ssl_errors(False)
+        accessor.set_ignore_ssl_errors(False, args.profile_name)
 
 
-def _prompt_for_allow_password_set():
+def _missing_default_profile(args):
+    profile_name_arg_is_none = (
+        args.profile_name is None or args.profile_name == ConfigAccessor.DEFAULT_VALUE
+    )
+    return profile_name_arg_is_none and not _default_profile_exists()
+
+
+def _default_profile_exists():
+    try:
+        accessor = get_config_accessor()
+        profile = Code42Profile(accessor.get_profile())
+        return profile.name and profile.name != ConfigAccessor.DEFAULT_VALUE
+    except Exception:
+        return False
+
+
+def _prompt_for_allow_password_set(args):
     answer = get_input(u"Would you like to set a password? (y/n): ")
     if answer.lower() == u"y":
-        prompt_for_password_reset()
+        prompt_for_password_reset(args)
 
 
-if __name__ == "__main__":
-    show_profile()
+def _log_key_save(key):
+    if key == ConfigAccessor.DEFAULT_PROFILE_IS_COMPLETE:
+        print(u"You have completed setting up your profile!")
+    else:
+        print(u"'{}' has been successfully updated".format(key))

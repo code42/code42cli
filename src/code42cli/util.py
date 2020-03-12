@@ -3,8 +3,6 @@ from __future__ import print_function, with_statement
 import sys
 from os import path, makedirs
 
-from code42cli.compat import urlparse
-
 
 def get_input(prompt):
     """Uses correct input function based on Python version."""
@@ -35,7 +33,7 @@ def open_file(file_path, mode, action):
 
 def print_error(error_text):
     """Prints red text."""
-    print("\033[91mERROR: {}\033[0m".format(error_text))
+    print("\033[91mUSAGE ERROR: {}\033[0m".format(error_text))
 
 
 def print_bold(bold_text):
@@ -44,6 +42,18 @@ def print_bold(bold_text):
 
 def is_interactive():
     return sys.stdin.isatty()
+
+
+def print_no_existing_profile_message():
+    print_error(u"No existing profile.")
+    print_set_profile_help()
+
+
+def print_set_profile_help():
+    print(u"")
+    print(u"To add a profile, use: ")
+    print_bold(u"\tcode42 profile set --profile <profile-name> -s <authority-URL> -u <username>")
+    print(u"")
 
 
 def get_url_parts(url_str):
