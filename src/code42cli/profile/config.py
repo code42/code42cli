@@ -25,11 +25,6 @@ class ConfigAccessor(object):
         else:
             self.parser.read(self.path)
 
-    @property
-    def internal(self):
-        """The internal section of the config file."""
-        return self.parser[self._INTERNAL_SECTION]
-
     def get_profile(self, name=None):
         """Returns the profile with the given name.
         If name is None, returns the default profile.
@@ -62,7 +57,7 @@ class ConfigAccessor(object):
         """Changes what is marked as the default profile in the internal section."""
         if self.get_profile(new_default_name) is None:
             raise Exception("Profile does not exist.")
-        self.internal[self.DEFAULT_PROFILE] = new_default_name
+        self._internal[self.DEFAULT_PROFILE] = new_default_name
         self._save()
 
     def set_authority_url(self, new_value, profile_name=None):
@@ -90,8 +85,13 @@ class ConfigAccessor(object):
         self._save()
 
     @property
+    def _internal(self):
+        """The internal section of the config file."""
+        return self.parser[self._INTERNAL_SECTION]
+
+    @property
     def _default_profile_name(self):
-        return self.internal[self.DEFAULT_PROFILE]
+        return self._internal[self.DEFAULT_PROFILE]
 
     def _get_profile_names(self):
         names = list(self.parser.sections())
@@ -110,15 +110,15 @@ class ConfigAccessor(object):
         self.parser[name][self.AUTHORITY_KEY] = self.DEFAULT_VALUE
         self.parser[name][self.USERNAME_KEY] = self.DEFAULT_VALUE
         self.parser[name][self.IGNORE_SSL_ERRORS_KEY] = str(False)
-        default_profile = self.internal.get(self.DEFAULT_PROFILE)
+        default_profile = self._internal.get(self.DEFAULT_PROFILE)
         if default_profile is None or default_profile is self.DEFAULT_VALUE:
-            self.internal[self.DEFAULT_PROFILE] = name
+            self._internal[self.DEFAULT_PROFILE] = name
 
     def _save(self):
         util.open_file(self.path, u"w+", lambda f: self.parser.write(f))
 
     def _try_complete_setup(self, profile):
-        if self.internal.getboolean(self.DEFAULT_PROFILE_IS_COMPLETE):
+        if self._internal.getboolean(self.DEFAULT_PROFILE_IS_COMPLETE):
             return
 
         authority = profile.get(self.AUTHORITY_KEY)
@@ -130,9 +130,9 @@ class ConfigAccessor(object):
         if not authority_valid or not username_valid:
             return
 
-        self.internal[self.DEFAULT_PROFILE_IS_COMPLETE] = str(True)
-        if self.internal[self.DEFAULT_PROFILE] == self.DEFAULT_VALUE:
-            self.internal[self.DEFAULT_PROFILE] = profile.name
+        self._internal[self.DEFAULT_PROFILE_IS_COMPLETE] = str(True)
+        if self._internal[self.DEFAULT_PROFILE] == self.DEFAULT_VALUE:
+            self._internal[self.DEFAULT_PROFILE] = profile.name
 
         self._save()
 
