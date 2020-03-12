@@ -23,4 +23,5 @@ def test_connection(username, password, authority_url):
         SDK.create_using_local_account(authority_url, username, password)
         return True
     except:
+        print(username, password, authority_url)
         return False

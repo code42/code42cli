@@ -113,7 +113,7 @@ def prompt_for_password_reset(args):
     """Securely prompts for your password and then stores it using keyring."""
     profile = get_profile(args.profile_name)
     new_password = password.get_password_from_prompt()
-    if not test_connection(profile.username, profile.authority_url, new_password):
+    if not test_connection(profile.username, new_password, profile.authority_url):
         print_error(
             "Failure to save password. Can't validate username, password, or authority URL."
         )
