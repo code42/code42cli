@@ -120,8 +120,8 @@ def _create_filters(args):
 
 def _get_event_timestamp_filter(args):
     try:
-        begin_date = tuple(args.begin_date.strip().split(" ")) if args.begin_date else None
-        end_date = tuple(args.end_date.strip().split(" ")) if args.end_date else None
+        begin_date = args.begin_date.strip().split(" ") if args.begin_date else None
+        end_date = args.end_date.strip().split(" ") if args.end_date else None
         return date_helper.create_event_timestamp_filter(begin_date, end_date)
     except ValueError as ex:
         print_error(str(ex))
