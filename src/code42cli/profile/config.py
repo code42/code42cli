@@ -32,7 +32,7 @@ class ConfigAccessor(object):
         """
         name = name or self._default_profile_name
         if name not in self.parser.sections() or name == self.DEFAULT_VALUE:
-            raise Exception("Profile does not exist.")
+            raise Exception(u"Profile does not exist.")
         return self.parser[name]
 
     def get_all_profiles(self):
@@ -56,7 +56,7 @@ class ConfigAccessor(object):
     def switch_default_profile(self, new_default_name):
         """Changes what is marked as the default profile in the internal section."""
         if self.get_profile(new_default_name) is None:
-            raise Exception("Profile does not exist.")
+            raise Exception(u"Profile does not exist.")
         self._internal[self.DEFAULT_PROFILE] = new_default_name
         self._save()
 
