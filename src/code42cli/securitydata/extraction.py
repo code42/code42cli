@@ -52,6 +52,82 @@ def _create_cursor_store(args, profile):
         return FileEventCursorStore(profile.name)
 
 
+def _get_filters(args, cursor_store):
+    if not _determine_if_advanced_query(args):
+        _verify_begin_date_requirements(args, cursor_store)
+        _verify_exposure_types(args.exposure_types)
+        return _create_filters(args)
+    else:
+        return args.advanced_query
+
+
+def _determine_if_advanced_query(args):
+    if args.advanced_query is not None:
+        given_args = vars(args)
+        for key in given_args:
+            val = given_args[key]
+            if not _verify_compatibility_with_advanced_query(key, val):
+                print_error(u"You cannot use --advanced-query with additional search args.")
+                exit(1)
+        return True
+    return False
+
+
+def _verify_begin_date_requirements(args, cursor_store):
+    if _begin_date_is_required(args, cursor_store) and not args.begin_date:
+        print_error(u"'begin date' is required.")
+        print(u"")
+        print_bold(u"Try using  '-b' or '--begin'. Use `-h` for more info.")
+        print(u"")
+        exit(1)
+
+
+def _begin_date_is_required(args, cursor_store):
+    if not args.is_incremental:
+        return True
+    required = cursor_store is not None and cursor_store.get_stored_insertion_timestamp() is None
+
+    # Ignore begin date when is incremental mode, it is not required, and it was passed an argument.
+    if not required and args.begin_date:
+        args.begin_date = None
+    return required
+
+
+def _verify_exposure_types(exposure_types):
+    if exposure_types is None:
+        return
+    options = list(ExposureTypeOptions())
+    for exposure_type in exposure_types:
+        if exposure_type not in options:
+            print_error(u"'{0}' is not a valid exposure type.".format(exposure_type))
+            exit(1)
+
+
+def _create_filters(args):
+    filters = []
+    event_timestamp_filter = _get_event_timestamp_filter(args)
+    not event_timestamp_filter or filters.append(event_timestamp_filter)
+    not args.c42usernames or filters.append(DeviceUsername.is_in(args.c42usernames))
+    not args.actors or filters.append(Actor.is_in(args.actors))
+    not args.md5_hashes or filters.append(MD5.is_in(args.md5_hashes))
+    not args.sha256_hashes or filters.append(SHA256.is_in(args.sha256_hashes))
+    not args.sources or filters.append(Source.is_in(args.sources))
+    not args.filenames or filters.append(FileName.is_in(args.filenames))
+    not args.filepaths or filters.append(FilePath.is_in(args.filepaths))
+    not args.process_owners or filters.append(ProcessOwner.is_in(args.process_owners))
+    not args.tab_urls or filters.append(TabURL.is_in(args.tab_urls))
+    _try_append_exposure_types_filter(filters, args)
+    return filters
+
+
+def _get_event_timestamp_filter(args):
+    try:
+        return date_helper.create_event_timestamp_filter(args.begin_date, args.end_date)
+    except ValueError as ex:
+        print_error(str(ex))
+        exit(1)
+
+
 def _create_event_handlers(output_logger, cursor_store):
     handlers = FileEventHandlers()
     error_logger = get_error_logger()
@@ -91,32 +167,11 @@ def _get_sdk(profile, is_debug_mode):
         exit(1)
 
 
-def _get_filters(args, cursor_store):
-    if not _determine_if_advanced_query(args):
-        _verify_begin_date_requirements(args, cursor_store)
-        _verify_exposure_types(args.exposure_types)
-        return _create_filters(args)
-    else:
-        return args.advanced_query
-
-
 def _call_extract(extractor, filters, args):
-    if not _determine_if_advanced_query(args):
-        extractor.extract(*filters)
-    else:
+    if args.advanced_query:
         extractor.extract_advanced(args.advanced_query)
-
-
-def _determine_if_advanced_query(args):
-    if args.advanced_query is not None:
-        given_args = vars(args)
-        for key in given_args:
-            val = given_args[key]
-            if not _verify_compatibility_with_advanced_query(key, val):
-                print_error(u"You cannot use --advanced-query with additional search args.")
-                exit(1)
-        return True
-    return False
+    else:
+        extractor.extract(*filters)
 
 
 def _verify_compatibility_with_advanced_query(key, val):
@@ -130,64 +185,9 @@ def _verify_compatibility_with_advanced_query(key, val):
     return True
 
 
-def _verify_begin_date_requirements(args, cursor_store):
-    if _begin_date_is_required(args, cursor_store) and not args.begin_date:
-        print_error(u"'begin date' is required.")
-        print(u"")
-        print_bold(u"Try using  '-b' or '--begin'. Use `-h` for more info.")
-        print(u"")
-        exit(1)
-
-
-def _begin_date_is_required(args, cursor_store):
-    if not args.is_incremental:
-        return True
-    required = cursor_store is not None and cursor_store.get_stored_insertion_timestamp() is None
-
-    # Ignore begin date when is incremental mode, it is not required, and it was passed an argument.
-    if not required and args.begin_date:
-        args.begin_date = None
-    return required
-
-
-def _verify_exposure_types(exposure_types):
-    if exposure_types is None:
-        return
-    options = list(ExposureTypeOptions())
-    for exposure_type in exposure_types:
-        if exposure_type not in options:
-            print_error(u"'{0}' is not a valid exposure type.".format(exposure_type))
-            exit(1)
-
-
-def _get_event_timestamp_filter(args):
-    try:
-        return date_helper.create_event_timestamp_filter(args.begin_date, args.end_date)
-    except ValueError as ex:
-        print_error(str(ex))
-        exit(1)
-
-
 def _handle_result():
     if is_interactive() and _EXCEPTIONS_OCCURRED:
         print_error(u"View exceptions that occurred at [HOME]/.code42cli/log/code42_errors.")
-
-
-def _create_filters(args):
-    filters = []
-    event_timestamp_filter = _get_event_timestamp_filter(args)
-    not event_timestamp_filter or filters.append(event_timestamp_filter)
-    not args.c42usernames or filters.append(DeviceUsername.is_in(args.c42usernames))
-    not args.actors or filters.append(Actor.is_in(args.actors))
-    not args.md5_hashes or filters.append(MD5.is_in(args.md5_hashes))
-    not args.sha256_hashes or filters.append(SHA256.is_in(args.sha256_hashes))
-    not args.sources or filters.append(Source.is_in(args.sources))
-    not args.filenames or filters.append(FileName.is_in(args.filenames))
-    not args.filepaths or filters.append(FilePath.is_in(args.filepaths))
-    not args.process_owners or filters.append(ProcessOwner.is_in(args.process_owners))
-    not args.tab_urls or filters.append(TabURL.is_in(args.tab_urls))
-    _try_append_exposure_types_filter(filters, args)
-    return filters
 
 
 def _try_append_exposure_types_filter(filters, args):
