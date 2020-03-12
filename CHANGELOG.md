@@ -16,6 +16,11 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - Bug where `profile show` indicated a password was set for a different profile.
 - We now validate credentials when setting a password.
 
+
+### Changed
+
+- Date inputs are now required to be in quotes when they include a time.
+
 ## 0.4.0 - 2020-03-12
 
 ### Added
