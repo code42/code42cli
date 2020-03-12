@@ -73,7 +73,7 @@ def init(subcommand_parser):
 
 
 def get_profile(profile_name=None):
-    """Returns the current profile object."""
+    """Returns the profile for the given name."""
     accessor = get_config_accessor()
     try:
         profile = accessor.get_profile(profile_name)
