@@ -172,7 +172,8 @@ def _add_disable_ssl_errors_arg(parser):
         action=u"store_true",
         default=None,
         dest=u"disable_ssl_errors",
-        help=u"Do not validate the SSL certificates of Code42 servers.",
+        help=u"For development purposes, do not validate the SSL certificates of Code42 servers."
+        u"This is not recommended unless it is required.",
     )
 
 

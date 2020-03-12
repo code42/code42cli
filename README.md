@@ -34,7 +34,7 @@ Your password is not stored in plain-text and is not shown when you do `code42 p
 However, `code42 profile show` will confirm that a password exists for your profile.
 If you do not set a password, you will be securely prompted to enter a password each time you run a command.
 
-To ignore SSL errors, do:
+For development purposes, you may need to ignore ssl errors. If you need to do this, do:
 ```bash
 code42 profile set --disable-ssl-errors
 ```
