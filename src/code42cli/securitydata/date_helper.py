@@ -14,7 +14,6 @@ def create_event_timestamp_filter(begin_date=None, end_date=None):
         Args:
             begin_date: The begin date for the range.
             end_date: The end date for the range.
-
     """
     end_date = _get_end_date_with_eod_time_if_needed(end_date)
     if begin_date and end_date:
