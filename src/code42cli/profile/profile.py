@@ -124,7 +124,7 @@ def list_profiles(*args):
 
 
 def use_profile(args):
-    """Changes the default profile."""
+    """Changes the default profile to the given one."""
     accessor = get_config_accessor()
     try:
         accessor.switch_default_profile(args.profile_name)
