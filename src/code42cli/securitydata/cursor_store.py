@@ -40,9 +40,9 @@ class BaseCursorStore(object):
             cursor = conn.cursor()
             cursor.execute(query, (primary_key,))
             query_result = cursor.fetchone()
-            if query_result:
-                return True
-            return False
+            if not query_result:
+                return False
+            return True
 
     def _drop_table(self):
         drop_query = u"DROP TABLE {0}".format(self._table_name)
