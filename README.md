@@ -56,7 +56,7 @@ To see all your profiles, do:
 code42 profile list
 ```
 
-Next, you can query for events and send them to three possible destination types
+Using the CLI, you can query for events and send them to three possible destination types:
 * stdout
 * A file
 * A server, such as SysLog
@@ -118,7 +118,7 @@ Each destination-type subcommand shares query parameters
 * `--advanced-query` (raw JSON query)
 
 You cannot use other query parameters if you use `--advanced-query`.
-To learn more about acceptable arguments, add the `-h` flag to `code42` or and of the destination-type subcommands.
+To learn more about acceptable arguments, add the `-h` flag to `code42` or any of the destination-type subcommands.
 
 
 # Known Issues
