@@ -13,9 +13,13 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Added
 
 - Support for multiple profiles:
-    - Optional `--profile` flag for `securitydata`, `profile show`, `profile set`, and `profile reset-pw`.
-    - `code42 profile use` for changing the default profile.
-    - `code42 profile list` for listing all the available profiles.
+    - Optional `--profile` flag for:
+        - `securitydata write-to`, `print`, and `send-to`,
+        - `profile show`, `set`, and `reset-pw`.
+    - `code42 profile use` command for changing the default profile.
+    - `code42 profile list` command for listing all the available profiles.
+- Search args `c42username`, `actor`, `--md5`, `sha256`, `filename`, `filepath`, `processOwner`, `tabURL`
+    can now take multiple values.
 
 ### Fixed
 
@@ -25,6 +29,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Begin dates are no longer required for subsequent interactive `securitydata` commands.
 - When provided, begin dates are now ignored on subsequent interactive `securitydata` commands.
+- `--profile` arg is now required the first time setting up a profile.
 
 ## 0.3.0 - 2020-03-04
 
