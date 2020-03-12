@@ -130,6 +130,7 @@ def use_profile(args):
         accessor.switch_default_profile(args.profile_name)
     except Exception as ex:
         print_error(ex)
+        exit(1)
 
 
 def _add_args_to_set_command(parser_for_set):
@@ -199,7 +200,7 @@ def _verify_args_for_set(args):
             profile = get_profile(args.profile_name)
             missing_values = not profile.username and not profile.authority_url
         except SystemExit:
-            missing_values = False
+            missing_values = True
 
     if missing_values:
         print_error(u"Missing username and authority url.")
