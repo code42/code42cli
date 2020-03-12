@@ -10,7 +10,7 @@ _ROOT_SERVICE_NAME = u"code42cli"
 
 
 def get_stored_password(profile_name):
-    """Gets your currently stored password for your profile."""
+    """Gets your currently stored password for the given profile name."""
     profile = _get_profile(profile_name)
     service_name = _get_service_name(profile_name)
     username = _get_username(profile)
@@ -19,10 +19,12 @@ def get_stored_password(profile_name):
 
 
 def get_password_from_prompt():
+    """Prompts you and returns what you input."""
     return getpass()
 
 
 def set_password(profile_name, new_password):
+    """Sets your password for the given profile name."""
     profile = _get_profile(profile_name)
     service_name = _get_service_name(profile_name)
     username = _get_username(profile)
