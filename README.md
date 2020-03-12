@@ -27,16 +27,12 @@ The `--profile` flag is required the first time and it takes a name.
 On subsequent uses of `set`, not specifying the profile will set the default profile.
 
 Your profile contains the necessary properties for logging into Code42 servers.
-After running `code42 profile set`, you will be prompted about storing a password.
-If you agree, you will be securely prompted to input your password.
-Your password is not stored in plain-text, and is not shown when you do `code42 profile show`.
-However, `code42 profile show` will confirm that there is a password set for your profile.
-If you do not set a password, you will be securely prompted to enter a password each time you run a command.
+After running `code42 profile set`, the program prompts you about storing a password.
+If you agree, you are then prompted to input your password.
 
-Use `--profile` to show a profile other than the default one:
-```bash
-code42 profile show --profile MY_OTHER_PROFILE
-```
+Your password is not stored in plain-text and is not shown when you do `code42 profile show`.
+However, `code42 profile show` will confirm that a password exists for your profile.
+If you do not set a password, you will be securely prompted to enter a password each time you run a command.
 
 To ignore SSL errors, do:
 ```bash
