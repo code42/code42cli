@@ -18,8 +18,15 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
         - `profile show`, `set`, and `reset-pw`.
     - `code42 profile use` command for changing the default profile.
     - `code42 profile list` command for listing all the available profiles.
-- Search args `c42username`, `actor`, `--md5`, `sha256`, `filename`, `filepath`, `processOwner`, `tabURL`
-    can now take multiple values.
+- The following search args can now take multiple values:
+    -`--c42username`,
+    - `--actor`,
+    - `--md5`,
+    - `--sha256`,
+    - `--filename`,
+    - `--filepath`,
+    - `--processOwner`,
+    - `--tabURL`
 
 ### Fixed
 
