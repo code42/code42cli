@@ -199,3 +199,16 @@ def test_set_profile_when_told_to_store_password_but_connection_fails_exits(
     )
     with pytest.raises(SystemExit):
         profile.set_profile(namespace)
+
+
+def test_prompt_for_password_reset_when_connection_fails_does_not_reset_password(mocker, config_accessor, input_function):
+    mock_successful_connection = mocker.patch("code42cli.profile.profile.test_connection")
+    mock_successful_connection.return_value = False
+    input_function.return_value = "y"
+    mocker.patch("code42cli.profile.password.get_password_from_prompt")
+    parser = _get_profile_parser()
+    namespace = parser.parse_args(
+        ["reset-pw", "--profile", "Test"]
+    )
+    with pytest.raises(SystemExit):
+        profile.prompt_for_password_reset(namespace)
