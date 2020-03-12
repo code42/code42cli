@@ -92,8 +92,7 @@ def show_profile(args):
     print(u"\t* {0} = {1}".format(ConfigAccessor.USERNAME_KEY, profile.username))
     print(u"\t* {0} = {1}".format(ConfigAccessor.AUTHORITY_KEY, profile.authority_url))
     print(u"\t* {0} = {1}".format(ConfigAccessor.IGNORE_SSL_ERRORS_KEY, profile.ignore_ssl_error))
-    profile_name = profile.name
-    if password.get_stored_password(profile_name) is not None:
+    if password.get_stored_password(profile.name) is not None:
         print(u"\t* A password is set.")
     print(u"")
 
