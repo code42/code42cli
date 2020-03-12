@@ -80,6 +80,7 @@ def get_profile(profile_name=None):
         return Code42Profile(profile)
     except Exception as ex:
         print_error(str(ex))
+        print_set_profile_help()
         exit(1)
 
 
