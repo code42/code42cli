@@ -19,7 +19,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `code42 profile use` command for changing the default profile.
     - `code42 profile list` command for listing all the available profiles.
 - The following search args can now take multiple values:
-    -`--c42username`,
+    - `--c42username`,
     - `--actor`,
     - `--md5`,
     - `--sha256`,
