@@ -65,14 +65,14 @@ class ConfigAccessor(object):
         Uses the default profile if name is None.
         """
         profile = self.get_profile(profile_name)
-        profile[self.AUTHORITY_KEY] = new_value
+        profile[self.AUTHORITY_KEY] = new_value.strip()
         self._save()
         self._try_complete_setup(profile)
 
     def set_username(self, new_value, profile_name=None):
         """Sets 'username' for a given profile. Uses the default profile if not given a name."""
         profile = self.get_profile(profile_name)
-        profile[self.USERNAME_KEY] = new_value
+        profile[self.USERNAME_KEY] = new_value.strip()
         self._save()
         self._try_complete_setup(profile)
 
@@ -121,8 +121,8 @@ class ConfigAccessor(object):
         if self._internal.getboolean(self.DEFAULT_PROFILE_IS_COMPLETE):
             return
 
-        authority = profile.get(self.AUTHORITY_KEY).strip()
-        username = profile.get(self.USERNAME_KEY).strip()
+        authority = profile.get(self.AUTHORITY_KEY)
+        username = profile.get(self.USERNAME_KEY)
 
         authority_valid = authority and authority != self.DEFAULT_VALUE
         username_valid = username and username != self.DEFAULT_VALUE
