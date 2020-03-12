@@ -35,38 +35,6 @@ class TestFileEventCursorStore(object):
         FileEventCursorStore("Profile B", self.MOCK_TEST_DB_NAME)
         assert spy.call_count == 2
 
-    def test_reset_executes_expected_drop_table_query(self, sqlite_connection):
-        store = FileEventCursorStore("Profile", self.MOCK_TEST_DB_NAME)
-        store.reset()
-        with store._connection as conn:
-            actual = conn.execute.call_args_list[0][0][0]
-            expected = "DROP TABLE file_event_checkpoints"
-            assert actual == expected
-
-    def test_reset_executes_expected_create_table_query(self, sqlite_connection):
-        store = FileEventCursorStore("Profile", self.MOCK_TEST_DB_NAME)
-        store.reset()
-        with store._connection as conn:
-            actual = conn.execute.call_args_list[1][0][0]
-            expected = "CREATE TABLE file_event_checkpoints (cursor_id, insertionTimestamp)"
-            assert actual == expected
-
-    def test_reset_executes_expected_insert_query(self, sqlite_connection):
-        store = FileEventCursorStore("Profile", self.MOCK_TEST_DB_NAME)
-        store.reset()
-        with store._connection as conn:
-            actual = conn.execute.call_args[0][0]
-            expected = "INSERT INTO file_event_checkpoints VALUES(?, null)"
-            assert actual == expected
-
-    def test_reset_executes_query_with_expected_primary_key(self, sqlite_connection):
-        store = FileEventCursorStore("Profile", self.MOCK_TEST_DB_NAME)
-        store.reset()
-        with store._connection as conn:
-            actual = conn.execute.call_args[0][1][0]
-            expected = store._primary_key
-            assert actual == expected
-
     def test_get_stored_insertion_timestamp_executes_expected_select_query(self, sqlite_connection):
         store = FileEventCursorStore("Profile", self.MOCK_TEST_DB_NAME)
         store.get_stored_insertion_timestamp()

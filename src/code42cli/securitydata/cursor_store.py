@@ -86,11 +86,6 @@ class FileEventCursorStore(BaseCursorStore):
             primary_key=self._primary_key,
         )
 
-    def reset(self):
-        self._drop_table()
-        self._init_table()
-        self._insert_new_row()
-
     def _init_table(self):
         columns = u"{0}, {1}".format(self._PRIMARY_KEY_COLUMN_NAME, _INSERTION_TIMESTAMP_FIELD_NAME)
         create_table_query = u"CREATE TABLE {0} ({1})".format(self._table_name, columns)

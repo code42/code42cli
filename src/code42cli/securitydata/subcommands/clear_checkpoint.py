@@ -19,4 +19,4 @@ def clear_checkpoint(args):
         This affects `incremental` mode by causing it to behave like it has never been run before.
     """
     profile_name = args.profile_name or get_profile().name
-    FileEventCursorStore(profile_name).reset()
+    FileEventCursorStore(profile_name).replace_stored_insertion_timestamp(None)

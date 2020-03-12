@@ -35,9 +35,9 @@ def test_clear_checkpoint_when_given_profile_name_calls_cursor_store_resets(
 ):
     namespace.profile_name = "Test"
     clearer.clear_checkpoint(namespace)
-    assert cursor_store.reset.call_count == 1
+    assert cursor_store.replace_stored_insertion_timestamp.call_args[0][0] is None
 
 
 def test_clear_checkpoint_calls_cursor_store_resets(cursor_store, namespace, profile):
     clearer.clear_checkpoint(namespace)
-    assert cursor_store.reset.call_count == 1
+    assert cursor_store.replace_stored_insertion_timestamp.call_args[0][0] is None
