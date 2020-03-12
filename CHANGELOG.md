@@ -12,7 +12,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Fixed
 
-- Bug where `profile reset-pw` password would use create a bad entry in keychain when using the default profile.
+- Bug where `profile reset-pw` password would create a bad entry in keychain when using the default profile.
 - Bug where `profile show` indicate a password was set for a different profile.
 
 ## 0.4.0 - 2020-03-12
