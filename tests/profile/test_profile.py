@@ -160,21 +160,11 @@ def test_set_profile_when_given_disable_ssl_errors_and_profile_name_sets_ignore_
 def test_set_profile_when_to_store_password_prompts_for_storing_password(
     mocker, config_accessor, input_function
 ):
+    mock_successful_connection = mocker.patch("code42cli.profile.profile.test_connection")
+    mock_successful_connection.return_value = True
     input_function.return_value = "y"
-    mock_set_password_function = mocker.patch("code42cli.profile.password.set_password_from_prompt")
-    parser = _get_profile_parser()
-    namespace = parser.parse_args(
-        ["set", "-s", "https://wwww.new.authority.example.com", "-u", "user"]
-    )
-    profile.set_profile(namespace)
-    assert mock_set_password_function.call_count
-
-
-def test_set_profile_when_told_to_store_password_using_capital_y_prompts_for_storing_password(
-    mocker, config_accessor, input_function
-):
-    input_function.return_value = "Y"
-    mock_set_password_function = mocker.patch("code42cli.profile.password.set_password_from_prompt")
+    mocker.patch("code42cli.profile.password.get_password_from_prompt")
+    mock_set_password_function = mocker.patch("code42cli.profile.password.set_password")
     parser = _get_profile_parser()
     namespace = parser.parse_args(
         ["set", "-s", "https://wwww.new.authority.example.com", "-u", "user"]
@@ -196,8 +186,16 @@ def test_set_profile_when_told_not_to_store_password_prompts_for_storing_passwor
     assert not mock_set_password_function.call_count
 
 
-def test_prompt_for_password_reset_calls_password_set_password_from_prompt(mocker, namespace):
-    namespace.profile_name = "profile name"
-    mock_set_password_function = mocker.patch("code42cli.profile.password.set_password_from_prompt")
-    profile.prompt_for_password_reset(namespace)
-    assert mock_set_password_function.call_count
+def test_set_profile_when_told_to_store_password_but_connection_fails_exits(
+    mocker, config_accessor, input_function
+):
+    mock_successful_connection = mocker.patch("code42cli.profile.profile.test_connection")
+    mock_successful_connection.return_value = False
+    input_function.return_value = "y"
+    mocker.patch("code42cli.profile.password.get_password_from_prompt")
+    parser = _get_profile_parser()
+    namespace = parser.parse_args(
+        ["set", "-s", "https://wwww.new.authority.example.com", "-u", "user"]
+    )
+    with pytest.raises(SystemExit):
+        profile.set_profile(namespace)

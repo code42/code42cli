@@ -33,7 +33,7 @@ def open_file(file_path, mode, action):
 
 def print_error(error_text):
     """Prints red text."""
-    print("\033[91mUSAGE ERROR: {}\033[0m".format(error_text))
+    print("\033[91mERROR: {}\033[0m".format(error_text))
 
 
 def print_bold(bold_text):

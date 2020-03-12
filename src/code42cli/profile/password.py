@@ -19,6 +19,14 @@ def get_password(profile_name):
     return password
 
 
+def set_password(profile_name, new_password):
+    accessor = get_config_accessor()
+    profile = accessor.get_profile(profile_name)
+    service_name = _get_service_name(profile_name)
+    username = _get_username(profile)
+    keyring.set_password(service_name, username, new_password)
+
+
 def set_password_from_prompt(profile_name):
     """Prompts and sets your password for your profile."""
     password = getpass()
