@@ -83,12 +83,12 @@ def _verify_begin_date_requirements(args, cursor_store):
 def _begin_date_is_required(args, cursor_store):
     if not args.is_incremental:
         return True
-    required = cursor_store is not None and cursor_store.get_stored_insertion_timestamp() is None
+    is_required = cursor_store and cursor_store.get_stored_insertion_timestamp() is None
 
     # Ignore begin date when is incremental mode, it is not required, and it was passed an argument.
-    if not required and args.begin_date:
+    if not is_required and args.begin_date:
         args.begin_date = None
-    return required
+    return is_required
 
 
 def _verify_exposure_types(exposure_types):
@@ -120,7 +120,9 @@ def _create_filters(args):
 
 def _get_event_timestamp_filter(args):
     try:
-        return date_helper.create_event_timestamp_filter(args.begin_date, args.end_date)
+        begin_date = tuple(args.begin_date.strip().split(" ")) if args.begin_date else None
+        end_date = tuple(args.end_date.strip().split(" ")) if args.end_date else None
+        return date_helper.create_event_timestamp_filter(begin_date, end_date)
     except ValueError as ex:
         print_error(str(ex))
         exit(1)

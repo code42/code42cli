@@ -7,7 +7,7 @@ from py42.sdk.file_event_query.file_query import FilePath, FileName, SHA256, MD5
 
 import code42cli.securitydata.extraction as extraction_module
 from code42cli.securitydata.options import ExposureType as ExposureTypeOptions
-from .conftest import SECURITYDATA_NAMESPACE, begin_date_tuple
+from .conftest import SECURITYDATA_NAMESPACE, begin_date_str
 from ..conftest import get_filter_value_from_json, get_test_date_str
 
 
@@ -45,7 +45,7 @@ def profile(mocker):
 
 @pytest.fixture
 def namespace_with_begin(namespace):
-    namespace.begin_date = begin_date_tuple
+    namespace.begin_date = begin_date_str
     return namespace
 
 
@@ -196,46 +196,50 @@ def test_extract_when_not_given_begin_or_advanced_causes_exit(logger, extractor,
 
 
 def test_extract_when_given_begin_date_uses_expected_query(logger, namespace, extractor):
-    namespace.begin_date = (get_test_date_str(days_ago=89),)
+    namespace.begin_date = get_test_date_str(days_ago=89)
     extraction_module.extract(logger, namespace)
     actual = get_filter_value_from_json(extractor.extract.call_args[0][0], filter_index=0)
-    expected = "{0}T00:00:00.000Z".format(namespace.begin_date[0])
+    expected = "{0}T00:00:00.000Z".format(namespace.begin_date)
     assert actual == expected
 
 
 def test_extract_when_given_begin_date_and_time_uses_expected_query(logger, namespace, extractor):
-    namespace.begin_date = (get_test_date_str(days_ago=89), "15:33:02")
+    date = get_test_date_str(days_ago=89)
+    time = "15:33:02"
+    namespace.begin_date = get_test_date_str(days_ago=89) + " " + time
     extraction_module.extract(logger, namespace)
     actual = get_filter_value_from_json(extractor.extract.call_args[0][0], filter_index=0)
-    expected = "{0}T{1}.000Z".format(namespace.begin_date[0], namespace.begin_date[1])
+    expected = "{0}T{1}.000Z".format(date, time)
     assert actual == expected
 
 
 def test_extract_when_given_end_date_uses_expected_query(logger, namespace_with_begin, extractor):
-    namespace_with_begin.end_date = (get_test_date_str(days_ago=10),)
+    namespace_with_begin.end_date = get_test_date_str(days_ago=10)
     extraction_module.extract(logger, namespace_with_begin)
     actual = get_filter_value_from_json(extractor.extract.call_args[0][0], filter_index=1)
-    expected = "{0}T23:59:59.000Z".format(namespace_with_begin.end_date[0])
+    expected = "{0}T23:59:59.000Z".format(namespace_with_begin.end_date)
     assert actual == expected
 
 
 def test_extract_when_given_end_date_and_time_uses_expected_query(
     logger, namespace_with_begin, extractor
 ):
-    namespace_with_begin.end_date = (get_test_date_str(days_ago=10), "12:00:11")
+    date = get_test_date_str(days_ago=10)
+    time = "12:00:11"
+    namespace_with_begin.end_date = date + " " + time
     extraction_module.extract(logger, namespace_with_begin)
     actual = get_filter_value_from_json(extractor.extract.call_args[0][0], filter_index=1)
-    expected = "{0}T{1}.000Z".format(
-        namespace_with_begin.end_date[0], namespace_with_begin.end_date[1]
-    )
+    expected = "{0}T{1}.000Z".format(date, time)
     assert actual == expected
 
 
 def test_extract_when_using_both_min_and_max_dates_uses_expected_timestamps(
     logger, namespace, extractor
 ):
-    namespace.begin_date = (get_test_date_str(days_ago=89),)
-    namespace.end_date = (get_test_date_str(days_ago=55), "13:44:44")
+    end_date = get_test_date_str(days_ago=55)
+    end_time = "13:44:44"
+    namespace.begin_date = get_test_date_str(days_ago=89)
+    namespace.end_date = end_date + " " + end_time
     extraction_module.extract(logger, namespace)
 
     actual_begin_timestamp = get_filter_value_from_json(
@@ -244,8 +248,8 @@ def test_extract_when_using_both_min_and_max_dates_uses_expected_timestamps(
     actual_end_timestamp = get_filter_value_from_json(
         extractor.extract.call_args[0][0], filter_index=1
     )
-    expected_begin_timestamp = "{0}T00:00:00.000Z".format(namespace.begin_date[0])
-    expected_end_timestamp = "{0}T{1}.000Z".format(namespace.end_date[0], namespace.end_date[1])
+    expected_begin_timestamp = "{0}T00:00:00.000Z".format(namespace.begin_date)
+    expected_end_timestamp = "{0}T{1}.000Z".format(end_date, end_time)
 
     assert actual_begin_timestamp == expected_begin_timestamp
     assert actual_end_timestamp == expected_end_timestamp
@@ -255,14 +259,15 @@ def test_extract_when_given_min_timestamp_more_than_ninety_days_back_in_ad_hoc_m
     logger, namespace, extractor
 ):
     namespace.is_incremental = False
-    namespace.begin_date = (get_test_date_str(days_ago=91), "12:51:00")
+    date = get_test_date_str(days_ago=91) + " 12:51:00"
+    namespace.begin_date = date
     with pytest.raises(SystemExit):
         extraction_module.extract(logger, namespace)
 
 
 def test_extract_when_end_date_is_before_begin_date_causes_exit(logger, namespace, extractor):
-    namespace.begin_date = (get_test_date_str(days_ago=5),)
-    namespace.end_date = (get_test_date_str(days_ago=6),)
+    namespace.begin_date = get_test_date_str(days_ago=5)
+    namespace.end_date = get_test_date_str(days_ago=6)
     with pytest.raises(SystemExit):
         extraction_module.extract(logger, namespace)
 
@@ -283,7 +288,7 @@ def test_when_given_begin_date_past_90_days_and_is_incremental_and_a_stored_curs
 def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_begin_date(
     mocker, logger, namespace, extractor
 ):
-    namespace.begin_date = (get_test_date_str(days_ago=1),)
+    namespace.begin_date = get_test_date_str(days_ago=1)
     namespace.is_incremental = False
     mock_checkpoint = mocker.patch(
         "code42cli.securitydata.cursor_store.FileEventCursorStore.get_stored_insertion_timestamp"
@@ -292,7 +297,7 @@ def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_b
     extraction_module.extract(logger, namespace)
 
     actual_ts = get_filter_value_from_json(extractor.extract.call_args[0][0], filter_index=0)
-    expected_ts = "{0}T00:00:00.000Z".format(namespace.begin_date[0])
+    expected_ts = "{0}T00:00:00.000Z".format(namespace.begin_date)
     assert actual_ts == expected_ts
     assert filter_term_is_in_call_args(extractor, EventTimestamp._term)
 
@@ -318,20 +323,6 @@ def test_extract_when_given_invalid_exposure_type_causes_exit(logger, namespace,
     ]
     with pytest.raises(SystemExit):
         extraction_module.extract(logger, namespace)
-
-
-def test_extract_when_given_begin_date_with_len_3_causes_exit(logger, namespace, extractor):
-    namespace.begin_date = (get_test_date_str(days_ago=5), "12:00:00", "+600")
-    with pytest.raises(SystemExit):
-        extraction_module.extract(logger, namespace)
-
-
-def test_extract_when_given_end_date_with_len_3_causes_exit(
-    logger, namespace_with_begin, extractor
-):
-    namespace_with_begin.end_date = (get_test_date_str(days_ago=5), "12:00:00", "+600")
-    with pytest.raises(SystemExit):
-        extraction_module.extract(logger, namespace_with_begin)
 
 
 def test_extract_when_given_username_uses_username_filter(logger, namespace_with_begin, extractor):

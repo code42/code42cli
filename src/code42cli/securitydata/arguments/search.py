@@ -70,7 +70,6 @@ def _add_begin_date_arg(parser):
     parser.add_argument(
         u"-b",
         u"--begin",
-        nargs=u"+",
         action=u"store",
         dest=SearchArguments.BEGIN_DATE,
         help=u"The beginning of the date range in which to look for events, "
@@ -82,7 +81,6 @@ def _add_end_date_arg(parser):
     parser.add_argument(
         u"-e",
         u"--end",
-        nargs=u"+",
         action=u"store",
         dest=SearchArguments.END_DATE,
         help=u"The end of the date range in which to look for events, "
