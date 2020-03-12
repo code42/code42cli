@@ -1,8 +1,20 @@
+import platform
 from argparse import ArgumentParser
 
 import code42cli.securitydata.main as securitydata
 from code42cli.compat import str
 from code42cli.profile import profile
+
+# If on Windows, configure console session to handle ANSI escape sequences correctly
+# source: https://bugs.python.org/issue29059
+if platform.system().lower() == "windows":
+    from ctypes import windll, c_int, byref
+
+    stdout_handle = windll.kernel32.GetStdHandle(c_int(-11))
+    mode = c_int(0)
+    windll.kernel32.GetConsoleMode(c_int(stdout_handle), byref(mode))
+    mode = c_int(mode.value | 4)
+    windll.kernel32.SetConsoleMode(c_int(stdout_handle), mode)
 
 
 def main():
