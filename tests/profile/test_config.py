@@ -134,6 +134,28 @@ class TestConfigAccessor(object):
         accessor.set_authority_url("new url", "ProfileA")
         assert mock_saver.call_count
 
+    def test_get_all_profiles_returns_profiles_with_expected_values(self, mock_config_parser):
+        mock_config_parser.sections.return_value = ["Internal", "ProfileA", "ProfileB"]
+        accessor = ConfigAccessor(mock_config_parser)
+        mock_profile_a = create_mock_profile_object("ProfileA", "test", "test")
+        mock_profile_b = create_mock_profile_object("ProfileB", "test", "test")
+
+        mock_internal = create_internal_object(True, "ProfileA")
+
+        def side_effect(item):
+            if item == "ProfileA":
+                return mock_profile_a
+            elif item == "ProfileB":
+                return mock_profile_b
+            elif item == "Internal":
+                return mock_internal
+
+        mock_config_parser.__getitem__.side_effect = side_effect
+        profiles = accessor.get_all_profiles()
+        assert profiles[0].name == "ProfileA"
+        assert profiles[1].name == "ProfileB"
+
+
     def test_switch_default_profile_switches_internal_value(self, mock_config_parser):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA", "ProfileB"]
         accessor = ConfigAccessor(mock_config_parser)
