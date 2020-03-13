@@ -10,6 +10,16 @@ from .conftest import (
 from ..conftest import get_filter_value_from_json, get_test_date_str
 
 
+def test_create_event_timestamp_filter_when_given_nothing_returns_none():
+    ts_range = create_event_timestamp_filter()
+    assert not ts_range
+
+
+def test_create_event_timestamp_filter_when_given_nones_returns_none():
+    ts_range = create_event_timestamp_filter(None, None)
+    assert not ts_range
+
+
 def test_create_event_timestamp_filter_builds_expected_query():
     ts_range = create_event_timestamp_filter(begin_date_list)
     actual = get_filter_value_from_json(ts_range, filter_index=0)

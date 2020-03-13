@@ -267,6 +267,7 @@ def test_list_profiles_when_profiles_exists_does_not_print_error(mocker, config_
 def test_use_profile_when_switching_fails_causes_exit(config_accessor):
     def side_effect(*args):
         raise Exception()
+
     config_accessor.switch_default_profile.side_effect = side_effect
     parser = _get_arg_parser()
     namespace = parser.parse_args(["use", "TestProfile"])

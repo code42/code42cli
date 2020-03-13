@@ -155,7 +155,6 @@ class TestConfigAccessor(object):
         assert profiles[0].name == "ProfileA"
         assert profiles[1].name == "ProfileB"
 
-
     def test_switch_default_profile_switches_internal_value(self, mock_config_parser):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA", "ProfileB"]
         accessor = ConfigAccessor(mock_config_parser)
