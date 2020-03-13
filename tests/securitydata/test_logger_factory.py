@@ -129,11 +129,12 @@ def test_get_logger_for_server_uses_no_priority_syslog_handler(no_priority_syslo
 
 
 def test_get_logger_for_server_constructs_handler_with_expected_args(
-    mocker, no_priority_syslog_handler
+    mocker, no_priority_syslog_handler, monkeypatch
 ):
     no_priority_syslog_handler_wrapper = mocker.patch(
         "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper.__init__"
     )
+    monkeypatch.setattr()
     no_priority_syslog_handler_wrapper.return_value = None
     factory.get_logger_for_server("example.com", "TCP", "CEF")
     no_priority_syslog_handler_wrapper.assert_called_once_with(
@@ -152,17 +153,6 @@ def test_get_logger_for_server_when_hostname_includes_port_constructs_handler_wi
     no_priority_syslog_handler_wrapper.assert_called_once_with(
         "example.com", port=999, protocol="TCP"
     )
-
-
-def test_get_logger_for_server_when_creating_handler_fails_causes_exit(mocker):
-    no_priority_syslog_handler_wrapper = mocker.patch(
-        "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper.__init__"
-    )
-    def side_effect(*args):
-        raise Exception()
-    no_priority_syslog_handler_wrapper.side_effect = side_effect
-    with pytest.raises(SystemExit):
-        factory.get_logger_for_server("example.com:999", "TCP", "CEF")
 
 
 def test_get_error_logger_when_called_twice_only_sets_handler_once():
