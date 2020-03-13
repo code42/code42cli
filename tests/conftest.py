@@ -31,14 +31,18 @@ def namespace(mocker):
     return mock
 
 
+def create_profile_values_dict(authority=None, username=None, ignore_ssl=False):
+    return {
+        ConfigAccessor.AUTHORITY_KEY: authority,
+        ConfigAccessor.USERNAME_KEY: username,
+        ConfigAccessor.IGNORE_SSL_ERRORS_KEY: ignore_ssl,
+    }
+
+
 class MockSection(object):
     def __init__(self, name="Test Profile Name", values_dict=None):
         self.name = name
-        self.values_dict = values_dict or {
-            ConfigAccessor.AUTHORITY_KEY: None,
-            ConfigAccessor.USERNAME_KEY: None,
-            ConfigAccessor.IGNORE_SSL_ERRORS_KEY: False,
-        }
+        self.values_dict = values_dict or create_profile_values_dict()
 
     def __getitem__(self, item):
         return self.values_dict[item]
@@ -59,6 +63,12 @@ def create_mock_profile(name=None):
 
     profile.get_password = mock_get_password
     return profile
+
+
+def setup_mock_accessor(mock_accessor, name=None, values_dict=None):
+    profile_section = MockSection(name, values_dict)
+    mock_accessor.get_profile.return_value = profile_section
+    return mock_accessor
 
 
 def get_filter_value_from_json(json, filter_index):
