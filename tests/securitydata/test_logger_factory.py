@@ -134,7 +134,6 @@ def test_get_logger_for_server_constructs_handler_with_expected_args(
     no_priority_syslog_handler_wrapper = mocker.patch(
         "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper.__init__"
     )
-    monkeypatch.setattr()
     no_priority_syslog_handler_wrapper.return_value = None
     factory.get_logger_for_server("example.com", "TCP", "CEF")
     no_priority_syslog_handler_wrapper.assert_called_once_with(
