@@ -14,7 +14,6 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Support for storing passwords when keying is not supported.
 
-
 ### Fixed
 
 - Bug where keyring would causes errors on certain OS where keyring was not supported.
