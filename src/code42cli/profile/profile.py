@@ -138,7 +138,7 @@ def use_profile(args):
     try:
         accessor.switch_default_profile(args.profile_name)
     except Exception as ex:
-        print_error(ex)
+        print_error(str(ex))
         exit(1)
 
 
