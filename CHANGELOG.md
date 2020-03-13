@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## 0.4.1 - 2020-03-13
+
+### Fixed
+
+- Bug where `profile reset-pw` did not work with the default profile.
+- Bug where `profile show` indicated a password was set for a different profile.
+- We now validate credentials when setting a password.
+
+
+### Changed
+
+- Date inputs are now required to be in quotes when they include a time.
+
 ## 0.4.0 - 2020-03-12
 
 ### Added

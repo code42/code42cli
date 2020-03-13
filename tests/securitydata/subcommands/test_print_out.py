@@ -3,19 +3,10 @@ from argparse import ArgumentParser
 import pytest
 
 import code42cli.securitydata.subcommands.print_out as printer
-from code42cli.profile.config import ConfigAccessor
 from .conftest import ACCEPTABLE_ARGS
 from ..conftest import SUBCOMMANDS_NAMESPACE
 
 _PRINT_PATH = "{0}.print_out".format(SUBCOMMANDS_NAMESPACE)
-
-
-@pytest.fixture
-def config_accessor(mocker):
-    mock = mocker.MagicMock(spec=ConfigAccessor)
-    factory = mocker.patch("")
-    factory.return_value = mock
-    return mock
 
 
 @pytest.fixture

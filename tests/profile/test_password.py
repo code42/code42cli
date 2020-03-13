@@ -3,6 +3,7 @@ import pytest
 import code42cli.profile.password as password
 from code42cli.profile.config import ConfigAccessor
 from .conftest import PASSWORD_NAMESPACE
+from ..conftest import setup_mock_accessor, create_profile_values_dict
 
 _USERNAME = "test.username"
 
@@ -12,12 +13,6 @@ def config_accessor(mocker):
     mock = mocker.MagicMock(spec=ConfigAccessor)
     factory = mocker.patch("{0}.get_config_accessor".format(PASSWORD_NAMESPACE))
     factory.return_value = mock
-
-    class MockConfigProfile(object):
-        def __getitem__(self, item):
-            return _USERNAME
-
-    mock.get_profile.return_value = MockConfigProfile()
     return mock
 
 
@@ -36,28 +31,42 @@ def getpass_function(mocker):
     return mocker.patch("code42cli.profile.password.getpass")
 
 
-def test_get_password_uses_expected_service_name_and_username(
+def test_get_stored_password_when_given_profile_name_gets_profile_for_that_name(
     keyring_password_getter, config_accessor
 ):
-    password.get_password("profile_name")
-    expected_service_name = "code42cli::profile_name"
-    keyring_password_getter.assert_called_once_with(expected_service_name, _USERNAME)
+    password.get_stored_password("profile_name")
+    config_accessor.get_profile.assert_called_once_with("profile_name")
 
 
-def test_get_password_returns_expected_password(
+def test_get_stored_password_returns_expected_password(
     keyring_password_getter, config_accessor, keyring_password_setter
 ):
     keyring_password_getter.return_value = "already stored password 123"
-    assert password.get_password("profile_name") == "already stored password 123"
+    assert password.get_stored_password("profile_name") == "already stored password 123"
 
 
-def test_set_password_from_prompt_uses_expected_service_name_username_and_password(
-    keyring_password_setter, config_accessor, getpass_function
+def test_set_password_uses_expected_service_name_username_and_password(
+    keyring_password_setter, config_accessor
 ):
-    getpass_function.return_value = "test password"
-    password.set_password_from_prompt("profile_name")
+    values = create_profile_values_dict(username="test.username")
+    setup_mock_accessor(config_accessor, "profile_name", values)
+    password.set_password("profile_name", "test_password")
     expected_service_name = "code42cli::profile_name"
     expected_username = "test.username"
     keyring_password_setter.assert_called_once_with(
-        expected_service_name, expected_username, "test password"
+        expected_service_name, expected_username, "test_password"
+    )
+
+
+def test_set_password_when_given_none_uses_password_from_default_profile(
+    keyring_password_setter, config_accessor
+):
+    values = create_profile_values_dict(username="test.username")
+    setup_mock_accessor(config_accessor, "Default_Profile", values)
+    config_accessor.name = "Default_Profile"
+    password.set_password(None, "test_password")
+    expected_service_name = "code42cli::Default_Profile"
+    expected_username = "test.username"
+    keyring_password_setter.assert_called_once_with(
+        expected_service_name, expected_username, "test_password"
     )

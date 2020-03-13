@@ -10,6 +10,7 @@ from code42cli.util import (
     print_set_profile_help,
     print_no_existing_profile_message,
 )
+from code42cli.sdk_client import validate_connection
 
 
 class Code42Profile(object):
@@ -33,7 +34,7 @@ class Code42Profile(object):
         return self._profile[ConfigAccessor.IGNORE_SSL_ERRORS_KEY]
 
     def get_password(self):
-        pwd = password.get_password(self.name)
+        pwd = password.get_stored_password(self.name)
         if not pwd:
             pwd = password.get_password_from_prompt()
         return pwd
@@ -91,7 +92,7 @@ def show_profile(args):
     print(u"\t* {0} = {1}".format(ConfigAccessor.USERNAME_KEY, profile.username))
     print(u"\t* {0} = {1}".format(ConfigAccessor.AUTHORITY_KEY, profile.authority_url))
     print(u"\t* {0} = {1}".format(ConfigAccessor.IGNORE_SSL_ERRORS_KEY, profile.ignore_ssl_error))
-    if password.get_password(args.profile_name) is not None:
+    if password.get_stored_password(profile.name) is not None:
         print(u"\t* A password is set.")
     print(u"")
 
@@ -109,7 +110,15 @@ def set_profile(args):
 
 def prompt_for_password_reset(args):
     """Securely prompts for your password and then stores it using keyring."""
-    password.set_password_from_prompt(args.profile_name)
+    profile = get_profile(args.profile_name)
+    new_password = password.get_password_from_prompt()
+    if not validate_connection(profile.authority_url, profile.username, new_password):
+        print_error(
+            "Your password was not saved because your credentials failed to validate. "
+            "Check your network connection and the spelling of your username and server URL."
+        )
+        exit(1)
+    password.set_password(profile.name, new_password)
 
 
 def list_profiles(*args):
@@ -130,7 +139,7 @@ def use_profile(args):
     try:
         accessor.switch_default_profile(args.profile_name)
     except Exception as ex:
-        print_error(ex)
+        print_error(str(ex))
         exit(1)
 
 
@@ -198,9 +207,10 @@ def _verify_args_for_set(args):
     missing_values = not args.c42_username and not args.c42_authority_url
     if missing_values:
         try:
-            profile = get_profile(args.profile_name)
+            accessor = get_config_accessor()
+            profile = Code42Profile(accessor.get_profile(args.profile_name))
             missing_values = not profile.username and not profile.authority_url
-        except SystemExit:
+        except Exception:
             missing_values = True
 
     if missing_values:
@@ -231,10 +241,10 @@ def _missing_default_profile(args):
     profile_name_arg_is_none = (
         args.profile_name is None or args.profile_name == ConfigAccessor.DEFAULT_VALUE
     )
-    return profile_name_arg_is_none and not _default_profile_exists()
+    return profile_name_arg_is_none and not _default_profile_exist()
 
 
-def _default_profile_exists():
+def _default_profile_exist():
     try:
         accessor = get_config_accessor()
         profile = Code42Profile(accessor.get_profile())

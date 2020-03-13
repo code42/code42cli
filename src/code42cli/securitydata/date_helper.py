@@ -63,24 +63,24 @@ def _verify_timestamp_order(min_timestamp, max_timestamp):
         raise ValueError(u"Begin date cannot be after end date")
 
 
-def _parse_timestamp(date_tuple):
+def _parse_timestamp(date_and_time):
     try:
-        date_str = _join_date_tuple(date_tuple)
-        date_format = u"%Y-%m-%d" if len(date_tuple) == 1 else u"%Y-%m-%d %H:%M:%S"
+        date_str = _join_date_and_time(date_and_time)
+        date_format = u"%Y-%m-%d" if len(date_and_time) == 1 else u"%Y-%m-%d %H:%M:%S"
         time = datetime.strptime(date_str, date_format)
     except ValueError:
         raise ValueError(_FORMAT_VALUE_ERROR_MESSAGE)
     return convert_datetime_to_timestamp(time)
 
 
-def _join_date_tuple(date_tuple):
-    if not date_tuple:
+def _join_date_and_time(date_and_time):
+    if not date_and_time:
         return None
-    date_str = date_tuple[0]
-    if len(date_tuple) == 1:
+    date_str = date_and_time[0]
+    if len(date_and_time) == 1:
         return date_str
-    if len(date_tuple) == 2:
-        date_str = "{0} {1}".format(date_str, date_tuple[1])
+    if len(date_and_time) == 2:
+        date_str = "{0} {1}".format(date_str, date_and_time[1])
     else:
         raise ValueError(_FORMAT_VALUE_ERROR_MESSAGE)
     return date_str

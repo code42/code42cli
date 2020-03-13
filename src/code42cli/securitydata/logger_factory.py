@@ -47,7 +47,7 @@ def get_logger_for_file(filename, output_format):
 
     with _logger_deps_lock:
         if not _logger_has_handlers(logger):
-            handler = logging.FileHandler(filename, delay=True)
+            handler = logging.FileHandler(filename, delay=True, encoding="utf-8")
             return _init_logger(logger, handler, output_format)
     return logger
 
@@ -86,7 +86,7 @@ def get_error_logger():
     with _logger_deps_lock:
         if not _logger_has_handlers(logger):
             formatter = logging.Formatter(u"%(asctime)s %(message)s")
-            handler = RotatingFileHandler(log_path, maxBytes=250000000)
+            handler = RotatingFileHandler(log_path, maxBytes=250000000, encoding="utf-8")
             return _apply_logger_dependencies(logger, handler, formatter)
     return logger
 

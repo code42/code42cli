@@ -4,9 +4,6 @@ import json
 
 from c42eventextractor import FileEventHandlers
 from c42eventextractor.extractors import FileEventExtractor
-from py42 import debug_level
-from py42 import settings
-from py42.sdk import SDK
 from py42.sdk.file_event_query.cloud_query import Actor
 from py42.sdk.file_event_query.device_query import DeviceUsername
 from py42.sdk.file_event_query.event_query import Source
@@ -22,6 +19,7 @@ from code42cli.securitydata.cursor_store import FileEventCursorStore
 from code42cli.securitydata.logger_factory import get_error_logger
 from code42cli.securitydata.options import ExposureType as ExposureTypeOptions
 from code42cli.util import print_error, print_bold, is_interactive
+from code42cli.sdk_client import create_sdk
 
 _EXCEPTIONS_OCCURRED = False
 
@@ -41,7 +39,7 @@ def extract(output_logger, args):
     store = _create_cursor_store(args, profile)
     filters = _get_filters(args, store)
     handlers = _create_event_handlers(output_logger, store)
-    sdk = _get_sdk(profile, args.is_debug_mode)
+    sdk = create_sdk(profile, args.is_debug_mode)
     extractor = FileEventExtractor(sdk, handlers)
     _call_extract(extractor, filters, args)
     _handle_result()
@@ -85,12 +83,12 @@ def _verify_begin_date_requirements(args, cursor_store):
 def _begin_date_is_required(args, cursor_store):
     if not args.is_incremental:
         return True
-    required = cursor_store is not None and cursor_store.get_stored_insertion_timestamp() is None
+    is_required = cursor_store and cursor_store.get_stored_insertion_timestamp() is None
 
     # Ignore begin date when is incremental mode, it is not required, and it was passed an argument.
-    if not required and args.begin_date:
+    if not is_required and args.begin_date:
         args.begin_date = None
-    return required
+    return is_required
 
 
 def _verify_exposure_types(exposure_types):
@@ -122,7 +120,9 @@ def _create_filters(args):
 
 def _get_event_timestamp_filter(args):
     try:
-        return date_helper.create_event_timestamp_filter(args.begin_date, args.end_date)
+        begin_date = args.begin_date.strip().split(" ") if args.begin_date else None
+        end_date = args.end_date.strip().split(" ") if args.end_date else None
+        return date_helper.create_event_timestamp_filter(begin_date, end_date)
     except ValueError as ex:
         print_error(str(ex))
         exit(1)
@@ -151,20 +151,6 @@ def _create_event_handlers(output_logger, cursor_store):
 
     handlers.handle_response = handle_response
     return handlers
-
-
-def _get_sdk(profile, is_debug_mode):
-    if is_debug_mode:
-        settings.debug_level = debug_level.DEBUG
-    try:
-        password = profile.get_password()
-        return SDK.create_using_local_account(profile.authority_url, profile.username, password)
-    except Exception:
-        print_error(
-            u"Invalid credentials or host address. "
-            u"Verify your profile is set up correctly and that you are supplying the correct password."
-        )
-        exit(1)
 
 
 def _call_extract(extractor, filters, args):

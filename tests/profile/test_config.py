@@ -1,10 +1,10 @@
 from __future__ import with_statement
 
+import pytest
 from configparser import ConfigParser
 
-import pytest
-
 from code42cli.profile.config import ConfigAccessor
+from ..conftest import MockSection
 
 
 @pytest.fixture
@@ -17,26 +17,11 @@ def mock_saver(mocker):
     return mocker.patch("code42cli.util.open_file")
 
 
-def create_mock_profile_object(name, authority=None, username=None):
-    authority = authority or ConfigAccessor.DEFAULT_VALUE
-    username = username or ConfigAccessor.DEFAULT_VALUE
-    profile_dict = {ConfigAccessor.AUTHORITY_KEY: authority, ConfigAccessor.USERNAME_KEY: username}
-
-    class ProfileObject(object):
-        def __getitem__(self, item):
-            return profile_dict[item]
-
-        def __setitem__(self, key, value):
-            profile_dict[key] = value
-
-        def get(self, item):
-            return profile_dict.get(item)
-
-        @property
-        def name(self):
-            return name
-
-    return ProfileObject()
+def create_mock_profile_object(profile_name, authority_url=None, username=None):
+    mock_profile = MockSection(profile_name)
+    mock_profile[ConfigAccessor.AUTHORITY_KEY] = authority_url
+    mock_profile[ConfigAccessor.USERNAME_KEY] = username
+    return mock_profile
 
 
 def create_internal_object(is_complete, default_profile_name=None):
@@ -45,18 +30,13 @@ def create_internal_object(is_complete, default_profile_name=None):
         ConfigAccessor.DEFAULT_PROFILE: default_profile_name,
         ConfigAccessor.DEFAULT_PROFILE_IS_COMPLETE: is_complete,
     }
+    internal_section = MockSection("Internal", internal_dict)
 
-    class InternalObject(object):
-        def __getitem__(self, item):
-            return internal_dict[item]
+    def getboolean(*args):
+        return is_complete
 
-        def __setitem__(self, key, value):
-            internal_dict[key] = value
-
-        def getboolean(self, *args):
-            return is_complete
-
-    return InternalObject()
+    internal_section.getboolean = getboolean
+    return internal_section
 
 
 def setup_parser_one_profile(profile, internal, parser):
@@ -99,7 +79,7 @@ class TestConfigAccessor(object):
     def test_set_username_marks_as_complete_if_ready(self, mock_config_parser):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
         accessor = ConfigAccessor(mock_config_parser)
-        mock_profile = create_mock_profile_object("ProfileA", "example.com", None)
+        mock_profile = create_mock_profile_object("ProfileA", "www.example.com", None)
         mock_internal = create_internal_object(False)
         setup_parser_one_profile(mock_profile, mock_internal, mock_config_parser)
         accessor.set_username("TestUser", "ProfileA")
@@ -119,7 +99,7 @@ class TestConfigAccessor(object):
     def test_set_username_saves(self, mock_config_parser, mock_saver):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
         accessor = ConfigAccessor(mock_config_parser)
-        mock_profile = create_mock_profile_object("ProfileA", "example.com", "console.com")
+        mock_profile = create_mock_profile_object("ProfileA", "www.example.com", "username")
         mock_internal = create_internal_object(True, "ProfileA")
         setup_parser_one_profile(mock_profile, mock_internal, mock_config_parser)
         accessor.set_username("TestUser", "ProfileA")
@@ -153,6 +133,27 @@ class TestConfigAccessor(object):
         setup_parser_one_profile(mock_profile, mock_internal, mock_config_parser)
         accessor.set_authority_url("new url", "ProfileA")
         assert mock_saver.call_count
+
+    def test_get_all_profiles_returns_profiles_with_expected_values(self, mock_config_parser):
+        mock_config_parser.sections.return_value = ["Internal", "ProfileA", "ProfileB"]
+        accessor = ConfigAccessor(mock_config_parser)
+        mock_profile_a = create_mock_profile_object("ProfileA", "test", "test")
+        mock_profile_b = create_mock_profile_object("ProfileB", "test", "test")
+
+        mock_internal = create_internal_object(True, "ProfileA")
+
+        def side_effect(item):
+            if item == "ProfileA":
+                return mock_profile_a
+            elif item == "ProfileB":
+                return mock_profile_b
+            elif item == "Internal":
+                return mock_internal
+
+        mock_config_parser.__getitem__.side_effect = side_effect
+        profiles = accessor.get_all_profiles()
+        assert profiles[0].name == "ProfileA"
+        assert profiles[1].name == "ProfileB"
 
     def test_switch_default_profile_switches_internal_value(self, mock_config_parser):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA", "ProfileB"]
