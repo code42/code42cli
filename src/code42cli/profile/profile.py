@@ -6,6 +6,7 @@ from code42cli.compat import str
 from code42cli.profile.config import get_config_accessor, ConfigAccessor
 from code42cli.util import (
     get_input,
+    does_user_agree,
     print_error,
     print_set_profile_help,
     print_no_existing_profile_message,
@@ -254,8 +255,7 @@ def _default_profile_exist():
 
 
 def _prompt_for_allow_password_set(args):
-    answer = get_input(u"Would you like to set a password? (y/n): ")
-    if answer.lower() == u"y":
+    if does_user_agree(u"Would you like to set a password? (y/n): "):
         prompt_for_password_reset(args)
 
 

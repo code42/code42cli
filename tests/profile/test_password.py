@@ -46,8 +46,9 @@ def test_get_stored_password_returns_expected_password(
 
 
 def test_set_password_uses_expected_service_name_username_and_password(
-    keyring_password_setter, config_accessor
+    keyring_password_setter, config_accessor, keyring_password_getter
 ):
+    keyring_password_getter.return_value = "test_password"
     values = create_profile_values_dict(username="test.username")
     setup_mock_accessor(config_accessor, "profile_name", values)
     password.set_password("profile_name", "test_password")
@@ -59,8 +60,9 @@ def test_set_password_uses_expected_service_name_username_and_password(
 
 
 def test_set_password_when_given_none_uses_password_from_default_profile(
-    keyring_password_setter, config_accessor
+    keyring_password_setter, config_accessor, keyring_password_getter
 ):
+    keyring_password_getter.return_value = "test_password"
     values = create_profile_values_dict(username="test.username")
     setup_mock_accessor(config_accessor, "Default_Profile", values)
     config_accessor.name = "Default_Profile"

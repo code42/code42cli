@@ -115,7 +115,7 @@ class ConfigAccessor(object):
             self._internal[self.DEFAULT_PROFILE] = name
 
     def _save(self):
-        util.open_file(self.path, u"w+", lambda f: self.parser.write(f))
+        util.open_file(self.path, u"w+", lambda file: self.parser.write(file))
 
     def _try_complete_setup(self, profile):
         if self._internal.getboolean(self.DEFAULT_PROFILE_IS_COMPLETE):

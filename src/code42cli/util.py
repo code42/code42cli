@@ -13,22 +13,28 @@ def get_input(prompt):
         return raw_input(prompt)
 
 
+def does_user_agree(prompt):
+    """Prompts the user and checks if they said yes."""
+    ans = get_input(prompt)
+    ans = ans.strip().lower()
+    return ans == u"y"
+
+
 def get_user_project_path(subdir=""):
     """The path on your user dir to /.code42cli/[subdir]."""
     package_name = __name__.split(".")[0]
     home = path.expanduser("~")
-    user_project_path = path.join(home, ".{0}".format(package_name), subdir)
-
+    hidden_package_name = ".{0}".format(package_name)
+    user_project_path = path.join(home, hidden_package_name, subdir)
     if not path.exists(user_project_path):
         makedirs(user_project_path)
-
     return user_project_path
 
 
 def open_file(file_path, mode, action):
     """Wrapper for opening files, useful for testing purposes."""
     with open(file_path, mode, encoding="utf-8") as f:
-        action(f)
+        return action(f)
 
 
 def print_error(error_text):
