@@ -57,8 +57,8 @@ def _get_password_from_file(profile):
 
     def read_password(file):
         try:
-            return file.readline(file)
-        except IOError:
+            return file.readline(0).strip()
+        except Exception:
             return None
 
     return open_file(path, u"r", lambda file: read_password(file))
@@ -85,7 +85,8 @@ def _store_password_using_file(profile, new_password):
 
         def write_password(file):
             file.truncate(0)
-            file.write(new_password)
+            line = u"{0}\n".format(new_password)
+            file.write(line)
 
         open_file(path, u"w+", lambda file: write_password(file))
 
