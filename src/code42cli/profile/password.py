@@ -12,7 +12,7 @@ _ROOT_SERVICE_NAME = u"code42cli"
 def get_stored_password(profile_name):
     """Gets your currently stored password for the given profile name."""
     profile = _get_profile(profile_name)
-    service_name = _get_service_name(profile_name)
+    service_name = _get_service_name(profile.name)
     username = _get_username(profile)
     password = keyring.get_password(service_name, username)
     return password
@@ -26,7 +26,7 @@ def get_password_from_prompt():
 def set_password(profile_name, new_password):
     """Sets your password for the given profile name."""
     profile = _get_profile(profile_name)
-    service_name = _get_service_name(profile_name)
+    service_name = _get_service_name(profile.name)
     username = _get_username(profile)
     keyring.set_password(service_name, username, new_password)
     print(u"'Code42 Password' updated.")
