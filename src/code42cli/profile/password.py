@@ -56,13 +56,13 @@ def _get_password_from_keyring(profile, service_name):
 def _get_password_from_file(service_name):
     path = _get_password_file_path(service_name)
 
-    def set_password_from_file(file):
+    def read_password(file):
         try:
             return file.readline(file)
         except IOError:
             return None
 
-    return open_file(path, u"w+", lambda file: set_password_from_file(file))
+    return open_file(path, u"r", lambda file: read_password(file))
 
 
 def _store_password(service_name, username, new_password):
@@ -83,7 +83,10 @@ def _store_password_using_file(service_name, new_password):
     save_to_file = _prompt_for_alternative_store()
     if save_to_file:
         path = _get_password_file_path(service_name)
-        open_file(path, u"w+", lambda file: file.write(new_password))
+        def write_password(file):
+            file.truncate(0)
+            file.write(new_password)
+        open_file(path, u"w+", lambda file: write_password(file))
 
 
 def _get_password_file_path(service_name):

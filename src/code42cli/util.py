@@ -34,17 +34,17 @@ def get_user_project_path(subdir=""):
 
 def open_file(file_path, mode, action):
     """Wrapper for opening files, useful for testing purposes."""
-    with open(file_path, mode, encoding="utf-8") as f:
+    with open(file_path, mode, encoding=u"utf-8") as f:
         return action(f)
 
 
 def print_error(error_text):
     """Prints red text."""
-    print("\033[91mERROR: {}\033[0m".format(error_text))
+    print(u"\033[91mERROR: {}\033[0m".format(error_text))
 
 
 def print_bold(bold_text):
-    print("\033[1m{}\033[0m".format(bold_text))
+    print(u"\033[1m{}\033[0m".format(bold_text))
 
 
 def is_interactive():
