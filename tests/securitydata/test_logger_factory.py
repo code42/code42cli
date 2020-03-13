@@ -41,7 +41,7 @@ def test_get_logger_for_stdout_when_given_raw_json_format_uses_raw_json_formatte
 
 
 def test_get_logger_for_stdout_when_called_twice_has_only_one_handler():
-    _ = factory.get_logger_for_stdout("CEF")
+    factory.get_logger_for_stdout("CEF")
     logger = factory.get_logger_for_stdout("CEF")
     assert len(logger.handlers) == 1
 
@@ -72,7 +72,7 @@ def test_get_logger_for_file_when_given_raw_json_format_uses_raw_json_formatter(
 
 
 def test_get_logger_for_file_when_called_twice_has_only_one_handler():
-    _ = factory.get_logger_for_file("Test.out", "JSON")
+    factory.get_logger_for_file("Test.out", "JSON")
     logger = factory.get_logger_for_file("Test.out", "JSON")
     assert type(logger.handlers[0].formatter) == FileEventDictToJSONFormatter
 
@@ -93,7 +93,7 @@ def test_get_logger_for_server_has_info_level(no_priority_syslog_handler):
 
 
 def test_get_logger_for_server_when_given_cef_format_uses_cef_formatter(no_priority_syslog_handler):
-    _ = factory.get_logger_for_server("example.com", "TCP", "CEF")
+    factory.get_logger_for_server("example.com", "TCP", "CEF")
     assert (
         type(no_priority_syslog_handler.setFormatter.call_args[0][0]) == FileEventDictToCEFFormatter
     )
@@ -103,7 +103,7 @@ def test_get_logger_for_server_when_given_json_format_uses_json_formatter(
     no_priority_syslog_handler
 ):
     factory.get_logger_for_server("example.com", "TCP", "JSON").handlers = []
-    _ = factory.get_logger_for_server("example.com", "TCP", "JSON")
+    factory.get_logger_for_server("example.com", "TCP", "JSON")
     actual = type(no_priority_syslog_handler.setFormatter.call_args[0][0])
     assert actual == FileEventDictToJSONFormatter
 
@@ -112,13 +112,13 @@ def test_get_logger_for_server_when_given_raw_json_format_uses_raw_json_formatte
     no_priority_syslog_handler
 ):
     factory.get_logger_for_server("example.com", "TCP", "RAW-JSON").handlers = []
-    _ = factory.get_logger_for_server("example.com", "TCP", "RAW-JSON")
+    factory.get_logger_for_server("example.com", "TCP", "RAW-JSON")
     actual = type(no_priority_syslog_handler.setFormatter.call_args[0][0])
     assert actual == FileEventDictToRawJSONFormatter
 
 
 def test_get_logger_for_server_when_called_twice_only_has_one_handler(no_priority_syslog_handler):
-    _ = factory.get_logger_for_server("example.com", "TCP", "JSON")
+    factory.get_logger_for_server("example.com", "TCP", "JSON")
     logger = factory.get_logger_for_server("example.com", "TCP", "CEF")
     assert len(logger.handlers) == 1
 
@@ -135,7 +135,7 @@ def test_get_logger_for_server_constructs_handler_with_expected_args(
         "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper.__init__"
     )
     no_priority_syslog_handler_wrapper.return_value = None
-    _ = factory.get_logger_for_server("example.com", "TCP", "CEF")
+    factory.get_logger_for_server("example.com", "TCP", "CEF")
     no_priority_syslog_handler_wrapper.assert_called_once_with(
         "example.com", port=514, protocol="TCP"
     )
@@ -148,10 +148,21 @@ def test_get_logger_for_server_when_hostname_includes_port_constructs_handler_wi
         "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper.__init__"
     )
     no_priority_syslog_handler_wrapper.return_value = None
-    _ = factory.get_logger_for_server("example.com:999", "TCP", "CEF")
+    factory.get_logger_for_server("example.com:999", "TCP", "CEF")
     no_priority_syslog_handler_wrapper.assert_called_once_with(
         "example.com", port=999, protocol="TCP"
     )
+
+
+def test_get_logger_for_server_when_creating_handler_fails_causes_exit(mocker):
+    no_priority_syslog_handler_wrapper = mocker.patch(
+        "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper.__init__"
+    )
+    def side_effect(*args):
+        raise Exception()
+    no_priority_syslog_handler_wrapper.side_effect = side_effect
+    with pytest.raises(SystemExit):
+        factory.get_logger_for_server("example.com:999", "TCP", "CEF")
 
 
 def test_get_error_logger_when_called_twice_only_sets_handler_once():
