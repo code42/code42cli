@@ -114,7 +114,8 @@ def prompt_for_password_reset(args):
     new_password = password.get_password_from_prompt()
     if not validate_connection(profile.authority_url, profile.username, new_password):
         print_error(
-            "Failure to save password. Can't validate username, password, or authority URL."
+            "Your password was not saved because your credentials failed to validate. "
+            "Check your network connection and the spelling of your username and server URL."
         )
         exit(1)
     password.set_password(profile.name, new_password)
