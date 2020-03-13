@@ -61,7 +61,10 @@ def _get_password_from_file(profile):
         except Exception:
             return None
 
-    return open_file(path, u"r", lambda file: read_password(file))
+    try:
+        return open_file(path, u"r", lambda file: read_password(file))
+    except Exception:
+        return None
 
 
 def _store_password(profile, service_name, username, new_password):
