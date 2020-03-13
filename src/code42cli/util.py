@@ -21,11 +21,11 @@ def does_user_agree(prompt):
     return ans == u"y"
 
 
-def get_user_project_path(subdir=""):
+def get_user_project_path(subdir=u""):
     """The path on your user dir to /.code42cli/[subdir]."""
-    package_name = __name__.split(".")[0]
-    home = path.expanduser("~")
-    hidden_package_name = ".{0}".format(package_name)
+    package_name = __name__.split(u".")[0]
+    home = path.expanduser(u"~")
+    hidden_package_name = u".{0}".format(package_name)
     user_project_path = path.join(home, hidden_package_name, subdir)
     if not path.exists(user_project_path):
         makedirs(user_project_path)

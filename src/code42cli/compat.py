@@ -15,6 +15,7 @@ if is_py2:
     from urlparse import urljoin, urlparse
 
     str = unicode
+
     import io
 
     open = io.open

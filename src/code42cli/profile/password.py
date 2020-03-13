@@ -54,6 +54,7 @@ def _get_password_from_keyring(profile):
 
 def _get_password_from_file(profile):
     path = _get_password_file_path(profile)
+
     def read_password(file):
         try:
             return file.readline(file)
@@ -81,15 +82,17 @@ def _store_password_using_file(profile, new_password):
     save_to_file = _prompt_for_alternative_store()
     if save_to_file:
         path = _get_password_file_path(profile)
+
         def write_password(file):
             file.truncate(0)
             file.write(new_password)
+
         open_file(path, u"w+", lambda file: write_password(file))
 
 
 def _get_password_file_path(profile):
     project_path = get_user_project_path()
-    return u"{0}.{1}".format(project_path, profile.name)
+    return u"{0}.{1}".format(project_path, profile.name.lower())
 
 
 def _get_username(profile):
