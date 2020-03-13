@@ -52,6 +52,7 @@ def _get_password_from_keyring(profile, service_name):
     except:
         return None
 
+
 def _get_password_from_file(service_name):
     path = _get_password_file_path(service_name)
 
@@ -65,8 +66,8 @@ def _get_password_from_file(service_name):
 
 
 def _store_password(service_name, username, new_password):
-    if not _store_password_using_keyring(service_name, username, new_password)
-        _store_password_using_file(service_name)
+    if not _store_password_using_keyring(service_name, username, new_password):
+        _store_password_using_file(service_name, new_password)
 
 
 def _store_password_using_keyring(service_name, username, new_password):
@@ -78,16 +79,11 @@ def _store_password_using_keyring(service_name, username, new_password):
         return False
 
 
-def _store_password_using_file(service_name):
+def _store_password_using_file(service_name, new_password):
     save_to_file = _prompt_for_alternative_store()
     if save_to_file:
         path = _get_password_file_path(service_name)
-
-        def write_password_to_file(file):
-            input_password = get_password_from_prompt()
-            file.write(input_password)
-
-        open_file(path, u"w+", lambda file: write_password_to_file(file))
+        open_file(path, u"w+", lambda file: file.write(new_password))
 
 
 def _get_password_file_path(service_name):

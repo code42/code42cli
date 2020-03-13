@@ -16,6 +16,7 @@ if is_py2:
 
     str = unicode
     import io
+
     open = io.open
 
     import repr as reprlib

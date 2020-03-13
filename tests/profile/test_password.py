@@ -35,7 +35,7 @@ def test_get_stored_password_when_given_profile_name_gets_profile_for_that_name(
     keyring_password_getter, config_accessor
 ):
     password.get_stored_password("profile_name")
-    config_accessor.get_profile.assert_called_once_with("profile_name")
+    assert config_accessor.get_profile.call_args_list[0][0][0] == "profile_name"
 
 
 def test_get_stored_password_returns_expected_password(
