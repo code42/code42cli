@@ -207,9 +207,10 @@ def _verify_args_for_set(args):
     missing_values = not args.c42_username and not args.c42_authority_url
     if missing_values:
         try:
-            profile = get_profile(args.profile_name)
+            accessor = get_config_accessor()
+            profile = Code42Profile(accessor.get_profile(args.profile_name))
             missing_values = not profile.username and not profile.authority_url
-        except SystemExit:
+        except Exception:
             missing_values = True
 
     if missing_values:
@@ -240,10 +241,10 @@ def _missing_default_profile(args):
     profile_name_arg_is_none = (
         args.profile_name is None or args.profile_name == ConfigAccessor.DEFAULT_VALUE
     )
-    return profile_name_arg_is_none and not _default_profile_exists()
+    return profile_name_arg_is_none and not _default_profile_exist()
 
 
-def _default_profile_exists():
+def _default_profile_exist():
     try:
         accessor = get_config_accessor()
         profile = Code42Profile(accessor.get_profile())
