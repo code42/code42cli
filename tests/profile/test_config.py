@@ -99,7 +99,7 @@ class TestConfigAccessor(object):
     def test_set_username_saves(self, mock_config_parser, mock_saver):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
         accessor = ConfigAccessor(mock_config_parser)
-        mock_profile = create_mock_profile_object("ProfileA", "www.xample.com", "username")
+        mock_profile = create_mock_profile_object("ProfileA", "www.example.com", "username")
         mock_internal = create_internal_object(True, "ProfileA")
         setup_parser_one_profile(mock_profile, mock_internal, mock_config_parser)
         accessor.set_username("TestUser", "ProfileA")
