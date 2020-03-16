@@ -19,16 +19,16 @@ if platform.system().lower() == u"windows":
 
 def main():
     description = u"""
-    Modules:
+    Groups:
         profile      - For managing Code42 settings.
         securitydata - Tools for getting security related data, such as file events.
     """
     code42_arg_parser = ArgumentParser(
         formatter_class=RawDescriptionHelpFormatter,
         description=description,
-        usage=u"code42 <module> <subcommand> <optional args>",
+        usage=u"code42 <group> <subcommand> <optional args>",
     )
-    subcommand_parser = code42_arg_parser.add_subparsers(title=u"modules")
+    subcommand_parser = code42_arg_parser.add_subparsers(title=u"groups")
     profile.init(subcommand_parser)
     securitydata.init_subcommand(subcommand_parser)
     _run(code42_arg_parser)
