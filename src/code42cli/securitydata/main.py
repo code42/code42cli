@@ -10,7 +10,7 @@ def init_subcommand(subcommand_parser):
             print             - Prints file events to stdout.
             send-to           - Sends file events to the given server address.
             write-to          - Writes file events to the file with the given name.
-            clear-checkpoint  - show all existing stored profiles
+            clear-checkpoint  - Removes the saved checkpoint from "incremental" mode.
     """
     securitydata_arg_parser = subcommand_parser.add_parser(
         u"securitydata", formatter_class=RawDescriptionHelpFormatter, description=description
