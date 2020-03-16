@@ -130,3 +130,9 @@ To learn more about acceptable arguments, add the `-h` flag to `code42` or any o
 # Known Issues
 
 Only the first 10,000 of each set of events containing the exact same insertion timestamp is reported.
+
+
+# Troubleshooting
+
+If you keep getting prompted for your password, try resetting with `code42 profile reset-pw`.
+If that doesn't work, delete your credentials file located at ~/.code42cli or the entry in keychain.

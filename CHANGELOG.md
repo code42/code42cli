@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## 0.4.3 - 2020-03-16
+
+### Added
+
+- Support for storing passwords when keying is not available.
+
+### Fixed
+
+- Bug where keyring caused errors on certain operating systems when not supported.
 
 ## Unreleased
 

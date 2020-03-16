@@ -68,9 +68,13 @@ def get_logger_for_server(hostname, protocol, output_format):
         if not _logger_has_handlers(logger):
             url_parts = get_url_parts(hostname)
             port = url_parts[1] or 514
-            handler = NoPrioritySysLogHandlerWrapper(
-                url_parts[0], port=port, protocol=protocol
-            ).handler
+            try:
+                handler = NoPrioritySysLogHandlerWrapper(
+                    url_parts[0], port=port, protocol=protocol
+                ).handler
+            except:
+                print_error(u"Unable to connect to {0}.".format(hostname))
+                exit(1)
             return _init_logger(logger, handler, output_format)
     return logger
 
