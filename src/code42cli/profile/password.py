@@ -35,8 +35,8 @@ def _get_profile(profile_name):
 
 
 def _get_stored_password(profile):
-    password_from_keyring = _get_password_from_keyring(profile)
-    return password_from_keyring or _get_password_from_file(profile)
+    password = _get_password_from_keyring(profile) or _get_password_from_file(profile)
+    return password
 
 
 def _get_keyring_service_name(profile_name):
@@ -54,10 +54,9 @@ def _get_password_from_keyring(profile):
 
 def _get_password_from_file(profile):
     path = _get_password_file_path(profile)
-
     def read_password(file):
         try:
-            return file.readline(0).strip()
+            return file.readline().strip()
         except Exception:
             return None
 
