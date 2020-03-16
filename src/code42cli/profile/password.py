@@ -71,9 +71,9 @@ def _get_password_from_file(profile):
 
 
 def _store_password(profile, service_name, username, new_password):
-    if not _store_password_using_keyring(service_name, username, new_password):
-        return _store_password_using_file(profile, new_password)
-    return True
+    return _store_password_using_keyring(
+        service_name, username, new_password
+    ) or _store_password_using_file(profile, new_password)
 
 
 def _store_password_using_keyring(service_name, username, new_password):
