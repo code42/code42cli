@@ -6,7 +6,7 @@ from code42cli.util import print_error
 
 def create_sdk(profile, is_debug_mode):
     if is_debug_mode:
-        py42.sdk.settings.debug.level = debug.INFO
+        py42.sdk.settings.debug.level = debug.DEBUG
     try:
         password = profile.get_password()
         return py42.sdk.from_local_account(profile.authority_url, profile.username, password)
