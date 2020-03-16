@@ -71,11 +71,31 @@ def init(subcommand_parser):
     )
     profile_subparsers = parser_profile.add_subparsers(title="subcommands")
 
-    parser_for_show = profile_subparsers.add_parser(u"show")
-    parser_for_set = profile_subparsers.add_parser(u"set")
-    parser_for_reset_password = profile_subparsers.add_parser(u"reset-pw")
-    parser_for_list = profile_subparsers.add_parser(u"list")
-    parser_for_use = profile_subparsers.add_parser(u"use")
+    parser_for_show = profile_subparsers.add_parser(
+        u"show",
+        description=u"Print the details of a profile.",
+        usage=u"code42 profile show <optional-args>",
+    )
+    parser_for_set = profile_subparsers.add_parser(
+        u"set",
+        description=u"Create or update profile settings. The first profile created will be the default.",
+        usage=u"code42 profile set <optional-args>",
+    )
+    parser_for_reset_password = profile_subparsers.add_parser(
+        u"reset-pw",
+        description=u"Change stored password for a profile.",
+        usage=u"code42 profile reset-pw <optional-args>",
+    )
+    parser_for_list = profile_subparsers.add_parser(
+        u"list",
+        description=u"Show all existing stored profiles.",
+        usage=u"code42 profile list <optional-args>",
+    )
+    parser_for_use = profile_subparsers.add_parser(
+        u"use",
+        description=u"Set a profile as the default.",
+        usage=u"code42 profile use <profile-name>",
+    )
 
     parser_for_show.set_defaults(func=show_profile)
     parser_for_set.set_defaults(func=set_profile)

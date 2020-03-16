@@ -7,10 +7,10 @@ from code42cli.securitydata.subcommands import send_to
 def init_subcommand(subcommand_parser):
     description = u"""
     Subcommands:
-            print             - Prints file events to stdout.
-            send-to           - Sends file events to the given server address.
-            write-to          - Writes file events to the file with the given name.
-            clear-checkpoint  - Removes the saved checkpoint from "incremental" (-i) mode.
+            print             - Print file events to stdout.
+            send-to           - Send file events to the given server address.
+            write-to          - Write file events to the file with the given name.
+            clear-checkpoint  - Remove the saved checkpoint from 'incremental' (-i) mode.
     """
     securitydata_arg_parser = subcommand_parser.add_parser(
         u"securitydata",

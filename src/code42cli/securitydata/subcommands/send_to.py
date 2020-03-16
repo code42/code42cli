@@ -12,7 +12,11 @@ def init(subcommand_parser):
         Args:
             subcommand_parser: The subparsers group created by the parent parser
     """
-    parser = subcommand_parser.add_parser(u"send-to")
+    parser = subcommand_parser.add_parser(
+        u"send-to",
+        description=u"Send file events to the given server address.",
+        usage=u"code42 securitydata send-to <server-address> <optional-args>",
+    )
     parser.set_defaults(func=send_to)
     _add_server_arg(parser)
     _add_protocol_arg(parser)

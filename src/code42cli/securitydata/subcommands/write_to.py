@@ -11,7 +11,11 @@ def init(subcommand_parser):
         Args:
             subcommand_parser: The subparsers group created by the parent parser.
     """
-    parser = subcommand_parser.add_parser(u"write-to")
+    parser = subcommand_parser.add_parser(
+        u"write-to",
+        description=u"Write file events to the file with the given name.",
+        usage=u"code42 securitydata write-to <filename> <optional-args>",
+    )
     parser.set_defaults(func=write_to)
     _add_filename_subcommand(parser)
     search_args.add_arguments_to_parser(parser)
