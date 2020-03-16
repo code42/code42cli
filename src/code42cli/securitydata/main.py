@@ -13,7 +13,10 @@ def init_subcommand(subcommand_parser):
             clear-checkpoint  - Removes the saved checkpoint from "incremental" mode.
     """
     securitydata_arg_parser = subcommand_parser.add_parser(
-        u"securitydata", formatter_class=RawDescriptionHelpFormatter, description=description
+        u"securitydata",
+        formatter_class=RawDescriptionHelpFormatter,
+        description=description,
+        epilog=u"Use --profile to do any of these commands for the given profile.",
     )
     securitydata_subparsers = securitydata_arg_parser.add_subparsers(title=u"subcommands")
     send_to.init(securitydata_subparsers)
