@@ -53,7 +53,7 @@ def init(subcommand_parser):
             subcommand_parser: The subparsers group created by the parent parser.
     """
     parser_profile = subcommand_parser.add_parser(u"profile")
-    profile_subparsers = parser_profile.add_subparsers()
+    profile_subparsers = parser_profile.add_subparsers(title="subcommands")
 
     parser_for_show = profile_subparsers.add_parser(u"show")
     parser_for_set = profile_subparsers.add_parser(u"set")
