@@ -64,7 +64,10 @@ def init(subcommand_parser):
           use       - Set a profile as the default.
     """
     parser_profile = subcommand_parser.add_parser(
-        u"profile", formatter_class=RawDescriptionHelpFormatter, description=description
+        u"profile",
+        formatter_class=RawDescriptionHelpFormatter,
+        description=description,
+        usage=u"code42 profile <subcommand> <optional args>",
     )
     profile_subparsers = parser_profile.add_subparsers(title="subcommands")
 

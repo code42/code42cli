@@ -17,7 +17,7 @@ def init_subcommand(subcommand_parser):
         formatter_class=RawDescriptionHelpFormatter,
         description=description,
         epilog=u"Use '--profile <profile-name>' to execute any of these commands for the given profile.",
-        usage="test"
+        usage=u"code42 securitydata <subcommand> <optional args>",
     )
     securitydata_subparsers = securitydata_arg_parser.add_subparsers(title=u"subcommands")
     send_to.init(securitydata_subparsers)

@@ -24,7 +24,9 @@ def main():
         securitydata - Tools for getting security related data, such as file events.
     """
     code42_arg_parser = ArgumentParser(
-        formatter_class=RawDescriptionHelpFormatter, description=description
+        formatter_class=RawDescriptionHelpFormatter,
+        description=description,
+        usage=u"code42 <module> <subcommand> <optional args>",
     )
     subcommand_parser = code42_arg_parser.add_subparsers(title=u"modules")
     profile.init(subcommand_parser)
