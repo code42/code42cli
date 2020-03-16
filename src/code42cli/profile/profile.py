@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+from argparse import RawDescriptionHelpFormatter
+
 import code42cli.arguments as main_args
 import code42cli.profile.password as password
 from code42cli.compat import str
@@ -52,7 +54,18 @@ def init(subcommand_parser):
         Args:
             subcommand_parser: The subparsers group created by the parent parser.
     """
-    parser_profile = subcommand_parser.add_parser(u"profile")
+
+    description = u"""
+    Subcommands:
+          show      - print details of a profile
+          set       - create or update profile settings
+          reset-pw  - change stored password
+          list      - show all existing stored profiles
+          use       - set a profile as the default
+    """
+    parser_profile = subcommand_parser.add_parser(
+        u"profile", formatter_class=RawDescriptionHelpFormatter, description=description
+    )
     profile_subparsers = parser_profile.add_subparsers(title="subcommands")
 
     parser_for_show = profile_subparsers.add_parser(u"show")

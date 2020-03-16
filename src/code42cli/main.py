@@ -1,5 +1,5 @@
 import platform
-from argparse import ArgumentParser
+from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 import code42cli.securitydata.main as securitydata
 from code42cli.compat import str
@@ -18,7 +18,14 @@ if platform.system().lower() == u"windows":
 
 
 def main():
-    code42_arg_parser = ArgumentParser()
+    description = u"""
+    Groups:
+        profile      - module for managing Code42 settings
+        securitydata - tools for getting security related data, such as file events.
+    """
+    code42_arg_parser = ArgumentParser(
+        formatter_class=RawDescriptionHelpFormatter, description=description
+    )
     subcommand_parser = code42_arg_parser.add_subparsers(title=u"subcommands")
     profile.init(subcommand_parser)
     securitydata.init_subcommand(subcommand_parser)
