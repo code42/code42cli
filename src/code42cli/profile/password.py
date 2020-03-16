@@ -30,8 +30,6 @@ def set_password(profile_name, new_password):
     username = _get_username(profile)
     if _store_password(profile, service_name, username, new_password):
         print(u"'Code42 Password' updated.")
-    else:
-        print_error(u"Failure to store password.")
 
 
 def _get_profile(profile_name):
@@ -103,6 +101,7 @@ def _store_password_using_file(profile, new_password):
                 return False
 
         return open_file(path, u"w+", lambda file: write_password(file))
+    return False
 
 
 def _get_password_file_path(profile):
