@@ -57,11 +57,11 @@ def init(subcommand_parser):
 
     description = u"""
     Subcommands:
-          show      - print details of a profile
-          set       - create or update profile settings
-          reset-pw  - change stored password
-          list      - show all existing stored profiles
-          use       - set a profile as the default
+          show      - Print the details of a profile.
+          set       - Create or update profile settings. The first profile created will be the default.
+          reset-pw  - Change stored password for a profile.
+          list      - Show all existing stored profiles.
+          use       - Set a profile as the default.
     """
     parser_profile = subcommand_parser.add_parser(
         u"profile", formatter_class=RawDescriptionHelpFormatter, description=description
