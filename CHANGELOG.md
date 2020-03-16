@@ -12,11 +12,11 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
-- Support for storing passwords when keying is not supported.
+- Support for storing passwords when keying is not available.
 
 ### Fixed
 
-- Bug where keyring would causes errors on certain OS where keyring was not supported.
+- Bug where keyring would causes errors on certain operating systems where keyring was not supported.
 
 ## 0.4.2 - 2020-03-13
 
