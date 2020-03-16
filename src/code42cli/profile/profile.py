@@ -59,7 +59,7 @@ def init(subcommand_parser):
     Subcommands:
           show      - Print the details of a profile.
           set       - Create or update profile settings. The first profile created will be the default.
-          reset-pw  - Change stored password for a profile.
+          reset-pw  - Change the stored password for a profile.
           list      - Show all existing stored profiles.
           use       - Set a profile as the default.
     """
@@ -83,7 +83,7 @@ def init(subcommand_parser):
     )
     parser_for_reset_password = profile_subparsers.add_parser(
         u"reset-pw",
-        description=u"Change stored password for a profile.",
+        description=u"Change the stored password for a profile.",
         usage=u"code42 profile reset-pw <optional-args>",
     )
     parser_for_list = profile_subparsers.add_parser(
