@@ -134,5 +134,5 @@ Only the first 10,000 of each set of events containing the exact same insertion 
 
 # Troubleshooting
 
-If you keep getting prompted for you password, try resetting it.
+If you keep getting prompted for your password, try resetting with `code42 profile reset-pw`.
 If that doesn't work, delete your credentials file located at ~/.code42cli or the entry in keychain.
