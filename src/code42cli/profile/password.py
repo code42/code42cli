@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+import os
+import stat
 from getpass import getpass
 
 import keyring
@@ -91,6 +93,7 @@ def _store_password_using_file(profile, new_password):
             file.truncate(0)
             line = u"{0}\n".format(new_password)
             file.write(line)
+            os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
 
         open_file(path, u"w+", lambda file: write_password(file))
 
