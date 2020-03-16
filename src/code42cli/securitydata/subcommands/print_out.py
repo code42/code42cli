@@ -11,7 +11,7 @@ def init(subcommand_parser):
         Args:
             subcommand_parser: The subparsers group created by the parent parser.
     """
-    parser = subcommand_parser.add_parser("print")
+    parser = subcommand_parser.add_parser(u"print")
     parser.set_defaults(func=print_out)
     search_args.add_arguments_to_parser(parser)
     securitydata_main_args.add_arguments_to_parser(parser)

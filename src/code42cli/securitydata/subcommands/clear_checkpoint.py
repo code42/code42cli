@@ -8,7 +8,7 @@ def init(subcommand_parser):
         Args:
             subcommand_parser: The subparsers group created by the parent parser.
     """
-    parser = subcommand_parser.add_parser("clear-checkpoint")
+    parser = subcommand_parser.add_parser(u"clear-checkpoint")
     add_profile_name_arg(parser)
     parser.set_defaults(func=clear_checkpoint)
 
