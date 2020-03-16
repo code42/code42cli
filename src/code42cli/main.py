@@ -26,7 +26,7 @@ def main():
     code42_arg_parser = ArgumentParser(
         formatter_class=RawDescriptionHelpFormatter, description=description
     )
-    subcommand_parser = code42_arg_parser.add_subparsers(title=u"subcommands")
+    subcommand_parser = code42_arg_parser.add_subparsers(title=u"groups")
     profile.init(subcommand_parser)
     securitydata.init_subcommand(subcommand_parser)
     _run(code42_arg_parser)
