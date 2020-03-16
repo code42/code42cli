@@ -1,5 +1,4 @@
 import pytest
-
 from py42 import debug_level
 from py42 import settings
 

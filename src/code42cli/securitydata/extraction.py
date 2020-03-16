@@ -12,6 +12,7 @@ from py42.sdk.file_event_query.file_query import MD5, SHA256, FileName, FilePath
 
 from code42cli.compat import str
 from code42cli.profile.profile import get_profile
+from code42cli.sdk_client import create_sdk
 from code42cli.securitydata import date_helper as date_helper
 from code42cli.securitydata.arguments.main import IS_INCREMENTAL_KEY
 from code42cli.securitydata.arguments.search import SearchArguments
@@ -19,7 +20,6 @@ from code42cli.securitydata.cursor_store import FileEventCursorStore
 from code42cli.securitydata.logger_factory import get_error_logger
 from code42cli.securitydata.options import ExposureType as ExposureTypeOptions
 from code42cli.util import print_error, print_bold, is_interactive
-from code42cli.sdk_client import create_sdk
 
 _EXCEPTIONS_OCCURRED = False
 

@@ -4,13 +4,13 @@ import code42cli.arguments as main_args
 import code42cli.profile.password as password
 from code42cli.compat import str
 from code42cli.profile.config import get_config_accessor, ConfigAccessor
+from code42cli.sdk_client import validate_connection
 from code42cli.util import (
     does_user_agree,
     print_error,
     print_set_profile_help,
     print_no_existing_profile_message,
 )
-from code42cli.sdk_client import validate_connection
 
 
 class Code42Profile(object):

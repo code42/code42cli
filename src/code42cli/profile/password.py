@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 from getpass import getpass
+
 import keyring
 
 from code42cli.profile.config import get_config_accessor, ConfigAccessor
@@ -54,6 +55,7 @@ def _get_password_from_keyring(profile):
 
 def _get_password_from_file(profile):
     path = _get_password_file_path(profile)
+
     def read_password(file):
         try:
             return file.readline().strip()
