@@ -7,7 +7,7 @@ from getpass import getpass
 import keyring
 
 from code42cli.profile.config import get_config_accessor, ConfigAccessor
-from code42cli.util import does_user_agree, open_file, get_user_project_path
+from code42cli.util import does_user_agree, open_file, get_user_project_path, print_error
 
 _ROOT_SERVICE_NAME = u"code42cli"
 
@@ -28,8 +28,10 @@ def set_password(profile_name, new_password):
     profile = _get_profile(profile_name)
     service_name = _get_keyring_service_name(profile.name)
     username = _get_username(profile)
-    _store_password(profile, service_name, username, new_password)
-    print(u"'Code42 Password' updated.")
+    if _store_password(profile, service_name, username, new_password):
+        print(u"'Code42 Password' updated.")
+    else:
+        print_error(u"Failure to store password.")
 
 
 def _get_profile(profile_name):
@@ -72,7 +74,7 @@ def _get_password_from_file(profile):
 
 def _store_password(profile, service_name, username, new_password):
     if not _store_password_using_keyring(service_name, username, new_password):
-        _store_password_using_file(profile, new_password)
+        return _store_password_using_file(profile, new_password)
 
 
 def _store_password_using_keyring(service_name, username, new_password):
@@ -90,12 +92,17 @@ def _store_password_using_file(profile, new_password):
         path = _get_password_file_path(profile)
 
         def write_password(file):
-            file.truncate(0)
-            line = u"{0}\n".format(new_password)
-            file.write(line)
-            os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+            try:
+                file.truncate(0)
+                line = u"{0}\n".format(new_password)
+                file.write(line)
+                os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+                return True
+            except Exception as ex:
+                print_error(str(ex))
+                return False
 
-        open_file(path, u"w+", lambda file: write_password(file))
+        return open_file(path, u"w+", lambda file: write_password(file))
 
 
 def _get_password_file_path(profile):
