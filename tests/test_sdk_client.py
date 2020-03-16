@@ -1,6 +1,6 @@
 import pytest
-from py42 import debug_level
-from py42 import settings
+import py42.sdk.settings.debug as debug
+import py42.sdk.settings as settings
 
 from code42cli.sdk_client import create_sdk, validate_connection
 from .conftest import create_mock_profile
@@ -8,11 +8,11 @@ from .conftest import create_mock_profile
 
 @pytest.fixture
 def mock_sdk_factory(mocker):
-    return mocker.patch("py42.sdk.SDK.create_using_local_account")
+    return mocker.patch("py42.sdk.from_local_account")
 
 
 @pytest.fixture
-def error_sdk_factory(mocker, mock_sdk_factory):
+def error_sdk_factory(mock_sdk_factory):
     def side_effect():
         raise Exception()
 
@@ -29,7 +29,7 @@ def test_create_sdk_when_py42_exception_occurs_causes_exit(error_sdk_factory):
 def test_create_sdk_when_told_to_debug_turns_on_debug(mock_sdk_factory):
     profile = create_mock_profile()
     create_sdk(profile, True)
-    assert settings.debug_level == debug_level.DEBUG
+    assert settings.debug_level == debug.DEBUG
 
 
 def test_validate_connection_when_creating_sdk_raises_returns_false(error_sdk_factory):

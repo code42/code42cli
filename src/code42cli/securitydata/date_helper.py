@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from c42eventextractor.common import convert_datetime_to_timestamp
-from py42.sdk.file_event_query.event_query import EventTimestamp
+from py42.sdk.queries.fileevents.filters.event_filter import EventTimestamp
 
 _MAX_LOOK_BACK_DAYS = 90
 _FORMAT_VALUE_ERROR_MESSAGE = u"input must be a date in YYYY-MM-DD or YYYY-MM-DD HH:MM:SS format."
