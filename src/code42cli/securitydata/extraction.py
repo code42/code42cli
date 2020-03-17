@@ -4,11 +4,7 @@ import json
 
 from c42eventextractor import FileEventHandlers
 from c42eventextractor.extractors import FileEventExtractor
-from py42.sdk.file_event_query.cloud_query import Actor
-from py42.sdk.file_event_query.device_query import DeviceUsername
-from py42.sdk.file_event_query.event_query import Source
-from py42.sdk.file_event_query.exposure_query import ExposureType, ProcessOwner, TabURL
-from py42.sdk.file_event_query.file_query import MD5, SHA256, FileName, FilePath
+from py42.sdk.queries.fileevents.filters import *
 
 from code42cli.compat import str
 from code42cli.profile.profile import get_profile

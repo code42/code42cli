@@ -8,7 +8,11 @@ def init(subcommand_parser):
         Args:
             subcommand_parser: The subparsers group created by the parent parser.
     """
-    parser = subcommand_parser.add_parser("clear-checkpoint")
+    parser = subcommand_parser.add_parser(
+        u"clear-checkpoint",
+        description=u"Remove the saved checkpoint from 'incremental' (-i) mode.",
+        usage=u"code42 securitydata clear-checkpoint <optional-args>",
+    )
     add_profile_name_arg(parser)
     parser.set_defaults(func=clear_checkpoint)
 

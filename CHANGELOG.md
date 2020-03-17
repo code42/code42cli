@@ -18,6 +18,10 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Bug where keyring caused errors on certain operating systems when not supported.
 
+### Changed
+
+- Updated help texts to be more descriptive.
+
 ## 0.4.2 - 2020-03-13
 
 ### Fixed

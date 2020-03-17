@@ -116,7 +116,7 @@ def _add_actor_arg(parser):
         nargs=u"+",
         action=u"store",
         dest=SearchArguments.ACTOR,
-        help=u"Limits events to only those enacted by these actors.",
+        help=u"Limits events to only those enacted by the cloud service user of the person who caused the event.",
     )
 
 
