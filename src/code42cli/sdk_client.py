@@ -10,7 +10,8 @@ def create_sdk(profile, is_debug_mode):
     try:
         password = profile.get_password()
         return py42.sdk.from_local_account(profile.authority_url, profile.username, password)
-    except Exception:
+    except Exception as e:
+        print(e)
         print_error(
             u"Invalid credentials or host address. "
             u"Verify your profile is set up correctly and that you are supplying the correct password."
@@ -23,5 +24,4 @@ def validate_connection(authority_url, username, password):
         py42.sdk.from_local_account(authority_url, username, password)
         return True
     except:
-        print(username, password, authority_url)
         return False

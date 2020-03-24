@@ -22,12 +22,22 @@ def error_sdk_factory(mock_sdk_factory):
 
 def test_create_sdk_when_py42_exception_occurs_causes_exit(error_sdk_factory):
     profile = create_mock_profile()
+
+    def mock_get_password():
+        return "Test Password"
+
+    profile.get_password = mock_get_password
     with pytest.raises(SystemExit):
         create_sdk(profile, False)
 
 
 def test_create_sdk_when_told_to_debug_turns_on_debug(mock_sdk_factory):
     profile = create_mock_profile()
+
+    def mock_get_password():
+        return "Test Password"
+
+    profile.get_password = mock_get_password
     create_sdk(profile, True)
     assert py42.sdk.settings.debug.level == debug.DEBUG
 
