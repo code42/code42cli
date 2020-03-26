@@ -213,7 +213,7 @@ def test_extract_when_given_end_date_uses_expected_query(logger, namespace_with_
     namespace_with_begin.end_date = get_test_date_str(days_ago=10)
     extraction_module.extract(logger, namespace_with_begin)
     actual = get_filter_value_from_json(extractor.extract.call_args[0][0], filter_index=1)
-    expected = "{0}T23:59:59.000Z".format(namespace_with_begin.end_date)
+    expected = "{0}T23:59:59.999Z".format(namespace_with_begin.end_date)
     assert actual == expected
 
 
