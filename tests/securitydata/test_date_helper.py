@@ -37,7 +37,7 @@ def test_create_event_timestamp_filter_when_given_begin_with_time_builds_expecte
 def test_create_event_timestamp_filter_when_given_end_builds_expected_query():
     ts_range = create_event_timestamp_filter(begin_date_list, end_date_list)
     actual = get_filter_value_from_json(ts_range, filter_index=1)
-    expected = "{0}T23:59:59.000Z".format(end_date_list[0])
+    expected = "{0}T23:59:59.999Z".format(end_date_list[0])
     assert actual == expected
 
 
