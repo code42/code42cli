@@ -15,9 +15,10 @@ from code42cli.securitydata.arguments.search import SearchArguments
 from code42cli.securitydata.cursor_store import FileEventCursorStore
 from code42cli.securitydata.logger_factory import get_error_logger
 from code42cli.securitydata.options import ExposureType as ExposureTypeOptions
-from code42cli.util import print_error, print_bold, is_interactive
+from code42cli.util import print_error, print_bold, is_interactive, print_to_stderr
 
 _EXCEPTIONS_OCCURRED = False
+_TOTAL_EVENTS = 0
 
 
 def extract(output_logger, args):
@@ -142,6 +143,8 @@ def _create_event_handlers(output_logger, cursor_store):
     def handle_response(response):
         response_dict = json.loads(response.text)
         events = response_dict.get(u"fileEvents")
+        global _TOTAL_EVENTS
+        _TOTAL_EVENTS += len(events)
         for event in events:
             output_logger.info(event)
 
@@ -170,6 +173,9 @@ def _verify_compatibility_with_advanced_query(key, val):
 def _handle_result():
     if is_interactive() and _EXCEPTIONS_OCCURRED:
         print_error(u"View exceptions that occurred at [HOME]/.code42cli/log/code42_errors.")
+    global _TOTAL_EVENTS
+    if not _TOTAL_EVENTS:
+        print_to_stderr(u"No results found\n")
 
 
 def _try_append_exposure_types_filter(filters, args):

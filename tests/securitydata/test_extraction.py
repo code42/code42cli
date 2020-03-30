@@ -511,3 +511,21 @@ def test_when_sdk_raises_exception_global_variable_gets_set(
 
     extraction_module.extract(logger, namespace_with_begin)
     assert extraction_module._EXCEPTIONS_OCCURRED
+
+
+def test_extract_when_no_results_are_found_prints_error_to_stderr(
+    mocker, logger, namespace_with_begin, extractor
+):
+    mock_error = mocker.patch("code42cli.securitydata.extraction.print_to_stderr")
+    extraction_module._TOTAL_EVENTS = 0
+    extraction_module.extract(logger, namespace_with_begin)
+    assert mock_error.call_count
+
+
+def test_extract_when_results_are_found_does_not_print_error_to_stderr(
+    mocker, logger, namespace_with_begin, extractor
+):
+    mock_error = mocker.patch("code42cli.securitydata.extraction.print_to_stderr")
+    extraction_module._TOTAL_EVENTS = 1
+    extraction_module.extract(logger, namespace_with_begin)
+    assert not mock_error.call_count
