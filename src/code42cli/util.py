@@ -70,3 +70,7 @@ def get_url_parts(url_str):
     if len(parts) > 1 and parts[1] != u"":
         port = int(parts[1])
     return parts[0], port
+
+
+def print_to_stderr(error_text):
+    sys.stderr.write(error_text)
