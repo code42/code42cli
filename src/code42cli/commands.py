@@ -98,6 +98,6 @@ def _handler_has_arg(arg_name, handler):
 
 
 def _kvps_to_obj(kvps):
-    new_kvps = {key: kvps[key] for key in kvps if key in ["sdk", "profile"]}
+    new_kvps = {key: kvps[key] for key in kvps if key in [u"sdk", u"profile"]}
     new_kvps[u"args"] = DictObject(kvps)
     return new_kvps

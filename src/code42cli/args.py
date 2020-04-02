@@ -20,13 +20,13 @@ class ArgConfig(object):
         return self._settings
 
     def set_choices(self, choices):
-        self._settings["choices"] = choices
+        self._settings[u"choices"] = choices
 
     def set_help(self, help):
-        self._settings["help"] = help
+        self._settings[u"help"] = help
 
     def add_short_option_name(self, short_name):
-        self._settings["options_list"].append(short_name)
+        self._settings[u"options_list"].append(short_name)
 
 
 class ArgConfigCollection(object):
