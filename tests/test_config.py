@@ -156,29 +156,3 @@ class TestConfigAccessor(object):
 
         accessor.create_or_update_profile("ProfileA", "example.com", "bar", False)
         assert mock_saver.call_count
-
-    def test_create_or_update_profile_with_missing_authority_does_not_save(
-        self, mock_config_parser, mock_saver
-    ):
-        mock_config_parser.sections.return_value = ["Internal"]
-        mock_profile = create_mock_profile_object("ProfileA", None, None)
-        mock_internal = create_internal_object(False)
-        mock_internal["default_profile_is_complete"] = "False"
-        setup_parser_one_profile(mock_internal, mock_internal, mock_config_parser)
-        accessor = ConfigAccessor(mock_config_parser)
-
-        accessor.create_or_update_profile("ProfileA", "", "bar", False)
-        assert mock_saver.call_count == 0
-
-    def test_create_or_update_profile_with_missing_username_does_not_save(
-        self, mock_config_parser, mock_saver
-    ):
-        mock_config_parser.sections.return_value = ["Internal"]
-        mock_profile = create_mock_profile_object("ProfileA", None, None)
-        mock_internal = create_internal_object(False)
-        mock_internal["default_profile_is_complete"] = "False"
-        setup_parser_one_profile(mock_internal, mock_internal, mock_config_parser)
-        accessor = ConfigAccessor(mock_config_parser)
-
-        accessor.create_or_update_profile("ProfileA", "example.com", "", False)
-        assert mock_saver.call_count == 0

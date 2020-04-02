@@ -115,15 +115,19 @@ def test_get_all_profiles_returns_expected_profile_list(config_accessor):
     assert profiles[1].name == "two"
 
 
-def test_get_stored_password_returns_expected_password(password_getter):
+def test_get_stored_password_returns_expected_password(config_accessor, password_getter):
+    mock_section = MockSection("testprofilename")
+    config_accessor.get_profile.return_value = mock_section
+    test_profile = "testprofilename"
     password_getter.return_value = "testpassword"
-    assert cliprofile.get_stored_password() == "testpassword"
+    assert cliprofile.get_stored_password("testprofilename") == "testpassword"
 
 
 def test_get_stored_password_uses_expected_profile_name(config_accessor, password_getter):
     mock_section = MockSection("testprofilename")
     config_accessor.get_profile.return_value = mock_section
     test_profile = "testprofilename"
+    password_getter.return_value = "testpassword"
     cliprofile.get_stored_password(test_profile)
     assert password_getter.call_args[0][0].name == test_profile
 
