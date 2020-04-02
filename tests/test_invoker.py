@@ -2,9 +2,7 @@ import pytest
 
 from code42cli.commands import Command
 from code42cli.invoker import CommandInvoker
-from code42cli.parser import CommandParser, ArgumentParserError
-
-from code42cli.commands import Command
+from code42cli.parser import ArgumentParserError, CommandParser
 
 
 def dummy_method(one, two, three=None):

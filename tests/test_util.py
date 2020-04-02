@@ -1,4 +1,4 @@
-from code42cli.util import get_url_parts, does_user_agree
+from code42cli.util import does_user_agree, get_url_parts
 
 
 def test_get_url_parts_when_given_host_and_port_returns_expected_parts():

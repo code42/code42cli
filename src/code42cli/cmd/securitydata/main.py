@@ -1,8 +1,8 @@
-from code42cli.args import ArgConfig, ArgConfigCollection
-from code42cli.commands import Command
-from code42cli.cmd.securitydata import logger_factory, enums
+from code42cli.args import ArgConfig
+from code42cli.cmd.securitydata import enums, logger_factory
 from code42cli.cmd.securitydata.extraction import extract
 from code42cli.cmd.shared.cursor_store import FileEventCursorStore
+from code42cli.commands import Command
 
 
 def load_subcommands():

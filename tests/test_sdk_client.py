@@ -1,6 +1,6 @@
-import pytest
 import py42.sdk
 import py42.sdk.settings.debug as debug
+import pytest
 
 from code42cli.sdk_client import create_sdk, validate_connection
 from .conftest import create_mock_profile

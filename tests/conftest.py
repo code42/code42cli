@@ -1,8 +1,5 @@
-from argparse import Namespace
-from datetime import datetime, timedelta
-
 import pytest
-
+from argparse import Namespace
 from py42.sdk import SDKClient
 
 from code42cli.config import ConfigAccessor

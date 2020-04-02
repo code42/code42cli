@@ -2,7 +2,6 @@ import pytest
 from py42.sdk import SDKClient
 from py42.sdk.queries.fileevents.filters import *
 
-from code42cli.profile import Code42Profile
 import code42cli.cmd.securitydata.extraction as extraction_module
 from code42cli.cmd.securitydata.enums import ExposureType as ExposureTypeOptions
 from .conftest import (

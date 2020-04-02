@@ -1,7 +1,8 @@
 from __future__ import print_function, with_statement
 
 import sys
-from os import path, makedirs
+
+from os import makedirs, path
 
 from code42cli.compat import open
 

@@ -1,8 +1,7 @@
 import pytest
 
-from ..conftest import create_mock_profile
-
 import code42cli.cmd.profile as profilecmd
+from ..conftest import create_mock_profile
 
 
 @pytest.fixture

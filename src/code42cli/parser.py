@@ -1,9 +1,8 @@
 import argparse
 from argparse import RawDescriptionHelpFormatter, SUPPRESS
-import sys
+from py42.__version__ import __version__ as py42version
 
 from code42cli.__version__ import __version__ as cliversion
-from py42.__version__ import __version__ as py42version
 
 BANNER = u""" 
  dP""b8  dP"Yb  8888b. 888888  dP88  oP"Yb. 

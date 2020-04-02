@@ -1,8 +1,6 @@
 import pytest
 
 import code42cli.password as password
-from code42cli.config import ConfigAccessor
-from .conftest import setup_mock_accessor, create_profile_values_dict
 
 _USERNAME = "test.username"
 

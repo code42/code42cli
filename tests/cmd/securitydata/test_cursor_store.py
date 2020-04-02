@@ -1,6 +1,5 @@
-from os import path
-
 from c42eventextractor.extractors import INSERTION_TIMESTAMP_FIELD_NAME
+from os import path
 
 from code42cli.cmd.shared.cursor_store import BaseCursorStore, FileEventCursorStore
 

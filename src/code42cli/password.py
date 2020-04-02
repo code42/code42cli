@@ -1,9 +1,7 @@
 from __future__ import print_function
-from getpass import getpass
 
 import keyring
-
-from code42cli.config import ConfigAccessor
+from getpass import getpass
 
 _ROOT_SERVICE_NAME = u"code42cli"
 

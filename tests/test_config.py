@@ -1,8 +1,7 @@
 from __future__ import with_statement
 
-from configparser import ConfigParser
-
 import pytest
+from configparser import ConfigParser
 
 from code42cli.config import ConfigAccessor
 from .conftest import MockSection

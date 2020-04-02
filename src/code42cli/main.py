@@ -1,11 +1,11 @@
+import sys
+
 import platform
 
-import sys
-from code42cli.invoker import CommandInvoker
-from code42cli.commands import Command
-from code42cli.args import get_auto_arg_configs
 from code42cli.cmd import profile
 from code42cli.cmd.securitydata import main as secmain
+from code42cli.commands import Command
+from code42cli.invoker import CommandInvoker
 
 # If on Windows, configure console session to handle ANSI escape sequences correctly
 # source: https://bugs.python.org/issue29059

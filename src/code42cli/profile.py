@@ -1,11 +1,6 @@
 import code42cli.password as password
-from code42cli.config import get_config_accessor, ConfigAccessor
-from code42cli.util import (
-    does_user_agree,
-    print_error,
-    print_set_profile_help,
-    print_no_existing_profile_message,
-)
+from code42cli.config import ConfigAccessor, get_config_accessor
+from code42cli.util import print_error, print_set_profile_help
 
 
 class Code42Profile(object):

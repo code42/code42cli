@@ -1,7 +1,8 @@
 from __future__ import print_function
+
 import sys
 
-from code42cli.parser import CommandParser, ArgumentParserError
+from code42cli.parser import ArgumentParserError, CommandParser
 
 
 class CommandInvoker(object):

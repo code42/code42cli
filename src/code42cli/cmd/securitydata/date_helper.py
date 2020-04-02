@@ -1,6 +1,5 @@
-from datetime import datetime, timedelta
-
 from c42eventextractor.common import convert_datetime_to_timestamp
+from datetime import datetime, timedelta
 from py42.sdk.queries.fileevents.filters.event_filter import EventTimestamp
 
 _MAX_LOOK_BACK_DAYS = 90
