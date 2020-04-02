@@ -15,7 +15,7 @@ from code42cli.cmd.securitydata.enums import (
 )
 from code42cli.cmd.shared.cursor_store import FileEventCursorStore
 from code42cli.cmd.securitydata.logger_factory import get_error_logger
-from code42cli.util import print_error, print_bold, is_interactive
+from code42cli.util import print_error, print_bold, is_interactive, print_to_stderr
 
 _EXCEPTIONS_OCCURRED = False
 _TOTAL_EVENTS = 0
