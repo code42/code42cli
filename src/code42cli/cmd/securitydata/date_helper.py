@@ -14,40 +14,54 @@ def create_event_timestamp_filter(begin_date=None, end_date=None):
             begin_date: The begin date for the range.
             end_date: The end date for the range.
     """
-    end_date = _get_end_date_with_eod_time_if_needed(end_date)
+
     if begin_date and end_date:
-        return _create_in_range_filter(begin_date, end_date)
+        min_timestamp = _parse_min_timestamp(begin_date)
+        max_timestamp = _parse_max_timestamp(end_date)
+        return _create_in_range_filter(min_timestamp, max_timestamp)
     elif begin_date and not end_date:
-        return _create_on_or_after_filter(begin_date)
+        min_timestamp = _parse_min_timestamp(begin_date)
+        return _create_on_or_after_filter(min_timestamp)
     elif end_date and not begin_date:
-        return _create_on_or_before_filter(end_date)
+        max_timestamp = _parse_max_timestamp(end_date)
+        return _create_on_or_before_filter(max_timestamp)
 
 
-def _create_in_range_filter(begin_date, end_date):
-    min_timestamp = _parse_min_timestamp(begin_date)
-    max_timestamp = _parse_timestamp(end_date)
+def _parse_max_timestamp(end_date):
+    if len(end_date) == 1:
+        end_date = _get_end_date_with_eod_time_if_needed(end_date)
+        max_time = _parse_timestamp(end_date)
+        max_time = _add_milliseconds(max_time)
+    else:
+        max_time = _parse_timestamp(end_date)
+
+    return convert_datetime_to_timestamp(max_time)
+
+
+def _add_milliseconds(max_time):
+    return max_time + timedelta(milliseconds=999)
+
+
+def _create_in_range_filter(min_timestamp, max_timestamp):
     _verify_timestamp_order(min_timestamp, max_timestamp)
     return EventTimestamp.in_range(min_timestamp, max_timestamp)
 
 
-def _create_on_or_after_filter(begin_date):
-    min_timestamp = _parse_min_timestamp(begin_date)
+def _create_on_or_after_filter(min_timestamp):
     return EventTimestamp.on_or_after(min_timestamp)
 
 
-def _create_on_or_before_filter(end_date):
-    max_timestamp = _parse_timestamp(end_date)
+def _create_on_or_before_filter(max_timestamp):
     return EventTimestamp.on_or_before(max_timestamp)
 
 
 def _get_end_date_with_eod_time_if_needed(end_date):
-    if end_date and len(end_date) == 1:
-        return end_date[0], "23:59:59"
-    return end_date
+    return end_date[0], "23:59:59"
 
 
 def _parse_min_timestamp(begin_date_str):
-    min_timestamp = _parse_timestamp(begin_date_str)
+    min_time = _parse_timestamp(begin_date_str)
+    min_timestamp = convert_datetime_to_timestamp(min_time)
     boundary_date = datetime.utcnow() - timedelta(days=_MAX_LOOK_BACK_DAYS)
     boundary = convert_datetime_to_timestamp(boundary_date)
     if min_timestamp and min_timestamp < boundary:
@@ -67,9 +81,9 @@ def _parse_timestamp(date_and_time):
         date_str = _join_date_and_time(date_and_time)
         date_format = u"%Y-%m-%d" if len(date_and_time) == 1 else u"%Y-%m-%d %H:%M:%S"
         time = datetime.strptime(date_str, date_format)
+        return time
     except ValueError:
         raise ValueError(_FORMAT_VALUE_ERROR_MESSAGE)
-    return convert_datetime_to_timestamp(time)
 
 
 def _join_date_and_time(date_and_time):
