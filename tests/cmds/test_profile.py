@@ -1,37 +1,37 @@
 import pytest
 
-import code42cli.cmd.profile as profilecmd
+import code42cli.cmds.profile as profilecmd
 from ..conftest import create_mock_profile
 
 
 @pytest.fixture
 def user_agreement(mocker):
-    mock = mocker.patch("code42cli.cmd.profile.does_user_agree")
+    mock = mocker.patch("code42cli.cmds.profile.does_user_agree")
     mock.return_value = True
     return mocker
 
 
 @pytest.fixture
 def user_disagreement(mocker):
-    mock = mocker.patch("code42cli.cmd.profile.does_user_agree")
+    mock = mocker.patch("code42cli.cmds.profile.does_user_agree")
     mock.return_value = False
     return mocker
 
 
 @pytest.fixture
 def mock_cliprofile_ns(mocker):
-    return mocker.patch("code42cli.cmd.profile.cliprofile")
+    return mocker.patch("code42cli.cmds.profile.cliprofile")
 
 
 @pytest.fixture(autouse=True)
 def mock_getpass(mocker):
-    mock = mocker.patch("code42cli.cmd.profile.getpass")
+    mock = mocker.patch("code42cli.cmds.profile.getpass")
     mock.return_value = "newpassword"
 
 
 @pytest.fixture
 def mock_verify(mocker):
-    return mocker.patch("code42cli.cmd.profile.validate_connection")
+    return mocker.patch("code42cli.cmds.profile.validate_connection")
 
 
 def test_show_profile_outputs_profile_info(capsys, mock_cliprofile_ns, profile):

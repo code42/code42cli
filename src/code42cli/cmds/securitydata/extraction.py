@@ -5,14 +5,14 @@ from c42eventextractor import FileEventHandlers
 from c42eventextractor.extractors import FileEventExtractor
 from py42.sdk.queries.fileevents.filters import *
 
-import code42cli.cmd.securitydata.date_helper as date_helper
-from code42cli.cmd.securitydata.enums import (
+import code42cli.cmds.securitydata.date_helper as date_helper
+from code42cli.cmds.securitydata.enums import (
     ExposureType as ExposureTypeOptions,
     IS_INCREMENTAL_KEY,
     SearchArguments,
 )
-from code42cli.cmd.securitydata.logger_factory import get_error_logger
-from code42cli.cmd.shared.cursor_store import FileEventCursorStore
+from code42cli.cmds.securitydata.logger_factory import get_error_logger
+from code42cli.cmds.shared.cursor_store import FileEventCursorStore
 from code42cli.compat import str
 from code42cli.util import is_interactive, print_bold, print_error, print_to_stderr
 

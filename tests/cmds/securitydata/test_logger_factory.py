@@ -7,7 +7,7 @@ from c42eventextractor.logging.formatters import (
 )
 from logging.handlers import RotatingFileHandler
 
-import code42cli.cmd.securitydata.logger_factory as factory
+import code42cli.cmds.securitydata.logger_factory as factory
 
 
 @pytest.fixture

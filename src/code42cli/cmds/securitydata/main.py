@@ -1,7 +1,7 @@
 from code42cli.args import ArgConfig
-from code42cli.cmd.securitydata import enums, logger_factory
-from code42cli.cmd.securitydata.extraction import extract
-from code42cli.cmd.shared.cursor_store import FileEventCursorStore
+from code42cli.cmds.securitydata import enums, logger_factory
+from code42cli.cmds.securitydata.extraction import extract
+from code42cli.cmds.shared.cursor_store import FileEventCursorStore
 from code42cli.commands import Command
 
 

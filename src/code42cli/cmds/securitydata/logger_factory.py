@@ -10,7 +10,7 @@ from c42eventextractor.logging.handlers import NoPrioritySysLogHandlerWrapper
 from logging.handlers import RotatingFileHandler
 from threading import Lock
 
-from code42cli.cmd.securitydata.enums import OutputFormat
+from code42cli.cmds.securitydata.enums import OutputFormat
 from code42cli.compat import str
 from code42cli.util import get_url_parts, get_user_project_path, print_error
 

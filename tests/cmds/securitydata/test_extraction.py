@@ -2,8 +2,8 @@ import pytest
 from py42.sdk import SDKClient
 from py42.sdk.queries.fileevents.filters import *
 
-import code42cli.cmd.securitydata.extraction as extraction_module
-from code42cli.cmd.securitydata.enums import ExposureType as ExposureTypeOptions
+import code42cli.cmds.securitydata.extraction as extraction_module
+from code42cli.cmds.securitydata.enums import ExposureType as ExposureTypeOptions
 from .conftest import (
     SECURITYDATA_NAMESPACE,
     begin_date_str,
@@ -297,7 +297,7 @@ def test_when_given_begin_date_past_90_days_and_is_incremental_and_a_stored_curs
     namespace.begin = "2019-01-01"
     namespace.incremental = True
     mock_checkpoint = mocker.patch(
-        "code42cli.cmd.shared.cursor_store.FileEventCursorStore.get_stored_insertion_timestamp"
+        "code42cli.cmds.shared.cursor_store.FileEventCursorStore.get_stored_insertion_timestamp"
     )
     mock_checkpoint.return_value = 22624624
     extraction_module.extract(sdk, profile, logger, namespace)
@@ -310,7 +310,7 @@ def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_b
     namespace.begin = get_test_date_str(days_ago=1)
     namespace.incremental = False
     mock_checkpoint = mocker.patch(
-        "code42cli.cmd.shared.cursor_store.FileEventCursorStore.get_stored_insertion_timestamp"
+        "code42cli.cmds.shared.cursor_store.FileEventCursorStore.get_stored_insertion_timestamp"
     )
     mock_checkpoint.return_value = 22624624
     extraction_module.extract(sdk, profile, logger, namespace)
@@ -327,7 +327,7 @@ def test_when_not_given_begin_date_and_is_incremental_but_no_stored_checkpoint_e
     namespace.begin = None
     namespace.is_incremental = True
     mock_checkpoint = mocker.patch(
-        "code42cli.cmd.shared.cursor_store.FileEventCursorStore.get_stored_insertion_timestamp"
+        "code42cli.cmds.shared.cursor_store.FileEventCursorStore.get_stored_insertion_timestamp"
     )
     mock_checkpoint.return_value = None
     with pytest.raises(SystemExit):
@@ -494,9 +494,9 @@ def test_extract_when_creating_sdk_throws_causes_exit(
 def test_extract_when_global_variable_is_true_and_is_interactive_prints_error(
     mocker, sdk, profile, logger, namespace_with_begin, extractor
 ):
-    mock_error_printer = mocker.patch("code42cli.cmd.securitydata.extraction.print_error")
+    mock_error_printer = mocker.patch("code42cli.cmds.securitydata.extraction.print_error")
     mock_is_interactive_function = mocker.patch(
-        "code42cli.cmd.securitydata.extraction.is_interactive"
+        "code42cli.cmds.securitydata.extraction.is_interactive"
     )
     mock_is_interactive_function.return_value = True
     extraction_module._EXCEPTIONS_OCCURRED = True
@@ -507,9 +507,9 @@ def test_extract_when_global_variable_is_true_and_is_interactive_prints_error(
 def test_extract_when_global_variable_is_true_and_not_is_interactive_does_not_print_error(
     mocker, sdk, profile, logger, namespace_with_begin, extractor
 ):
-    mock_error_printer = mocker.patch("code42cli.cmd.securitydata.extraction.print_error")
+    mock_error_printer = mocker.patch("code42cli.cmds.securitydata.extraction.print_error")
     mock_is_interactive_function = mocker.patch(
-        "code42cli.cmd.securitydata.extraction.is_interactive"
+        "code42cli.cmds.securitydata.extraction.is_interactive"
     )
     mock_is_interactive_function.return_value = False
     extraction_module._EXCEPTIONS_OCCURRED = True
@@ -520,9 +520,9 @@ def test_extract_when_global_variable_is_true_and_not_is_interactive_does_not_pr
 def test_extract_when_global_variable_is_false_and_is_interactive_does_not_print_error(
     mocker, sdk, profile, logger, namespace_with_begin, extractor
 ):
-    mock_error_printer = mocker.patch("code42cli.cmd.securitydata.extraction.print_error")
+    mock_error_printer = mocker.patch("code42cli.cmds.securitydata.extraction.print_error")
     mock_is_interactive_function = mocker.patch(
-        "code42cli.cmd.securitydata.extraction.is_interactive"
+        "code42cli.cmds.securitydata.extraction.is_interactive"
     )
     mock_is_interactive_function.return_value = True
     extraction_module._EXCEPTIONS_OCCURRED = False
@@ -537,7 +537,7 @@ def test_when_sdk_raises_exception_global_variable_gets_set(
     mock_sdk = mocker.MagicMock()
 
     # For ease
-    mock = mocker.patch("code42cli.cmd.securitydata.extraction.is_interactive")
+    mock = mocker.patch("code42cli.cmds.securitydata.extraction.is_interactive")
     mock.return_value = False
 
     def sdk_side_effect(self, *args):

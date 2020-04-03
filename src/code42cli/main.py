@@ -2,8 +2,8 @@ import sys
 
 import platform
 
-from code42cli.cmd import profile
-from code42cli.cmd.securitydata import main as secmain
+from code42cli.cmds import profile
+from code42cli.cmds.securitydata import main as secmain
 from code42cli.commands import Command
 from code42cli.invoker import CommandInvoker
 

@@ -2,7 +2,7 @@ import json as json_module
 import pytest
 from datetime import datetime, timedelta
 
-SECURITYDATA_NAMESPACE = "code42cli.cmd.securitydata"
+SECURITYDATA_NAMESPACE = "code42cli.cmds.securitydata"
 
 
 def get_filter_value_from_json(json, filter_index):
