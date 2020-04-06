@@ -21,7 +21,7 @@ def load_subcommands():
         _load_profile_description,
     )
 
-    list = Command(
+    list_all = Command(
         u"list",
         u"Show all existing stored profiles.",
         u"{} {}".format(usage_prefix, u"list"),
@@ -51,7 +51,7 @@ def load_subcommands():
         _load_profile_create_descripions,
     )
 
-    return [show, list, use, reset_pw, create]
+    return [show, list_all, use, reset_pw, create]
 
 
 def show_profile(profile=None):
