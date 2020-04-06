@@ -37,7 +37,7 @@ class ArgConfigCollection(object):
     def arg_configs(self):
         return self._arg_configs
 
-    def add(self, name, arg_config):
+    def append(self, name, arg_config):
         self._arg_configs[name] = arg_config
 
     def extend(self, arg_config_dict):
@@ -57,7 +57,7 @@ def get_auto_arg_configs(handler):
             if not key in [u"sdk", u"args"]:
                 arg_config = _create_auto_args_config(i, key, argspec, num_args, num_kw_args)
                 _set_smart_defaults(arg_config)
-                arg_configs.add(key, arg_config)
+                arg_configs.append(key, arg_config)
 
         if u"sdk" in argspec.args:
             _build_sdk_arg_configs(arg_configs)

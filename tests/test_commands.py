@@ -22,7 +22,7 @@ def subcommand_loader():
 
 
 def arg_customizer(arg_collection):
-    arg_collection.add("success", ArgConfig("--success"))
+    arg_collection.append("success", ArgConfig("--success"))
 
 
 @pytest.fixture

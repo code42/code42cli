@@ -55,7 +55,7 @@ class TestArgConfigCollection(object):
     def test_add_adds_arg_config(self):
         arg_config = ArgConfig()
         coll = ArgConfigCollection()
-        coll.add("test", arg_config)
+        coll.append("test", arg_config)
         assert coll.arg_configs["test"] == arg_config
 
     def test_extends_adds_multiple_arg_configs(self):
