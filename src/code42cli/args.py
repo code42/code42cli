@@ -53,9 +53,11 @@ def get_auto_arg_configs(handler):
         num_args = len(argspec.args)
         num_kw_args = len(argspec.defaults) if argspec.defaults else 0
 
-        for i, key in enumerate(argspec.args):
+        for arg_position, key in enumerate(argspec.args):
             if not key in [u"sdk", u"args"]:
-                arg_config = _create_auto_args_config(i, key, argspec, num_args, num_kw_args)
+                arg_config = _create_auto_args_config(
+                    arg_position, key, argspec, num_args, num_kw_args
+                )
                 _set_smart_defaults(arg_config)
                 arg_configs.append(key, arg_config)
 
@@ -65,13 +67,13 @@ def get_auto_arg_configs(handler):
     return arg_configs
 
 
-def _create_auto_args_config(i, key, argspec, num_args, num_kw_args):
+def _create_auto_args_config(arg_position, key, argspec, num_args, num_kw_args):
     default = None
     param_name = key.replace(u"_", u"-")
     difference = num_args - num_kw_args
-    if i > difference - 1:
+    if arg_position > difference - 1:
         # this is an optional arg
-        default_value = argspec.defaults[i - difference]
+        default_value = argspec.defaults[arg_position - difference]
         option_names = [u"--{}".format(param_name)]
         default = default_value
     else:
@@ -90,6 +92,6 @@ def _set_smart_defaults(arg_config):
 
 def _build_sdk_arg_configs(arg_config_collection):
     profile = ArgConfig(u"--profile", help=PROFILE_HELP)
-    debug = ArgConfig(u"-d", u"--debug", action="store_true", help=u"Turn on Debug logging.")
+    debug = ArgConfig(u"-d", u"--debug", action=u"store_true", help=u"Turn on Debug logging.")
     extras = {u"profile": profile, u"debug": debug}
     arg_config_collection.extend(extras)

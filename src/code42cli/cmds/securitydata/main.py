@@ -183,7 +183,7 @@ def _load_search_args(arg_collection):
         u"incremental": ArgConfig(
             u"-i",
             u"--incremental",
-            action="store_true",
+            action=u"store_true",
             help=u"Only get events that were not previously retrieved.",
         ),
     }

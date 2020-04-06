@@ -170,7 +170,6 @@ def _verify_compatibility_with_advanced_query(key, val):
 def _handle_result():
     if is_interactive() and _EXCEPTIONS_OCCURRED:
         print_error(u"View exceptions that occurred at [HOME]/.code42cli/log/code42_errors.")
-    global _TOTAL_EVENTS
     if not _TOTAL_EVENTS:
         print_to_stderr(u"No results found\n")
 
