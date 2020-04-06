@@ -71,9 +71,9 @@ def switch_default_profile(profile_name):
     config.switch_default_profile(profile_name)
 
 
-def create_or_update_profile(name, server, username, ignore_ssl_errors):
+def create_profile(name, server, username, ignore_ssl_errors):
     config = get_config_accessor()
-    config.create_or_update_profile(name, server, username, ignore_ssl_errors)
+    config.create_profile(name, server, username, ignore_ssl_errors)
 
 
 def get_all_profiles():

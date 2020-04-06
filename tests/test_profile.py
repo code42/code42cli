@@ -94,13 +94,13 @@ def test_switch_default_profile_switches_to_expected_profile(config_accessor):
     config_accessor.switch_default_profile.assert_called_once_with("switchtome")
 
 
-def test_create_or_update_profile_uses_expected_profile_values(config_accessor):
+def test_create_profile_uses_expected_profile_values(config_accessor):
     profile_name = "profilename"
     server = "server"
     username = "username"
     ssl_errors_disabled = True
-    cliprofile.create_or_update_profile(profile_name, server, username, ssl_errors_disabled)
-    config_accessor.create_or_update_profile.assert_called_once_with(
+    cliprofile.create_profile(profile_name, server, username, ssl_errors_disabled)
+    config_accessor.create_profile.assert_called_once_with(
         profile_name, server, username, ssl_errors_disabled
     )
 

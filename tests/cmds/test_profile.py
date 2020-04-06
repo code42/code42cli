@@ -69,7 +69,7 @@ def test_create_profile_if_user_sets_password_is_created(
 ):
     mock_cliprofile_ns.profile_exists.return_value = False
     profilecmd.create_profile("foo", "bar", "baz", True)
-    mock_cliprofile_ns.create_or_update_profile.assert_called_once_with("foo", "bar", "baz", True)
+    mock_cliprofile_ns.create_profile.assert_called_once_with("foo", "bar", "baz", True)
 
 
 def test_create_profile_if_user_does_not_set_password_is_created(
@@ -77,7 +77,7 @@ def test_create_profile_if_user_does_not_set_password_is_created(
 ):
     mock_cliprofile_ns.profile_exists.return_value = False
     profilecmd.create_profile("foo", "bar", "baz", True)
-    mock_cliprofile_ns.create_or_update_profile.assert_called_once_with("foo", "bar", "baz", True)
+    mock_cliprofile_ns.create_profile.assert_called_once_with("foo", "bar", "baz", True)
 
 
 def test_create_profile_if_credentials_invalid_password_not_saved(

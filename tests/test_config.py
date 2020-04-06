@@ -137,15 +137,13 @@ class TestConfigAccessor(object):
         accessor.switch_default_profile("ProfileB")
         assert mock_saver.call_count
 
-    def test_create_or_update_profile_when_given_default_name_does_not_create(
-        self, mock_config_parser
-    ):
+    def test_create_profile_when_given_default_name_does_not_create(self, mock_config_parser):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
         accessor = ConfigAccessor(mock_config_parser)
         with pytest.raises(Exception):
-            accessor.create_or_update_profile(ConfigAccessor.DEFAULT_VALUE, "foo", "bar", False)
+            accessor.create_profile(ConfigAccessor.DEFAULT_VALUE, "foo", "bar", False)
 
-    def test_create_or_update_profile_when_not_existing_saves(self, mock_config_parser, mock_saver):
+    def test_create_profile_when_not_existing_saves(self, mock_config_parser, mock_saver):
         mock_config_parser.sections.return_value = ["Internal"]
         mock_profile = create_mock_profile_object("ProfileA", None, None)
         mock_internal = create_internal_object(False)
@@ -153,5 +151,5 @@ class TestConfigAccessor(object):
         setup_parser_one_profile(mock_internal, mock_internal, mock_config_parser)
         accessor = ConfigAccessor(mock_config_parser)
 
-        accessor.create_or_update_profile("ProfileA", "example.com", "bar", False)
+        accessor.create_profile("ProfileA", "example.com", "bar", False)
         assert mock_saver.call_count

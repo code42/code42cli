@@ -72,7 +72,7 @@ def create_profile(profile, server, username, disable_ssl_errors=False):
         print_error(u"A profile named {} already exists.".format(profile))
         exit(1)
 
-    cliprofile.create_or_update_profile(profile, server, username, disable_ssl_errors)
+    cliprofile.create_profile(profile, server, username, disable_ssl_errors)
     _prompt_for_allow_password_set(profile)
 
 

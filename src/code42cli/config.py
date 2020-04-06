@@ -43,10 +43,10 @@ class ConfigAccessor(object):
             profiles.append(self.get_profile(name))
         return profiles
 
-    def create_or_update_profile(self, name, server, username, ignore_ssl_errors):
+    def create_profile(self, name, server, username, ignore_ssl_errors):
         """Creates a new profile if one does not already exist for that name."""
         try:
-            profile = self.get_profile(name)
+            self.get_profile(name)
         except Exception as ex:
             if name is not None and name != self.DEFAULT_VALUE:
                 self._create_profile_section(name)
