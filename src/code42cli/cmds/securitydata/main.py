@@ -13,8 +13,8 @@ def load_subcommands():
         u"print",
         u"Print file events to stdout",
         u"{} {}".format(usage_prefix, u"print <optional-args>"),
-        print_out,
-        _load_search_args,
+        handler=print_out,
+        arg_customizer=_load_search_args,
         use_single_arg_obj=True,
     )
 
@@ -22,8 +22,8 @@ def load_subcommands():
         u"write-to",
         u"Write file events to the file with the given name.",
         u"{} {}".format(usage_prefix, u"write-to <filename> <optional-args>"),
-        write_to,
-        _load_write_to_args,
+        handler=write_to,
+        arg_customizer=_load_write_to_args,
         use_single_arg_obj=True,
     )
 
@@ -31,8 +31,8 @@ def load_subcommands():
         u"send-to",
         u"Send file events to the given server address.",
         u"{} {}".format(usage_prefix, u"send-to <server-address> <optional-args>"),
-        send_to,
-        _load_send_to_args,
+        handler=send_to,
+        arg_customizer=_load_send_to_args,
         use_single_arg_obj=True,
     )
 
@@ -40,7 +40,7 @@ def load_subcommands():
         u"clear-checkpoint",
         u"Remove the saved checkpoint from 'incremental' (-i) mode.",
         u"{} {}".format(usage_prefix, u"clear-checkpoint <optional-args>"),
-        clear_checkpoint,
+        handler=clear_checkpoint,
     )
 
     return [print_func, write, send, clear]

@@ -17,38 +17,38 @@ def load_subcommands():
         u"show",
         u"Print the details of a profile.",
         u"{} {}".format(usage_prefix, u"show <optional-args>"),
-        show_profile,
-        _load_profile_description,
+        handler=show_profile,
+        arg_customizer=_load_profile_description,
     )
 
     list_all = Command(
         u"list",
         u"Show all existing stored profiles.",
         u"{} {}".format(usage_prefix, u"list"),
-        list_profiles,
+        handler=list_profiles,
     )
 
     use = Command(
         u"use",
         u"Set a profile as the default.",
         u"{} {}".format(usage_prefix, u"use <profile-name>"),
-        use_profile,
+        handler=use_profile,
     )
 
     reset_pw = Command(
         u"reset-pw",
         u"Change the stored password for a profile.",
         u"{} {}".format(usage_prefix, u"reset-pw <optional-args>"),
-        prompt_for_password_reset,
-        _load_profile_description,
+        handler=prompt_for_password_reset,
+        arg_customizer=_load_profile_description,
     )
 
     create = Command(
         u"create",
         u"Create profile settings. The first profile created will be the default.",
         u"{} {}".format(usage_prefix, u"create <profile-name> <server-address> <username>"),
-        create_profile,
-        _load_profile_create_descripions,
+        handler=create_profile,
+        arg_customizer=_load_profile_create_descripions,
     )
 
     return [show, list_all, use, reset_pw, create]
