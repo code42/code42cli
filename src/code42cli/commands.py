@@ -71,10 +71,7 @@ class Command(object):
 
 def _get_arg_kvps(parsed_args, handler):
     # transform parsed args from argparse into a dict
-    kvps = {}
-    parsed_dict = parsed_args.__dict__
-    for key in parsed_dict:
-        kvps[key] = parsed_dict[key]
+    kvps = dict(vars(parsed_args))
     kvps.pop(u"func", None)
     return _inject_params(kvps, handler)
 
