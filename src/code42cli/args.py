@@ -1,6 +1,6 @@
 import inspect
 
-PROFILE_HELP = u"The name of the Code42 profile to be used when executing this command."
+PROFILE_HELP = u"The name of the Code42 profile use when executing this command."
 
 
 class ArgConfig(object):
@@ -41,9 +41,7 @@ class ArgConfigCollection(object):
         self._arg_configs[name] = arg_config
 
     def extend(self, arg_config_dict):
-        for key in arg_config_dict:
-            arg_config = arg_config_dict[key]
-            self._arg_configs[key] = arg_config
+        self.arg_configs.update(arg_config_dict)
 
 
 def get_auto_arg_configs(handler):
