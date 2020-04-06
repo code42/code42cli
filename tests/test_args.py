@@ -70,7 +70,3 @@ class TestArgConfigCollection(object):
         assert len(coll.arg_configs) == 2
         assert coll.arg_configs["one"] == arg_config1
         assert coll.arg_configs["two"] == arg_config2
-
-
-def test_get_auto_arg_configs_when_func_with_args_excludes_args():
-    pass
