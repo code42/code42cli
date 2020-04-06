@@ -11,6 +11,30 @@ class DictObject(object):
 
 
 class Command(object):
+    """
+    Represents a function that a CLI user can execute. Add a command to `code42cli.main._load_top_commands` or as a subcommand of one those commands to make it available for use.
+
+    Args:
+        name (str): The name of command. For example, in
+            `code42 profile show`, "show" is the name, while "profile"
+            is the name of the parent command.
+
+        description (str): Descriptive text to be displayed when using -h.
+
+        usage (str, optional): A usage example to be displayed when using -h.
+        handler (function, optional): The function to be exectued when the command is run.
+
+        arg_customizer (function, optional): A function accepting a single `ArgCollection`
+            parameter that allows for editing the collection when `get_arg_configs` is run.
+
+        subcommand_loader (function, optional): A function returning a list of all subcommands
+            parented by this command.
+
+        use_single_arg_obj (bool, optional): When True, causes all parameters sent to
+            `__call__` to be consolidated in an object with attribute names dictated
+            by the parameter names. That object is passed to `handler`'s `arg` parameter.
+    """
+
     def __init__(
         self,
         name,
@@ -21,6 +45,7 @@ class Command(object):
         subcommand_loader=None,
         use_single_arg_obj=None,
     ):
+
         self._name = name
         self._description = description
         self._usage = usage
@@ -28,10 +53,13 @@ class Command(object):
         self._arg_customizer = arg_customizer
         self._subcommand_loader = subcommand_loader
         self._use_single_arg_obj = use_single_arg_obj
-        self._args = {}
         self._subcommands = []
 
     def __call__(self, *args, **kwargs):
+        """Passes the parsed argparse args to the handler, or
+        shows the help of for this command if there is no handler
+        (common in commands that are simply groups of subcommands).
+        """
         if callable(self._handler):
             kvps = _get_arg_kvps(args[0], self._handler)
             if self._use_single_arg_obj:
@@ -62,6 +90,8 @@ class Command(object):
             self._subcommands = self._subcommand_loader()
 
     def get_arg_configs(self):
+        """Returns a collection of argparse configurations based on
+        the parameter names of `handler` and any user customizations."""
         arg_config_collection = get_auto_arg_configs(self._handler)
         if callable(self._arg_customizer):
             self._arg_customizer(arg_config_collection)
@@ -77,6 +107,8 @@ def _get_arg_kvps(parsed_args, handler):
 
 
 def _inject_params(kvps, handler):
+    """automatically populates parameters named "sdk" or "profile" with instances of the sdk
+    and profile, respectively."""
     if _handler_has_arg(u"sdk", handler):
         profile_name = kvps.pop(u"profile", None)
         debug = kvps.pop(u"debug", None)

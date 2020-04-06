@@ -4,7 +4,7 @@ PROFILE_HELP = u"The name of the Code42 profile use when executing this command.
 
 
 class ArgConfig(object):
-    """Allows for reuse of args with similar options."""
+    """Stores a set of argparse commands for later use by a command."""
 
     def __init__(self, *args, **kwargs):
         self._settings = {}
@@ -45,14 +45,18 @@ class ArgConfigCollection(object):
 
 
 def get_auto_arg_configs(handler):
+    """Looks at the parameter names of `handler` and builds an `ArgConfigCollection` containing argparse
+    parameters based on them."""
     arg_configs = ArgConfigCollection()
     if callable(handler):
+        # get the number of positional and keyword args
         argspec = inspect.getargspec(handler)
         num_args = len(argspec.args)
         num_kw_args = len(argspec.defaults) if argspec.defaults else 0
 
         for arg_position, key in enumerate(argspec.args):
-            if not key in [u"sdk", u"args"]:
+            # do not create cli parameters for arguments named "sdk", "args", or "kwargs"
+            if not key in [u"sdk", u"args", u"kwargs"]:
                 arg_config = _create_auto_args_config(
                     arg_position, key, argspec, num_args, num_kw_args
                 )
@@ -68,27 +72,34 @@ def get_auto_arg_configs(handler):
 def _create_auto_args_config(arg_position, key, argspec, num_args, num_kw_args):
     default = None
     param_name = key.replace(u"_", u"-")
-    difference = num_args - num_kw_args
-    if arg_position > difference - 1:
-        # this is an optional arg
+    last_positional_arg_idx = num_args - num_kw_args - 1
+    # postional arguments will come first, so if the arg position
+    # is greater than the index of the last positional arg, it's a kwarg.
+    if arg_position > last_positional_arg_idx:
+        # this is a keyword arg, treat it as an optional cli arg.
         default_value = argspec.defaults[arg_position - difference]
         option_names = [u"--{}".format(param_name)]
         default = default_value
     else:
-        # required (positional) arg
+        # this is a positional arg, treat it as a required cli arg.
         option_names = [param_name]
     return ArgConfig(*option_names, default=default)
 
 
 def _set_smart_defaults(arg_config):
     default = arg_config.settings.get(u"default")
+    # make a parameter allow lists as input if its default value is a list,
+    # e.g. --my-param one two three four
     nargs = u"+" if type(default) == list else None
     arg_config.settings[u"nargs"] = nargs
+    # make the param not require a value (e.g. --enable) if the default value of
+    # the param is a bool.
     if type(default) == bool:
         arg_config.settings[u"action"] = u"store_{}".format(default).lower()
 
 
 def _build_sdk_arg_configs(arg_config_collection):
+    """Add extra cli parameters that will always be relevant when a handler needs the sdk."""
     profile = ArgConfig(u"--profile", help=PROFILE_HELP)
     debug = ArgConfig(u"-d", u"--debug", action=u"store_true", help=u"Turn on Debug logging.")
     extras = {u"profile": profile, u"debug": debug}

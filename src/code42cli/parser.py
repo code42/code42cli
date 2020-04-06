@@ -90,11 +90,7 @@ def _add_argument(parser, arg_settings):
 
 
 def _get_group_help(command):
-    subs = command.subcommands
-    name = command.name
-    name_width = len(max([cmd.name for cmd in subs], key=len))
-    lines = [u"  {} - {}".format(cmd.name.ljust(name_width), cmd.description) for cmd in subs]
-    descriptions = u"\n".join(lines)
+    descriptions = _build_group_command_descriptions(command)
     output = []
     if not command.name:
         name = u"code42"
@@ -102,3 +98,11 @@ def _get_group_help(command):
 
     output.extend([u" \nAvailable commands in <{}>:".format(name), descriptions])
     return "\n".join(output)
+
+
+def _build_group_command_descriptions(command):
+    subs = command.subcommands
+    name = command.name
+    name_width = len(max([cmd.name for cmd in subs], key=len))
+    lines = [u"  {} - {}".format(cmd.name.ljust(name_width), cmd.description) for cmd in subs]
+    return u"\n".join(lines)
