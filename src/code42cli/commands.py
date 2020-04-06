@@ -11,8 +11,9 @@ class DictObject(object):
 
 
 class Command(object):
-    """
-    Represents a function that a CLI user can execute. Add a command to `code42cli.main._load_top_commands` or as a subcommand of one those commands to make it available for use.
+    """Represents a function that a CLI user can execute. Add a command to 
+    `code42cli.main._load_top_commands` or as a subcommand of one those
+    commands to make it available for use.
 
     Args:
         name (str): The name of command. For example, in
