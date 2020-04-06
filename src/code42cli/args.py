@@ -72,7 +72,8 @@ def get_auto_arg_configs(handler):
 def _create_auto_args_config(arg_position, key, argspec, num_args, num_kw_args):
     default = None
     param_name = key.replace(u"_", u"-")
-    last_positional_arg_idx = num_args - num_kw_args - 1
+    difference = num_args - num_kw_args
+    last_positional_arg_idx = difference - 1
     # postional arguments will come first, so if the arg position
     # is greater than the index of the last positional arg, it's a kwarg.
     if arg_position > last_positional_arg_idx:

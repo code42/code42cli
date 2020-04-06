@@ -51,12 +51,16 @@ class TestCommandParser(object):
         parts = ["runnable"]
         parser = CommandParser()
         parser.prepare_command(cmd, parts)
-        with pytest.raises(SystemExit):
+        success = False
+        try:
             parsed_args = parser.parse_args(["runnable", "-h"])
-        captured = capsys.readouterr()
-        assert "the desc" in captured.out
-        assert "one" in captured.out
-        assert "two" in captured.out
+        except SystemExit:
+            success = True
+            captured = capsys.readouterr()
+            assert "the desc" in captured.out
+            assert "one" in captured.out
+            assert "two" in captured.out
+        assert success
 
     def test_prepare_command_when_optional_args(self):
         cmd = Command("runnable", "the desc", "the usage", handler=dummy_method_optional_args)
@@ -71,12 +75,16 @@ class TestCommandParser(object):
         parts = ["runnable"]
         parser = CommandParser()
         parser.prepare_command(cmd, parts)
-        with pytest.raises(SystemExit):
+        success = False
+        try:
             parsed_args = parser.parse_args(["runnable", "-h"])
-        captured = capsys.readouterr()
-        assert "the desc" in captured.out
-        assert "--one" in captured.out
-        assert "--two" in captured.out
+        except SystemExit:
+            success = True
+            captured = capsys.readouterr()
+            assert "the desc" in captured.out
+            assert "--one" in captured.out
+            assert "--two" in captured.out
+        assert success
 
     def test_prepare_command_when_required_args_and_args_missing_throws(self, capsys):
         cmd = Command("runnable", "the desc", "the usage", handler=dummy_method_required_args)

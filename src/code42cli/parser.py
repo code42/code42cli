@@ -96,7 +96,7 @@ def _get_group_help(command):
         name = u"code42"
         output.append(BANNER)
 
-    output.extend([u" \nAvailable commands in <{}>:".format(name), descriptions])
+    output.extend([u" \nAvailable commands in <{}>:".format(command.name), descriptions])
     return "\n".join(output)
 
 

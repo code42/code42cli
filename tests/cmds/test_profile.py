@@ -58,10 +58,14 @@ def test_show_profile_when_password_set_outputs_password_note(capsys, mock_clipr
 
 def test_create_profile_if_profile_exists_exits(capsys, mock_cliprofile_ns):
     mock_cliprofile_ns.profile_exists.return_value = True
-    with pytest.raises(SystemExit):
+    success = True
+    try:
         profilecmd.create_profile("foo", "bar", "baz", True)
-    capture = capsys.readouterr()
-    assert "already exists" in capture.out
+    except SystemExit:
+        success = True
+        capture = capsys.readouterr()
+        assert "already exists" in capture.out
+    assert success
 
 
 def test_create_profile_if_user_sets_password_is_created(
@@ -85,9 +89,13 @@ def test_create_profile_if_credentials_invalid_password_not_saved(
 ):
     mock_verify.return_value = False
     mock_cliprofile_ns.profile_exists.return_value = False
-    with pytest.raises(SystemExit):
+    success = False
+    try:
         profilecmd.create_profile("foo", "bar", "baz", True)
-    assert not mock_cliprofile_ns.set_password.call_count
+    except SystemExit:
+        success = True
+        assert not mock_cliprofile_ns.set_password.call_count
+    assert success
 
 
 def test_create_profile_if_credentials_valid_password_saved(
@@ -113,9 +121,13 @@ def test_prompt_for_password_reset_if_credentials_invalid_password_not_saved(
 ):
     mock_verify.return_value = False
     mock_cliprofile_ns.profile_exists.return_value = False
-    with pytest.raises(SystemExit):
+    success = False
+    try:
         profilecmd.prompt_for_password_reset()
-    assert not mock_cliprofile_ns.set_password.call_count
+    except SystemExit:
+        success = True
+        assert not mock_cliprofile_ns.set_password.call_count
+    assert success
 
 
 def test_list_profiles(capsys, mock_cliprofile_ns):
