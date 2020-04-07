@@ -134,6 +134,9 @@ class ConfigAccessor(object):
         self._save()
 
 
+config_accessor = ConfigAccessor(ConfigParser())
+
+
 def get_config_accessor():
     """Create a ConfigAccessor with a ConfigParser as its parser."""
-    return ConfigAccessor(ConfigParser())
+    return config_accessor
