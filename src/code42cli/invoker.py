@@ -17,7 +17,7 @@ class CommandInvoker(object):
         `input_args` and runs it with the supplied parameters.
         
         Args:
-            input_args (iter(str)): the full list of arguments
+            input_args (iter[str]): the full list of arguments
             supplied by the user to `code42` cli command.
         """
         path_parts = self._get_path_parts(input_args)
@@ -63,4 +63,3 @@ class CommandInvoker(object):
         except ArgumentParserError as e:
             print(u"error: {}".format(e), file=sys.stderr)
             parser.print_help(sys.stderr)
-            sys.exit(2)

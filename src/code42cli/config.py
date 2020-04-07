@@ -52,7 +52,6 @@ class ConfigAccessor(object):
                 self._create_profile_section(name)
             else:
                 raise ex
-        print("create_profile")
         profile = self.parser[name]
         self._set_authority_url(server, profile)
         self._set_username(username, profile)
@@ -67,24 +66,16 @@ class ConfigAccessor(object):
         self._save()
 
     def _set_authority_url(self, new_value, profile):
-        """Sets 'authority URL' for a given profile.
-        Uses the default profile if name is None.
-        """
         profile[self.AUTHORITY_KEY] = new_value.strip()
 
     def _set_username(self, new_value, profile):
-        """Sets 'username' for a given profile. Uses the default profile if not given a name."""
         profile[self.USERNAME_KEY] = new_value.strip()
 
     def _set_ignore_ssl_errors(self, new_value, profile):
-        """Sets 'ignore_ssl_errors' for a given profile.
-        Uses the default profile if name is None.
-        """
         profile[self.IGNORE_SSL_ERRORS_KEY] = str(new_value)
 
     @property
     def _internal(self):
-        """The internal section of the config file."""
         return self.parser[self._INTERNAL_SECTION]
 
     @property

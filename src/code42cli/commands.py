@@ -16,7 +16,7 @@ class Command(object):
     commands to make it available for use.
 
     Args:
-        name (str): The name of command. For example, in
+        name (str): The name of the command. For example, in
             `code42 profile show`, "show" is the name, while "profile"
             is the name of the parent command.
 
