@@ -27,6 +27,9 @@ class CommandInvoker(object):
     def _get_path_parts(self, input_args):
         """Gets the portion of `input_args` that refers to a
         valid command or subcommand, removing parameters.
+        For example, `input_args` of ["command", "sub", "--arg", "argval"]
+        would return ["command", "sub"], assuming "command" is a top level command,
+        "sub" is a subcommand of "command", and the rest of the values are normal parameters.
         Returns an empty string if a valid command or subcommand is not found.
         """
         path = u""
