@@ -123,27 +123,27 @@ class TestCommand(object):
         assert not coll.get("args")
 
     def test_call_when_keyword_args(self, mocker):
-        def test_func(one=None, two=None, three=None):
+        def test_handler(one=None, two=None, three=None):
             if one == "testone" and two == "testtwo" and three == "testthree":
                 return "success"
 
-        command = Command("test", "test desc", "test usage", test_func)
+        command = Command("test", "test desc", "test usage", test_handler)
         kvps = {"one": "testone", "two": "testtwo", "three": "testthree"}
         kvps = DictObject(kvps)
         assert command(kvps) == "success"
 
     def test_call_when_positional_args(self, mocker):
-        def test_func(one, two, three):
+        def test_handler(one, two, three):
             if one == "testone" and two == "testtwo" and three == "testthree":
                 return "success"
 
-        command = Command("test", "test desc", "test usage", test_func)
+        command = Command("test", "test desc", "test usage", test_handler)
         kvps = {"one": "testone", "two": "testtwo", "three": "testthree"}
         kvps = DictObject(kvps)
         assert command(kvps) == "success"
 
     def test_call_when_mixed_args(self, mocker):
-        def test_func(one, two, three=None, four=None):
+        def test_handler(one, two, three=None, four=None):
             if (
                 one == "testone"
                 and two == "testtwo"
@@ -152,13 +152,13 @@ class TestCommand(object):
             ):
                 return "success"
 
-        command = Command("test", "test desc", "test usage", test_func)
+        command = Command("test", "test desc", "test usage", test_handler)
         kvps = {"one": "testone", "two": "testtwo", "three": "testthree", "four": "testfour"}
         kvps = DictObject(kvps)
         assert command(kvps) == "success"
 
     def test_call_configs_when_func_with_sdk(self, mocker, mock_sdk_client, mock_profile_reader):
-        def test_func(sdk, one, two, three=None, four=None):
+        def test_handler(sdk, one, two, three=None, four=None):
             if (
                 sdk == mock_sdk_client
                 and one == "testone"
@@ -168,7 +168,7 @@ class TestCommand(object):
             ):
                 return "success"
 
-        command = Command("test", "test desc", "test usage", test_func)
+        command = Command("test", "test desc", "test usage", test_handler)
         kvps = {"one": "testone", "two": "testtwo", "three": "testthree", "four": "testfour"}
         kvps = DictObject(kvps)
         assert command(kvps) == "success"
@@ -179,7 +179,7 @@ class TestCommand(object):
         mock_profile = mocker.MagicMock(spec=Code42Profile)
         mock_profile_reader.return_value = mock_profile
 
-        def test_func(sdk, profile, one, two, three=None, four=None):
+        def test_handler(sdk, profile, one, two, three=None, four=None):
             if (
                 sdk == mock_sdk_client
                 and profile == mock_profile
@@ -190,17 +190,17 @@ class TestCommand(object):
             ):
                 return "success"
 
-        command = Command("test", "test desc", "test usage", test_func)
+        command = Command("test", "test desc", "test usage", test_handler)
         kvps = {"one": "testone", "two": "testtwo", "three": "testthree", "four": "testfour"}
         kvps = DictObject(kvps)
         assert command(kvps) == "success"
 
     def test_call_when_func_with_args_calling_with_single_obj(self):
-        def test_func(args):
+        def test_handler(args):
             if args.one == "testone" and args.two == "testtwo" and args.three == "testthree":
                 return "success"
 
-        command = Command("test", "test desc", "test usage", test_func, use_single_arg_obj=True)
+        command = Command("test", "test desc", "test usage", test_handler, use_single_arg_obj=True)
         kvps = {"one": "testone", "two": "testtwo", "three": "testthree"}
         kvps = DictObject(kvps)
         assert command(kvps) == "success"
