@@ -86,6 +86,14 @@ def test_create_profile_if_user_does_not_set_password_is_created(
     mock_cliprofile_namespace.create_profile.assert_called_once_with("foo", "bar", "baz", True)
 
 
+def test_create_profile_if_user_does_not_set_password_does_not_save_password(
+    user_disagreement, mock_verify, mock_cliprofile_namespace
+):
+    mock_cliprofile_namespace.profile_exists.return_value = False
+    profilecmd.create_profile("foo", "bar", "baz", True)
+    assert not mock_cliprofile_namespace.set_password.call_count
+
+
 def test_create_profile_if_credentials_invalid_password_not_saved(
     user_agreement, mock_verify, mock_cliprofile_namespace
 ):
