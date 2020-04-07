@@ -138,5 +138,5 @@ config_accessor = ConfigAccessor(ConfigParser())
 
 
 def get_config_accessor():
-    """Create a ConfigAccessor with a ConfigParser as its parser."""
+    """Get the global ConfigAccessor with a ConfigParser as its parser."""
     return config_accessor
