@@ -106,7 +106,7 @@ class TestCommand(object):
         assert "--three" in coll["three"].settings["options_list"]
         assert "--four" in coll["four"].settings["options_list"]
 
-    def test_get_arg_configs_when_func_with_sdk_includes_profile_and_debug(self):
+    def test_get_arg_configs_when_handler_with_sdk_includes_profile_and_debug(self):
         command = Command("test", "test desc", "test usage", func_with_sdk)
         coll = command.get_arg_configs()
         assert "one" in coll["one"].settings["options_list"]
@@ -117,7 +117,7 @@ class TestCommand(object):
         assert "--debug" in coll["debug"].settings["options_list"]
         assert not coll.get("sdk")
 
-    def test_get_arg_configs_when_func_with_args_excludes_args(self):
+    def test_get_arg_configs_when_handler_with_args_excludes_args(self):
         command = Command("test", "test desc", "test usage", func_with_args)
         coll = command.get_arg_configs()
         assert not coll.get("args")
@@ -157,7 +157,7 @@ class TestCommand(object):
         kvps = DictObject(kvps)
         assert command(kvps) == "success"
 
-    def test_call_configs_when_func_with_sdk(self, mocker, mock_sdk_client, mock_profile_reader):
+    def test_call_configs_when_handler_with_sdk(self, mocker, mock_sdk_client, mock_profile_reader):
         def test_handler(sdk, one, two, three=None, four=None):
             if (
                 sdk == mock_sdk_client
@@ -173,7 +173,7 @@ class TestCommand(object):
         kvps = DictObject(kvps)
         assert command(kvps) == "success"
 
-    def test_call_configs_when_func_with_sdk_and_profile(
+    def test_call_configs_when_handler_with_sdk_and_profile(
         self, mocker, mock_sdk_client, mock_profile_reader
     ):
         mock_profile = mocker.MagicMock(spec=Code42Profile)
@@ -195,7 +195,7 @@ class TestCommand(object):
         kvps = DictObject(kvps)
         assert command(kvps) == "success"
 
-    def test_call_when_func_with_args_calling_with_single_obj(self):
+    def test_call_when_handler_with_args_calling_with_single_obj(self):
         def test_handler(args):
             if args.one == "testone" and args.two == "testtwo" and args.three == "testthree":
                 return "success"
