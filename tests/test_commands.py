@@ -122,7 +122,7 @@ class TestCommand(object):
         coll = command.get_arg_configs()
         assert not coll.get("args")
 
-    def test_call_when_keyword_args(self, mocker):
+    def test_call_when_keyword_args_passes_expected_values(self, mocker):
         def test_handler(one=None, two=None, three=None):
             if one == "testone" and two == "testtwo" and three == "testthree":
                 return "success"
@@ -132,7 +132,7 @@ class TestCommand(object):
         kvps = DictObject(kvps)
         assert command(kvps) == "success"
 
-    def test_call_when_positional_args(self, mocker):
+    def test_call_when_positional_args_passes_expected_values(self, mocker):
         def test_handler(one, two, three):
             if one == "testone" and two == "testtwo" and three == "testthree":
                 return "success"
@@ -142,7 +142,7 @@ class TestCommand(object):
         kvps = DictObject(kvps)
         assert command(kvps) == "success"
 
-    def test_call_when_mixed_args(self, mocker):
+    def test_call_when_both_positional_and_optional_args_passes_expected_values(self, mocker):
         def test_handler(one, two, three=None, four=None):
             if (
                 one == "testone"
@@ -157,7 +157,9 @@ class TestCommand(object):
         kvps = DictObject(kvps)
         assert command(kvps) == "success"
 
-    def test_call_configs_when_handler_with_sdk(self, mocker, mock_sdk_client, mock_profile_reader):
+    def test_call_when_handler_with_sdk_passes_expected_values(
+        self, mocker, mock_sdk_client, mock_profile_reader
+    ):
         def test_handler(sdk, one, two, three=None, four=None):
             if (
                 sdk == mock_sdk_client
@@ -173,7 +175,7 @@ class TestCommand(object):
         kvps = DictObject(kvps)
         assert command(kvps) == "success"
 
-    def test_call_configs_when_handler_with_sdk_and_profile(
+    def test_call_when_handler_with_sdk_and_profile_passes_expected_values(
         self, mocker, mock_sdk_client, mock_profile_reader
     ):
         mock_profile = mocker.MagicMock(spec=Code42Profile)
@@ -195,7 +197,7 @@ class TestCommand(object):
         kvps = DictObject(kvps)
         assert command(kvps) == "success"
 
-    def test_call_when_handler_with_args_calling_with_single_obj(self):
+    def test_call_when_handler_with_args_calls_with_single_obj_with_expected_values(self):
         def test_handler(args):
             if args.one == "testone" and args.two == "testtwo" and args.three == "testthree":
                 return "success"
@@ -205,7 +207,7 @@ class TestCommand(object):
         kvps = DictObject(kvps)
         assert command(kvps) == "success"
 
-    def test_call_func_with_no_handler_and_print_help(self):
+    def test_call_func_with_no_handler_and_print_help_prints_help(self):
         def dummy_print_help():
             return "success"
 
