@@ -52,6 +52,7 @@ class ConfigAccessor(object):
                 self._create_profile_section(name)
             else:
                 raise ex
+        print("create_profile")
         profile = self.parser[name]
         self._set_authority_url(server, profile)
         self._set_username(username, profile)
@@ -116,6 +117,7 @@ class ConfigAccessor(object):
 
     def _try_complete_setup(self, profile):
         if self._internal.getboolean(self.DEFAULT_PROFILE_IS_COMPLETE):
+            self._save()
             return
 
         authority = profile.get(self.AUTHORITY_KEY)
