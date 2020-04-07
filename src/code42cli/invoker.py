@@ -66,3 +66,4 @@ class CommandInvoker(object):
         except ArgumentParserError as e:
             print(u"error: {}".format(e), file=sys.stderr)
             parser.print_help(sys.stderr)
+            sys.exit(2)
