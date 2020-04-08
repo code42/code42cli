@@ -166,6 +166,33 @@ class TestConfigAccessor(object):
         with pytest.raises(Exception):
             accessor.create_profile(ConfigAccessor.DEFAULT_VALUE, "foo", "bar", False)
 
+    def test_create_profile_when_no_default_profile_sets_default(
+        self, mocker, mock_config_parser, mock_saver
+    ):
+        mock_config_parser.sections.return_value = ["Internal"]
+        mock_profile = create_mock_profile_object("ProfileA", None, None)
+        mock_internal = create_internal_object(False)
+        mock_internal["default_profile_is_complete"] = "False"
+        setup_parser_one_profile(mock_internal, mock_internal, mock_config_parser)
+        accessor = ConfigAccessor(mock_config_parser)
+        accessor.switch_default_profile = mocker.MagicMock()
+
+        accessor.create_profile("ProfileA", "example.com", "bar", False)
+        assert accessor.switch_default_profile.call_count == 1
+
+    def test_create_profile_when_has_default_profile_does_not_set_default(
+        self, mocker, mock_config_parser, mock_saver
+    ):
+        mock_config_parser.sections.return_value = ["Internal"]
+        mock_profile = create_mock_profile_object("ProfileA", None, None)
+        mock_internal = create_internal_object(True, "ProfileA")
+        setup_parser_one_profile(mock_internal, mock_internal, mock_config_parser)
+        accessor = ConfigAccessor(mock_config_parser)
+        accessor.switch_default_profile = mocker.MagicMock()
+
+        accessor.create_profile("ProfileA", "example.com", "bar", False)
+        assert not accessor.switch_default_profile.call_count
+
     def test_create_profile_when_not_existing_saves(self, mock_config_parser, mock_saver):
         mock_config_parser.sections.return_value = ["Internal"]
         mock_profile = create_mock_profile_object("ProfileA", None, None)
