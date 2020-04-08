@@ -116,6 +116,7 @@ See class documentation on the [Command](src/code42cli/commands.py) class for an
 
 6. If you have an `sdk` parameter, a parameter named `profile` will automatically contain the info of the profile that was used to create the sdk.
     - A parameter named `profile` behaves normally if you do not also have a parameter named `sdk`.
+    - A cli parameter named `--sdk` with _not_ be added in this case.
 
 7. Each command accepts a `use_single_arg_obj` bool in its constructor. If set to true, this will instead cause the handler to be called with a single object
     containing all of the args as attributes, which will be passed to a variable named `args` in your handler. Since your handler will only contain the parameter `args`,
