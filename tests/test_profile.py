@@ -8,9 +8,8 @@ from .conftest import MockSection, create_mock_profile
 @pytest.fixture
 def config_accessor(mocker):
     mock = mocker.MagicMock(spec=ConfigAccessor, name="Config Accessor")
-    factory = mocker.patch("code42cli.profile.get_config_accessor")
-    factory.return_value = mock
-    return mock
+    attr = mocker.patch("code42cli.profile.config_accessor", mock)
+    return attr
 
 
 @pytest.fixture

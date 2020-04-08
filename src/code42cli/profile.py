@@ -1,5 +1,5 @@
 import code42cli.password as password
-from code42cli.config import ConfigAccessor, get_config_accessor
+from code42cli.config import ConfigAccessor, config_accessor
 from code42cli.util import print_error, print_create_profile_help
 
 
@@ -37,8 +37,7 @@ class Code42Profile(object):
 
 def _get_profile(profile_name=None):
     """Returns the profile for the given name."""
-    accessor = get_config_accessor()
-    return Code42Profile(accessor.get_profile(profile_name))
+    return Code42Profile(config_accessor.get_profile(profile_name))
 
 
 def get_profile(profile_name=None):
@@ -67,18 +66,15 @@ def profile_exists(profile_name=None):
 
 
 def switch_default_profile(profile_name):
-    config = get_config_accessor()
-    config.switch_default_profile(profile_name)
+    config_accessor.switch_default_profile(profile_name)
 
 
 def create_profile(name, server, username, ignore_ssl_errors):
-    config = get_config_accessor()
-    config.create_profile(name, server, username, ignore_ssl_errors)
+    config_accessor.create_profile(name, server, username, ignore_ssl_errors)
 
 
 def get_all_profiles():
-    config = get_config_accessor()
-    profiles = [Code42Profile(profile) for profile in config.get_all_profiles()]
+    profiles = [Code42Profile(profile) for profile in config_accessor.get_all_profiles()]
     return profiles
 
 
