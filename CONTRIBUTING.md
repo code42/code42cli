@@ -113,7 +113,7 @@ See class documentation on the [Command](src/code42cli/commands.py) class for an
 
 5. If one of your handler's parameters is named `sdk`, you will automatically get a `--profile` argument available in the cli and the `sdk` parameter
     will automatically contain an instance of `py42.sdk.SDKClient` that was created with the given (or default) profile.
-    - A cli parameter named `--sdk` with _not_ be added in this case.
+    - A cli parameter named `--sdk` will _not_ be added in this case.
 
 6. If you have an `sdk` parameter, a parameter named `profile` will automatically contain the info of the profile that was used to create the sdk.
     - A parameter named `profile` behaves normally if you do not also have a parameter named `sdk`.
