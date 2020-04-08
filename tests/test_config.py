@@ -137,6 +137,29 @@ class TestConfigAccessor(object):
         accessor.switch_default_profile("ProfileB")
         assert mock_saver.call_count
 
+    def test_switch_default_profile_outputs_confirmation(
+        self, capsys, mock_config_parser, mock_saver
+    ):
+        mock_config_parser.sections.return_value = ["Internal", "ProfileA", "ProfileB"]
+        accessor = ConfigAccessor(mock_config_parser)
+        mock_profile_a = create_mock_profile_object("ProfileA", "test", "test")
+        mock_profile_b = create_mock_profile_object("ProfileB", "test", "test")
+
+        mock_internal = create_internal_object(True, "ProfileA")
+
+        def side_effect(item):
+            if item == "ProfileA":
+                return mock_profile_a
+            elif item == "ProfileB":
+                return mock_profile_b
+            elif item == "Internal":
+                return mock_internal
+
+        mock_config_parser.__getitem__.side_effect = side_effect
+        accessor.switch_default_profile("ProfileB")
+        capture = capsys.readouterr()
+        assert "set as the default profile" in capture.out
+
     def test_create_profile_when_given_default_name_does_not_create(self, mock_config_parser):
         mock_config_parser.sections.return_value = ["Internal", "ProfileA"]
         accessor = ConfigAccessor(mock_config_parser)
@@ -153,3 +176,17 @@ class TestConfigAccessor(object):
 
         accessor.create_profile("ProfileA", "example.com", "bar", False)
         assert mock_saver.call_count
+
+    def test_create_profile_when_not_existing_outputs_confirmation(
+        self, capsys, mock_config_parser, mock_saver
+    ):
+        mock_config_parser.sections.return_value = ["Internal"]
+        mock_profile = create_mock_profile_object("ProfileA", None, None)
+        mock_internal = create_internal_object(False)
+        mock_internal["default_profile_is_complete"] = "False"
+        setup_parser_one_profile(mock_internal, mock_internal, mock_config_parser)
+        accessor = ConfigAccessor(mock_config_parser)
+
+        accessor.create_profile("ProfileA", "example.com", "bar", False)
+        capture = capsys.readouterr()
+        assert "Successfully saved" in capture.out
