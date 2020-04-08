@@ -23,5 +23,4 @@ def validate_connection(authority_url, username, password):
         py42.sdk.from_local_account(authority_url, username, password)
         return True
     except:
-        print(username, password, authority_url)
         return False

@@ -1,46 +1,56 @@
-import json as json_module
-from argparse import Namespace
-from datetime import datetime, timedelta
-
 import pytest
+from argparse import Namespace
+from py42.sdk import SDKClient
 
-from code42cli.profile.config import ConfigAccessor
-from code42cli.profile.profile import Code42Profile
+from code42cli.config import ConfigAccessor
+from code42cli.profile import Code42Profile
 
 
 @pytest.fixture
 def namespace(mocker):
     mock = mocker.MagicMock(spec=Namespace)
-    mock.profile_name = None
-    mock.is_incremental = None
+    mock.incremental = None
     mock.advanced_query = None
-    mock.is_debug_mode = None
-    mock.begin_date = None
-    mock.end_date = None
-    mock.exposure_types = None
-    mock.c42usernames = None
-    mock.actors = None
-    mock.md5_hashes = None
-    mock.sha256_hashes = None
-    mock.sources = None
-    mock.filenames = None
-    mock.filepaths = None
-    mock.process_owners = None
-    mock.tab_urls = None
-    mock.include_non_exposure_events = None
+    mock.begin = None
+    mock.end = None
+    mock.type = None
+    mock.c42username = None
+    mock.actor = None
+    mock.md5 = None
+    mock.sha256 = None
+    mock.source = None
+    mock.filename = None
+    mock.filepath = None
+    mock.processOwner = None
+    mock.tabURL = None
+    mock.include_non_exposure = None
+    mock.format = None
+    mock.output_file = None
+    mock.server = None
+    mock.protocol = None
     return mock
 
 
 def create_profile_values_dict(authority=None, username=None, ignore_ssl=False):
     return {
-        ConfigAccessor.AUTHORITY_KEY: authority,
-        ConfigAccessor.USERNAME_KEY: username,
-        ConfigAccessor.IGNORE_SSL_ERRORS_KEY: ignore_ssl,
+        ConfigAccessor.AUTHORITY_KEY: "example.com",
+        ConfigAccessor.USERNAME_KEY: "foo",
+        ConfigAccessor.IGNORE_SSL_ERRORS_KEY: True,
     }
 
 
+@pytest.fixture
+def sdk(mocker):
+    return mocker.MagicMock(spec=SDKClient)
+
+
+@pytest.fixture()
+def mock_42(mocker):
+    return mocker.patch("py42.sdk.from_local_account")
+
+
 class MockSection(object):
-    def __init__(self, name="Test Profile Name", values_dict=None):
+    def __init__(self, name=None, values_dict=None):
         self.name = name
         self.values_dict = values_dict or create_profile_values_dict()
 
@@ -54,14 +64,9 @@ class MockSection(object):
         return self.values_dict.get(item)
 
 
-def create_mock_profile(name=None):
+def create_mock_profile(name="Test Profile Name"):
     profile_section = MockSection(name)
     profile = Code42Profile(profile_section)
-
-    def mock_get_password():
-        return "Test Password"
-
-    profile.get_password = mock_get_password
     return profile
 
 
@@ -71,23 +76,26 @@ def setup_mock_accessor(mock_accessor, name=None, values_dict=None):
     return mock_accessor
 
 
-def get_filter_value_from_json(json, filter_index):
-    return json_module.loads(str(json))["filters"][filter_index]["value"]
+@pytest.fixture
+def profile(mocker):
+    return mocker.MagicMock(spec=Code42Profile)
 
 
-def parse_date_from_filter_value(json, filter_index):
-    date_str = get_filter_value_from_json(json, filter_index)
-    return convert_str_to_date(date_str)
+def func_keyword_args(one=None, two=None, three=None, default="testdefault", nargstest=[]):
+    pass
 
 
-def convert_str_to_date(date_str):
-    return datetime.strptime(date_str, u"%Y-%m-%dT%H:%M:%S.%fZ")
+def func_positional_args(one, two, three):
+    pass
 
 
-def get_test_date(days_ago):
-    now = datetime.utcnow()
-    return now - timedelta(days=days_ago)
+def func_mixed_args(one, two, three=None, four=None):
+    pass
 
 
-def get_test_date_str(days_ago):
-    return get_test_date(days_ago).strftime("%Y-%m-%d")
+def func_with_sdk(sdk, one, two, three=None, four=None):
+    pass
+
+
+def func_with_args(args):
+    pass

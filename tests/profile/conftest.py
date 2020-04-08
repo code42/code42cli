@@ -1,3 +1,0 @@
-PROFILE_NAMESPACE = "code42cli.profile"
-CONFIG_NAMESPACE = "{0}.config".format(PROFILE_NAMESPACE)
-PASSWORD_NAMESPACE = "{0}.password".format(PROFILE_NAMESPACE)

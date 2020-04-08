@@ -1,9 +1,11 @@
-import platform
-from argparse import ArgumentParser, RawDescriptionHelpFormatter
+import sys
 
-import code42cli.securitydata.main as securitydata
-from code42cli.compat import str
-from code42cli.profile import profile
+import platform
+
+from code42cli.cmds import profile
+from code42cli.cmds.securitydata import main as secmain
+from code42cli.commands import Command
+from code42cli.invoker import CommandInvoker
 
 # If on Windows, configure console session to handle ANSI escape sequences correctly
 # source: https://bugs.python.org/issue29059
@@ -18,31 +20,22 @@ if platform.system().lower() == u"windows":
 
 
 def main():
-    description = u"""
-    Groups:
-        profile      - For managing Code42 settings.
-        securitydata - Tools for getting security related data, such as file events.
-    """
-    code42_arg_parser = ArgumentParser(
-        formatter_class=RawDescriptionHelpFormatter,
-        description=description,
-        usage=u"code42 <group> <subcommand> <optional args>",
-    )
-    subcommand_parser = code42_arg_parser.add_subparsers(title=u"groups")
-    profile.init(subcommand_parser)
-    securitydata.init_subcommand(subcommand_parser)
-    _run(code42_arg_parser)
+    top = Command("", "", subcommand_loader=_load_top_commands)
+    invoker = CommandInvoker(top)
+    invoker.run(sys.argv[1:])
 
 
-def _run(parser):
-    try:
-        args = parser.parse_args()
-        args.func(args)
-    except AttributeError as ex:
-        if str(ex) == u"'Namespace' object has no attribute 'func'":
-            parser.print_help()
-            return
-        raise ex
+def _load_top_commands():
+    return [
+        Command(
+            u"profile", u"For managing Code42 settings.", subcommand_loader=profile.load_subcommands
+        ),
+        Command(
+            u"securitydata",
+            u"Tools for getting security related data, such as file events.",
+            subcommand_loader=secmain.load_subcommands,
+        ),
+    ]
 
 
 if __name__ == "__main__":
