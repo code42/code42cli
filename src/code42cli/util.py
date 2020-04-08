@@ -55,13 +55,13 @@ def is_interactive():
 
 def print_no_existing_profile_message():
     print_error(u"No existing profile.")
-    print_set_profile_help()
+    print_create_profile_help()
 
 
-def print_set_profile_help():
+def print_create_profile_help():
     print(u"")
     print(u"To add a profile, use: ")
-    print_bold(u"\tcode42 profile set --profile <profile-name> -s <authority-URL> -u <username>")
+    print_bold(u"\tcode42 profile create <profile-name> <authority-URL> <username>")
     print(u"")
 
 

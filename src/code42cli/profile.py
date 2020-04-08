@@ -1,6 +1,6 @@
 import code42cli.password as password
 from code42cli.config import ConfigAccessor, get_config_accessor
-from code42cli.util import print_error, print_set_profile_help
+from code42cli.util import print_error, print_create_profile_help
 
 
 class Code42Profile(object):
@@ -46,7 +46,7 @@ def get_profile(profile_name=None):
         return _get_profile(profile_name)
     except Exception as ex:
         print_error(str(ex))
-        print_set_profile_help()
+        print_create_profile_help()
         exit(1)
 
 
