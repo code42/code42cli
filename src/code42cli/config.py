@@ -118,7 +118,7 @@ class ConfigAccessor(object):
         print(u"Successfully saved profile '{}'.".format(profile.name))
 
         default_profile = self._internal.get(self.DEFAULT_PROFILE)
-        if default_profile is None or default_profile is self.DEFAULT_VALUE:
+        if default_profile is None or default_profile == self.DEFAULT_VALUE:
             self.switch_default_profile(profile.name)
 
 
