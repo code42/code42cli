@@ -64,6 +64,7 @@ class ConfigAccessor(object):
             raise Exception(u"Profile does not exist.")
         self._internal[self.DEFAULT_PROFILE] = new_default_name
         self._save()
+        print(u"{} has been set as the default profile.".format(new_default_name))
 
     def _set_authority_url(self, new_value, profile):
         profile[self.AUTHORITY_KEY] = new_value.strip()
@@ -99,18 +100,11 @@ class ConfigAccessor(object):
         self.parser[name][self.AUTHORITY_KEY] = self.DEFAULT_VALUE
         self.parser[name][self.USERNAME_KEY] = self.DEFAULT_VALUE
         self.parser[name][self.IGNORE_SSL_ERRORS_KEY] = str(False)
-        default_profile = self._internal.get(self.DEFAULT_PROFILE)
-        if default_profile is None or default_profile is self.DEFAULT_VALUE:
-            self._internal[self.DEFAULT_PROFILE] = name
 
     def _save(self):
         util.open_file(self.path, u"w+", lambda file: self.parser.write(file))
 
     def _try_complete_setup(self, profile):
-        if self._internal.getboolean(self.DEFAULT_PROFILE_IS_COMPLETE):
-            self._save()
-            return
-
         authority = profile.get(self.AUTHORITY_KEY)
         username = profile.get(self.USERNAME_KEY)
 
@@ -120,11 +114,12 @@ class ConfigAccessor(object):
         if not authority_valid or not username_valid:
             return
 
-        self._internal[self.DEFAULT_PROFILE_IS_COMPLETE] = str(True)
-        if self._internal[self.DEFAULT_PROFILE] == self.DEFAULT_VALUE:
-            self._internal[self.DEFAULT_PROFILE] = profile.name
-
         self._save()
+        print(u"Successfully saved profile '{}'.".format(profile.name))
+
+        default_profile = self._internal.get(self.DEFAULT_PROFILE)
+        if default_profile is None or default_profile is self.DEFAULT_VALUE:
+            self.switch_default_profile(profile.name)
 
 
 config_accessor = ConfigAccessor(ConfigParser())
