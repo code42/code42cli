@@ -10,7 +10,7 @@ def generate_template(handler, path=None):
     """Looks at the parameter names of `handler` and creates a csv file with the same column names.
     """
     if callable(handler):
-        argspec = inspect.getfullargspec(handler)
+        argspec = inspect.signature(handler)
         columns = [str(arg) for arg in argspec.args if arg not in [u"sdk", u"profile"]]
         path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))
         with open(path, u"w", encoding=u"utf8") as new_csv:
