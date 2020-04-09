@@ -93,7 +93,7 @@ def _get_group_help(command):
     descriptions = _build_group_command_descriptions(command)
     output = []
     name = command.name
-    if not command.name:
+    if not name:
         name = u"code42"
         output.append(BANNER)
 
