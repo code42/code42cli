@@ -66,6 +66,13 @@ class ConfigAccessor(object):
         self._save()
         print(u"{} has been set as the default profile.".format(new_default_name))
 
+    def delete_profile(self, name):
+        """Deletes a profile."""
+        if self.get_profile(name) is None:
+            raise Exception(u"Profile does not exist.")
+        self.parser.remove_section(name)
+        self._save()
+
     def _set_authority_url(self, new_value, profile):
         profile[self.AUTHORITY_KEY] = new_value.strip()
 
