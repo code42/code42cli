@@ -1,6 +1,11 @@
 import code42cli.password as password
 from code42cli.config import ConfigAccessor, config_accessor
-from code42cli.util import print_error, print_create_profile_help
+from code42cli.util import (
+    print_error,
+    print_create_profile_help,
+    print_set_default_profile_help,
+    print_no_existing_profile_message,
+)
 
 
 class Code42Profile(object):
@@ -41,6 +46,8 @@ def _get_profile(profile_name=None):
 
 
 def get_profile(profile_name=None):
+    if profile_name is None:
+        validate_default_profile()
     try:
         return _get_profile(profile_name)
     except Exception as ex:
@@ -55,6 +62,16 @@ def default_profile_exists():
         return profile.name and profile.name != ConfigAccessor.DEFAULT_VALUE
     except Exception:
         return False
+
+
+def validate_default_profile():
+    if not default_profile_exists():
+        existing_profiles = get_all_profiles()
+        if not existing_profiles:
+            print_no_existing_profile_message()
+        else:
+            print_set_default_profile_help(existing_profiles)
+        exit(1)
 
 
 def profile_exists(profile_name=None):
