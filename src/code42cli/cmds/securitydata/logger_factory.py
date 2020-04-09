@@ -1,14 +1,14 @@
-import sys
-
 import logging
+import sys
+from logging.handlers import RotatingFileHandler
+from threading import Lock
+
 from c42eventextractor.logging.formatters import (
     FileEventDictToCEFFormatter,
     FileEventDictToJSONFormatter,
     FileEventDictToRawJSONFormatter,
 )
 from c42eventextractor.logging.handlers import NoPrioritySysLogHandlerWrapper
-from logging.handlers import RotatingFileHandler
-from threading import Lock
 
 from code42cli.cmds.securitydata.enums import OutputFormat
 from code42cli.compat import str

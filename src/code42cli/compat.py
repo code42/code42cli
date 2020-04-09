@@ -21,6 +21,8 @@ if is_py2:
     open = io.open
 
     import repr as reprlib
+
+    import Queue as queue
 else:
     from urllib.parse import urljoin, urlparse
 
@@ -28,3 +30,5 @@ else:
     open = open
 
     import reprlib
+
+    import queue

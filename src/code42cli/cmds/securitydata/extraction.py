@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import json
+
 from c42eventextractor import FileEventHandlers
 from c42eventextractor.extractors import FileEventExtractor
 from py42.sdk.queries.fileevents.filters import *

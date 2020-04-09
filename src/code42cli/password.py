@@ -1,7 +1,8 @@
 from __future__ import print_function
 
-import keyring
 from getpass import getpass
+
+import keyring
 
 from code42cli.util import does_user_agree
 

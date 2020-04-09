@@ -11,16 +11,16 @@ class DictObject(object):
 
 
 class Command(object):
-    """Represents a function that a CLI user can execute. Add a command to 
+    """Represents a function that a CLI user can execute. Add a command to
     `code42cli.main._load_top_commands` or as a subcommand of one those
     commands to make it available for use.
 
     Args:
-        name (str): The name of the command. For example, in
+        name (str or unicode): The name of the command. For example, in
             `code42 profile show`, "show" is the name, while "profile"
             is the name of the parent command.
 
-        description (str): Descriptive text to be displayed when using -h.
+        description (str or unicode): Descriptive text to be displayed when using -h.
 
         usage (str, optional): A usage example to be displayed when using -h.
         handler (function, optional): The function to be exectued when the command is run.

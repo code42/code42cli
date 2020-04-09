@@ -13,6 +13,9 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Added
 
 - `code42 profile create` command.
+- `code42 detectionlists departingemployee commands`:
+    - `init-csv`
+    - `add`
 
 ### Removed
 
