@@ -50,7 +50,7 @@ def get_auto_arg_configs(handler):
     arg_configs = ArgConfigCollection()
     if callable(handler):
         # get the number of positional and keyword args
-        argspec = inspect.getargspec(handler)
+        argspec = inspect.getfullargspec(handler)
         num_args = len(argspec.args)
         num_kw_args = len(argspec.defaults) if argspec.defaults else 0
 
