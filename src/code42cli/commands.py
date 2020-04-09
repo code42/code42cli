@@ -123,7 +123,7 @@ def _inject_params(kvps, handler):
 
 
 def _handler_has_arg(arg_name, handler):
-    argspec = inspect.signature(handler)
+    argspec = inspect.getargspec(handler)
     return arg_name in argspec.args
 
 
