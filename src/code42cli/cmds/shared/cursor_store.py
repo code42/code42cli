@@ -33,6 +33,13 @@ class BaseCursorStore(object):
         with self._connection as conn:
             conn.execute(query, (new_value, primary_key))
 
+    def _delete(self, column_name, primary_key):
+        query = u"DELETE FROM {0} WHERE {1}=?".format(
+            self._table_name, self._PRIMARY_KEY_COLUMN_NAME
+        )
+        with self._connection as conn:
+            conn.execute(query, (primary_key, ))
+
     def _row_exists(self, primary_key):
         query = u"SELECT * FROM {0} WHERE {1}=?"
         query = query.format(self._table_name, self._PRIMARY_KEY_COLUMN_NAME)
@@ -85,6 +92,10 @@ class FileEventCursorStore(BaseCursorStore):
             new_value=new_insertion_timestamp,
             primary_key=self._primary_key,
         )
+
+    def clean(self):
+        """Removes profile cursor data from store."""
+        self._delete(_INSERTION_TIMESTAMP_FIELD_NAME, self._primary_key)
 
     def _init_table(self):
         columns = u"{0}, {1}".format(self._PRIMARY_KEY_COLUMN_NAME, _INSERTION_TIMESTAMP_FIELD_NAME)
