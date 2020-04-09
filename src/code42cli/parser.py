@@ -4,10 +4,10 @@ from py42.__version__ import __version__ as py42version
 
 from code42cli.__version__ import __version__ as cliversion
 
-BANNER = u""" 
- dP""b8  dP"Yb  8888b. 888888  dP88  oP"Yb. 
-dP   `" dP   Yb 8I  Yb 88__   dP 88  "' dP' 
-Yb      Yb   dP 8I  dY 88""  d888888   dP'  
+BANNER = u"""
+ dP""b8  dP"Yb  8888b. 888888  dP88  oP"Yb.
+dP   `" dP   Yb 8I  Yb 88__   dP 88  "' dP'
+Yb      Yb   dP 8I  dY 88""  d888888   dP'
  YboodP  YbodP  8888Y" 888888    88  .d8888
 
 code42cli version {}, by Code42 Software.
@@ -92,17 +92,17 @@ def _add_argument(parser, arg_settings):
 def _get_group_help(command):
     descriptions = _build_group_command_descriptions(command)
     output = []
+    name = command.name
     if not command.name:
         name = u"code42"
         output.append(BANNER)
 
-    output.extend([u" \nAvailable commands in <{}>:".format(command.name), descriptions])
+    output.extend([u" \nAvailable commands in <{}>:".format(name), descriptions])
     return "\n".join(output)
 
 
 def _build_group_command_descriptions(command):
     subs = command.subcommands
-    name = command.name
     name_width = len(max([cmd.name for cmd in subs], key=len))
     lines = [u"  {} - {}".format(cmd.name.ljust(name_width), cmd.description) for cmd in subs]
     return u"\n".join(lines)
