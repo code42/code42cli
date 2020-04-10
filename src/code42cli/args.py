@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import inspect
 
 PROFILE_HELP = u"The name of the Code42 profile use when executing this command."
@@ -31,7 +32,7 @@ class ArgConfig(object):
 
 class ArgConfigCollection(object):
     def __init__(self):
-        self._arg_configs = {}
+        self._arg_configs = OrderedDict()
 
     @property
     def arg_configs(self):
