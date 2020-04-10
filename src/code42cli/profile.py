@@ -1,4 +1,5 @@
 import code42cli.password as password
+from code42cli.cmds.shared.cursor_store import FileEventCursorStore
 from code42cli.config import ConfigAccessor, config_accessor
 from code42cli.util import (
     print_error,
@@ -90,6 +91,14 @@ def create_profile(name, server, username, ignore_ssl_errors):
     config_accessor.create_profile(name, server, username, ignore_ssl_errors)
 
 
+def delete_profile(profile_name):
+    profile = _get_profile(profile_name)
+    if password.get_stored_password(profile) is not None:
+        password.delete_password(profile)
+    FileEventCursorStore(profile_name).clean()
+    config_accessor.delete_profile(profile_name)
+
+
 def get_all_profiles():
     profiles = [Code42Profile(profile) for profile in config_accessor.get_all_profiles()]
     return profiles
@@ -103,3 +112,4 @@ def get_stored_password(profile_name=None):
 def set_password(new_password, profile_name=None):
     profile = get_profile(profile_name)
     password.set_password(profile, new_password)
+
