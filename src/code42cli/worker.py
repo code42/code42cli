@@ -13,6 +13,13 @@ class Worker(object):
         self.__start_lock = Lock()
 
     def do_async(self, func, *args, **kwargs):
+        """Execute the given func asynchronously given *args and **kwargs.
+        
+        Args:
+            func (callable): The function to execute asynchronously.
+            *args (iter): Positional args to pass to the function.
+            **kwargs (dict): Key-value args to pass to the function.
+        """
         if not self.__started:
             with self.__start_lock:
                 if not self.__started:
@@ -21,6 +28,8 @@ class Worker(object):
         self._queue.put({u"func": func, u"args": args, u"kwargs": kwargs})
 
     def wait(self):
+        """Wait for the tasks in the queue to complete. This should usually be called before 
+        program termination."""
         self._queue.join()
 
     def _process_queue(self):

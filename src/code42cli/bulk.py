@@ -18,12 +18,29 @@ def generate_template(handler, path=None):
 
 
 class BulkProcessor(object):
+    """A class for bulk processing a csv file asynchronously. 
+    
+    Args:
+        csv_file_path (str): The path to the csv file for processing.
+        row_handler (callable): To be executed on each row given **kwargs representing the column 
+            names mapped to the properties found in the row. For example, if the csv file header 
+            looked like `prop_a,prop_b` and the next row looked like `1,test`, then row handler 
+            would receive args `{'prop_a': '1', 'prop_b': 'test'}` when processing row 1.
+    """
+
     def __init__(self, csv_file_path, row_handler):
         self.csv_file_path = csv_file_path
-        self.row_handler = row_handler
+        self._row_handler = row_handler
         self.__worker = Worker(5)
 
+    @property
+    def row_handler(self):
+        """A `callable` property to be executed on each row in the csv file."""
+        return self._row_handler
+
     def run(self):
+        """Process the csv file specified in the ctor, calling `self.row_handler` on each row 
+        asynchronously."""
         with open(self.csv_file_path, newline=u"") as csv_file:
             rows = csv.DictReader(csv_file)
             self._process_rows(rows)
@@ -31,7 +48,4 @@ class BulkProcessor(object):
 
     def _process_rows(self, rows):
         for row in rows:
-            self.__worker.do_async(self._process_row, **row)
-
-    def _process_row(self, **kwargs):
-        self.row_handler(**kwargs)
+            self.__worker.do_async(lambda **kwargs: self.row_handler(**kwargs), **row)
