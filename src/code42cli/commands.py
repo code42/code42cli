@@ -101,15 +101,25 @@ class Command(object):
 
 
 def _get_arg_kvps(parsed_args, handler):
-    # transform parsed args from argparse into a dict
+    # transform parsed args from `argparse` into a dict
     kvps = dict(vars(parsed_args))
     kvps.pop(u"func", None)
     return _inject_params(kvps, handler)
 
 
 def _inject_params(kvps, handler):
-    """automatically populates parameters named "sdk" or "profile" with instances of the sdk
-    and profile, respectively."""
+    """Automatically populates parameters named "sdk" or "profile" with instances of the sdk and 
+    profile, respectively.
+
+    Args:
+        kvps (dict): A dictionary of the parsed command line arguments.
+        handler (callable): The function or command responsible for processing the command line 
+            arguments.
+
+    Returns:
+        dict: The dictionary of parsed command line arguments with possibly additional populated 
+            fields.
+    """
     if _handler_has_arg(u"sdk", handler):
         profile_name = kvps.pop(u"profile", None)
         debug = kvps.pop(u"debug", None)

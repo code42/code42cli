@@ -17,6 +17,11 @@ def generate_template(handler, path=None):
             new_csv.write(u",".join(columns))
 
 
+def create_bulk_processor(csv_file_path, row_handler):
+    """A factory method to create the bulk processor, useful for testing purposes."""
+    return BulkProcessor(csv_file_path, row_handler)
+
+
 class BulkProcessor(object):
     """A class for bulk processing a csv file asynchronously. 
     

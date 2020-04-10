@@ -1,4 +1,4 @@
-from code42cli.bulk import generate_template, BulkProcessor
+from code42cli.bulk import generate_template, create_bulk_processor
 from code42cli.commands import Command
 
 
@@ -47,7 +47,7 @@ def bulk_add_high_risk_employees(sdk, profile, csv_file):
         profile (Code42Profile): The profile under which to execute this command.
         csv_file (str): The path to the csv file containing rows of users.
     """
-    processor = BulkProcessor(
+    processor = create_bulk_processor(
         csv_file, lambda **kwargs: add_high_risk_employee(sdk, profile, **kwargs)
     )
     processor.run()
@@ -62,7 +62,6 @@ def add_high_risk_employee(sdk, profile, user_id, risk_factors=None):
         user_id (str): The ID for the user profile in detection lists.
         risk_factors (iter[str]): The list of risk factors associated with the user.
     """
-    pass
 
 
 def _load_add_description(argument_collection):
