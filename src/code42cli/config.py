@@ -71,6 +71,8 @@ class ConfigAccessor(object):
         if self.get_profile(name) is None:
             raise Exception(u"Profile does not exist.")
         self.parser.remove_section(name)
+        if name == self._default_profile_name:
+            self._internal[self.DEFAULT_PROFILE] = self.DEFAULT_VALUE
         self._save()
 
     def _set_authority_url(self, new_value, profile):
