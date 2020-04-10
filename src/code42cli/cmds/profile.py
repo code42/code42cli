@@ -3,7 +3,7 @@ from __future__ import print_function
 from getpass import getpass
 
 import code42cli.profile as cliprofile
-from code42cli.args import PROFILE_HELP
+from code42cli.args import PROFILE_HELP, ArgConfig
 from code42cli.commands import Command
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree, print_error, print_no_existing_profile_message
@@ -48,10 +48,24 @@ def load_subcommands():
         u"Create profile settings. The first profile created will be the default.",
         u"{} {}".format(usage_prefix, u"create <profile-name> <server-address> <username>"),
         handler=create_profile,
-        arg_customizer=_load_profile_create_descripions,
+        arg_customizer=_load_profile_create_descriptions,
     )
 
-    return [show, list_all, use, reset_pw, create]
+    delete = Command(
+        u"delete",
+        "Deletes a profile and its stored password (if any).",
+        u"{} {}".format(usage_prefix, u"delete <profile-name>"),
+        handler=delete_profile,
+    )
+
+    delete_all = Command(
+        u"delete-all",
+        u"Deletes all profiles and saved passwords (if any).",
+        u"{} {}".format(usage_prefix, u"delete-all"),
+        handler=delete_all_profiles,
+    )
+
+    return [show, list_all, use, reset_pw, create, delete, delete_all]
 
 
 def show_profile(profile=None):
@@ -105,12 +119,31 @@ def use_profile(profile):
     cliprofile.switch_default_profile(profile)
 
 
+def delete_profile(name):
+    if cliprofile.default_profile_exists():
+        default = cliprofile.get_profile()
+        if name == default.name:
+            if not does_user_agree(u"{} is currently the default profile, are you sure? (y/n): ".format(name)):
+                return
+    cliprofile.delete_profile(name)
+
+
+def delete_all_profiles():
+    existing_profiles = cliprofile.get_all_profiles()
+    print(u"\nAre you sure you want to delete the following profiles?")
+    for profile in existing_profiles:
+        print(u"\t{}".format(profile.name))
+    if does_user_agree(u"\nThis will also delete any stored passwords and checkpoints. (y/n): "):
+        for profile in existing_profiles:
+            cliprofile.delete_profile(profile.name)
+
+
 def _load_profile_description(argument_collection):
     profile = argument_collection.arg_configs["profile"]
     profile.set_help(PROFILE_HELP)
 
 
-def _load_profile_create_descripions(argument_collection):
+def _load_profile_create_descriptions(argument_collection):
     profile = argument_collection.arg_configs["profile"]
     server = argument_collection.arg_configs["server"]
     username = argument_collection.arg_configs["username"]
