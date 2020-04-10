@@ -106,16 +106,16 @@ def use_profile(profile):
 
 
 def _load_profile_description(argument_collection):
-    profile = argument_collection.arg_configs["profile"]
+    profile = argument_collection.arg_configs[u"profile"]
     profile.set_help(PROFILE_HELP)
 
 
 def _load_profile_create_descriptions(argument_collection):
-    profile = argument_collection.arg_configs["profile"]
-    server = argument_collection.arg_configs["server"]
-    username = argument_collection.arg_configs["username"]
-
-    disable_ssl_errors = argument_collection.arg_configs["disable_ssl_errors"]
+    profile = argument_collection.arg_configs[u"profile"]
+    server = argument_collection.arg_configs[u"server"]
+    username = argument_collection.arg_configs[u"username"]
+    disable_ssl_errors = argument_collection.arg_configs[u"disable_ssl_errors"]
+    
     profile.set_help(u"The name to give the profile being created.")
     server.set_help(u"The url and port of the Code42 server.")
     username.set_help(u"The username of the Code42 API user.")

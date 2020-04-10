@@ -18,10 +18,9 @@ def generate_template(handler, path=None):
 
 
 class BulkProcessor(object):
-    def __init__(self, csv_file_path, row_handler, primary_key):
+    def __init__(self, csv_file_path, row_handler):
         self.csv_file_path = csv_file_path
         self.row_handler = row_handler
-        self.primary_key = primary_key
         self.__worker = Worker(5)
 
     def run(self):

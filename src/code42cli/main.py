@@ -31,12 +31,12 @@ def _load_top_commands():
             u"profile", u"For managing Code42 settings.", subcommand_loader=profile.load_subcommands
         ),
         Command(
-            u"security-data",
+            u"securitydata",
             u"Tools for getting security related data, such as file events.",
             subcommand_loader=secmain.load_subcommands,
         ),
         Command(
-            u"detectionlists",
+            u"detection-lists",
             u"For adding and removing employees from detection lists.",
             subcommand_loader=dlmain.load_subcommands,
         ),
