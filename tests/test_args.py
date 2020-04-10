@@ -70,3 +70,23 @@ class TestArgConfigCollection(object):
         assert len(coll.arg_configs) == 2
         assert coll.arg_configs["one"] == arg_config1
         assert coll.arg_configs["two"] == arg_config2
+
+    def test_arg_configs_are_in_same_order_as_added(self):
+        arg_config1 = ArgConfig("--test")
+        arg_config2 = ArgConfig("--test2")
+        arg_config3 = ArgConfig("--test3")
+
+        coll = ArgConfigCollection()
+        coll.append("test3", arg_config3)
+        coll.append("test1", arg_config1)
+        coll.append("test2", arg_config2)
+
+        for position, key in enumerate(coll.arg_configs):
+            if position == 0:
+                assert coll.arg_configs[key] == arg_config3
+
+            if position == 1:
+                assert coll.arg_configs[key] == arg_config1
+
+            if position == 2:
+                assert coll.arg_configs[key] == arg_config2
