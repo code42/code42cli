@@ -48,7 +48,7 @@ def load_subcommands():
         u"Create profile settings. The first profile created will be the default.",
         u"{} {}".format(usage_prefix, u"create <profile-name> <server-address> <username>"),
         handler=create_profile,
-        arg_customizer=_load_profile_create_descripions,
+        arg_customizer=_load_profile_create_descriptions,
     )
 
     return [show, list_all, use, reset_pw, create]
@@ -110,7 +110,7 @@ def _load_profile_description(argument_collection):
     profile.set_help(PROFILE_HELP)
 
 
-def _load_profile_create_descripions(argument_collection):
+def _load_profile_create_descriptions(argument_collection):
     profile = argument_collection.arg_configs["profile"]
     server = argument_collection.arg_configs["server"]
     username = argument_collection.arg_configs["username"]

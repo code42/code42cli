@@ -10,9 +10,4 @@ def load_subcommands():
             u"Add or remove users from the `departing employee` detection list.",
             subcommand_loader=de.load_subcommands,
         ),
-        # Command(
-        #     u"hishrisk",
-        #     u"Add ore remove users from the `high risk` detection list.",
-        #     subcommand_loader=high_risk.load_subcommands,
-        # ),
     ]

@@ -3,7 +3,7 @@ import inspect
 import csv
 
 from code42cli.compat import open, str
-from code42cli.worker import WorkerGroup
+from code42cli.worker import Worker
 
 
 def generate_template(handler, path=None):
@@ -22,18 +22,17 @@ class BulkProcessor(object):
         self.csv_file_path = csv_file_path
         self.row_handler = row_handler
         self.primary_key = primary_key
-        self.__workers = WorkerGroup(row_handler)
+        self.__worker = Worker(5)
 
     def run(self):
         with open(self.csv_file_path, newline=u"") as csv_file:
             rows = csv.DictReader(csv_file)
             self._process_rows(rows)
-        self.__workers.wait_all()
+        self.__worker.wait()
 
     def _process_rows(self, rows):
         for row in rows:
-            worker = self.__workers.add_and_get_worker(row[self.primary_key])
-            worker.do_async(self._process_row, **row)
+            self.__worker.do_async(self._process_row, **row)
 
     def _process_row(self, **kwargs):
         self.row_handler(**kwargs)
