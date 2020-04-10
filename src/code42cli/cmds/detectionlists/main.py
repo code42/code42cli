@@ -1,5 +1,4 @@
 import code42cli.cmds.detectionlists.departing_employee as de
-import code42cli.cmds.detectionlists.high_risk as high_risk
 from code42cli.commands import Command
 
 
