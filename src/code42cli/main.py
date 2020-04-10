@@ -31,7 +31,7 @@ def _load_top_commands():
             u"profile", u"For managing Code42 settings.", subcommand_loader=profile.load_subcommands
         ),
         Command(
-            u"securitydata",
+            u"security-data",
             u"Tools for getting security related data, such as file events.",
             subcommand_loader=secmain.load_subcommands,
         ),

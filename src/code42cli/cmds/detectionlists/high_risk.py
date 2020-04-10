@@ -11,7 +11,7 @@ def load_subcommands():
     add = Command(
         u"add",
         u"Add a user to the departing employee detection list.",
-        handler=add_departing_employee,
+        handler=add_high_risk_employee,
     )
     return [bulk, add]
 
@@ -25,23 +25,20 @@ def load_bulk_subcommands():
     add = Command(
         u"add",
         u"Bulk add users to the departing employee detection list using a .csv file.",
-        handler=bulk_add_departing_employees
+        handler=bulk_add_high_risk_employees
     )
     return [gen_template, add]
 
 def create_csv_file(path=None):
-    generate_template(add_departing_employee, path)
+    generate_template(add_high_risk_employee, path)
 
 
-
-
-
-def add_departing_employee(sdk, profile, user_id, departure_date=None):
+def add_high_risk_employee(sdk, profile, user_id, departure_date=None):
     # sdk.detectionlists.departing_employee.create(user_id, departure_date=departure_date)
     pass
 
 
-def bulk_add_departing_employees(sdk, profile, csv_file):
+def bulk_add_high_risk_employees(sdk, profile, csv_file):
     """Takes a csv file in the form `user_id,departure_date` with each row representing an 
     employee and adds each employee to the departing employee detection list in a bulk fasion.
     
@@ -51,6 +48,6 @@ def bulk_add_departing_employees(sdk, profile, csv_file):
         csv_file (_io.TextIOWrapper): The csv containing rows of users.
     """
     processor = BulkProcessor(
-        csv_file, lambda **kwargs: add_departing_employee(sdk, profile, **kwargs), u"user_id"
+        csv_file, lambda **kwargs: add_high_risk_employee(sdk, profile, **kwargs), u"user_id"
     )
     processor.run()
