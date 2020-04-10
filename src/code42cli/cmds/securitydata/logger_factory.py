@@ -1,7 +1,5 @@
 import logging
 import sys
-from logging.handlers import RotatingFileHandler
-from threading import Lock
 
 from c42eventextractor.logging.formatters import (
     FileEventDictToCEFFormatter,
@@ -11,10 +9,8 @@ from c42eventextractor.logging.formatters import (
 from c42eventextractor.logging.handlers import NoPrioritySysLogHandlerWrapper
 
 from code42cli.cmds.securitydata.enums import OutputFormat
-from code42cli.compat import str
-from code42cli.util import get_url_parts, get_user_project_path, print_error
-
-_logger_deps_lock = Lock()
+from code42cli.util import get_url_parts, print_error
+from code42cli.logger import logger_has_handlers, logger_deps_lock, apply_logger_dependencies
 
 
 def get_logger_for_stdout(output_format):
@@ -24,11 +20,11 @@ def get_logger_for_stdout(output_format):
             output_format: CEF, JSON, or RAW_JSON. Each type results in a different logger instance.
     """
     logger = logging.getLogger(u"code42_stdout_{0}".format(output_format.lower()))
-    if _logger_has_handlers(logger):
+    if logger_has_handlers(logger):
         return logger
 
-    with _logger_deps_lock:
-        if not _logger_has_handlers(logger):
+    with logger_deps_lock:
+        if not logger_has_handlers(logger):
             handler = logging.StreamHandler(sys.stdout)
             return _init_logger(logger, handler, output_format)
     return logger
@@ -42,11 +38,11 @@ def get_logger_for_file(filename, output_format):
             output_format: CEF, JSON, or RAW_JSON. Each type results in a different logger instance.
     """
     logger = logging.getLogger(u"code42_file_{0}".format(output_format.lower()))
-    if _logger_has_handlers(logger):
+    if logger_has_handlers(logger):
         return logger
 
-    with _logger_deps_lock:
-        if not _logger_has_handlers(logger):
+    with logger_deps_lock:
+        if not logger_has_handlers(logger):
             handler = logging.FileHandler(filename, delay=True, encoding="utf-8")
             return _init_logger(logger, handler, output_format)
     return logger
@@ -61,11 +57,11 @@ def get_logger_for_server(hostname, protocol, output_format):
             output_format: CEF, JSON, or RAW_JSON. Each type results in a different logger instance.
     """
     logger = logging.getLogger(u"code42_syslog_{0}".format(output_format.lower()))
-    if _logger_has_handlers(logger):
+    if logger_has_handlers(logger):
         return logger
 
-    with _logger_deps_lock:
-        if not _logger_has_handlers(logger):
+    with logger_deps_lock:
+        if not logger_has_handlers(logger):
             url_parts = get_url_parts(hostname)
             port = url_parts[1] or 514
             try:
@@ -79,40 +75,10 @@ def get_logger_for_server(hostname, protocol, output_format):
     return logger
 
 
-def get_error_logger():
-    """Gets the logger where exceptions are logged."""
-    log_path = get_user_project_path(u"log")
-    log_path = u"{0}/code42_errors.log".format(log_path)
-    logger = logging.getLogger(u"code42_error_logger")
-    if _logger_has_handlers(logger):
-        return logger
-
-    with _logger_deps_lock:
-        if not _logger_has_handlers(logger):
-            formatter = logging.Formatter(u"%(asctime)s %(message)s")
-            handler = RotatingFileHandler(log_path, maxBytes=250000000, encoding="utf-8")
-            return _apply_logger_dependencies(logger, handler, formatter)
-    return logger
-
-
-def _logger_has_handlers(logger):
-    return len(logger.handlers)
-
-
 def _init_logger(logger, handler, output_format):
     formatter = _get_formatter(output_format)
     logger.setLevel(logging.INFO)
-    return _apply_logger_dependencies(logger, handler, formatter)
-
-
-def _apply_logger_dependencies(logger, handler, formatter):
-    try:
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-    except Exception as ex:
-        print_error(str(ex))
-        exit(1)
-    return logger
+    return apply_logger_dependencies(logger, handler, formatter)
 
 
 def _get_formatter(output_format):

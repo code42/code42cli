@@ -1,14 +1,14 @@
-import traceback
 from threading import Thread, Lock
 
 from code42cli.compat import queue
-from code42cli.util import print_error
+from code42cli.logger import get_error_logger
 
 
 class Worker(object):
     def __init__(self, thread_count):
         self._queue = queue.Queue()
         self._thread_count = thread_count
+        self._error_logger = get_error_logger()
         self.__started = False
         self.__start_lock = Lock()
 
@@ -40,9 +40,8 @@ class Worker(object):
                 args = task[u"args"]
                 kwargs = task[u"kwargs"]
                 func(*args, **kwargs)
-            except Exception:
-                trace = traceback.format_exc()
-                print_error(u"Failed to process row. Trace: {0}".format(trace))
+            except Exception as ex:
+                self._error_logger.error(ex)
             finally:
                 self._queue.task_done()
 
