@@ -88,7 +88,7 @@ def _load_add_description(argument_collection):
 def _load_bulk_generate_template_description(argument_collection):
     cmd_type = argument_collection.arg_configs[u"cmd"]
     cmd_type.set_help(u"The type of command the template with be used for.")
-    cmd_type.set_choices([u"add", u"remove"])
+    cmd_type.set_choices(BulkCommandType())
 
 
 def _load_bulk_add_description(argument_collection):
