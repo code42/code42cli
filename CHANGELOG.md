@@ -16,7 +16,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - `code42 detection-lists high-risk` commands:
     - `bulk`
         - `add`: adds a csv list of users to the high risk detection list.
-        - `gen-template`: generates a template to use for `add`.
+        - `gen-template`: generates a template to use for the given command type, such as `add`.
     - `add`: adds a user to high risk detection list.
 
 ### Removed
