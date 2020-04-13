@@ -1,15 +1,20 @@
+import pytest
+
 from code42cli.cmds.detectionlists.high_risk import (
     generate_csv_file,
     add_high_risk_employee,
     bulk_add_high_risk_employees,
 )
 
+@pytest.fixture
+def bulk_template_generator(mocker):
+    return mocker.patch("code42cli.cmds.detectionlists.high_risk.generate_template")
 
-def test_create_csv_file_generates_template(mocker):
-    gen_mock = mocker.patch("code42cli.cmds.detectionlists.high_risk.generate_template")
+
+def test_generate_csv_file_generates_template(bulk_template_generator):
     path = "some/path"
-    generate_csv_file(path)
-    gen_mock.assert_called_once_with(add_high_risk_employee, path)
+    generate_csv_file("add", path)
+    bulk_template_generator.assert_called_once_with(add_high_risk_employee, path)
 
 
 def test_bulk_add_high_risk_employees_runs(mocker, bulk_processor, sdk, profile):
