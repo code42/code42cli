@@ -1,3 +1,4 @@
+from code42cli.cmds.detectionlists.enums import BulkCommandType
 from code42cli.bulk import generate_template, create_bulk_processor
 from code42cli.commands import Command
 
@@ -22,6 +23,7 @@ def load_bulk_subcommands():
         u"gen-template",
         u"Generates the necessary csv template needed for bulk adding users.",
         handler=generate_csv_file,
+        arg_customizer=_load_bulk_generate_template_description,
     )
     add = Command(
         u"add",
@@ -32,10 +34,13 @@ def load_bulk_subcommands():
     return [gen_template, add]
 
 
-def generate_csv_file(path=None):
+def generate_csv_file(cmd, path=None):
     """Generates a csv template a user would need to fill-in for bulk adding users to the high 
     risk detection list."""
-    generate_template(add_high_risk_employee, path)
+    handler = None
+    if cmd == BulkCommandType.ADD:
+        handler = add_high_risk_employee
+    generate_template(handler, path)
 
 
 def bulk_add_high_risk_employees(sdk, profile, csv_file):
@@ -71,6 +76,12 @@ def _load_add_description(argument_collection):
     risk_factors = argument_collection.arg_configs[u"risk_factors"]
     user_id.set_help(u"A user profile ID for detection lists.")
     risk_factors.set_help(u"Risk factors associated with the employee.")
+
+
+def _load_bulk_generate_template_description(argument_collection):
+    cmd_type = argument_collection.arg_configs[u"cmd"]
+    cmd_type.set_help(u"The type of command the template with be used for.")
+    cmd_type.set_choices([u"add", u"remove"])
 
 
 def _load_bulk_add_description(argument_collection):
