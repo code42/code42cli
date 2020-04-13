@@ -59,8 +59,12 @@ class BulkProcessor(object):
 
     def _get_rows(self):
         with open(self.csv_file_path, newline=u"", encoding=u"utf8") as csv_file:
-            return csv.DictReader(csv_file)
+            return _create_dict_reader(csv_file)
 
     def _process_rows(self, rows):
         for row in rows:
             self.__worker.do_async(lambda **kwargs: self.row_handler(**kwargs), **row)
+
+
+def _create_dict_reader(csv_file):
+    return csv.DictReader(csv_file)

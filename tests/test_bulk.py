@@ -11,9 +11,9 @@ def test_generate_template_uses_expected_path_and_column_names(mocker):
 
 
 def test_generate_template_when_given_non_callable_handler_does_not_create(mocker):
-    template_writer = mocker.patch("code42cli.bulk._write_template_file")
+    mock_open = mocker.patch("code42cli.bulk.open")
     generate_template(None, "some/path")
-    assert not template_writer.call_count
+    assert not mock_open.call_count
 
 
 class TestBulkProcessor(object):
@@ -23,8 +23,9 @@ class TestBulkProcessor(object):
         def func_for_bulk(test1, test2):
             processed_rows.append((test1, test2))
 
-        rows = mocker.patch("code42cli.bulk.BulkProcessor._get_rows")
-        rows.return_value = [
+        mocker.patch("code42cli.bulk.open")
+        dict_reader = mocker.patch("code42cli.bulk._create_dict_reader")
+        dict_reader.return_value = [
             {"test1": 1, "test2": 2},
             {"test1": 3, "test2": 4},
             {"test1": 5, "test2": 6},
