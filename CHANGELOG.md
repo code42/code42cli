@@ -10,7 +10,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
-### Changes
+### Changed
 
 - `securitydata` renamed to `security-data`.
 - From `security-data` related subcommands (such as `print`):
