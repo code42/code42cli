@@ -2,6 +2,8 @@ from code42cli.cmds.detectionlists.enums import BulkCommandType
 from code42cli.bulk import generate_template, create_bulk_processor
 from code42cli.commands import Command
 
+_USAGE_PREFIX = u"code452 detection-lists high-risk"
+
 
 def load_subcommands():
     bulk = Command(
@@ -12,6 +14,7 @@ def load_subcommands():
     add = Command(
         u"add",
         u"Add a user to the departing employee detection list.",
+        u"{} add <username> <optional args>".format(_USAGE_PREFIX),
         handler=add_high_risk_employee,
         arg_customizer=_load_add_description,
     )
@@ -19,15 +22,19 @@ def load_subcommands():
 
 
 def load_bulk_subcommands():
+    _usage_prefix = u"{} bulk".format(_USAGE_PREFIX)
+    
     gen_template = Command(
         u"gen-template",
         u"Generates the necessary csv template needed for bulk adding users.",
+        u"{} gen-template <cmd> <optional args>".format(_usage_prefix),
         handler=generate_csv_file,
         arg_customizer=_load_bulk_generate_template_description,
     )
     add = Command(
         u"add",
         u"Bulk add users to the departing employee detection list using a csv file.",
+        u"{} add <csv-file>".format(_usage_prefix),
         handler=bulk_add_high_risk_employees,
         arg_customizer=_load_bulk_add_description,
     )
@@ -72,9 +79,9 @@ def add_high_risk_employee(sdk, profile, username, cloud_aliases=None, risk_fact
 
 
 def _load_add_description(argument_collection):
-    user_id = argument_collection.arg_configs[u"user_id"]
+    username = argument_collection.arg_configs[u"username"]
     risk_factors = argument_collection.arg_configs[u"risk_factors"]
-    user_id.set_help(u"A user profile ID for detection lists.")
+    username.set_help(u"A user profile ID for detection lists.")
     risk_factors.set_help(u"Risk factors associated with the employee.")
 
 
