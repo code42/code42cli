@@ -88,10 +88,9 @@ def update_profile(profile=None, server=None, username=None, disable_ssl_errors=
     profile = cliprofile.get_profile(profile)
     if profile.has_stored_password:
         _validate_connection(server, username, profile.get_password())
-    cliprofile.update_profile(profile, server, username, disable_ssl_errors)
-    if does_user_agree(u"Would you like to store this password? (y/n): "):
-        new_password = getpass()
-        cliprofile.set_password(new_password, profile)
+
+    cliprofile.update_profile(profile.name, server, username, disable_ssl_errors)
+    _prompt_for_allow_password_set(profile.name)
 
 
 def prompt_for_password_reset(profile=None):

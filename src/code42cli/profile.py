@@ -79,6 +79,7 @@ def create_profile(name, server, username, ignore_ssl_errors):
     
 
 def update_profile(name, server, username, ignore_ssl_errors):
+    
     profile = get_profile(name)  # For verifying it exists
     config_accessor.update_profile(profile.name, server, username, ignore_ssl_errors)
 
