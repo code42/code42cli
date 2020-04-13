@@ -5,7 +5,6 @@ from c42eventextractor.logging.formatters import (
     FileEventDictToJSONFormatter,
     FileEventDictToRawJSONFormatter,
 )
-from logging.handlers import RotatingFileHandler
 
 import code42cli.cmds.securitydata.logger_factory as factory
 
@@ -151,14 +150,3 @@ def test_get_logger_for_server_when_hostname_includes_port_constructs_handler_wi
     no_priority_syslog_handler_wrapper.assert_called_once_with(
         "example.com", port=999, protocol="TCP"
     )
-
-
-def test_get_error_logger_when_called_twice_only_sets_handler_once():
-    _ = factory.get_error_logger()
-    logger = factory.get_error_logger()
-    assert len(logger.handlers) == 1
-
-
-def test_get_error_logger_uses_rotating_file_handler():
-    logger = factory.get_error_logger()
-    assert type(logger.handlers[0]) == RotatingFileHandler
