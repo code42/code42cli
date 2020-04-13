@@ -21,18 +21,18 @@ def load_bulk_subcommands():
     gen_template = Command(
         u"gen-template",
         u"Generates the necessary csv template needed for bulk adding users.",
-        handler=create_csv_file,
+        handler=generate_csv_file,
     )
     add = Command(
         u"add",
         u"Bulk add users to the departing employee detection list using a csv file.",
         handler=bulk_add_high_risk_employees,
-        arg_customizer=_load_bulk_add_description
+        arg_customizer=_load_bulk_add_description,
     )
     return [gen_template, add]
 
 
-def create_csv_file(path=None):
+def generate_csv_file(path=None):
     """Generates a csv template a user would need to fill-in for bulk adding users to the high 
     risk detection list."""
     generate_template(add_high_risk_employee, path)

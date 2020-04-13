@@ -13,9 +13,11 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Added
 
 - `code42 profile create` command.
-- `code42 detectionlists departingemployee` commands:
-    - `init-csv`
-    - `add`
+- `code42 detection-lists high-risk` commands:
+    - `bulk`
+        - `add`: adds a csv list of users to the high risk detection list.
+        - `gen-template`: generates a template to use for `add`.
+    - `add`: adds a user to high risk detection list.
 
 ### Removed
 

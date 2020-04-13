@@ -11,10 +11,18 @@ def generate_template(handler, path=None):
     """
     if callable(handler):
         argspec = inspect.getargspec(handler)
-        columns = [str(arg) for arg in argspec.args if arg not in [u"sdk", u"profile"]]
+        columns = [
+            str(arg)
+            for arg in argspec.args
+            if arg not in [u"sdk", u"profile", u"*args", u"**kwargs"]
+        ]
         path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))
-        with open(path, u"w", encoding=u"utf8") as new_csv:
-            new_csv.write(u",".join(columns))
+        _write_template_file(path, columns)
+
+
+def _write_template_file(path, columns):
+    with open(path, u"w", encoding=u"utf8") as new_csv:
+        new_csv.write(u",".join(columns))
 
 
 def create_bulk_processor(csv_file_path, row_handler):
@@ -46,10 +54,13 @@ class BulkProcessor(object):
     def run(self):
         """Process the csv file specified in the ctor, calling `self.row_handler` on each row 
         asynchronously."""
-        with open(self.csv_file_path, newline=u"") as csv_file:
-            rows = csv.DictReader(csv_file)
-            self._process_rows(rows)
+        rows = self._get_rows()
+        self._process_rows(rows)
         self.__worker.wait()
+
+    def _get_rows(self):
+        with open(self.csv_file_path, newline=u"") as csv_file:
+            return csv.DictReader(csv_file)
 
     def _process_rows(self, rows):
         for row in rows:

@@ -2,6 +2,7 @@ import pytest
 from argparse import Namespace
 from py42.sdk import SDKClient
 
+from code42cli.bulk import BulkProcessor
 from code42cli.config import ConfigAccessor
 from code42cli.profile import Code42Profile
 
@@ -99,3 +100,8 @@ def func_with_sdk(sdk, one, two, three=None, four=None):
 
 def func_with_args(args):
     pass
+
+
+@pytest.fixture
+def bulk_processor(mocker):
+    return mocker.MagicMock(spec=BulkProcessor)
