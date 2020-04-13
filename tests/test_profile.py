@@ -72,7 +72,7 @@ def test_default_profile_exists_when_exists_returns_true(config_accessor):
 
 
 def test_default_profile_exists_when_not_exists_returns_false(config_accessor):
-    mock_section = MockSection("__DEFAULT__")
+    mock_section = MockSection(ConfigAccessor.DEFAULT_VALUE)
     config_accessor.get_profile.return_value = mock_section
     assert not cliprofile.default_profile_exists()
 

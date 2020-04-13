@@ -102,7 +102,7 @@ class TestConfigAccessor(object):
         mock_config_parser.sections.return_value = [_INTERNAL]
         accessor = ConfigAccessor(mock_config_parser)
         with pytest.raises(NoConfigProfileError):
-            accessor.get_profile("__DEFAULT__")
+            accessor.get_profile(ConfigAccessor.DEFAULT_VALUE)
 
     def test_get_profile_returns_expected_profile(self, mock_config_parser):
         mock_config_parser.sections.return_value = [_INTERNAL, _TEST_PROFILE_NAME]
