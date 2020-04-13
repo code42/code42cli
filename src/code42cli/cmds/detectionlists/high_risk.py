@@ -53,14 +53,16 @@ def bulk_add_high_risk_employees(sdk, profile, csv_file):
     processor.run()
 
 
-def add_high_risk_employee(sdk, profile, user_id, risk_factors=None):
+def add_high_risk_employee(sdk, profile, username, cloud_aliases=None, risk_factors=None, notes=None):
     """Adds the user with the given user profile ID to the high risk detection list.
     
     Args:
         sdk (py42.sdk.SDKClient): The py42 sdk.
         profile (Code42Profile): The profile under which to execute this command.
-        user_id (str): The ID for the user profile in detection lists.
+        username (str): The username for the user.
+        cloud_aliases (iter[str]): A list of cloud aliases associated with the user.
         risk_factors (iter[str]): The list of risk factors associated with the user.
+        notes (str): Notes about the user.
     """
 
 
