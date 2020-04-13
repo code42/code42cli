@@ -27,8 +27,13 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
         - `add`: adds a csv list of users to the high risk detection list with parameters:
             - `csv-file` containing a list of users to add.
         - `gen-template`: generates a template to use for the given command type, such as `add`.
-            - ``
-    - `add`: adds a user to high risk detection list.
+            - `cmd`: Currently, must be `add`.
+            - `path`
+    - `add`: adds a user to high risk detection list with parameters:
+        - `username`
+        - `cloud-aliases`
+        - `risk-factors`
+        - `notes`
 
 ### Removed
 
