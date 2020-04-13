@@ -44,19 +44,21 @@ class ServerProtocol(object):
 
 
 class SearchArguments(object):
+    """These string values should match `argparse` stored parameter names. For example, for the 
+    CLI argument `--c42-username`, the string should be `c42_username`."""
     ADVANCED_QUERY = u"advanced_query"
     BEGIN_DATE = u"begin"
     END_DATE = u"end"
     EXPOSURE_TYPES = u"type"
-    C42USERNAME = u"c42username"
+    C42_USERNAME = u"c42_username"
     ACTOR = u"actor"
     MD5 = u"md5"
     SHA256 = u"sha256"
     SOURCE = u"source"
-    FILENAME = u"filename"
-    FILEPATH = u"filepath"
-    PROCESS_OWNER = u"processOwner"
-    TAB_URL = u"tabURL"
+    FILE_NAME = u"file_name"
+    FILE_PATH = u"file_path"
+    PROCESS_OWNER = u"process_owner"
+    TAB_URL = u"tab_url"
     INCLUDE_NON_EXPOSURE_EVENTS = u"include_non_exposure"
 
     def __iter__(self):
@@ -66,13 +68,13 @@ class SearchArguments(object):
                 self.BEGIN_DATE,
                 self.END_DATE,
                 self.EXPOSURE_TYPES,
-                self.C42USERNAME,
+                self.C42_USERNAME,
                 self.ACTOR,
                 self.MD5,
                 self.SHA256,
                 self.SOURCE,
-                self.FILENAME,
-                self.FILEPATH,
+                self.FILE_NAME,
+                self.FILE_PATH,
                 self.PROCESS_OWNER,
                 self.TAB_URL,
                 self.INCLUDE_NON_EXPOSURE_EVENTS,

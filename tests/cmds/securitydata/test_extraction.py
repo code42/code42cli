@@ -92,7 +92,7 @@ def test_extract_when_is_advanced_query_and_has_exposure_types_exits(
 
 def test_extract_when_is_advanced_query_and_has_username_exits(sdk, profile, logger, namespace):
     namespace.advanced_query = "some complex json"
-    namespace.c42username = ["Someone"]
+    namespace.c42_username = ["Someone"]
     with pytest.raises(SystemExit):
         extraction_module.extract(sdk, profile, logger, namespace)
 
@@ -125,16 +125,16 @@ def test_extract_when_is_advanced_query_and_has_source_exits(sdk, profile, logge
         extraction_module.extract(sdk, profile, logger, namespace)
 
 
-def test_extract_when_is_advanced_query_and_has_filename_exits(sdk, profile, logger, namespace):
+def test_extract_when_is_advanced_query_and_has_file_name_exits(sdk, profile, logger, namespace):
     namespace.advanced_query = "some complex json"
-    namespace.filename = ["test.out"]
+    namespace.file_name = ["test.out"]
     with pytest.raises(SystemExit):
         extraction_module.extract(sdk, profile, logger, namespace)
 
 
-def test_extract_when_is_advanced_query_and_has_filepath_exits(sdk, profile, logger, namespace):
+def test_extract_when_is_advanced_query_and_has_file_path_exits(sdk, profile, logger, namespace):
     namespace.advanced_query = "some complex json"
-    namespace.filepath = ["path/to/file"]
+    namespace.file_path = ["path/to/file"]
     with pytest.raises(SystemExit):
         extraction_module.extract(sdk, profile, logger, namespace)
 
@@ -143,14 +143,14 @@ def test_extract_when_is_advanced_query_and_has_process_owner_exits(
     sdk, profile, logger, namespace
 ):
     namespace.advanced_query = "some complex json"
-    namespace.processOwner = ["someone"]
+    namespace.process_owner = ["someone"]
     with pytest.raises(SystemExit):
         extraction_module.extract(sdk, profile, logger, namespace)
 
 
 def test_extract_when_is_advanced_query_and_has_tab_url_exits(sdk, profile, logger, namespace):
     namespace.advanced_query = "some complex json"
-    namespace.tabURL = ["https://www.example.com"]
+    namespace.tab_url = ["https://www.example.com"]
     with pytest.raises(SystemExit):
         extraction_module.extract(sdk, profile, logger, namespace)
 
@@ -349,10 +349,10 @@ def test_extract_when_given_invalid_exposure_type_causes_exit(
 def test_extract_when_given_username_uses_username_filter(
     sdk, profile, logger, namespace_with_begin, extractor
 ):
-    namespace_with_begin.c42username = ["test.testerson@example.com"]
+    namespace_with_begin.c42_username = ["test.testerson@example.com"]
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
     assert str(extractor.extract.call_args[0][1]) == str(
-        DeviceUsername.is_in(namespace_with_begin.c42username)
+        DeviceUsername.is_in(namespace_with_begin.c42_username)
     )
 
 
@@ -390,42 +390,42 @@ def test_extract_when_given_source_uses_source_filter(
     assert str(extractor.extract.call_args[0][1]) == str(Source.is_in(namespace_with_begin.source))
 
 
-def test_extract_when_given_filename_uses_filename_filter(
+def test_extract_when_given_file_name_uses_file_name_filter(
     sdk, profile, logger, namespace_with_begin, extractor
 ):
-    namespace_with_begin.filename = ["file.txt", "txt.file"]
+    namespace_with_begin.file_name = ["file.txt", "txt.file"]
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
     assert str(extractor.extract.call_args[0][1]) == str(
-        FileName.is_in(namespace_with_begin.filename)
+        FileName.is_in(namespace_with_begin.file_name)
     )
 
 
-def test_extract_when_given_filepath_uses_filepath_filter(
+def test_extract_when_given_file_path_uses_file_path_filter(
     sdk, profile, logger, namespace_with_begin, extractor
 ):
-    namespace_with_begin.filepath = ["/path/to/file.txt", "path2"]
+    namespace_with_begin.file_path = ["/path/to/file.txt", "path2"]
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
     assert str(extractor.extract.call_args[0][1]) == str(
-        FilePath.is_in(namespace_with_begin.filepath)
+        FilePath.is_in(namespace_with_begin.file_path)
     )
 
 
 def test_extract_when_given_process_owner_uses_process_owner_filter(
     sdk, profile, logger, namespace_with_begin, extractor
 ):
-    namespace_with_begin.processOwner = ["test.testerson", "another"]
+    namespace_with_begin.process_owner = ["test.testerson", "another"]
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
     assert str(extractor.extract.call_args[0][1]) == str(
-        ProcessOwner.is_in(namespace_with_begin.processOwner)
+        ProcessOwner.is_in(namespace_with_begin.process_owner)
     )
 
 
 def test_extract_when_given_tab_url_uses_process_tab_url_filter(
     sdk, profile, logger, namespace_with_begin, extractor
 ):
-    namespace_with_begin.tabURL = ["https://www.example.com"]
+    namespace_with_begin.tab_url = ["https://www.example.com"]
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
-    assert str(extractor.extract.call_args[0][1]) == str(TabURL.is_in(namespace_with_begin.tabURL))
+    assert str(extractor.extract.call_args[0][1]) == str(TabURL.is_in(namespace_with_begin.tab_url))
 
 
 def test_extract_when_given_exposure_types_uses_exposure_type_is_in_filter(
@@ -458,17 +458,17 @@ def test_extract_when_not_given_include_non_exposure_includes_exposure_type_exis
 def test_extract_when_given_multiple_search_args_uses_expected_filters(
     sdk, profile, logger, namespace_with_begin, extractor
 ):
-    namespace_with_begin.filepath = ["/path/to/file.txt"]
-    namespace_with_begin.processOwner = ["test.testerson", "flag.flagerson"]
-    namespace_with_begin.tabURL = ["https://www.example.com"]
+    namespace_with_begin.file_path = ["/path/to/file.txt"]
+    namespace_with_begin.process_owner = ["test.testerson", "flag.flagerson"]
+    namespace_with_begin.tab_url = ["https://www.example.com"]
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
     assert str(extractor.extract.call_args[0][1]) == str(
-        FilePath.is_in(namespace_with_begin.filepath)
+        FilePath.is_in(namespace_with_begin.file_path)
     )
     assert str(extractor.extract.call_args[0][2]) == str(
-        ProcessOwner.is_in(namespace_with_begin.processOwner)
+        ProcessOwner.is_in(namespace_with_begin.process_owner)
     )
-    assert str(extractor.extract.call_args[0][3]) == str(TabURL.is_in(namespace_with_begin.tabURL))
+    assert str(extractor.extract.call_args[0][3]) == str(TabURL.is_in(namespace_with_begin.tab_url))
 
 
 def test_extract_when_given_include_non_exposure_and_exposure_types_causes_exit(
