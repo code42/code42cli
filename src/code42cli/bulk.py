@@ -48,11 +48,11 @@ class BulkProcessor(object):
 
     @property
     def row_handler(self):
-        """A `callable` property to be executed on each row in the csv file."""
+        """A `callable` property  executed on each row in the csv file when `run()` is called."""
         return self._row_handler
 
     def run(self):
-        """Process the csv file specified in the ctor, calling `self.row_handler` on each row."""
+        """Processes the csv file specified in the ctor, calling `self.row_handler` on each row."""
         rows = self._get_rows()
         self._process_rows(rows)
         self.__worker.wait()
