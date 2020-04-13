@@ -58,7 +58,7 @@ class BulkProcessor(object):
         self.__worker.wait()
 
     def _get_rows(self):
-        with open(self.csv_file_path, newline=u"") as csv_file:
+        with open(self.csv_file_path, newline=u"", encoding=u"utf8") as csv_file:
             return csv.DictReader(csv_file)
 
     def _process_rows(self, rows):
