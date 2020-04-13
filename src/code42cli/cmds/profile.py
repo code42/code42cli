@@ -132,7 +132,8 @@ def _load_profile_update_descriptions(argument_collection):
     profile = argument_collection.arg_configs["profile"]
     profile.set_help(u"The name to give the profile being updated.")
     _load_profile_settings_descriptions(argument_collection)
-    
+
+
 def _load_profile_settings_descriptions(argument_collection):
     server = argument_collection.arg_configs["server"]
     username = argument_collection.arg_configs["username"]
