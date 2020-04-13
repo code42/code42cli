@@ -1,7 +1,7 @@
 import pytest
 
 import code42cli.profile as cliprofile
-from code42cli.config import ConfigAccessor
+from code42cli.config import ConfigAccessor, NoConfigProfileError
 from .conftest import MockSection, create_mock_profile
 
 
@@ -60,7 +60,7 @@ def test_get_profile_returns_expected_profile(config_accessor):
 
 
 def test_get_profile_when_config_accessor_throws_exits(config_accessor):
-    config_accessor.get_profile.side_effect = Exception()
+    config_accessor.get_profile.side_effect = NoConfigProfileError()
     with pytest.raises(SystemExit):
         profile = cliprofile.get_profile("testprofilename")
 
@@ -84,7 +84,7 @@ def test_profile_exists_when_exists_returns_true(config_accessor):
 
 
 def test_profile_exists_when_not_exists_returns_false(config_accessor):
-    config_accessor.get_profile.side_effect = Exception()
+    config_accessor.get_profile.side_effect = NoConfigProfileError()
     assert not cliprofile.profile_exists("idontexist")
 
 
@@ -94,6 +94,7 @@ def test_switch_default_profile_switches_to_expected_profile(config_accessor):
 
 
 def test_create_profile_uses_expected_profile_values(config_accessor):
+    config_accessor.get_profile.side_effect = NoConfigProfileError()
     profile_name = "profilename"
     server = "server"
     username = "username"
@@ -102,6 +103,18 @@ def test_create_profile_uses_expected_profile_values(config_accessor):
     config_accessor.create_profile.assert_called_once_with(
         profile_name, server, username, ssl_errors_disabled
     )
+
+
+def test_create_profile_if_profile_exists_exits(mocker, capsys, config_accessor):
+    config_accessor.get_profile.return_value = mocker.MagicMock()
+    success = True
+    try:
+        cliprofile.create_profile("foo", "bar", "baz", True)
+    except SystemExit:
+        success = True
+        capture = capsys.readouterr()
+        assert "already exists" in capture.out
+    assert success
 
 
 def test_get_all_profiles_returns_expected_profile_list(config_accessor):

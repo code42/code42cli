@@ -75,11 +75,6 @@ def show_profile(profile=None):
 
 
 def create_profile(profile, server, username, disable_ssl_errors=False):
-    """Sets the given profile using command line arguments."""
-    if cliprofile.profile_exists(profile):
-        print_error(u"A profile named {} already exists.".format(profile))
-        exit(1)
-
     cliprofile.create_profile(profile, server, username, disable_ssl_errors)
     _prompt_for_allow_password_set(profile)
 

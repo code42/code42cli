@@ -7,6 +7,11 @@ import code42cli.util as util
 from code42cli.compat import str
 
 
+class NoConfigProfileError(Exception):
+    def __init__(self):
+        super(Exception, self).__init__(u"Profile does not exist.")
+
+
 class ConfigAccessor(object):
     DEFAULT_VALUE = u"__DEFAULT__"
     AUTHORITY_KEY = u"c42_authority_url"
@@ -32,7 +37,7 @@ class ConfigAccessor(object):
         """
         name = name or self._default_profile_name
         if name not in self._get_sections() or name == self.DEFAULT_VALUE:
-            raise Exception(u"Profile does not exist.")
+            raise NoConfigProfileError()
         return self._get_profile(name)
 
     def get_all_profiles(self):
@@ -47,7 +52,7 @@ class ConfigAccessor(object):
         """Creates a new profile if one does not already exist for that name."""
         try:
             self.get_profile(name)
-        except Exception as ex:
+        except NoConfigProfileError as ex:
             if name is not None and name != self.DEFAULT_VALUE:
                 self._create_profile_section(name)
             else:
@@ -70,7 +75,7 @@ class ConfigAccessor(object):
     def switch_default_profile(self, new_default_name):
         """Changes what is marked as the default profile in the internal section."""
         if self.get_profile(new_default_name) is None:
-            raise Exception(u"Profile does not exist.")
+            raise NoConfigProfileError()
         self._internal[self.DEFAULT_PROFILE] = new_default_name
         self._save()
         print(u"{} has been set as the default profile.".format(new_default_name))
@@ -83,13 +88,13 @@ class ConfigAccessor(object):
 
     def _set_ignore_ssl_errors(self, new_value, profile):
         profile[self.IGNORE_SSL_ERRORS_KEY] = str(new_value)
-    
+
     def _get_sections(self):
         return self.parser.sections()
-    
+
     def _get_profile(self, name):
         return self.parser[name]
-    
+
     @property
     def _internal(self):
         return self.parser[self._INTERNAL_SECTION]
