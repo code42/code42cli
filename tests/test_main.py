@@ -3,7 +3,7 @@ from code42cli.main import main
 
 
 def test_securitydata_commands_load(capsys, mocker):
-    mocker.patch("sys.argv", ["code42", "securitydata", "print", "-h"])
+    mocker.patch("sys.argv", ["code42", "security-data", "print", "-h"])
     success = False
     try:
         main()

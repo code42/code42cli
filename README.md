@@ -1,7 +1,7 @@
 # The Code42 CLI
 
 Use the `code42` command to interact with your Code42 environment.
-`code42 securitydata` is a CLI tool for extracting AED events.
+`code42 security-data` is a CLI tool for extracting AED events.
 Additionally, you can choose to only get events that Code42 previously did not observe since you last recorded a checkpoint
 (provided you do not change your query).
 
@@ -45,7 +45,7 @@ You can add multiple profiles with different names and the change the default pr
 code42 profile use MY_SECOND_PROFILE
 ```
 
-When the `--profile` flag is available on other commands, such as those in `securitydata`, it will use that profile instead of the default one.
+When the `--profile` flag is available on other commands, such as those in `security-data`, it will use that profile instead of the default one.
 
 To see all your profiles, do:
 
@@ -61,14 +61,14 @@ Using the CLI, you can query for events and send them to three possible destinat
 To print events to stdout, do:
 
 ```bash
-code42 securitydata print -b 2020-02-02
+code42 security-data print -b 2020-02-02
 ```
 
 Note that `-b` or `--begin` is usually required.
 To specify a time, do:
 
 ```bash
-code42 securitydata print -b 2020-02-02 12:51
+code42 security-data print -b 2020-02-02 12:51
 ```
 
 Begin date will be ignored if provided on subsequent queries using `-i`.
@@ -76,7 +76,7 @@ Begin date will be ignored if provided on subsequent queries using `-i`.
 Use different format with `-f`:
 
 ```bash
-code42 securitydata print -b 2020-02-02 -f CEF
+code42 security-data print -b 2020-02-02 -f CEF
 ```
 
 The available formats are CEF, JSON, and RAW-JSON.
@@ -84,19 +84,19 @@ The available formats are CEF, JSON, and RAW-JSON.
 To write events to a file, do:
 
 ```bash
-code42 securitydata write-to filename.txt -b 2020-02-02
+code42 security-data write-to filename.txt -b 2020-02-02
 ```
 
 To send events to a server, do:
 
 ```bash
-code42 securitydata send-to syslog.company.com -p TCP -b 2020-02-02
+code42 security-data send-to syslog.company.com -p TCP -b 2020-02-02
 ```
 
 To only get events that Code42 previously did not observe since you last recorded a checkpoint, use the `-i` flag.
 
 ```bash
-code42 securitydata send-to syslog.company.com -i
+code42 security-data send-to syslog.company.com -i
 ```
 
 This is only guaranteed if you did not change your query.
@@ -104,13 +104,13 @@ This is only guaranteed if you did not change your query.
 To send events to a server using a specific profile, do:
 
 ```bash
-code42 securitydata send-to --profile PROFILE_FOR_RECURRING_JOB syslog.company.com -b 2020-02-02 -f CEF -i
+code42 security-data send-to --profile PROFILE_FOR_RECURRING_JOB syslog.company.com -b 2020-02-02 -f CEF -i
 ```
 
 You can also use wildcard for queries, but note, if they are not in quotes, you may get unexpected behavior.
 
 ```bash
-code42 securitydata print --actor "*"
+code42 security-data print --actor "*"
 ```
 
 Each destination-type subcommand shares query parameters
@@ -118,15 +118,15 @@ Each destination-type subcommand shares query parameters
 - `-t` (exposure types)
 - `-b` (begin date)
 - `-e` (end date)
-- `--c42username`
+- `--c42-username`
 - `--actor`
 - `--md5`
 - `--sha256`
 - `--source`
-- `--filename`
-- `--filepath`
-- `--processOwner`
-- `--tabURL`
+- `--file-name`
+- `--file-path`
+- `--process-owner`
+- `--tab-url`
 - `--include-non-exposure` (does not work with `-t`)
 - `--advanced-query` (raw JSON query)
 
