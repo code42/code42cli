@@ -23,7 +23,7 @@ def load_subcommands():
 
 def load_bulk_subcommands():
     _usage_prefix = u"{} bulk".format(_USAGE_PREFIX)
-    
+
     gen_template = Command(
         u"gen-template",
         u"Generates the necessary csv template needed for bulk adding users.",
@@ -65,7 +65,9 @@ def bulk_add_high_risk_employees(sdk, profile, csv_file):
     processor.run()
 
 
-def add_high_risk_employee(sdk, profile, username, cloud_aliases=None, risk_factors=None, notes=None):
+def add_high_risk_employee(
+    sdk, profile, username, cloud_aliases=None, risk_factors=None, notes=None
+):
     """Adds the user with the given user profile ID to the high risk detection list.
     
     Args:

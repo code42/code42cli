@@ -6,6 +6,7 @@ from code42cli.cmds.detectionlists.high_risk import (
     bulk_add_high_risk_employees,
 )
 
+
 @pytest.fixture
 def bulk_template_generator(mocker):
     return mocker.patch("code42cli.cmds.detectionlists.high_risk.generate_template")

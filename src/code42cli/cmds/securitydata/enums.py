@@ -46,6 +46,7 @@ class ServerProtocol(object):
 class SearchArguments(object):
     """These string values should match `argparse` stored parameter names. For example, for the 
     CLI argument `--c42-username`, the string should be `c42_username`."""
+
     ADVANCED_QUERY = u"advanced_query"
     BEGIN_DATE = u"begin"
     END_DATE = u"end"
