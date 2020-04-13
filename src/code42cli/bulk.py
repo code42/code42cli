@@ -46,11 +46,6 @@ class BulkProcessor(object):
         self._row_handler = row_handler
         self.__worker = Worker(5)
 
-    @property
-    def row_handler(self):
-        """A `callable` property  executed on each row in the csv file when `run()` is called."""
-        return self._row_handler
-
     def run(self):
         """Processes the csv file specified in the ctor, calling `self.row_handler` on each row."""
         rows = self._get_rows()
@@ -63,7 +58,7 @@ class BulkProcessor(object):
 
     def _process_rows(self, rows):
         for row in rows:
-            self.__worker.do_async(lambda **kwargs: self.row_handler(**kwargs), **row)
+            self.__worker.do_async(lambda **kwargs: self._row_handler(**kwargs), **row)
 
 
 def _create_dict_reader(csv_file):
