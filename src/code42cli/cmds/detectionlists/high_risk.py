@@ -74,5 +74,5 @@ def _load_add_description(argument_collection):
 def _load_bulk_add_description(argument_collection):
     csv_file = argument_collection.arg_configs[u"csv_file"]
     csv_file.set_help(
-        u"The path to the csv file for bulk adding users to the high risk detection" u"list"
+        u"The path to the csv file for bulk adding users to the high risk detection list."
     )

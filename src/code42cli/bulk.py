@@ -31,14 +31,14 @@ def create_bulk_processor(csv_file_path, row_handler):
 
 
 class BulkProcessor(object):
-    """A class for bulk processing a csv file asynchronously. 
+    """A class for bulk processing a csv file. 
     
     Args:
         csv_file_path (str): The path to the csv file for processing.
         row_handler (callable): To be executed on each row given **kwargs representing the column 
             names mapped to the properties found in the row. For example, if the csv file header 
             looked like `prop_a,prop_b` and the next row looked like `1,test`, then row handler 
-            would receive args `{'prop_a': '1', 'prop_b': 'test'}` when processing row 1.
+            would receive args `prop_a: '1', prop_b: 'test'` when processing row 1.
     """
 
     def __init__(self, csv_file_path, row_handler):
@@ -52,8 +52,7 @@ class BulkProcessor(object):
         return self._row_handler
 
     def run(self):
-        """Process the csv file specified in the ctor, calling `self.row_handler` on each row 
-        asynchronously."""
+        """Process the csv file specified in the ctor, calling `self.row_handler` on each row."""
         rows = self._get_rows()
         self._process_rows(rows)
         self.__worker.wait()
