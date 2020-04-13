@@ -31,9 +31,9 @@ class ConfigAccessor(object):
         If the name does not exist or there is no existing profile, it will throw an exception.
         """
         name = name or self._default_profile_name
-        if name not in self.parser.sections() or name == self.DEFAULT_VALUE:
+        if name not in self._get_sections() or name == self.DEFAULT_VALUE:
             raise Exception(u"Profile does not exist.")
-        return self.parser[name]
+        return self._get_profile(name)
 
     def get_all_profiles(self):
         """Returns all the available profiles."""
@@ -52,11 +52,20 @@ class ConfigAccessor(object):
                 self._create_profile_section(name)
             else:
                 raise ex
-        profile = self.parser[name]
-        self._set_authority_url(server, profile)
-        self._set_username(username, profile)
-        self._set_ignore_ssl_errors(ignore_ssl_errors, profile)
+
+        profile = self.get_profile(name)
+        self.update_profile(profile.name, server, username, ignore_ssl_errors)
         self._try_complete_setup(profile)
+
+    def update_profile(self, name, server=None, username=None, ignore_ssl_errors=None):
+        profile = self.get_profile(name)
+        if server:
+            self._set_authority_url(server, profile)
+        if username:
+            self._set_username(username, profile)
+        if ignore_ssl_errors is not None:
+            self._set_ignore_ssl_errors(ignore_ssl_errors, profile)
+        self._save()
 
     def switch_default_profile(self, new_default_name):
         """Changes what is marked as the default profile in the internal section."""
@@ -74,7 +83,13 @@ class ConfigAccessor(object):
 
     def _set_ignore_ssl_errors(self, new_value, profile):
         profile[self.IGNORE_SSL_ERRORS_KEY] = str(new_value)
-
+    
+    def _get_sections(self):
+        return self.parser.sections()
+    
+    def _get_profile(self, name):
+        return self.parser[name]
+    
     @property
     def _internal(self):
         return self.parser[self._INTERNAL_SECTION]
@@ -84,7 +99,7 @@ class ConfigAccessor(object):
         return self._internal[self.DEFAULT_PROFILE]
 
     def _get_profile_names(self):
-        names = list(self.parser.sections())
+        names = list(self._get_sections())
         names.remove(self._INTERNAL_SECTION)
         return names
 

@@ -22,6 +22,11 @@ class Code42Profile(object):
     @property
     def ignore_ssl_errors(self):
         return self._profile[ConfigAccessor.IGNORE_SSL_ERRORS_KEY]
+    
+    @property
+    def has_stored_password(self):
+        stored_password = password.get_stored_password(self)
+        return stored_password is not None and stored_password != u""
 
     def get_password(self):
         pwd = password.get_stored_password(self)
@@ -71,6 +76,11 @@ def switch_default_profile(profile_name):
 
 def create_profile(name, server, username, ignore_ssl_errors):
     config_accessor.create_profile(name, server, username, ignore_ssl_errors)
+    
+
+def update_profile(name, server, username, ignore_ssl_errors):
+    profile = get_profile(name)  # For verifying it exists
+    config_accessor.update_profile(profile.name, server, username, ignore_ssl_errors)
 
 
 def get_all_profiles():

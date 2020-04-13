@@ -117,6 +117,24 @@ def test_create_profile_if_credentials_valid_password_saved(
     mock_cliprofile_namespace.set_password.assert_called_once_with("newpassword", mocker.ANY)
 
 
+def test_update_profile_if_profile_exists_updates(capsys, mock_cliprofile_namespace):
+    mock_cliprofile_namespace.profile_exists.return_value = True
+    profilecmd.update_profile("foo", "bar", "baz", True)
+    mock_cliprofile_namespace.update_profile.assert_called_once_with("foo", "bar", "baz", True)
+
+
+def test_update_profile_if_profile_not_exists_exits(capsys, mock_cliprofile_namespace):
+    mock_cliprofile_namespace.profile_exists.return_value = True
+    success = True
+    try:
+        profilecmd.update_profile("foo", "bar", "baz", True)
+    except SystemExit:
+        success = True
+        capture = capsys.readouterr()
+        assert "already exists" in capture.out
+    assert success
+
+
 def test_prompt_for_password_reset_if_credentials_valid_password_saved(
     mocker, user_agreement, mock_verify, mock_cliprofile_namespace
 ):
