@@ -54,7 +54,7 @@ def load_subcommands():
     update = Command(
         u"update",
         u"Update an existing profile.",
-        u"{} {}".format(usage_prefix, u"update <profile-name> -s <server-address> -u <username>"),
+        u"{} {}".format(usage_prefix, u"update <optional args>"),
         handler=update_profile,
         arg_customizer=_load_profile_update_descriptions,
     )
@@ -132,8 +132,7 @@ def _load_profile_update_descriptions(argument_collection):
     profile = argument_collection.arg_configs["profile"]
     profile.set_help(u"The name to give the profile being updated.")
     _load_profile_settings_descriptions(argument_collection)
-
-
+    
 def _load_profile_settings_descriptions(argument_collection):
     server = argument_collection.arg_configs["server"]
     username = argument_collection.arg_configs["username"]
