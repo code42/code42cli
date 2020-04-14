@@ -1,6 +1,6 @@
 import pytest
-
 from code42cli.cmds.securitydata.date_helper import create_event_timestamp_filter
+
 from .conftest import (
     begin_date_list,
     begin_date_list_with_time,

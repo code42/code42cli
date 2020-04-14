@@ -1,6 +1,7 @@
 import json as json_module
-import pytest
 from datetime import datetime, timedelta
+
+import pytest
 
 SECURITYDATA_NAMESPACE = "code42cli.cmds.securitydata"
 
