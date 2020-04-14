@@ -132,22 +132,24 @@ def use_profile(profile):
 
 
 def delete_profile(name):
-    if cliprofile.default_profile_exists():
-        default = cliprofile.get_profile()
-        if name == default.name:
-            if not does_user_agree(u"{} is currently the default profile, are you sure? (y/n): ".format(name)):
-                return
+    if cliprofile.is_default_profile(name):
+        print(u"\n{} is currently the default profile!".format(name))
+    if not does_user_agree(u"\nDeleting this profile will also delete any stored passwords and checkpoints. Are you sure? (y/n): "):
+        return
     cliprofile.delete_profile(name)
 
 
 def delete_all_profiles():
     existing_profiles = cliprofile.get_all_profiles()
-    print(u"\nAre you sure you want to delete the following profiles?")
-    for profile in existing_profiles:
-        print(u"\t{}".format(profile.name))
-    if does_user_agree(u"\nThis will also delete any stored passwords and checkpoints. (y/n): "):
+    if existing_profiles:
+        print(u"\nAre you sure you want to delete the following profiles?")
         for profile in existing_profiles:
-            cliprofile.delete_profile(profile.name)
+            print(u"\t{}".format(profile.name))
+        if does_user_agree(u"\nThis will also delete any stored passwords and checkpoints. (y/n): "):
+            for profile in existing_profiles:
+                cliprofile.delete_profile(profile.name)
+    else:
+        print(u"\nNo profiles exist. Nothing to delete.")
 
 
 def _load_profile_description(argument_collection):

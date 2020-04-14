@@ -70,6 +70,12 @@ def default_profile_exists():
         return False
 
 
+def is_default_profile(name):
+    if default_profile_exists():
+        default = get_profile()
+        return name == default.name
+
+
 def validate_default_profile():
     if not default_profile_exists():
         existing_profiles = get_all_profiles()
