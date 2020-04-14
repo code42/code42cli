@@ -23,17 +23,12 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - `code42 profile create` command.
 - `code42 detection-lists high-risk` commands:
-    - `bulk`
-        - `add`: adds a csv list of users to the high risk detection list with parameters:
-            - `csv-file` containing a list of users to add.
-        - `gen-template`: generates a template to use for the given command type, such as `add`.
-            - `cmd`: Currently, must be `add`.
+    - `bulk` with subcommands:
+        - `add`: that takes a csv file of users.
+        - `gen-template`: that creates the csv file template. And parameters:
+            - `cmd`: with the option `add`.
             - `path`
-    - `add`: adds a user to high risk detection list with parameters:
-        - `username`
-        - `cloud-aliases`
-        - `risk-factors`
-        - `notes`
+    - `add` that takes parameters: `--username`, `--cloud-aliases`, `--risk-factors`, and `--notes`.
 
 ### Removed
 
