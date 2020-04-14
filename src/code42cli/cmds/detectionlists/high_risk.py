@@ -8,12 +8,12 @@ _USAGE_PREFIX = u"code452 detection-lists high-risk"
 def load_subcommands():
     bulk = Command(
         u"bulk",
-        u"Tools for executing bulk departing employee commands.",
+        u"Tools for executing bulk high risk commands.",
         subcommand_loader=load_bulk_subcommands,
     )
     add = Command(
         u"add",
-        u"Add a user to the departing employee detection list.",
+        u"Add a user to the high risk detection list.",
         u"{} add <username> <optional args>".format(_USAGE_PREFIX),
         handler=add_high_risk_employee,
         arg_customizer=_load_add_description,
@@ -33,7 +33,7 @@ def load_bulk_subcommands():
     )
     add = Command(
         u"add",
-        u"Bulk add users to the departing employee detection list using a csv file.",
+        u"Bulk add users to the high risk detection list using a csv file.",
         u"{} add <csv-file>".format(_usage_prefix),
         handler=bulk_add_high_risk_employees,
         arg_customizer=_load_bulk_add_description,
