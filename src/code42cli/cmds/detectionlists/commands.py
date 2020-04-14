@@ -1,3 +1,4 @@
+from code42cli.cmds.detectionlists.enums import BulkCommandType
 from code42cli.commands import Command
 
 
@@ -31,20 +32,33 @@ class DetectionListCommandFactory:
             arg_customizer=arg_customizer,
         )
 
-    def create_bulk_generate_template_command(self, handler, arg_customizer):
+    def create_bulk_generate_template_command(self, handler):
         return Command(
             u"generate-template",
             u"Generates the necessary csv template needed for bulk adding users.",
             u"{} gen-template <cmd> <optional args>".format(self._bulk_usage_prefix),
             handler=handler,
-            arg_customizer=arg_customizer,
+            arg_customizer=self._load_bulk_generate_template_description,
         )
 
-    def create_bulk_add_command(self, handler, arg_customizer):
+    def create_bulk_add_command(self, handler):
         return Command(
             u"add",
             u"Bulk add users to the {} detection list using a csv file.".format(self._name),
             u"{} add <csv-file>".format(self._bulk_usage_prefix),
             handler=handler,
-            arg_customizer=arg_customizer,
+            arg_customizer=self._load_bulk_add_description,
+        )
+
+    def _load_bulk_generate_template_description(self, argument_collection):
+        cmd_type = argument_collection.arg_configs[u"cmd"]
+        cmd_type.set_help(u"The type of command the template with be used for.")
+        cmd_type.set_choices(BulkCommandType())
+
+    def _load_bulk_add_description(self, argument_collection):
+        csv_file = argument_collection.arg_configs[u"csv_file"]
+        csv_file.set_help(
+            u"The path to the csv file for bulk adding users to the {} detection list.".format(
+                self._name
+            )
         )

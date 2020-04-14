@@ -8,18 +8,15 @@ _USAGE_PREFIX = create_usage_prefix(_NAME)
 
 
 def load_subcommands():
-    factory = DetectionListCommandFactory(u"high-risk")
+    factory = DetectionListCommandFactory(_NAME)
     bulk = factory.create_bulk_command(lambda: load_bulk_subcommands(factory))
     add = factory.create_add_command(add_high_risk_employee, _load_add_description)
     return [bulk, add]
 
 
 def load_bulk_subcommands(factory):
-    generate_template_cmd = factory.create_bulk_generate_template_command(
-        generate_csv_file, _load_bulk_generate_template_description
-    )
-
-    add = factory.create_bulk_add_command(bulk_add_high_risk_employees, _load_bulk_add_description)
+    generate_template_cmd = factory.create_bulk_generate_template_command(generate_csv_file)
+    add = factory.create_bulk_add_command(bulk_add_high_risk_employees)
     return [generate_template_cmd, add]
 
 
@@ -68,16 +65,3 @@ def _load_add_description(argument_collection):
     risk_factors = argument_collection.arg_configs[u"risk_factors"]
     username.set_help(u"A user profile ID for detection lists.")
     risk_factors.set_help(u"Risk factors associated with the employee.")
-
-
-def _load_bulk_generate_template_description(argument_collection):
-    cmd_type = argument_collection.arg_configs[u"cmd"]
-    cmd_type.set_help(u"The type of command the template with be used for.")
-    cmd_type.set_choices(BulkCommandType())
-
-
-def _load_bulk_add_description(argument_collection):
-    csv_file = argument_collection.arg_configs[u"csv_file"]
-    csv_file.set_help(
-        u"The path to the csv file for bulk adding users to the high risk detection list."
-    )
