@@ -13,7 +13,7 @@ def test_generate_template_uses_expected_path_and_column_names(mocker):
     template_file = mock_open.return_value.__enter__.return_value
 
     generate_template(func_for_bulk, file_path)
-    mock_open.assert_called_once_with(file_path, u'w', encoding=u'utf8')
+    mock_open.assert_called_once_with(file_path, u"w", encoding=u"utf8")
     template_file.write.assert_called_once_with("test1,test2")
 
 

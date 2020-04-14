@@ -11,11 +11,7 @@ def generate_template(handler, path=None):
     """
     if callable(handler):
         argspec = inspect.getargspec(handler)
-        columns = [
-            str(arg)
-            for arg in argspec.args
-            if arg not in [u"sdk", u"profile", u"*args", u"**kwargs"]
-        ]
+        columns = [str(arg) for arg in argspec.args if arg not in [u"sdk", u"profile"]]
         path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))
         _write_template_file(path, columns)
 
