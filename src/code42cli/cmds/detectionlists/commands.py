@@ -38,7 +38,7 @@ class DetectionListCommandFactory:
             u"Generates the necessary csv template needed for bulk adding users.",
             u"{} gen-template <cmd> <optional args>".format(self._bulk_usage_prefix),
             handler=handler,
-            arg_customizer=self._load_bulk_generate_template_description,
+            arg_customizer=DetectionListCommandFactory._load_bulk_generate_template_description,
         )
 
     def create_bulk_add_command(self, handler):
@@ -50,7 +50,8 @@ class DetectionListCommandFactory:
             arg_customizer=self._load_bulk_add_description,
         )
 
-    def _load_bulk_generate_template_description(self, argument_collection):
+    @staticmethod
+    def _load_bulk_generate_template_description(argument_collection):
         cmd_type = argument_collection.arg_configs[u"cmd"]
         cmd_type.set_help(u"The type of command the template with be used for.")
         cmd_type.set_choices(BulkCommandType())
