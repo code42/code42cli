@@ -25,7 +25,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - `code42 detection-lists high-risk` commands:
     - `bulk` with subcommands:
         - `add`: that takes a csv file of users.
-        - `gen-template`: that creates the csv file template. And parameters:
+        - `generate-template`: that creates the csv file template. And parameters:
             - `cmd`: with the option `add`.
             - `path`
     - `add` that takes parameters: `--username`, `--cloud-aliases`, `--risk-factors`, and `--notes`.

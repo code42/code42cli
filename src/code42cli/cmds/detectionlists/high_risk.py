@@ -24,8 +24,8 @@ def load_subcommands():
 def load_bulk_subcommands():
     _usage_prefix = u"{} bulk".format(_USAGE_PREFIX)
 
-    gen_template = Command(
-        u"gen-template",
+    generate_template_cmd = Command(
+        u"generate-template",
         u"Generates the necessary csv template needed for bulk adding users.",
         u"{} gen-template <cmd> <optional args>".format(_usage_prefix),
         handler=generate_csv_file,
@@ -38,7 +38,7 @@ def load_bulk_subcommands():
         handler=bulk_add_high_risk_employees,
         arg_customizer=_load_bulk_add_description,
     )
-    return [gen_template, add]
+    return [generate_template_cmd, add]
 
 
 def generate_csv_file(cmd, path=None):
