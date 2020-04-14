@@ -77,15 +77,13 @@ def print_set_default_profile_help(existing_profiles):
 
 
 def print_set_default_profile_help(existing_profiles):
-    print(u"")
-    print_error(u"No default profile set.")
-    print(u"")
-    print(u"Use the --profile flag to specify which profile to use.")
-    print(u"")
-    print(u"To set the default profile (used whenever --profile argument is not provided), use:")
+    print(
+        u"\nNo default profile set.\n",
+        u"\nUse the --profile flag to specify which profile to use.\n",
+        u"\nTo set the default profile (used whenever --profile argument is not provided), use:"
+    )
     print_bold(u"\tcode42 profile use <profile-name>")
-    print(u"")
-    print(u"Existing profiles:")
+    print(u"\nExisting profiles:")
     for profile in existing_profiles:
         print("\t{}".format(profile))
     print(u"")

@@ -47,7 +47,8 @@ class Code42Profile(object):
 
 def _get_profile(profile_name=None):
     """Returns the profile for the given name."""
-    return Code42Profile(config_accessor.get_profile(profile_name))
+    config_profile = config_accessor.get_profile(profile_name)
+    return Code42Profile(config_profile)
 
 
 def get_profile(profile_name=None):
@@ -55,7 +56,7 @@ def get_profile(profile_name=None):
         validate_default_profile()
     try:
         return _get_profile(profile_name)
-    except Exception as ex:
+    except NoConfigProfileError as ex:
         print_error(str(ex))
         print_create_profile_help()
         exit(1)
@@ -65,7 +66,7 @@ def default_profile_exists():
     try:
         profile = _get_profile()
         return profile.name and profile.name != ConfigAccessor.DEFAULT_VALUE
-    except Exception:
+    except NoConfigProfileError:
         return False
 
 
@@ -83,7 +84,7 @@ def profile_exists(profile_name=None):
     try:
         _get_profile(profile_name)
         return True
-    except Exception:
+    except NoConfigProfileError:
         return False
 
 

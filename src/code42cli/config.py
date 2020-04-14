@@ -83,7 +83,7 @@ class ConfigAccessor(object):
     def delete_profile(self, name):
         """Deletes a profile."""
         if self.get_profile(name) is None:
-            raise Exception(u"Profile does not exist.")
+            raise NoConfigProfileError()
         self.parser.remove_section(name)
         if name == self._default_profile_name:
             self._internal[self.DEFAULT_PROFILE] = self.DEFAULT_VALUE
