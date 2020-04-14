@@ -1,7 +1,7 @@
-import pytest
-
 import code42cli.profile as cliprofile
+import pytest
 from code42cli.config import ConfigAccessor
+
 from .conftest import MockSection, create_mock_profile
 
 

@@ -19,9 +19,7 @@ def load_bulk_subcommands(factory):
         generate_csv_file, _load_bulk_generate_template_description
     )
 
-    add = factory.create_bulk_add_command(
-        bulk_add_high_risk_employees, _load_bulk_add_description
-    )
+    add = factory.create_bulk_add_command(bulk_add_high_risk_employees, _load_bulk_add_description)
     return [generate_template_cmd, add]
 
 

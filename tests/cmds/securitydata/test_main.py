@@ -1,6 +1,5 @@
-import pytest
-
 import code42cli.cmds.securitydata.main as main
+import pytest
 
 
 @pytest.fixture

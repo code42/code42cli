@@ -1,9 +1,9 @@
 from __future__ import with_statement
 
 import pytest
+from code42cli.config import ConfigAccessor
 from configparser import ConfigParser
 
-from code42cli.config import ConfigAccessor
 from .conftest import MockSection
 
 
