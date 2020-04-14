@@ -69,7 +69,7 @@ def bulk_add_high_risk_employees(sdk, profile, csv_file):
 def add_high_risk_employee(
     sdk, profile, username, cloud_aliases=None, risk_factors=None, notes=None
 ):
-    """Adds the user with the given user profile ID to the high risk detection list.
+    """Adds the user with the given username to the high risk detection list.
     
     Args:
         sdk (py42.sdk.SDKClient): The py42 sdk.
