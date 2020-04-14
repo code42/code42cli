@@ -1,12 +1,11 @@
 import code42cli.password as password
-from code42cli.config import ConfigAccessor, config_accessor
+from code42cli.config import ConfigAccessor, config_accessor, NoConfigProfileError
 from code42cli.util import (
     print_error,
     print_create_profile_help,
     print_set_default_profile_help,
     print_no_existing_profile_message,
 )
-
 
 class Code42Profile(object):
     def __init__(self, profile):
@@ -28,6 +27,11 @@ class Code42Profile(object):
     def ignore_ssl_errors(self):
         return self._profile[ConfigAccessor.IGNORE_SSL_ERRORS_KEY]
 
+    @property
+    def has_stored_password(self):
+        stored_password = password.get_stored_password(self)
+        return stored_password is not None and stored_password != u""
+
     def get_password(self):
         pwd = password.get_stored_password(self)
         if not pwd:
@@ -42,7 +46,8 @@ class Code42Profile(object):
 
 def _get_profile(profile_name=None):
     """Returns the profile for the given name."""
-    return Code42Profile(config_accessor.get_profile(profile_name))
+    config_profile = config_accessor.get_profile(profile_name)
+    return Code42Profile(config_profile)
 
 
 def get_profile(profile_name=None):
@@ -50,7 +55,7 @@ def get_profile(profile_name=None):
         validate_default_profile()
     try:
         return _get_profile(profile_name)
-    except Exception as ex:
+    except NoConfigProfileError as ex:
         print_error(str(ex))
         print_create_profile_help()
         exit(1)
@@ -60,7 +65,7 @@ def default_profile_exists():
     try:
         profile = _get_profile()
         return profile.name and profile.name != ConfigAccessor.DEFAULT_VALUE
-    except Exception:
+    except NoConfigProfileError:
         return False
 
 
@@ -78,7 +83,7 @@ def profile_exists(profile_name=None):
     try:
         _get_profile(profile_name)
         return True
-    except Exception:
+    except NoConfigProfileError:
         return False
 
 
@@ -87,7 +92,15 @@ def switch_default_profile(profile_name):
 
 
 def create_profile(name, server, username, ignore_ssl_errors):
+    if profile_exists(name):
+        print_error(u"A profile named {} already exists.".format(name))
+        exit(1)
+
     config_accessor.create_profile(name, server, username, ignore_ssl_errors)
+
+
+def update_profile(name, server, username, ignore_ssl_errors):
+    config_accessor.update_profile(name, server, username, ignore_ssl_errors)
 
 
 def get_all_profiles():

@@ -16,13 +16,13 @@ class Command(object):
     commands to make it available for use.
 
     Args:
-        name (str): The name of the command. For example, in
+        name (str or unicode): The name of the command. For example, in
             `code42 profile show`, "show" is the name, while "profile"
             is the name of the parent command.
 
-        description (str): Descriptive text to be displayed when using -h.
+        description (str or unicode): Descriptive text to be displayed when using -h.
 
-        usage (str, optional): A usage example to be displayed when using -h.
+        usage (str or unicode, optional): A usage example to be displayed when using -h.
         handler (function, optional): The function to be exectued when the command is run.
 
         arg_customizer (function, optional): A function accepting a single `ArgCollection`
