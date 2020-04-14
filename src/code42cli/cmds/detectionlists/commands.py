@@ -10,6 +10,11 @@ def create_bulk_usage_prefix(detection_list_name):
     return u"{} bulk".format(create_usage_prefix(detection_list_name))
 
 
+def load_username(argument_collection):
+    username = argument_collection.arg_configs[u"username"]
+    username.set_help(u"A username for detection lists.")
+
+
 class DetectionListCommandFactory:
     def __init__(self, detection_list_name):
         self._name = detection_list_name

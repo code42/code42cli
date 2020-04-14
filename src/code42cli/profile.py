@@ -7,6 +7,7 @@ from code42cli.util import (
     print_no_existing_profile_message,
 )
 
+
 class Code42Profile(object):
     def __init__(self, profile):
         self._profile = profile
