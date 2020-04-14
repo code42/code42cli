@@ -71,6 +71,7 @@ def load_subcommands():
         u"Deletes all profiles and saved passwords (if any).",
         u"{} {}".format(usage_prefix, u"delete-all"),
         handler=delete_all_profiles,
+    )
 
     return [show, list_all, use, reset_pw, create, update, delete, delete_all]
 
