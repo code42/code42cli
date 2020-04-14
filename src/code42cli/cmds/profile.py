@@ -51,7 +51,15 @@ def load_subcommands():
         arg_customizer=_load_profile_create_descriptions,
     )
 
-    return [show, list_all, use, reset_pw, create]
+    update = Command(
+        u"update",
+        u"Update an existing profile.",
+        u"{} {}".format(usage_prefix, u"update <optional args>"),
+        handler=update_profile,
+        arg_customizer=_load_profile_update_descriptions,
+    )
+
+    return [show, list_all, use, reset_pw, create, update]
 
 
 def show_profile(profile=None):
@@ -67,27 +75,31 @@ def show_profile(profile=None):
 
 
 def create_profile(profile, server, username, disable_ssl_errors=False):
-    """Sets the given profile using command line arguments."""
-    if cliprofile.profile_exists(profile):
-        print_error(u"A profile named {} already exists.".format(profile))
-        exit(1)
-
     cliprofile.create_profile(profile, server, username, disable_ssl_errors)
     _prompt_for_allow_password_set(profile)
+
+
+def update_profile(profile=None, server=None, username=None, disable_ssl_errors=None):
+    profile = cliprofile.get_profile(profile)
+    cliprofile.update_profile(profile.name, server, username, disable_ssl_errors)
+    _prompt_for_allow_password_set(profile.name)
 
 
 def prompt_for_password_reset(profile=None):
     """Securely prompts for your password and then stores it using keyring."""
     c42profile = cliprofile.get_profile(profile)
     new_password = getpass()
+    _validate_connection(c42profile.authority_url, c42profile.username, new_password)
+    cliprofile.set_password(new_password, c42profile.name)
 
-    if not validate_connection(c42profile.authority_url, c42profile.username, new_password):
+
+def _validate_connection(authority, username, password):
+    if not validate_connection(authority, username, password):
         print_error(
             u"Your credentials failed to validate, so your password was not stored."
             u"Check your network connection and the spelling of your username and server URL."
         )
         exit(1)
-    cliprofile.set_password(new_password, c42profile.name)
 
 
 def list_profiles(*args):
@@ -112,11 +124,22 @@ def _load_profile_description(argument_collection):
 
 def _load_profile_create_descriptions(argument_collection):
     profile = argument_collection.arg_configs[u"profile"]
+    profile.set_help(u"The name to give the profile being created.")
+    _load_profile_settings_descriptions(argument_collection)
+
+
+def _load_profile_update_descriptions(argument_collection):
+    profile = argument_collection.arg_configs[u"profile"]
+    profile.set_help(u"The name to give the profile being updated.")
+    _load_profile_settings_descriptions(argument_collection)
+    argument_collection.arg_configs[u"server"].add_short_option_name(u"-s")
+    argument_collection.arg_configs[u"username"].add_short_option_name(u"-u")
+
+
+def _load_profile_settings_descriptions(argument_collection):
     server = argument_collection.arg_configs[u"server"]
     username = argument_collection.arg_configs[u"username"]
     disable_ssl_errors = argument_collection.arg_configs[u"disable_ssl_errors"]
-
-    profile.set_help(u"The name to give the profile being created.")
     server.set_help(u"The url and port of the Code42 server.")
     username.set_help(u"The username of the Code42 API user.")
     disable_ssl_errors.set_help(
