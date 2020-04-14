@@ -6,7 +6,7 @@ def load_subcommands():
     return [
         Command(
             u"high-risk",
-            u"Add or remove users from the `departing employee` detection list.",
+            u"Add or remove users from the `high risk` detection list.",
             subcommand_loader=high_risk.load_subcommands,
         )
     ]
