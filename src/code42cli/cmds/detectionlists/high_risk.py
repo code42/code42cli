@@ -1,7 +1,6 @@
 from code42cli.cmds.detectionlists.enums import BulkCommandType
 from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory, create_usage_prefix
 from code42cli.bulk import generate_template, create_bulk_processor
-from code42cli.commands import Command
 
 
 _NAME = u"high-risk"
