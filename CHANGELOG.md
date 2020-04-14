@@ -10,9 +10,19 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
+### Changed
+
+- `securitydata` renamed to `security-data`.
+- From `security-data` related subcommands (such as `print`):
+    - `--c42username` flag renamed to `--c42-username`.
+    - `--filename` flag renamed to `--file-name`.
+    - `--filepath` flag renamed to `--file-path`.
+    - `--processOwner` flag renamed to `--process-owner`
+
 ### Added
 
 - `code42 profile create` command.
+- `code42 profile update` command.
 
 ### Removed
 

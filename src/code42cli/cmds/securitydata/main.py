@@ -6,8 +6,8 @@ from code42cli.commands import Command
 
 
 def load_subcommands():
-    """Sets up the `securitydata` subcommand with all of its subcommands."""
-    usage_prefix = u"code42 securitydata"
+    """Sets up the `security-data` subcommand with all of its subcommands."""
+    usage_prefix = u"code42 security-data"
 
     print_func = Command(
         u"print",
@@ -48,7 +48,7 @@ def load_subcommands():
 
 def clear_checkpoint(sdk, profile):
     """Removes the stored checkpoint that keeps track of the last event you got.
-        To use, run `code42 securitydata clear-checkpoint`.
+        To use, run `code42 security-data clear-checkpoint`.
         This affects `incremental` mode by causing it to behave like it has never been run before.
     """
     FileEventCursorStore(profile.name).replace_stored_insertion_timestamp(None)
@@ -121,8 +121,8 @@ def _load_search_args(arg_collection):
             help=u"Limits events to those with given exposure types. "
             u"Available choices={0}".format(list(enums.ExposureType())),
         ),
-        enums.SearchArguments.C42USERNAME: ArgConfig(
-            u"--{}".format(enums.SearchArguments.C42USERNAME),
+        enums.SearchArguments.C42_USERNAME: ArgConfig(
+            u"--{}".format(enums.SearchArguments.C42_USERNAME),
             nargs=u"+",
             help=u"Limits events to endpoint events for these users.",
         ),
@@ -147,13 +147,13 @@ def _load_search_args(arg_collection):
             nargs=u"+",
             help=u"Limits events to only those from one of these sources. Example=Gmail.",
         ),
-        enums.SearchArguments.FILENAME: ArgConfig(
-            u"--{}".format(enums.SearchArguments.FILENAME),
+        enums.SearchArguments.FILE_NAME: ArgConfig(
+            u"--{}".format(enums.SearchArguments.FILE_NAME),
             nargs=u"+",
             help=u"Limits events to file events where the file has one of these names.",
         ),
-        enums.SearchArguments.FILEPATH: ArgConfig(
-            u"--{}".format(enums.SearchArguments.FILEPATH),
+        enums.SearchArguments.FILE_PATH: ArgConfig(
+            u"--{}".format(enums.SearchArguments.FILE_PATH),
             nargs=u"+",
             help=u"Limits events to file events where the file is located at one of these paths.",
         ),

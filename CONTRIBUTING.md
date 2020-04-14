@@ -89,7 +89,8 @@ See class documentation on the [Command](src/code42cli/commands.py) class for an
 
 3. For commands that actually are executed (rather than just being groups), you will add a `handler` function as a constructor parameter.
    This will be the function that you want to execute when your command is run.
-   * _Positional_ arguments of the handler will automatically become _required_ cli arguments
+   * _Positional_ arguments of the handler will automatically become _required_ cli arguments.
+     * The order that the positional arguments should be entered in on the cli is the same as the order in which they appear in the handler.
    * _Keyword_ arguments of the handler will automatically become _optional_ cli arguments
    * the cli argument name will be the same as the handler param name except with `_` replaced with `-`, and prefixed with `--` if optional
 

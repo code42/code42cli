@@ -1,13 +1,12 @@
 import code42cli.password as password
 from code42cli.cmds.shared.cursor_store import FileEventCursorStore
-from code42cli.config import ConfigAccessor, config_accessor
+from code42cli.config import ConfigAccessor, config_accessor, NoConfigProfileError
 from code42cli.util import (
     print_error,
     print_create_profile_help,
     print_set_default_profile_help,
     print_no_existing_profile_message,
 )
-
 
 class Code42Profile(object):
     def __init__(self, profile):
@@ -28,6 +27,11 @@ class Code42Profile(object):
     @property
     def ignore_ssl_errors(self):
         return self._profile[ConfigAccessor.IGNORE_SSL_ERRORS_KEY]
+
+    @property
+    def has_stored_password(self):
+        stored_password = password.get_stored_password(self)
+        return stored_password is not None and stored_password != u""
 
     def get_password(self):
         pwd = password.get_stored_password(self)
@@ -88,6 +92,10 @@ def switch_default_profile(profile_name):
 
 
 def create_profile(name, server, username, ignore_ssl_errors):
+    if profile_exists(name):
+        print_error(u"A profile named {} already exists.".format(name))
+        exit(1)
+
     config_accessor.create_profile(name, server, username, ignore_ssl_errors)
 
 
@@ -97,6 +105,10 @@ def delete_profile(profile_name):
         password.delete_password(profile)
     FileEventCursorStore(profile_name).clean()
     config_accessor.delete_profile(profile_name)
+
+
+def update_profile(name, server, username, ignore_ssl_errors):
+    config_accessor.update_profile(name, server, username, ignore_ssl_errors)
 
 
 def get_all_profiles():
@@ -112,4 +124,3 @@ def get_stored_password(profile_name=None):
 def set_password(new_password, profile_name=None):
     profile = get_profile(profile_name)
     password.set_password(profile, new_password)
-

@@ -99,15 +99,15 @@ def _create_filters(args):
     filters = []
     event_timestamp_filter = _get_event_timestamp_filter(args.begin, args.end)
     not event_timestamp_filter or filters.append(event_timestamp_filter)
-    not args.c42username or filters.append(DeviceUsername.is_in(args.c42username))
+    not args.c42_username or filters.append(DeviceUsername.is_in(args.c42_username))
     not args.actor or filters.append(Actor.is_in(args.actor))
     not args.md5 or filters.append(MD5.is_in(args.md5))
     not args.sha256 or filters.append(SHA256.is_in(args.sha256))
     not args.source or filters.append(Source.is_in(args.source))
-    not args.filename or filters.append(FileName.is_in(args.filename))
-    not args.filepath or filters.append(FilePath.is_in(args.filepath))
-    not args.processOwner or filters.append(ProcessOwner.is_in(args.processOwner))
-    not args.tabURL or filters.append(TabURL.is_in(args.tabURL))
+    not args.file_name or filters.append(FileName.is_in(args.file_name))
+    not args.file_path or filters.append(FilePath.is_in(args.file_path))
+    not args.process_owner or filters.append(ProcessOwner.is_in(args.process_owner))
+    not args.tab_url or filters.append(TabURL.is_in(args.tab_url))
     _try_append_exposure_types_filter(filters, args.include_non_exposure, args.type)
     return filters
 
@@ -175,9 +175,9 @@ def _handle_result():
 
 
 def _try_append_exposure_types_filter(filters, include_non_exposure_events, exposure_types):
-    exposure_filter = _create_exposure_type_filter(include_non_exposure_events, exposure_types)
-    if exposure_filter:
-        filters.append(exposure_filter)
+    _exposure_filter = _create_exposure_type_filter(include_non_exposure_events, exposure_types)
+    if _exposure_filter:
+        filters.append(_exposure_filter)
 
 
 def _create_exposure_type_filter(include_non_exposure_events, exposure_types):
