@@ -75,7 +75,7 @@ def _create_auto_args_config(arg_position, key, argspec, num_args, num_kw_args):
     param_name = key.replace(u"_", u"-")
     difference = num_args - num_kw_args
     last_positional_arg_idx = difference - 1
-    # postional arguments will come first, so if the arg position
+    # positional arguments will come first, so if the arg position
     # is greater than the index of the last positional arg, it's a kwarg.
     if arg_position > last_positional_arg_idx:
         # this is a keyword arg, treat it as an optional cli arg.
