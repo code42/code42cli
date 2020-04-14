@@ -46,8 +46,8 @@ class ArgConfigCollection(object):
 
 
 def get_auto_arg_configs(handler):
-    """Looks at the parameter names of `handler` and builds an `ArgConfigCollection` containing argparse
-    parameters based on them."""
+    """Looks at the parameter names of `handler` and builds an `ArgConfigCollection` containing
+    `argparse` parameters based on them."""
     arg_configs = ArgConfigCollection()
     if callable(handler):
         # get the number of positional and keyword args

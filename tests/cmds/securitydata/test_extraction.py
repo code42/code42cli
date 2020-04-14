@@ -1,9 +1,9 @@
+import code42cli.cmds.securitydata.extraction as extraction_module
 import pytest
+from code42cli.cmds.securitydata.enums import ExposureType as ExposureTypeOptions
 from py42.sdk import SDKClient
 from py42.sdk.queries.fileevents.filters import *
 
-import code42cli.cmds.securitydata.extraction as extraction_module
-from code42cli.cmds.securitydata.enums import ExposureType as ExposureTypeOptions
 from .conftest import (
     SECURITYDATA_NAMESPACE,
     begin_date_str,

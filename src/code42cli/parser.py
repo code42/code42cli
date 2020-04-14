@@ -1,5 +1,6 @@
 import argparse
 from argparse import RawDescriptionHelpFormatter, SUPPRESS
+
 from py42.__version__ import __version__ as py42version
 
 from code42cli.__version__ import __version__ as cliversion
