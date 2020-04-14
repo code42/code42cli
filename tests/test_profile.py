@@ -1,5 +1,6 @@
 import pytest
 
+from code42cli import PRODUCT_NAME
 import code42cli.profile as cliprofile
 from code42cli.config import ConfigAccessor, NoConfigProfileError
 from .conftest import MockSection, create_mock_profile
@@ -8,24 +9,24 @@ from .conftest import MockSection, create_mock_profile
 @pytest.fixture
 def config_accessor(mocker):
     mock = mocker.MagicMock(spec=ConfigAccessor, name="Config Accessor")
-    attr = mocker.patch("code42cli.profile.config_accessor", mock)
+    attr = mocker.patch("{}.profile.config_accessor".format(PRODUCT_NAME), mock)
     return attr
 
 
 @pytest.fixture
 def password_setter(mocker):
-    return mocker.patch("code42cli.password.set_password")
+    return mocker.patch("{}.password.set_password".format(PRODUCT_NAME))
 
 
 @pytest.fixture
 def password_getter(mocker):
-    return mocker.patch("code42cli.password.get_stored_password")
+    return mocker.patch("{}.password.get_stored_password".format(PRODUCT_NAME))
 
 
 class TestCode42Profile(object):
     def test_get_password_when_is_none_returns_password_from_getpass(self, mocker, password_getter):
         password_getter.return_value = None
-        mock_getpass = mocker.patch("code42cli.password.get_password_from_prompt")
+        mock_getpass = mocker.patch("{}.password.get_password_from_prompt".format(PRODUCT_NAME))
         mock_getpass.return_value = "Test Password"
         actual = create_mock_profile().get_password()
         assert actual == "Test Password"
@@ -58,6 +59,7 @@ def test_get_profile_returns_expected_profile(config_accessor):
     profile = cliprofile.get_profile("testprofilename")
     assert profile.name == "testprofilename"
 
+
 def test_get_profile_when_config_accessor_throws_exits(config_accessor):
     config_accessor.get_profile.side_effect = NoConfigProfileError()
     with pytest.raises(SystemExit):
@@ -76,18 +78,20 @@ def test_default_profile_exists_when_not_exists_returns_false(config_accessor):
     assert not cliprofile.default_profile_exists()
 
 
-def test_validate_default_profile_prints_set_default_help_when_no_valid_default_but_another_profile_exists(capsys, config_accessor):
+def test_validate_default_profile_prints_set_default_help_when_no_valid_default_but_another_profile_exists(
+    capsys, config_accessor
+):
     config_accessor.get_profile.side_effect = NoConfigProfileError()
-    config_accessor.get_all_profiles.return_value = [
-        MockSection("thisprofilexists")
-    ]
+    config_accessor.get_all_profiles.return_value = [MockSection("thisprofilexists")]
     with pytest.raises(SystemExit):
         cliprofile.validate_default_profile()
         capture = capsys.readouterr()
         assert "No default profile set." in capture.out
 
 
-def test_validate_default_profile_prints_create_profile_help_when_no_valid_default_and_no_other_profiles_exists(capsys, config_accessor):
+def test_validate_default_profile_prints_create_profile_help_when_no_valid_default_and_no_other_profiles_exists(
+    capsys, config_accessor
+):
     config_accessor.get_profile.side_effect = NoConfigProfileError()
     config_accessor.get_all_profiles.return_value = []
     with pytest.raises(SystemExit):

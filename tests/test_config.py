@@ -3,6 +3,7 @@ from __future__ import with_statement
 import pytest
 from configparser import ConfigParser
 
+from code42cli import PRODUCT_NAME
 from code42cli.config import ConfigAccessor, NoConfigProfileError
 from .conftest import MockSection
 
@@ -56,7 +57,8 @@ def config_parser_for_create(mock_config_parser):
 
 @pytest.fixture(autouse=True)
 def mock_saver(mocker):
-    return mocker.patch("code42cli.util.open_file")
+    return mocker.patch("{}.util.open_file".format(PRODUCT_NAME))
+    return mocker.patch("{}.util.open_file".format(PRODUCT_NAME))
 
 
 def create_mock_profile_object(profile_name, authority_url=None, username=None):

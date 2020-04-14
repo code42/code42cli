@@ -1,4 +1,5 @@
 import pytest
+from code42cli import PRODUCT_NAME
 from code42cli.args import ArgConfig
 from code42cli.commands import Command, DictObject
 from code42cli.profile import Code42Profile
@@ -27,7 +28,7 @@ def arg_customizer(arg_collection):
 
 @pytest.fixture
 def mock_profile_reader(mocker):
-    return mocker.patch("code42cli.profile.get_profile")
+    return mocker.patch("{}.profile.get_profile".format(PRODUCT_NAME))
 
 
 @pytest.fixture

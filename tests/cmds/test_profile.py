@@ -1,37 +1,38 @@
 import code42cli.cmds.profile as profilecmd
 import pytest
 
+from code42cli import PRODUCT_NAME
 from ..conftest import create_mock_profile
 
 
 @pytest.fixture
 def user_agreement(mocker):
-    mock = mocker.patch("code42cli.cmds.profile.does_user_agree")
+    mock = mocker.patch("{}.cmds.profile.does_user_agree".format(PRODUCT_NAME))
     mock.return_value = True
     return mocker
 
 
 @pytest.fixture
 def user_disagreement(mocker):
-    mock = mocker.patch("code42cli.cmds.profile.does_user_agree")
+    mock = mocker.patch("{}.cmds.profile.does_user_agree".format(PRODUCT_NAME))
     mock.return_value = False
     return mocker
 
 
 @pytest.fixture
 def mock_cliprofile_namespace(mocker):
-    return mocker.patch("code42cli.cmds.profile.cliprofile")
+    return mocker.patch("{}.cmds.profile.cliprofile".format(PRODUCT_NAME))
 
 
 @pytest.fixture(autouse=True)
 def mock_getpass(mocker):
-    mock = mocker.patch("code42cli.cmds.profile.getpass")
+    mock = mocker.patch("{}.cmds.profile.getpass".format(PRODUCT_NAME))
     mock.return_value = "newpassword"
 
 
 @pytest.fixture
 def mock_verify(mocker):
-    return mocker.patch("code42cli.cmds.profile.validate_connection")
+    return mocker.patch("{}.cmds.profile.validate_connection".format(PRODUCT_NAME))
 
 
 @pytest.fixture

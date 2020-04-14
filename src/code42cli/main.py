@@ -1,6 +1,9 @@
 import platform
 import sys
 
+from py42.sdk.settings import set_user_agent_suffix
+
+from code42cli import PRODUCT_NAME
 from code42cli.cmds import profile
 from code42cli.cmds.detectionlists import main as dlmain
 from code42cli.cmds.securitydata import main as secmain
@@ -17,6 +20,11 @@ if platform.system().lower() == u"windows":
     windll.kernel32.GetConsoleMode(c_int(stdout_handle), byref(mode))
     mode = c_int(mode.value | 4)
     windll.kernel32.SetConsoleMode(c_int(stdout_handle), mode)
+
+
+# Sets part of the user agent string that py42 attaches to requests for the purposes of
+# identifying CLI users.
+set_user_agent_suffix(PRODUCT_NAME)
 
 
 def main():
