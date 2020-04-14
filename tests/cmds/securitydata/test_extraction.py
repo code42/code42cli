@@ -74,6 +74,15 @@ def non_interactive_mode(is_interactive_function):
     return is_interactive_function
 
 
+@pytest.fixture
+def checkpoint(mocker):
+    return mocker.patch(
+        "{}.cmds.shared.cursor_store.FileEventCursorStore.get_stored_insertion_timestamp".format(
+            PRODUCT_NAME
+        )
+    )
+
+
 def filter_term_is_in_call_args(extractor, term):
     arg_filters = extractor.extract.call_args[0]
     for f in arg_filters:
@@ -316,31 +325,21 @@ def test_extract_when_end_date_is_before_begin_date_causes_exit(
 
 
 def test_when_given_begin_date_past_90_days_and_is_incremental_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
-    mocker, sdk, profile, logger, namespace, extractor
+    sdk, profile, logger, namespace, extractor, checkpoint
 ):
     namespace.begin = "2019-01-01"
     namespace.incremental = True
-    mock_checkpoint = mocker.patch(
-        "{}.cmds.shared.cursor_store.FileEventCursorStore.get_stored_insertion_timestamp".format(
-            PRODUCT_NAME
-        )
-    )
-    mock_checkpoint.return_value = 22624624
+    checkpoint.return_value = 22624624
     extraction_module.extract(sdk, profile, logger, namespace)
     assert not filter_term_is_in_call_args(extractor, EventTimestamp._term)
 
 
 def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_begin_date(
-    mocker, sdk, profile, logger, namespace, extractor
+    sdk, profile, logger, namespace, extractor
 ):
     namespace.begin = get_test_date_str(days_ago=1)
     namespace.incremental = False
-    mock_checkpoint = mocker.patch(
-        "{}.cmds.shared.cursor_store.FileEventCursorStore.get_stored_insertion_timestamp".format(
-            PRODUCT_NAME
-        )
-    )
-    mock_checkpoint.return_value = 22624624
+    checkpoint.return_value = 22624624
     extraction_module.extract(sdk, profile, logger, namespace)
 
     actual_ts = get_filter_value_from_json(extractor.extract.call_args[0][0], filter_index=0)
@@ -350,16 +349,11 @@ def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_b
 
 
 def test_when_not_given_begin_date_and_is_incremental_but_no_stored_checkpoint_exists_causes_exit(
-    mocker, sdk, profile, logger, namespace, extractor
+    sdk, profile, logger, namespace, extractor
 ):
     namespace.begin = None
     namespace.is_incremental = True
-    mock_checkpoint = mocker.patch(
-        "{}.cmds.shared.cursor_store.FileEventCursorStore.get_stored_insertion_timestamp".format(
-            PRODUCT_NAME
-        )
-    )
-    mock_checkpoint.return_value = None
+    checkpoint.return_value = None
     with pytest.raises(SystemExit):
         extraction_module.extract(sdk, profile, logger, namespace)
 
