@@ -77,7 +77,7 @@ def test_default_profile_exists_when_not_exists_returns_false(config_accessor):
 
 
 def test_validate_default_profile_prints_set_default_help_when_no_valid_default_but_another_profile_exists(capsys, config_accessor):
-    config_accessor.get_profile.side_effect = Exception()
+    config_accessor.get_profile.side_effect = NoConfigProfileError()
     config_accessor.get_all_profiles.return_value = [
         MockSection("thisprofilexists")
     ]
@@ -88,7 +88,7 @@ def test_validate_default_profile_prints_set_default_help_when_no_valid_default_
 
 
 def test_validate_default_profile_prints_create_profile_help_when_no_valid_default_and_no_other_profiles_exists(capsys, config_accessor):
-    config_accessor.get_profile.side_effect = Exception()
+    config_accessor.get_profile.side_effect = NoConfigProfileError()
     config_accessor.get_all_profiles.return_value = []
     with pytest.raises(SystemExit):
         cliprofile.validate_default_profile()
