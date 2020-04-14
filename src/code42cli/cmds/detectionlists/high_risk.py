@@ -1,9 +1,9 @@
-from code42cli.cmds.detectionlists.enums import BulkCommandType
+from code42cli.cmds.detectionlists.enums import BulkCommandType, DetectionLists
 from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory, create_usage_prefix
 from code42cli.bulk import generate_template, create_bulk_processor
 
 
-_NAME = u"high-risk"
+_NAME = DetectionLists.HIGH_RISK
 _USAGE_PREFIX = create_usage_prefix(_NAME)
 
 
