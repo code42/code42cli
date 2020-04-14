@@ -1,6 +1,9 @@
 from code42cli.commands import Command
 
 
+_USAGE_PREFIX = u"code452 detection-lists departing-employee"
+
+
 def load_subcommands():
     bulk = Command(
         u"bulk",
