@@ -51,8 +51,9 @@ def generate_csv_file(cmd, path=None):
 
 
 def bulk_add_high_risk_employees(sdk, profile, csv_file):
-    """Takes a csv file in the form `user_id,risk_factors` with each row representing an 
-    employee and adds each employee to the high risk detection list in a bulk fashion.
+    """Takes a csv file in the form `username,cloud_aliases,risk_factors,notes` with each row 
+    representing an employee and adds each employee to the high risk detection list in a bulk 
+    fashion.
     
     Args:
         sdk (py42.sdk.SDKClient): The py42 sdk.
