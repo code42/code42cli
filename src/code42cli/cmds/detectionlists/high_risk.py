@@ -1,42 +1,27 @@
 from code42cli.cmds.detectionlists.enums import BulkCommandType
+from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory, create_usage_prefix
 from code42cli.bulk import generate_template, create_bulk_processor
 from code42cli.commands import Command
 
-_USAGE_PREFIX = u"code452 detection-lists high-risk"
+
+_NAME = u"high-risk"
+_USAGE_PREFIX = create_usage_prefix(_NAME)
 
 
 def load_subcommands():
-    bulk = Command(
-        u"bulk",
-        u"Tools for executing bulk high risk commands.",
-        subcommand_loader=load_bulk_subcommands,
-    )
-    add = Command(
-        u"add",
-        u"Add a user to the high risk detection list.",
-        u"{} add <username> <optional args>".format(_USAGE_PREFIX),
-        handler=add_high_risk_employee,
-        arg_customizer=_load_add_description,
-    )
+    factory = DetectionListCommandFactory(u"high-risk")
+    bulk = factory.create_bulk_command(lambda: load_bulk_subcommands(factory))
+    add = factory.create_add_command(add_high_risk_employee, _load_add_description)
     return [bulk, add]
 
 
-def load_bulk_subcommands():
-    _usage_prefix = u"{} bulk".format(_USAGE_PREFIX)
-
-    generate_template_cmd = Command(
-        u"generate-template",
-        u"Generates the necessary csv template needed for bulk adding users.",
-        u"{} gen-template <cmd> <optional args>".format(_usage_prefix),
-        handler=generate_csv_file,
-        arg_customizer=_load_bulk_generate_template_description,
+def load_bulk_subcommands(factory):
+    generate_template_cmd = factory.create_bulk_generate_template_command(
+        generate_csv_file, _load_bulk_generate_template_description
     )
-    add = Command(
-        u"add",
-        u"Bulk add users to the high risk detection list using a csv file.",
-        u"{} add <csv-file>".format(_usage_prefix),
-        handler=bulk_add_high_risk_employees,
-        arg_customizer=_load_bulk_add_description,
+
+    add = factory.create_bulk_add_command(
+        bulk_add_high_risk_employees, _load_bulk_add_description
     )
     return [generate_template_cmd, add]
 
