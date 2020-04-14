@@ -17,7 +17,6 @@ class ConfigAccessor(object):
     AUTHORITY_KEY = u"c42_authority_url"
     USERNAME_KEY = u"c42_username"
     IGNORE_SSL_ERRORS_KEY = u"ignore-ssl-errors"
-    DEFAULT_PROFILE_IS_COMPLETE = u"default_profile_is_complete"
     DEFAULT_PROFILE = u"default_profile"
     _INTERNAL_SECTION = u"Internal"
 
@@ -120,7 +119,6 @@ class ConfigAccessor(object):
     def _create_internal_section(self):
         self.parser.add_section(self._INTERNAL_SECTION)
         self.parser[self._INTERNAL_SECTION] = {}
-        self.parser[self._INTERNAL_SECTION][self.DEFAULT_PROFILE_IS_COMPLETE] = str(False)
         self.parser[self._INTERNAL_SECTION][self.DEFAULT_PROFILE] = self.DEFAULT_VALUE
 
     def _create_profile_section(self, name):
