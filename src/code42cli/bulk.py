@@ -34,7 +34,7 @@ class BulkProcessor(object):
     """A class for bulk processing a csv file. 
     
     Args:
-        csv_file_path (str): The path to the csv file for processing.
+        csv_file_path (str or unicode): The path to the csv file for processing.
         row_handler (callable): To be executed on each row given **kwargs representing the column 
             names mapped to the properties found in the row. For example, if the csv file header 
             looked like `prop_a,prop_b` and the next row looked like `1,test`, then row handler 
