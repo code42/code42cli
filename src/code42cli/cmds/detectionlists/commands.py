@@ -43,7 +43,7 @@ class DetectionListCommandFactory:
     def create_bulk_add_command(self, handler, arg_customizer):
         return Command(
             u"add",
-            u"Bulk add users to the high risk detection list using a csv file.",
+            u"Bulk add users to the {} detection list using a csv file.".format(self._name),
             u"{} add <csv-file>".format(self._bulk_usage_prefix),
             handler=handler,
             arg_customizer=arg_customizer,
