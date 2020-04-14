@@ -3,7 +3,6 @@ from code42cli.commands import Command
 
 
 def load_subcommands():
-    usage_prefix = u"code42 detection-lists"
     return [
         Command(
             u"high-risk",
