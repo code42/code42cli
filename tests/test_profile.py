@@ -58,6 +58,7 @@ def test_get_profile_returns_expected_profile(config_accessor):
     profile = cliprofile.get_profile("testprofilename")
     assert profile.name == "testprofilename"
 
+
 def test_get_profile_when_config_accessor_throws_exits(config_accessor):
     config_accessor.get_profile.side_effect = NoConfigProfileError()
     with pytest.raises(SystemExit):
@@ -76,18 +77,20 @@ def test_default_profile_exists_when_not_exists_returns_false(config_accessor):
     assert not cliprofile.default_profile_exists()
 
 
-def test_validate_default_profile_prints_set_default_help_when_no_valid_default_but_another_profile_exists(capsys, config_accessor):
+def test_validate_default_profile_prints_set_default_help_when_no_valid_default_but_another_profile_exists(
+    capsys, config_accessor
+):
     config_accessor.get_profile.side_effect = NoConfigProfileError()
-    config_accessor.get_all_profiles.return_value = [
-        MockSection("thisprofilexists")
-    ]
+    config_accessor.get_all_profiles.return_value = [MockSection("thisprofilexists")]
     with pytest.raises(SystemExit):
         cliprofile.validate_default_profile()
         capture = capsys.readouterr()
         assert "No default profile set." in capture.out
 
 
-def test_validate_default_profile_prints_create_profile_help_when_no_valid_default_and_no_other_profiles_exists(capsys, config_accessor):
+def test_validate_default_profile_prints_create_profile_help_when_no_valid_default_and_no_other_profiles_exists(
+    capsys, config_accessor
+):
     config_accessor.get_profile.side_effect = NoConfigProfileError()
     config_accessor.get_all_profiles.return_value = []
     with pytest.raises(SystemExit):
