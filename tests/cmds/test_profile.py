@@ -123,9 +123,7 @@ def test_update_profile_updates_existing_profile(
     mock_cliprofile_namespace.get_profile.return_value = profile
 
     profilecmd.update_profile(name=name, server="bar", username="baz", disable_ssl_errors=True)
-    mock_cliprofile_namespace.update_profile.assert_called_once_with(
-        name=name, server="bar", username="baz", disable_ssl_errors=True
-    )
+    mock_cliprofile_namespace.update_profile.assert_called_once_with(name, "bar", "baz", True)
 
 
 def test_update_profile_if_user_does_not_agree_does_not_save_password(
