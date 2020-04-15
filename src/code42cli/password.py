@@ -4,9 +4,8 @@ from getpass import getpass
 
 import keyring
 
+from code42cli import PRODUCT_NAME
 from code42cli.util import does_user_agree
-
-_ROOT_SERVICE_NAME = u"code42cli"
 
 
 def get_stored_password(profile):
@@ -31,7 +30,7 @@ def set_password(profile, new_password):
 
 
 def _get_keyring_service_name(profile_name):
-    return u"{}::{}".format(_ROOT_SERVICE_NAME, profile_name)
+    return u"{}::{}".format(PRODUCT_NAME, profile_name)
 
 
 def _prompt_for_alternative_store():

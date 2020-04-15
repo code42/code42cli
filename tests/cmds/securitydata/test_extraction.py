@@ -1,9 +1,11 @@
-import code42cli.cmds.securitydata.extraction as extraction_module
 import pytest
-from code42cli.cmds.securitydata.enums import ExposureType as ExposureTypeOptions
+
 from py42.sdk import SDKClient
 from py42.sdk.queries.fileevents.filters import *
 
+from code42cli import PRODUCT_NAME
+from code42cli.cmds.securitydata.enums import ExposureType as ExposureTypeOptions
+import code42cli.cmds.securitydata.extraction as extraction_module
 from .conftest import (
     SECURITYDATA_NAMESPACE,
     begin_date_str,
@@ -35,6 +37,11 @@ def error_logger(mocker):
 
 
 @pytest.fixture
+def error_printer(mocker):
+    return mocker.patch("{}.cmds.securitydata.extraction.print_error".format(PRODUCT_NAME))
+
+
+@pytest.fixture
 def extractor(mocker):
     mock = mocker.MagicMock()
     mock.extract_advanced = mocker.patch(
@@ -48,6 +55,32 @@ def extractor(mocker):
 def namespace_with_begin(namespace):
     namespace.begin = begin_date_str
     return namespace
+
+
+@pytest.fixture
+def is_interactive_function(mocker):
+    return mocker.patch("{}.cmds.securitydata.extraction.is_interactive".format(PRODUCT_NAME))
+
+
+@pytest.fixture
+def interactive_mode(is_interactive_function):
+    is_interactive_function.return_value = True
+    return is_interactive_function
+
+
+@pytest.fixture
+def non_interactive_mode(is_interactive_function):
+    is_interactive_function.return_value = False
+    return is_interactive_function
+
+
+@pytest.fixture
+def checkpoint(mocker):
+    return mocker.patch(
+        "{}.cmds.shared.cursor_store.FileEventCursorStore.get_stored_insertion_timestamp".format(
+            PRODUCT_NAME
+        )
+    )
 
 
 def filter_term_is_in_call_args(extractor, term):
@@ -292,27 +325,21 @@ def test_extract_when_end_date_is_before_begin_date_causes_exit(
 
 
 def test_when_given_begin_date_past_90_days_and_is_incremental_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
-    mocker, sdk, profile, logger, namespace, extractor
+    sdk, profile, logger, namespace, extractor, checkpoint
 ):
     namespace.begin = "2019-01-01"
     namespace.incremental = True
-    mock_checkpoint = mocker.patch(
-        "code42cli.cmds.shared.cursor_store.FileEventCursorStore.get_stored_insertion_timestamp"
-    )
-    mock_checkpoint.return_value = 22624624
+    checkpoint.return_value = 22624624
     extraction_module.extract(sdk, profile, logger, namespace)
     assert not filter_term_is_in_call_args(extractor, EventTimestamp._term)
 
 
 def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_begin_date(
-    mocker, sdk, profile, logger, namespace, extractor
+    sdk, profile, logger, namespace, extractor
 ):
     namespace.begin = get_test_date_str(days_ago=1)
     namespace.incremental = False
-    mock_checkpoint = mocker.patch(
-        "code42cli.cmds.shared.cursor_store.FileEventCursorStore.get_stored_insertion_timestamp"
-    )
-    mock_checkpoint.return_value = 22624624
+    checkpoint.return_value = 22624624
     extraction_module.extract(sdk, profile, logger, namespace)
 
     actual_ts = get_filter_value_from_json(extractor.extract.call_args[0][0], filter_index=0)
@@ -322,14 +349,11 @@ def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_b
 
 
 def test_when_not_given_begin_date_and_is_incremental_but_no_stored_checkpoint_exists_causes_exit(
-    mocker, sdk, profile, logger, namespace, extractor
+    sdk, profile, logger, namespace, extractor
 ):
     namespace.begin = None
     namespace.is_incremental = True
-    mock_checkpoint = mocker.patch(
-        "code42cli.cmds.shared.cursor_store.FileEventCursorStore.get_stored_insertion_timestamp"
-    )
-    mock_checkpoint.return_value = None
+    checkpoint.return_value = None
     with pytest.raises(SystemExit):
         extraction_module.extract(sdk, profile, logger, namespace)
 
@@ -492,42 +516,27 @@ def test_extract_when_creating_sdk_throws_causes_exit(
 
 
 def test_extract_when_global_variable_is_true_and_is_interactive_prints_error(
-    mocker, sdk, profile, logger, namespace_with_begin, extractor
+    sdk, profile, logger, namespace_with_begin, extractor, error_printer, interactive_mode
 ):
-    mock_error_printer = mocker.patch("code42cli.cmds.securitydata.extraction.print_error")
-    mock_is_interactive_function = mocker.patch(
-        "code42cli.cmds.securitydata.extraction.is_interactive"
-    )
-    mock_is_interactive_function.return_value = True
     extraction_module._EXCEPTIONS_OCCURRED = True
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
-    assert mock_error_printer.call_count
+    assert error_printer.call_count
 
 
 def test_extract_when_global_variable_is_true_and_not_is_interactive_does_not_print_error(
-    mocker, sdk, profile, logger, namespace_with_begin, extractor
+    sdk, profile, logger, namespace_with_begin, extractor, error_printer, non_interactive_mode
 ):
-    mock_error_printer = mocker.patch("code42cli.cmds.securitydata.extraction.print_error")
-    mock_is_interactive_function = mocker.patch(
-        "code42cli.cmds.securitydata.extraction.is_interactive"
-    )
-    mock_is_interactive_function.return_value = False
     extraction_module._EXCEPTIONS_OCCURRED = True
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
-    assert not mock_error_printer.call_count
+    assert not error_printer.call_count
 
 
 def test_extract_when_global_variable_is_false_and_is_interactive_does_not_print_error(
-    mocker, sdk, profile, logger, namespace_with_begin, extractor
+    sdk, profile, logger, namespace_with_begin, extractor, error_printer, interactive_mode
 ):
-    mock_error_printer = mocker.patch("code42cli.cmds.securitydata.extraction.print_error")
-    mock_is_interactive_function = mocker.patch(
-        "code42cli.cmds.securitydata.extraction.is_interactive"
-    )
-    mock_is_interactive_function.return_value = True
     extraction_module._EXCEPTIONS_OCCURRED = False
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
-    assert not mock_error_printer.call_count
+    assert not error_printer.call_count
 
 
 def test_when_sdk_raises_exception_global_variable_gets_set(
@@ -537,7 +546,7 @@ def test_when_sdk_raises_exception_global_variable_gets_set(
     mock_sdk = mocker.MagicMock()
 
     # For ease
-    mock = mocker.patch("code42cli.cmds.securitydata.extraction.is_interactive")
+    mock = mocker.patch("{}.cmds.securitydata.extraction.is_interactive".format(PRODUCT_NAME))
     mock.return_value = False
 
     def sdk_side_effect(self, *args):

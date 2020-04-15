@@ -1,6 +1,8 @@
 from os import path
 
 from c42eventextractor.extractors import INSERTION_TIMESTAMP_FIELD_NAME
+
+from code42cli import PRODUCT_NAME
 from code42cli.cmds.shared.cursor_store import BaseCursorStore, FileEventCursorStore
 
 
@@ -27,7 +29,9 @@ class TestFileEventCursorStore(object):
     def test_init_when_called_twice_with_different_profile_names_creates_two_rows(
         self, mocker, sqlite_connection
     ):
-        mock = mocker.patch("code42cli.cmds.shared.cursor_store.FileEventCursorStore._row_exists")
+        mock = mocker.patch(
+            "{}.cmds.shared.cursor_store.FileEventCursorStore._row_exists".format(PRODUCT_NAME)
+        )
         mock.return_value = False
         spy = mocker.spy(FileEventCursorStore, "_insert_new_row")
         FileEventCursorStore("Profile A", self.MOCK_TEST_DB_NAME)

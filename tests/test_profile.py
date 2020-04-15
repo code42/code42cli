@@ -1,5 +1,6 @@
 import pytest
 
+from code42cli import PRODUCT_NAME
 import code42cli.profile as cliprofile
 from code42cli.config import ConfigAccessor, NoConfigProfileError
 from .conftest import MockSection, create_mock_profile
@@ -8,24 +9,24 @@ from .conftest import MockSection, create_mock_profile
 @pytest.fixture
 def config_accessor(mocker):
     mock = mocker.MagicMock(spec=ConfigAccessor, name="Config Accessor")
-    attr = mocker.patch("code42cli.profile.config_accessor", mock)
+    attr = mocker.patch("{}.profile.config_accessor".format(PRODUCT_NAME), mock)
     return attr
 
 
 @pytest.fixture
 def password_setter(mocker):
-    return mocker.patch("code42cli.password.set_password")
+    return mocker.patch("{}.password.set_password".format(PRODUCT_NAME))
 
 
 @pytest.fixture
 def password_getter(mocker):
-    return mocker.patch("code42cli.password.get_stored_password")
+    return mocker.patch("{}.password.get_stored_password".format(PRODUCT_NAME))
 
 
 class TestCode42Profile(object):
     def test_get_password_when_is_none_returns_password_from_getpass(self, mocker, password_getter):
         password_getter.return_value = None
-        mock_getpass = mocker.patch("code42cli.password.get_password_from_prompt")
+        mock_getpass = mocker.patch("{}.password.get_password_from_prompt".format(PRODUCT_NAME))
         mock_getpass.return_value = "Test Password"
         actual = create_mock_profile().get_password()
         assert actual == "Test Password"
