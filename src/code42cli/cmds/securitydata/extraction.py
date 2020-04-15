@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import json
+
 from c42eventextractor import FileEventHandlers
 from c42eventextractor.extractors import FileEventExtractor
 from py42.sdk.queries.fileevents.filters import *
@@ -11,10 +12,11 @@ from code42cli.cmds.securitydata.enums import (
     IS_INCREMENTAL_KEY,
     SearchArguments,
 )
-from code42cli.cmds.securitydata.logger_factory import get_error_logger
+from code42cli.logger import get_error_logger
 from code42cli.cmds.shared.cursor_store import FileEventCursorStore
 from code42cli.compat import str
 from code42cli.util import is_interactive, print_bold, print_error, print_to_stderr
+
 
 _EXCEPTIONS_OCCURRED = False
 _TOTAL_EVENTS = 0
@@ -24,12 +26,13 @@ def extract(sdk, profile, output_logger, args):
     """Extracts file events using the given command-line arguments.
 
         Args:
-            output_logger: The logger specified by which subcommand you use. For example,
+            sdk (py42.sdk.SDKClient): The py42 sdk.
+            profile (Code42Profile): The profile under which to execute this command.
+            output_logger (Logger): The logger specified by which subcommand you use. For example,
                 print: uses a logger that streams to stdout.
                 write-to: uses a logger that logs to a file.
                 send-to: uses a logger that sends logs to a server.
-            args:
-                Command line args used to build up file event query filters.
+            args: Command line args used to build up file event query filters.
     """
     store = _create_cursor_store(args, profile)
     filters = _get_filters(args, store)

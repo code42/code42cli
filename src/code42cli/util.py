@@ -1,7 +1,6 @@
 from __future__ import print_function, with_statement
 
 import sys
-
 from os import makedirs, path
 
 from code42cli.compat import open
@@ -67,7 +66,7 @@ def print_set_default_profile_help(existing_profiles):
     print(
         u"\nNo default profile set.\n",
         u"\nUse the --profile flag to specify which profile to use.\n",
-        u"\nTo set the default profile (used whenever --profile argument is not provided), use:"
+        u"\nTo set the default profile (used whenever --profile argument is not provided), use:",
     )
     print_bold(u"\tcode42 profile use <profile-name>")
     print(u"\nExisting profiles:")

@@ -1,11 +1,11 @@
 from __future__ import print_function
 
-import keyring
 from getpass import getpass
 
-from code42cli.util import does_user_agree
+import keyring
 
-_ROOT_SERVICE_NAME = u"code42cli"
+from code42cli import PRODUCT_NAME
+from code42cli.util import does_user_agree
 
 
 def get_stored_password(profile):
@@ -36,7 +36,7 @@ def delete_password(profile):
 
 
 def _get_keyring_service_name(profile_name):
-    return u"{}::{}".format(_ROOT_SERVICE_NAME, profile_name)
+    return u"{}::{}".format(PRODUCT_NAME, profile_name)
 
 
 def _prompt_for_alternative_store():

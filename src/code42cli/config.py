@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import os
+
 from configparser import ConfigParser
 
 import code42cli.util as util
@@ -9,7 +10,7 @@ from code42cli.compat import str
 
 class NoConfigProfileError(Exception):
     def __init__(self):
-        super(Exception, self).__init__(u"Profile does not exist.")
+        super(NoConfigProfileError, self).__init__(u"Profile does not exist.")
 
 
 class ConfigAccessor(object):

@@ -18,7 +18,7 @@ def load_subcommands():
         u"Print the details of a profile.",
         u"{} {}".format(usage_prefix, u"show <optional-args>"),
         handler=show_profile,
-        arg_customizer=_load_profile_description,
+        arg_customizer=_load_optional_profile_description,
     )
 
     list_all = Command(
@@ -40,7 +40,7 @@ def load_subcommands():
         u"Change the stored password for a profile.",
         u"{} {}".format(usage_prefix, u"reset-pw <optional-args>"),
         handler=prompt_for_password_reset,
-        arg_customizer=_load_profile_description,
+        arg_customizer=_load_optional_profile_description,
     )
 
     create = Command(
@@ -76,9 +76,9 @@ def load_subcommands():
     return [show, list_all, use, reset_pw, create, update, delete, delete_all]
 
 
-def show_profile(profile=None):
+def show_profile(name=None):
     """Prints the given profile to stdout."""
-    c42profile = cliprofile.get_profile(profile)
+    c42profile = cliprofile.get_profile(name)
     print(u"\n{0}:".format(c42profile.name))
     print(u"\t* username = {}".format(c42profile.username))
     print(u"\t* authority url = {}".format(c42profile.authority_url))
@@ -93,15 +93,15 @@ def create_profile(profile, server, username, disable_ssl_errors=False):
     _prompt_for_allow_password_set(profile)
 
 
-def update_profile(profile=None, server=None, username=None, disable_ssl_errors=None):
-    profile = cliprofile.get_profile(profile)
+def update_profile(name=None, server=None, username=None, disable_ssl_errors=None):
+    profile = cliprofile.get_profile(name)
     cliprofile.update_profile(profile.name, server, username, disable_ssl_errors)
     _prompt_for_allow_password_set(profile.name)
 
 
-def prompt_for_password_reset(profile=None):
+def prompt_for_password_reset(name=None):
     """Securely prompts for your password and then stores it using keyring."""
-    c42profile = cliprofile.get_profile(profile)
+    c42profile = cliprofile.get_profile(name)
     new_password = getpass()
     _validate_connection(c42profile.authority_url, c42profile.username, new_password)
     cliprofile.set_password(new_password, c42profile.name)
@@ -150,31 +150,31 @@ def delete_all_profiles():
                 cliprofile.delete_profile(profile.name)
     else:
         print(u"\nNo profiles exist. Nothing to delete.")
+        
 
-
-def _load_profile_description(argument_collection):
-    profile = argument_collection.arg_configs["profile"]
+def _load_optional_profile_description(argument_collection):
+    profile = argument_collection.arg_configs[u"name"]
+    profile.add_short_option_name(u"-n")
     profile.set_help(PROFILE_HELP)
 
 
 def _load_profile_create_descriptions(argument_collection):
-    profile = argument_collection.arg_configs["profile"]
-    profile.set_help(u"The name to give the profile being created.")
+    profile = argument_collection.arg_configs[u"profile"]
+    profile.set_help(PROFILE_HELP)
     _load_profile_settings_descriptions(argument_collection)
 
 
 def _load_profile_update_descriptions(argument_collection):
-    profile = argument_collection.arg_configs["profile"]
-    profile.set_help(u"The name to give the profile being updated.")
+    _load_optional_profile_description(argument_collection)
     _load_profile_settings_descriptions(argument_collection)
-    argument_collection.arg_configs["server"].add_short_option_name("-s")
-    argument_collection.arg_configs["username"].add_short_option_name("-u")
+    argument_collection.arg_configs[u"server"].add_short_option_name(u"-s")
+    argument_collection.arg_configs[u"username"].add_short_option_name(u"-u")
 
 
 def _load_profile_settings_descriptions(argument_collection):
-    server = argument_collection.arg_configs["server"]
-    username = argument_collection.arg_configs["username"]
-    disable_ssl_errors = argument_collection.arg_configs["disable_ssl_errors"]
+    server = argument_collection.arg_configs[u"server"]
+    username = argument_collection.arg_configs[u"username"]
+    disable_ssl_errors = argument_collection.arg_configs[u"disable_ssl_errors"]
     server.set_help(u"The url and port of the Code42 server.")
     username.set_help(u"The username of the Code42 API user.")
     disable_ssl_errors.set_help(

@@ -1,8 +1,11 @@
 import json as json_module
-import pytest
 from datetime import datetime, timedelta
 
-SECURITYDATA_NAMESPACE = "code42cli.cmds.securitydata"
+import pytest
+
+from code42cli import PRODUCT_NAME
+
+SECURITYDATA_NAMESPACE = "{}.cmds.securitydata".format(PRODUCT_NAME)
 
 
 def get_filter_value_from_json(json, filter_index):

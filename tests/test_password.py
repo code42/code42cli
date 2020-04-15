@@ -1,6 +1,7 @@
+import code42cli.password as password
 import pytest
 
-import code42cli.password as password
+from code42cli import PRODUCT_NAME
 
 _USERNAME = "test.username"
 
@@ -24,19 +25,19 @@ def get_keyring(mocker):
 
 @pytest.fixture
 def getpass_function(mocker):
-    return mocker.patch("code42cli.password.getpass")
+    return mocker.patch("{}.password.getpass".format(PRODUCT_NAME))
 
 
 @pytest.fixture
 def user_agreement(mocker):
-    mock = mocker.patch("code42cli.password.does_user_agree")
+    mock = mocker.patch("{}.password.does_user_agree".format(PRODUCT_NAME))
     mock.return_value = True
     return mocker
 
 
 @pytest.fixture
 def user_disagreement(mocker):
-    mock = mocker.patch("code42cli.password.does_user_agree")
+    mock = mocker.patch("{}.password.does_user_agree".format(PRODUCT_NAME))
     mock.return_value = False
     return mocker
 
@@ -46,7 +47,7 @@ def test_get_stored_password_when_given_profile_name_gets_profile_for_that_name(
 ):
     profile.name = "foo"
     profile.username = "bar"
-    service_name = "code42cli::{}".format(profile.name)
+    service_name = "{}::{}".format(PRODUCT_NAME, profile.name)
     password.get_stored_password(profile)
     keyring_password_getter.assert_called_once_with(service_name, profile.username)
 
