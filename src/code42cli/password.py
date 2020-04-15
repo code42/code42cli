@@ -29,6 +29,12 @@ def set_password(profile, new_password):
     keyring.set_password(service_name, profile.username, new_password)
 
 
+def delete_password(profile):
+    """Deletes password for the given profile name."""
+    service_name = _get_keyring_service_name(profile.name)
+    keyring.delete_password(service_name, profile.username)
+
+
 def _get_keyring_service_name(profile_name):
     return u"{}::{}".format(PRODUCT_NAME, profile_name)
 

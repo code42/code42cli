@@ -18,11 +18,14 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `--filename` flag renamed to `--file-name`.
     - `--filepath` flag renamed to `--file-path`.
     - `--processOwner` flag renamed to `--process-owner`
+- Default profile validation logic added to prevent confusing error states.
 
 ### Added
 
 - `code42 profile update` command.
 - `code42 profile create` command.
+- `code42 profile delete` command.
+- `code42 profile delete-all` command.
 - `code42 high-risk-employee` commands:
     - `bulk` with subcommands:
         - `add`: that takes a csv file of users.
