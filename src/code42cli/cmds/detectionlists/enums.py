@@ -1,6 +1,6 @@
 class DetectionLists(object):
     DEPARTING_EMPLOYEE = u"departing-employee"
-    HIGH_RISK = u"high-risk"
+    HIGH_RISK_EMPLOYEE = u"high-risk-employee"
 
 
 class BulkCommandType(object):

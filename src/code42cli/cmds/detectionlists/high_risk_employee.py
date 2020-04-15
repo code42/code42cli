@@ -7,7 +7,7 @@ from code42cli.cmds.detectionlists.commands import (
 from code42cli.bulk import generate_template, run_bulk_process
 
 
-_NAME = DetectionLists.HIGH_RISK
+_NAME = DetectionLists.HIGH_RISK_EMPLOYEE
 _USAGE_PREFIX = create_usage_prefix(_NAME)
 
 
@@ -26,7 +26,7 @@ def load_bulk_subcommands(factory):
 
 def generate_csv_file(cmd, path=None):
     """Generates a csv template a user would need to fill-in for bulk adding users to the high 
-    risk detection list."""
+    risk employee detection list."""
     handler = None
     if cmd == BulkCommandType.ADD:
         handler = add_high_risk_employee
@@ -35,8 +35,8 @@ def generate_csv_file(cmd, path=None):
 
 def bulk_add_high_risk_employees(sdk, profile, csv_file):
     """Takes a csv file in the form `username,cloud_aliases,risk_factors,notes` with each row 
-    representing an employee and adds each employee to the high risk detection list in a bulk 
-    fashion.
+    representing an employee and adds each employee to the high risk employee detection list in a 
+    bulk fashion.
     
     Args:
         sdk (py42.sdk.SDKClient): The py42 sdk.
@@ -49,7 +49,7 @@ def bulk_add_high_risk_employees(sdk, profile, csv_file):
 def add_high_risk_employee(
     sdk, profile, username, cloud_aliases=None, risk_factors=None, notes=None
 ):
-    """Adds the user with the given username to the high risk detection list.
+    """Adds the user with the given username to the high risk employee detection list.
     
     Args:
         sdk (py42.sdk.SDKClient): The py42 sdk.
