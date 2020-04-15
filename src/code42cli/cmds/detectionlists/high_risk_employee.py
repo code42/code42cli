@@ -1,6 +1,10 @@
 from code42cli.cmds.detectionlists.enums import BulkCommandType, DetectionLists
-from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory, create_usage_prefix
-from code42cli.bulk import generate_template, create_bulk_processor
+from code42cli.cmds.detectionlists.commands import (
+    DetectionListCommandFactory,
+    create_usage_prefix,
+    load_username_description,
+)
+from code42cli.bulk import generate_template, run_bulk_process
 
 
 _NAME = DetectionLists.HIGH_RISK
@@ -39,10 +43,7 @@ def bulk_add_high_risk_employees(sdk, profile, csv_file):
         profile (Code42Profile): The profile under which to execute this command.
         csv_file (str): The path to the csv file containing rows of users.
     """
-    processor = create_bulk_processor(
-        csv_file, lambda **kwargs: add_high_risk_employee(sdk, profile, **kwargs)
-    )
-    processor.run()
+    run_bulk_process(csv_file, lambda **kwargs: add_high_risk_employee(sdk, profile, **kwargs))
 
 
 def add_high_risk_employee(
@@ -61,7 +62,6 @@ def add_high_risk_employee(
 
 
 def _load_add_description(argument_collection):
-    username = argument_collection.arg_configs[u"username"]
+    load_username_description(argument_collection)
     risk_factors = argument_collection.arg_configs[u"risk_factors"]
-    username.set_help(u"A user profile ID for detection lists.")
     risk_factors.set_help(u"Risk factors associated with the employee.")

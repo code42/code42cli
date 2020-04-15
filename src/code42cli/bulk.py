@@ -21,7 +21,12 @@ def _write_template_file(path, columns):
         new_csv.write(u",".join(columns))
 
 
-def create_bulk_processor(csv_file_path, row_handler):
+def run_bulk_process(csv_file_path, row_handler):
+    processor = _create_bulk_processor(csv_file_path, row_handler)
+    processor.run()
+
+
+def _create_bulk_processor(csv_file_path, row_handler):
     """A factory method to create the bulk processor, useful for testing purposes."""
     return BulkProcessor(csv_file_path, row_handler)
 

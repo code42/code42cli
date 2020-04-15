@@ -5,7 +5,7 @@ from py42.sdk.settings import set_user_agent_suffix
 
 from code42cli import PRODUCT_NAME
 from code42cli.cmds import profile
-from code42cli.cmds.detectionlists import main as dlmain
+from code42cli.cmds.detectionlists import high_risk_employee as hre
 from code42cli.cmds.securitydata import main as secmain
 from code42cli.commands import Command
 from code42cli.invoker import CommandInvoker
@@ -34,6 +34,8 @@ def main():
 
 
 def _load_top_commands():
+    detection_lists_description = u"For adding and removing employees from the {} detection list."
+
     return [
         Command(
             u"profile", u"For managing Code42 settings.", subcommand_loader=profile.load_subcommands
@@ -44,12 +46,12 @@ def _load_top_commands():
             subcommand_loader=secmain.load_subcommands,
         ),
         Command(
-            u"detection-lists",
-            u"For adding and removing employees from detection lists.",
-            subcommand_loader=dlmain.load_subcommands,
+            u"high-risk-employee",
+            detection_lists_description.format(u"high risk employee"),
+            subcommand_loader=hre.load_subcommands,
         ),
     ]
 
 
-if __name__ == "__main__":
+if __name__ == u"__main__":
     main()

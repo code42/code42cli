@@ -100,8 +100,3 @@ def func_with_sdk(sdk, one, two, three=None, four=None):
 
 def func_with_args(args):
     pass
-
-
-@pytest.fixture
-def bulk_processor(mocker):
-    return mocker.MagicMock(spec=BulkProcessor)
