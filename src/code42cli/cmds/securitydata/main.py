@@ -74,7 +74,7 @@ def send_to(sdk, profile, args):
 
 def _load_write_to_args(arg_collection):
     output_file = ArgConfig(u"output_file", help=u"The name of the local file to send output to.")
-    arg_collection.add(u"output_file", output_file)
+    arg_collection.append(u"output_file", output_file)
     _load_search_args(arg_collection)
 
 
