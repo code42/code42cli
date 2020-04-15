@@ -75,3 +75,15 @@ class TestFileEventCursorStore(object):
         with store._connection as conn:
             actual = conn.execute.call_args[0][1][0]
             assert actual == new_insertion_timestamp
+
+    def test_clean_executes_query_with_expected_primary_key(self, sqlite_connection):
+        profile_name = "Profile"
+        store = FileEventCursorStore(profile_name, self.MOCK_TEST_DB_NAME)
+        store.clean()
+        with store._connection as conn:
+            expected_query = "DELETE FROM {0} WHERE {1}=?".format(
+                store._table_name, store._PRIMARY_KEY_COLUMN_NAME
+            )
+            actual_query, pk = conn.execute.call_args[0]
+            assert expected_query == actual_query
+            assert pk == (profile_name,)

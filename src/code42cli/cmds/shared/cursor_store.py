@@ -38,7 +38,7 @@ class BaseCursorStore(object):
             self._table_name, self._PRIMARY_KEY_COLUMN_NAME
         )
         with self._connection as conn:
-            conn.execute(query, (primary_key, ))
+            conn.execute(query, (primary_key,))
 
     def _row_exists(self, primary_key):
         query = u"SELECT * FROM {0} WHERE {1}=?"
@@ -107,3 +107,7 @@ class FileEventCursorStore(BaseCursorStore):
         insert_query = u"INSERT INTO {0} VALUES(?, null)".format(self._table_name)
         with self._connection as conn:
             conn.execute(insert_query, (self._primary_key,))
+
+
+def get_file_event_cursor_store(profile_name):
+    return FileEventCursorStore(profile_name)

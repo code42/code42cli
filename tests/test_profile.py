@@ -2,6 +2,7 @@ import pytest
 
 import code42cli.profile as cliprofile
 from code42cli.config import ConfigAccessor, NoConfigProfileError
+from code42cli.cmds.shared.cursor_store import FileEventCursorStore
 from .conftest import MockSection, create_mock_profile
 
 
@@ -20,6 +21,11 @@ def password_setter(mocker):
 @pytest.fixture
 def password_getter(mocker):
     return mocker.patch("code42cli.password.get_stored_password")
+
+
+@pytest.fixture
+def password_deleter(mocker):
+    return mocker.patch("code42cli.password.delete_password")
 
 
 class TestCode42Profile(object):
@@ -58,6 +64,7 @@ def test_get_profile_returns_expected_profile(config_accessor):
     profile = cliprofile.get_profile("testprofilename")
     assert profile.name == "testprofilename"
 
+
 def test_get_profile_when_config_accessor_throws_exits(config_accessor):
     config_accessor.get_profile.side_effect = NoConfigProfileError()
     with pytest.raises(SystemExit):
@@ -76,18 +83,20 @@ def test_default_profile_exists_when_not_exists_returns_false(config_accessor):
     assert not cliprofile.default_profile_exists()
 
 
-def test_validate_default_profile_prints_set_default_help_when_no_valid_default_but_another_profile_exists(capsys, config_accessor):
+def test_validate_default_profile_prints_set_default_help_when_no_valid_default_but_another_profile_exists(
+    capsys, config_accessor
+):
     config_accessor.get_profile.side_effect = NoConfigProfileError()
-    config_accessor.get_all_profiles.return_value = [
-        MockSection("thisprofilexists")
-    ]
+    config_accessor.get_all_profiles.return_value = [MockSection("thisprofilexists")]
     with pytest.raises(SystemExit):
         cliprofile.validate_default_profile()
         capture = capsys.readouterr()
         assert "No default profile set." in capture.out
 
 
-def test_validate_default_profile_prints_create_profile_help_when_no_valid_default_and_no_other_profiles_exists(capsys, config_accessor):
+def test_validate_default_profile_prints_create_profile_help_when_no_valid_default_and_no_other_profiles_exists(
+    capsys, config_accessor
+):
     config_accessor.get_profile.side_effect = NoConfigProfileError()
     config_accessor.get_all_profiles.return_value = []
     with pytest.raises(SystemExit):
@@ -178,3 +187,27 @@ def test_set_password_uses_expected_password(config_accessor, password_setter):
     test_profile = "testprofilename"
     cliprofile.set_password("newpassword", test_profile)
     assert password_setter.call_args[0][1] == "newpassword"
+
+
+def test_delete_profile_deletes_password_if_exists(
+    config_accessor, mocker, password_getter, password_deleter
+):
+    profile = create_mock_profile("deleteme")
+    mock_get_profile = mocker.patch("code42cli.profile._get_profile")
+    mock_get_profile.return_value = profile
+    password_getter.return_value = "i_exist"
+    cliprofile.delete_profile("deleteme")
+    password_deleter.assert_called_once_with(profile)
+
+
+def test_delete_profile_clears_checkpoint(config_accessor, mocker):
+    profile = create_mock_profile("deleteme")
+    mock_get_profile = mocker.patch("code42cli.profile._get_profile")
+    mock_get_profile.return_value = profile
+    mock_cursor_store = mocker.patch(
+        "code42cli.cmds.shared.cursor_store.get_file_event_cursor_store"
+    )
+    store = mocker.MagicMock(spec=FileEventCursorStore)
+    mock_cursor_store.return_value = store
+    cliprofile.delete_profile("deleteme")
+    store.clean.assert_called_once()

@@ -1,5 +1,5 @@
 import code42cli.password as password
-from code42cli.cmds.shared.cursor_store import FileEventCursorStore
+from code42cli.cmds.shared.cursor_store import get_file_event_cursor_store
 from code42cli.config import ConfigAccessor, config_accessor, NoConfigProfileError
 from code42cli.util import (
     print_error,
@@ -7,6 +7,7 @@ from code42cli.util import (
     print_set_default_profile_help,
     print_no_existing_profile_message,
 )
+
 
 class Code42Profile(object):
     def __init__(self, profile):
@@ -110,7 +111,8 @@ def delete_profile(profile_name):
     profile = _get_profile(profile_name)
     if password.get_stored_password(profile) is not None:
         password.delete_password(profile)
-    FileEventCursorStore(profile_name).clean()
+    cursor_store = get_file_event_cursor_store(profile_name)
+    cursor_store.clean()
     config_accessor.delete_profile(profile_name)
 
 
