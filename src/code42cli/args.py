@@ -57,7 +57,7 @@ def get_auto_arg_configs(handler):
 
         for arg_position, key in enumerate(argspec.args):
             # do not create cli parameters for arguments named "sdk", "args", or "kwargs"
-            if not key in [u"sdk", u"args", u"kwargs"]:
+            if not key in [u"sdk", u"args", u"kwargs", u"self"]:
                 arg_config = _create_auto_args_config(
                     arg_position, key, argspec, num_args, num_kw_args
                 )

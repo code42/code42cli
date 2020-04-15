@@ -1,64 +1,25 @@
-from code42cli.cmds.detectionlists.enums import BulkCommandType, DetectionLists
-from code42cli.cmds.detectionlists.commands import (
-    DetectionListCommandFactory,
-    create_usage_prefix,
+from code42cli.cmds.detectionlists.enums import DetectionLists
+from code42cli.cmds.detectionlists import (
+    DetectionList,
+    DetectionListHandlers,
     load_username_description,
 )
-from code42cli.bulk import generate_template, run_bulk_process
-
-
-_NAME = DetectionLists.HIGH_RISK_EMPLOYEE
-_USAGE_PREFIX = create_usage_prefix(_NAME)
 
 
 def load_subcommands():
-    factory = DetectionListCommandFactory(_NAME)
-    bulk = factory.create_bulk_command(lambda: load_bulk_subcommands(factory))
-    add = factory.create_add_command(add_high_risk_employee, _load_add_description)
-    return [bulk, add]
+    handlers = DetectionListHandlers(add=add_high_risk_employee, load_add=_load_add_description)
+    detection_list = DetectionList(DetectionLists.HIGH_RISK_EMPLOYEE, handlers)
+    return detection_list.load_subcommands()
 
 
-def load_bulk_subcommands(factory):
-    generate_template_cmd = factory.create_bulk_generate_template_command(generate_csv_file)
-    add = factory.create_bulk_add_command(bulk_add_high_risk_employees)
-    return [generate_template_cmd, add]
-
-
-def generate_csv_file(cmd, path=None):
-    """Generates a csv template a user would need to fill-in for bulk adding users to the high 
-    risk employee detection list."""
-    handler = None
-    if cmd == BulkCommandType.ADD:
-        handler = add_high_risk_employee
-    generate_template(handler, path)
-
-
-def bulk_add_high_risk_employees(sdk, profile, csv_file):
-    """Takes a csv file in the form `username,cloud_aliases,risk_factors,notes` with each row 
-    representing an employee and adds each employee to the high risk employee detection list in a 
-    bulk fashion.
-    
-    Args:
-        sdk (py42.sdk.SDKClient): The py42 sdk.
-        profile (Code42Profile): The profile under which to execute this command.
-        csv_file (str): The path to the csv file containing rows of users.
-    """
-    run_bulk_process(csv_file, lambda **kwargs: add_high_risk_employee(sdk, profile, **kwargs))
+def _get_handlers():
+    return DetectionListHandlers(add=add_high_risk_employee, load_add=_load_add_description)
 
 
 def add_high_risk_employee(
     sdk, profile, username, cloud_aliases=None, risk_factors=None, notes=None
 ):
-    """Adds the user with the given username to the high risk employee detection list.
-    
-    Args:
-        sdk (py42.sdk.SDKClient): The py42 sdk.
-        profile (Code42Profile): The profile under which to execute this command.
-        username (str): The username for the user.
-        cloud_aliases (iter[str]): A list of cloud aliases associated with the user.
-        risk_factors (iter[str]): The list of risk factors associated with the user.
-        notes (str): Notes about the user.
-    """
+    pass
 
 
 def _load_add_description(argument_collection):
