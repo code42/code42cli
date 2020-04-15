@@ -46,6 +46,11 @@ def _load_top_commands():
             subcommand_loader=secmain.load_subcommands,
         ),
         Command(
+            u"departing-employee",
+            detection_lists_description.format(u"departing employee"),
+            subcommand_loader=hre.load_subcommands,
+        ),
+        Command(
             u"high-risk-employee",
             detection_lists_description.format(u"high risk employee"),
             subcommand_loader=hre.load_subcommands,
