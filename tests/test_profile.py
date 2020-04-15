@@ -3,6 +3,7 @@ import pytest
 from code42cli import PRODUCT_NAME
 import code42cli.profile as cliprofile
 from code42cli.config import ConfigAccessor, NoConfigProfileError
+from code42cli.cmds.shared.cursor_store import FileEventCursorStore
 from .conftest import MockSection, create_mock_profile
 
 
@@ -21,6 +22,11 @@ def password_setter(mocker):
 @pytest.fixture
 def password_getter(mocker):
     return mocker.patch("{}.password.get_stored_password".format(PRODUCT_NAME))
+
+
+@pytest.fixture
+def password_deleter(mocker):
+    return mocker.patch("code42cli.password.delete_password")
 
 
 class TestCode42Profile(object):
@@ -182,3 +188,25 @@ def test_set_password_uses_expected_password(config_accessor, password_setter):
     test_profile = "testprofilename"
     cliprofile.set_password("newpassword", test_profile)
     assert password_setter.call_args[0][1] == "newpassword"
+
+
+def test_delete_profile_deletes_password_if_exists(
+    config_accessor, mocker, password_getter, password_deleter
+):
+    profile = create_mock_profile("deleteme")
+    mock_get_profile = mocker.patch("code42cli.profile._get_profile")
+    mock_get_profile.return_value = profile
+    password_getter.return_value = "i_exist"
+    cliprofile.delete_profile("deleteme")
+    password_deleter.assert_called_once_with(profile)
+
+
+def test_delete_profile_clears_checkpoint(config_accessor, mocker):
+    profile = create_mock_profile("deleteme")
+    mock_get_profile = mocker.patch("code42cli.profile._get_profile")
+    mock_get_profile.return_value = profile
+    store = mocker.MagicMock(spec=FileEventCursorStore)
+    mock_get_cursor_store = mocker.patch("code42cli.profile.get_file_event_cursor_store")
+    mock_get_cursor_store.return_value = store
+    cliprofile.delete_profile("deleteme")
+    assert store.clean.call_count == 1
