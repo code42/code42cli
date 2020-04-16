@@ -15,19 +15,19 @@ def sdk_with_user(sdk):
 def test_add_high_risk_employee_when_given_cloud_aliases_adds_alias(sdk_with_user, profile):
     alias = "risk employee alias"
     add_high_risk_employee(sdk_with_user, profile, "risky employee", cloud_aliases=[alias])
-    sdk_with_user.detectionlists.add_cloud_aliases.assert_called_once_with(_TEST_ID, [alias])
+    sdk_with_user.detectionlists.add_user_cloud_aliases.assert_called_once_with(_TEST_ID, [alias])
 
 
 def test_add_high_risk_employee_when_given_risk_factors_adds_tags(sdk_with_user, profile):
     risk_factor = "being risky"
     add_high_risk_employee(sdk_with_user, profile, "risky employee", risk_factors=[risk_factor])
-    sdk_with_user.detectionlists.add_risk_tags.assert_called_once_with(_TEST_ID, [risk_factor])
+    sdk_with_user.detectionlists.add_user_risk_tags.assert_called_once_with(_TEST_ID, [risk_factor])
 
 
 def test_add_high_risk_employee_when_given_notes_updates_notes(sdk_with_user, profile):
     notes = "being risky"
     add_high_risk_employee(sdk_with_user, profile, "risky employee", notes=notes)
-    sdk_with_user.detectionlists.update_notes.assert_called_once_with(_TEST_ID, notes)
+    sdk_with_user.detectionlists.update_user_notes.assert_called_once_with(_TEST_ID, notes)
 
 
 def test_add_high_risk_employee_adds(sdk_with_user, profile):
