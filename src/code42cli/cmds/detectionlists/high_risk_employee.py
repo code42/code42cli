@@ -1,8 +1,9 @@
+from code42cli.compat import str
 from code42cli.cmds.detectionlists.enums import DetectionLists
 from code42cli.cmds.detectionlists import (
     DetectionList,
     DetectionListHandlers,
-    load_username_description,
+    load_user_descriptions,
     get_user_id,
     update_user,
 )
@@ -31,12 +32,19 @@ def add_high_risk_employee(
         risk_factors (iter[str]): Risk factors associated with the employee.
         notes: (str): Notes about the employee.
     """
+    if risk_factors and type(risk_factors) != list:
+        risk_factors = risk_factors.split()
+
+    if cloud_aliases and type(cloud_aliases) != list:
+        cloud_aliases = cloud_aliases.split()
+
     user_id = get_user_id(sdk, username)
     update_user(sdk, user_id, cloud_aliases, risk_factors, notes)
     sdk.detectionlists.high_risk_employee.add(user_id)
 
 
 def _load_add_description(argument_collection):
-    load_username_description(argument_collection)
+    load_user_descriptions(argument_collection)
     risk_factors = argument_collection.arg_configs[u"risk_factors"]
+    risk_factors.as_multi_val_param()
     risk_factors.set_help(u"Risk factors associated with the employee.")

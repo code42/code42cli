@@ -18,8 +18,29 @@ def test_add_high_risk_employee_when_given_cloud_aliases_adds_alias(sdk_with_use
     sdk_with_user.detectionlists.add_user_cloud_aliases.assert_called_once_with(_TEST_ID, [alias])
 
 
+def test_add_high_risk_employee_when_given_str_of_cloud_aliases_adds_aliases(
+    sdk_with_user, profile
+):
+    add_high_risk_employee(
+        sdk_with_user,
+        profile,
+        "risky employee",
+        cloud_aliases="1@example.com 2@example.com 3@example.com",
+    )
+    sdk_with_user.detectionlists.add_user_cloud_aliases.assert_called_once_with(
+        _TEST_ID, ["1@example.com", "2@example.com", "3@example.com"]
+    )
+
+
 def test_add_high_risk_employee_when_given_risk_factors_adds_tags(sdk_with_user, profile):
-    risk_factor = "being risky"
+    add_high_risk_employee(sdk_with_user, profile, "risky employee", risk_factors="RF1 RF2 RF3")
+    sdk_with_user.detectionlists.add_user_risk_tags.assert_called_once_with(
+        _TEST_ID, ["RF1", "RF2", "RF3"]
+    )
+
+
+def test_add_high_risk_employee_when_given_str_of_risk_factors_adds_tags(sdk_with_user, profile):
+    risk_factor = "BeingRisky"
     add_high_risk_employee(sdk_with_user, profile, "risky employee", risk_factors=[risk_factor])
     sdk_with_user.detectionlists.add_user_risk_tags.assert_called_once_with(_TEST_ID, [risk_factor])
 

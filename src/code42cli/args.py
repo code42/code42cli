@@ -30,6 +30,9 @@ class ArgConfig(object):
     def add_short_option_name(self, short_name):
         self._settings[u"options_list"].append(short_name)
 
+    def as_multi_val_param(self, nargs=u"+"):
+        self._settings[u"nargs"] = nargs
+
 
 class ArgConfigCollection(object):
     def __init__(self):

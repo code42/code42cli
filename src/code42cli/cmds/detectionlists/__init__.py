@@ -47,14 +47,24 @@ class DetectionList(object):
             profile (Code42Profile): The profile under which to execute this command.
             csv_file (str): The path to the csv file containing rows of users.
         """
-        run_bulk_process(
-            csv_file, lambda **kwargs: self.handlers.add_employee(sdk, profile, **kwargs)
-        )
+        run_bulk_process(csv_file, lambda **kwargs: self._add_employee(sdk, profile, **kwargs))
+
+    def _add_employee(self, sdk, profile, **kwargs):
+        if kwargs.has_key(u"cloud_aliases") and type(kwargs[u"cloud_aliases"]) != list:
+            kwargs[u"cloud_aliases"] = kwargs[u"cloud_aliases"].split()
+
+        self.handlers.add_employee(sdk, profile, **kwargs)
 
 
-def load_username_description(argument_collection):
+def load_user_descriptions(argument_collection):
     username = argument_collection.arg_configs[u"username"]
+    cloud_aliases = argument_collection.arg_configs[u"cloud_aliases"]
+    notes = argument_collection.arg_configs[u"notes"]
+
     username.set_help(u"The code42 username of the user you want to add.")
+    cloud_aliases.set_help(u"Alternative emails addresses for other cloud services.")
+    cloud_aliases.as_multi_val_param()
+    notes.set_help(u"Notes about the employee.")
 
 
 def get_user_id(sdk, username):
