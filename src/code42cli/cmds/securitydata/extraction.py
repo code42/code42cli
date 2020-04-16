@@ -62,7 +62,7 @@ def _determine_if_advanced_query(args):
         for key in given_args:
             val = given_args[key]
             if not _verify_compatibility_with_advanced_query(key, val):
-                print_error(u"You cannot use --advanced-query with additional search args.")
+                print_error("You cannot use --advanced-query with additional search args.")
                 exit(1)
         return True
     return False
@@ -70,10 +70,10 @@ def _determine_if_advanced_query(args):
 
 def _verify_begin_date_requirements(args, cursor_store):
     if _begin_date_is_required(args, cursor_store) and not args.begin:
-        print_error(u"'begin date' is required.")
-        print(u"")
-        print_bold(u"Try using  '-b' or '--begin'. Use `-h` for more info.")
-        print(u"")
+        print_error("'begin date' is required.")
+        print("")
+        print_bold("Try using  '-b' or '--begin'. Use `-h` for more info.")
+        print("")
         exit(1)
 
 
@@ -94,7 +94,7 @@ def _verify_exposure_types(exposure_types):
     options = list(ExposureTypeOptions())
     for exposure_type in exposure_types:
         if exposure_type not in options:
-            print_error(u"'{0}' is not a valid exposure type.".format(exposure_type))
+            print_error("'{0}' is not a valid exposure type.".format(exposure_type))
             exit(1)
 
 
@@ -117,8 +117,8 @@ def _create_filters(args):
 
 def _get_event_timestamp_filter(begin_date, end_date):
     try:
-        begin_date = begin_date.strip().split() if begin_date else None
-        end_date = end_date.strip().split() if end_date else None
+        begin_date = begin_date.strip() if begin_date else None
+        end_date = end_date.strip() if end_date else None
         return date_helper.create_event_timestamp_filter(begin_date, end_date)
     except ValueError as ex:
         print_error(str(ex))
@@ -142,7 +142,7 @@ def _create_event_handlers(output_logger, cursor_store):
 
     def handle_response(response):
         response_dict = json.loads(response.text)
-        events = response_dict.get(u"fileEvents")
+        events = response_dict.get("fileEvents")
         global _TOTAL_EVENTS
         _TOTAL_EVENTS += len(events)
         for event in events:
@@ -172,9 +172,9 @@ def _verify_compatibility_with_advanced_query(key, val):
 
 def _handle_result():
     if is_interactive() and _EXCEPTIONS_OCCURRED:
-        print_error(u"View exceptions that occurred at [HOME]/.code42cli/log/code42_errors.")
+        print_error("View exceptions that occurred at [HOME]/.code42cli/log/code42_errors.")
     if not _TOTAL_EVENTS:
-        print_to_stderr(u"No results found\n")
+        print_to_stderr("No results found\n")
 
 
 def _try_append_exposure_types_filter(filters, include_non_exposure_events, exposure_types):
@@ -185,7 +185,7 @@ def _try_append_exposure_types_filter(filters, include_non_exposure_events, expo
 
 def _create_exposure_type_filter(include_non_exposure_events, exposure_types):
     if include_non_exposure_events and exposure_types:
-        print_error(u"Cannot use exposure types with `--include-non-exposure`.")
+        print_error("Cannot use exposure types with `--include-non-exposure`.")
         exit(1)
     if exposure_types:
         return ExposureType.is_in(exposure_types)
