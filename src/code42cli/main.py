@@ -1,7 +1,7 @@
 import platform
 import sys
 
-from py42.sdk.settings import set_user_agent_suffix
+from py42.settings import set_user_agent_suffix
 
 from code42cli import PRODUCT_NAME
 from code42cli.cmds import profile
