@@ -55,3 +55,16 @@ class DetectionList(object):
 def load_username_description(argument_collection):
     username = argument_collection.arg_configs[u"username"]
     username.set_help(u"The code42 username of the user you want to add.")
+
+
+def get_user_id(sdk, username):
+    return sdk.users.get_by_username(username)[u"users"][0][u"userUid"]
+
+
+def update_user(sdk, user_id, cloud_aliases=None, risk_factors=None, notes=None):
+    if cloud_aliases:
+        sdk.detectionlists.add_cloud_aliases(user_id, cloud_aliases)
+    if risk_factors:
+        sdk.detectionlists.add_risk_tags(user_id, risk_factors)
+    if notes:
+        sdk.detectionlists.update_notes(user_id, notes)
