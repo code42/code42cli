@@ -49,6 +49,9 @@ class DetectionList(object):
         """
         run_bulk_process(csv_file, lambda **kwargs: self._add_employee(sdk, profile, **kwargs))
 
+    def bulk_remove_employees(self, sdk, profile, users_file):
+        run_bulk_process(users_file, lambda **kwargs: self.handlers.remove_employee(**kwargs))
+
     def _add_employee(self, sdk, profile, **kwargs):
         if kwargs.has_key(u"cloud_aliases") and type(kwargs[u"cloud_aliases"]) != list:
             kwargs[u"cloud_aliases"] = kwargs[u"cloud_aliases"].split()
