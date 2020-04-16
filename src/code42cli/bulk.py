@@ -21,15 +21,15 @@ def _write_template_file(path, columns):
         new_csv.write(u",".join(columns))
 
 
-def run_bulk_process(csv_file_path, row_handler, process_type):
-    processor = _create_bulk_processor(csv_file_path, row_handler, process_type)
+def run_bulk_process(file_path, row_handler, process_type):
+    processor = _create_bulk_processor(file_path, row_handler, process_type)
     processor.run()
 
 
-def _create_bulk_processor(csv_file_path, row_handler, process_type):
+def _create_bulk_processor(file_path, row_handler, process_type):
     """A factory method to create the bulk processor, useful for testing purposes."""
     reader = _get_reader(process_type)
-    return BulkProcessor(csv_file_path, row_handler, reader)
+    return BulkProcessor(file_path, row_handler, reader)
 
 
 def _get_reader(process_type):
@@ -40,14 +40,15 @@ def _get_reader(process_type):
 
 
 class BulkProcessor(object):
-    """A class for bulk processing a csv file. 
+    """A class for bulk processing a file. 
     
     Args:
-        file_path (str or unicode): The path to the csv file for processing.
+        file_path (str or unicode): The path to the file for processing.
         row_handler (callable): To be executed on each row given **kwargs representing the column 
-            names mapped to the properties found in the row. For example, if the csv file header 
+            names mapped to the properties found in the row. For example, if the file header 
             looked like `prop_a,prop_b` and the next row looked like `1,test`, then row handler 
-            would receive args `prop_a: '1', prop_b: 'test'` when processing row 1.
+            would receive args `prop_a: '1', prop_b: 'test'` when processing row 1. If it's a flat 
+            file, the handler only needs to take an extra arg. 
     """
 
     def __init__(self, file_path, row_handler, reader):
