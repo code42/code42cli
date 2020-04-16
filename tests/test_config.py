@@ -69,9 +69,7 @@ def create_mock_profile_object(profile_name, authority_url=None, username=None):
 
 def create_internal_object(is_complete, default_profile_name=None):
     default_profile_name = default_profile_name or ConfigAccessor.DEFAULT_VALUE
-    internal_dict = {
-        ConfigAccessor.DEFAULT_PROFILE: default_profile_name,
-    }
+    internal_dict = {ConfigAccessor.DEFAULT_PROFILE: default_profile_name}
     internal_section = MockSection(_INTERNAL, internal_dict)
 
     def getboolean(*args):

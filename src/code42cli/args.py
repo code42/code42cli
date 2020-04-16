@@ -8,13 +8,14 @@ class ArgConfig(object):
     """Stores a set of argparse commands for later use by a command."""
 
     def __init__(self, *args, **kwargs):
-        self._settings = {}
-        self._settings[u"action"] = kwargs.get(u"action")
-        self._settings[u"choices"] = kwargs.get(u"choices")
-        self._settings[u"default"] = kwargs.get(u"default")
-        self._settings[u"help"] = kwargs.get(u"help")
-        self._settings[u"options_list"] = list(args)
-        self._settings[u"nargs"] = kwargs.get(u"nargs")
+        self._settings = {
+            u"action": kwargs.get(u"action"),
+            u"choices": kwargs.get(u"choices"),
+            u"default": kwargs.get(u"default"),
+            u"help": kwargs.get(u"help"),
+            u"options_list": list(args),
+            u"nargs": kwargs.get(u"nargs"),
+        }
 
     @property
     def settings(self):

@@ -12,7 +12,6 @@ def sdk_with_user(sdk):
     return sdk
 
 
-
 def test_add_high_risk_employee_when_given_cloud_aliases_adds_alias(sdk_with_user, profile):
     alias = "risk employee alias"
     add_high_risk_employee(sdk_with_user, profile, "risky employee", cloud_aliases=[alias])

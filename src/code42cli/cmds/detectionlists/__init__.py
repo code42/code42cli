@@ -8,7 +8,7 @@ class DetectionListHandlers(object):
         self.add_employee = add
         self.remove_employee = remove
         self.load_add_description = load_add
-        
+
 
 class DetectionList(object):
     def __init__(self, list_name, handlers, cmd_factory=None):

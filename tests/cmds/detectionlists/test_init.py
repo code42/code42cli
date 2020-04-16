@@ -23,14 +23,14 @@ class TestDetectionList(object):
         cmds = detection_list.load_subcommands()
         assert cmds[0].name == "bulk"
         assert cmds[1].name == "add"
-    
+
     def test_generate_csv_file_generates_template(self, bulk_template_generator):
         handlers = DetectionListHandlers()
         detection_list = DetectionList("TestList", handlers)
         path = "some/path"
         detection_list.generate_csv_file("add", path)
         bulk_template_generator.assert_called_once_with(handlers.add_employee, path)
-    
+
     def test_bulk_add_employees_uses_csv_path(self, sdk, profile, bulk_processor):
         detection_list = DetectionList("TestList", DetectionListHandlers())
         detection_list.bulk_add_employees(sdk, profile, "csv_test")
