@@ -28,7 +28,8 @@ class DetectionList(object):
             self.generate_csv_file
         )
         add = self.factory.create_bulk_add_command(self.bulk_add_employees)
-        return [generate_template_cmd, add]
+        remove = self.factory.create_bulk_remove_command(self.bulk_remove_employees)
+        return [generate_template_cmd, add, remove]
 
     def generate_csv_file(self, cmd, path=None):
         """Generates a csv template a user would need to fill-in for bulk adding users to the 
@@ -47,16 +48,23 @@ class DetectionList(object):
             profile (Code42Profile): The profile under which to execute this command.
             csv_file (str): The path to the csv file containing rows of users.
         """
-        run_bulk_process(csv_file, lambda **kwargs: self._add_employee(sdk, profile, **kwargs))
+        run_bulk_process(
+            csv_file, lambda **kwargs: self._add_employee(sdk, profile, **kwargs), u"add"
+        )
 
     def bulk_remove_employees(self, sdk, profile, users_file):
-        run_bulk_process(users_file, lambda **kwargs: self.handlers.remove_employee(**kwargs))
+        run_bulk_process(
+            users_file, lambda *args, **kwargs: self._remove_employee(sdk, profile, *args, **kwargs), u"remove"
+        )
 
     def _add_employee(self, sdk, profile, **kwargs):
         if kwargs.has_key(u"cloud_aliases") and type(kwargs[u"cloud_aliases"]) != list:
             kwargs[u"cloud_aliases"] = kwargs[u"cloud_aliases"].split()
 
         self.handlers.add_employee(sdk, profile, **kwargs)
+
+    def _remove_employee(self, sdk, profile, *args, **kwargs):
+        self.handlers.remove_employee(sdk, profile, *args, **kwargs)
 
 
 def load_user_descriptions(argument_collection):

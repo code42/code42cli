@@ -21,49 +21,65 @@ def _write_template_file(path, columns):
         new_csv.write(u",".join(columns))
 
 
-def run_bulk_process(csv_file_path, row_handler):
-    processor = _create_bulk_processor(csv_file_path, row_handler)
+def run_bulk_process(csv_file_path, row_handler, process_type):
+    processor = _create_bulk_processor(csv_file_path, row_handler, process_type)
     processor.run()
 
 
-def _create_bulk_processor(csv_file_path, row_handler):
+def _create_bulk_processor(csv_file_path, row_handler, process_type):
     """A factory method to create the bulk processor, useful for testing purposes."""
-    return BulkProcessor(csv_file_path, row_handler)
+    reader = _get_reader(process_type)
+    return BulkProcessor(csv_file_path, row_handler, reader)
+
+
+def _get_reader(process_type):
+    if process_type == u"add":
+        return CSVReader()
+    elif process_type == u"remove":
+        return FlatFileReader()
 
 
 class BulkProcessor(object):
     """A class for bulk processing a csv file. 
     
     Args:
-        csv_file_path (str or unicode): The path to the csv file for processing.
+        file_path (str or unicode): The path to the csv file for processing.
         row_handler (callable): To be executed on each row given **kwargs representing the column 
             names mapped to the properties found in the row. For example, if the csv file header 
             looked like `prop_a,prop_b` and the next row looked like `1,test`, then row handler 
             would receive args `prop_a: '1', prop_b: 'test'` when processing row 1.
     """
 
-    def __init__(self, csv_file_path, row_handler):
-        self.csv_file_path = csv_file_path
+    def __init__(self, file_path, row_handler, reader):
+        self.file_path = file_path
         self._row_handler = row_handler
+        self._reader = reader
         self.__worker = Worker(5)
 
     def run(self):
         """Processes the csv file specified in the ctor, calling `self.row_handler` on each row."""
-        with open(self.csv_file_path, newline=u"", encoding=u"utf8") as csv_file:
-            rows = _create_dict_reader(csv_file)
+        with open(self.file_path, newline=u"", encoding=u"utf8") as bulk_file:
+            rows = self._reader(bulk_file=bulk_file)
             self._process_rows(rows)
             self.__worker.wait()
 
     def _process_rows(self, rows):
         for row in rows:
-            self.__worker.do_async(lambda **kwargs: self._row_handler(**kwargs), **row)
-    
-    def _get_rows(self, csv_file):
-        return csv.DictReader(csv_file)
+            if type(row) is dict:
+                self.__worker.do_async(
+                    lambda **kwargs: self._row_handler(**kwargs), **row
+                )
+            else:
+                self.__worker.do_async(
+                    lambda *args, **kwargs: self._row_handler(*args, **kwargs), row.strip()
+                )
+        
+
+class CSVReader(object):
+    def __call__(self, *args, **kwargs):
+        return csv.DictReader(kwargs.get(u"bulk_file"))
 
 
-def _create_dict_reader(csv_file):
-    dict_reader = csv.DictReader(csv_file)
-    if len(dict_reader.fieldnames) == 1:
-        return csv.reader(csv_file)
-    return dict_reader
+class FlatFileReader(object):
+    def __call__(self, *args, **kwargs):
+        return kwargs[u"bulk_file"].readlines()
