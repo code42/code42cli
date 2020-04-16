@@ -161,18 +161,23 @@ class TestCommand(object):
     def test_call_when_handler_with_sdk_passes_expected_values(
         self, mocker, mock_sdk_client, mock_profile_reader
     ):
-        def test_handler(sdk, one, two, three=None, four=None):
+        def test_handler(sdk, one, two, three=None, four_underscore=None):
             if (
                 sdk == mock_sdk_client
                 and one == "testone"
                 and two == "testtwo"
                 and three == "testthree"
-                and four == "testfour"
+                and four_underscore == "testfour"
             ):
                 return "success"
 
         command = Command("test", "test desc", "test usage", test_handler)
-        kvps = {"one": "testone", "two": "testtwo", "three": "testthree", "four": "testfour"}
+        kvps = {
+            "one": "testone",
+            "two": "testtwo",
+            "three": "testthree",
+            "four-underscore": "testfour",
+        }
         kvps = DictObject(kvps)
         assert command(kvps) == "success"
 
