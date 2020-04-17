@@ -3,6 +3,11 @@ from code42cli.bulk import generate_template, run_bulk_process
 from code42cli.cmds.detectionlists.enums import BulkCommandType
 
 
+class UserDoesNotExistError(Exception):
+    def __init__(self, username):
+        super(UserDoesNotExistError, self).__init__(u"User '{}' does not exist.".format(username))
+
+
 class DetectionListHandlers(object):
     def __init__(self, add=None, remove=None, load_add=None):
         self.add_employee = add
@@ -86,9 +91,11 @@ def load_user_descriptions(argument_collection):
     cloud_aliases.as_multi_val_param()
     notes.set_help(u"Notes about the employee.")
 
-
+ 
 def get_user_id(sdk, username):
-    return sdk.users.get_by_username(username)[u"users"][0][u"userUid"]
+    users = sdk.users.get_by_username(username)[u"users"]
+    if not users:
+        raise UserDoesNotExistError(username)
 
 
 def update_user(sdk, user_id, cloud_aliases=None, risk_factors=None, notes=None):
