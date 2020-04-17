@@ -1,7 +1,8 @@
 from argparse import Namespace
+from datetime import datetime, timedelta
+import json as json_module
 
 import pytest
-from code42cli.bulk import BulkProcessor
 from code42cli.config import ConfigAccessor
 from code42cli.profile import Code42Profile
 from py42.sdk import SDKClient
@@ -100,3 +101,35 @@ def func_with_sdk(sdk, one, two, three=None, four=None):
 
 def func_with_args(args):
     pass
+
+
+def get_filter_value_from_json(json, filter_index):
+    return json_module.loads(str(json))["filters"][filter_index]["value"]
+
+
+def parse_date_from_filter_value(json, filter_index):
+    date_str = get_filter_value_from_json(json, filter_index)
+    return convert_str_to_date(date_str)
+
+
+def convert_str_to_date(date_str):
+    return datetime.strptime(date_str, u"%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+def get_test_date(days_ago):
+    now = datetime.utcnow()
+    return now - timedelta(days=days_ago)
+
+
+def get_test_date_str(days_ago):
+    return get_test_date(days_ago).strftime("%Y-%m-%d")
+
+
+begin_date_str = get_test_date_str(days_ago=89)
+begin_date_str_with_time = "{0} 3:12:33".format(begin_date_str)
+end_date_str = get_test_date_str(days_ago=10)
+end_date_str_with_time = "{0} 11:22:43".format(end_date_str)
+begin_date_str = get_test_date_str(days_ago=89)
+begin_date_with_time = [get_test_date_str(days_ago=89), "3:12:33"]
+end_date_str = get_test_date_str(days_ago=10)
+end_date_with_time = [get_test_date_str(days_ago=10), "11:22:43"]
