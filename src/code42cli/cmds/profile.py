@@ -97,7 +97,8 @@ def update_profile(name=None, server=None, username=None, disable_ssl_errors=Non
     profile = cliprofile.get_profile(name)
     cliprofile.update_profile(profile.name, server, username, disable_ssl_errors)
     _prompt_for_allow_password_set(profile.name)
-
+    print(u"Profile '{}' has been updated.".format(profile.name))
+    
 
 def prompt_for_password_reset(name=None):
     """Securely prompts for your password and then stores it using keyring."""
