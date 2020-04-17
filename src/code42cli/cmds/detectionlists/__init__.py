@@ -9,12 +9,12 @@ from code42cli.util import print_error
 
 
 class DetectionListHandlers(object):
-    """Handlers DTO for passing in specific detection list functions
+    """Handlers DTO for passing in specific detection list functions.
     
     Args:
-        add (callable): A function to add an employee to the list.
-        remove (callable): A function to remove an employee from the list.
-        load_add (callable): A function to load the add-related arguments.
+        add (callable): A function that adds an employee to the list.
+        remove (callable): A function that removes an employee from the list.
+        load_add (callable): A function that loads the add-related `ArgConfig`s.
     """
 
     def __init__(self, add=None, remove=None, load_add=None):
@@ -38,8 +38,8 @@ class DetectionList(object):
     Args:
         list_name (str): An option from the DetectionLists enum. For convenience, use one of the 
             given `classmethods`.
-        handlers (DetectionListHandlers): Handlers holding functions, such as adding / removing 
-            implementations for specific lists.
+        handlers (DetectionListHandlers): A DTO containing implementations for adding / removing 
+            users from specific lists.
         cmd_factory (DetectionListCommandFactory): A factory that creates detection list commands.
     """
 
@@ -53,8 +53,8 @@ class DetectionList(object):
         """Creates a high risk detection list.
         
         Args:
-            handlers (DetectionListHandlers): Handlers containing functions relating to the high 
-                risk detection list.
+            handlers (DetectionListHandlers): A DTO containing implementations for adding / 
+                removing users from specific lists.
         
         Returns:
             DetectionList: A high-risk employee detection list.
@@ -81,7 +81,7 @@ class DetectionList(object):
         detection list.
         
         Args:
-            cmd (str): An option from the BulkCommandType enum specifying which type of csv to 
+            cmd (str): An option from the `BulkCommandType` enum specifying which type of csv to 
                 generate.
             path (str, optional): A path to put the file after it's generated. If None, will use 
                 the current working directory. Defaults to None.
