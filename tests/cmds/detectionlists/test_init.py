@@ -45,8 +45,8 @@ def test_update_user_adds_cloud_aliases(sdk_with_user, profile):
     )
 
 
-def test_update_user_adds_risk_factors(sdk_with_user, profile):
-    update_user(sdk_with_user, TEST_ID, risk_factor=["rf1", "rf2", "rf3"])
+def test_update_user_adds_risk_tags(sdk_with_user, profile):
+    update_user(sdk_with_user, TEST_ID, risk_tag=["rf1", "rf2", "rf3"])
     sdk_with_user.detectionlists.add_user_risk_tags.assert_called_once_with(
         TEST_ID, ["rf1", "rf2", "rf3"]
     )

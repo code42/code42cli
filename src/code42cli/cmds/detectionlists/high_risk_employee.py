@@ -18,7 +18,7 @@ def _get_handlers():
     return DetectionListHandlers(add=add_high_risk_employee, load_add=_load_add_description)
 
 
-def add_high_risk_employee(sdk, profile, username, cloud_alias=None, risk_factor=None, notes=None):
+def add_high_risk_employee(sdk, profile, username, cloud_alias=None, risk_tag=None, notes=None):
     """Adds an employee to the high risk detection list.
     
     Args:
@@ -26,26 +26,26 @@ def add_high_risk_employee(sdk, profile, username, cloud_alias=None, risk_factor
         profile (C42Profile): Your code42 profile
         username (str): The username of the employee to add.
         cloud_alias (iter[str]): Alternative emails addresses for other cloud services.
-        risk_factor (iter[str]): Risk factors associated with the employee.
+        risk_tag (iter[str]): Risk tags associated with the employee.
         notes: (str): Notes about the employee.
     """
-    if risk_factor and type(risk_factor) != list:
-        risk_factor = risk_factor.split()
+    if risk_tag and type(risk_tag) != list:
+        risk_tag = risk_tag.split()
 
     if cloud_alias and type(cloud_alias) != list:
         cloud_alias = cloud_alias.split()
 
     user_id = get_user_id(sdk, username)
-    update_user(sdk, user_id, cloud_alias, risk_factor, notes)
+    update_user(sdk, user_id, cloud_alias, risk_tag, notes)
     sdk.detectionlists.high_risk_employee.add(user_id)
 
 
 def _load_add_description(argument_collection):
     load_user_descriptions(argument_collection)
-    risk_factors = argument_collection.arg_configs[DetectionListUserKeys.RISK_FACTOR]
-    risk_factors.as_multi_val_param()
-    risk_factors.set_help(
-        u"Risk factors associated with the employee. "
+    risk_tag = argument_collection.arg_configs[DetectionListUserKeys.RISK_TAG]
+    risk_tag.as_multi_val_param()
+    risk_tag.set_help(
+        u"Risk tags associated with the employee. "
         u"Options include "
         u"[HIGH_IMPACT_EMPLOYEE, "
         u"ELEVATED_ACCESS_PRIVILEGES, "

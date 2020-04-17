@@ -150,19 +150,19 @@ def get_user_id(sdk, username):
     return users[0][u"userUid"]
 
 
-def update_user(sdk, user_id, cloud_alias=None, risk_factor=None, notes=None):
+def update_user(sdk, user_id, cloud_alias=None, risk_tag=None, notes=None):
     """Updates a detection list user.
     
     Args:
         user_id (str): The ID of the user to update. This is their `userUid` found from 
             `sdk.users.get_by_username()`.
         cloud_alias (iter[str]): A list of cloud aliases to add to the user.
-        risk_factor (iter[str]): A list of risk factors associated with user.
+        risk_tag (iter[str]): A list of risk tags associated with user.
         notes (str): Notes about the user.
     """
     if cloud_alias:
         sdk.detectionlists.add_user_cloud_aliases(user_id, cloud_alias)
-    if risk_factor:
-        sdk.detectionlists.add_user_risk_tags(user_id, risk_factor)
+    if risk_tag:
+        sdk.detectionlists.add_user_risk_tags(user_id, risk_tag)
     if notes:
         sdk.detectionlists.update_user_notes(user_id, notes)
