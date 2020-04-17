@@ -70,10 +70,10 @@ def _determine_if_advanced_query(args):
 
 def _verify_begin_date_requirements(args, cursor_store):
     if _begin_date_is_required(args, cursor_store) and not args.begin:
-        print_error("'begin date' is required.")
-        print("")
-        print_bold("Try using  '-b' or '--begin'. Use `-h` for more info.")
-        print("")
+        print_error(u"'begin date' is required.")
+        print(u"")
+        print_bold(u"Try using  '-b' or '--begin'. Use `-h` for more info.")
+        print(u"")
         exit(1)
 
 
@@ -94,7 +94,7 @@ def _verify_exposure_types(exposure_types):
     options = list(ExposureTypeOptions())
     for exposure_type in exposure_types:
         if exposure_type not in options:
-            print_error("'{0}' is not a valid exposure type.".format(exposure_type))
+            print_error(u"'{0}' is not a valid exposure type.".format(exposure_type))
             exit(1)
 
 
@@ -142,7 +142,7 @@ def _create_event_handlers(output_logger, cursor_store):
 
     def handle_response(response):
         response_dict = json.loads(response.text)
-        events = response_dict.get("fileEvents")
+        events = response_dict.get(u"fileEvents")
         global _TOTAL_EVENTS
         _TOTAL_EVENTS += len(events)
         for event in events:
@@ -172,9 +172,9 @@ def _verify_compatibility_with_advanced_query(key, val):
 
 def _handle_result():
     if is_interactive() and _EXCEPTIONS_OCCURRED:
-        print_error("View exceptions that occurred at [HOME]/.code42cli/log/code42_errors.")
+        print_error(u"View exceptions that occurred at [HOME]/.code42cli/log/code42_errors.")
     if not _TOTAL_EVENTS:
-        print_to_stderr("No results found\n")
+        print_to_stderr(u"No results found\n")
 
 
 def _try_append_exposure_types_filter(filters, include_non_exposure_events, exposure_types):
@@ -185,7 +185,7 @@ def _try_append_exposure_types_filter(filters, include_non_exposure_events, expo
 
 def _create_exposure_type_filter(include_non_exposure_events, exposure_types):
     if include_non_exposure_events and exposure_types:
-        print_error("Cannot use exposure types with `--include-non-exposure`.")
+        print_error(u"Cannot use exposure types with `--include-non-exposure`.")
         exit(1)
     if exposure_types:
         return ExposureType.is_in(exposure_types)
