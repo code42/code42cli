@@ -170,7 +170,7 @@ def test_delete_profile_warns_if_deleting_default(
     profilecmd.delete_profile("mockdefault")
     capture = capsys.readouterr()
     assert "mockdefault is currently the default profile!" in capture.out
-    
+
 
 def test_delete_all_warns_if_profiles_exist(capsys, user_agreement, mock_cliprofile_namespace):
     mock_cliprofile_namespace.get_all_profiles.return_value = [
@@ -182,22 +182,22 @@ def test_delete_all_warns_if_profiles_exist(capsys, user_agreement, mock_cliprof
     assert "Are you sure you want to delete the following profiles?" in capture.out
     assert "test1" in capture.out
     assert "test2" in capture.out
-    
+
 
 def test_delete_profile_does_nothing_if_user_doesnt_agree(
     user_disagreement, mock_cliprofile_namespace
 ):
     profilecmd.delete_profile("mockprofile")
-    assert mock_cliprofile_namespace.delete_profile.call_count == 0 
-    
-    
+    assert mock_cliprofile_namespace.delete_profile.call_count == 0
+
+
 def test_delete_all_profiles_does_nothing_if_user_doesnt_agree(
     user_disagreement, mock_cliprofile_namespace
 ):
     profilecmd.delete_all_profiles()
     assert mock_cliprofile_namespace.delete_profile.call_count == 0
-    
-    
+
+
 def test_delete_all_deletes_all_existing_profiles(user_agreement, mock_cliprofile_namespace):
     mock_cliprofile_namespace.get_all_profiles.return_value = [
         create_mock_profile("test1"),
@@ -206,8 +206,8 @@ def test_delete_all_deletes_all_existing_profiles(user_agreement, mock_cliprofil
     profilecmd.delete_all_profiles()
     mock_cliprofile_namespace.delete_profile.assert_any_call("test1")
     mock_cliprofile_namespace.delete_profile.assert_any_call("test2")
-    
-    
+
+
 def test_prompt_for_password_reset_if_credentials_valid_password_saved(
     mocker, user_agreement, mock_verify, mock_cliprofile_namespace
 ):

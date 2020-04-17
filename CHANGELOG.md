@@ -26,7 +26,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - `code42 profile create` command.
 - `code42 profile delete` command.
 - `code42 profile delete-all` command.
-- `code42 detection-lists high-risk` commands:
+- `code42 high-risk-employee` commands:
     - `bulk` with subcommands:
         - `add`: that takes a csv file of users.
         - `generate-template`: that creates the csv file template. And parameters:

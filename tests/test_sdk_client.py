@@ -1,5 +1,5 @@
 import py42.sdk
-import py42.sdk.settings.debug as debug
+import py42.settings.debug as debug
 import pytest
 from code42cli.sdk_client import create_sdk, validate_connection
 
@@ -39,7 +39,7 @@ def test_create_sdk_when_told_to_debug_turns_on_debug(mock_sdk_factory):
 
     profile.get_password = mock_get_password
     create_sdk(profile, True)
-    assert py42.sdk.settings.debug.level == debug.DEBUG
+    assert py42.settings.debug.level == debug.DEBUG
 
 
 def test_validate_connection_when_creating_sdk_raises_returns_false(error_sdk_factory):

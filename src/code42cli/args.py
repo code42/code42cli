@@ -8,13 +8,14 @@ class ArgConfig(object):
     """Stores a set of argparse commands for later use by a command."""
 
     def __init__(self, *args, **kwargs):
-        self._settings = {}
-        self._settings[u"action"] = kwargs.get(u"action")
-        self._settings[u"choices"] = kwargs.get(u"choices")
-        self._settings[u"default"] = kwargs.get(u"default")
-        self._settings[u"help"] = kwargs.get(u"help")
-        self._settings[u"options_list"] = list(args)
-        self._settings[u"nargs"] = kwargs.get(u"nargs")
+        self._settings = {
+            u"action": kwargs.get(u"action"),
+            u"choices": kwargs.get(u"choices"),
+            u"default": kwargs.get(u"default"),
+            u"help": kwargs.get(u"help"),
+            u"options_list": list(args),
+            u"nargs": kwargs.get(u"nargs"),
+        }
 
     @property
     def settings(self):
@@ -28,6 +29,9 @@ class ArgConfig(object):
 
     def add_short_option_name(self, short_name):
         self._settings[u"options_list"].append(short_name)
+
+    def as_multi_val_param(self, nargs=u"+"):
+        self._settings[u"nargs"] = nargs
 
 
 class ArgConfigCollection(object):
@@ -57,7 +61,7 @@ def get_auto_arg_configs(handler):
 
         for arg_position, key in enumerate(argspec.args):
             # do not create cli parameters for arguments named "sdk", "args", or "kwargs"
-            if not key in [u"sdk", u"args", u"kwargs"]:
+            if not key in [u"sdk", u"args", u"kwargs", u"self"]:
                 arg_config = _create_auto_args_config(
                     arg_position, key, argspec, num_args, num_kw_args
                 )

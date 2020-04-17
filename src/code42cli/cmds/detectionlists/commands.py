@@ -3,7 +3,7 @@ from code42cli.commands import Command
 
 
 def create_usage_prefix(detection_list_name):
-    return u"code42 detection-list {}".format(detection_list_name)
+    return u"code42 {}".format(detection_list_name)
 
 
 def create_bulk_usage_prefix(detection_list_name):
@@ -36,7 +36,7 @@ class DetectionListCommandFactory:
         return Command(
             u"generate-template",
             u"Generate the necessary csv template needed for bulk adding users.",
-            u"{} gen-template <cmd> <optional args>".format(self._bulk_usage_prefix),
+            u"{} generate-template <cmd> <optional args>".format(self._bulk_usage_prefix),
             handler=handler,
             arg_customizer=DetectionListCommandFactory._load_bulk_generate_template_description,
         )
