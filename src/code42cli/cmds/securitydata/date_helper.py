@@ -13,8 +13,8 @@ class DateArgumentException(Exception):
         super(DateArgumentException, self).__init__(message)
 
 
-TIMESTAMP_REGEX = re.compile("(\d{4}-\d{2}-\d{2})\s*(.*)?")
-MAGIC_TIME_REGEX = re.compile("(\d+)([dhm])$")
+TIMESTAMP_REGEX = re.compile(u"(\d{4}-\d{2}-\d{2})\s*(.*)?")
+MAGIC_TIME_REGEX = re.compile(u"(\d+)([dhm])$")
 
 
 def create_event_timestamp_filter(begin_date=None, end_date=None):
@@ -51,22 +51,29 @@ def _create_on_or_before_filter(max_timestamp):
     return EventTimestamp.on_or_before(max_timestamp)
 
 
-def _parse_min_timestamp(begin_date_str):
-    timestamp_match = TIMESTAMP_REGEX.match(begin_date_str)
-    magic_match = MAGIC_TIME_REGEX.match(begin_date_str)
+def _parse_timestamp(date_str, rounding_func):
+    timestamp_match = TIMESTAMP_REGEX.match(date_str)
+    magic_match = MAGIC_TIME_REGEX.match(date_str)
 
     if timestamp_match:
         date, time = timestamp_match.groups()
         dt = _get_dt_from_date_time_pair(date, time)
+        if not time:
+            dt = rounding_func(dt)
 
     elif magic_match:
         num, period = magic_match.groups()
         dt = _get_dt_from_magic_time_pair(num, period)
-        if period == "d":
-            dt = _round_datetime_to_day_start(dt)
+        if period == u"d":
+            dt = rounding_func(dt)
 
     else:
         raise DateArgumentException()
+    return dt
+
+
+def _parse_min_timestamp(begin_date_str):
+    dt = _parse_timestamp(begin_date_str, _round_datetime_to_day_start)
 
     boundary_date = _round_datetime_to_day_start(
         datetime.utcnow() - timedelta(days=_MAX_LOOK_BACK_DAYS)
@@ -78,24 +85,7 @@ def _parse_min_timestamp(begin_date_str):
 
 
 def _parse_max_timestamp(end_date_str):
-    timestamp_match = TIMESTAMP_REGEX.match(end_date_str)
-    magic_match = MAGIC_TIME_REGEX.match(end_date_str)
-
-    if timestamp_match:
-        date, time = timestamp_match.groups()
-        dt = _get_dt_from_date_time_pair(date, time)
-        if not time:
-            dt = _round_datetime_to_day_end(dt)
-
-    elif magic_match:
-        num, period = magic_match.groups()
-        dt = _get_dt_from_magic_time_pair(num, period)
-        if period == "d":
-            dt = _round_datetime_to_day_end(dt)
-
-    else:
-        raise DateArgumentException()
-
+    dt = _parse_timestamp(end_date_str, _round_datetime_to_day_end)
     return convert_datetime_to_timestamp(dt)
 
 
@@ -113,11 +103,11 @@ def _get_dt_from_date_time_pair(date, time):
 
 def _get_dt_from_magic_time_pair(num, period):
     num = int(num)
-    if period == "d":
+    if period == u"d":
         dt = datetime.utcnow() - timedelta(days=num)
-    elif period == "h":
+    elif period == u"h":
         dt = datetime.utcnow() - timedelta(hours=num)
-    elif period == "m":
+    elif period == u"m":
         dt = datetime.utcnow() - timedelta(minutes=num)
     else:
         raise DateArgumentException(u"Couldn't parse magic time string: {}{}".format(num, period))
