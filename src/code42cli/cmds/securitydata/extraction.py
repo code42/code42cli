@@ -117,10 +117,10 @@ def _create_filters(args):
 
 def _get_event_timestamp_filter(begin_date, end_date):
     try:
-        begin_date = begin_date.strip().split() if begin_date else None
-        end_date = end_date.strip().split() if end_date else None
+        begin_date = begin_date.strip() if begin_date else None
+        end_date = end_date.strip() if end_date else None
         return date_helper.create_event_timestamp_filter(begin_date, end_date)
-    except ValueError as ex:
+    except date_helper.DateArgumentException as ex:
         print_error(str(ex))
         exit(1)
 
