@@ -21,7 +21,10 @@ class DetectionList(object):
         add = self.factory.create_add_command(
             self.handlers.add_employee, self.handlers.load_add_description
         )
-        return [bulk, add]
+        remove = self.factory.create_remove_command(
+            self.handlers.remove_employee, load_username_description
+        )
+        return [bulk, add, remove]
 
     def _load_bulk_subcommands(self):
         generate_template_cmd = self.factory.create_bulk_generate_template_command(
@@ -69,12 +72,16 @@ class DetectionList(object):
         self.handlers.remove_employee(sdk, profile, *args, **kwargs)
 
 
-def load_user_descriptions(argument_collection):
+def load_username_description(argument_collection):
     username = argument_collection.arg_configs[u"username"]
+    username.set_help(u"The code42 username of the user you want to add.")
+
+
+def load_user_descriptions(argument_collection):
+    load_username_description(argument_collection)
     cloud_aliases = argument_collection.arg_configs[u"cloud_aliases"]
     notes = argument_collection.arg_configs[u"notes"]
 
-    username.set_help(u"The code42 username of the user you want to add.")
     cloud_aliases.set_help(u"Alternative emails addresses for other cloud services.")
     cloud_aliases.as_multi_val_param()
     notes.set_help(u"Notes about the employee.")
