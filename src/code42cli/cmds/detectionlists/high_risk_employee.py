@@ -45,4 +45,14 @@ def _load_add_description(argument_collection):
     load_user_descriptions(argument_collection)
     risk_factors = argument_collection.arg_configs[u"risk_factors"]
     risk_factors.as_multi_val_param()
-    risk_factors.set_help(u"Risk factors associated with the employee.")
+    risk_factors.set_help(
+        u"Risk factors associated with the employee. "
+        u"Options include "
+        u"[HIGH_IMPACT_EMPLOYEE, "
+        u"ELEVATED_ACCESS_PRIVILEGES, "
+        u"PERFORMANCE_CONCERNS, "
+        u"FLIGHT_RISK, "
+        u"SUSPICIOUS_SYSTEM_ACTIVITY, "
+        u"POOR_SECURITY_PRACTICES, "
+        u"CONTRACT_EMPLOYEE]"
+    )

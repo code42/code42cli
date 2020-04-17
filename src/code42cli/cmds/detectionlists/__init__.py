@@ -1,7 +1,6 @@
 from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory
 from code42cli.bulk import generate_template, run_bulk_process
-from code42cli.cmds.detectionlists.departing_employee import DetectionLists
-from code42cli.cmds.detectionlists.enums import BulkCommandType
+from code42cli.cmds.detectionlists.enums import BulkCommandType, DetectionLists
 from code42cli.util import print_error
 
 
@@ -13,7 +12,7 @@ class DetectionListHandlers(object):
         remove (callable): A function to remove an employee from the list.
         load_add (callable): A function to load the add-related arguments.
     """
-    
+
     def __init__(self, add=None, remove=None, load_add=None):
         self.add_employee = add
         self.remove_employee = remove
@@ -22,7 +21,7 @@ class DetectionListHandlers(object):
 
 class UserDoesNotExistError(Exception):
     """An error to represent a username that is not in our system."""
-    
+
     def __init__(self, username):
         super(UserDoesNotExistError, self).__init__(u"User '{}' does not exist.".format(username))
 
@@ -39,12 +38,12 @@ class DetectionList(object):
             implementations for specific lists.
         cmd_factory (DetectionListCommandFactory): A factory that creates detection list commands.
     """
-    
+
     def __init__(self, list_name, handlers, cmd_factory=None):
         self.name = list_name
         self.handlers = handlers
         self.factory = cmd_factory or DetectionListCommandFactory(list_name)
-    
+
     @classmethod
     def create_high_risk_list(cls, handlers):
         """Creates a high risk detection list.
