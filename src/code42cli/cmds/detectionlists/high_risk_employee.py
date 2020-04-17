@@ -1,4 +1,3 @@
-from code42cli.cmds.detectionlists.enums import DetectionLists
 from code42cli.cmds.detectionlists import (
     DetectionList,
     DetectionListHandlers,
@@ -10,7 +9,7 @@ from code42cli.cmds.detectionlists import (
 
 def load_subcommands():
     handlers = _get_handlers()
-    detection_list = DetectionList(DetectionLists.HIGH_RISK_EMPLOYEE, handlers)
+    detection_list = DetectionList.create_high_risk_list(handlers)
     return detection_list.load_subcommands()
 
 
