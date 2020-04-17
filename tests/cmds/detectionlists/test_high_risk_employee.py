@@ -53,7 +53,9 @@ def test_add_high_risk_employee_when_user_does_not_exist_exits(sdk_without_user,
         add_high_risk_employee(sdk_without_user, profile, "risky employee")
 
 
-def test_add_high_risk_employee_when_user_does_not_exist_exits(sdk_without_user, profile, capsys):
+def test_add_high_risk_employee_when_user_does_not_exist_print_error(
+    sdk_without_user, profile, capsys
+):
     try:
         add_high_risk_employee(sdk_without_user, profile, "risky employee")
     except SystemExit:
