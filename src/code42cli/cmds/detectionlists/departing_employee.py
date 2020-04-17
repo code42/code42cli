@@ -36,7 +36,7 @@ def add_departing_employee(
 
     user_id = get_user_id(sdk, username)
     update_user(sdk, user_id, cloud_aliases, departure_date, notes)
-    sdk.detectionlists.high_risk_employee.add(user_id)
+    sdk.detectionlists.departing_employee.add(user_id)
 
 
 def remove_high_risk_employee(sdk, profile, username):
