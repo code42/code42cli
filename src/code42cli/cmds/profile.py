@@ -3,7 +3,7 @@ from __future__ import print_function
 from getpass import getpass
 
 import code42cli.profile as cliprofile
-from code42cli.args import PROFILE_HELP, ArgConfig
+from code42cli.args import PROFILE_HELP
 from code42cli.commands import Command
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree, print_error, print_no_existing_profile_message
