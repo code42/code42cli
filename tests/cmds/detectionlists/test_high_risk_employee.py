@@ -1,6 +1,9 @@
 import pytest
 
-from code42cli.cmds.detectionlists.high_risk_employee import add_high_risk_employee
+from code42cli.cmds.detectionlists.high_risk_employee import (
+    add_high_risk_employee,
+    remove_high_risk_employee,
+)
 
 
 _TEST_ID = "TEST_ID"
@@ -54,3 +57,8 @@ def test_add_high_risk_employee_when_given_notes_updates_notes(sdk_with_user, pr
 def test_add_high_risk_employee_adds(sdk_with_user, profile):
     add_high_risk_employee(sdk_with_user, profile, "risky employee")
     sdk_with_user.detectionlists.high_risk_employee.add.assert_called_once_with(_TEST_ID)
+
+
+def test_remove_high_risk_employee_removes(sdk_with_user, profile):
+    remove_high_risk_employee(sdk_with_user, profile, "risk employee")
+    sdk_with_user.detectionlists.high_risk_employee.remove.assert_called_once_with(_TEST_ID)

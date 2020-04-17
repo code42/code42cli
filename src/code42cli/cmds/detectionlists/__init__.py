@@ -54,7 +54,9 @@ class DetectionList(object):
 
     def bulk_remove_employees(self, sdk, profile, users_file):
         run_bulk_process(
-            users_file, lambda *args, **kwargs: self._remove_employee(sdk, profile, *args, **kwargs), u"remove"
+            users_file,
+            lambda *args, **kwargs: self._remove_employee(sdk, profile, *args, **kwargs),
+            u"remove",
         )
 
     def _add_employee(self, sdk, profile, **kwargs):

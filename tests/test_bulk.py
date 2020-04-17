@@ -63,7 +63,7 @@ class TestBulkProcessor(object):
             processed_rows.append((test1, test2))
 
         dict_reader = mocker.patch("{}._get_reader".format(_NAMESPACE))
-        
+
         class MockAddReader(object):
             def __call__(self, *args, **kwargs):
                 return [
@@ -71,9 +71,9 @@ class TestBulkProcessor(object):
                     {"test1": 3, "test2": 4},
                     {"test1": 5, "test2": 6},
                 ]
-            
+
         dict_reader.return_value = MockAddReader()
-            
+
         processor = BulkProcessor("some/path", func_for_bulk, MockAddReader())
         processor.run()
         assert processed_rows == [(1, 2), (3, 4), (5, 6)]
