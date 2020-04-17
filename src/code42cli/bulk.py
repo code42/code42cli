@@ -21,22 +21,23 @@ def _write_template_file(path, columns):
         new_csv.write(u",".join(columns))
 
 
-def run_bulk_process(file_path, row_handler, process_type):
-    processor = _create_bulk_processor(file_path, row_handler, process_type)
+def run_bulk_process(file_path, row_handler, reader=None):
+    """Runs a bulk process.
+    
+    Args: 
+        file_path (str): The path to the file feeding the data for the bulk process.
+        row_handler (callable): A callable that you define to take *args or **kwargs.
+        reader: (callable, optional): A generator that reads rows and yields data into 
+            row_handler. If None, will use a CSVReader. Defaults to None.
+    """
+    reader = reader or CSVReader()
+    processor = _create_bulk_processor(file_path, row_handler, reader)
     processor.run()
 
 
-def _create_bulk_processor(file_path, row_handler, process_type):
+def _create_bulk_processor(file_path, row_handler, reader):
     """A factory method to create the bulk processor, useful for testing purposes."""
-    reader = _get_reader(process_type)
     return BulkProcessor(file_path, row_handler, reader)
-
-
-def _get_reader(process_type):
-    if process_type == u"add":
-        return CSVReader()
-    elif process_type == u"remove":
-        return FlatFileReader()
 
 
 class BulkProcessor(object):
@@ -66,7 +67,9 @@ class BulkProcessor(object):
 
     def _process_row(self, row):
         if type(row) is dict:
-            self.__worker.do_async(lambda **kwargs: self._row_handler(**kwargs), **row)
+            self.__worker.do_async(
+                lambda *args, **kwargs: self._row_handler(*args, **kwargs), **row
+            )
         else:
             self.__worker.do_async(
                 lambda *args, **kwargs: self._row_handler(*args, **kwargs), row.strip()
@@ -74,12 +77,16 @@ class BulkProcessor(object):
 
 
 class CSVReader(object):
+    """A csv line generator that yields kwargs."""
+
     def __call__(self, *args, **kwargs):
         for row in csv.DictReader(kwargs.get(u"bulk_file")):
             yield row
 
 
 class FlatFileReader(object):
+    """A flat file reader that yields raw rows."""
+
     def __call__(self, *args, **kwargs):
         for row in kwargs[u"bulk_file"]:
             yield row

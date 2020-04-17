@@ -1,6 +1,9 @@
 import pytest
 
-from code42cli.cmds.detectionlists.high_risk_employee import add_high_risk_employee, remove_high_risk_employee
+from code42cli.cmds.detectionlists.high_risk_employee import (
+    add_high_risk_employee,
+    remove_high_risk_employee,
+)
 from .conftest import TEST_ID
 
 

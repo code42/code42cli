@@ -1,4 +1,3 @@
-
 from code42cli.cmds.detectionlists import (
     DetectionList,
     DetectionListHandlers,
@@ -21,9 +20,7 @@ def _get_handlers():
     )
 
 
-def add_high_risk_employee(
-    sdk, profile, username, cloud_alias=None, risk_tag=None, notes=None
-):
+def add_high_risk_employee(sdk, profile, username, cloud_alias=None, risk_tag=None, notes=None):
     """Adds an employee to the high risk detection list.
     
     Args:

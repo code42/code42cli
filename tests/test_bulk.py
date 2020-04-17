@@ -46,13 +46,19 @@ def test_generate_template_when_given_non_callable_handler_does_not_create(mock_
 
 
 def test_run_bulk_process_calls_run(bulk_processor, bulk_processor_factory):
-    run_bulk_process("some/path", func_for_bulk, "add")
+    run_bulk_process("some/path", func_for_bulk, None)
     assert bulk_processor.run.call_count
 
 
 def test_run_bulk_process_creates_processor(bulk_processor_factory):
-    run_bulk_process("some/path", func_for_bulk, "add")
-    bulk_processor_factory.assert_called_once_with("some/path", func_for_bulk, "add")
+    reader = CSVReader()
+    run_bulk_process("some/path", func_for_bulk, reader)
+    bulk_processor_factory.assert_called_once_with("some/path", func_for_bulk, reader)
+
+
+def test_run_bulk_process_when_not_given_reader_uses_csv_reader(bulk_processor_factory):
+    run_bulk_process("some/path", func_for_bulk)
+    assert type(bulk_processor_factory.call_args[0][2]) == CSVReader
 
 
 class TestBulkProcessor(object):
@@ -62,8 +68,6 @@ class TestBulkProcessor(object):
         def func_for_bulk(test1, test2):
             processed_rows.append((test1, test2))
 
-        dict_reader = mocker.patch("{}._get_reader".format(_NAMESPACE))
-
         class MockAddReader(object):
             def __call__(self, *args, **kwargs):
                 return [
@@ -71,8 +75,6 @@ class TestBulkProcessor(object):
                     {"test1": 3, "test2": 4},
                     {"test1": 5, "test2": 6},
                 ]
-
-        dict_reader.return_value = MockAddReader()
 
         processor = BulkProcessor("some/path", func_for_bulk, MockAddReader())
         processor.run()

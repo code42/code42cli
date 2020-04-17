@@ -1,5 +1,5 @@
 from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory
-from code42cli.bulk import generate_template, run_bulk_process
+from code42cli.bulk import generate_template, run_bulk_process, CSVReader, FlatFileReader
 from code42cli.util import print_error
 from code42cli.cmds.detectionlists.enums import (
     BulkCommandType,
@@ -10,7 +10,7 @@ from code42cli.cmds.detectionlists.enums import (
 
 class UserDoesNotExistError(Exception):
     """An error to represent a username that is not in our system."""
-    
+
     def __init__(self, username):
         super(UserDoesNotExistError, self).__init__(u"User '{}' does not exist.".format(username))
 
@@ -105,14 +105,14 @@ class DetectionList(object):
             csv_file (str): The path to the csv file containing rows of users.
         """
         run_bulk_process(
-            csv_file, lambda **kwargs: self._add_employee(sdk, profile, **kwargs), u"add"
+            csv_file, lambda **kwargs: self._add_employee(sdk, profile, **kwargs), CSVReader()
         )
 
     def bulk_remove_employees(self, sdk, profile, users_file):
         run_bulk_process(
             users_file,
             lambda *args, **kwargs: self._remove_employee(sdk, profile, *args, **kwargs),
-            u"remove",
+            FlatFileReader(),
         )
 
     def _add_employee(self, sdk, profile, **kwargs):
