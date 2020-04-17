@@ -1,7 +1,7 @@
 import pytest
 
 from code42cli import PRODUCT_NAME
-from code42cli.cmds.detectionlists import DetectionList, DetectionListHandlers
+from code42cli.cmds.detectionlists import DetectionList, DetectionListHandlers, get_user_id
 
 
 _NAMESPACE = "{}.cmds.detectionlists".format(PRODUCT_NAME)
@@ -15,6 +15,19 @@ def bulk_template_generator(mocker):
 @pytest.fixture
 def bulk_processor(mocker):
     return mocker.patch("{}.run_bulk_process".format(_NAMESPACE))
+
+
+def test_get_user_id_when_user_does_not_exist_exits(sdk_without_user):
+    with pytest.raises(SystemExit):
+        get_user_id(sdk_without_user, "risky employee")
+
+
+def test_get_user_id_when_user_does_not_exist_exits(sdk_without_user, capsys):
+    try:
+        get_user_id(sdk_without_user, "risky employee")
+    except SystemExit:
+        capture = capsys.readouterr()
+        assert "ERROR: User 'risky employee' does not exist." in capture.out
 
 
 class TestDetectionList(object):
