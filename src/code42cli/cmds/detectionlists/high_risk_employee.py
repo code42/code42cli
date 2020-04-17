@@ -1,4 +1,3 @@
-from code42cli.compat import str
 from code42cli.cmds.detectionlists.enums import DetectionLists
 from code42cli.cmds.detectionlists import (
     DetectionList,
@@ -6,9 +5,7 @@ from code42cli.cmds.detectionlists import (
     load_user_descriptions,
     get_user_id,
     update_user,
-    UserDoesNotExistError,
 )
-from code42cli.util import print_error
 
 
 def load_subcommands():
@@ -40,7 +37,7 @@ def add_high_risk_employee(
     if cloud_aliases and type(cloud_aliases) != list:
         cloud_aliases = cloud_aliases.split()
 
-    user_id = _get_user_id(sdk, username)
+    user_id = get_user_id(sdk, username)
     update_user(sdk, user_id, cloud_aliases, risk_factors, notes)
     sdk.detectionlists.high_risk_employee.add(user_id)
 
@@ -50,11 +47,3 @@ def _load_add_description(argument_collection):
     risk_factors = argument_collection.arg_configs[u"risk_factors"]
     risk_factors.as_multi_val_param()
     risk_factors.set_help(u"Risk factors associated with the employee.")
-
-
-def _get_user_id(sdk, username):
-    try:
-        return get_user_id(sdk, username)
-    except UserDoesNotExistError as ex:
-        print_error(str(ex))
-        exit(1)

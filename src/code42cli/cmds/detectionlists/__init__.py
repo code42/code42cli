@@ -1,6 +1,7 @@
 from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory
 from code42cli.bulk import generate_template, run_bulk_process
 from code42cli.cmds.detectionlists.enums import BulkCommandType
+from code42cli.util import print_error
 
 
 class DetectionListHandlers(object):
@@ -75,7 +76,8 @@ def load_user_descriptions(argument_collection):
 def get_user_id(sdk, username):
     users = sdk.users.get_by_username(username)[u"users"]
     if not users:
-        raise UserDoesNotExistError(username)
+        print_error(str(UserDoesNotExistError(username)))
+        exit(1)
     return users[0][u"userUid"]
 
 
