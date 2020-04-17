@@ -4,16 +4,16 @@ from code42cli.cmds.detectionlists.enums import BulkCommandType
 from code42cli.util import print_error
 
 
+class UserDoesNotExistError(Exception):
+    def __init__(self, username):
+        super(UserDoesNotExistError, self).__init__(u"User '{}' does not exist.".format(username))
+
+
 class DetectionListHandlers(object):
     def __init__(self, add=None, remove=None, load_add=None):
         self.add_employee = add
         self.remove_employee = remove
         self.load_add_description = load_add
-
-
-class UserDoesNotExistError(Exception):
-    def __init__(self, username):
-        super(UserDoesNotExistError, self).__init__(u"User '{}' does not exist.".format(username))
 
 
 class DetectionList(object):
@@ -27,14 +27,18 @@ class DetectionList(object):
         add = self.factory.create_add_command(
             self.handlers.add_employee, self.handlers.load_add_description
         )
-        return [bulk, add]
+        remove = self.factory.create_remove_command(
+            self.handlers.remove_employee, load_username_description
+        )
+        return [bulk, add, remove]
 
     def _load_bulk_subcommands(self):
         generate_template_cmd = self.factory.create_bulk_generate_template_command(
             self.generate_csv_file
         )
         add = self.factory.create_bulk_add_command(self.bulk_add_employees)
-        return [generate_template_cmd, add]
+        remove = self.factory.create_bulk_remove_command(self.bulk_remove_employees)
+        return [generate_template_cmd, add, remove]
 
     def generate_csv_file(self, cmd, path=None):
         """Generates a csv template a user would need to fill-in for bulk adding users to the 
@@ -53,7 +57,16 @@ class DetectionList(object):
             profile (Code42Profile): The profile under which to execute this command.
             csv_file (str): The path to the csv file containing rows of users.
         """
-        run_bulk_process(csv_file, lambda **kwargs: self._add_employee(sdk, profile, **kwargs))
+        run_bulk_process(
+            csv_file, lambda **kwargs: self._add_employee(sdk, profile, **kwargs), u"add"
+        )
+
+    def bulk_remove_employees(self, sdk, profile, users_file):
+        run_bulk_process(
+            users_file,
+            lambda *args, **kwargs: self._remove_employee(sdk, profile, *args, **kwargs),
+            u"remove",
+        )
 
     def _add_employee(self, sdk, profile, **kwargs):
         if kwargs.has_key(u"cloud_aliases") and type(kwargs[u"cloud_aliases"]) != list:
@@ -61,13 +74,20 @@ class DetectionList(object):
 
         self.handlers.add_employee(sdk, profile, **kwargs)
 
+    def _remove_employee(self, sdk, profile, *args, **kwargs):
+        self.handlers.remove_employee(sdk, profile, *args, **kwargs)
+
+
+def load_username_description(argument_collection):
+    username = argument_collection.arg_configs[u"username"]
+    username.set_help(u"The code42 username of the user you want to add.")
+
 
 def load_user_descriptions(argument_collection):
-    username = argument_collection.arg_configs[u"username"]
+    load_username_description(argument_collection)
     cloud_aliases = argument_collection.arg_configs[u"cloud_aliases"]
     notes = argument_collection.arg_configs[u"notes"]
 
-    username.set_help(u"The code42 username of the user you want to add.")
     cloud_aliases.set_help(u"Alternative emails addresses for other cloud services.")
     cloud_aliases.as_multi_val_param()
     notes.set_help(u"Notes about the employee.")

@@ -32,7 +32,9 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
         - `generate-template`: that creates the csv file template. And parameters:
             - `cmd`: with the option `add`.
             - `path`
+        - `remove`: that takes a list of users in a file
     - `add` that takes parameters: `--username`, `--cloud-aliases`, `--risk-factors`, and `--notes`.
+    - `remove` that takes a username.
 
 ### Removed
 

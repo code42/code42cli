@@ -5,7 +5,9 @@ from code42cli.cmds.detectionlists import (
     load_user_descriptions,
     get_user_id,
     update_user,
+    UserDoesNotExistError,
 )
+from code42cli.util import print_error
 
 
 def load_subcommands():
@@ -15,7 +17,9 @@ def load_subcommands():
 
 
 def _get_handlers():
-    return DetectionListHandlers(add=add_high_risk_employee, load_add=_load_add_description)
+    return DetectionListHandlers(
+        add=add_high_risk_employee, remove=remove_high_risk_employee, load_add=_load_add_description
+    )
 
 
 def add_high_risk_employee(
@@ -40,6 +44,11 @@ def add_high_risk_employee(
     user_id = get_user_id(sdk, username)
     update_user(sdk, user_id, cloud_aliases, risk_factors, notes)
     sdk.detectionlists.high_risk_employee.add(user_id)
+
+
+def remove_high_risk_employee(sdk, profile, username):
+    user_id = get_user_id(sdk, username)
+    sdk.detectionlists.high_risk_employee.remove(user_id)
 
 
 def _load_add_description(argument_collection):
