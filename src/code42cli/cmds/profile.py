@@ -3,7 +3,7 @@ from __future__ import print_function
 from getpass import getpass
 
 import code42cli.profile as cliprofile
-from code42cli.args import PROFILE_HELP, ArgConfig
+from code42cli.args import PROFILE_HELP
 from code42cli.commands import Command
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree, print_error, print_no_existing_profile_message
@@ -91,6 +91,7 @@ def show_profile(name=None):
 def create_profile(profile, server, username, disable_ssl_errors=False):
     cliprofile.create_profile(profile, server, username, disable_ssl_errors)
     _prompt_for_allow_password_set(profile)
+    print(u"Profile '{}' has been updated.")
 
 
 def update_profile(name=None, server=None, username=None, disable_ssl_errors=None):
