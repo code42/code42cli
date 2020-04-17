@@ -46,4 +46,4 @@ def _load_add_description(argument_collection):
     load_user_descriptions(argument_collection)
     risk_factors = argument_collection.arg_configs[u"risk_factors"]
     risk_factors.as_multi_val_param()
-    risk_factors.set_help(u"Risk factors associated with the employee.")
+    risk_factors.set_hdelp(u"Risk factors associated with the employee.")
