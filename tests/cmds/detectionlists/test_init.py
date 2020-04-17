@@ -1,7 +1,13 @@
 import pytest
 
 from code42cli import PRODUCT_NAME
-from code42cli.cmds.detectionlists import DetectionList, DetectionListHandlers
+from code42cli.cmds.detectionlists import (
+    DetectionList,
+    DetectionListHandlers,
+    get_user_id,
+    update_user,
+)
+from .conftest import TEST_ID
 
 
 _NAMESPACE = "{}.cmds.detectionlists".format(PRODUCT_NAME)
@@ -15,6 +21,41 @@ def bulk_template_generator(mocker):
 @pytest.fixture
 def bulk_processor(mocker):
     return mocker.patch("{}.run_bulk_process".format(_NAMESPACE))
+
+
+def test_get_user_id_when_user_does_not_exist_exits(sdk_without_user):
+    with pytest.raises(SystemExit):
+        get_user_id(sdk_without_user, "risky employee")
+
+
+def test_get_user_id_when_user_does_not_exist_print_error(sdk_without_user, capsys):
+    try:
+        get_user_id(sdk_without_user, "risky employee")
+    except SystemExit:
+        capture = capsys.readouterr()
+        assert "ERROR: User 'risky employee' does not exist." in capture.out
+
+
+def test_update_user_adds_cloud_aliases(sdk_with_user, profile):
+    update_user(
+        sdk_with_user, TEST_ID, cloud_aliases=["1@example.com", "2@example.com", "3@example.com"]
+    )
+    sdk_with_user.detectionlists.add_user_cloud_aliases.assert_called_once_with(
+        TEST_ID, ["1@example.com", "2@example.com", "3@example.com"]
+    )
+
+
+def test_update_user_adds_risk_factors(sdk_with_user, profile):
+    update_user(sdk_with_user, TEST_ID, risk_factors=["rf1", "rf2", "rf3"])
+    sdk_with_user.detectionlists.add_user_risk_tags.assert_called_once_with(
+        TEST_ID, ["rf1", "rf2", "rf3"]
+    )
+
+
+def test_update_user_updates_notes(sdk_with_user, profile):
+    notes = "notes"
+    update_user(sdk_with_user, TEST_ID, notes=notes)
+    sdk_with_user.detectionlists.update_user_notes.assert_called_once_with(TEST_ID, notes)
 
 
 class TestDetectionList(object):
