@@ -49,13 +49,13 @@ class TestArgConfig(object):
         arg_config = ArgConfig("--test")
         arg_config.add_short_option_name("-x")
         assert "-x" in arg_config.settings["options_list"]
-    
+
     def test_as_multi_val_param_modifies_nargs(self):
         nargs = "*"
         arg_config = ArgConfig("-t", "--test")
         arg_config.as_multi_val_param(nargs)
         assert arg_config.settings["nargs"] == "*"
-    
+
     def test_as_multi_val_params_when_default_modifies_nargs_to_be_plus(self):
         arg_config = ArgConfig("-t", "--test")
         arg_config.as_multi_val_param()

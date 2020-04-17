@@ -10,6 +10,11 @@ class DetectionListHandlers(object):
         self.load_add_description = load_add
 
 
+class UserDoesNotExistError(Exception):
+    def __init__(self, username):
+        super(UserDoesNotExistError, self).__init__(u"User '{}' does not exist.".format(username))
+
+
 class DetectionList(object):
     def __init__(self, list_name, handlers, cmd_factory=None):
         self.name = list_name
@@ -68,7 +73,10 @@ def load_user_descriptions(argument_collection):
 
 
 def get_user_id(sdk, username):
-    return sdk.users.get_by_username(username)[u"users"][0][u"userUid"]
+    users = sdk.users.get_by_username(username)[u"users"]
+    if not users:
+        raise UserDoesNotExistError(username)
+    return users[0][u"userUid"]
 
 
 def update_user(sdk, user_id, cloud_aliases=None, risk_factors=None, notes=None):
