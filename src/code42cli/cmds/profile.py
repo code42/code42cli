@@ -3,7 +3,7 @@ from __future__ import print_function
 from getpass import getpass
 
 import code42cli.profile as cliprofile
-from code42cli.args import PROFILE_HELP, ArgConfig
+from code42cli.args import PROFILE_HELP
 from code42cli.commands import Command
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree, print_error, print_no_existing_profile_message
@@ -97,7 +97,8 @@ def update_profile(name=None, server=None, username=None, disable_ssl_errors=Non
     profile = cliprofile.get_profile(name)
     cliprofile.update_profile(profile.name, server, username, disable_ssl_errors)
     _prompt_for_allow_password_set(profile.name)
-
+    print(u"Profile '{}' has been updated.".format(profile.name))
+    
 
 def prompt_for_password_reset(name=None):
     """Securely prompts for your password and then stores it using keyring."""
