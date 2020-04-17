@@ -1,4 +1,3 @@
-import re
 from py42.sdk.queries.fileevents.filters.event_filter import EventTimestamp
 
 from code42cli.date_parse import parse_min_timestamp, parse_max_timestamp

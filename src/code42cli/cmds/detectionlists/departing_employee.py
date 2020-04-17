@@ -10,7 +10,7 @@ from code42cli.cmds.detectionlists import (
 
 def load_subcommands():
     handlers = _get_handlers()
-    detection_list = DetectionList(DetectionLists.HIGH_RISK_EMPLOYEE, handlers)
+    detection_list = DetectionList(DetectionLists.DEPARTING_EMPLOYEE, handlers)
     return detection_list.load_subcommands()
 
 
