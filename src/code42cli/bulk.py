@@ -49,13 +49,10 @@ class BulkProcessor(object):
 
     def run(self):
         """Processes the csv file specified in the ctor, calling `self.row_handler` on each row."""
-        rows = self._get_rows()
-        self._process_rows(rows)
-        self.__worker.wait()
-
-    def _get_rows(self):
         with open(self.csv_file_path, newline=u"", encoding=u"utf8") as csv_file:
-            return _create_dict_reader(csv_file)
+            rows = _create_dict_reader(csv_file)
+            self._process_rows(rows)
+            self.__worker.wait()
 
     def _process_rows(self, rows):
         for row in rows:

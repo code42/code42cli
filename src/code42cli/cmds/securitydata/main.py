@@ -97,7 +97,7 @@ def _load_send_to_args(arg_collection):
 def _load_search_args(arg_collection):
     search_args = {
         enums.SearchArguments.ADVANCED_QUERY: ArgConfig(
-            u"--advanced-query",
+            u"--{}".format(enums.SearchArguments.ADVANCED_QUERY.replace(u"_", u"-")),
             help=u"A raw JSON file event query. "
             u"Useful for when the provided query parameters do not satisfy your requirements."
             u"WARNING: Using advanced queries ignores all other query parameters.",
@@ -122,7 +122,7 @@ def _load_search_args(arg_collection):
             u"Available choices={0}".format(list(enums.ExposureType())),
         ),
         enums.SearchArguments.C42_USERNAME: ArgConfig(
-            u"--{}".format(enums.SearchArguments.C42_USERNAME),
+            u"--{}".format(enums.SearchArguments.C42_USERNAME.replace(u"_", u"-")),
             nargs=u"+",
             help=u"Limits events to endpoint events for these users.",
         ),
@@ -148,23 +148,23 @@ def _load_search_args(arg_collection):
             help=u"Limits events to only those from one of these sources. Example=Gmail.",
         ),
         enums.SearchArguments.FILE_NAME: ArgConfig(
-            u"--{}".format(enums.SearchArguments.FILE_NAME),
+            u"--{}".format(enums.SearchArguments.FILE_NAME.replace(u"_", u"-")),
             nargs=u"+",
             help=u"Limits events to file events where the file has one of these names.",
         ),
         enums.SearchArguments.FILE_PATH: ArgConfig(
-            u"--{}".format(enums.SearchArguments.FILE_PATH),
+            u"--{}".format(enums.SearchArguments.FILE_PATH.replace(u"_", u"-")),
             nargs=u"+",
             help=u"Limits events to file events where the file is located at one of these paths.",
         ),
         enums.SearchArguments.PROCESS_OWNER: ArgConfig(
-            u"--{}".format(enums.SearchArguments.PROCESS_OWNER),
+            u"--{}".format(enums.SearchArguments.PROCESS_OWNER.replace(u"_", u"-")),
             nargs=u"+",
             help=u"Limits events to exposure events where one of these users "
             u"owns the process behind the exposure.",
         ),
         enums.SearchArguments.TAB_URL: ArgConfig(
-            u"--{}".format(enums.SearchArguments.TAB_URL),
+            u"--{}".format(enums.SearchArguments.TAB_URL.replace(u"_", u"-")),
             nargs=u"+",
             help=u"Limits events to be exposure events with one of these destination tab URLs.",
         ),

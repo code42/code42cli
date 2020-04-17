@@ -9,8 +9,7 @@ class CommandInvoker(object):
     def __init__(self, top_command, cmd_parser=None):
         self._top_command = top_command
         self._cmd_parser = cmd_parser or CommandParser()
-        self._commands = {}
-        self._commands[u""] = self._top_command
+        self._commands = {u"": self._top_command}
 
     def run(self, input_args):
         """Locates a command that matches the one specified by
@@ -21,7 +20,7 @@ class CommandInvoker(object):
             supplied by the user to `code42` cli command.
         """
         path_parts = self._get_path_parts(input_args)
-        command = self._commands.get(" ".join(path_parts))
+        command = self._commands.get(u" ".join(path_parts))
         self._try_run_command(command, path_parts, input_args)
 
     def _get_path_parts(self, input_args):

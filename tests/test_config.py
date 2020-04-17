@@ -69,10 +69,7 @@ def create_mock_profile_object(profile_name, authority_url=None, username=None):
 
 def create_internal_object(is_complete, default_profile_name=None):
     default_profile_name = default_profile_name or ConfigAccessor.DEFAULT_VALUE
-    internal_dict = {
-        ConfigAccessor.DEFAULT_PROFILE: default_profile_name,
-        ConfigAccessor.DEFAULT_PROFILE_IS_COMPLETE: is_complete,
-    }
+    internal_dict = {ConfigAccessor.DEFAULT_PROFILE: default_profile_name}
     internal_section = MockSection(_INTERNAL, internal_dict)
 
     def getboolean(*args):
@@ -164,7 +161,6 @@ class TestConfigAccessor(object):
     ):
         mock_profile = create_mock_profile_object(_TEST_PROFILE_NAME, None, None)
         mock_internal = create_internal_object(False)
-        mock_internal["default_profile_is_complete"] = "False"
         setup_parser_one_profile(mock_internal, mock_internal, config_parser_for_create)
         accessor = ConfigAccessor(config_parser_for_create)
         accessor.switch_default_profile = mocker.MagicMock()
@@ -187,7 +183,6 @@ class TestConfigAccessor(object):
     def test_create_profile_when_not_existing_saves(self, config_parser_for_create, mock_saver):
         create_mock_profile_object(_TEST_PROFILE_NAME, None, None)
         mock_internal = create_internal_object(False)
-        mock_internal["default_profile_is_complete"] = "False"
         setup_parser_one_profile(mock_internal, mock_internal, config_parser_for_create)
         accessor = ConfigAccessor(config_parser_for_create)
 
@@ -198,7 +193,6 @@ class TestConfigAccessor(object):
         self, capsys, config_parser_for_create, mock_saver
     ):
         mock_internal = create_internal_object(False)
-        mock_internal["default_profile_is_complete"] = "False"
         setup_parser_one_profile(mock_internal, mock_internal, config_parser_for_create)
         accessor = ConfigAccessor(config_parser_for_create)
 

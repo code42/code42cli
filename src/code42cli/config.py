@@ -18,7 +18,6 @@ class ConfigAccessor(object):
     AUTHORITY_KEY = u"c42_authority_url"
     USERNAME_KEY = u"c42_username"
     IGNORE_SSL_ERRORS_KEY = u"ignore-ssl-errors"
-    DEFAULT_PROFILE_IS_COMPLETE = u"default_profile_is_complete"
     DEFAULT_PROFILE = u"default_profile"
     _INTERNAL_SECTION = u"Internal"
 
@@ -81,6 +80,15 @@ class ConfigAccessor(object):
         self._save()
         print(u"{} has been set as the default profile.".format(new_default_name))
 
+    def delete_profile(self, name):
+        """Deletes a profile."""
+        if self.get_profile(name) is None:
+            raise NoConfigProfileError()
+        self.parser.remove_section(name)
+        if name == self._default_profile_name:
+            self._internal[self.DEFAULT_PROFILE] = self.DEFAULT_VALUE
+        self._save()
+
     def _set_authority_url(self, new_value, profile):
         profile[self.AUTHORITY_KEY] = new_value.strip()
 
@@ -112,7 +120,6 @@ class ConfigAccessor(object):
     def _create_internal_section(self):
         self.parser.add_section(self._INTERNAL_SECTION)
         self.parser[self._INTERNAL_SECTION] = {}
-        self.parser[self._INTERNAL_SECTION][self.DEFAULT_PROFILE_IS_COMPLETE] = str(False)
         self.parser[self._INTERNAL_SECTION][self.DEFAULT_PROFILE] = self.DEFAULT_VALUE
 
     def _create_profile_section(self, name):

@@ -3,7 +3,7 @@ from __future__ import print_function
 from getpass import getpass
 
 import code42cli.profile as cliprofile
-from code42cli.args import PROFILE_HELP, ArgConfig
+from code42cli.args import PROFILE_HELP
 from code42cli.commands import Command
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree, print_error, print_no_existing_profile_message
@@ -59,7 +59,21 @@ def load_subcommands():
         arg_customizer=_load_profile_update_descriptions,
     )
 
-    return [show, list_all, use, reset_pw, create, update]
+    delete = Command(
+        u"delete",
+        "Deletes a profile and its stored password (if any).",
+        u"{} {}".format(usage_prefix, u"delete <profile-name>"),
+        handler=delete_profile,
+    )
+
+    delete_all = Command(
+        u"delete-all",
+        u"Deletes all profiles and saved passwords (if any).",
+        u"{} {}".format(usage_prefix, u"delete-all"),
+        handler=delete_all_profiles,
+    )
+
+    return [show, list_all, use, reset_pw, create, update, delete, delete_all]
 
 
 def show_profile(name=None):
@@ -115,6 +129,31 @@ def list_profiles(*args):
 def use_profile(profile):
     """Changes the default profile to the given one."""
     cliprofile.switch_default_profile(profile)
+
+
+def delete_profile(name):
+    if cliprofile.is_default_profile(name):
+        print(u"\n{} is currently the default profile!".format(name))
+    if not does_user_agree(
+        u"\nDeleting this profile will also delete any stored passwords and checkpoints. Are you sure? (y/n): "
+    ):
+        return
+    cliprofile.delete_profile(name)
+
+
+def delete_all_profiles():
+    existing_profiles = cliprofile.get_all_profiles()
+    if existing_profiles:
+        print(u"\nAre you sure you want to delete the following profiles?")
+        for profile in existing_profiles:
+            print(u"\t{}".format(profile.name))
+        if does_user_agree(
+            u"\nThis will also delete any stored passwords and checkpoints. (y/n): "
+        ):
+            for profile in existing_profiles:
+                cliprofile.delete_profile(profile.name)
+    else:
+        print(u"\nNo profiles exist. Nothing to delete.")
 
 
 def _load_optional_profile_description(argument_collection):

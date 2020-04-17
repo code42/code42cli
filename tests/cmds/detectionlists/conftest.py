@@ -1,18 +1,16 @@
-from code42cli import PRODUCT_NAME
+import pytest
 
 
-def create_namespace(detection_list_type):
-    return "{}.cmds.detectionlists.{}".format(PRODUCT_NAME, detection_list_type)
+TEST_ID = "TEST_ID"
 
 
-class DetectionListMockFactory(object):
-    def __init__(self, mocker, detection_list_type):
-        self.mocker = mocker
-        self._type = detection_list_type
-        self.namespace = create_namespace(detection_list_type)
+@pytest.fixture
+def sdk_with_user(sdk):
+    sdk.users.get_by_username.return_value = {"users": [{"userUid": TEST_ID}]}
+    return sdk
 
-    def create_bulk_template_generator(self):
-        return self.mocker.patch("{}.generate_template".format(self.namespace))
 
-    def create_bulk_processor(self):
-        return self.mocker.patch("{}.run_bulk_process".format(self.namespace))
+@pytest.fixture
+def sdk_without_user(sdk):
+    sdk.users.get_by_username.return_value = {"users": []}
+    return sdk
