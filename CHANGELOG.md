@@ -18,6 +18,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `--filename` flag renamed to `--file-name`.
     - `--filepath` flag renamed to `--file-path`.
     - `--processOwner` flag renamed to `--process-owner`
+- `-b|--begin` and `-e|--end` arguments now accept shorthand date-range strings for days, hours, and minute intervals going back from the current time (i.e. `30d`, `24h`, `15m`).
 
 ### Added
 
