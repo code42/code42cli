@@ -2,7 +2,7 @@ import pytest
 from io import IOBase
 
 from code42cli import PRODUCT_NAME
-from code42cli.bulk import generate_template, BulkProcessor, run_bulk_process
+from code42cli.bulk import generate_template, BulkProcessor, run_bulk_process, CSVReader
 
 
 _NAMESPACE = "{}.bulk".format(PRODUCT_NAME)
@@ -46,13 +46,13 @@ def test_generate_template_when_given_non_callable_handler_does_not_create(mock_
 
 
 def test_run_bulk_process_calls_run(bulk_processor, bulk_processor_factory):
-    run_bulk_process("some/path", func_for_bulk)
+    run_bulk_process("some/path", func_for_bulk, "add")
     assert bulk_processor.run.call_count
 
 
 def test_run_bulk_process_creates_processor(bulk_processor_factory):
-    run_bulk_process("some/path", func_for_bulk)
-    bulk_processor_factory.assert_called_once_with("some/path", func_for_bulk)
+    run_bulk_process("some/path", func_for_bulk, "add")
+    bulk_processor_factory.assert_called_once_with("some/path", func_for_bulk, "add")
 
 
 class TestBulkProcessor(object):
@@ -62,12 +62,18 @@ class TestBulkProcessor(object):
         def func_for_bulk(test1, test2):
             processed_rows.append((test1, test2))
 
-        dict_reader = mocker.patch("{}._create_dict_reader".format(_NAMESPACE))
-        dict_reader.return_value = [
-            {"test1": 1, "test2": 2},
-            {"test1": 3, "test2": 4},
-            {"test1": 5, "test2": 6},
-        ]
-        processor = BulkProcessor("some/path", func_for_bulk)
+        dict_reader = mocker.patch("{}._get_reader".format(_NAMESPACE))
+        
+        class MockAddReader(object):
+            def __call__(self, *args, **kwargs):
+                return [
+                    {"test1": 1, "test2": 2},
+                    {"test1": 3, "test2": 4},
+                    {"test1": 5, "test2": 6},
+                ]
+            
+        dict_reader.return_value = MockAddReader()
+            
+        processor = BulkProcessor("some/path", func_for_bulk, MockAddReader())
         processor.run()
         assert processed_rows == [(1, 2), (3, 4), (5, 6)]
