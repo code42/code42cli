@@ -62,13 +62,13 @@ def test_run_bulk_process_when_not_given_reader_uses_csv_reader(bulk_processor_f
 
 
 class TestBulkProcessor(object):
-    def test_run_processes_rows(self, mocker, mock_open):
+    def test_run_when_reader_returns_dict_process_kwargs(self, mock_open):
         processed_rows = []
 
         def func_for_bulk(test1, test2):
             processed_rows.append((test1, test2))
 
-        class MockAddReader(object):
+        class MockDictReader(object):
             def __call__(self, *args, **kwargs):
                 return [
                     {"test1": 1, "test2": 2},
@@ -76,6 +76,20 @@ class TestBulkProcessor(object):
                     {"test1": 5, "test2": 6},
                 ]
 
-        processor = BulkProcessor("some/path", func_for_bulk, MockAddReader())
+        processor = BulkProcessor("some/path", func_for_bulk, MockDictReader())
         processor.run()
         assert processed_rows == [(1, 2), (3, 4), (5, 6)]
+    
+    def test_run_when_reader_returns_strs_processes_args(self, mock_open):
+        processed_rows = []
+
+        def func_for_bulk(test):
+            processed_rows.append(test)
+
+        class MockRowReader(object):
+            def __call__(self, *args, **kwargs):
+                return ["row1", "row2", "row3"]
+
+        processor = BulkProcessor("some/path", func_for_bulk, MockRowReader())
+        processor.run()
+        assert processed_rows == ["row1", "row2", "row3"]

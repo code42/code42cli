@@ -67,13 +67,19 @@ class BulkProcessor(object):
 
     def _process_row(self, row):
         if type(row) is dict:
-            self.__worker.do_async(
-                lambda *args, **kwargs: self._row_handler(*args, **kwargs), **row
-            )
+            self._process_row_as_kwargs(row)
         else:
-            self.__worker.do_async(
-                lambda *args, **kwargs: self._row_handler(*args, **kwargs), row.strip()
-            )
+            self._process_row_as_arg(row)
+    
+    def _process_row_as_kwargs(self, row):
+        self.__worker.do_async(
+            lambda *args, **kwargs: self._row_handler(*args, **kwargs), **row
+        )
+    
+    def _process_row_as_arg(self, row):
+        self.__worker.do_async(
+            lambda *args, **kwargs: self._row_handler(*args, **kwargs), row.strip()
+        )
 
 
 class CSVReader(object):
