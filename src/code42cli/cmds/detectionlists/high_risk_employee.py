@@ -5,6 +5,7 @@ from code42cli.cmds.detectionlists import (
     get_user_id,
     update_user,
 )
+from code42cli.cmds.detectionlists.enums import DetectionListUserKeys
 
 
 def load_subcommands():
@@ -17,33 +18,31 @@ def _get_handlers():
     return DetectionListHandlers(add=add_high_risk_employee, load_add=_load_add_description)
 
 
-def add_high_risk_employee(
-    sdk, profile, username, cloud_aliases=None, risk_factors=None, notes=None
-):
+def add_high_risk_employee(sdk, profile, username, cloud_alias=None, risk_factor=None, notes=None):
     """Adds an employee to the high risk detection list.
     
     Args:
         sdk (py42.sdk.SDKClient): py42
         profile (C42Profile): Your code42 profile
         username (str): The username of the employee to add.
-        cloud_aliases (iter[str]): Alternative emails addresses for other cloud services.
-        risk_factors (iter[str]): Risk factors associated with the employee.
+        cloud_alias (iter[str]): Alternative emails addresses for other cloud services.
+        risk_factor (iter[str]): Risk factors associated with the employee.
         notes: (str): Notes about the employee.
     """
-    if risk_factors and type(risk_factors) != list:
-        risk_factors = risk_factors.split()
+    if risk_factor and type(risk_factor) != list:
+        risk_factor = risk_factor.split()
 
-    if cloud_aliases and type(cloud_aliases) != list:
-        cloud_aliases = cloud_aliases.split()
+    if cloud_alias and type(cloud_alias) != list:
+        cloud_alias = cloud_alias.split()
 
     user_id = get_user_id(sdk, username)
-    update_user(sdk, user_id, cloud_aliases, risk_factors, notes)
+    update_user(sdk, user_id, cloud_alias, risk_factor, notes)
     sdk.detectionlists.high_risk_employee.add(user_id)
 
 
 def _load_add_description(argument_collection):
     load_user_descriptions(argument_collection)
-    risk_factors = argument_collection.arg_configs[u"risk_factors"]
+    risk_factors = argument_collection.arg_configs[DetectionListUserKeys.RISK_FACTOR]
     risk_factors.as_multi_val_param()
     risk_factors.set_help(
         u"Risk factors associated with the employee. "

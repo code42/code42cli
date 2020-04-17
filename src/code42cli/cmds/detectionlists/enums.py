@@ -8,3 +8,10 @@ class BulkCommandType(object):
 
     def __iter__(self):
         return iter([self.ADD])
+
+
+class DetectionListUserKeys(object):
+    CLOUD_ALIAS = u"cloud_alias"
+    USERNAME = u"username"
+    NOTES = u"notes"
+    RISK_FACTOR = u"risk_factor"

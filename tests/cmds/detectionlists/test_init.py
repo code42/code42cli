@@ -38,7 +38,7 @@ def test_get_user_id_when_user_does_not_exist_print_error(sdk_without_user, caps
 
 def test_update_user_adds_cloud_aliases(sdk_with_user, profile):
     update_user(
-        sdk_with_user, TEST_ID, cloud_aliases=["1@example.com", "2@example.com", "3@example.com"]
+        sdk_with_user, TEST_ID, cloud_alias=["1@example.com", "2@example.com", "3@example.com"]
     )
     sdk_with_user.detectionlists.add_user_cloud_aliases.assert_called_once_with(
         TEST_ID, ["1@example.com", "2@example.com", "3@example.com"]
@@ -46,7 +46,7 @@ def test_update_user_adds_cloud_aliases(sdk_with_user, profile):
 
 
 def test_update_user_adds_risk_factors(sdk_with_user, profile):
-    update_user(sdk_with_user, TEST_ID, risk_factors=["rf1", "rf2", "rf3"])
+    update_user(sdk_with_user, TEST_ID, risk_factor=["rf1", "rf2", "rf3"])
     sdk_with_user.detectionlists.add_user_risk_tags.assert_called_once_with(
         TEST_ID, ["rf1", "rf2", "rf3"]
     )

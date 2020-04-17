@@ -1,6 +1,10 @@
 from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory
 from code42cli.bulk import generate_template, run_bulk_process
-from code42cli.cmds.detectionlists.enums import BulkCommandType, DetectionLists
+from code42cli.cmds.detectionlists.enums import (
+    BulkCommandType,
+    DetectionLists,
+    DetectionListUserKeys,
+)
 from code42cli.util import print_error
 
 
@@ -99,8 +103,13 @@ class DetectionList(object):
         run_bulk_process(csv_file, lambda **kwargs: self._add_employee(sdk, profile, **kwargs))
 
     def _add_employee(self, sdk, profile, **kwargs):
-        if kwargs.has_key(u"cloud_aliases") and type(kwargs[u"cloud_aliases"]) != list:
-            kwargs[u"cloud_aliases"] = kwargs[u"cloud_aliases"].split()
+        if (
+            kwargs.has_key(DetectionListUserKeys.CLOUD_ALIAS)
+            and type(kwargs[DetectionListUserKeys.CLOUD_ALIAS]) != list
+        ):
+            kwargs[DetectionListUserKeys.CLOUD_ALIAS] = kwargs[
+                DetectionListUserKeys.CLOUD_ALIAS
+            ].split()
 
         self.handlers.add_employee(sdk, profile, **kwargs)
 
@@ -113,13 +122,13 @@ def load_user_descriptions(argument_collection):
         argument_collection (ArgConfigCollection): The arg configs off the command that needs its 
             user descriptions loaded.
     """
-    username = argument_collection.arg_configs[u"username"]
-    cloud_aliases = argument_collection.arg_configs[u"cloud_aliases"]
-    notes = argument_collection.arg_configs[u"notes"]
+    username = argument_collection.arg_configs[DetectionListUserKeys.USERNAME]
+    cloud_alias = argument_collection.arg_configs[DetectionListUserKeys.CLOUD_ALIAS]
+    notes = argument_collection.arg_configs[DetectionListUserKeys.NOTES]
 
     username.set_help(u"The code42 username of the user you want to add.")
-    cloud_aliases.set_help(u"Alternative emails addresses for other cloud services.")
-    cloud_aliases.as_multi_val_param()
+    cloud_alias.set_help(u"Alternative emails addresses for other cloud services.")
+    cloud_alias.as_multi_val_param()
     notes.set_help(u"Notes about the employee.")
 
 
@@ -141,19 +150,19 @@ def get_user_id(sdk, username):
     return users[0][u"userUid"]
 
 
-def update_user(sdk, user_id, cloud_aliases=None, risk_factors=None, notes=None):
+def update_user(sdk, user_id, cloud_alias=None, risk_factor=None, notes=None):
     """Updates a detection list user.
     
     Args:
         user_id (str): The ID of the user to update. This is their `userUid` found from 
             `sdk.users.get_by_username()`.
-        cloud_aliases (iter[str]): A list of cloud aliases to add to the user.
-        risk_factors (iter[str]): A list of risk factors associated with user.
+        cloud_alias (iter[str]): A list of cloud aliases to add to the user.
+        risk_factor (iter[str]): A list of risk factors associated with user.
         notes (str): Notes about the user.
     """
-    if cloud_aliases:
-        sdk.detectionlists.add_user_cloud_aliases(user_id, cloud_aliases)
-    if risk_factors:
-        sdk.detectionlists.add_user_risk_tags(user_id, risk_factors)
+    if cloud_alias:
+        sdk.detectionlists.add_user_cloud_aliases(user_id, cloud_alias)
+    if risk_factor:
+        sdk.detectionlists.add_user_risk_tags(user_id, risk_factor)
     if notes:
         sdk.detectionlists.update_user_notes(user_id, notes)
