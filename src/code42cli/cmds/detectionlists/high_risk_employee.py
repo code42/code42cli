@@ -33,6 +33,7 @@ def add_high_risk_employee(
         risk_factors (iter[str]): Risk factors associated with the employee.
         notes: (str): Notes about the employee.
     """
+    print("*" + username + "*")
     if risk_factors and type(risk_factors) != list:
         risk_factors = risk_factors.split()
 

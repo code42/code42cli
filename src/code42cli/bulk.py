@@ -60,27 +60,28 @@ class BulkProcessor(object):
     def run(self):
         """Processes the csv file specified in the ctor, calling `self.row_handler` on each row."""
         with open(self.file_path, newline=u"", encoding=u"utf8") as bulk_file:
-            rows = self._reader(bulk_file=bulk_file)
-            self._process_rows(rows)
+            for row in self._reader(bulk_file=bulk_file):
+                self._process_row(row)
             self.__worker.wait()
 
-    def _process_rows(self, rows):
-        for row in rows:
-            if type(row) is dict:
-                self.__worker.do_async(
-                    lambda **kwargs: self._row_handler(**kwargs), **row
-                )
-            else:
-                self.__worker.do_async(
-                    lambda *args, **kwargs: self._row_handler(*args, **kwargs), row.strip()
-                )
+    def _process_row(self, row):
+        if type(row) is dict:
+            self.__worker.do_async(
+                lambda **kwargs: self._row_handler(**kwargs), **row
+            )
+        else:
+            self.__worker.do_async(
+                lambda *args, **kwargs: self._row_handler(*args, **kwargs), row.strip()
+            )
         
 
 class CSVReader(object):
     def __call__(self, *args, **kwargs):
-        return csv.DictReader(kwargs.get(u"bulk_file"))
+        for row in csv.DictReader(kwargs.get(u"bulk_file")):
+            yield row
 
 
 class FlatFileReader(object):
     def __call__(self, *args, **kwargs):
-        return kwargs[u"bulk_file"].readlines()
+        for row in kwargs[u"bulk_file"]:
+            yield row
