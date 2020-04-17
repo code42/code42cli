@@ -62,7 +62,7 @@ def _determine_if_advanced_query(args):
         for key in given_args:
             val = given_args[key]
             if not _verify_compatibility_with_advanced_query(key, val):
-                print_error("You cannot use --advanced-query with additional search args.")
+                print_error(u"You cannot use --advanced-query with additional search args.")
                 exit(1)
         return True
     return False
