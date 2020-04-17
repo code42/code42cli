@@ -96,6 +96,7 @@ def get_user_id(sdk, username):
     users = sdk.users.get_by_username(username)[u"users"]
     if not users:
         raise UserDoesNotExistError(username)
+    return users[0][u"userUid"]
 
 
 def update_user(sdk, user_id, cloud_aliases=None, risk_factors=None, notes=None):
