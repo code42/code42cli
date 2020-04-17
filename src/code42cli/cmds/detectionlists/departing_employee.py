@@ -39,6 +39,11 @@ def add_departing_employee(
     sdk.detectionlists.high_risk_employee.add(user_id)
 
 
+def remove_high_risk_employee(sdk, profile, username):
+    user_id = get_user_id(sdk, username)
+    sdk.detectionlists.departing_employee.remove(user_id)
+
+
 def _load_add_description(argument_collection):
     load_user_descriptions(argument_collection)
     risk_factors = argument_collection.arg_configs[u"departure_date"]
