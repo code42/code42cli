@@ -19,11 +19,14 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `--filepath` flag renamed to `--file-path`.
     - `--processOwner` flag renamed to `--process-owner`
 - `-b|--begin` and `-e|--end` arguments now accept shorthand date-range strings for days, hours, and minute intervals going back from the current time (i.e. `30d`, `24h`, `15m`).
+- Default profile validation logic added to prevent confusing error states.
 
 ### Added
 
 - `code42 profile update` command.
 - `code42 profile create` command.
+- `code42 profile delete` command.
+- `code42 profile delete-all` command.
 - `code42 detection-lists high-risk` commands:
     - `bulk` with subcommands:
         - `add`: that takes a csv file of users.
