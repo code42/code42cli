@@ -106,13 +106,17 @@ def _load_search_args(arg_collection):
             u"-b",
             u"--{}".format(enums.SearchArguments.BEGIN_DATE),
             help=u"The beginning of the date range in which to look for events, "
-            u"in YYYY-MM-DD (UTC) or YYYY-MM-DD HH:MM:SS (UTC+24-hr time) format.",
+            u"can be a date/time in YYYY-MM-DD (UTC) or YYYY-MM-DD HH:MM:SS (UTC+24-hr time) format "
+            u"or a short value representing days (30d), hours (24h) or minutes (15m) from current "
+            u"time.",
         ),
         enums.SearchArguments.END_DATE: ArgConfig(
             u"-e",
             u"--{}".format(enums.SearchArguments.END_DATE),
             help=u"The end of the date range in which to look for events, "
-            u"in YYYY-MM-DD (UTC) or YYYY-MM-DD HH:MM:SS (UTC+24-hr time) format.",
+            u"can be a date/time in YYYY-MM-DD (UTC) or YYYY-MM-DD HH:MM:SS (UTC+24-hr time) format "
+            u"or a short value representing days (30d), hours (24h) or minutes (15m) from current "
+            u"time.",
         ),
         enums.SearchArguments.EXPOSURE_TYPES: ArgConfig(
             u"-t",
