@@ -13,7 +13,7 @@ def generate_template(handler, path=None, for_flat_file=False):
     """
     columns = None
     path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))
-    
+
     if not for_flat_file:
         argspec = inspect.getargspec(handler)
         columns = [str(arg) for arg in argspec.args if arg not in [u"sdk", u"profile"]]
