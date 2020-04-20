@@ -127,7 +127,7 @@ class DetectionList(object):
 
 def _load_username_description(argument_collection):
     username = argument_collection.arg_configs[DetectionListUserKeys.USERNAME]
-    username.set_help(u"The code42 username of the user you want to add.")
+    username.set_help(u"A code42 username for an employee.")
 
 
 def load_user_descriptions(argument_collection):
