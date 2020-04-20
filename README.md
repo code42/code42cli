@@ -65,14 +65,31 @@ Using the CLI, you can query for events and send them to three possible destinat
 To print events to stdout, do:
 
 ```bash
-code42 security-data print -b 2020-02-02
+code42 security-data print -b <begin_date>
 ```
 
 Note that `-b` or `--begin` is usually required.
-To specify a time, do:
+
+And end date can also be given with `-e` or `--end` to query for a specific date range (if end is not passed, it will get all events up to the present time).
+
+To specify a begin/end time, you can pass a date or a date w/ time as a string:
 
 ```bash
-code42 security-data print -b 2020-02-02 12:51
+code42 security-data print -b '2020-02-02 12:51:00'
+```
+
+```bash
+code42 security-data print -b 2020-02-02
+```
+
+or a shorthand string specifying either days, hours, or minutes back from the current time:
+
+```bash
+code42 security-data print -b 30d
+```
+
+```bash
+code42 security-data print -b 10d -e 12h
 ```
 
 Begin date will be ignored if provided on subsequent queries using `-i`.
