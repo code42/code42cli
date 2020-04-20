@@ -5,7 +5,6 @@ from code42cli.cmds.detectionlists import (
     get_user_id,
     update_user,
 )
-from code42cli.cmds.detectionlists.enums import DetectionListUserKeys
 
 
 def load_subcommands():

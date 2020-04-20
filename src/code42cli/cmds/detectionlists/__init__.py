@@ -74,6 +74,7 @@ class DetectionList(object):
         Returns:
             DetectionList: A departing employee detection list.
         """
+        return cls(DetectionLists.DEPARTING_EMPLOYEE, handlers)
 
     def load_subcommands(self):
         """Loads high risk employee related subcommands"""
