@@ -51,8 +51,8 @@ class DetectionList(object):
         self.factory = cmd_factory or DetectionListCommandFactory(list_name)
 
     @classmethod
-    def create_high_risk_list(cls, handlers):
-        """Creates a high risk detection list.
+    def create_high_risk_employee_list(cls, handlers):
+        """Creates a high risk employee detection list.
         
         Args:
             handlers (DetectionListHandlers): A DTO containing implementations for adding / 
@@ -62,6 +62,18 @@ class DetectionList(object):
             DetectionList: A high-risk employee detection list.
         """
         return cls(DetectionLists.HIGH_RISK_EMPLOYEE, handlers)
+
+    @classmethod
+    def create_departing_employee_list(cls, handlers):
+        """Creates a departing employee detection list.
+        
+        Args:
+            handlers (DetectionListHandlers): A DTO containing implementations for adding /
+                removing users from specific lists.
+        
+        Returns:
+            DetectionList: A departing employee detection list.
+        """
 
     def load_subcommands(self):
         """Loads high risk employee related subcommands"""

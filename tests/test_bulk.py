@@ -119,6 +119,7 @@ class TestBulkProcessor(object):
 
     def test_run_when_error_occurs_prints_error_messages(self, mock_open, capsys):
         errors.ERRORED = False
+
         def func_for_bulk(test):
             if test == "row2":
                 raise Exception()

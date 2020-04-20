@@ -5,6 +5,7 @@ from py42.settings import set_user_agent_suffix
 
 from code42cli import PRODUCT_NAME
 from code42cli.cmds import profile
+from code42cli.cmds.detectionlists import departing_employee as de
 from code42cli.cmds.detectionlists import high_risk_employee as hre
 from code42cli.cmds.securitydata import main as secmain
 from code42cli.commands import Command
@@ -44,6 +45,11 @@ def _load_top_commands():
             u"security-data",
             u"Tools for getting security related data, such as file events.",
             subcommand_loader=secmain.load_subcommands,
+        ),
+        Command(
+            u"departing-employee",
+            detection_lists_description.format(u"departing employee"),
+            subcommand_loader=de.load_subcommands,
         ),
         Command(
             u"high-risk-employee",
