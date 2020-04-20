@@ -38,7 +38,7 @@ def run_bulk_process(file_path, row_handler, reader=None):
         file_path (str): The path to the file feeding the data for the bulk process.
         row_handler (callable): A callable that you define to process values from the row as 
             either *args or **kwargs.
-        reader: (generator, optional): A generator that reads rows and yields data into 
+        reader: (FileReader, optional): A generator that reads rows and yields data into 
             `row_handler`. If None, it will use a CSVReader. Defaults to None.
     """
     reader = reader or CSVReader()
@@ -61,7 +61,7 @@ class BulkProcessor(object):
             and first row `1,test`, then `row_handler` should receive kwargs 
             `prop_a: '1', prop_b: 'test'` when processing the first row. If it's a flat file, then 
             `row_handler` only needs to take an extra arg.
-        reader (generator): A generator that reads rows and yields data into `row_handler`.
+        reader (FileReader): A generator that reads rows and yields data into `row_handler`.
     """
 
     def __init__(self, file_path, row_handler, reader):
@@ -100,9 +100,13 @@ class BulkProcessor(object):
             print(
                 u"Go to '[HOME]/.code42cli/log/code42_errors.log' to see which errors have occurred."
             )
+            
+
+class FileReader(object):
+    pass
 
 
-class CSVReader(object):
+class CSVReader(FileReader):
     """A generator that yields header keys mapped to row values from a csv file."""
 
     def __call__(self, *args, **kwargs):
@@ -110,7 +114,7 @@ class CSVReader(object):
             yield row
 
 
-class FlatFileReader(object):
+class FlatFileReader(FileReader):
     """A generator that yields a single-value per row from a file."""
 
     def __call__(self, *args, **kwargs):
