@@ -7,7 +7,8 @@ from code42cli.worker import Worker
 
 
 def generate_template(handler, path=None):
-    """Looks at the parameter names of `handler` and creates a csv file with the same column names.
+    """Looks at the parameter names of `handler` and creates a csv file with the same column 
+    names.
     """
     if callable(handler):
         argspec = inspect.getargspec(handler)
@@ -26,9 +27,10 @@ def run_bulk_process(file_path, row_handler, reader=None):
     
     Args: 
         file_path (str): The path to the file feeding the data for the bulk process.
-        row_handler (callable): A callable that you define to take *args or **kwargs.
-        reader: (callable, optional): A generator that reads rows and yields data into 
-            row_handler. If None, will use a CSVReader. Defaults to None.
+        row_handler (callable): A callable that you define to process values from the row as 
+            either *args or **kwargs.
+        reader: (generator, optional): A generator that reads rows and yields data into 
+            `row_handler`. If None, it will use a CSVReader. Defaults to None.
     """
     reader = reader or CSVReader()
     processor = _create_bulk_processor(file_path, row_handler, reader)
@@ -45,11 +47,12 @@ class BulkProcessor(object):
     
     Args:
         file_path (str or unicode): The path to the file for processing.
-        row_handler (callable): To be executed on each row given **kwargs representing the column 
-            names mapped to the properties found in the row. For example, if the file header 
-            looked like `prop_a,prop_b` and the next row looked like `1,test`, then row handler 
-            would receive args `prop_a: '1', prop_b: 'test'` when processing row 1. If it's a flat 
-            file, the handler only needs to take an extra arg. 
+        row_handler (callable): A callable that you define to process values from the row as 
+            either *args or **kwargs. For example, if it's a csv file with header `prop_a,prop_b` 
+            and first row `1,test`, then `row_handler` could receive kwargs 
+            `prop_a: '1', prop_b: 'test'` when processing the first row. If it's a flat file, the 
+            `row_handler` only needs to take an extra arg.
+        reader (generator): A generator that reads rows and yields data into `row_handler`.
     """
 
     def __init__(self, file_path, row_handler, reader):
@@ -70,12 +73,10 @@ class BulkProcessor(object):
             self._process_kwargs_row(row)
         else:
             self._process_arg_row(row)
-    
+
     def _process_kwargs_row(self, row):
-        self.__worker.do_async(
-            lambda *args, **kwargs: self._row_handler(*args, **kwargs), **row
-        )
-    
+        self.__worker.do_async(lambda *args, **kwargs: self._row_handler(*args, **kwargs), **row)
+
     def _process_arg_row(self, row):
         self.__worker.do_async(
             lambda *args, **kwargs: self._row_handler(*args, **kwargs), row.strip()
@@ -83,7 +84,7 @@ class BulkProcessor(object):
 
 
 class CSVReader(object):
-    """A csv line generator that yields kwargs."""
+    """A generator that yields header keys mapped to row values from a csv file."""
 
     def __call__(self, *args, **kwargs):
         for row in csv.DictReader(kwargs.get(u"bulk_file")):
@@ -91,7 +92,7 @@ class CSVReader(object):
 
 
 class FlatFileReader(object):
-    """A flat file reader that yields raw rows."""
+    """A generator that yields a single-value per row from a file."""
 
     def __call__(self, *args, **kwargs):
         for row in kwargs[u"bulk_file"]:

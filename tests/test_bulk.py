@@ -79,7 +79,7 @@ class TestBulkProcessor(object):
         processor = BulkProcessor("some/path", func_for_bulk, MockDictReader())
         processor.run()
         assert processed_rows == [(1, 2), (3, 4), (5, 6)]
-    
+
     def test_run_when_reader_returns_strs_processes_args(self, mock_open):
         processed_rows = []
 
