@@ -46,7 +46,6 @@ class Command(object):
         subcommand_loader=None,
         use_single_arg_obj=None,
     ):
-
         self._name = name
         self._description = description
         self._usage = usage

@@ -16,9 +16,9 @@ from code42cli.logger import get_error_logger
 from code42cli.cmds.shared.cursor_store import FileEventCursorStore
 from code42cli.compat import str
 from code42cli.util import is_interactive, print_bold, print_error, print_to_stderr
+import code42cli.errors as errors
 
 
-_EXCEPTIONS_OCCURRED = False
 _TOTAL_EVENTS = 0
 
 
@@ -131,8 +131,7 @@ def _create_event_handlers(output_logger, cursor_store):
 
     def handle_error(exception):
         error_logger.error(exception)
-        global _EXCEPTIONS_OCCURRED
-        _EXCEPTIONS_OCCURRED = True
+        errors.set_did_error()
 
     handlers.handle_error = handle_error
 
@@ -171,7 +170,7 @@ def _verify_compatibility_with_advanced_query(key, val):
 
 
 def _handle_result():
-    if is_interactive() and _EXCEPTIONS_OCCURRED:
+    if is_interactive() and errors.ERRORED:
         print_error(u"View exceptions that occurred at [HOME]/.code42cli/log/code42_errors.")
     if not _TOTAL_EVENTS:
         print_to_stderr(u"No results found\n")

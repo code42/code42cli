@@ -12,6 +12,7 @@ from .conftest import (
     get_filter_value_from_json,
     get_test_date_str,
 )
+import code42cli.errors as errors
 
 
 @pytest.fixture
@@ -515,7 +516,7 @@ def test_extract_when_creating_sdk_throws_causes_exit(
         extraction_module.extract(sdk, profile, logger, namespace)
 
 
-def test_extract_when_global_variable_is_true_and_is_interactive_prints_error(
+def test_extract_when_errored_and_is_interactive_prints_error(
     sdk, profile, logger, namespace_with_begin, extractor, error_printer, interactive_mode
 ):
     extraction_module._EXCEPTIONS_OCCURRED = True
@@ -523,18 +524,18 @@ def test_extract_when_global_variable_is_true_and_is_interactive_prints_error(
     assert error_printer.call_count
 
 
-def test_extract_when_global_variable_is_true_and_not_is_interactive_does_not_print_error(
+def test_extract_when_errored_and_is_not_interactive_does_not_print_error(
     sdk, profile, logger, namespace_with_begin, extractor, error_printer, non_interactive_mode
 ):
-    extraction_module._EXCEPTIONS_OCCURRED = True
+    errors.set_did_error()
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
     assert not error_printer.call_count
 
 
-def test_extract_when_global_variable_is_false_and_is_interactive_does_not_print_error(
+def test_extract_when_not_errored_and_is_interactive_does_not_print_error(
     sdk, profile, logger, namespace_with_begin, extractor, error_printer, interactive_mode
 ):
-    extraction_module._EXCEPTIONS_OCCURRED = False
+    errors.ERRORED = False
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
     assert not error_printer.call_count
 
@@ -560,4 +561,4 @@ def test_when_sdk_raises_exception_global_variable_gets_set(
     )
 
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
-    assert extraction_module._EXCEPTIONS_OCCURRED
+    assert errors.ERRORED

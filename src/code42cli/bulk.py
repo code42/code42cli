@@ -67,6 +67,7 @@ class BulkProcessor(object):
             for row in self._reader(bulk_file=bulk_file):
                 self._process_row(row)
             self.__worker.wait()
+        self._print_result()
 
     def _process_row(self, row):
         if type(row) is dict:
@@ -81,6 +82,15 @@ class BulkProcessor(object):
         self.__worker.do_async(
             lambda *args, **kwargs: self._row_handler(*args, **kwargs), row.strip()
         )
+
+    def _print_result(self):
+        stats = self.__worker.stats
+        successes = stats.total - stats.total_errors
+        print(u"{} processed successfully out of {}.".format(successes, stats.total))
+        if stats.total_errors:
+            print(
+                u"Go to '[HOME]/.code42cli/log/code42_errors.log' to see which errors have occurred."
+            )
 
 
 class CSVReader(object):
