@@ -43,6 +43,13 @@ def add_high_risk_employee(sdk, profile, username, cloud_alias=None, risk_tag=No
 
 
 def remove_high_risk_employee(sdk, profile, username):
+    """Removes an employee from the high risk employee detection list.
+    
+    Args:
+        sdk (py42.sdk.SDKClient): py42
+        profile (C42Profile): Your code42 profile
+                username (str): The username of the employee to remove.
+    """
     user_id = get_user_id(sdk, username)
     sdk.detectionlists.high_risk_employee.remove(user_id)
 

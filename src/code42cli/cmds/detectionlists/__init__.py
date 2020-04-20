@@ -59,7 +59,7 @@ class DetectionList(object):
                 removing users from specific lists.
         
         Returns:
-            DetectionList: A high-risk employee detection list.
+            DetectionList: A high risk employee detection list.
         """
         return cls(DetectionLists.HIGH_RISK_EMPLOYEE, handlers)
 
