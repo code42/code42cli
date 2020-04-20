@@ -3,6 +3,7 @@ from io import IOBase
 
 from code42cli import PRODUCT_NAME
 from code42cli.bulk import generate_template, BulkProcessor, run_bulk_process, CSVReader
+from code42cli import errors as errors
 
 
 _NAMESPACE = "{}.bulk".format(PRODUCT_NAME)
@@ -117,6 +118,7 @@ class TestBulkProcessor(object):
         assert processed_rows == ["row1", "row2", "row3"]
 
     def test_run_when_error_occurs_prints_error_messages(self, mock_open, capsys):
+        errors.ERRORED = False
         def func_for_bulk(test):
             if test == "row2":
                 raise Exception()

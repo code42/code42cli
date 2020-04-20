@@ -519,20 +519,23 @@ def test_extract_when_creating_sdk_throws_causes_exit(
 def test_extract_when_errored_and_is_interactive_prints_error(
     mocker, sdk, profile, logger, namespace_with_begin, extractor
 ):
+    errors.ERRORED = False
     errors_error_printer = mocker.patch("{}.errors.print_error".format(PRODUCT_NAME))
     errors_interactive_mode = mocker.patch("{}.errors.is_interactive".format(PRODUCT_NAME))
     errors_interactive_mode.return_value = True
-    errors.set_did_error()
+    errors.ERRORED = True
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
     assert errors_error_printer.call_count
+    errors.ERRORED = False
 
 
 def test_extract_when_errored_and_is_not_interactive_does_not_print_error(
     sdk, profile, logger, namespace_with_begin, extractor, error_printer, non_interactive_mode
 ):
-    errors.set_did_error()
+    errors.ERRORED = True
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
     assert not error_printer.call_count
+    errors.ERRORED = False
 
 
 def test_extract_when_not_errored_and_is_interactive_does_not_print_error(
@@ -541,12 +544,13 @@ def test_extract_when_not_errored_and_is_interactive_does_not_print_error(
     errors.ERRORED = False
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
     assert not error_printer.call_count
+    errors.ERRORED = False
 
 
 def test_when_sdk_raises_exception_global_variable_gets_set(
     mocker, sdk, profile, logger, namespace_with_begin, mock_42
 ):
-    extraction_module._EXCEPTIONS_OCCURRED = False
+    errors.ERRORED = False
     mock_sdk = mocker.MagicMock()
 
     # For ease
@@ -565,3 +569,4 @@ def test_when_sdk_raises_exception_global_variable_gets_set(
 
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
     assert errors.ERRORED
+    errors.ERRORED = False

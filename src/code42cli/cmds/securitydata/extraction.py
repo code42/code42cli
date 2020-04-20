@@ -131,7 +131,7 @@ def _create_event_handlers(output_logger, cursor_store):
 
     def handle_error(exception):
         error_logger.error(exception)
-        errors.set_did_error()
+        errors.ERRORED = True
 
     handlers.handle_error = handle_error
 
