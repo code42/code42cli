@@ -156,7 +156,7 @@ To learn more about acceptable arguments, add the `-h` flag to `code42` or any o
 
 ## Detection Lists
 
-You can both add and remove employees from detection lists using the CLI:
+You can both add and remove employees from detection lists using the CLI. This example uses `high-risk-employee`.
 
 ```bash
 code42 high-risk-employee add user@example.com --notes "These are notes"
