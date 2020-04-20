@@ -80,8 +80,8 @@ class Worker(object):
                 self._error_logger.error(ex)
                 self._stats.increment_total_errors()
             finally:
-                self._queue.task_done()
                 self._stats.increment_total()
+                self._queue.task_done()
 
     def __start(self):
         for _ in range(0, self._thread_count):
