@@ -78,14 +78,14 @@ class BulkProcessor(object):
 
     def _process_row(self, row):
         if type(row) is dict:
-            self._process_kwargs_row(row)
+            self._process_csv_row(row)
         else:
-            self._process_arg_row(row)
+            self._process_flat_file_row(row)
 
-    def _process_kwargs_row(self, row):
+    def _process_csv_row(self, row):
         self.__worker.do_async(lambda *args, **kwargs: self._row_handler(*args, **kwargs), **row)
 
-    def _process_arg_row(self, row):
+    def _process_flat_file_row(self, row):
         self.__worker.do_async(
             lambda *args, **kwargs: self._row_handler(*args, **kwargs), row.strip()
         )
