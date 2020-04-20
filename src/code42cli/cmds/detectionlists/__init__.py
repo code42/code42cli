@@ -9,7 +9,9 @@ from code42cli.cmds.detectionlists.enums import (
 
 
 class UserDoesNotExistError(Exception):
-    """An error to represent a username that is not in our system."""
+    """An error to represent a username that is not in our system. The CLI shows this error when 
+    the user tries to add or remove a user that does not exist. This error is not shown during 
+    bulk add or remove."""
 
     def __init__(self, username):
         super(UserDoesNotExistError, self).__init__(u"User '{}' does not exist.".format(username))
