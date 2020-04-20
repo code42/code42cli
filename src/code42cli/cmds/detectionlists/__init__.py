@@ -109,7 +109,7 @@ class DetectionList(object):
         for_flat_file = False
         if cmd == BulkCommandType.ADD:
             handler = self.handlers.add_employee
-        
+
         if cmd == BulkCommandType.REMOVE:
             handler = self.handlers.remove_employee
             for_flat_file = True
