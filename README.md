@@ -6,7 +6,7 @@ Use the `code42` command to interact with your Code42 environment.
     Additionally, you can choose to only get events that Code42 previously did not observe since you last recorded a 
     checkpoint (provided you do not change your query).
 * `code42 detection-lists` is a collection of tools for managing code42 detection lists, such as departing employee or
-    high risk.
+    high risk employee.
 
 ## Requirements
 
