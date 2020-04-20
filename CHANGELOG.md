@@ -17,7 +17,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `--c42username` flag renamed to `--c42-username`.
     - `--filename` flag renamed to `--file-name`.
     - `--filepath` flag renamed to `--file-path`.
-    - `--processOwner` flag renamed to `--process-owner`
+    - `--processOwner` flag renamed to `--process-owner`.
 - Default profile validation logic added to prevent confusing error states.
 
 ### Added
@@ -32,7 +32,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
         - `generate-template`: that creates the csv file template. And parameters:
             - `cmd`: with the option `add` and `remove`.
             - `path`
-        - `remove`: that takes a list of users in a file
+        - `remove`: that takes a list of users in a file.
     - `add` that takes parameters: `--username`, `--cloud-aliases`, `--risk-factors`, and `--notes`.
     - `remove` that takes a username.
 
