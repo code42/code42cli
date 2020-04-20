@@ -161,7 +161,7 @@ Next, fill out the csv file with all the users and then pass the file in as para
 code42 high-risk-employee bulk add users_to_add.csv
 ```
 
-Note that for `bulk remove`, the file only has to contain an end-line list of users.
+Note that for `bulk remove`, the file only has to be an end-line delimited list of users, with one line per user.
 
 ## Known Issues
 
