@@ -13,19 +13,18 @@ def generate_template(handler, path=None):
     `handler` is not callable or is None, it will create a blank file. This is useful for 
     commands such as `remove` which only require a list of users.
     """
-    columns = None
     path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))
-    argspec = inspect.getargspec(handler)
-    num_args = len([arg for arg in argspec.args if arg != u"sdk" and arg != u"profile"])
-    if num_args != 1:
-        argspec = inspect.getargspec(handler)
-        columns = [str(arg) for arg in argspec.args if arg not in [u"sdk", u"profile"]]
+    args = [arg for arg in inspect.getargspec(handler).args if arg != u"sdk" and arg != u"profile"]
+    if len(args) != 1:
         path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))
     else:
         print(
-            u"A blank file was generated because there are no csv headers needed for this command type."
+            u"A blank file was generated because there are no csv headers needed for this command "
+            u"type. Simply enter one {} per line.".format(args[0])
         )
-    _write_template_file(path, columns)
+        # Set args to None so that we don't make a header out of the single arg.
+        args = None
+    _write_template_file(path, args)
 
 
 def _write_template_file(path, columns=None):
