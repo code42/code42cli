@@ -5,8 +5,7 @@ Use the `code42` command to interact with your Code42 environment.
 * `code42 security-data` is a CLI tool for extracting AED events.
     Additionally, you can choose to only get events that Code42 previously did not observe since you last recorded a 
     checkpoint (provided you do not change your query).
-* `code42 detection-lists` is a collection of tools for managing code42 detection lists, such as departing employee or
-    high risk employee.
+* `code42 high-risk-employee` is a collection of tools for managing the high risk employee detection list.
 
 ## Requirements
 
