@@ -56,7 +56,7 @@ class BulkProcessor(object):
         file_path (str or unicode): The path to the file for processing.
         row_handler (callable): A callable that you define to process values from the row as 
             either *args or **kwargs. For example, if it's a csv file with header `prop_a,prop_b` 
-            and first row `1,test`, then `row_handler` could receive kwargs 
+            and first row `1,test`, then `row_handler` should receive kwargs 
             `prop_a: '1', prop_b: 'test'` when processing the first row. If it's a flat file, then 
             `row_handler` only needs to take an extra arg.
         reader (generator): A generator that reads rows and yields data into `row_handler`.
