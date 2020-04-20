@@ -31,7 +31,7 @@ def func_for_bulk(sdk, profile, test1, test2):
     pass
 
 
-def test_generate_template_uses_expected_path_and_column_names(mocker, mock_open):
+def test_generate_template_uses_expected_path_and_column_names(mock_open):
     file_path = "some/path"
     template_file = mock_open.return_value.__enter__.return_value
 
@@ -40,9 +40,31 @@ def test_generate_template_uses_expected_path_and_column_names(mocker, mock_open
     template_file.write.assert_called_once_with("test1,test2")
 
 
-def test_generate_template_when_given_non_callable_handler_does_not_create(mock_open):
+def test_generate_template_when_given_non_callable_handler_creates_file_without_columns(mock_open):
+    file_path = "some/path"
+    template_file = mock_open.return_value.__enter__.return_value
+
     generate_template(None, "some/path")
-    assert not mock_open.call_count
+    mock_open.assert_called_once_with(file_path, u"w", encoding=u"utf8")
+    assert not template_file.write.call_count
+
+
+def test_generate_template_when_given_non_callable_handler_prints_message(mock_open, capsys):
+    generate_template(None, "some/path")
+    capture = capsys.readouterr()
+    assert (
+        u"There are no headers needed for this command type. A blank file is generated."
+        in capture.out
+    )
+
+
+def test_generate_template_when_given_callable_does_not_print_message(mock_open, capsys):
+    generate_template(func_for_bulk, "some/path")
+    capture = capsys.readouterr()
+    assert (
+        u"There are no headers needed for this command type. A blank file is generated."
+        not in capture.out
+    )
 
 
 def test_run_bulk_process_calls_run(bulk_processor, bulk_processor_factory):

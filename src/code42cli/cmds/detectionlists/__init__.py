@@ -74,13 +74,13 @@ class DetectionList(object):
 
     def _load_bulk_subcommands(self):
         generate_template_cmd = self.factory.create_bulk_generate_template_command(
-            self.generate_csv_file
+            self.generate_template_file
         )
         add = self.factory.create_bulk_add_command(self.bulk_add_employees)
         remove = self.factory.create_bulk_remove_command(self.bulk_remove_employees)
         return [generate_template_cmd, add, remove]
 
-    def generate_csv_file(self, cmd, path=None):
+    def generate_template_file(self, cmd, path=None):
         """Generates a csv template a user would need to fill-in for bulk adding users to the 
         detection list.
         
@@ -93,6 +93,7 @@ class DetectionList(object):
         handler = None
         if cmd == BulkCommandType.ADD:
             handler = self.handlers.add_employee
+
         generate_template(handler, path)
 
     def bulk_add_employees(self, sdk, profile, csv_file):

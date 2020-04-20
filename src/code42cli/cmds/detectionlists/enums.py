@@ -5,6 +5,7 @@ class DetectionLists(object):
 
 class BulkCommandType(object):
     ADD = u"add"
+    REMOVE = u"remove"
 
     def __iter__(self):
         return iter([self.ADD])

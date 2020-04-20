@@ -10,16 +10,20 @@ def generate_template(handler, path=None):
     """Looks at the parameter names of `handler` and creates a csv file with the same column 
     names.
     """
-    if callable(handler):
+    columns = None
+    if handler and callable(handler):
         argspec = inspect.getargspec(handler)
         columns = [str(arg) for arg in argspec.args if arg not in [u"sdk", u"profile"]]
         path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))
-        _write_template_file(path, columns)
+    else:
+        print(u"There are no headers needed for this command type. A blank file is generated.")
+    _write_template_file(path, columns)
 
 
-def _write_template_file(path, columns):
-    with open(path, u"w", encoding=u"utf8") as new_csv:
-        new_csv.write(u",".join(columns))
+def _write_template_file(path, columns=None):
+    with open(path, u"w", encoding=u"utf8") as new_file:
+        if columns:
+            new_file.write(u",".join(columns))
 
 
 def run_bulk_process(file_path, row_handler, reader=None):

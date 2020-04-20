@@ -65,21 +65,24 @@ class TestDetectionList(object):
         assert cmds[0].name == "bulk"
         assert cmds[1].name == "add"
 
-    def test_generate_csv_file_generates_template(self, bulk_template_generator):
+    def test_generate_template_file_generates_template(self, bulk_template_generator):
+        def test_func():
+            pass
         handlers = DetectionListHandlers()
+        handlers.add_employee = test_func
         detection_list = DetectionList("TestList", handlers)
         path = "some/path"
-        detection_list.generate_csv_file("add", path)
-        bulk_template_generator.assert_called_once_with(handlers.add_employee, path)
+        detection_list.generate_template_file("add", path)
+        bulk_template_generator.assert_called_once_with(test_func, path)
 
-    def test_generate_csv_file_when_given_remove_generates_expected_template(
+    def test_generate_template_file_when_given_remove_generates_expected_template(
         self, bulk_template_generator
     ):
         handlers = DetectionListHandlers()
         detection_list = DetectionList("TestList", handlers)
         path = "some/path"
-        detection_list.generate_csv_file("remove", path)
-        bulk_template_generator.assert_called_once_with(handlers.remove_employee, path)
+        detection_list.generate_template_file("remove", path)
+        bulk_template_generator.assert_called_once_with(None, path)
 
     def test_bulk_add_employees_uses_csv_path(self, sdk, profile, bulk_processor):
         detection_list = DetectionList("TestList", DetectionListHandlers())
