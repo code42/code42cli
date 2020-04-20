@@ -16,7 +16,7 @@ def generate_template(handler, path=None):
         columns = [str(arg) for arg in argspec.args if arg not in [u"sdk", u"profile"]]
         path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))
     else:
-        print(u"There are no headers needed for this command type. A blank file is generated.")
+        print(u"A blank was generated because there are no headers needed for this command type.")
     _write_template_file(path, columns)
 
 

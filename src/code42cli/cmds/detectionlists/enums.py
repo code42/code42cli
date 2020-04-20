@@ -8,7 +8,7 @@ class BulkCommandType(object):
     REMOVE = u"remove"
 
     def __iter__(self):
-        return iter([self.ADD])
+        return iter([self.ADD, self.REMOVE])
 
 
 class DetectionListUserKeys(object):

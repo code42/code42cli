@@ -53,7 +53,7 @@ def test_generate_template_when_given_non_callable_handler_prints_message(mock_o
     generate_template(None, "some/path")
     capture = capsys.readouterr()
     assert (
-        u"There are no headers needed for this command type. A blank file is generated."
+        u"A blank was generated because there are no headers needed for this command type."
         in capture.out
     )
 
@@ -62,7 +62,7 @@ def test_generate_template_when_given_callable_does_not_print_message(mock_open,
     generate_template(func_for_bulk, "some/path")
     capture = capsys.readouterr()
     assert (
-        u"There are no headers needed for this command type. A blank file is generated."
+        u"A blank was generated because there are no headers needed for this command type."
         not in capture.out
     )
 
