@@ -10,7 +10,7 @@ from code42cli.cmds.detectionlists.enums import DetectionListUserKeys
 
 def load_subcommands():
     handlers = _get_handlers()
-    detection_list = DetectionList.create_high_risk_list(handlers)
+    detection_list = DetectionList.create_high_risk_employee_list(handlers)
     return detection_list.load_subcommands()
 
 
@@ -21,7 +21,7 @@ def _get_handlers():
 
 
 def add_high_risk_employee(sdk, profile, username, cloud_alias=None, risk_tag=None, notes=None):
-    """Adds an employee to the high risk detection list.
+    """Adds an employee to the high risk employee detection list.
     
     Args:
         sdk (py42.sdk.SDKClient): py42
@@ -43,6 +43,13 @@ def add_high_risk_employee(sdk, profile, username, cloud_alias=None, risk_tag=No
 
 
 def remove_high_risk_employee(sdk, profile, username):
+    """Removes an employee from the high risk employee detection list.
+    
+    Args:
+        sdk (py42.sdk.SDKClient): py42
+        profile (C42Profile): Your code42 profile
+                username (str): The username of the employee to remove.
+    """
     user_id = get_user_id(sdk, username)
     sdk.detectionlists.high_risk_employee.remove(user_id)
 

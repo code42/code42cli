@@ -135,8 +135,10 @@ class TestBulkProcessor(object):
             "Go to '[HOME]/.code42cli/log/code42_errors.log' to see which errors have occurred."
             in capture.out
         )
+        errors.ERRORED = False
 
     def test_run_when_no_errors_occur_prints_success_messages(self, mock_open, capsys):
+        errors.ERRORED = False
         def func_for_bulk(test):
             pass
 
