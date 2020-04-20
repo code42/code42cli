@@ -93,3 +93,38 @@ class TestBulkProcessor(object):
         processor = BulkProcessor("some/path", func_for_bulk, MockRowReader())
         processor.run()
         assert processed_rows == ["row1", "row2", "row3"]
+
+    def test_run_when_error_occurs_prints_error_messages(self, mock_open, capsys):
+        def func_for_bulk(test):
+            if test == "row2":
+                raise Exception()
+
+        class MockRowReader(object):
+            def __call__(self, *args, **kwargs):
+                return ["row1", "row2", "row3"]
+
+        processor = BulkProcessor("some/path", func_for_bulk, MockRowReader())
+        processor.run()
+        capture = capsys.readouterr()
+        assert "2 processed successfully out of 3." in capture.out
+        assert (
+            "Go to '[HOME]/.code42cli/log/code42_errors.log' to see which errors have occurred."
+            in capture.out
+        )
+
+    def test_run_no_errors_occur_prints_success_messages(self, mock_open, capsys):
+        def func_for_bulk(test):
+            pass
+
+        class MockRowReader(object):
+            def __call__(self, *args, **kwargs):
+                return ["row1", "row2", "row3"]
+
+        processor = BulkProcessor("some/path", func_for_bulk, MockRowReader())
+        processor.run()
+        capture = capsys.readouterr()
+        assert "3 processed successfully out of 3." in capture.out
+        assert (
+            "Go to '[HOME]/.code42cli/log/code42_errors.log' to see which errors have occurred."
+            not in capture.out
+        )

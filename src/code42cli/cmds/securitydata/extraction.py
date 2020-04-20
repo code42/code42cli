@@ -170,8 +170,9 @@ def _verify_compatibility_with_advanced_query(key, val):
 
 
 def _handle_result():
-    if is_interactive() and errors.ERRORED:
-        print_error(u"View exceptions that occurred at [HOME]/.code42cli/log/code42_errors.")
+    # Have to call this explicitly (instead of relying on invoker) because errors are caught in
+    # `c42eventextractor`.
+    errors.print_errors_occurred_if_needed()
     if not _TOTAL_EVENTS:
         print_to_stderr(u"No results found\n")
 

@@ -517,11 +517,14 @@ def test_extract_when_creating_sdk_throws_causes_exit(
 
 
 def test_extract_when_errored_and_is_interactive_prints_error(
-    sdk, profile, logger, namespace_with_begin, extractor, error_printer, interactive_mode
+    mocker, sdk, profile, logger, namespace_with_begin, extractor
 ):
-    extraction_module._EXCEPTIONS_OCCURRED = True
+    errors_error_printer = mocker.patch("{}.errors.print_error".format(PRODUCT_NAME))
+    errors_interactive_mode = mocker.patch("{}.errors.is_interactive".format(PRODUCT_NAME))
+    errors_interactive_mode.return_value = True
+    errors.set_did_error()
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
-    assert error_printer.call_count
+    assert errors_error_printer.call_count
 
 
 def test_extract_when_errored_and_is_not_interactive_does_not_print_error(

@@ -3,6 +3,7 @@ from __future__ import print_function
 import sys
 
 from code42cli.parser import ArgumentParserError, CommandParser
+from code42cli.errors import log_error
 
 
 class CommandInvoker(object):
@@ -19,9 +20,12 @@ class CommandInvoker(object):
             input_args (iter[str]): the full list of arguments
             supplied by the user to `code42` cli command.
         """
-        path_parts = self._get_path_parts(input_args)
-        command = self._commands.get(u" ".join(path_parts))
-        self._try_run_command(command, path_parts, input_args)
+        try:
+            path_parts = self._get_path_parts(input_args)
+            command = self._commands.get(u" ".join(path_parts))
+            self._try_run_command(command, path_parts, input_args)
+        except Exception as ex:
+            log_error(ex)
 
     def _get_path_parts(self, input_args):
         """Gets the portion of `input_args` that refers to a
