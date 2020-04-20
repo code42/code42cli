@@ -9,12 +9,12 @@ from code42cli.cmds.detectionlists.enums import DetectionListUserKeys
 
 
 def load_subcommands():
-    handlers = _get_handlers()
+    handlers = _create_handlers()
     detection_list = DetectionList.create_high_risk_employee_list(handlers)
     return detection_list.load_subcommands()
 
 
-def _get_handlers():
+def _create_handlers():
     return DetectionListHandlers(
         add=add_high_risk_employee, remove=remove_high_risk_employee, load_add=_load_add_description
     )

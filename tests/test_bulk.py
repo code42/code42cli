@@ -2,8 +2,9 @@ import pytest
 from io import IOBase
 
 from code42cli import PRODUCT_NAME
-from code42cli.bulk import generate_template, BulkProcessor, run_bulk_process, CSVReader
 from code42cli import errors as errors
+from code42cli.bulk import generate_template, BulkProcessor, run_bulk_process, CSVReader, FileReader
+from code42cli.util import get_user_project_path
 
 
 _NAMESPACE = "{}.bulk".format(PRODUCT_NAME)
@@ -91,7 +92,7 @@ class TestBulkProcessor(object):
         def func_for_bulk(test1, test2):
             processed_rows.append((test1, test2))
 
-        class MockDictReader(object):
+        class MockDictReader(FileReader):
             def __call__(self, *args, **kwargs):
                 return [
                     {"test1": 1, "test2": 2},
@@ -109,7 +110,7 @@ class TestBulkProcessor(object):
         def func_for_bulk(test):
             processed_rows.append(test)
 
-        class MockRowReader(object):
+        class MockRowReader(FileReader):
             def __call__(self, *args, **kwargs):
                 return ["row1", "row2", "row3"]
 
@@ -124,7 +125,7 @@ class TestBulkProcessor(object):
             if test == "row2":
                 raise Exception()
 
-        class MockRowReader(object):
+        class MockRowReader(FileReader):
             def __call__(self, *args, **kwargs):
                 return ["row1", "row2", "row3"]
 
@@ -132,8 +133,10 @@ class TestBulkProcessor(object):
         processor.run()
         capture = capsys.readouterr()
         assert "2 processed successfully out of 3." in capture.out
+
+        path = get_user_project_path("log")
         assert (
-            "Go to '[HOME]/.code42cli/log/code42_errors.log' to see which errors have occurred."
+            "Go to '{}/{}' to see which errors have occurred.".format(path, errors.ERROR_LOG_FILE_NAME)
             in capture.out
         )
         errors.ERRORED = False
@@ -144,7 +147,7 @@ class TestBulkProcessor(object):
         def func_for_bulk(test):
             pass
 
-        class MockRowReader(object):
+        class MockRowReader(FileReader):
             def __call__(self, *args, **kwargs):
                 return ["row1", "row2", "row3"]
 
@@ -152,7 +155,9 @@ class TestBulkProcessor(object):
         processor.run()
         capture = capsys.readouterr()
         assert "3 processed successfully out of 3." in capture.out
+
+        path = get_user_project_path("log")
         assert (
-            "Go to '[HOME]/.code42cli/log/code42_errors.log' to see which errors have occurred."
+            "Go to '{}/{}' to see which errors have occurred.".format(path, errors.ERROR_LOG_FILE_NAME)
             not in capture.out
         )

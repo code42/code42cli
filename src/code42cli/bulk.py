@@ -4,6 +4,8 @@ import csv
 
 from code42cli.compat import open, str
 from code42cli.worker import Worker
+from code42cli.util import get_user_project_path
+from code42cli.errors import ERROR_LOG_FILE_NAME
 
 
 def generate_template(handler, path=None, for_flat_file=False):
@@ -97,12 +99,13 @@ class BulkProcessor(object):
         successes = stats.total - stats.total_errors
         print(u"{} processed successfully out of {}.".format(successes, stats.total))
         if stats.total_errors:
-            print(
-                u"Go to '[HOME]/.code42cli/log/code42_errors.log' to see which errors have occurred."
-            )
-            
+            path = u"{}/{}".format(get_user_project_path(u"log"), ERROR_LOG_FILE_NAME)
+            print(u"Go to '{}' to see which errors have occurred.".format(path))
+
 
 class FileReader(object):
+    """A base class for documentation and reference purposes."""
+
     pass
 
 

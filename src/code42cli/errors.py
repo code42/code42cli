@@ -1,5 +1,5 @@
-from code42cli.logger import get_error_logger
-from code42cli.util import is_interactive, print_error
+from code42cli.logger import get_error_logger, ERROR_LOG_FILE_NAME
+from code42cli.util import is_interactive, print_error, get_user_project_path
 
 ERRORED = False
 
@@ -12,4 +12,5 @@ def log_error(exception):
 
 def print_errors_occurred_if_needed():
     if is_interactive() and ERRORED:
-        print_error(u"View exceptions that occurred at [HOME]/.code42cli/log/code42_errors.")
+        path = get_user_project_path(u"log")
+        print_error(u"View exceptions that occurred at {}/{}.".format(path, ERROR_LOG_FILE_NAME))

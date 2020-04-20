@@ -7,12 +7,13 @@ from code42cli.util import get_user_project_path, print_error
 
 
 logger_deps_lock = Lock()
+ERROR_LOG_FILE_NAME = u"code42_errors.log"
 
 
 def get_error_logger():
     """Gets the logger where exceptions are logged."""
     log_path = get_user_project_path(u"log")
-    log_path = u"{0}/code42_errors.log".format(log_path)
+    log_path = u"{}/{}".format(log_path, ERROR_LOG_FILE_NAME)
     logger = logging.getLogger(u"code42_error_logger")
     if logger_has_handlers(logger):
         return logger
