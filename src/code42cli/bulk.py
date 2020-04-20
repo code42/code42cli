@@ -7,8 +7,9 @@ from code42cli.worker import Worker
 
 
 def generate_template(handler, path=None):
-    """Looks at the parameter names of `handler` and creates a csv file with the same column 
-    names.
+    """Looks at the parameter names of `handler` and creates a file with the same column names. If 
+    `handler` is not callable or is None, it will create a blank file. This is useful for 
+    commands such as `remove` which only require a list of users.
     """
     columns = None
     if handler and callable(handler):
@@ -16,7 +17,9 @@ def generate_template(handler, path=None):
         columns = [str(arg) for arg in argspec.args if arg not in [u"sdk", u"profile"]]
         path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))
     else:
-        print(u"A blank was generated because there are no headers needed for this command type.")
+        print(
+            u"A blank file was generated because there are no csv headers needed for this command type."
+        )
     _write_template_file(path, columns)
 
 
@@ -54,7 +57,7 @@ class BulkProcessor(object):
         row_handler (callable): A callable that you define to process values from the row as 
             either *args or **kwargs. For example, if it's a csv file with header `prop_a,prop_b` 
             and first row `1,test`, then `row_handler` could receive kwargs 
-            `prop_a: '1', prop_b: 'test'` when processing the first row. If it's a flat file, the 
+            `prop_a: '1', prop_b: 'test'` when processing the first row. If it's a flat file, then 
             `row_handler` only needs to take an extra arg.
         reader (generator): A generator that reads rows and yields data into `row_handler`.
     """

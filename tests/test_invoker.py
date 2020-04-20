@@ -59,7 +59,7 @@ class TestCommandInvoker(object):
             invoker.run(["testsub1", "inner1", "one", "two", "--invalid", "test"])
         assert mock_subparser.print_help.call_count
 
-    def test_run_when_errors_occur_from_handler_prints_error_message(self, mocker, mock_parser):
+    def test_run_when_errors_occur_from_handler_calls_log_error(self, mocker, mock_parser):
         error_logger = mocker.patch("{}.invoker.log_error".format(PRODUCT_NAME))
         ex = Exception()
         cmd = Command("", "top level desc", subcommand_loader=load_subcommands)

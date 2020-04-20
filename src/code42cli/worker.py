@@ -71,7 +71,6 @@ class Worker(object):
     def _process_queue(self):
         while True:
             try:
-
                 task = self._queue.get()
                 func = task[u"func"]
                 args = task[u"args"]

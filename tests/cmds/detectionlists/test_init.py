@@ -65,9 +65,12 @@ class TestDetectionList(object):
         assert cmds[0].name == "bulk"
         assert cmds[1].name == "add"
 
-    def test_generate_template_file_generates_template(self, bulk_template_generator):
+    def test_generate_template_file_when_given_add_generates_template_from_handler(
+        self, bulk_template_generator
+    ):
         def test_func():
             pass
+
         handlers = DetectionListHandlers()
         handlers.add_employee = test_func
         detection_list = DetectionList("TestList", handlers)
@@ -75,7 +78,7 @@ class TestDetectionList(object):
         detection_list.generate_template_file("add", path)
         bulk_template_generator.assert_called_once_with(test_func, path)
 
-    def test_generate_template_file_when_given_remove_generates_expected_template(
+    def test_generate_template_file_when_given_remove_generates_template_without_handler(
         self, bulk_template_generator
     ):
         handlers = DetectionListHandlers()

@@ -143,7 +143,7 @@ To learn more about acceptable arguments, add the `-h` flag to `code42` or any o
 You can both add and remove employees from detection lists using the CLI:
 
 ```bash
-code42 high-risk-employee add user@example.com --notes "There are notes"
+code42 high-risk-employee add user@example.com --notes "These are notes"
 code42 high-risk-employee remove user@example.com
 ```
 
@@ -162,7 +162,7 @@ Next, fill out the csv file with all the users and then pass the file in as para
 code42 high-risk-employee bulk add users_to_add.csv
 ```
 
-Note that `bulk remove` may only require a list of users.
+Note that `bulk remove` only requires a list of users.
 
 ## Known Issues
 

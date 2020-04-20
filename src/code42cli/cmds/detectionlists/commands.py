@@ -12,8 +12,6 @@ def create_bulk_usage_prefix(detection_list_name):
 
 class DetectionListCommandFactory:
     _USAGE_SUFFIX = u"<username> <optional args>"
-    _ADD = u"add"
-    _REMOVE = u"remove"
 
     def __init__(self, detection_list_name):
         self._name = detection_list_name
@@ -29,18 +27,18 @@ class DetectionListCommandFactory:
 
     def create_add_command(self, handler, arg_customizer):
         return Command(
-            self._ADD,
+            BulkCommandType.ADD,
             u"Add a user to the {} detection list.".format(self._name),
-            u"{} {} {}".format(self._usage_prefix, self._ADD, self._USAGE_SUFFIX),
+            u"{} {} {}".format(self._usage_prefix, BulkCommandType.ADD, self._USAGE_SUFFIX),
             handler=handler,
             arg_customizer=arg_customizer,
         )
 
     def create_remove_command(self, handler, arg_customizer):
         return Command(
-            self._REMOVE,
+            BulkCommandType.REMOVE,
             u"Remove a user from the {} detection list.".format(self._name),
-            u"{} {} {}".format(self._usage_prefix, self._REMOVE, self._USAGE_SUFFIX),
+            u"{} {} {}".format(self._usage_prefix, BulkCommandType.REMOVE, self._USAGE_SUFFIX),
             handler=handler,
             arg_customizer=arg_customizer,
         )
@@ -56,18 +54,18 @@ class DetectionListCommandFactory:
 
     def create_bulk_add_command(self, handler):
         return Command(
-            self._ADD,
+            BulkCommandType.ADD,
             u"Bulk add users to the {} detection list using a csv file.".format(self._name),
-            u"{} {} <csv-file>".format(self._bulk_usage_prefix, self._ADD),
+            u"{} {} <csv-file>".format(self._bulk_usage_prefix, BulkCommandType.ADD),
             handler=handler,
             arg_customizer=self._load_bulk_add_description,
         )
 
     def create_bulk_remove_command(self, handler):
         return Command(
-            self._REMOVE,
+            BulkCommandType.REMOVE,
             u"Bulk remove users from the {} detection list using a file.".format(self._name),
-            u"{} {} <file>".format(self._bulk_usage_prefix, self._REMOVE),
+            u"{} {} <file>".format(self._bulk_usage_prefix, BulkCommandType.REMOVE),
             handler=handler,
             arg_customizer=self._load_bulk_remove_description,
         )
