@@ -86,7 +86,7 @@ class TestDetectionList(object):
         detection_list.bulk_add_employees(sdk, profile, "csv_test")
         assert bulk_processor.call_args[0][0] == "csv_test"
 
-    def test_bulk_remove_employees_uses_csv_path(self, sdk, profile, bulk_processor):
+    def test_bulk_remove_employees_uses_file_path(self, sdk, profile, bulk_processor):
         detection_list = DetectionList("TestList", DetectionListHandlers())
         detection_list.bulk_remove_employees(sdk, profile, "file_test")
         assert bulk_processor.call_args[0][0] == "file_test"

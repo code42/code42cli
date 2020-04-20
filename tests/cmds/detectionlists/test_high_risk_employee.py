@@ -28,9 +28,9 @@ def test_add_high_risk_employee_when_given_str_of_cloud_aliases_adds_aliases(
 
 
 def test_add_high_risk_employee_when_given_risk_tags_adds_tags(sdk_with_user, profile):
-    add_high_risk_employee(sdk_with_user, profile, "risky employee", risk_tag="RF1 RF2 RF3")
+    add_high_risk_employee(sdk_with_user, profile, "risky employee", risk_tag="tag1 tag2 tag3")
     sdk_with_user.detectionlists.add_user_risk_tags.assert_called_once_with(
-        TEST_ID, ["RF1", "RF2", "RF3"]
+        TEST_ID, ["tag1", "tag2", "tag3"]
     )
 
 
@@ -56,7 +56,7 @@ def test_add_high_risk_employee_when_user_does_not_exist_exits(sdk_without_user,
         add_high_risk_employee(sdk_without_user, profile, "risky employee")
 
 
-def test_add_high_risk_employee_when_user_does_not_exist_print_error(
+def test_add_high_risk_employee_when_user_does_not_exist_prints_error(
     sdk_without_user, profile, capsys
 ):
     try:
@@ -76,7 +76,7 @@ def test_remove_high_risk_employee_when_user_does_not_exist_exits(sdk_without_us
         remove_high_risk_employee(sdk_without_user, profile, "risky employee")
 
 
-def test_remove_high_risk_employee_when_user_does_not_exist_print_error(
+def test_remove_high_risk_employee_when_user_does_not_exist_prints_error(
     sdk_without_user, profile, capsys
 ):
     try:

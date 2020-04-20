@@ -1,9 +1,12 @@
 # The Code42 CLI
 
 Use the `code42` command to interact with your Code42 environment.
-`code42 security-data` is a CLI tool for extracting AED events.
-Additionally, you can choose to only get events that Code42 previously did not observe since you last recorded a checkpoint
-(provided you do not change your query).
+
+* `code42 security-data` is a CLI tool for extracting AED events.
+    Additionally, you can choose to only get events that Code42 previously did not observe since you last recorded a 
+    checkpoint (provided you do not change your query).
+* `code42 detection-lists` is a collection of tools for managing code42 detection lists, such as departing employee or
+    high risk.
 
 ## Requirements
 
@@ -52,6 +55,8 @@ To see all your profiles, do:
 ```bash
 code42 profile list
 ```
+
+## Security Data
 
 Using the CLI, you can query for events and send them to three possible destination types:
 * stdout
@@ -132,6 +137,32 @@ Each destination-type subcommand shares query parameters
 
 You cannot use other query parameters if you use `--advanced-query`.
 To learn more about acceptable arguments, add the `-h` flag to `code42` or any of the destination-type subcommands.
+
+## Detection Lists
+
+You can both add and remove employees from detection lists using the CLI:
+
+```bash
+code42 high-risk-employee add user@example.com --notes "There are notes"
+code42 high-risk-employee remove user@example.com
+```
+
+Detection lists include a `bulk` command. To add employees to a list, you can pass in a csv file. First, generate the 
+csv file for the desired command by executing the `generate-template` command:
+
+```bash
+code42 high-risk-employee bulk generate-template add
+```
+
+Notice that `generate-template` takes a `cmd` parameter for determining what type of template to generate.
+
+Next, fill out the csv file with all the users and then pass the file in as parameter to `bulk add`:
+
+```bash
+code42 high-risk-employee bulk add users_to_add.csv
+```
+
+Note that `bulk remove` may only require a list of users.
 
 ## Known Issues
 
