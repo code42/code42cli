@@ -162,11 +162,12 @@ Next, fill out the csv file with all the users and then pass the file in as para
 code42 high-risk-employee bulk add users_to_add.csv
 ```
 
-Note that `bulk remove` only requires a list of users.
+Note that for `bulk remove`, the file only has to contain an end-line list of users.
 
 ## Known Issues
 
-Only the first 10,000 of each set of events containing the exact same insertion timestamp is reported.
+In `security-data`, only the first 10,000 of each set of events containing the exact same insertion timestamp is 
+reported.
 
 ## Troubleshooting
 
