@@ -106,10 +106,15 @@ class DetectionList(object):
                 the current working directory. Defaults to None.
         """
         handler = None
+        for_flat_file = False
         if cmd == BulkCommandType.ADD:
             handler = self.handlers.add_employee
+        
+        if cmd == BulkCommandType.REMOVE:
+            handler = self.handlers.remove_employee
+            for_flat_file = True
 
-        generate_template(handler, path)
+        generate_template(handler, path, for_flat_file=for_flat_file)
 
     def bulk_add_employees(self, sdk, profile, csv_file):
         """Takes a csv file with each row representing an employee and adds them all to a 

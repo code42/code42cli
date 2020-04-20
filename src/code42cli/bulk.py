@@ -6,13 +6,15 @@ from code42cli.compat import open, str
 from code42cli.worker import Worker
 
 
-def generate_template(handler, path=None):
+def generate_template(handler, path=None, for_flat_file=False):
     """Looks at the parameter names of `handler` and creates a file with the same column names. If 
     `handler` is not callable or is None, it will create a blank file. This is useful for 
     commands such as `remove` which only require a list of users.
     """
     columns = None
-    if handler and callable(handler):
+    path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))
+    
+    if not for_flat_file:
         argspec = inspect.getargspec(handler)
         columns = [str(arg) for arg in argspec.args if arg not in [u"sdk", u"profile"]]
         path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))
