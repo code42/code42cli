@@ -41,17 +41,17 @@ def test_generate_template_uses_expected_path_and_column_names(mock_open):
     template_file.write.assert_called_once_with("test1,test2")
 
 
-def test_generate_template_when_given_non_callable_handler_creates_file_without_columns(mock_open):
+def test_generate_template_when_told_for_flat_file_creates_file_without_columns(mock_open):
     file_path = "some/path"
     template_file = mock_open.return_value.__enter__.return_value
 
-    generate_template(None, "some/path")
+    generate_template(None, "some/path", for_flat_file=True)
     mock_open.assert_called_once_with(file_path, u"w", encoding=u"utf8")
     assert not template_file.write.call_count
 
 
-def test_generate_template_when_given_non_callable_handler_prints_message(mock_open, capsys):
-    generate_template(None, "some/path")
+def test_generate_template_when_told_for_flat_file_prints_message(mock_open, capsys):
+    generate_template(None, "some/path", True)
     capture = capsys.readouterr()
     assert (
         u"A blank file was generated because there are no csv headers needed for this command type."

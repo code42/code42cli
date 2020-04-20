@@ -68,24 +68,28 @@ class TestDetectionList(object):
     def test_generate_template_file_when_given_add_generates_template_from_handler(
         self, bulk_template_generator
     ):
-        def test_func():
+        def a_test_func():
             pass
 
         handlers = DetectionListHandlers()
-        handlers.add_employee = test_func
+        handlers.add_employee = a_test_func
         detection_list = DetectionList("TestList", handlers)
         path = "some/path"
         detection_list.generate_template_file("add", path)
-        bulk_template_generator.assert_called_once_with(test_func, path)
+        bulk_template_generator.assert_called_once_with(a_test_func, path, for_flat_file=False)
 
-    def test_generate_template_file_when_given_remove_generates_template_without_handler(
+    def test_generate_template_file_when_given_remove_generates_template_from_handler(
         self, bulk_template_generator
     ):
+        def a_test_func():
+            pass
+
         handlers = DetectionListHandlers()
+        handlers.remove_employee = a_test_func
         detection_list = DetectionList("TestList", handlers)
         path = "some/path"
         detection_list.generate_template_file("remove", path)
-        bulk_template_generator.assert_called_once_with(None, path)
+        bulk_template_generator.assert_called_once_with(a_test_func, path, for_flat_file=True)
 
     def test_bulk_add_employees_uses_csv_path(self, sdk, profile, bulk_processor):
         detection_list = DetectionList("TestList", DetectionListHandlers())
