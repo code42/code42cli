@@ -30,7 +30,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `bulk` with subcommands:
         - `add`: that takes a csv file of users.
         - `generate-template`: that creates the csv file template. And parameters:
-            - `cmd`: with the option `add` and `remove`.
+            - `cmd`: with the options `add` and `remove`.
             - `path`
         - `remove`: that takes a list of users in a file.
     - `add` that takes parameters: `--username`, `--cloud-aliases`, `--risk-factors`, and `--notes`.
