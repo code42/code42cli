@@ -1,5 +1,6 @@
 import pytest
 
+from code42cli.cmds.detectionlists import UserDoesNotExistError
 from code42cli.cmds.detectionlists.high_risk_employee import (
     add_high_risk_employee,
     remove_high_risk_employee,
@@ -38,7 +39,7 @@ def test_add_high_risk_employee_adds(sdk_with_user, profile):
 
 
 def test_add_high_risk_employee_when_user_does_not_exist_exits(sdk_without_user, profile):
-    with pytest.raises(SystemExit):
+    with pytest.raises(UserDoesNotExistError):
         add_high_risk_employee(sdk_without_user, profile, "risky employee")
 
 
@@ -47,7 +48,7 @@ def test_add_high_risk_employee_when_user_does_not_exist_prints_error(
 ):
     try:
         add_high_risk_employee(sdk_without_user, profile, "risky employee")
-    except SystemExit:
+    except UserDoesNotExistError:
         capture = capsys.readouterr()
         assert "ERROR: User 'risky employee' does not exist." in capture.out
 
@@ -58,7 +59,7 @@ def test_remove_high_risk_employee_calls_remove(sdk_with_user, profile):
 
 
 def test_remove_high_risk_employee_when_user_does_not_exist_exits(sdk_without_user, profile):
-    with pytest.raises(SystemExit):
+    with pytest.raises(UserDoesNotExistError):
         remove_high_risk_employee(sdk_without_user, profile, "risky employee")
 
 
@@ -67,6 +68,6 @@ def test_remove_high_risk_employee_when_user_does_not_exist_prints_error(
 ):
     try:
         remove_high_risk_employee(sdk_without_user, profile, "risky employee")
-    except SystemExit:
+    except UserDoesNotExistError:
         capture = capsys.readouterr()
         assert "ERROR: User 'risky employee' does not exist." in capture.out

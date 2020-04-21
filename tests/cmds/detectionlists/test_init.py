@@ -5,7 +5,8 @@ from code42cli.cmds.detectionlists import (
     DetectionList,
     DetectionListHandlers,
     get_user_id,
-    update_user,
+    update_user, 
+    UserDoesNotExistError,
 )
 from code42cli.cmds.detectionlists.enums import BulkCommandType
 from .conftest import TEST_ID
@@ -24,15 +25,15 @@ def bulk_processor(mocker):
     return mocker.patch("{}.run_bulk_process".format(_NAMESPACE))
 
 
-def test_get_user_id_when_user_does_not_exist_exits(sdk_without_user):
-    with pytest.raises(SystemExit):
+def test_get_user_id_when_user_does_not_raise_error(sdk_without_user):
+    with pytest.raises(UserDoesNotExistError):
         get_user_id(sdk_without_user, "risky employee")
 
 
-def test_get_user_id_when_user_does_not_exist_print_error(sdk_without_user, capsys):
+def test_get_user_id_when_user_does_not_exist_prints_error(sdk_without_user, capsys):
     try:
         get_user_id(sdk_without_user, "risky employee")
-    except SystemExit:
+    except UserDoesNotExistError:
         capture = capsys.readouterr()
         assert "ERROR: User 'risky employee' does not exist." in capture.out
 
