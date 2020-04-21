@@ -2,8 +2,11 @@ from __future__ import print_function
 
 import sys
 
+from py42.exceptions import Py42ForbiddenError
+
 from code42cli.parser import ArgumentParserError, CommandParser
 from code42cli.errors import log_error
+from code42cli.util import print_error
 
 
 class CommandInvoker(object):
@@ -24,6 +27,12 @@ class CommandInvoker(object):
             path_parts = self._get_path_parts(input_args)
             command = self._commands.get(u" ".join(path_parts))
             self._try_run_command(command, path_parts, input_args)
+        except Py42ForbiddenError as err:
+            log_error(err)
+            print_error(
+                u"You do not have the necessary permissions to perform this task. "
+                u"Try using or creating a different profile."
+            )
         except Exception as ex:
             log_error(ex)
 

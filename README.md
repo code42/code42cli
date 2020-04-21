@@ -5,8 +5,7 @@ Use the `code42` command to interact with your Code42 environment.
 * `code42 security-data` is a CLI tool for extracting AED events.
     Additionally, you can choose to only get events that Code42 previously did not observe since you last recorded a 
     checkpoint (provided you do not change your query).
-* `code42 detection-lists` is a collection of tools for managing code42 detection lists, such as departing employee or
-    high risk employee.
+* `code42 high-risk-employee` is a collection of tools for managing the high risk employee detection list.
 
 ## Requirements
 
@@ -66,14 +65,31 @@ Using the CLI, you can query for events and send them to three possible destinat
 To print events to stdout, do:
 
 ```bash
-code42 security-data print -b 2020-02-02
+code42 security-data print -b <begin_date>
 ```
 
 Note that `-b` or `--begin` is usually required.
-To specify a time, do:
+
+And end date can also be given with `-e` or `--end` to query for a specific date range (if end is not passed, it will get all events up to the present time).
+
+To specify a begin/end time, you can pass a date or a date w/ time as a string:
 
 ```bash
-code42 security-data print -b 2020-02-02 12:51
+code42 security-data print -b '2020-02-02 12:51:00'
+```
+
+```bash
+code42 security-data print -b 2020-02-02
+```
+
+or a shorthand string specifying either days, hours, or minutes back from the current time:
+
+```bash
+code42 security-data print -b 30d
+```
+
+```bash
+code42 security-data print -b 10d -e 12h
 ```
 
 Begin date will be ignored if provided on subsequent queries using `-i`.
@@ -140,7 +156,7 @@ To learn more about acceptable arguments, add the `-h` flag to `code42` or any o
 
 ## Detection Lists
 
-You can both add and remove employees from detection lists using the CLI:
+You can both add and remove employees from detection lists using the CLI. This example uses `high-risk-employee`.
 
 ```bash
 code42 high-risk-employee add user@example.com --notes "These are notes"
@@ -154,15 +170,16 @@ csv file for the desired command by executing the `generate-template` command:
 code42 high-risk-employee bulk generate-template add
 ```
 
-Notice that `generate-template` takes a `cmd` parameter for determining what type of template to generate.
+Notice that `generate-template` takes a `cmd` parameter for determining what type of template to generate. In the 
+example above, we give it the value `add` to generate a file for bulk adding users to the high risk employee list.
 
-Next, fill out the csv file with all the users and then pass the file in as parameter to `bulk add`:
+Next, fill out the csv file with all the users and then pass it in as a parameter to `bulk add`:
 
 ```bash
 code42 high-risk-employee bulk add users_to_add.csv
 ```
 
-Note that for `bulk remove`, the file only has to contain an end-line list of users.
+Note that for `bulk remove`, the file only has to be an end-line delimited list of users with one line per user.
 
 ## Known Issues
 

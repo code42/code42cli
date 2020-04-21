@@ -4,25 +4,31 @@ import csv
 
 from code42cli.compat import open, str
 from code42cli.worker import Worker
+from code42cli.errors import print_errors_occurred
+from code42cli.args import SDK_ARG_NAME, PROFILE_ARG_NAME
 
 
-def generate_template(handler, path=None, for_flat_file=False):
+def generate_template(handler, path=None):
     """Looks at the parameter names of `handler` and creates a file with the same column names. If 
-    `handler` is not callable or is None, it will create a blank file. This is useful for 
-    commands such as `remove` which only require a list of users.
+    `handler` only has one parameter that is not `sdk` or `profile`, it will create a blank file. 
+    This is useful for commands such as `remove` which only require a list of users.
     """
-    columns = None
     path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))
+    args = [
+        arg
+        for arg in inspect.getargspec(handler).args
+        if arg != SDK_ARG_NAME and arg != PROFILE_ARG_NAME
+    ]
 
-    if not for_flat_file:
-        argspec = inspect.getargspec(handler)
-        columns = [str(arg) for arg in argspec.args if arg not in [u"sdk", u"profile"]]
-        path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))
-    else:
+    if len(args) <= 1:
         print(
-            u"A blank file was generated because there are no csv headers needed for this command type."
+            u"A blank file was generated because there are no csv headers needed for this command. "
+            u"Simply enter one {} per line.".format(args[0])
         )
-    _write_template_file(path, columns)
+        # Set args to None so that we don't make a header out of the single arg.
+        args = None
+
+    _write_template_file(path, args)
 
 
 def _write_template_file(path, columns=None):
@@ -35,10 +41,10 @@ def run_bulk_process(file_path, row_handler, reader=None):
     """Runs a bulk process.
     
     Args: 
-        file_path (str): The path to the file feeding the data for the bulk process.
+        file_path (str or unicode): The path to the file feeding the data for the bulk process.
         row_handler (callable): A callable that you define to process values from the row as 
             either *args or **kwargs.
-        reader: (generator, optional): A generator that reads rows and yields data into 
+        reader: (CSVReader or FlatFileReader, optional): A generator that reads rows and yields data into 
             `row_handler`. If None, it will use a CSVReader. Defaults to None.
     """
     reader = reader or CSVReader()
@@ -61,7 +67,7 @@ class BulkProcessor(object):
             and first row `1,test`, then `row_handler` should receive kwargs 
             `prop_a: '1', prop_b: 'test'` when processing the first row. If it's a flat file, then 
             `row_handler` only needs to take an extra arg.
-        reader (generator): A generator that reads rows and yields data into `row_handler`.
+        reader (CSVReader or FlatFileReader): A generator that reads rows and yields data into `row_handler`.
     """
 
     def __init__(self, file_path, row_handler, reader):
@@ -81,25 +87,25 @@ class BulkProcessor(object):
     def _process_row(self, row):
         if type(row) is dict:
             self._process_csv_row(row)
-        else:
-            self._process_flat_file_row(row)
+        elif row:
+            self._process_flat_file_row(row.strip())
 
     def _process_csv_row(self, row):
+        # Removes problems from including extra comments. Error messages from out of order args
+        # are more indicative this way too.
+        row.pop(None, None)
         self.__worker.do_async(lambda *args, **kwargs: self._row_handler(*args, **kwargs), **row)
 
     def _process_flat_file_row(self, row):
-        self.__worker.do_async(
-            lambda *args, **kwargs: self._row_handler(*args, **kwargs), row.strip()
-        )
+        if row:
+            self.__worker.do_async(lambda *args, **kwargs: self._row_handler(*args, **kwargs), row)
 
     def _print_result(self):
         stats = self.__worker.stats
         successes = stats.total - stats.total_errors
         print(u"{} processed successfully out of {}.".format(successes, stats.total))
         if stats.total_errors:
-            print(
-                u"Go to '[HOME]/.code42cli/log/code42_errors.log' to see which errors have occurred."
-            )
+            print_errors_occurred()
 
 
 class CSVReader(object):

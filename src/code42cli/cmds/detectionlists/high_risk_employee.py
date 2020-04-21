@@ -11,7 +11,7 @@ from code42cli.commands import Command
 
 
 def load_subcommands():
-    handlers = _get_handlers()
+    handlers = _create_handlers()
     detection_list = DetectionList.create_high_risk_employee_list(handlers)
     cmd_list = detection_list.load_subcommands()
 
@@ -34,7 +34,7 @@ def load_subcommands():
     return cmd_list
 
 
-def _get_handlers():
+def _create_handlers():
     return DetectionListHandlers(
         add=add_high_risk_employee, remove=remove_high_risk_employee, load_add=_load_add_description
     )
@@ -56,15 +56,14 @@ def add_high_risk_employee(sdk, profile, username, cloud_alias=None, risk_tag=No
     """Adds an employee to the high risk employee detection list.
     
     Args:
-        sdk (py42.sdk.SDKClient): py42
-        profile (C42Profile): Your code42 profile
+        sdk (py42.sdk.SDKClient): py42.
+        profile (C42Profile): Your code42 profile.
         username (str): The username of the employee to add.
-        cloud_alias (iter[str]): Alternative emails addresses for other cloud services.
+        cloud_alias (str): An alternative email address for another cloud service.
         risk_tag (iter[str]): Risk tags associated with the employee.
         notes: (str): Notes about the employee.
     """
     risk_tag = _handle_list_args(risk_tag)
-    cloud_alias = _handle_list_args(cloud_alias)
     user_id = get_user_id(sdk, username)
     update_user(sdk, user_id, cloud_alias, risk_tag, notes)
     sdk.detectionlists.high_risk_employee.add(user_id)
@@ -74,8 +73,8 @@ def remove_high_risk_employee(sdk, profile, username):
     """Removes an employee from the high risk employee detection list.
     
     Args:
-        sdk (py42.sdk.SDKClient): py42
-        profile (C42Profile): Your code42 profile
+        sdk (py42.sdk.SDKClient): py42.
+        profile (C42Profile): Your code42 profile.
         username (str): The username of the employee to remove.
     """
     user_id = get_user_id(sdk, username)

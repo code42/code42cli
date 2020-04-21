@@ -1,7 +1,10 @@
 from collections import OrderedDict
 import inspect
 
+
 PROFILE_HELP = u"The name of the Code42 profile use when executing this command."
+SDK_ARG_NAME = u"sdk"
+PROFILE_ARG_NAME = u"profile"
 
 
 class ArgConfig(object):
@@ -61,14 +64,14 @@ def get_auto_arg_configs(handler):
 
         for arg_position, key in enumerate(argspec.args):
             # do not create cli parameters for arguments named "sdk", "args", or "kwargs"
-            if not key in [u"sdk", u"args", u"kwargs", u"self"]:
+            if not key in [SDK_ARG_NAME, u"args", u"kwargs", u"self"]:
                 arg_config = _create_auto_args_config(
                     arg_position, key, argspec, num_args, num_kw_args
                 )
                 _set_smart_defaults(arg_config)
                 arg_configs.append(key, arg_config)
 
-        if u"sdk" in argspec.args:
+        if SDK_ARG_NAME in argspec.args:
             _build_sdk_arg_configs(arg_configs)
 
     return arg_configs
@@ -108,5 +111,5 @@ def _build_sdk_arg_configs(arg_config_collection):
     """Add extra cli parameters that will always be relevant when a handler needs the sdk."""
     profile = ArgConfig(u"--profile", help=PROFILE_HELP)
     debug = ArgConfig(u"-d", u"--debug", action=u"store_true", help=u"Turn on Debug logging.")
-    extras = {u"profile": profile, u"debug": debug}
+    extras = {PROFILE_ARG_NAME: profile, u"debug": debug}
     arg_config_collection.extend(extras)

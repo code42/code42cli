@@ -6,7 +6,9 @@ from code42cli.cmds.detectionlists import (
     DetectionListHandlers,
     get_user_id,
     update_user,
+    UserDoesNotExistError,
 )
+from code42cli.cmds.detectionlists.enums import BulkCommandType
 from .conftest import TEST_ID
 
 
@@ -23,25 +25,23 @@ def bulk_processor(mocker):
     return mocker.patch("{}.run_bulk_process".format(_NAMESPACE))
 
 
-def test_get_user_id_when_user_does_not_exist_exits(sdk_without_user):
-    with pytest.raises(SystemExit):
+def test_get_user_id_when_user_does_not_raise_error(sdk_without_user):
+    with pytest.raises(UserDoesNotExistError):
         get_user_id(sdk_without_user, "risky employee")
 
 
-def test_get_user_id_when_user_does_not_exist_print_error(sdk_without_user, capsys):
+def test_get_user_id_when_user_does_not_exist_prints_error(sdk_without_user, capsys):
     try:
         get_user_id(sdk_without_user, "risky employee")
-    except SystemExit:
+    except UserDoesNotExistError:
         capture = capsys.readouterr()
         assert "ERROR: User 'risky employee' does not exist." in capture.out
 
 
-def test_update_user_adds_cloud_aliases(sdk_with_user, profile):
-    update_user(
-        sdk_with_user, TEST_ID, cloud_alias=["1@example.com", "2@example.com", "3@example.com"]
-    )
-    sdk_with_user.detectionlists.add_user_cloud_aliases.assert_called_once_with(
-        TEST_ID, ["1@example.com", "2@example.com", "3@example.com"]
+def test_update_user_adds_cloud_alias(sdk_with_user, profile):
+    update_user(sdk_with_user, TEST_ID, cloud_alias="1@example.com")
+    sdk_with_user.detectionlists.add_user_cloud_alias.assert_called_once_with(
+        TEST_ID, "1@example.com"
     )
 
 
@@ -64,19 +64,20 @@ class TestDetectionList(object):
         cmds = detection_list.load_subcommands()
         assert cmds[0].name == "bulk"
         assert cmds[1].name == "add"
+        assert cmds[2].name == "remove"
 
     def test_generate_template_file_when_given_add_generates_template_from_handler(
         self, bulk_template_generator
     ):
-        def a_test_func():
+        def a_test_func(param1, param2, param3):
             pass
 
         handlers = DetectionListHandlers()
         handlers.add_employee = a_test_func
         detection_list = DetectionList("TestList", handlers)
         path = "some/path"
-        detection_list.generate_template_file("add", path)
-        bulk_template_generator.assert_called_once_with(a_test_func, path, for_flat_file=False)
+        detection_list.generate_template_file(BulkCommandType.ADD, path)
+        bulk_template_generator.assert_called_once_with(a_test_func, path)
 
     def test_generate_template_file_when_given_remove_generates_template_from_handler(
         self, bulk_template_generator
@@ -88,8 +89,8 @@ class TestDetectionList(object):
         handlers.remove_employee = a_test_func
         detection_list = DetectionList("TestList", handlers)
         path = "some/path"
-        detection_list.generate_template_file("remove", path)
-        bulk_template_generator.assert_called_once_with(a_test_func, path, for_flat_file=True)
+        detection_list.generate_template_file(BulkCommandType.REMOVE, path)
+        bulk_template_generator.assert_called_once_with(a_test_func, path)
 
     def test_bulk_add_employees_uses_csv_path(self, sdk, profile, bulk_processor):
         detection_list = DetectionList("TestList", DetectionListHandlers())
