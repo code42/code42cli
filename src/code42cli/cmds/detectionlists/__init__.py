@@ -95,8 +95,7 @@ class DetectionList(object):
         handler = None
         if cmd == BulkCommandType.ADD:
             handler = self.handlers.add_employee
-
-        if cmd == BulkCommandType.REMOVE:
+        elif cmd == BulkCommandType.REMOVE:
             handler = self.handlers.remove_employee
 
         generate_template(handler, path)
