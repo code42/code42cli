@@ -5,7 +5,7 @@ from code42cli.cmds.detectionlists import (
     DetectionList,
     DetectionListHandlers,
     get_user_id,
-    update_user, 
+    update_user,
     UserDoesNotExistError,
 )
 from code42cli.cmds.detectionlists.enums import BulkCommandType
