@@ -7,6 +7,7 @@ from code42cli.cmds.detectionlists import (
     get_user_id,
     update_user,
 )
+from code42cli.cmds.detectionlists.enums import BulkCommandType
 from .conftest import TEST_ID
 
 _NAMESPACE = "{}.cmds.detectionlists".format(PRODUCT_NAME)
@@ -61,6 +62,7 @@ class TestDetectionList(object):
         cmds = detection_list.load_subcommands()
         assert cmds[0].name == "bulk"
         assert cmds[1].name == "add"
+        assert cmds[2].name == "remove"
 
     def test_generate_template_file_when_given_add_generates_template_from_handler(
         self, bulk_template_generator
@@ -72,7 +74,7 @@ class TestDetectionList(object):
         handlers.add_employee = a_test_func
         detection_list = DetectionList("TestList", handlers)
         path = "some/path"
-        detection_list.generate_template_file("add", path)
+        detection_list.generate_template_file(BulkCommandType.ADD, path)
         bulk_template_generator.assert_called_once_with(a_test_func, path)
 
     def test_generate_template_file_when_given_remove_generates_template_from_handler(
@@ -85,7 +87,7 @@ class TestDetectionList(object):
         handlers.remove_employee = a_test_func
         detection_list = DetectionList("TestList", handlers)
         path = "some/path"
-        detection_list.generate_template_file("remove", path)
+        detection_list.generate_template_file(BulkCommandType.REMOVE, path)
         bulk_template_generator.assert_called_once_with(a_test_func, path)
 
     def test_bulk_add_employees_uses_csv_path(self, sdk, profile, bulk_processor):
