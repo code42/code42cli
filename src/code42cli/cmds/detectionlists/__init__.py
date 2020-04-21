@@ -190,8 +190,9 @@ def get_user_id(sdk, username):
     """
     users = sdk.users.get_by_username(username)[u"users"]
     if not users:
-        print_error(str(UserDoesNotExistError(username)))
-        exit(1)
+        ex = UserDoesNotExistError(username)
+        print_error(str(ex))
+        raise ex
     return users[0][u"userUid"]
 
 
