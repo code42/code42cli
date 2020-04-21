@@ -41,7 +41,7 @@ def run_bulk_process(file_path, row_handler, reader=None):
     """Runs a bulk process.
     
     Args: 
-        file_path (str): The path to the file feeding the data for the bulk process.
+        file_path (str or unicode): The path to the file feeding the data for the bulk process.
         row_handler (callable): A callable that you define to process values from the row as 
             either *args or **kwargs.
         reader: (CSVReader or FlatFileReader, optional): A generator that reads rows and yields data into 

@@ -58,7 +58,7 @@ def test_generate_template_when_handler_has_one_arg_prints_message(mock_open, ca
     generate_template(func_with_one_arg, "some/path")
     capture = capsys.readouterr()
     assert (
-        u"A blank file was generated because there are no csv headers needed for this command type. "
+        u"A blank file was generated because there are no csv headers needed for this command. "
         u"Simply enter one test1 per line." in capture.out
     )
 
