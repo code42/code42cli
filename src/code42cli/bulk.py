@@ -22,8 +22,8 @@ def generate_template(handler, path=None):
 
     if len(args) <= 1:
         print(
-            u"A blank file was generated because there are no csv headers needed for this command "
-            u"type. Simply enter one {} per line.".format(args[0])
+            u"A blank file was generated because there are no csv headers needed for this command. "
+            u"Simply enter one {} per line.".format(args[0])
         )
         # Set args to None so that we don't make a header out of the single arg.
         args = None
