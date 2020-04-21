@@ -6,12 +6,8 @@ import code42cli.cmds.securitydata.extraction as extraction_module
 import code42cli.errors as errors
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.securitydata.enums import ExposureType as ExposureTypeOptions
-from .conftest import (
-    SECURITYDATA_NAMESPACE,
-    begin_date_str,
-    get_filter_value_from_json,
-    get_test_date_str,
-)
+from .conftest import SECURITYDATA_NAMESPACE, get_filter_value_from_json
+from ...conftest import get_test_date_str, begin_date_str
 
 
 @pytest.fixture

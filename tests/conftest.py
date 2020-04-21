@@ -1,4 +1,5 @@
 from argparse import Namespace
+from datetime import datetime, timedelta
 
 import pytest
 from py42.sdk import SDKClient
@@ -100,3 +101,32 @@ def func_with_sdk(sdk, one, two, three=None, four=None):
 
 def func_with_args(args):
     pass
+
+
+def convert_str_to_date(date_str):
+    return datetime.strptime(date_str, u"%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+def get_test_date(days_ago=None, hours_ago=None, minutes_ago=None):
+    """Note: only pass in one parameter to get the right test date... this is just a test func."""
+    now = datetime.utcnow()
+    if days_ago:
+        return now - timedelta(days=days_ago)
+    if hours_ago:
+        return now - timedelta(hours=hours_ago)
+    if minutes_ago:
+        return now - timedelta(minutes=minutes_ago)
+
+
+def get_test_date_str(days_ago):
+    return get_test_date(days_ago).strftime("%Y-%m-%d")
+
+
+begin_date_str = get_test_date_str(days_ago=89)
+begin_date_str_with_time = "{0} 3:12:33".format(begin_date_str)
+end_date_str = get_test_date_str(days_ago=10)
+end_date_str_with_time = "{0} 11:22:43".format(end_date_str)
+begin_date_str = get_test_date_str(days_ago=89)
+begin_date_with_time = [get_test_date_str(days_ago=89), "3:12:33"]
+end_date_str = get_test_date_str(days_ago=10)
+end_date_with_time = [get_test_date_str(days_ago=10), "11:22:43"]

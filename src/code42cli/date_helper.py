@@ -17,7 +17,22 @@ class DateArgumentException(Exception):
         super(DateArgumentException, self).__init__(message)
 
 
-def parse_timestamp(date_str, rounding_func):
+def parse_min_timestamp(begin_date_str, max_days_back=90):
+    dt = _parse_timestamp(begin_date_str, _round_datetime_to_day_start)
+
+    boundary_date = _round_datetime_to_day_start(datetime.utcnow() - timedelta(days=max_days_back))
+    if dt < boundary_date:
+        raise DateArgumentException(u"'Begin date' must be within 90 days.")
+
+    return convert_datetime_to_timestamp(dt)
+
+
+def parse_max_timestamp(end_date_str):
+    dt = _parse_timestamp(end_date_str, _round_datetime_to_day_end)
+    return convert_datetime_to_timestamp(dt)
+
+
+def _parse_timestamp(date_str, rounding_func):
     timestamp_match = TIMESTAMP_REGEX.match(date_str)
     magic_match = MAGIC_TIME_REGEX.match(date_str)
 
@@ -36,21 +51,6 @@ def parse_timestamp(date_str, rounding_func):
     else:
         raise DateArgumentException()
     return dt
-
-
-def parse_min_timestamp(begin_date_str, min_days_back=90):
-    dt = parse_timestamp(begin_date_str, _round_datetime_to_day_start)
-
-    boundary_date = _round_datetime_to_day_start(datetime.utcnow() - timedelta(days=min_days_back))
-    if dt < boundary_date:
-        raise DateArgumentException(u"'Begin date' must be within 90 days.")
-
-    return convert_datetime_to_timestamp(dt)
-
-
-def parse_max_timestamp(end_date_str):
-    dt = parse_timestamp(end_date_str, _round_datetime_to_day_end)
-    return convert_datetime_to_timestamp(dt)
 
 
 def _get_dt_from_date_time_pair(date, time):

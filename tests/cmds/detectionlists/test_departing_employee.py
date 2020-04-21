@@ -7,24 +7,10 @@ from code42cli.cmds.detectionlists.departing_employee import (
 from .conftest import TEST_ID
 
 
-def test_add_departing_employee_when_given_cloud_aliases_adds_alias(sdk_with_user, profile):
+def test_add_departing_employee_when_given_cloud_alias_adds_alias(sdk_with_user, profile):
     alias = "departing employee alias"
     add_departing_employee(sdk_with_user, profile, "departing employee", cloud_alias=[alias])
-    sdk_with_user.detectionlists.add_user_cloud_aliases.assert_called_once_with(TEST_ID, [alias])
-
-
-def test_add_departing_employee_when_given_str_of_cloud_aliases_adds_aliases(
-    sdk_with_user, profile
-):
-    add_departing_employee(
-        sdk_with_user,
-        profile,
-        "departing employee",
-        cloud_alias="1@example.com 2@example.com 3@example.com",
-    )
-    sdk_with_user.detectionlists.add_user_cloud_aliases.assert_called_once_with(
-        TEST_ID, ["1@example.com", "2@example.com", "3@example.com"]
-    )
+    sdk_with_user.detectionlists.add_user_cloud_alias.assert_called_once_with(TEST_ID, [alias])
 
 
 def test_add_departing_employee_when_given_notes_updates_notes(sdk_with_user, profile):
