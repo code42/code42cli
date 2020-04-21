@@ -1,7 +1,7 @@
 import inspect
 
 from code42cli import profile as cliprofile
-from code42cli.args import get_auto_arg_configs
+from code42cli.args import get_auto_arg_configs, SDK_ARG_NAME, PROFILE_ARG_NAME
 from code42cli.sdk_client import create_sdk
 
 
@@ -120,15 +120,15 @@ def _inject_params(kvps, handler):
         dict: The dictionary of parsed command line arguments with possibly additional populated 
             fields.
     """
-    if _handler_has_arg(u"sdk", handler):
-        profile_name = kvps.pop(u"profile", None)
+    if _handler_has_arg(SDK_ARG_NAME, handler):
+        profile_name = kvps.pop(PROFILE_ARG_NAME, None)
         debug = kvps.pop(u"debug", None)
 
         profile = cliprofile.get_profile(profile_name)
-        kvps[u"sdk"] = create_sdk(profile, debug)
+        kvps[SDK_ARG_NAME] = create_sdk(profile, debug)
 
-        if _handler_has_arg(u"profile", handler):
-            kvps[u"profile"] = profile
+        if _handler_has_arg(PROFILE_ARG_NAME, handler):
+            kvps[PROFILE_ARG_NAME] = profile
     return kvps
 
 
@@ -138,6 +138,6 @@ def _handler_has_arg(arg_name, handler):
 
 
 def _kvps_to_obj(kvps):
-    new_kvps = {key: kvps[key] for key in kvps if key in [u"sdk", u"profile"]}
+    new_kvps = {key: kvps[key] for key in kvps if key in [SDK_ARG_NAME, PROFILE_ARG_NAME]}
     new_kvps[u"args"] = DictObject(kvps)
     return new_kvps

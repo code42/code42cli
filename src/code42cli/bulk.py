@@ -5,6 +5,7 @@ import csv
 from code42cli.compat import open, str
 from code42cli.worker import Worker
 from code42cli.errors import print_errors_occurred
+from code42cli.args import SDK_ARG_NAME, PROFILE_ARG_NAME
 
 
 def generate_template(handler, path=None):
@@ -13,7 +14,7 @@ def generate_template(handler, path=None):
     This is useful for commands such as `remove` which only require a list of users.
     """
     path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))
-    args = [arg for arg in inspect.getargspec(handler).args if arg != u"sdk" and arg != u"profile"]
+    args = [arg for arg in inspect.getargspec(handler).args if arg != SDK_ARG_NAME and arg != PROFILE_ARG_NAME]
     
     if len(args) <= 1:
         print(
