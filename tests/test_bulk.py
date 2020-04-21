@@ -75,23 +75,27 @@ def test_generate_template_when_handler_has_more_than_one_arg_does_not_print_mes
 
 
 def test_run_bulk_process_calls_run(bulk_processor, bulk_processor_factory):
+    errors.ERRORED = False
     run_bulk_process("some/path", func_with_one_arg, None)
     assert bulk_processor.run.call_count
 
 
 def test_run_bulk_process_creates_processor(bulk_processor_factory):
+    errors.ERRORED = False
     reader = CSVReader()
     run_bulk_process("some/path", func_with_one_arg, reader)
     bulk_processor_factory.assert_called_once_with("some/path", func_with_one_arg, reader)
 
 
 def test_run_bulk_process_when_not_given_reader_uses_csv_reader(bulk_processor_factory):
+    errors.ERRORED = False
     run_bulk_process("some/path", func_with_one_arg)
     assert type(bulk_processor_factory.call_args[0][2]) == CSVReader
 
 
 class TestBulkProcessor(object):
     def test_run_when_reader_returns_dict_process_kwargs(self, mock_open):
+        errors.ERRORED = False
         processed_rows = []
 
         def func_for_bulk(test1, test2):
@@ -110,6 +114,7 @@ class TestBulkProcessor(object):
         assert processed_rows == [(1, 2), (3, 4), (5, 6)]
 
     def test_run_when_dict_reader_has_none_for_key_ignores_key(self, mock_open):
+        errors.ERRORED = False
         processed_rows = []
 
         def func_for_bulk(test1):
@@ -124,6 +129,7 @@ class TestBulkProcessor(object):
         assert processed_rows == [1]
 
     def test_run_when_reader_returns_strs_processes_strs(self, mock_open):
+        errors.ERRORED = False
         processed_rows = []
 
         def func_for_bulk(test):
