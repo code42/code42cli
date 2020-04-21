@@ -3,7 +3,7 @@ from io import IOBase
 
 from code42cli import PRODUCT_NAME
 from code42cli import errors as errors
-from code42cli.bulk import generate_template, BulkProcessor, run_bulk_process, CSVReader, FileReader
+from code42cli.bulk import generate_template, BulkProcessor, run_bulk_process, CSVReader
 from code42cli.util import get_user_project_path
 
 
@@ -98,7 +98,7 @@ class TestBulkProcessor(object):
         def func_for_bulk(test1, test2):
             processed_rows.append((test1, test2))
 
-        class MockDictReader(FileReader):
+        class MockDictReader(object):
             def __call__(self, *args, **kwargs):
                 return [
                     {"test1": 1, "test2": 2},
@@ -116,7 +116,7 @@ class TestBulkProcessor(object):
         def func_for_bulk(test):
             processed_rows.append(test)
 
-        class MockRowReader(FileReader):
+        class MockRowReader(object):
             def __call__(self, *args, **kwargs):
                 return ["row1", "row2", "row3"]
 
@@ -131,7 +131,7 @@ class TestBulkProcessor(object):
             if test == "row2":
                 raise Exception()
 
-        class MockRowReader(FileReader):
+        class MockRowReader(object):
             def __call__(self, *args, **kwargs):
                 return ["row1", "row2", "row3"]
 
@@ -155,7 +155,7 @@ class TestBulkProcessor(object):
         def func_for_bulk(test):
             pass
 
-        class MockRowReader(FileReader):
+        class MockRowReader(object):
             def __call__(self, *args, **kwargs):
                 return ["row1", "row2", "row3"]
 
