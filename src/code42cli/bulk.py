@@ -9,20 +9,20 @@ from code42cli.errors import print_errors_occurred
 
 def generate_template(handler, path=None):
     """Looks at the parameter names of `handler` and creates a file with the same column names. If 
-    `handler` is not callable or is None, it will create a blank file. This is useful for 
-    commands such as `remove` which only require a list of users.
+    `handler` only has one parameter that is not `sdk` or `profile`, it will create a blank file. 
+    This is useful for commands such as `remove` which only require a list of users.
     """
     path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))
     args = [arg for arg in inspect.getargspec(handler).args if arg != u"sdk" and arg != u"profile"]
-    if len(args) != 1:
-        path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))
-    else:
+    
+    if len(args) == 1:
         print(
             u"A blank file was generated because there are no csv headers needed for this command "
             u"type. Simply enter one {} per line.".format(args[0])
         )
         # Set args to None so that we don't make a header out of the single arg.
         args = None
+
     _write_template_file(path, args)
 
 
