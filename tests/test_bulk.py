@@ -4,7 +4,6 @@ from io import IOBase
 from code42cli import PRODUCT_NAME
 from code42cli import errors as errors
 from code42cli.bulk import generate_template, BulkProcessor, run_bulk_process, CSVReader
-from code42cli.util import get_user_project_path
 
 
 _NAMESPACE = "{}.bulk".format(PRODUCT_NAME)
@@ -139,14 +138,7 @@ class TestBulkProcessor(object):
         processor.run()
         capture = capsys.readouterr()
         assert "2 processed successfully out of 3." in capture.out
-
-        path = get_user_project_path("log")
-        assert (
-            "Go to '{}/{}' to see which errors have occurred.".format(
-                path, errors.ERROR_LOG_FILE_NAME
-            )
-            in capture.out
-        )
+        assert errors.get_error_message() in capture.out
         errors.ERRORED = False
 
     def test_run_when_no_errors_occur_prints_success_messages(self, mock_open, capsys):
@@ -163,11 +155,4 @@ class TestBulkProcessor(object):
         processor.run()
         capture = capsys.readouterr()
         assert "3 processed successfully out of 3." in capture.out
-
-        path = get_user_project_path("log")
-        assert (
-            "Go to '{}/{}' to see which errors have occurred.".format(
-                path, errors.ERROR_LOG_FILE_NAME
-            )
-            not in capture.out
-        )
+        assert errors.get_error_message() not in capture.out

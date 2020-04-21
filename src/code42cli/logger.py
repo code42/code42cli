@@ -20,8 +20,8 @@ def get_error_logger():
 
     with logger_deps_lock:
         if not logger_has_handlers(logger):
-            formatter = logging.Formatter("%(asctime)s %(message)s")
-            handler = RotatingFileHandler(log_path, maxBytes=250000000, encoding="utf-8")
+            formatter = logging.Formatter(u"%(asctime)s %(message)s")
+            handler = RotatingFileHandler(log_path, maxBytes=250000000, encoding=u"utf-8")
             return apply_logger_dependencies(logger, handler, formatter)
     return logger
 
