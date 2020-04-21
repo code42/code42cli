@@ -109,6 +109,20 @@ class TestBulkProcessor(object):
         processor.run()
         assert processed_rows == [(1, 2), (3, 4), (5, 6)]
 
+    def test_run_when_dict_reader_has_none_for_key_ignores_key(self, mock_open):
+        processed_rows = []
+
+        def func_for_bulk(test1):
+            processed_rows.append(test1)
+
+        class MockDictReader(object):
+            def __call__(self, *args, **kwargs):
+                return [{"test1": 1, None: 2}]
+
+        processor = BulkProcessor("some/path", func_for_bulk, MockDictReader())
+        processor.run()
+        assert processed_rows == [1]
+
     def test_run_when_reader_returns_strs_processes_strs(self, mock_open):
         processed_rows = []
 
