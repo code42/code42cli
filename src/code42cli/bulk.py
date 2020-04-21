@@ -14,8 +14,12 @@ def generate_template(handler, path=None):
     This is useful for commands such as `remove` which only require a list of users.
     """
     path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))
-    args = [arg for arg in inspect.getargspec(handler).args if arg != SDK_ARG_NAME and arg != PROFILE_ARG_NAME]
-    
+    args = [
+        arg
+        for arg in inspect.getargspec(handler).args
+        if arg != SDK_ARG_NAME and arg != PROFILE_ARG_NAME
+    ]
+
     if len(args) <= 1:
         print(
             u"A blank file was generated because there are no csv headers needed for this command "
