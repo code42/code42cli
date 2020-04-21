@@ -129,9 +129,13 @@ class DetectionList(object):
         )
 
     def _add_employee(self, sdk, profile, **kwargs):
-        key = u"cloud_alias"
-        if kwargs.has_key(key) and type(kwargs[key]) != list:
-            kwargs[key] = kwargs[key].split()
+        if (
+            kwargs.has_key(DetectionListUserKeys.CLOUD_ALIAS)
+            and type(kwargs[DetectionListUserKeys.CLOUD_ALIAS]) != list
+        ):
+            kwargs[DetectionListUserKeys.CLOUD_ALIAS] = kwargs[
+                DetectionListUserKeys.CLOUD_ALIAS
+            ].split()
 
         self.handlers.add_employee(sdk, profile, **kwargs)
 

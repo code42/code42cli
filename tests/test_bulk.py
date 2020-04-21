@@ -170,10 +170,10 @@ class TestBulkProcessor(object):
         capture = capsys.readouterr()
         assert "3 processed successfully out of 3." in capture.out
         assert errors.get_error_message() not in capture.out
-    
+
     def test_run_when_row_is_endline_does_not_process_row(self, mock_open, capsys):
         errors.ERRORED = False
-        
+
         def func_for_bulk(test):
             pass
 
