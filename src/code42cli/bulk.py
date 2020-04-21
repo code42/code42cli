@@ -15,7 +15,7 @@ def generate_template(handler, path=None):
     path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))
     args = [arg for arg in inspect.getargspec(handler).args if arg != u"sdk" and arg != u"profile"]
     
-    if len(args) == 1:
+    if len(args) <= 1:
         print(
             u"A blank file was generated because there are no csv headers needed for this command "
             u"type. Simply enter one {} per line.".format(args[0])
