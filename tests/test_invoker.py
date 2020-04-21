@@ -1,5 +1,7 @@
 import pytest
 
+from py42.exceptions import Py42ForbiddenError
+
 from code42cli import PRODUCT_NAME
 from code42cli.commands import Command
 from code42cli.invoker import CommandInvoker
@@ -69,3 +71,18 @@ class TestCommandInvoker(object):
         invoker = CommandInvoker(cmd, mock_parser)
         invoker.run(["testsub1", "inner1", "one", "two", "--invalid", "test"])
         error_logger.assert_called_once_with(ex)
+
+    def test_run_when_forbidden_error_occurs_prints_message(self, mocker, mock_parser, capsys):
+        mocker.patch("{}.invoker.log_error".format(PRODUCT_NAME))
+        cmd = Command("", "top level desc", subcommand_loader=load_subcommands)
+        mock_parser.parse_args.side_effect = Py42ForbiddenError(Exception())
+        mock_subparser = mocker.MagicMock()
+        mock_parser.prepare_command.return_value = mock_subparser
+        invoker = CommandInvoker(cmd, mock_parser)
+        invoker.run(["testsub1", "inner1", "one", "two", "--invalid", "test"])
+
+        capture = capsys.readouterr()
+        assert (
+            u"You do not have the necessary permissions to perform this task. Try using or "
+            u"creating a different profile." in capture.out
+        )

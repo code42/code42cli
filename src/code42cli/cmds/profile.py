@@ -3,7 +3,7 @@ from __future__ import print_function
 from getpass import getpass
 
 import code42cli.profile as cliprofile
-from code42cli.args import PROFILE_HELP
+from code42cli.args import PROFILE_HELP, PROFILE_ARG_NAME
 from code42cli.commands import Command
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree, print_error, print_no_existing_profile_message
@@ -164,7 +164,7 @@ def _load_optional_profile_description(argument_collection):
 
 
 def _load_profile_create_descriptions(argument_collection):
-    profile = argument_collection.arg_configs[u"profile"]
+    profile = argument_collection.arg_configs[PROFILE_ARG_NAME]
     profile.set_help(PROFILE_HELP)
     _load_profile_settings_descriptions(argument_collection)
 

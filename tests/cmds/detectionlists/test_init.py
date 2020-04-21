@@ -36,12 +36,10 @@ def test_get_user_id_when_user_does_not_exist_print_error(sdk_without_user, caps
         assert "ERROR: User 'risky employee' does not exist." in capture.out
 
 
-def test_update_user_adds_cloud_aliases(sdk_with_user, profile):
-    update_user(
-        sdk_with_user, TEST_ID, cloud_alias=["1@example.com", "2@example.com", "3@example.com"]
-    )
-    sdk_with_user.detectionlists.add_user_cloud_aliases.assert_called_once_with(
-        TEST_ID, ["1@example.com", "2@example.com", "3@example.com"]
+def test_update_user_adds_cloud_alias(sdk_with_user, profile):
+    update_user(sdk_with_user, TEST_ID, cloud_alias="1@example.com")
+    sdk_with_user.detectionlists.add_user_cloud_alias.assert_called_once_with(
+        TEST_ID, "1@example.com"
     )
 
 
@@ -68,7 +66,7 @@ class TestDetectionList(object):
     def test_generate_template_file_when_given_add_generates_template_from_handler(
         self, bulk_template_generator
     ):
-        def a_test_func():
+        def a_test_func(param1, param2, param3):
             pass
 
         handlers = DetectionListHandlers()
@@ -76,7 +74,7 @@ class TestDetectionList(object):
         detection_list = DetectionList("TestList", handlers)
         path = "some/path"
         detection_list.generate_template_file("add", path)
-        bulk_template_generator.assert_called_once_with(a_test_func, path, for_flat_file=False)
+        bulk_template_generator.assert_called_once_with(a_test_func, path)
 
     def test_generate_template_file_when_given_remove_generates_template_from_handler(
         self, bulk_template_generator
@@ -89,7 +87,7 @@ class TestDetectionList(object):
         detection_list = DetectionList("TestList", handlers)
         path = "some/path"
         detection_list.generate_template_file("remove", path)
-        bulk_template_generator.assert_called_once_with(a_test_func, path, for_flat_file=True)
+        bulk_template_generator.assert_called_once_with(a_test_func, path)
 
     def test_bulk_add_employees_uses_csv_path(self, sdk, profile, bulk_processor):
         detection_list = DetectionList("TestList", DetectionListHandlers())

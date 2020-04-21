@@ -1,6 +1,6 @@
 import pytest
 from code42cli import PRODUCT_NAME
-from code42cli.args import ArgConfig
+from code42cli.args import ArgConfig, SDK_ARG_NAME, PROFILE_ARG_NAME
 from code42cli.commands import Command, DictObject
 from code42cli.profile import Code42Profile
 from py42.sdk import SDKClient
@@ -114,9 +114,9 @@ class TestCommand(object):
         assert "two" in coll["two"].settings["options_list"]
         assert "--three" in coll["three"].settings["options_list"]
         assert "--four" in coll["four"].settings["options_list"]
-        assert "--profile" in coll["profile"].settings["options_list"]
+        assert "--profile" in coll[PROFILE_ARG_NAME].settings["options_list"]
         assert "--debug" in coll["debug"].settings["options_list"]
-        assert not coll.get("sdk")
+        assert not coll.get(SDK_ARG_NAME)
 
     def test_get_arg_configs_when_handler_with_args_excludes_args(self):
         command = Command("test", "test desc", "test usage", func_with_args)

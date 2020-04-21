@@ -38,7 +38,7 @@ class DetectionList(object):
     shared help texts.
     
     Args:
-        list_name (str): An option from the DetectionLists enum. For convenience, use one of the 
+        list_name (str or unicode): An option from the DetectionLists enum. For convenience, use one of the 
             given `classmethods`.
         handlers (DetectionListHandlers): A DTO containing implementations for adding / removing 
             users from specific lists.
@@ -96,25 +96,22 @@ class DetectionList(object):
         return [generate_template_cmd, add, remove]
 
     def generate_template_file(self, cmd, path=None):
-        """Generates a csv template a user would need to fill-in for bulk adding users to the 
+        """Generates a template file a user would need to fill-in for bulk operating on the 
         detection list.
         
         Args:
-            cmd (str): An option from the `BulkCommandType` enum specifying which type of csv to 
+            cmd (str or unicode): An option from the `BulkCommandType` enum specifying which type of file to 
                 generate.
-            path (str, optional): A path to put the file after it's generated. If None, will use 
+            path (str or unicode, optional): A path to put the file after it's generated. If None, will use 
                 the current working directory. Defaults to None.
         """
         handler = None
-        for_flat_file = False
         if cmd == BulkCommandType.ADD:
             handler = self.handlers.add_employee
-
-        if cmd == BulkCommandType.REMOVE:
+        elif cmd == BulkCommandType.REMOVE:
             handler = self.handlers.remove_employee
-            for_flat_file = True
 
-        generate_template(handler, path, for_flat_file=for_flat_file)
+        generate_template(handler, path)
 
     def bulk_add_employees(self, sdk, profile, csv_file):
         """Takes a csv file with each row representing an employee and adds them all to a 
@@ -123,13 +120,21 @@ class DetectionList(object):
         Args:
             sdk (py42.sdk.SDKClient): The py42 sdk.
             profile (Code42Profile): The profile under which to execute this command.
-            csv_file (str): The path to the csv file containing rows of users.
+            csv_file (str or unicode): The path to the csv file containing rows of users.
         """
         run_bulk_process(
             csv_file, lambda **kwargs: self._add_employee(sdk, profile, **kwargs), CSVReader()
         )
 
     def bulk_remove_employees(self, sdk, profile, users_file):
+        """Takes a flat file with each row containing a username and removes them all from the 
+        detection list in a bulk fashion.
+        
+        Args:
+            sdk (py42.sdk.SDKClient): The py42 sdk.
+            profile (Code42Profile): The profile under which to execute this command.
+            users_file (str or unicode): The path to the file containing rows of user names.
+        """
         run_bulk_process(
             users_file,
             lambda *args, **kwargs: self._remove_employee(sdk, profile, *args, **kwargs),
@@ -137,8 +142,9 @@ class DetectionList(object):
         )
 
     def _add_employee(self, sdk, profile, **kwargs):
-        if kwargs.has_key(u"cloud_aliases") and type(kwargs[u"cloud_aliases"]) != list:
-            kwargs[u"cloud_aliases"] = kwargs[u"cloud_aliases"].split()
+        key = u"cloud_alias"
+        if kwargs.has_key(key) and type(kwargs[key]) != list:
+            kwargs[key] = kwargs[key].split()
 
         self.handlers.add_employee(sdk, profile, **kwargs)
 
@@ -153,7 +159,7 @@ def _load_username_description(argument_collection):
 
 def load_user_descriptions(argument_collection):
     """Loads the arg descriptions related to updating fields about a detection list user, such as 
-    notes or cloud aliases.
+    notes or a cloud alias.
     
     Args:
         argument_collection (ArgConfigCollection): The arg configs off the command that needs its 
@@ -189,14 +195,14 @@ def update_user(sdk, user_id, cloud_alias=None, risk_tag=None, notes=None):
     """Updates a detection list user.
     
     Args:
-        user_id (str): The ID of the user to update. This is their `userUid` found from 
+        user_id (str or unicode): The ID of the user to update. This is their `userUid` found from 
             `sdk.users.get_by_username()`.
-        cloud_alias (iter[str]): A list of cloud aliases to add to the user.
-        risk_tag (iter[str]): A list of risk tags associated with user.
-        notes (str): Notes about the user.
+        cloud_alias (str or unicode): A cloud alias to add to the user.
+        risk_tag (iter[str or unicode]): A list of risk tags associated with user.
+        notes (str or unicode): Notes about the user.
     """
     if cloud_alias:
-        sdk.detectionlists.add_user_cloud_aliases(user_id, cloud_alias)
+        sdk.detectionlists.add_user_cloud_alias(user_id, cloud_alias)
     if risk_tag:
         sdk.detectionlists.add_user_risk_tags(user_id, risk_tag)
     if notes:

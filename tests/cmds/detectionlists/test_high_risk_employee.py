@@ -7,24 +7,10 @@ from code42cli.cmds.detectionlists.high_risk_employee import (
 from .conftest import TEST_ID
 
 
-def test_add_high_risk_employee_when_given_cloud_aliases_adds_alias(sdk_with_user, profile):
+def test_add_high_risk_employee_when_given_cloud_alias_adds_alias(sdk_with_user, profile):
     alias = "risk employee alias"
-    add_high_risk_employee(sdk_with_user, profile, "risky employee", cloud_alias=[alias])
-    sdk_with_user.detectionlists.add_user_cloud_aliases.assert_called_once_with(TEST_ID, [alias])
-
-
-def test_add_high_risk_employee_when_given_str_of_cloud_aliases_adds_aliases(
-    sdk_with_user, profile
-):
-    add_high_risk_employee(
-        sdk_with_user,
-        profile,
-        "risky employee",
-        cloud_alias="1@example.com 2@example.com 3@example.com",
-    )
-    sdk_with_user.detectionlists.add_user_cloud_aliases.assert_called_once_with(
-        TEST_ID, ["1@example.com", "2@example.com", "3@example.com"]
-    )
+    add_high_risk_employee(sdk_with_user, profile, "risky employee", cloud_alias=alias)
+    sdk_with_user.detectionlists.add_user_cloud_alias.assert_called_once_with(TEST_ID, alias)
 
 
 def test_add_high_risk_employee_when_given_risk_tags_adds_tags(sdk_with_user, profile):
