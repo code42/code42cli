@@ -38,7 +38,7 @@ class DetectionList(object):
     shared help texts.
     
     Args:
-        list_name (str): An option from the DetectionLists enum. For convenience, use one of the 
+        list_name (str or unicode): An option from the DetectionLists enum. For convenience, use one of the 
             given `classmethods`.
         handlers (DetectionListHandlers): A DTO containing implementations for adding / removing 
             users from specific lists.
@@ -87,9 +87,9 @@ class DetectionList(object):
         detection list.
         
         Args:
-            cmd (str): An option from the `BulkCommandType` enum specifying which type of file to 
+            cmd (str or unicode): An option from the `BulkCommandType` enum specifying which type of file to 
                 generate.
-            path (str, optional): A path to put the file after it's generated. If None, will use 
+            path (str or unicode, optional): A path to put the file after it's generated. If None, will use 
                 the current working directory. Defaults to None.
         """
         handler = None
@@ -107,7 +107,7 @@ class DetectionList(object):
         Args:
             sdk (py42.sdk.SDKClient): The py42 sdk.
             profile (Code42Profile): The profile under which to execute this command.
-            csv_file (str): The path to the csv file containing rows of users.
+            csv_file (str or unicode): The path to the csv file containing rows of users.
         """
         run_bulk_process(
             csv_file, lambda **kwargs: self._add_employee(sdk, profile, **kwargs), CSVReader()
@@ -120,7 +120,7 @@ class DetectionList(object):
         Args:
             sdk (py42.sdk.SDKClient): The py42 sdk.
             profile (Code42Profile): The profile under which to execute this command.
-            users_file (str): The path to the file containing rows of user names.
+            users_file (str or unicode): The path to the file containing rows of user names.
         """
         run_bulk_process(
             users_file,
