@@ -34,7 +34,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
             - `cmd`: with options `add` and `remove`.
             - `path`
         - `remove`: that takes a list of users in a file.
-    - `add` that takes parameters: `--username`, `--cloud-aliases`, `--risk-factors`, and `--notes`.
+    - `add` that takes parameters: `--username`, `--cloud-alias`, `--risk-factor`, and `--notes`.
     - `remove` that takes a username.
 
 ### Removed

@@ -189,7 +189,7 @@ def update_user(sdk, user_id, cloud_alias=None, risk_tag=None, notes=None):
         notes (str or unicode): Notes about the user.
     """
     if cloud_alias:
-        sdk.detectionlists.add_user_cloud_aliases(user_id, cloud_alias)
+        sdk.detectionlists.add_user_cloud_alias(user_id, cloud_alias)
     if risk_tag:
         sdk.detectionlists.add_user_risk_tags(user_id, risk_tag)
     if notes:
