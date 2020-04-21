@@ -1,5 +1,4 @@
 import pytest
-
 from py42.exceptions import Py42ForbiddenError
 
 from code42cli import PRODUCT_NAME

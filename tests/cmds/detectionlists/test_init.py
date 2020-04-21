@@ -9,7 +9,6 @@ from code42cli.cmds.detectionlists import (
 )
 from .conftest import TEST_ID
 
-
 _NAMESPACE = "{}.cmds.detectionlists".format(PRODUCT_NAME)
 
 

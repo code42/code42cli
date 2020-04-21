@@ -1,10 +1,10 @@
-import pytest
 from io import IOBase
+
+import pytest
 
 from code42cli import PRODUCT_NAME
 from code42cli import errors as errors
 from code42cli.bulk import generate_template, BulkProcessor, run_bulk_process, CSVReader
-
 
 _NAMESPACE = "{}.bulk".format(PRODUCT_NAME)
 

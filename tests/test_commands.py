@@ -1,10 +1,10 @@
 import pytest
+from py42.sdk import SDKClient
+
 from code42cli import PRODUCT_NAME
 from code42cli.args import ArgConfig, SDK_ARG_NAME, PROFILE_ARG_NAME
 from code42cli.commands import Command, DictObject
 from code42cli.profile import Code42Profile
-from py42.sdk import SDKClient
-
 from .conftest import (
     func_keyword_args,
     func_mixed_args,

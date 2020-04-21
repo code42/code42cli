@@ -1,9 +1,9 @@
 import pytest
+
 from code42cli.cmds.securitydata.date_helper import (
     create_event_timestamp_filter,
     DateArgumentException,
 )
-
 from .conftest import (
     begin_date_str,
     begin_date_with_time,
