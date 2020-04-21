@@ -44,7 +44,7 @@ def test_add_departing_employee_when_user_does_not_exist_prints_error(
         add_departing_employee(sdk_without_user, profile, _EMPLOYEE)
     except UserDoesNotExistError:
         capture = capsys.readouterr()
-        assert "ERROR: User '{}' does not exist.".format(_EMPLOYEE) in capture.out
+        assert str(UserDoesNotExistError(_EMPLOYEE)) in capture.out
 
 
 def test_remove_departing_employee_calls_remove(sdk_with_user, profile):
