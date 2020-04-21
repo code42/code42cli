@@ -85,11 +85,10 @@ class BulkProcessor(object):
         self._print_result()
 
     def _process_row(self, row):
-        print(row)
         if type(row) is dict:
             self._process_csv_row(row)
-        else:
-            self._process_flat_file_row(row)
+        elif row:
+            self._process_flat_file_row(row.strip())
 
     def _process_csv_row(self, row):
         # Removes problems from including extra comments. Error messages from out of order args 
@@ -98,9 +97,8 @@ class BulkProcessor(object):
         self.__worker.do_async(lambda *args, **kwargs: self._row_handler(*args, **kwargs), **row)
 
     def _process_flat_file_row(self, row):
-        self.__worker.do_async(
-            lambda *args, **kwargs: self._row_handler(*args, **kwargs), row.strip()
-        )
+        if row:
+            self.__worker.do_async(lambda *args, **kwargs: self._row_handler(*args, **kwargs), row)
 
     def _print_result(self):
         stats = self.__worker.stats
