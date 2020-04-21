@@ -83,11 +83,11 @@ class DetectionList(object):
         return [generate_template_cmd, add, remove]
 
     def generate_template_file(self, cmd, path=None):
-        """Generates a csv template a user would need to fill-in for bulk adding users to the 
+        """Generates a template file a user would need to fill-in for bulk operating on the 
         detection list.
         
         Args:
-            cmd (str): An option from the `BulkCommandType` enum specifying which type of csv to 
+            cmd (str): An option from the `BulkCommandType` enum specifying which type of file to 
                 generate.
             path (str, optional): A path to put the file after it's generated. If None, will use 
                 the current working directory. Defaults to None.
@@ -115,6 +115,14 @@ class DetectionList(object):
         )
 
     def bulk_remove_employees(self, sdk, profile, users_file):
+        """Takes a flat file with each row containing a username and removes them all from the 
+        detection list in a bulk fashion.
+        
+        Args:
+            sdk (py42.sdk.SDKClient): The py42 sdk.
+            profile (Code42Profile): The profile under which to execute this command.
+            users_file (str): The path to the file containing rows of user names.
+        """
         run_bulk_process(
             users_file,
             lambda *args, **kwargs: self._remove_employee(sdk, profile, *args, **kwargs),
