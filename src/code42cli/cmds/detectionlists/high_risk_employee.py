@@ -107,6 +107,8 @@ def _load_risk_tag_mgmt_descriptions(argument_collection):
 
 
 def _handle_list_args(list_arg):
+    """Converts str args to a list. Useful for `bulk` commands which don't use `argparse` but 
+    instead pass in values from files, such as in the form "item1 item2"."""
     if list_arg and type(list_arg) != list:
         return list_arg.split()
     return list_arg
