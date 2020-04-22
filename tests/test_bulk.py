@@ -1,5 +1,4 @@
 from io import IOBase
-
 import pytest
 
 from code42cli import PRODUCT_NAME
@@ -35,7 +34,6 @@ def func_with_multiple_args(sdk, profile, test1, test2):
 def func_with_one_arg(sdk, profile, test1):
     pass
 
-
 def test_generate_template_uses_expected_path_and_column_names(mock_open):
     file_path = "some/path"
     template_file = mock_open.return_value.__enter__.return_value
@@ -62,7 +60,6 @@ def test_generate_template_when_handler_has_one_arg_prints_message(mock_open, ca
         u"Simply enter one test1 per line." in capture.out
     )
 
-
 def test_generate_template_when_handler_has_more_than_one_arg_does_not_print_message(
     mock_open, capsys
 ):
@@ -75,23 +72,27 @@ def test_generate_template_when_handler_has_more_than_one_arg_does_not_print_mes
 
 
 def test_run_bulk_process_calls_run(bulk_processor, bulk_processor_factory):
+    errors.ERRORED = False
     run_bulk_process("some/path", func_with_one_arg, None)
     assert bulk_processor.run.call_count
 
 
 def test_run_bulk_process_creates_processor(bulk_processor_factory):
+    errors.ERRORED = False
     reader = CSVReader()
     run_bulk_process("some/path", func_with_one_arg, reader)
     bulk_processor_factory.assert_called_once_with("some/path", func_with_one_arg, reader)
 
 
 def test_run_bulk_process_when_not_given_reader_uses_csv_reader(bulk_processor_factory):
+    errors.ERRORED = False
     run_bulk_process("some/path", func_with_one_arg)
     assert type(bulk_processor_factory.call_args[0][2]) == CSVReader
 
 
 class TestBulkProcessor(object):
     def test_run_when_reader_returns_dict_process_kwargs(self, mock_open):
+        errors.ERRORED = False
         processed_rows = []
 
         def func_for_bulk(test1, test2):
@@ -110,6 +111,7 @@ class TestBulkProcessor(object):
         assert processed_rows == [(1, 2), (3, 4), (5, 6)]
 
     def test_run_when_dict_reader_has_none_for_key_ignores_key(self, mock_open):
+        errors.ERRORED = False
         processed_rows = []
 
         def func_for_bulk(test1):
@@ -124,6 +126,7 @@ class TestBulkProcessor(object):
         assert processed_rows == [1]
 
     def test_run_when_reader_returns_strs_processes_strs(self, mock_open):
+        errors.ERRORED = False
         processed_rows = []
 
         def func_for_bulk(test):
