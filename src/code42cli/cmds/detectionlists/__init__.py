@@ -164,7 +164,7 @@ def load_user_descriptions(argument_collection):
     _load_username_description(argument_collection)
     cloud_alias = argument_collection.arg_configs[DetectionListUserKeys.CLOUD_ALIAS]
     notes = argument_collection.arg_configs[DetectionListUserKeys.NOTES]
-    cloud_alias.set_help(u"Alternative emails addresses for other cloud services.")
+    cloud_alias.set_help(u"An alternative email address for another cloud service.")
     notes.set_help(u"Notes about the employee.")
 
 
