@@ -1,7 +1,6 @@
 from argparse import Namespace
 
 import pytest
-from code42cli.bulk import BulkProcessor
 from code42cli.config import ConfigAccessor
 from code42cli.profile import Code42Profile
 from py42.sdk import SDKClient

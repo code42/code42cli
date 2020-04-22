@@ -4,11 +4,41 @@ from code42cli.compat import queue
 from code42cli.logger import get_error_logger
 
 
+class WorkerStats(object):
+    """Stats about the tasks that have run."""
+
+    _total = 0
+    _total_errors = 0
+    __total_lock = Lock()
+    __total_errors_lock = Lock()
+
+    @property
+    def total(self):
+        """The total number of tasks executed."""
+        return self._total
+
+    @property
+    def total_errors(self):
+        """The amount of errors that occurred."""
+        return self._total_errors
+
+    def increment_total(self):
+        """+1 to self.total"""
+        with self.__total_lock:
+            self._total += 1
+
+    def increment_total_errors(self):
+        """+1 to self.total_errors"""
+        with self.__total_errors_lock:
+            self._total_errors += 1
+
+
 class Worker(object):
     def __init__(self, thread_count):
         self._queue = queue.Queue()
         self._thread_count = thread_count
         self._error_logger = get_error_logger()
+        self._stats = WorkerStats()
         self.__started = False
         self.__start_lock = Lock()
 
@@ -27,6 +57,12 @@ class Worker(object):
                     self.__started = True
         self._queue.put({u"func": func, u"args": args, u"kwargs": kwargs})
 
+    @property
+    def stats(self):
+        """Stats about the tasks that have been executed, such as the total errors that occurred.
+        """
+        return self._stats
+
     def wait(self):
         """Wait for the tasks in the queue to complete. This should usually be called before 
         program termination."""
@@ -42,7 +78,9 @@ class Worker(object):
                 func(*args, **kwargs)
             except Exception as ex:
                 self._error_logger.error(ex)
+                self._stats.increment_total_errors()
             finally:
+                self._stats.increment_total()
                 self._queue.task_done()
 
     def __start(self):

@@ -17,7 +17,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `--c42username` flag renamed to `--c42-username`.
     - `--filename` flag renamed to `--file-name`.
     - `--filepath` flag renamed to `--file-path`.
-    - `--processOwner` flag renamed to `--process-owner`
+    - `--processOwner` flag renamed to `--process-owner`.
 - `-b|--begin` and `-e|--end` arguments now accept shorthand date-range strings for days, hours, and minute intervals going back from the current time (e.g. `30d`, `24h`, `15m`).
 - Default profile validation logic added to prevent confusing error states.
 
@@ -31,9 +31,11 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `bulk` with subcommands:
         - `add`: that takes a csv file of users.
         - `generate-template`: that creates the csv file template. And parameters:
-            - `cmd`: with the option `add`.
+            - `cmd`: with options `add` and `remove`.
             - `path`
-    - `add` that takes parameters: `--username`, `--cloud-aliases`, `--risk-factors`, and `--notes`.
+        - `remove`: that takes a list of users in a file.
+    - `add` that takes parameters: `--username`, `--cloud-alias`, `--risk-factor`, and `--notes`.
+    - `remove` that takes a username.
 
 ### Removed
 
