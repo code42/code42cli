@@ -4,6 +4,8 @@ from code42cli.cmds.detectionlists import UserDoesNotExistError
 from code42cli.cmds.detectionlists.high_risk_employee import (
     add_high_risk_employee,
     remove_high_risk_employee,
+    add_risk_tags,
+    remove_risk_tags,
 )
 from .conftest import TEST_ID
 
@@ -71,6 +73,60 @@ def test_remove_high_risk_employee_when_user_does_not_exist_prints_error(
 ):
     try:
         remove_high_risk_employee(sdk_without_user, profile, _EMPLOYEE)
+    except UserDoesNotExistError:
+        capture = capsys.readouterr()
+        assert str(UserDoesNotExistError(_EMPLOYEE)) in capture.out
+
+
+def test_add_risk_tags_adds_tags(sdk_with_user, profile):
+    add_risk_tags(sdk_with_user, profile, _EMPLOYEE, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"])
+    sdk_with_user.detectionlists.add_user_risk_tags.assert_called_once_with(
+        TEST_ID, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"]
+    )
+
+
+def test_add_risk_tags_when_given_space_delimited_str_adds_expected_tags(sdk_with_user, profile):
+    add_risk_tags(sdk_with_user, profile, _EMPLOYEE, "TAG_YOU_ARE_IT GROUND_IS_LAVA")
+    sdk_with_user.detectionlists.add_user_risk_tags.assert_called_once_with(
+        TEST_ID, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"]
+    )
+
+
+def test_add_risk_tags_when_user_does_not_exist_exits(sdk_without_user, profile):
+    with pytest.raises(UserDoesNotExistError):
+        add_risk_tags(sdk_without_user, profile, _EMPLOYEE, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"])
+
+
+def test_add_risk_tags_when_user_does_not_exist_prints_error(sdk_without_user, profile, capsys):
+    try:
+        add_risk_tags(sdk_without_user, profile, _EMPLOYEE, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"])
+    except UserDoesNotExistError:
+        capture = capsys.readouterr()
+        assert str(UserDoesNotExistError(_EMPLOYEE)) in capture.out
+
+
+def test_remove_risk_tags_adds_tags(sdk_with_user, profile):
+    remove_risk_tags(sdk_with_user, profile, _EMPLOYEE, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"])
+    sdk_with_user.detectionlists.remove_user_risk_tags.assert_called_once_with(
+        TEST_ID, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"]
+    )
+
+
+def test_remove_risk_tags_when_given_space_delimited_str_adds_expected_tags(sdk_with_user, profile):
+    remove_risk_tags(sdk_with_user, profile, _EMPLOYEE, "TAG_YOU_ARE_IT GROUND_IS_LAVA")
+    sdk_with_user.detectionlists.remove_user_risk_tags.assert_called_once_with(
+        TEST_ID, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"]
+    )
+
+
+def test_remove_risk_tags_when_user_does_not_exist_exits(sdk_without_user, profile):
+    with pytest.raises(UserDoesNotExistError):
+        remove_risk_tags(sdk_without_user, profile, _EMPLOYEE, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"])
+
+
+def test_remove_risk_tags_when_user_does_not_exist_prints_error(sdk_without_user, profile, capsys):
+    try:
+        remove_risk_tags(sdk_without_user, profile, _EMPLOYEE, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"])
     except UserDoesNotExistError:
         capture = capsys.readouterr()
         assert str(UserDoesNotExistError(_EMPLOYEE)) in capture.out

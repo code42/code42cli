@@ -83,7 +83,7 @@ class DetectionList(object):
             self.handlers.add_employee, self.handlers.load_add_description
         )
         remove = self.factory.create_remove_command(
-            self.handlers.remove_employee, _load_username_description
+            self.handlers.remove_employee, load_username_description
         )
         return [bulk, add, remove]
 
@@ -148,7 +148,9 @@ class DetectionList(object):
         self.handlers.remove_employee(sdk, profile, *args, **kwargs)
 
 
-def _load_username_description(argument_collection):
+
+def load_username_description(argument_collection):
+    """Loads the arg descriptions for the `username` CLI parameter."""
     username = argument_collection.arg_configs[DetectionListUserKeys.USERNAME]
     username.set_help(u"A code42 username for an employee.")
 
@@ -161,7 +163,7 @@ def load_user_descriptions(argument_collection):
         argument_collection (ArgConfigCollection): The arg configs off the command that needs its 
             user descriptions loaded.
     """
-    _load_username_description(argument_collection)
+    load_username_description(argument_collection)
     cloud_alias = argument_collection.arg_configs[DetectionListUserKeys.CLOUD_ALIAS]
     notes = argument_collection.arg_configs[DetectionListUserKeys.NOTES]
     cloud_alias.set_help(u"An alternative email address for another cloud service.")

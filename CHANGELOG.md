@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-## Unreleased
+## 0.5.0 - Unreleased
 
 ### Changed
 
@@ -36,6 +36,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
         - `remove`: that takes a list of users in a file.
     - `add` that takes parameters: `--username`, `--cloud-alias`, `--risk-factor`, and `--notes`.
     - `remove` that takes a username.
+    - `add-risk-tags` that takes a username and risk tags.
+    - `remove-risk-tags` that takes a username and risk tags.
 - `code42 departing-employee` commands:
     - `bulk` with subcommands:
         - `add`: that takes a csv file of users.
