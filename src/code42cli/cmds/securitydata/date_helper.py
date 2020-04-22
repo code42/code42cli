@@ -2,8 +2,6 @@ from py42.sdk.queries.fileevents.filters.event_filter import EventTimestamp
 
 from code42cli.date_helper import DateArgumentException, parse_min_timestamp, parse_max_timestamp
 
-_MAX_LOOK_BACK_DAYS = 90
-
 
 def create_event_timestamp_filter(begin_date=None, end_date=None):
     """Creates a `py42.sdk.file_event_query.event_query.EventTimestamp` filter using the given dates.

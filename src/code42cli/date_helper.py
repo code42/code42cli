@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import re
+import operator
 
 from c42eventextractor.common import convert_datetime_to_timestamp
 
@@ -18,7 +19,7 @@ class DateArgumentException(Exception):
 
 
 def parse_min_timestamp(begin_date_str, max_days_back=90):
-    dt = _parse_timestamp(begin_date_str, _round_datetime_to_day_start)
+    dt = _parse_timestamp(begin_date_str, _round_datetime_to_day_start, operator.sub)
 
     boundary_date = _round_datetime_to_day_start(datetime.utcnow() - timedelta(days=max_days_back))
     if dt < boundary_date:
@@ -28,11 +29,11 @@ def parse_min_timestamp(begin_date_str, max_days_back=90):
 
 
 def parse_max_timestamp(end_date_str):
-    dt = _parse_timestamp(end_date_str, _round_datetime_to_day_end)
+    dt = _parse_timestamp(end_date_str, _round_datetime_to_day_end, operator.sub)
     return convert_datetime_to_timestamp(dt)
 
 
-def _parse_timestamp(date_str, rounding_func):
+def _parse_timestamp(date_str, rounding_func, op):
     timestamp_match = TIMESTAMP_REGEX.match(date_str)
     magic_match = MAGIC_TIME_REGEX.match(date_str)
 
@@ -44,7 +45,7 @@ def _parse_timestamp(date_str, rounding_func):
 
     elif magic_match:
         num, period = magic_match.groups()
-        dt = _get_dt_from_magic_time_pair(num, period)
+        dt = _get_dt_from_magic_time_pair(num, period, op)
         if period == u"d":
             dt = rounding_func(dt)
 
@@ -65,17 +66,18 @@ def _get_dt_from_date_time_pair(date, time):
         return dt
 
 
-def _get_dt_from_magic_time_pair(num, period):
+def _get_dt_from_magic_time_pair(num, period, op):
     num = int(num)
     if period == u"d":
-        dt = datetime.utcnow() - timedelta(days=num)
+        td = timedelta(days=num)
     elif period == u"h":
-        dt = datetime.utcnow() - timedelta(hours=num)
+        td = timedelta(hours=num)
     elif period == u"m":
-        dt = datetime.utcnow() - timedelta(minutes=num)
+        td = timedelta(minutes=num)
     else:
         raise DateArgumentException(u"Couldn't parse magic time string: {}{}".format(num, period))
-    return dt
+    
+    return op(datetime.utcnow(), td)
 
 
 def _round_datetime_to_day_start(dt):

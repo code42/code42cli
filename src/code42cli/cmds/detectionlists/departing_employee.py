@@ -29,7 +29,7 @@ def add_departing_employee(
         profile (C42Profile): Your code42 profile
         username (str): The username of the employee to add.
         cloud_alias (str): An alternative email address for another cloud service.
-        departure_date (str): The date the employee is departing.
+        departure_date (str): The date the employee is departing in format 'YYYY-MM-DD`.
         notes: (str): Notes about the employee.
     """
     user_id = get_user_id(sdk, username)
