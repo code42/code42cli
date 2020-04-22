@@ -30,7 +30,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - `code42 high-risk-employee` commands:
     - `bulk` with subcommands:
         - `add`: that takes a csv file of users.
-        - `generate-template`: that creates the csv file template. And parameters:
+        - `generate-template`: that creates the file template. And parameters:
             - `cmd`: with options `add` and `remove`.
             - `path`
         - `remove`: that takes a list of users in a file.
@@ -38,6 +38,15 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `remove` that takes a username.
     - `add-risk-tags` that takes a username and risk tags.
     - `remove-risk-tags` that takes a username and risk tags.
+- `code42 departing-employee` commands:
+    - `bulk` with subcommands:
+        - `add`: that takes a csv file of users.
+        - `generate-template`: that creates the file template. And parameters:
+            - `cmd`: with options `add` and `remove`.
+            - `path`
+        - `remove`: that takes a list of users in a file.
+    - `add` that takes parameters: `--username`, `--cloud-alias`, `--departure-date`, and `--notes`.
+    - `remove` that takes a username.
 
 ### Removed
 

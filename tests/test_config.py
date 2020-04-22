@@ -7,7 +7,6 @@ from code42cli import PRODUCT_NAME
 from code42cli.config import ConfigAccessor, NoConfigProfileError
 from .conftest import MockSection
 
-
 _TEST_PROFILE_NAME = "ProfileA"
 _TEST_SECOND_PROFILE_NAME = "ProfileB"
 _INTERNAL = "Internal"

@@ -63,6 +63,19 @@ class DetectionList(object):
         """
         return cls(DetectionLists.HIGH_RISK_EMPLOYEE, handlers)
 
+    @classmethod
+    def create_departing_employee_list(cls, handlers):
+        """Creates a departing employee detection list.
+        
+        Args:
+            handlers (DetectionListHandlers): A DTO containing implementations for adding /
+                removing users from specific lists.
+        
+        Returns:
+            DetectionList: A departing employee detection list.
+        """
+        return cls(DetectionLists.DEPARTING_EMPLOYEE, handlers)
+
     def load_subcommands(self):
         """Loads high risk employee related subcommands"""
         bulk = self.factory.create_bulk_command(lambda: self._load_bulk_subcommands())
@@ -153,7 +166,7 @@ def load_user_descriptions(argument_collection):
     load_username_description(argument_collection)
     cloud_alias = argument_collection.arg_configs[DetectionListUserKeys.CLOUD_ALIAS]
     notes = argument_collection.arg_configs[DetectionListUserKeys.NOTES]
-    cloud_alias.set_help(u"Alternative emails addresses for other cloud services.")
+    cloud_alias.set_help(u"An alternative email address for another cloud service.")
     notes.set_help(u"Notes about the employee.")
 
 

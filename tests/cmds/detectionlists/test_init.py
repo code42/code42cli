@@ -11,7 +11,6 @@ from code42cli.cmds.detectionlists import (
 from code42cli.cmds.detectionlists.enums import BulkCommandType
 from .conftest import TEST_ID
 
-
 _NAMESPACE = "{}.cmds.detectionlists".format(PRODUCT_NAME)
 
 

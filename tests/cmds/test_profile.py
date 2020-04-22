@@ -1,6 +1,6 @@
-import code42cli.cmds.profile as profilecmd
 import pytest
 
+import code42cli.cmds.profile as profilecmd
 from code42cli import PRODUCT_NAME
 from ..conftest import create_mock_profile
 

@@ -1,6 +1,7 @@
-from code42cli import PRODUCT_NAME
-import code42cli.cmds.securitydata.main as main
 import pytest
+
+import code42cli.cmds.securitydata.main as main
+from code42cli import PRODUCT_NAME
 
 
 @pytest.fixture
