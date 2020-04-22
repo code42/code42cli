@@ -65,6 +65,18 @@ def test_create_event_timestamp_filter_when_given_both_begin_and_end_builds_expe
     assert actual_end == expected_end
 
 
+def test_create_event_timestamp_filter_when_given_short_time_args_builds_expected_query():
+    begin_date = "{} 10".format(begin_date_str)
+    end_date = "{} 12:37".format(end_date_str)
+    ts_range = create_event_timestamp_filter(begin_date, end_date)
+    actual_begin = get_filter_value_from_json(ts_range, filter_index=0)
+    actual_end = get_filter_value_from_json(ts_range, filter_index=1)
+    expected_begin = "{0}T10:00:00.000Z".format(begin_date_str)
+    expected_end = "{0}T12:37:00.000Z".format(end_date_str)
+    assert actual_begin == expected_begin
+    assert actual_end == expected_end
+
+
 def test_create_event_timestamp_filter_when_begin_more_than_ninety_days_back_causes_value_error():
     begin_date_str = get_test_date_str(days_ago=91)
     with pytest.raises(DateArgumentException):
@@ -90,22 +102,18 @@ def test_create_event_timestamp_filter_when_args_are_magic_days_builds_expected_
     assert actual_end == expected_end
 
 
-def test_create_event_timestamp_filter_when_given_improperly_formatted_arg_raises_value_error():
-    missing_seconds = "{} {}".format(get_test_date_str(days_ago=5), "12:00")
-    month_first_date = "01-01-2020"
-    time_typo = "{} {}".format(get_test_date_str(days_ago=5), "b20:30:00")
-    bad_magic = "2months"
-    bad_magic_2 = "100s"
-    bad_magic_3 = "10 d"
+@pytest.mark.parametrize(
+    "bad_date_param",
+    [
+        "01-01-2020",
+        "{} {}".format(get_test_date_str(days_ago=5), "b20:30:00"),
+        "2months",
+        "100s",
+        "10 d",
+    ],
+)
+def test_create_event_timestamp_filter_when_given_improperly_formatted_arg_raises_value_error(
+    bad_date_param,
+):
     with pytest.raises(DateArgumentException):
-        create_event_timestamp_filter(missing_seconds)
-    with pytest.raises(DateArgumentException):
-        create_event_timestamp_filter(month_first_date)
-    with pytest.raises(DateArgumentException):
-        create_event_timestamp_filter(time_typo)
-    with pytest.raises(DateArgumentException):
-        create_event_timestamp_filter(bad_magic)
-    with pytest.raises(DateArgumentException):
-        create_event_timestamp_filter(bad_magic_2)
-    with pytest.raises(DateArgumentException):
-        create_event_timestamp_filter(bad_magic_3)
+        create_event_timestamp_filter(bad_date_param)
