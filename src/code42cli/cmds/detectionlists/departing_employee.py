@@ -28,13 +28,10 @@ def add_departing_employee(
         sdk (py42.sdk.SDKClient): py42
         profile (C42Profile): Your code42 profile
         username (str): The username of the employee to add.
-        cloud_alias (iter[str]): Alternative emails addresses for other cloud services.
+        cloud_alias (str): An alternative email address for another cloud service.
         departure_date (str): The date the employee is departing.
         notes: (str): Notes about the employee.
     """
-    if cloud_alias and type(cloud_alias) != list:
-        cloud_alias = cloud_alias.split()
-
     user_id = get_user_id(sdk, username)
     update_user(sdk, user_id, cloud_alias, notes=notes)
     sdk.detectionlists.departing_employee.add(user_id, departure_date)
