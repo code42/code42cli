@@ -25,8 +25,8 @@ def add_departing_employee(
     """Adds an employee to the departing employee detection list.
 
     Args:
-        sdk (py42.sdk.SDKClient): py42
-        profile (C42Profile): Your code42 profile
+        sdk (py42.sdk.SDKClient): py42.
+        profile (C42Profile): Your code42 profile.
         username (str): The username of the employee to add.
         cloud_alias (str): An alternative email address for another cloud service.
         departure_date (str): The date the employee is departing in format `YYYY-MM-DD`.
