@@ -34,6 +34,7 @@ def func_with_multiple_args(sdk, profile, test1, test2):
 def func_with_one_arg(sdk, profile, test1):
     pass
 
+
 def test_generate_template_uses_expected_path_and_column_names(mock_open):
     file_path = "some/path"
     template_file = mock_open.return_value.__enter__.return_value
@@ -59,6 +60,7 @@ def test_generate_template_when_handler_has_one_arg_prints_message(mock_open, ca
         u"A blank file was generated because there are no csv headers needed for this command. "
         u"Simply enter one test1 per line." in capture.out
     )
+
 
 def test_generate_template_when_handler_has_more_than_one_arg_does_not_print_message(
     mock_open, capsys
@@ -108,7 +110,9 @@ class TestBulkProcessor(object):
 
         processor = BulkProcessor("some/path", func_for_bulk, MockDictReader())
         processor.run()
-        assert processed_rows == [(1, 2), (3, 4), (5, 6)]
+        assert (1,2) in processed_rows
+        assert (3,4) in processed_rows
+        assert (5,6) in processed_rows
 
     def test_run_when_dict_reader_has_none_for_key_ignores_key(self, mock_open):
         errors.ERRORED = False
@@ -138,7 +142,9 @@ class TestBulkProcessor(object):
 
         processor = BulkProcessor("some/path", func_for_bulk, MockRowReader())
         processor.run()
-        assert processed_rows == ["row1", "row2", "row3"]
+        assert "row1" in processed_rows
+        assert "row2" in processed_rows
+        assert "row3" in processed_rows
 
     def test_run_when_error_occurs_prints_error_messages(self, mock_open, capsys):
         errors.ERRORED = False

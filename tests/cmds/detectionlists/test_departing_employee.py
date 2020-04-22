@@ -24,9 +24,7 @@ def test_add_departing_employee_when_given_notes_updates_notes(sdk_with_user, pr
 
 
 def test_add_departing_employee_adds(sdk_with_user, profile):
-    add_departing_employee(
-        sdk_with_user, profile, _EMPLOYEE, departure_date="2020-02-02"
-    )
+    add_departing_employee(sdk_with_user, profile, _EMPLOYEE, departure_date="2020-02-02")
     sdk_with_user.detectionlists.departing_employee.add.assert_called_once_with(
         TEST_ID, "2020-02-02"
     )

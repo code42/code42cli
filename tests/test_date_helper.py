@@ -1,4 +1,3 @@
-import pytest
 from datetime import datetime
 
 from c42eventextractor.common import convert_datetime_to_timestamp
@@ -14,13 +13,17 @@ from .conftest import (
 
 
 def test_parse_min_timestamp_when_given_date_str_parses_successfully():
-    ts = parse_min_timestamp(begin_date_str)
-    assert ts == 1579737600.0
+    actual = parse_min_timestamp(begin_date_str)
+    expected = convert_datetime_to_timestamp(datetime.strptime(begin_date_str, "%Y-%m-%d"))
+    assert actual == expected
 
 
 def test_parse_min_timestamp_when_given_date_str_with_time_parses_successfully():
-    ts = parse_min_timestamp(begin_date_str_with_time)
-    assert ts == 1579749153.0
+    actual = parse_min_timestamp(begin_date_str_with_time)
+    expected = convert_datetime_to_timestamp(
+        datetime.strptime(begin_date_str_with_time, "%Y-%m-%d %H:%M:%S")
+    )
+    assert actual == expected
 
 
 def test_parse_min_timestamp_when_given_magic_days_parses_successfully():
@@ -45,13 +48,17 @@ def test_parse_min_timestamp_when_given_magic_minutes_parses_successfully():
 
 
 def test_parse_max_timestamp_when_given_date_str_parses_successfully():
-    ts = parse_max_timestamp(end_date_str)
-    assert ts == 1586649599.999
+    actual = parse_min_timestamp(end_date_str)
+    expected = convert_datetime_to_timestamp(datetime.strptime(end_date_str, "%Y-%m-%d"))
+    assert actual == expected
 
 
 def test_parse_max_timestamp_when_given_date_str_with_time_parses_successfully():
-    ts = parse_max_timestamp(end_date_str_with_time)
-    assert ts == 1586604163.0
+    actual = parse_min_timestamp(end_date_str_with_time)
+    expected = convert_datetime_to_timestamp(
+        datetime.strptime(end_date_str_with_time, "%Y-%m-%d %H:%M:%S")
+    )
+    assert actual == expected
 
 
 def test_parse_max_timestamp_when_given_magic_days_parses_successfully():
