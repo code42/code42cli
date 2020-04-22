@@ -36,6 +36,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
         - `remove`: that takes a list of users in a file.
     - `add` that takes parameters: `--username`, `--cloud-alias`, `--risk-factor`, and `--notes`.
     - `remove` that takes a username.
+    - `add-risk-tags` that takes a username and risk tags.
+    - `remove-risk-tags` that takes a username and risk tags.
 
 ### Removed
 

@@ -11,10 +11,10 @@ from code42cli.commands import Command
 
 
 def load_subcommands():
+
     handlers = _create_handlers()
     detection_list = DetectionList.create_high_risk_employee_list(handlers)
     cmd_list = detection_list.load_subcommands()
-
     cmd_list.extend(
         [
             Command(
@@ -81,7 +81,6 @@ def remove_high_risk_employee(sdk, profile, username):
 
 
 def _load_risk_tag_description(argument_collection):
-    load_user_descriptions(argument_collection)
     risk_tag = argument_collection.arg_configs[DetectionListUserKeys.RISK_TAG]
     risk_tag.as_multi_val_param()
     risk_tag.set_help(
