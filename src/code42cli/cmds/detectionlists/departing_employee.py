@@ -45,4 +45,4 @@ def remove_departing_employee(sdk, profile, username):
 def _load_add_description(argument_collection):
     load_user_descriptions(argument_collection)
     departure_date = argument_collection.arg_configs[u"departure_date"]
-    departure_date.set_help(u"The date the employee is departing.")
+    departure_date.set_help(u"The date the employee is departing in format YYYY-MM-DD.")
