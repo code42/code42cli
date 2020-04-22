@@ -8,12 +8,12 @@ from code42cli.cmds.detectionlists import (
 
 
 def load_subcommands():
-    handlers = _get_handlers()
+    handlers = _create_handlers()
     detection_list = DetectionList.create_departing_employee_list(handlers)
     return detection_list.load_subcommands()
 
 
-def _get_handlers():
+def _create_handlers():
     return DetectionListHandlers(
         add=add_departing_employee, remove=remove_departing_employee, load_add=_load_add_description
     )
