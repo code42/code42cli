@@ -91,14 +91,11 @@ def test_create_event_timestamp_filter_when_args_are_magic_days_builds_expected_
 
 
 def test_create_event_timestamp_filter_when_given_improperly_formatted_arg_raises_value_error():
-    missing_seconds = "{} {}".format(get_test_date_str(days_ago=5), "12:00")
     month_first_date = "01-01-2020"
     time_typo = "{} {}".format(get_test_date_str(days_ago=5), "b20:30:00")
     bad_magic = "2months"
     bad_magic_2 = "100s"
     bad_magic_3 = "10 d"
-    with pytest.raises(DateArgumentException):
-        create_event_timestamp_filter(missing_seconds)
     with pytest.raises(DateArgumentException):
         create_event_timestamp_filter(month_first_date)
     with pytest.raises(DateArgumentException):
