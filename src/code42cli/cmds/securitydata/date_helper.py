@@ -91,7 +91,10 @@ def _parse_max_timestamp(end_date_str):
 
 def _get_dt_from_date_time_pair(date, time):
     date_format = u"%Y-%m-%d %H:%M:%S"
-    time = time or u"00:00:00"
+    if time:
+        time = "{}:{}:{}".format(*time.split(":") + ["00", "00"])
+    else:
+        time = u"00:00:00"
     date_string = u"{} {}".format(date, time)
     try:
         dt = datetime.strptime(date_string, date_format)
