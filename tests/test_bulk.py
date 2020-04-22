@@ -110,9 +110,9 @@ class TestBulkProcessor(object):
 
         processor = BulkProcessor("some/path", func_for_bulk, MockDictReader())
         processor.run()
-        assert (1,2) in processed_rows
-        assert (3,4) in processed_rows
-        assert (5,6) in processed_rows
+        assert (1, 2) in processed_rows
+        assert (3, 4) in processed_rows
+        assert (5, 6) in processed_rows
 
     def test_run_when_dict_reader_has_none_for_key_ignores_key(self, mock_open):
         errors.ERRORED = False
