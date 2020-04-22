@@ -5,7 +5,7 @@ from c42eventextractor.common import convert_datetime_to_timestamp
 from py42.sdk.queries.fileevents.filters.event_filter import EventTimestamp
 
 _MAX_LOOK_BACK_DAYS = 90
-_FORMAT_VALUE_ERROR_MESSAGE = u"input must be a date in YYYY-MM-DD or YYYY-MM-DD HH:MM:SS format, or a short value in days, hours, or minutes (e.g. 30d, 24h, 15m)"
+_FORMAT_VALUE_ERROR_MESSAGE = u"input must be a date/time string (e.g. 'YYYY-MM-DD', 'YY-MM-DD HH:MM', 'YY-MM-DD HH:MM:SS'), or a short value in days, hours, or minutes (e.g. 30d, 24h, 15m)"
 
 
 class DateArgumentException(Exception):
