@@ -45,7 +45,6 @@ def add_risk_tags(sdk, profile, username, risk_tag):
     user_id = get_user_id(sdk, username)
     sdk.detectionlists.add_user_risk_tags(user_id, risk_tag)
 
-
 def remove_risk_tags(sdk, profile, username, risk_tag):
     risk_tag = _handle_list_args(risk_tag)
     user_id = get_user_id(sdk, username)
@@ -82,6 +81,7 @@ def remove_high_risk_employee(sdk, profile, username):
 
 
 def _load_risk_tag_description(argument_collection):
+    load_user_descriptions(argument_collection)
     risk_tag = argument_collection.arg_configs[DetectionListUserKeys.RISK_TAG]
     risk_tag.as_multi_val_param()
     risk_tag.set_help(

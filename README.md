@@ -79,6 +79,14 @@ code42 security-data print -b '2020-02-02 12:51:00'
 ```
 
 ```bash
+code42 security-data print -b '2020-02-02 12:30'
+```
+
+```bash
+code42 security-data print -b '2020-02-02 12'
+```
+
+```bash
 code42 security-data print -b 2020-02-02
 ```
 

@@ -129,18 +129,11 @@ class DetectionList(object):
         )
 
     def _add_employee(self, sdk, profile, **kwargs):
-        if (
-            kwargs.has_key(DetectionListUserKeys.CLOUD_ALIAS)
-            and type(kwargs[DetectionListUserKeys.CLOUD_ALIAS]) != list
-        ):
-            kwargs[DetectionListUserKeys.CLOUD_ALIAS] = kwargs[
-                DetectionListUserKeys.CLOUD_ALIAS
-            ].split()
-
         self.handlers.add_employee(sdk, profile, **kwargs)
 
     def _remove_employee(self, sdk, profile, *args, **kwargs):
         self.handlers.remove_employee(sdk, profile, *args, **kwargs)
+
 
 
 def load_username_description(argument_collection):
@@ -161,7 +154,6 @@ def load_user_descriptions(argument_collection):
     cloud_alias = argument_collection.arg_configs[DetectionListUserKeys.CLOUD_ALIAS]
     notes = argument_collection.arg_configs[DetectionListUserKeys.NOTES]
     cloud_alias.set_help(u"Alternative emails addresses for other cloud services.")
-    cloud_alias.as_multi_val_param()
     notes.set_help(u"Notes about the employee.")
 
 
