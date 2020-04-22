@@ -1,5 +1,4 @@
 from io import IOBase
-
 import pytest
 
 from code42cli import PRODUCT_NAME
@@ -35,7 +34,6 @@ def func_with_multiple_args(sdk, profile, test1, test2):
 def func_with_one_arg(sdk, profile, test1):
     pass
 
-
 def test_generate_template_uses_expected_path_and_column_names(mock_open):
     file_path = "some/path"
     template_file = mock_open.return_value.__enter__.return_value
@@ -61,7 +59,6 @@ def test_generate_template_when_handler_has_one_arg_prints_message(mock_open, ca
         u"A blank file was generated because there are no csv headers needed for this command. "
         u"Simply enter one test1 per line." in capture.out
     )
-
 
 def test_generate_template_when_handler_has_more_than_one_arg_does_not_print_message(
     mock_open, capsys
