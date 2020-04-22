@@ -1,6 +1,6 @@
-import code42cli.password as password
 import pytest
 
+import code42cli.password as password
 from code42cli import PRODUCT_NAME
 
 _USERNAME = "test.username"

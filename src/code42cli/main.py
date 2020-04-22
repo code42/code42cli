@@ -5,7 +5,9 @@ from py42.settings import set_user_agent_suffix
 
 from code42cli import PRODUCT_NAME
 from code42cli.cmds import profile
+from code42cli.cmds.detectionlists import departing_employee as de
 from code42cli.cmds.detectionlists import high_risk_employee as hre
+from code42cli.cmds.detectionlists.enums import DetectionLists
 from code42cli.cmds.securitydata import main as secmain
 from code42cli.commands import Command
 from code42cli.invoker import CommandInvoker
@@ -46,7 +48,12 @@ def _load_top_commands():
             subcommand_loader=secmain.load_subcommands,
         ),
         Command(
-            u"high-risk-employee",
+            DetectionLists.DEPARTING_EMPLOYEE,
+            detection_lists_description.format(u"departing employee"),
+            subcommand_loader=de.load_subcommands,
+        ),
+        Command(
+            DetectionLists.HIGH_RISK_EMPLOYEE,
             detection_lists_description.format(u"high risk employee"),
             subcommand_loader=hre.load_subcommands,
         ),

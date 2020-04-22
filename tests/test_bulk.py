@@ -1,10 +1,9 @@
-import pytest
 from io import IOBase
+import pytest
 
 from code42cli import PRODUCT_NAME
 from code42cli import errors as errors
 from code42cli.bulk import generate_template, BulkProcessor, run_bulk_process, CSVReader
-
 
 _NAMESPACE = "{}.bulk".format(PRODUCT_NAME)
 
@@ -111,7 +110,9 @@ class TestBulkProcessor(object):
 
         processor = BulkProcessor("some/path", func_for_bulk, MockDictReader())
         processor.run()
-        assert processed_rows == [(1, 2), (3, 4), (5, 6)]
+        assert (1, 2) in processed_rows
+        assert (3, 4) in processed_rows
+        assert (5, 6) in processed_rows
 
     def test_run_when_dict_reader_has_none_for_key_ignores_key(self, mock_open):
         errors.ERRORED = False
@@ -141,7 +142,9 @@ class TestBulkProcessor(object):
 
         processor = BulkProcessor("some/path", func_for_bulk, MockRowReader())
         processor.run()
-        assert processed_rows == ["row1", "row2", "row3"]
+        assert "row1" in processed_rows
+        assert "row2" in processed_rows
+        assert "row3" in processed_rows
 
     def test_run_when_error_occurs_prints_error_messages(self, mock_open, capsys):
         errors.ERRORED = False

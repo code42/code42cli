@@ -1,12 +1,13 @@
 import logging
 
-import code42cli.cmds.securitydata.logger_factory as factory
 import pytest
 from c42eventextractor.logging.formatters import (
     FileEventDictToCEFFormatter,
     FileEventDictToJSONFormatter,
     FileEventDictToRawJSONFormatter,
 )
+
+import code42cli.cmds.securitydata.logger_factory as factory
 
 
 @pytest.fixture

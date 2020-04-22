@@ -70,7 +70,7 @@ def test_remove_high_risk_employee_when_user_does_not_exist_prints_error(
     sdk_without_user, profile, capsys
 ):
     try:
-        remove_high_risk_employee(sdk_without_user, profile, "risky employee")
+        remove_high_risk_employee(sdk_without_user, profile, _EMPLOYEE)
     except UserDoesNotExistError:
         capture = capsys.readouterr()
         assert str(UserDoesNotExistError(_EMPLOYEE)) in capture.out
