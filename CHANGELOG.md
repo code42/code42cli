@@ -14,7 +14,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Issue that prevented version 0.5.0 from updating its dependencies properly.
 
-- Issue that prevented the`add` and `bulk add` functionality of `departing-employee` and `high-risk-employee` from successfully adding users to lists when specifying optional fields.
+- Issue that prevented the `add` and `bulk add` functionality of `departing-employee` and `high-risk-employee` from successfully adding users to lists when specifying optional fields.
 
 ## 0.5.0 - 2020-04-24
 
