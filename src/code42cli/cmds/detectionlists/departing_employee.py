@@ -33,8 +33,8 @@ def add_departing_employee(
         notes: (str): Notes about the employee.
     """
     user_id = get_user_id(sdk, username)
-    update_user(sdk, user_id, cloud_alias, notes=notes)
     sdk.detectionlists.departing_employee.add(user_id, departure_date)
+    update_user(sdk, user_id, cloud_alias, notes=notes)
 
 
 def remove_departing_employee(sdk, profile, username):
