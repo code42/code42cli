@@ -45,6 +45,7 @@ def add_risk_tags(sdk, profile, username, risk_tag):
     user_id = get_user_id(sdk, username)
     sdk.detectionlists.add_user_risk_tags(user_id, risk_tag)
 
+
 def remove_risk_tags(sdk, profile, username, risk_tag):
     risk_tag = _handle_list_args(risk_tag)
     user_id = get_user_id(sdk, username)
@@ -64,8 +65,8 @@ def add_high_risk_employee(sdk, profile, username, cloud_alias=None, risk_tag=No
     """
     risk_tag = _handle_list_args(risk_tag)
     user_id = get_user_id(sdk, username)
-    update_user(sdk, user_id, cloud_alias, risk_tag, notes)
     sdk.detectionlists.high_risk_employee.add(user_id)
+    update_user(sdk, user_id, cloud_alias, risk_tag, notes)
 
 
 def remove_high_risk_employee(sdk, profile, username):
