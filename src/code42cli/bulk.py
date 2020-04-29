@@ -85,7 +85,7 @@ class BulkProcessor(object):
         self._print_result()
 
     def _process_row(self, row):
-        if type(row) is dict:
+        if isinstance(row, dict):
             self._process_csv_row(row)
         elif row:
             self._process_flat_file_row(row.strip())
