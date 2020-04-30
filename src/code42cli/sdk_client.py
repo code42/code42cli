@@ -1,7 +1,7 @@
 import py42.sdk
 import py42.settings.debug as debug
 
-from code42cli.util import print_error
+from code42cli.logger import print_error
 
 
 def create_sdk(profile, is_debug_mode):

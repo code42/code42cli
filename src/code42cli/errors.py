@@ -1,5 +1,5 @@
-from code42cli.logger import get_error_logger, ERROR_LOG_FILE_NAME
-from code42cli.util import is_interactive, print_error, get_user_project_path
+from code42cli.logger import get_error_logger, ERROR_LOG_FILE_NAME, print_error
+from code42cli.util import is_interactive, get_user_project_path
 
 
 ERRORED = False

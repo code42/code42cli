@@ -1,5 +1,4 @@
 import logging
-import sys
 
 from c42eventextractor.logging.formatters import (
     FileEventDictToCEFFormatter,
@@ -9,12 +8,13 @@ from c42eventextractor.logging.formatters import (
 from c42eventextractor.logging.handlers import NoPrioritySysLogHandlerWrapper
 
 from code42cli.cmds.securitydata.enums import OutputFormat
-from code42cli.util import get_url_parts, print_error
+from code42cli.util import get_url_parts
 from code42cli.logger import (
     logger_has_handlers,
     logger_deps_lock,
     apply_logger_dependencies,
     get_logger_for_stdout as get_stdout_logger,
+    print_error,
 )
 
 

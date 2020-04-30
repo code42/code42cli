@@ -1,6 +1,6 @@
 from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory
 from code42cli.bulk import generate_template, run_bulk_process, CSVReader, FlatFileReader
-from code42cli.util import print_error
+from code42cli.logger import print_error
 from code42cli.cmds.detectionlists.enums import (
     BulkCommandType,
     DetectionLists,

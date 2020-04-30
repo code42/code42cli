@@ -1,7 +1,7 @@
 import code42cli.password as password
 from code42cli.cmds.shared.cursor_store import get_file_event_cursor_store
 from code42cli.config import ConfigAccessor, config_accessor, NoConfigProfileError
-from code42cli.util import (
+from code42cli.logger import (
     print_error,
     print_create_profile_help,
     print_set_default_profile_help,
@@ -96,7 +96,8 @@ def profile_exists(profile_name=None):
 
 
 def switch_default_profile(profile_name):
-    config_accessor.switch_default_profile(profile_name)
+    profile = get_profile(profile_name)  # Handles profile not existing
+    config_accessor.switch_default_profile(profile.name)
 
 
 def create_profile(name, server, username, ignore_ssl_errors):

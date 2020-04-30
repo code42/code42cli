@@ -6,7 +6,8 @@ import code42cli.profile as cliprofile
 from code42cli.args import PROFILE_HELP, PROFILE_ARG_NAME
 from code42cli.commands import Command
 from code42cli.sdk_client import validate_connection
-from code42cli.util import does_user_agree, print_error, print_no_existing_profile_message
+from code42cli.util import does_user_agree
+from code42cli.logger import print_error, print_no_existing_profile_message
 
 
 def load_subcommands():

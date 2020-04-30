@@ -6,7 +6,7 @@ from py42.exceptions import Py42ForbiddenError
 
 from code42cli.parser import ArgumentParserError, CommandParser
 from code42cli.errors import log_error
-from code42cli.util import print_error
+from code42cli.logger import print_error
 
 
 class CommandInvoker(object):
