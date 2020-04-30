@@ -1,4 +1,5 @@
 import logging
+import sys
 from logging.handlers import RotatingFileHandler
 from threading import Lock
 
@@ -22,6 +23,20 @@ def get_error_logger():
         if not logger_has_handlers(logger):
             formatter = logging.Formatter(u"%(asctime)s %(message)s")
             handler = RotatingFileHandler(log_path, maxBytes=250000000, encoding=u"utf-8")
+            return apply_logger_dependencies(logger, handler, formatter)
+    return logger
+
+
+def get_logger_for_stdout(name_suffix, formatter=None):
+    logger = logging.getLogger(u"code42_stdout_{0}".format(name_suffix))
+    if logger_has_handlers(logger):
+        return logger
+
+    with logger_deps_lock:
+        if not logger_has_handlers(logger):
+            handler = logging.StreamHandler(sys.stdout)
+            formatter = formatter or logging.Formatter(u"%(message)s")
+            logger.setLevel(logging.INFO)
             return apply_logger_dependencies(logger, handler, formatter)
     return logger
 

@@ -148,7 +148,6 @@ class DetectionList(object):
         self.handlers.remove_employee(sdk, profile, *args, **kwargs)
 
 
-
 def load_username_description(argument_collection):
     """Loads the arg descriptions for the `username` CLI parameter."""
     username = argument_collection.arg_configs[DetectionListUserKeys.USERNAME]
