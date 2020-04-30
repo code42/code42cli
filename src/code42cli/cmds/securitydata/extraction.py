@@ -12,13 +12,14 @@ from code42cli.cmds.securitydata.enums import (
     IS_INCREMENTAL_KEY,
     SearchArguments,
 )
-from code42cli.logger import get_error_logger, print_bold, print_error, print_to_stderr
 from code42cli.cmds.shared.cursor_store import FileEventCursorStore
 from code42cli.compat import str
 import code42cli.errors as errors
+from code42cli.logger import get_error_logger, get_main_cli_logger
 
 
 _TOTAL_EVENTS = 0
+_cli_logger = get_main_cli_logger()
 
 
 def extract(sdk, profile, output_logger, args):
@@ -61,7 +62,7 @@ def _determine_if_advanced_query(args):
         for key in given_args:
             val = given_args[key]
             if not _verify_compatibility_with_advanced_query(key, val):
-                print_error(u"You cannot use --advanced-query with additional search args.")
+                _cli_logger.error(u"You cannot use --advanced-query with additional search args.")
                 exit(1)
         return True
     return False
@@ -69,10 +70,8 @@ def _determine_if_advanced_query(args):
 
 def _verify_begin_date_requirements(args, cursor_store):
     if _begin_date_is_required(args, cursor_store) and not args.begin:
-        print_error(u"'begin date' is required.")
-        print(u"")
-        print_bold(u"Try using  '-b' or '--begin'. Use `-h` for more info.")
-        print(u"")
+        _cli_logger.error(u"'begin date' is required.\n")
+        _cli_logger.info_bold(u"Try using  '-b' or '--begin'. Use `-h` for more info.\n")
         exit(1)
 
 
@@ -93,7 +92,7 @@ def _verify_exposure_types(exposure_types):
     options = list(ExposureTypeOptions())
     for exposure_type in exposure_types:
         if exposure_type not in options:
-            print_error(u"'{0}' is not a valid exposure type.".format(exposure_type))
+            _cli_logger.error(u"'{0}' is not a valid exposure type.".format(exposure_type))
             exit(1)
 
 
@@ -120,7 +119,7 @@ def _get_event_timestamp_filter(begin_date, end_date):
         end_date = end_date.strip() if end_date else None
         return date_helper.create_event_timestamp_filter(begin_date, end_date)
     except date_helper.DateArgumentException as ex:
-        print_error(str(ex))
+        _cli_logger.error(str(ex))
         exit(1)
 
 
@@ -171,9 +170,10 @@ def _verify_compatibility_with_advanced_query(key, val):
 def _handle_result():
     # Have to call this explicitly (instead of relying on invoker) because errors are caught in
     # `c42eventextractor`.
-    errors.print_errors_occurred_if_needed()
+    _cli_logger.print_errors_occurred_if_needed()
     if not _TOTAL_EVENTS:
-        print_to_stderr(u"No results found\n")
+        # prints to stderr so that successful results can be piped into other commands.
+        _cli_logger.print_to_stderr(u"No results found\n")
 
 
 def _try_append_exposure_types_filter(filters, include_non_exposure_events, exposure_types):
@@ -184,7 +184,7 @@ def _try_append_exposure_types_filter(filters, include_non_exposure_events, expo
 
 def _create_exposure_type_filter(include_non_exposure_events, exposure_types):
     if include_non_exposure_events and exposure_types:
-        print_error(u"Cannot use exposure types with `--include-non-exposure`.")
+        _cli_logger.print_error(u"Cannot use exposure types with `--include-non-exposure`.")
         exit(1)
     if exposure_types:
         return ExposureType.is_in(exposure_types)

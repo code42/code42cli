@@ -14,8 +14,8 @@ from code42cli.logger import (
     logger_deps_lock,
     apply_logger_dependencies,
     get_logger_for_stdout as get_stdout_logger,
-    print_error,
 )
+from code42cli.out import print_error
 
 
 def get_logger_for_stdout(output_format):

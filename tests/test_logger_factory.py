@@ -24,7 +24,7 @@ def test_get_logger_for_stdout_when_not_given_formatter_uses_expected_formatter(
 def test_get_logger_for_stdout_when_given_formatter_uses_expected_formatter():
     logger = factory.get_logger_for_stdout("test", Formatter("%(asctime)s %(message)s"))
     assert type(logger.handlers[0].formatter) == Formatter
-    assert logger.handlers[0].formatter._fmt =="%(asctime)s %(message)s"
+    assert logger.handlers[0].formatter._fmt == "%(asctime)s %(message)s"
 
 
 def test_get_error_logger_when_called_twice_only_sets_handler_once():

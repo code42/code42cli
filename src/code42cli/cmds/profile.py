@@ -7,7 +7,10 @@ from code42cli.args import PROFILE_HELP, PROFILE_ARG_NAME
 from code42cli.commands import Command
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree
-from code42cli.logger import print_error, print_no_existing_profile_message
+from code42cli.logger import get_main_cli_logger
+
+
+_logger = get_main_cli_logger()
 
 
 def load_subcommands():
@@ -80,13 +83,13 @@ def load_subcommands():
 def show_profile(name=None):
     """Prints the given profile to stdout."""
     c42profile = cliprofile.get_profile(name)
-    print(u"\n{0}:".format(c42profile.name))
-    print(u"\t* username = {}".format(c42profile.username))
-    print(u"\t* authority url = {}".format(c42profile.authority_url))
-    print(u"\t* ignore-ssl-errors = {}".format(c42profile.ignore_ssl_errors))
+    _logger.info(u"\n{0}:".format(c42profile.name))
+    _logger.info(u"\t* username = {}".format(c42profile.username))
+    _logger.info(u"\t* authority url = {}".format(c42profile.authority_url))
+    _logger.info(u"\t* ignore-ssl-errors = {}".format(c42profile.ignore_ssl_errors))
     if cliprofile.get_stored_password(c42profile.name) is not None:
-        print(u"\t* A password is set.")
-    print(u"")
+        _logger.info(u"\t* A password is set.")
+    _logger.info(u"")
 
 
 def create_profile(profile, server, username, disable_ssl_errors=False):
@@ -98,7 +101,7 @@ def update_profile(name=None, server=None, username=None, disable_ssl_errors=Non
     profile = cliprofile.get_profile(name)
     cliprofile.update_profile(profile.name, server, username, disable_ssl_errors)
     _prompt_for_allow_password_set(profile.name)
-    print(u"Profile '{}' has been updated.".format(profile.name))
+    _logger.info(u"Profile '{}' has been updated.".format(profile.name))
 
 
 def prompt_for_password_reset(name=None):
@@ -111,7 +114,7 @@ def prompt_for_password_reset(name=None):
 
 def _validate_connection(authority, username, password):
     if not validate_connection(authority, username, password):
-        print_error(
+        _logger.error(
             u"Your credentials failed to validate, so your password was not stored."
             u"Check your network connection and the spelling of your username and server URL."
         )
@@ -122,10 +125,10 @@ def list_profiles(*args):
     """Lists all profiles that exist for this OS user."""
     profiles = cliprofile.get_all_profiles()
     if not profiles:
-        print_no_existing_profile_message()
+        _logger.print_no_existing_profile_message()
         return
     for profile in profiles:
-        print(profile)
+        _logger.info(profile)
 
 
 def use_profile(profile):
@@ -135,7 +138,7 @@ def use_profile(profile):
 
 def delete_profile(name):
     if cliprofile.is_default_profile(name):
-        print(u"\n{} is currently the default profile!".format(name))
+        _logger.info(u"\n{} is currently the default profile!".format(name))
     if not does_user_agree(
         u"\nDeleting this profile will also delete any stored passwords and checkpoints. Are you sure? (y/n): "
     ):
@@ -146,16 +149,16 @@ def delete_profile(name):
 def delete_all_profiles():
     existing_profiles = cliprofile.get_all_profiles()
     if existing_profiles:
-        print(u"\nAre you sure you want to delete the following profiles?")
+        _logger.info(u"\nAre you sure you want to delete the following profiles?")
         for profile in existing_profiles:
-            print(u"\t{}".format(profile.name))
+            _logger.info(u"\t{}".format(profile.name))
         if does_user_agree(
             u"\nThis will also delete any stored passwords and checkpoints. (y/n): "
         ):
             for profile in existing_profiles:
                 cliprofile.delete_profile(profile.name)
     else:
-        print(u"\nNo profiles exist. Nothing to delete.")
+        _logger.info(u"\nNo profiles exist. Nothing to delete.")
 
 
 def _load_optional_profile_description(argument_collection):

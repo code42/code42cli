@@ -54,6 +54,7 @@ class Command(object):
         self._subcommand_loader = subcommand_loader
         self._use_single_arg_obj = use_single_arg_obj
         self._subcommands = []
+        self.invocation = None
 
     def __call__(self, *args, **kwargs):
         """Passes the parsed argparse args to the handler, or

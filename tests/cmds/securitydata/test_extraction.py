@@ -3,7 +3,7 @@ from py42.sdk import SDKClient
 from py42.sdk.queries.fileevents.filters import *
 
 import code42cli.cmds.securitydata.extraction as extraction_module
-import code42cli.errors as errors
+import code42cli.logger as cli_logger
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.securitydata.enums import ExposureType as ExposureTypeOptions
 from .conftest import SECURITYDATA_NAMESPACE, get_filter_value_from_json
@@ -514,38 +514,38 @@ def test_extract_when_creating_sdk_throws_causes_exit(
 def test_extract_when_errored_and_is_interactive_prints_error(
     mocker, sdk, profile, logger, namespace_with_begin, extractor
 ):
-    errors.ERRORED = False
+    cli_logger.ERRORED = False
     errors_error_printer = mocker.patch("{}.errors.print_error".format(PRODUCT_NAME))
     errors_interactive_mode = mocker.patch("{}.errors.is_interactive".format(PRODUCT_NAME))
     errors_interactive_mode.return_value = True
-    errors.ERRORED = True
+    cli_logger.ERRORED = True
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
     assert errors_error_printer.call_count
-    errors.ERRORED = False
+    cli_logger.ERRORED = False
 
 
 def test_extract_when_errored_and_is_not_interactive_does_not_print_error(
     sdk, profile, logger, namespace_with_begin, extractor, error_printer, non_interactive_mode
 ):
-    errors.ERRORED = True
+    cli_logger.ERRORED = True
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
     assert not error_printer.call_count
-    errors.ERRORED = False
+    cli_logger.ERRORED = False
 
 
 def test_extract_when_not_errored_and_is_interactive_does_not_print_error(
     sdk, profile, logger, namespace_with_begin, extractor, error_printer, interactive_mode
 ):
-    errors.ERRORED = False
+    cli_logger.ERRORED = False
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
     assert not error_printer.call_count
-    errors.ERRORED = False
+    cli_logger.ERRORED = False
 
 
 def test_when_sdk_raises_exception_global_variable_gets_set(
     mocker, sdk, profile, logger, namespace_with_begin, mock_42
 ):
-    errors.ERRORED = False
+    cli_logger.ERRORED = False
     mock_sdk = mocker.MagicMock()
 
     # For ease
@@ -563,5 +563,5 @@ def test_when_sdk_raises_exception_global_variable_gets_set(
     )
 
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
-    assert errors.ERRORED
-    errors.ERRORED = False
+    assert cli_logger.ERRORED
+    cli_logger.ERRORED = False

@@ -8,7 +8,15 @@ from code42cli.compat import open
 
 def is_interactive():
     return sys.stdin.isatty()
-    
+
+
+def get_red_text(text, prefix=u"ERROR"):
+    return u"\033[91m{}: {}\033[0m".format(prefix, text)
+
+
+def get_bold_text(text):
+    return u"\033[1m{}\033[0m".format(text)
+
 
 def get_input(prompt):
     """Uses correct input function based on Python version."""
