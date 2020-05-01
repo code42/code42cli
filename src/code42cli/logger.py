@@ -86,7 +86,7 @@ class CliLogger(object):
         `self._info_logger` is what you want to display simple information with, like 
             `profile list`. This does not go to the log file.
             
-        `self._error_logger` is what you want to print in red text to the user in interactive mode.
+        `self._user_error_logger` is what you want to print in red text to the user in interactive mode.
             It also goes to the log file for debugging purposes.
         """
         handlers = [_get_error_log_handler()]
@@ -95,10 +95,10 @@ class CliLogger(object):
         if is_interactive():
             # Add error log handlers to CLI basic output loggers for debugging purposes.
             self._info_logger = get_stream_logger(stream=sys.stdout)
-            self._error_logger = get_stream_logger(stream=sys.stderr, additional_handlers=handlers)
+            self._user_error_logger = get_stream_logger(stream=sys.stderr, additional_handlers=handlers)
         else:
             self._info_logger = None
-            self._error_logger = error_file_logger
+            self._user_error_logger = error_file_logger
 
     def info(self, message):
         if self._info_logger:
@@ -110,7 +110,7 @@ class CliLogger(object):
 
     def error(self, message):
         """Logs red text to stderr and a log file."""
-        self._error_logger.error(u"\033[91mERROR: {}\033[0m".format(message))
+        self._user_error_logger.error(u"\033[91mERROR: {}\033[0m".format(message))
 
     def log_exception_detail_to_file(self, exception):
         self._error_file_logger.error(str(exception))
@@ -154,4 +154,4 @@ def get_main_cli_logger():
 
 if __name__ == "__main__":
     logger = CliLogger()
-    
+    logger.error("TEST")
