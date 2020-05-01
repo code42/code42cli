@@ -20,7 +20,6 @@ from code42cli.logger import (
 
 def get_logger_for_stdout(output_format):
     """Gets the stdout logger for the given format.
-
         Args:
             output_format: CEF, JSON, or RAW_JSON. Each type results in a different logger instance.
     """
@@ -84,7 +83,7 @@ def get_logger_for_server(hostname, protocol, output_format):
 def _init_logger(logger, handler, output_format):
     formatter = _get_formatter(output_format)
     logger.setLevel(logging.INFO)
-    return apply_logger_dependencies(logger, [handler], formatter)
+    return apply_logger_dependencies(logger, handler, formatter)
 
 
 def _get_formatter(output_format):

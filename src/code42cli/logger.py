@@ -10,30 +10,72 @@ logger_deps_lock = Lock()
 ERROR_LOG_FILE_NAME = u"code42_errors.log"
 
 
-def get_stream_logger(
-    stream=sys.stdout, name_suffix=None, formatter=None, additional_handlers=None
-):
-    """Supply additional handlers to log to multiple locations besides stdout."""
-    suffix = name_suffix or u"main"
-    logger = logging.getLogger(u"code42_stdout_{0}".format(suffix))
+def _get_user_error_logger():
+    if is_interactive():
+        return _get_interactive_user_error_logger()
+    else:
+        return _get_error_file_logger()
+
+
+def _get_main_logger(stream_name):
+    return logging.getLogger(u"code42_{}_main".format(stream_name))
+
+
+def _get_interactive_user_error_logger():
+    logger = _get_main_logger("stderr")
     if logger_has_handlers(logger):
         return logger
 
     with logger_deps_lock:
         if not logger_has_handlers(logger):
-            handlers = additional_handlers or []
-            handlers.extend([logging.StreamHandler(stream)])
-            formatter = formatter or logging.Formatter(u"%(message)s")
-            level = logging.ERROR if stream == sys.stderr else logging.INFO
-            logger.setLevel(level)
-            return apply_logger_dependencies(logger, handlers, formatter)
+            stderr_handler = logging.StreamHandler(sys.stderr)
+            stderr_formatter = logging.Formatter(u"%(message)s")
+            stderr_handler.setFormatter(stderr_formatter)
+            
+            file_handler = _create_error_file_handler()
+            file_formatter = logging.Formatter(u"%(asctime)s %(message)s")
+            file_handler.setFormatter(file_formatter)
+            
+            handlers = [stderr_handler, file_handler]
+            for handler in handlers:
+                logger.addHandler(handler)
+
+            logger.setLevel(logging.ERROR)
+            return logger
     return logger
 
 
-def apply_logger_dependencies(logger, handlers, formatter):
-    for handler in handlers:
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
+def _get_info_logger():
+    logger = _get_main_logger("stdout")
+    if logger_has_handlers(logger):
+        return logger
+
+    with logger_deps_lock:
+        if not logger_has_handlers(logger):
+            stderr_handler = logging.StreamHandler(sys.stderr)
+            stderr_formatter = logging.Formatter(u"%(message)s")
+            stderr_handler.setFormatter(stderr_formatter)
+
+            file_handler = _create_error_file_handler()
+            file_formatter = logging.Formatter(u"%(asctime)s %(message)s")
+            file_handler.setFormatter(file_formatter)
+
+            handlers = [stderr_handler, file_handler]
+            for handler in handlers:
+                logger.addHandler(handler)
+            return logger
+    return logger
+
+
+def _create_error_file_handler():
+    log_path = get_user_project_path(u"log")
+    log_path = u"{}/{}".format(log_path, ERROR_LOG_FILE_NAME)
+    return RotatingFileHandler(log_path, maxBytes=250000000, encoding=u"utf-8")
+
+
+def apply_logger_dependencies(logger, handler, formatter):
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
     return logger
 
 
@@ -50,15 +92,9 @@ def _get_error_file_logger(handler=None):
     with logger_deps_lock:
         if not logger_has_handlers(logger):
             formatter = logging.Formatter(u"%(asctime)s %(message)s")
-            handler = handler or _get_error_log_handler()
-            return apply_logger_dependencies(logger, [handler], formatter)
+            handler = handler or _create_error_file_handler()
+            return apply_logger_dependencies(logger, handler, formatter)
     return logger
-
-
-def _get_error_log_handler():
-    log_path = get_user_project_path(u"log")
-    log_path = u"{}/{}".format(log_path, ERROR_LOG_FILE_NAME)
-    return RotatingFileHandler(log_path, maxBytes=250000000, encoding=u"utf-8")
 
 
 def _get_view_exceptions_location_message():
@@ -80,33 +116,24 @@ class CliLogger(object):
     def __init__(self):
         """The following properties explain how to log to different locations:
         
-        `self._error_file_logger` logs directly to the error file is only meant for verbose 
-            debugging information, such as raw exceptions.
-            
         `self._info_logger` is what you want to display simple information with, like 
             `profile list`. This does not go to the log file.
+        
+        `self._error_file_logger` logs directly to the error file is only meant for verbose 
+            debugging information, such as raw exceptions.
             
         `self._user_error_logger` is what you want to print in red text to the user in interactive mode.
             It also goes to the log file for debugging purposes.
         """
-        handlers = [_get_error_log_handler()]
-        error_file_logger = _get_error_file_logger(handler=handlers[0])
-        self._error_file_logger = error_file_logger
-        if is_interactive():
-            # Add error log handlers to CLI basic output loggers for debugging purposes.
-            self._info_logger = get_stream_logger(stream=sys.stdout)
-            self._user_error_logger = get_stream_logger(stream=sys.stderr, additional_handlers=handlers)
-        else:
-            self._info_logger = None
-            self._user_error_logger = error_file_logger
+        self._info_logger = get_stream_logger(stream=sys.stdout)
+        self._user_error_logger = _get_user_error_logger()
+        self._error_file_logger = _get_error_file_logger()
 
     def info(self, message):
-        if self._info_logger:
-            self._info_logger.info(message)
+        self._info_logger.info(message)
 
     def info_bold(self, message):
-        if self._info_logger:
-            self._info_logger.info(u"\033[1m{}\033[0m".format(message))
+        self._info_logger.info(u"\033[1m{}\033[0m".format(message))
 
     def error(self, message):
         """Logs red text to stderr and a log file."""
@@ -154,4 +181,4 @@ def get_main_cli_logger():
 
 if __name__ == "__main__":
     logger = CliLogger()
-    logger.error("TEST")
+    logger.error("TEST3")
