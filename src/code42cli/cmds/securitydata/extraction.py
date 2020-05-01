@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import json
 
 from c42eventextractor import FileEventHandlers
@@ -12,11 +10,11 @@ from code42cli.cmds.securitydata.enums import (
     IS_INCREMENTAL_KEY,
     SearchArguments,
 )
-from code42cli.logger import get_error_logger
 from code42cli.cmds.shared.cursor_store import FileEventCursorStore
 from code42cli.compat import str
-from code42cli.util import is_interactive, print_bold, print_error, print_to_stderr
 import code42cli.errors as errors
+from code42cli.logger import get_main_cli_logger
+from code42cli.util import is_interactive
 
 
 _TOTAL_EVENTS = 0
@@ -62,7 +60,8 @@ def _determine_if_advanced_query(args):
         for key in given_args:
             val = given_args[key]
             if not _verify_compatibility_with_advanced_query(key, val):
-                print_error(u"You cannot use --advanced-query with additional search args.")
+                logger = get_main_cli_logger()
+                logger.error(u"You cannot use --advanced-query with additional search args.")
                 exit(1)
         return True
     return False
@@ -70,10 +69,9 @@ def _determine_if_advanced_query(args):
 
 def _verify_begin_date_requirements(args, cursor_store):
     if _begin_date_is_required(args, cursor_store) and not args.begin:
-        print_error(u"'begin date' is required.")
-        print(u"")
-        print_bold(u"Try using  '-b' or '--begin'. Use `-h` for more info.")
-        print(u"")
+        logger = get_main_cli_logger()
+        logger.error(u"'begin date' is required.\n")
+        logger.info_bold(u"Try using  '-b' or '--begin'. Use `-h` for more info.\n")
         exit(1)
 
 
@@ -94,7 +92,8 @@ def _verify_exposure_types(exposure_types):
     options = list(ExposureTypeOptions())
     for exposure_type in exposure_types:
         if exposure_type not in options:
-            print_error(u"'{0}' is not a valid exposure type.".format(exposure_type))
+            logger = get_main_cli_logger()
+            logger.error(u"'{0}' is not a valid exposure type.".format(exposure_type))
             exit(1)
 
 
@@ -121,16 +120,16 @@ def _get_event_timestamp_filter(begin_date, end_date):
         end_date = end_date.strip() if end_date else None
         return date_helper.create_event_timestamp_filter(begin_date, end_date)
     except date_helper.DateArgumentException as ex:
-        print_error(str(ex))
+        get_main_cli_logger().error(str(ex))
         exit(1)
 
 
 def _create_event_handlers(output_logger, cursor_store):
     handlers = FileEventHandlers()
-    error_logger = get_error_logger()
+    logger = get_main_cli_logger()
 
     def handle_error(exception):
-        error_logger.error(exception)
+        logger.log_exception_detail_to_file(exception)
         errors.ERRORED = True
 
     handlers.handle_error = handle_error
@@ -172,9 +171,17 @@ def _verify_compatibility_with_advanced_query(key, val):
 def _handle_result():
     # Have to call this explicitly (instead of relying on invoker) because errors are caught in
     # `c42eventextractor`.
-    errors.print_errors_occurred_if_needed()
+    logger = get_main_cli_logger()
+    _print_errors_occurred_if_needed(logger)
     if not _TOTAL_EVENTS:
-        print_to_stderr(u"No results found\n")
+        logger.error(u"No results found\n")
+
+
+def _print_errors_occurred_if_needed(logger):
+    """If interactive and errors occurred, it will print a message telling the user how to retrieve 
+    error logs."""
+    if is_interactive() and errors.ERRORED:
+        logger.print_errors_occurred()
 
 
 def _try_append_exposure_types_filter(filters, include_non_exposure_events, exposure_types):
@@ -185,7 +192,7 @@ def _try_append_exposure_types_filter(filters, include_non_exposure_events, expo
 
 def _create_exposure_type_filter(include_non_exposure_events, exposure_types):
     if include_non_exposure_events and exposure_types:
-        print_error(u"Cannot use exposure types with `--include-non-exposure`.")
+        get_main_cli_logger().error(u"Cannot use exposure types with `--include-non-exposure`.")
         exit(1)
     if exposure_types:
         return ExposureType.is_in(exposure_types)

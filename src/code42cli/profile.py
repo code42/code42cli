@@ -1,12 +1,7 @@
 import code42cli.password as password
 from code42cli.cmds.shared.cursor_store import get_file_event_cursor_store
 from code42cli.config import ConfigAccessor, config_accessor, NoConfigProfileError
-from code42cli.util import (
-    print_error,
-    print_create_profile_help,
-    print_set_default_profile_help,
-    print_no_existing_profile_message,
-)
+from code42cli.logger import get_main_cli_logger
 
 
 class Code42Profile(object):
@@ -58,8 +53,9 @@ def get_profile(profile_name=None):
     try:
         return _get_profile(profile_name)
     except NoConfigProfileError as ex:
-        print_error(str(ex))
-        print_create_profile_help()
+        logger = get_main_cli_logger()
+        logger.error(str(ex))
+        logger.print_create_profile_help()
         exit(1)
 
 
@@ -79,11 +75,12 @@ def is_default_profile(name):
 
 def validate_default_profile():
     if not default_profile_exists():
+        logger = get_main_cli_logger()
         existing_profiles = get_all_profiles()
         if not existing_profiles:
-            print_no_existing_profile_message()
+            logger.print_no_existing_profile_message()
         else:
-            print_set_default_profile_help(existing_profiles)
+            logger.print_set_default_profile_help(existing_profiles)
         exit(1)
 
 
@@ -101,7 +98,8 @@ def switch_default_profile(profile_name):
 
 def create_profile(name, server, username, ignore_ssl_errors):
     if profile_exists(name):
-        print_error(u"A profile named {} already exists.".format(name))
+        logger = get_main_cli_logger()
+        logger.error(u"A profile named {} already exists.".format(name))
         exit(1)
 
     config_accessor.create_profile(name, server, username, ignore_ssl_errors)

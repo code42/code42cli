@@ -1,6 +1,6 @@
 from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory
 from code42cli.bulk import generate_template, run_bulk_process, CSVReader, FlatFileReader
-from code42cli.util import print_error
+from code42cli.logger import get_main_cli_logger
 from code42cli.cmds.detectionlists.enums import (
     BulkCommandType,
     DetectionLists,
@@ -183,7 +183,7 @@ def get_user_id(sdk, username):
     users = sdk.users.get_by_username(username)[u"users"]
     if not users:
         ex = UserDoesNotExistError(username)
-        print_error(str(ex))
+        get_main_cli_logger().error(str(ex))
         raise ex
     return users[0][u"userUid"]
 

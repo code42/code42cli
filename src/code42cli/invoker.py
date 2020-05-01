@@ -1,12 +1,9 @@
-from __future__ import print_function
-
 import sys
 
 from py42.exceptions import Py42ForbiddenError
 
 from code42cli.parser import ArgumentParserError, CommandParser
-from code42cli.errors import log_error
-from code42cli.util import print_error
+from code42cli.logger import get_main_cli_logger
 
 
 class CommandInvoker(object):
@@ -28,13 +25,14 @@ class CommandInvoker(object):
             command = self._commands.get(u" ".join(path_parts))
             self._try_run_command(command, path_parts, input_args)
         except Py42ForbiddenError as err:
-            log_error(err)
-            print_error(
+            logger = get_main_cli_logger()
+            logger.log_exception_detail_to_file(err)
+            logger.error(
                 u"You do not have the necessary permissions to perform this task. "
                 u"Try using or creating a different profile."
             )
         except Exception as ex:
-            log_error(ex)
+            get_main_cli_logger().log_exception_detail_to_file(ex)
 
     def _get_path_parts(self, input_args):
         """Gets the portion of `input_args` that refers to a
@@ -75,7 +73,7 @@ class CommandInvoker(object):
                 parser = self._cmd_parser.prepare_command(command, path_parts)
             parsed_args = self._cmd_parser.parse_args(input_args)
             parsed_args.func(parsed_args)
-        except ArgumentParserError as e:
-            print(u"error: {}".format(e), file=sys.stderr)
+        except ArgumentParserError as err:
+            get_main_cli_logger().log_exception_detail_to_file(err)
             parser.print_help(sys.stderr)
             sys.exit(2)

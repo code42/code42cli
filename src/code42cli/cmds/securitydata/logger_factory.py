@@ -9,8 +9,13 @@ from c42eventextractor.logging.formatters import (
 from c42eventextractor.logging.handlers import NoPrioritySysLogHandlerWrapper
 
 from code42cli.cmds.securitydata.enums import OutputFormat
-from code42cli.util import get_url_parts, print_error
-from code42cli.logger import logger_has_handlers, logger_deps_lock, apply_logger_dependencies
+from code42cli.util import get_url_parts
+from code42cli.logger import (
+    logger_has_handlers,
+    logger_deps_lock,
+    apply_logger_dependencies,
+    get_main_cli_logger,
+)
 
 
 def get_logger_for_stdout(output_format):
@@ -69,7 +74,8 @@ def get_logger_for_server(hostname, protocol, output_format):
                     url_parts[0], port=port, protocol=protocol
                 ).handler
             except:
-                print_error(u"Unable to connect to {0}.".format(hostname))
+                logger = get_main_cli_logger()
+                logger.error(u"Unable to connect to {0}.".format(hostname))
                 exit(1)
             return _init_logger(logger, handler, output_format)
     return logger

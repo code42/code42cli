@@ -4,14 +4,15 @@ from logging.handlers import RotatingFileHandler
 from threading import Lock
 
 from code42cli.compat import str
-from code42cli.util import get_user_project_path, get_red_text, is_interactive
-import code42cli.errors as errors
+from code42cli.util import get_user_project_path, is_interactive
 
 logger_deps_lock = Lock()
 ERROR_LOG_FILE_NAME = u"code42_errors.log"
 
 
-def get_stream_logger(stream=sys.stdout, name_suffix=None, formatter=None, additional_handlers=None):
+def get_stream_logger(
+    stream=sys.stdout, name_suffix=None, formatter=None, additional_handlers=None
+):
     """Supply additional handlers to log to multiple locations besides stdout."""
     suffix = name_suffix or u"main"
     logger = logging.getLogger(u"code42_stdout_{0}".format(suffix))
@@ -40,7 +41,7 @@ def logger_has_handlers(logger):
     return len(logger.handlers)
 
 
-def get_error_file_logger(handler=None):
+def _get_error_file_logger(handler=None):
     """Gets the logger where raw exceptions are logged."""
     logger = logging.getLogger(u"code42_error_logger")
     if logger_has_handlers(logger):
@@ -49,7 +50,7 @@ def get_error_file_logger(handler=None):
     with logger_deps_lock:
         if not logger_has_handlers(logger):
             formatter = logging.Formatter(u"%(asctime)s %(message)s")
-            handler = handler or get_error_log_handler()
+            handler = handler or _get_error_log_handler()
 
             # Can't use apply_logger_dependencies() in case it raises an exception and causes
             # a stack overflow.
@@ -59,52 +60,49 @@ def get_error_file_logger(handler=None):
     return logger
 
 
-def get_error_log_handler():
+def _get_error_log_handler():
     log_path = get_user_project_path(u"log")
     log_path = u"{}/{}".format(log_path, ERROR_LOG_FILE_NAME)
     return RotatingFileHandler(log_path, maxBytes=250000000, encoding=u"utf-8")
 
 
-# def log_error_to_log_file(cmd, exception, additional_info=None):
-#     """Logs the error to the CLI error log file. If running interactively, it will also print a 
-#     message telling the user the location of the error log file."""
-#     logger = get_error_file_logger()
-#     logger.error(
-#         u"Exception {} raised during invocation of '{}'. Additional info: {}".format(
-#             str(exception), cmd.invocation, additional_info
-#         )
-#     )
-#     errors.ERRORED = True
-#     logger = get_main_cli_logger()
-#     logger.print_errors_occurred(additional_info)
-
-
-# def get_view_exceptions_location_message():
-#     """Returns the error message that is printed when errors occur."""
-#     path = get_user_project_path(u"log")
-#     return u"View exceptions that occurred at {}/{}.".format(path, ERROR_LOG_FILE_NAME)
+def get_view_exceptions_location_message():
+    """Returns the error message that is printed when errors occur."""
+    path = get_user_project_path(u"log")
+    return u"View exceptions that occurred at {}/{}.".format(path, ERROR_LOG_FILE_NAME)
 
 
 class CliLogger(object):
     """There are three loggers part of the CliLogger. The following table illustrates where they 
     log too in both interactive mode and non-interactive mode.
     
-    | interactive mode | info logger       | error logger      | error file logger
-    ------------------------------------------------------------------------------
-    | True             | stdout + log file | stderr + log file | log file
-    | False            | log file          | log file          | log file
+    | interactive | info     | error            | error file
+    --------------------------------------------------------
+    | True        | stdout   | stderr, log file | log file
+    | False       | no where | log file         | log file
     """
 
     def __init__(self):
-        handlers = [get_error_log_handler()]
-        error_file_logger = get_error_file_logger(handler=handlers[0])
+        """The following properties explain how to log to different locations:
+        
+        `self._error_file_logger` logs directly to the error file is only meant for verbose 
+            debugging information, such as raw exceptions.
+            
+        `self._info_logger` is what you want to display simple information with, like 
+            `profile list`. This does not go to the log file.
+            
+        `self._error_logger` is what you want to print in red text to the user in interactive mode.
+            It also goes to the log file for debugging purposes.
+        """
+        handlers = [_get_error_log_handler()]
+        error_file_logger = _get_error_file_logger(handler=handlers[0])
         self._error_file_logger = error_file_logger
         if is_interactive():
             # Add error log handlers to CLI basic output loggers for debugging purposes.
-            self._info_logger = get_stream_logger(stream=sys.stdout, additional_handlers=handlers)
+            self._info_logger = get_stream_logger(stream=sys.stdout)
             self._error_logger = get_stream_logger(stream=sys.stderr, additional_handlers=handlers)
         else:
-            self._info_logger = error_file_logger
+            self._info_logger = None
             self._error_logger = error_file_logger
 
     def info(self, message):
@@ -116,6 +114,10 @@ class CliLogger(object):
     def error(self, message):
         """Logs red text to stderr and a log file."""
         self._error_logger.error(u"\033[91mERROR: {}\033[0m".format(message))
+
+    def log_exception_detail_to_file(self, exception):
+        self._error_file_logger.error(str(exception))
+        self.print_errors_occurred()
 
     def print_errors_occurred(self, additional_info=None):
         """Prints a message telling the user how to retrieve error logs."""
