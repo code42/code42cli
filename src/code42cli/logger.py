@@ -51,12 +51,7 @@ def _get_error_file_logger(handler=None):
         if not logger_has_handlers(logger):
             formatter = logging.Formatter(u"%(asctime)s %(message)s")
             handler = handler or _get_error_log_handler()
-
-            # Can't use apply_logger_dependencies() in case it raises an exception and causes
-            # a stack overflow.
-            handler.setFormatter(formatter)
-            logger.addHandler(handler)
-            return logger
+            return apply_logger_dependencies(logger, [handler], formatter)
     return logger
 
 
@@ -155,3 +150,8 @@ class CliLogger(object):
 
 def get_main_cli_logger():
     return CliLogger()
+
+
+if __name__ == "__main__":
+    logger = CliLogger()
+    

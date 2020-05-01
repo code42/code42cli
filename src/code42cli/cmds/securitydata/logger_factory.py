@@ -84,7 +84,7 @@ def get_logger_for_server(hostname, protocol, output_format):
 def _init_logger(logger, handler, output_format):
     formatter = _get_formatter(output_format)
     logger.setLevel(logging.INFO)
-    return apply_logger_dependencies(logger, handler, formatter)
+    return apply_logger_dependencies(logger, [handler], formatter)
 
 
 def _get_formatter(output_format):
