@@ -114,8 +114,7 @@ class TestBulkProcessor(object):
         assert (1, 2) in processed_rows
         assert (3, 4) in processed_rows
         assert (5, 6) in processed_rows
-        
-    
+
     def test_run_when_reader_returns_dict_process_kwargs(self, mock_open):
         errors.ERRORED = False
         processed_rows = []
