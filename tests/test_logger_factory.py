@@ -28,11 +28,11 @@ def test_get_logger_for_stdout_when_given_formatter_uses_expected_formatter():
 
 
 def test_get_error_logger_when_called_twice_only_sets_handler_once():
-    _ = factory.get_error_logger()
-    logger = factory.get_error_logger()
+    _ = factory.get_exception_logger()
+    logger = factory.get_exception_logger()
     assert len(logger.handlers) == 1
 
 
 def test_get_error_logger_uses_rotating_file_handler():
-    logger = factory.get_error_logger()
+    logger = factory.get_exception_logger()
     assert type(logger.handlers[0]) == RotatingFileHandler

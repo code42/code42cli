@@ -6,7 +6,7 @@ from py42.exceptions import Py42ForbiddenError
 
 from code42cli import MAIN_COMMAND
 from code42cli.parser import ArgumentParserError, CommandParser
-from code42cli.logger import get_main_cli_logger
+from code42cli.logger import get_main_cli_logger, get_exception_logger
 
 
 class CommandInvoker(object):
@@ -15,6 +15,7 @@ class CommandInvoker(object):
         self._cmd_parser = cmd_parser or CommandParser()
         self._commands = {u"": self._top_command}
         self._log = get_main_cli_logger()
+        self._exception_log = get_exception_logger()
 
     def run(self, input_args):
         """Locates a command that matches the one specified by
@@ -31,7 +32,7 @@ class CommandInvoker(object):
             command.invocation = u"{} {}".format(MAIN_COMMAND, u" ".join(input_args))
             self._try_run_command(command, path_parts, input_args)
         except Py42ForbiddenError as err:
-            self._log.log_error_to_log_file(
+            self._log.error(
                 command,
                 err,
                 u"You do not have the necessary permissions to perform this task. "
@@ -39,9 +40,7 @@ class CommandInvoker(object):
             )
 
         except FileNotFoundError as err:
-            self._log.log_error_to_log_file(
-                command, err, u"File '{}' was not found.".format(err.filename)
-            )
+            self._log.error(command, err, u"File '{}' was not found.".format(err.filename))
 
         except Exception as err:
             self._log.log_error_to_log_file(command, err)

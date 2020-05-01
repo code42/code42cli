@@ -22,7 +22,7 @@ class ConfigAccessor(object):
     DEFAULT_PROFILE = u"default_profile"
     _INTERNAL_SECTION = u"Internal"
 
-    def __init__(self, parser):
+    def __init__(self, parser, logger=None):
         self.parser = parser
         self.path = u"{}config.cfg".format(util.get_user_project_path())
         if not os.path.exists(self.path):
@@ -30,7 +30,7 @@ class ConfigAccessor(object):
             self._save()
         else:
             self.parser.read(self.path)
-        self.log = get_main_cli_logger()
+        self.log = logger or get_main_cli_logger()
 
     def get_profile(self, name=None):
         """Returns the profile with the given name.
@@ -145,11 +145,12 @@ class ConfigAccessor(object):
             return
 
         self._save()
-        self.log.info(u"Successfully saved profile '{}'.".format(profile.name))
 
         default_profile = self._internal.get(self.DEFAULT_PROFILE)
         if default_profile is None or default_profile == self.DEFAULT_VALUE:
             self.switch_default_profile(profile.name)
+
+        self.log.info(u"Successfully saved profile '{}'.".format(profile.name))
 
 
 config_accessor = ConfigAccessor(ConfigParser())

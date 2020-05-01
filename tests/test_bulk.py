@@ -4,7 +4,7 @@ import pytest
 
 from code42cli import PRODUCT_NAME
 from code42cli import errors as errors
-from code42cli.out import get_view_exceptions_location_message
+from code42cli.logger import get_view_exceptions_location_message
 from code42cli.bulk import generate_template, BulkProcessor, run_bulk_process, CSVReader
 
 _NAMESPACE = "{}.bulk".format(PRODUCT_NAME)
@@ -27,6 +27,13 @@ def bulk_processor_factory(mocker, bulk_processor):
     mock_factory = mocker.patch("{}._create_bulk_processor".format(_NAMESPACE))
     mock_factory.return_value = bulk_processor
     return mock_factory
+
+
+@pytest.fixture
+def bulk_logger(mocker, mock_logger):
+    factory = mocker.patch("{}.get_main_cli_logger".format(_NAMESPACE))
+    factory.return_value = mock_logger
+    return mock_logger
 
 
 def func_with_multiple_args(sdk, profile, test1, test2):
@@ -55,12 +62,11 @@ def test_generate_template_when_handler_has_one_arg_creates_file_without_columns
     assert not template_file.write.call_count
 
 
-def test_generate_template_when_handler_has_one_arg_prints_message(mock_open, capsys):
+def test_generate_template_when_handler_has_one_arg_prints_message(mock_open, bulk_logger):
     generate_template(func_with_one_arg, "some/path")
-    capture = capsys.readouterr()
-    assert (
+    bulk_logger.info.assert_called_once_with(
         u"A blank file was generated because there are no csv headers needed for this command. "
-        u"Simply enter one test1 per line." in capture.out
+        u"Simply enter one test1 per line."
     )
 
 
@@ -169,7 +175,7 @@ class TestBulkProcessor(object):
         assert "row2" in processed_rows
         assert "row3" in processed_rows
 
-    def test_run_when_error_occurs_prints_error_messages(self, mock_open, capsys):
+    def test_run_when_error_occurs_prints_error_messages(self, mock_open, bulk_logger):
         errors.ERRORED = False
 
         def func_for_bulk(test):
@@ -182,12 +188,12 @@ class TestBulkProcessor(object):
 
         processor = BulkProcessor("some/path", func_for_bulk, MockRowReader())
         processor.run()
-        capture = capsys.readouterr()
-        assert "2 processed successfully out of 3." in capture.out
-        # assert view_exceptions_location_message_printed(capture.out)
+
+        bulk_logger.info.assert_called_once_with("2 processed successfully out of 3.")
+        assert bulk_logger.print_errors_occurred.call_count == 1
         errors.ERRORED = False
 
-    def test_run_when_no_errors_occur_prints_success_messages(self, mock_open, capsys):
+    def test_run_when_no_errors_occur_prints_success_messages(self, mock_open, bulk_logger):
         errors.ERRORED = False
 
         def func_for_bulk(test):
@@ -199,11 +205,10 @@ class TestBulkProcessor(object):
 
         processor = BulkProcessor("some/path", func_for_bulk, MockRowReader())
         processor.run()
-        capture = capsys.readouterr()
-        assert "3 processed successfully out of 3." in capture.out
-        assert not view_exceptions_location_message_printed(capture.out)
+        bulk_logger.info.assert_called_once_with("3 processed successfully out of 3.")
+        assert not bulk_logger.print_errors_occurred.call_count
 
-    def test_run_when_row_is_endline_does_not_process_row(self, mock_open, capsys):
+    def test_run_when_row_is_endline_does_not_process_row(self, mock_open, bulk_logger):
         errors.ERRORED = False
 
         def func_for_bulk(test):
@@ -215,9 +220,6 @@ class TestBulkProcessor(object):
 
         processor = BulkProcessor("some/path", func_for_bulk, MockRowReader())
         processor.run()
-        capture = capsys.readouterr()
-        assert "2 processed successfully out of 2." in capture.out
 
-
-def view_exceptions_location_message_printed(capture_out):
-    return get_view_exceptions_location_message() not in capture_out
+        bulk_logger.info.assert_called_once_with("2 processed successfully out of 2.")
+        assert not bulk_logger.print_errors_occurred.call_count

@@ -35,7 +35,7 @@ def apply_logger_dependencies(logger, handlers, formatter):
             handler.setFormatter(formatter)
             logger.addHandler(handler)
     except Exception as ex:
-        logger = get_error_logger()
+        logger = get_exception_logger()
         logger.error(str(ex))
     return logger
 
@@ -44,7 +44,7 @@ def logger_has_handlers(logger):
     return len(logger.handlers)
 
 
-def get_error_logger():
+def get_exception_logger():
     """Gets the logger where raw exceptions are logged."""
     logger = logging.getLogger(u"code42_error_logger")
     if logger_has_handlers(logger):
@@ -72,14 +72,14 @@ def get_error_log_handler():
 def log_error_to_log_file(cmd, exception, additional_info=None):
     """Logs the error to the CLI error log file. If running interactively, it will also print a 
     message telling the user the location of the error log file."""
-    logger = get_error_logger()
+    logger = get_exception_logger()
     logger.error(
         u"Exception {} raised during invocation of '{}'. Additional info: {}".format(
             str(exception), cmd.invocation, additional_info
         )
     )
     errors.ERRORED = True
-    logger = CliLogger()
+    logger = get_main_cli_logger()
     logger.print_errors_occurred_if_needed(additional_info)
 
 
@@ -97,7 +97,7 @@ class CliLogger(object):
         if is_interactive():
             self._logger = get_logger_for_stdout(additional_handlers=[get_error_log_handler()])
         else:
-            self._logger = get_error_logger()
+            self._logger = get_exception_logger()
 
     def info(self, message):
         self._logger.info(message)
@@ -108,12 +108,6 @@ class CliLogger(object):
     def error(self, message):
         """Prints red text."""
         self._logger.error(get_red_text(message))
-
-    def print_errors_occurred_if_needed(self, additional_info=None):
-        """If interactive and errors occurred, it will print a message telling the user how to retrieve 
-        error logs."""
-        if is_interactive() and errors.ERRORED:
-            self.print_errors_occurred(additional_info)
 
     def print_errors_occurred(self, additional_info=None):
         """Prints a message telling the user how to retrieve error logs."""

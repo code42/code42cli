@@ -4,7 +4,7 @@ import csv
 
 from code42cli.compat import open, str
 from code42cli.worker import Worker
-from code42cli.out import print_errors_occurred, cli_out
+from code42cli.logger import get_main_cli_logger
 from code42cli.args import SDK_ARG_NAME, PROFILE_ARG_NAME
 
 
@@ -21,7 +21,8 @@ def generate_template(handler, path=None):
     ]
 
     if len(args) <= 1:
-        cli_out.info(
+        logger = get_main_cli_logger()
+        logger.info(
             u"A blank file was generated because there are no csv headers needed for this command. "
             u"Simply enter one {} per line.".format(args[0])
         )
@@ -103,9 +104,10 @@ class BulkProcessor(object):
     def _print_result(self):
         stats = self.__worker.stats
         successes = stats.total - stats.total_errors
-        cli_out.info(u"{} processed successfully out of {}.".format(successes, stats.total))
+        logger = get_main_cli_logger()
+        logger.info(u"{} processed successfully out of {}.".format(successes, stats.total))
         if stats.total_errors:
-            print_errors_occurred()
+            logger.print_errors_occurred()
 
 
 class CSVReader(object):

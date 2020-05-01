@@ -15,7 +15,7 @@ from code42cli.cmds.securitydata.enums import (
 from code42cli.cmds.shared.cursor_store import FileEventCursorStore
 from code42cli.compat import str
 import code42cli.errors as errors
-from code42cli.logger import get_error_logger, get_main_cli_logger
+from code42cli.logger import get_exception_logger, get_main_cli_logger
 
 
 _TOTAL_EVENTS = 0
@@ -125,7 +125,7 @@ def _get_event_timestamp_filter(begin_date, end_date):
 
 def _create_event_handlers(output_logger, cursor_store):
     handlers = FileEventHandlers()
-    error_logger = get_error_logger()
+    error_logger = get_exception_logger()
 
     def handle_error(exception):
         error_logger.error(exception)

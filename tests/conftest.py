@@ -6,6 +6,7 @@ from py42.sdk import SDKClient
 
 from code42cli.config import ConfigAccessor
 from code42cli.profile import Code42Profile
+from code42cli.logger import CliLogger
 
 
 @pytest.fixture
@@ -31,6 +32,11 @@ def namespace(mocker):
     mock.server = None
     mock.protocol = None
     return mock
+
+
+@pytest.fixture(autouse=True)
+def mock_logger(mocker):
+    return mocker.MagicMock(spec=CliLogger)
 
 
 def create_profile_values_dict(authority=None, username=None, ignore_ssl=False):
