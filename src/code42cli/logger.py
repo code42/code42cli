@@ -106,10 +106,12 @@ class CliLogger(object):
             self._error_logger = error_file_logger
 
     def info(self, message):
-        self._info_logger.info(message)
+        if self._info_logger:
+            self._info_logger.info(message)
 
     def info_bold(self, message):
-        self._info_logger.info(u"\033[1m{}\033[0m".format(message))
+        if self._info_logger:
+            self._info_logger.info(u"\033[1m{}\033[0m".format(message))
 
     def error(self, message):
         """Logs red text to stderr and a log file."""
@@ -117,11 +119,16 @@ class CliLogger(object):
 
     def log_exception_detail_to_file(self, exception):
         self._error_file_logger.error(str(exception))
-        self.print_errors_occurred()
 
     def print_errors_occurred(self, additional_info=None):
         """Prints a message telling the user how to retrieve error logs."""
-        self.error(u"{}\n{}".format(additional_info, get_view_exceptions_location_message()))
+        locations_message = get_view_exceptions_location_message()
+        message = (
+            u"{}\n{}".format(additional_info, locations_message)
+            if additional_info
+            else locations_message
+        )
+        self.error(message)
 
     def print_no_existing_profile_message(self):
         self.error(u"No existing profile.")

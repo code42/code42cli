@@ -55,7 +55,11 @@ def get_profile(profile_name=None):
     except NoConfigProfileError as ex:
         logger = get_main_cli_logger()
         logger.error(str(ex))
-        logger.print_create_profile_help()
+
+        if not default_profile_exists():
+            logger.print_create_profile_help()
+        else:
+            get_all_profiles()
         exit(1)
 
 
@@ -93,7 +97,8 @@ def profile_exists(profile_name=None):
 
 
 def switch_default_profile(profile_name):
-    config_accessor.switch_default_profile(profile_name)
+    profile = get_profile(profile_name)  # Handles if profile does not exist.
+    config_accessor.switch_default_profile(profile.name)
 
 
 def create_profile(name, server, username, ignore_ssl_errors):

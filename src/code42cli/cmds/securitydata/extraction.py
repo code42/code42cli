@@ -14,7 +14,6 @@ from code42cli.cmds.shared.cursor_store import FileEventCursorStore
 from code42cli.compat import str
 import code42cli.errors as errors
 from code42cli.logger import get_main_cli_logger
-from code42cli.util import is_interactive
 
 
 _TOTAL_EVENTS = 0
@@ -180,7 +179,7 @@ def _handle_result():
 def _print_errors_occurred_if_needed(logger):
     """If interactive and errors occurred, it will print a message telling the user how to retrieve 
     error logs."""
-    if is_interactive() and errors.ERRORED:
+    if errors.ERRORED:
         logger.print_errors_occurred()
 
 
