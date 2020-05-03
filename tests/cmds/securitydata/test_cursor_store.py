@@ -1,6 +1,7 @@
 from os import path
 
-from c42eventextractor.extractors import INSERTION_TIMESTAMP_FIELD_NAME
+INSERTION_TIMESTAMP_FIELD_NAME = u"insertionTimestamp"
+DATE_OBSERVED_TIMESTAMP_FIELD_NAME = u"createdAt"
 
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.shared.cursor_store import BaseCursorStore, FileEventCursorStore
@@ -40,7 +41,7 @@ class TestFileEventCursorStore(object):
 
     def test_get_stored_insertion_timestamp_executes_expected_select_query(self, sqlite_connection):
         store = FileEventCursorStore("Profile", self.MOCK_TEST_DB_NAME)
-        store.get_stored_insertion_timestamp()
+        store.get_stored_cursor_timestamp()
         with store._connection as conn:
             expected = "SELECT {0} FROM file_event_checkpoints WHERE cursor_id=?".format(
                 INSERTION_TIMESTAMP_FIELD_NAME
@@ -52,7 +53,7 @@ class TestFileEventCursorStore(object):
         self, sqlite_connection
     ):
         store = FileEventCursorStore("Profile", self.MOCK_TEST_DB_NAME)
-        store.get_stored_insertion_timestamp()
+        store.get_stored_cursor_timestamp()
         with store._connection as conn:
             actual = conn.cursor().execute.call_args[0][1][0]
             expected = store._primary_key
@@ -62,7 +63,7 @@ class TestFileEventCursorStore(object):
         self, sqlite_connection
     ):
         store = FileEventCursorStore("Profile", self.MOCK_TEST_DB_NAME)
-        store.replace_stored_insertion_timestamp(123)
+        store.replace_stored_cursor_timestamp(123)
         with store._connection as conn:
             expected = "UPDATE file_event_checkpoints SET {0}=? WHERE cursor_id=?".format(
                 INSERTION_TIMESTAMP_FIELD_NAME
@@ -75,7 +76,7 @@ class TestFileEventCursorStore(object):
     ):
         store = FileEventCursorStore("Profile", self.MOCK_TEST_DB_NAME)
         new_insertion_timestamp = 123
-        store.replace_stored_insertion_timestamp(new_insertion_timestamp)
+        store.replace_stored_cursor_timestamp(new_insertion_timestamp)
         with store._connection as conn:
             actual = conn.execute.call_args[0][1][0]
             assert actual == new_insertion_timestamp

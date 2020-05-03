@@ -5,7 +5,9 @@ import pytest
 from code42cli import PRODUCT_NAME
 from ...conftest import convert_str_to_date
 
+SHARED_NAMESPACE = "{}.cmds.shared".format(PRODUCT_NAME)
 SECURITYDATA_NAMESPACE = "{}.cmds.securitydata".format(PRODUCT_NAME)
+ALERTS_NAMESPACE = "{}.cmds.alerts".format(PRODUCT_NAME)
 
 
 def get_filter_value_from_json(json, filter_index):
