@@ -11,6 +11,8 @@ from code42cli.profile import Code42Profile
 @pytest.fixture
 def namespace(mocker):
     mock = mocker.MagicMock(spec=Namespace)
+    mock.sdk = mock_42
+    mock.profile = create_mock_profile
     mock.incremental = None
     mock.advanced_query = None
     mock.begin = None
@@ -30,6 +32,7 @@ def namespace(mocker):
     mock.output_file = None
     mock.server = None
     mock.protocol = None
+    mock._dict = mock.__dict__
     return mock
 
 
