@@ -1,5 +1,5 @@
 from code42cli.args import ArgConfig
-from code42cli.cmds.securitydata import enums, logger_factory
+from code42cli.cmds.shared import enums, logger_factory
 from code42cli.cmds.securitydata.extraction import extract
 from code42cli.cmds.shared.cursor_store import FileEventCursorStore
 from code42cli.commands import Command
@@ -51,7 +51,7 @@ def clear_checkpoint(sdk, profile):
         To use, run `code42 security-data clear-checkpoint`.
         This affects `incremental` mode by causing it to behave like it has never been run before.
     """
-    FileEventCursorStore(profile.name).replace_stored_insertion_timestamp(None)
+    FileEventCursorStore(profile.name).replace_stored_cursor_timestamp(None)
 
 
 def print_out(sdk, profile, args):
