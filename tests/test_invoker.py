@@ -1,5 +1,8 @@
 import pytest
 
+from requests.exceptions import HTTPError
+from requests import Response
+
 from py42.exceptions import Py42ForbiddenError
 
 from code42cli import PRODUCT_NAME
@@ -74,8 +77,10 @@ class TestCommandInvoker(object):
 
     def test_run_when_forbidden_error_occurs_prints_message(self, mocker, mock_parser, capsys):
         mocker.patch("{}.invoker.log_error".format(PRODUCT_NAME))
+        http_error = mocker.MagicMock(spec=HTTPError)
+        http_error.response = mocker.MagicMock(spec=Response)
         cmd = Command("", "top level desc", subcommand_loader=load_subcommands)
-        mock_parser.parse_args.side_effect = Py42ForbiddenError(Exception())
+        mock_parser.parse_args.side_effect = Py42ForbiddenError(http_error)
         mock_subparser = mocker.MagicMock()
         mock_parser.prepare_command.return_value = mock_subparser
         invoker = CommandInvoker(cmd, mock_parser)

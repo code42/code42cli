@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from io import IOBase
 import pytest
 
@@ -93,6 +94,28 @@ def test_run_bulk_process_when_not_given_reader_uses_csv_reader(bulk_processor_f
 
 
 class TestBulkProcessor(object):
+    def test_run_when_reader_returns_ordered_dict_process_kwargs(self, mock_open):
+        errors.ERRORED = False
+        processed_rows = []
+
+        def func_for_bulk(test1, test2):
+            processed_rows.append((test1, test2))
+
+        class MockDictReader(object):
+            def __call__(self, *args, **kwargs):
+                return [
+                    OrderedDict({"test1": 1, "test2": 2}),
+                    OrderedDict({"test1": 3, "test2": 4}),
+                    OrderedDict({"test1": 5, "test2": 6}),
+                ]
+
+        processor = BulkProcessor("some/path", func_for_bulk, MockDictReader())
+        processor.run()
+        assert (1, 2) in processed_rows
+        assert (3, 4) in processed_rows
+        assert (5, 6) in processed_rows
+        
+    
     def test_run_when_reader_returns_dict_process_kwargs(self, mock_open):
         errors.ERRORED = False
         processed_rows = []
