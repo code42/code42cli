@@ -1,4 +1,5 @@
 import pytest
+import logging
 
 from code42cli.cmds.detectionlists import UserDoesNotExistError
 from code42cli.cmds.detectionlists.departing_employee import (
@@ -36,13 +37,13 @@ def test_add_departing_employee_when_user_does_not_exist_exits(sdk_without_user,
 
 
 def test_add_departing_employee_when_user_does_not_exist_prints_error(
-    sdk_without_user, profile, capsys
+    sdk_without_user, profile, caplog
 ):
-    try:
-        add_departing_employee(sdk_without_user, profile, _EMPLOYEE)
-    except UserDoesNotExistError:
-        capture = capsys.readouterr()
-        assert str(UserDoesNotExistError(_EMPLOYEE)) in capture.out
+    with caplog.at_level(logging.ERROR):
+        try:
+            add_departing_employee(sdk_without_user, profile, _EMPLOYEE)
+        except UserDoesNotExistError:
+            assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text
 
 
 def test_remove_departing_employee_calls_remove(sdk_with_user, profile):
@@ -56,10 +57,10 @@ def test_remove_departing_employee_when_user_does_not_exist_exits(sdk_without_us
 
 
 def test_remove_departing_employee_when_user_does_not_exist_prints_error(
-    sdk_without_user, profile, capsys
+    sdk_without_user, profile, caplog
 ):
-    try:
-        remove_departing_employee(sdk_without_user, profile, _EMPLOYEE)
-    except UserDoesNotExistError:
-        capture = capsys.readouterr()
-        assert str(UserDoesNotExistError(_EMPLOYEE)) in capture.out
+    with caplog.at_level(logging.ERROR):
+        try:
+            remove_departing_employee(sdk_without_user, profile, _EMPLOYEE)
+        except UserDoesNotExistError:
+            assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text

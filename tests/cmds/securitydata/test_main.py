@@ -16,7 +16,7 @@ def mock_extract(mocker):
 
 def test_print_out(sdk, profile, namespace, mocker, mock_logger_factory, mock_extract):
     logger = mocker.MagicMock()
-    mock_logger_factory.get_stream_logger.return_value = logger
+    mock_logger_factory.get_logger_for_stdout.return_value = logger
     main.print_out(sdk, profile, namespace)
     mock_extract.assert_called_with(sdk, profile, logger, namespace)
 

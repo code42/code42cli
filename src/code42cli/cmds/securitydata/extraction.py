@@ -180,7 +180,7 @@ def _print_errors_occurred_if_needed(logger):
     """If interactive and errors occurred, it will print a message telling the user how to retrieve 
     error logs."""
     if errors.ERRORED:
-        logger.print_errors_occurred()
+        logger.log_errors_occurred_message()
 
 
 def _try_append_exposure_types_filter(filters, include_non_exposure_events, exposure_types):

@@ -103,12 +103,11 @@ class BulkProcessor(object):
     def _print_result(self):
         stats = self.__worker.stats
         successes = stats.total - stats.total_errors
-        get_main_cli_logger().info(
-            u"{} processed successfully out of {}.".format(successes, stats.total)
-        )
+        logger = get_main_cli_logger()
+        logger.info(u"{} processed successfully out of {}.".format(successes, stats.total))
         if stats.total_errors:
-            logger = get_main_cli_logger()
-            logger.print_errors_occurred()
+            logger = logger
+            logger.log_errors_occurred_message()
 
 
 class CSVReader(object):

@@ -123,7 +123,7 @@ def list_profiles(*args):
     profiles = cliprofile.get_all_profiles()
     logger = get_main_cli_logger()
     if not profiles:
-        logger.print_no_existing_profile_message()
+        logger.log_no_existing_profile()
         return
     for profile in profiles:
         logger.info(str(profile))

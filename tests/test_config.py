@@ -2,6 +2,7 @@ from __future__ import with_statement
 
 import pytest
 from configparser import ConfigParser
+import logging
 
 from code42cli import PRODUCT_NAME
 from code42cli.config import ConfigAccessor, NoConfigProfileError
@@ -143,12 +144,12 @@ class TestConfigAccessor(object):
         assert mock_saver.call_count
 
     def test_switch_default_profile_outputs_confirmation(
-        self, capsys, config_parser_for_multiple_profiles, mock_saver
+        self, caplog, config_parser_for_multiple_profiles, mock_saver
     ):
         accessor = ConfigAccessor(config_parser_for_multiple_profiles)
-        accessor.switch_default_profile(_TEST_SECOND_PROFILE_NAME)
-        capture = capsys.readouterr()
-        assert "set as the default profile" in capture.out
+        with caplog.at_level(logging.INFO):
+            accessor.switch_default_profile(_TEST_SECOND_PROFILE_NAME)
+            assert "set as the default profile" in caplog.text
 
     def test_create_profile_when_given_default_name_does_not_create(self, config_parser_for_create):
         accessor = ConfigAccessor(config_parser_for_create)
@@ -189,15 +190,15 @@ class TestConfigAccessor(object):
         assert mock_saver.call_count
 
     def test_create_profile_when_not_existing_outputs_confirmation(
-        self, capsys, config_parser_for_create, mock_saver
+        self, caplog, config_parser_for_create, mock_saver
     ):
         mock_internal = create_internal_object(False)
         setup_parser_one_profile(mock_internal, mock_internal, config_parser_for_create)
         accessor = ConfigAccessor(config_parser_for_create)
 
-        accessor.create_profile(_TEST_PROFILE_NAME, "example.com", "bar", False)
-        capture = capsys.readouterr()
-        assert "Successfully saved" in capture.out
+        with caplog.at_level(logging.INFO):
+            accessor.create_profile(_TEST_PROFILE_NAME, "example.com", "bar", False)
+            assert "Successfully saved" in caplog.text
 
     def test_update_profile_when_no_profile_exists_raises_exception(
         self, config_parser_for_multiple_profiles

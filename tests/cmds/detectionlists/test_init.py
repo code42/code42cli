@@ -1,4 +1,5 @@
 import pytest
+import logging
 
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.detectionlists import (
@@ -10,6 +11,7 @@ from code42cli.cmds.detectionlists import (
 )
 from code42cli.cmds.detectionlists.enums import BulkCommandType
 from .conftest import TEST_ID
+
 
 _NAMESPACE = "{}.cmds.detectionlists".format(PRODUCT_NAME)
 
@@ -29,12 +31,12 @@ def test_get_user_id_when_user_does_not_raise_error(sdk_without_user):
         get_user_id(sdk_without_user, "risky employee")
 
 
-def test_get_user_id_when_user_does_not_exist_prints_error(sdk_without_user, capsys):
-    try:
-        get_user_id(sdk_without_user, "risky employee")
-    except UserDoesNotExistError:
-        capture = capsys.readouterr()
-        assert "ERROR: User 'risky employee' does not exist." in capture.out
+def test_get_user_id_when_user_does_not_exist_logs_error(sdk_without_user, caplog):
+    with caplog.at_level(logging.ERROR):
+        try:
+            get_user_id(sdk_without_user, "risky employee")
+        except UserDoesNotExistError:
+            assert "ERROR: User 'risky employee' does not exist." in caplog.text
 
 
 def test_update_user_adds_cloud_alias(sdk_with_user, profile):

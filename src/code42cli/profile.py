@@ -57,7 +57,7 @@ def get_profile(profile_name=None):
         logger.error(str(ex))
 
         if not default_profile_exists():
-            logger.print_create_profile_help()
+            logger.log_create_profile_help()
         else:
             get_all_profiles()
         exit(1)
@@ -82,9 +82,9 @@ def validate_default_profile():
         logger = get_main_cli_logger()
         existing_profiles = get_all_profiles()
         if not existing_profiles:
-            logger.print_no_existing_profile_message()
+            logger.log_no_existing_profile()
         else:
-            logger.print_set_default_profile_help(existing_profiles)
+            logger.log_set_default_profile_help(existing_profiles)
         exit(1)
 
 

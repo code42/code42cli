@@ -6,6 +6,7 @@ from threading import Lock
 from code42cli.compat import str
 from code42cli.util import get_user_project_path, is_interactive
 
+
 logger_deps_lock = Lock()
 ERROR_LOG_FILE_NAME = u"code42_errors.log"
 
@@ -17,25 +18,25 @@ def _get_user_error_logger():
         return _get_error_file_logger()
 
 
-def _get_main_logger(stream_name):
+def _get_standard_logger(stream_name):
     return logging.getLogger(u"code42_{}_main".format(stream_name))
 
 
 def _get_interactive_user_error_logger():
-    logger = _get_main_logger("stderr")
+    logger = logging.getLogger(u"code42_stderr_main")
     if logger_has_handlers(logger):
         return logger
 
     with logger_deps_lock:
         if not logger_has_handlers(logger):
             stderr_handler = logging.StreamHandler(sys.stderr)
-            stderr_formatter = logging.Formatter(u"%(message)s")
+            stderr_formatter = _get_standard_formatter()
             stderr_handler.setFormatter(stderr_formatter)
-            
+
             file_handler = _create_error_file_handler()
             file_formatter = logging.Formatter(u"%(asctime)s %(message)s")
             file_handler.setFormatter(file_formatter)
-            
+
             handlers = [stderr_handler, file_handler]
             for handler in handlers:
                 logger.addHandler(handler)
@@ -45,26 +46,22 @@ def _get_interactive_user_error_logger():
     return logger
 
 
-def _get_info_logger():
-    logger = _get_main_logger("stdout")
+def get_logger_for_stdout(name_suffix=u"main", formatter=None):
+    logger = logging.getLogger(u"code42_stdout_{}".format(name_suffix))
     if logger_has_handlers(logger):
         return logger
 
     with logger_deps_lock:
         if not logger_has_handlers(logger):
-            stderr_handler = logging.StreamHandler(sys.stderr)
-            stderr_formatter = logging.Formatter(u"%(message)s")
-            stderr_handler.setFormatter(stderr_formatter)
-
-            file_handler = _create_error_file_handler()
-            file_formatter = logging.Formatter(u"%(asctime)s %(message)s")
-            file_handler.setFormatter(file_formatter)
-
-            handlers = [stderr_handler, file_handler]
-            for handler in handlers:
-                logger.addHandler(handler)
-            return logger
+            handler = logging.StreamHandler(sys.stdout)
+            formatter = formatter or _get_standard_formatter()
+            logger.setLevel(logging.INFO)
+            return add_handler_to_logger(logger, handler, formatter)
     return logger
+
+
+def _get_standard_formatter():
+    return logging.Formatter(u"%(message)s")
 
 
 def _create_error_file_handler():
@@ -73,7 +70,7 @@ def _create_error_file_handler():
     return RotatingFileHandler(log_path, maxBytes=250000000, encoding=u"utf-8")
 
 
-def apply_logger_dependencies(logger, handler, formatter):
+def add_handler_to_logger(logger, handler, formatter):
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     return logger
@@ -93,11 +90,11 @@ def _get_error_file_logger(handler=None):
         if not logger_has_handlers(logger):
             formatter = logging.Formatter(u"%(asctime)s %(message)s")
             handler = handler or _create_error_file_handler()
-            return apply_logger_dependencies(logger, handler, formatter)
+            return add_handler_to_logger(logger, handler, formatter)
     return logger
 
 
-def _get_view_exceptions_location_message():
+def get_view_exceptions_location_message():
     """Returns the error message that is printed when errors occur."""
     path = get_user_project_path(u"log")
     return u"View exceptions that occurred at {}/{}.".format(path, ERROR_LOG_FILE_NAME)
@@ -125,7 +122,7 @@ class CliLogger(object):
         `self._user_error_logger` is what you want to print in red text to the user in interactive mode.
             It also goes to the log file for debugging purposes.
         """
-        self._info_logger = get_stream_logger(stream=sys.stdout)
+        self._info_logger = get_logger_for_stdout()
         self._user_error_logger = _get_user_error_logger()
         self._error_file_logger = _get_error_file_logger()
 
@@ -142,9 +139,9 @@ class CliLogger(object):
     def log_exception_detail_to_file(self, exception):
         self._error_file_logger.error(str(exception))
 
-    def print_errors_occurred(self, additional_info=None):
+    def log_errors_occurred_message(self, additional_info=None):
         """Prints a message telling the user how to retrieve error logs."""
-        locations_message = _get_view_exceptions_location_message()
+        locations_message = get_view_exceptions_location_message()
         message = (
             u"{}\n{}".format(additional_info, locations_message)
             if additional_info
@@ -152,33 +149,26 @@ class CliLogger(object):
         )
         self.error(message)
 
-    def print_no_existing_profile_message(self):
+    def log_no_existing_profile(self):
         self.error(u"No existing profile.")
-        self.print_create_profile_help()
+        self.log_create_profile_help()
 
-    def print_create_profile_help(self):
+    def log_create_profile_help(self):
         self.info(u"\nTo add a profile, use: ")
         self.info_bold(u"\tcode42 profile create <profile-name> <authority-URL> <username>\n")
 
-    def print_set_default_profile_help(self, existing_profiles):
+    def log_set_default_profile_help(self, existing_profiles):
         self.info(
             u"\nNo default profile set.\n"
             u"\nUse the --profile flag to specify which profile to use.\n"
             u"\nTo set the default profile (used whenever --profile argument is not provided), use:"
         )
         self.info_bold(u"\tcode42 profile use <profile-name>")
-        self.info_bold(u"\tcode42 profile use <profile-name>")
         self.info(u"\nExisting profiles:")
         for profile in existing_profiles:
-            self.info("\t{}".format(profile))
             self.info("\t{}".format(profile))
         self.info(u"")
 
 
 def get_main_cli_logger():
     return CliLogger()
-
-
-if __name__ == "__main__":
-    logger = CliLogger()
-    logger.error("TEST3")

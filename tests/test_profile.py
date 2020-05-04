@@ -1,4 +1,5 @@
 import pytest
+import logging
 
 import code42cli.profile as cliprofile
 from code42cli import PRODUCT_NAME
@@ -118,6 +119,8 @@ def test_profile_exists_when_not_exists_returns_false(config_accessor):
 
 
 def test_switch_default_profile_switches_to_expected_profile(config_accessor):
+    mock_section = MockSection("switchtome")
+    config_accessor.get_profile.return_value = mock_section
     cliprofile.switch_default_profile("switchtome")
     config_accessor.switch_default_profile.assert_called_once_with("switchtome")
 
@@ -134,16 +137,16 @@ def test_create_profile_uses_expected_profile_values(config_accessor):
     )
 
 
-def test_create_profile_if_profile_exists_exits(mocker, capsys, config_accessor):
+def test_create_profile_if_profile_exists_exits(mocker, caplog, config_accessor):
     config_accessor.get_profile.return_value = mocker.MagicMock()
     success = True
-    try:
-        cliprofile.create_profile("foo", "bar", "baz", True)
-    except SystemExit:
-        success = True
-        capture = capsys.readouterr()
-        assert "already exists" in capture.out
-    assert success
+    with caplog.at_level(logging.ERROR):
+        try:
+            cliprofile.create_profile("foo", "bar", "baz", True)
+        except SystemExit:
+            success = True
+            assert "already exists" in caplog.text
+        assert success
 
 
 def test_get_all_profiles_returns_expected_profile_list(config_accessor):
