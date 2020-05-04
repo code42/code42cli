@@ -151,8 +151,8 @@ class CliLogger(object):
             if additional_info
             else locations_message
         )
-        # Use `info_to_error()` because this message is pointless in the error log.
-        self.info_to_error(self._get_red_error_text(message))
+        # Use `info()` because this message is pointless in the error log.
+        self.info(self._get_red_error_text(message))
 
     def log_no_existing_profile(self):
         self.error(u"No existing profile.")

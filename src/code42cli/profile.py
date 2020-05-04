@@ -104,7 +104,7 @@ def switch_default_profile(profile_name):
 def create_profile(name, server, username, ignore_ssl_errors):
     if profile_exists(name):
         logger = get_main_cli_logger()
-        logger.error(u"A profile named {} already exists.".format(name))
+        logger.error(u"A profile named '{}' already exists.".format(name))
         exit(1)
 
     config_accessor.create_profile(name, server, username, ignore_ssl_errors)
