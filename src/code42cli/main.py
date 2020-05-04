@@ -11,7 +11,7 @@ from code42cli.cmds.detectionlists.enums import DetectionLists
 from code42cli.cmds.securitydata import main as secmain
 from code42cli.commands import Command
 from code42cli.invoker import CommandInvoker
-from code42cli.cmds.alerts.rules import user_rule
+from code42cli.cmds.alerts.rules import commands as user_rule_commands
 
 
 # If on Windows, configure console session to handle ANSI escape sequences correctly
@@ -39,7 +39,6 @@ def main():
 
 def _load_top_commands():
     detection_lists_description = u"For adding and removing employees from the {} detection list."
-
     return [
         Command(
             u"profile", u"For managing Code42 settings.", subcommand_loader=profile.load_subcommands
@@ -60,9 +59,9 @@ def _load_top_commands():
             subcommand_loader=hre.load_subcommands,
         ),
         Command(
-            u"Alert Rules",
-            u"To manage user criteria in rules",
-            subcommand_loader=user_rule.load_subcommands,
+            u"alert-rules",
+            u"Manage alert rules",
+            subcommand_loader= user_rule_commands.load_subcommands,
         ),
     ]
 
