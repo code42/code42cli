@@ -12,7 +12,10 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
-- Improved output messages.
+- Success messages for `profile delete` and `profile update`.
+- Additional information in the error log file
+    - The full command path for the command that errored.
+    - User-facing error messages that were already present during adhoc sessions.
 
 ### 0.5.3 - 2020-05-04
 
