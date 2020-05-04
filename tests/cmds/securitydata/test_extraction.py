@@ -487,9 +487,9 @@ def test_extract_when_creating_sdk_throws_causes_exit(
 
 
 def test_extract_when_errored_logs_error_occurred(
-    sdk, profile, logger, namespace_with_begin, extractor, caplog
+    sdk, profile, logger, namespace_with_begin, extractor, caplog,
 ):
-    with ErrorTrackerTestHelper(True):
+    with ErrorTrackerTestHelper():
         with caplog.at_level(logging.ERROR):
             extraction_module.extract(sdk, profile, logger, namespace_with_begin)
             assert "ERROR" in caplog.text
@@ -497,16 +497,15 @@ def test_extract_when_errored_logs_error_occurred(
 
 
 def test_extract_when_not_errored_and_does_not_log_error_occurred(
-    sdk, profile, logger, namespace_with_begin, extractor, caplog
+    sdk, profile, logger, namespace_with_begin, extractor, caplog,
 ):
-    with ErrorTrackerTestHelper(False):
-        extraction_module.extract(sdk, profile, logger, namespace_with_begin)
-        with caplog.at_level(logging.ERROR):
-            assert "View exceptions that occurred at" not in caplog.text
+    extraction_module.extract(sdk, profile, logger, namespace_with_begin)
+    with caplog.at_level(logging.ERROR):
+        assert "View exceptions that occurred at" not in caplog.text
 
 
-def test_when_sdk_raises_exception_global_variable_gets_set(
-    mocker, sdk, profile, logger, namespace_with_begin, mock_42
+def test_when_handle_event_raises_exception_global_variable_gets_set(
+    mocker, sdk, extractor, profile, logger, namespace_with_begin, mock_42
 ):
     mock_sdk = mocker.MagicMock()
 
@@ -517,7 +516,7 @@ def test_when_sdk_raises_exception_global_variable_gets_set(
     mock_42.return_value = mock_sdk
 
     mocker.patch(
-        "c42eventextractor.extractors.FileEventExtractor._verify_compatibility_of_filter_groups"
+        "c42eventextractor.extractors.BaseExtractor._verify_filter_groups"
     )
     with ErrorTrackerTestHelper():
         extraction_module.extract(sdk, profile, logger, namespace_with_begin)

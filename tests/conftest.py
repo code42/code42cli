@@ -135,14 +135,8 @@ end_date_with_time = [get_test_date_str(days_ago=10), "11:22:43"]
 
 
 class ErrorTrackerTestHelper:
-    def __init__(self, val=None):
-        self._val = val
-        self._orig = error_tracker.ERRORED
-        error_tracker.ERRORED = val
-
     def __enter__(self):
-        if self._val is not None:
-            error_tracker.ERRORED = self._val
+        error_tracker.ERRORED = True
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        error_tracker.ERRORED = self._orig
+        error_tracker.ERRORED = False

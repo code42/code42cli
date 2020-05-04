@@ -191,8 +191,6 @@ class TestBulkProcessor(object):
                 assert get_view_exceptions_location_message() in caplog.text
 
     def test_run_when_no_errors_occur_prints_success_messages(self, mock_open, caplog):
-        caplog.clear()
-
         def func_for_bulk(test):
             pass
 
@@ -207,8 +205,6 @@ class TestBulkProcessor(object):
             assert "3 processed successfully out of 3." in caplog.text
 
     def test_run_when_no_errors_occur_does_not_print_error_message(self, mock_open, caplog):
-        caplog.clear()
-
         def func_for_bulk(test):
             pass
 
@@ -223,8 +219,6 @@ class TestBulkProcessor(object):
             assert get_view_exceptions_location_message() not in caplog.text
 
     def test_run_when_row_is_endline_does_not_process_row(self, mock_open, caplog):
-        caplog.clear()
-
         processed_rows = []
 
         def func_for_bulk(test):

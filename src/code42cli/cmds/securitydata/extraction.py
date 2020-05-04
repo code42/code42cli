@@ -1,6 +1,6 @@
 import json
 
-from c42eventextractor import FileEventHandlers
+from c42eventextractor import ExtractionHandlers
 from c42eventextractor.extractors import FileEventExtractor
 from py42.sdk.queries.fileevents.filters import *
 
@@ -124,7 +124,7 @@ def _get_event_timestamp_filter(begin_date, end_date):
 
 
 def _create_event_handlers(output_logger, cursor_store):
-    handlers = FileEventHandlers()
+    handlers = ExtractionHandlers()
     logger = get_main_cli_logger()
 
     def handle_error(exception):
