@@ -1,67 +1,95 @@
+from code42cli.cmds.alerts.rules.user_rule import (
+    add_user, 
+    remove_user, 
+    remove_all_users, 
+    get_by_rule_type,
+    get_all, get_by_name,
+)
 from code42cli.commands import Command
-from code42cli.cmds.alerts.rules import user_rule
-
-"""
-Intended usages: 
-ADD
-code42 alert-rule add-user rule-id uid
-
-code42 alert-rule remove-user rule-id
-code42 alert-rule remove-user rule-id --uid value
-
-code42 alert-rule get
-code42 alert-rule get --name value
-code42 alert-rule get rule-id --rule-type value 
-
-"""
 
 
-class AlertRulesCommandFactory(object):
+def add_arguments(argument_collection):
+    rule_id = argument_collection.arg_configs[u"rule_id"]
+    rule_id.set_help(u"Observer Id of a rule to be updated.")
+    user_id = argument_collection.arg_configs[u"user_id"]
+    user_id.set_help(u"The Code42 userUid  of the user to add to the alert")
+
+
+def remove_arguments(argument_collection):
+
+    rule_id = argument_collection.arg_configs[u"rule_id"]
+    rule_id.set_help(u"Update alert rule criteria to remove users the from the alert rule.")
+    user_id = argument_collection.arg_configs[u"user_id"]
+    user_id.set_help(u"Update alert rule criteria to remove a user and all its aliases "
+                     u"from a rule of the specified userUid")
+
+
+def remove_all_arguments(argument_collection):
+    rule_id = argument_collection.arg_configs[u"rule_id"]
+    rule_id.set_help(u"Update alert rule criteria to remove all users the from the alert rule.")
+
+
+def list_arguments(argument_collection):
+    rule_type = argument_collection.arg_configs[u"rule_type"]
+    rule_type.set_help(u"Type of rule, either of 'exfiltration', 'cloudshare', 'filetypemismatch'")
+    rule_type.set_choices([u"exfiltration", u"cloudshare", u"filetypemismatch"])
+    rule_id = argument_collection.arg_configs[u"rule_id"]
+    rule_id.set_help(u"Rule id of th rule")
+
+
+def search_arguments(argument_collection):
+    rule_name = argument_collection.arg_configs[u"rule_name"]
+    rule_name.set_help(u"Search for matching rules by name.")
+
+
+def load_subcommands():
+    usage_prefix = u"code42 alert-rules"
     
-    def __init__(self):
-        self._name = u""
-        
-    def create_add_users_command(self):
-        return Command(
+    add = Command(
             u"add-user",
-            u"",
-            handler= user_rule.add
-            
-        )   
-    
-    def create_remove_users_command(self):
-        return Command(
-            u"remove-users",
-            u"",
-            handler=user_rule.remove
-            
+            u"Update alert rule to monitor user aliases against the Uid for the given rule id.",
+            u"{} {}".format(usage_prefix, u"add-user <rule_id> <user_id>"),
+            handler=add_user,
+            arg_customizer=add_arguments
         )
-    
-    def create_remove_all_users_command(self):
-        return Command(
-            u"remove-all-users",
-            u"",
-            handler=user_rule.remove_all
+
+    remove_one = Command(
+            u"remove-user",
+            u"Update alert rule criteria to remove a user and all its aliases.",
+            u"{} {}".format(usage_prefix, u"remove-user <rule_id>  <user_id>"),
+            handler=remove_user,
+            arg_customizer=remove_arguments
         )
+
+    remove_all = Command(
+        u"remove-all",
+        u"Update alert rule criteria to remove all users and all its aliases from a rule.",
+        u"{} {}".format(usage_prefix, u"remove-all <rule_id>"),
+        handler=remove_all_users,
+        arg_customizer=remove_all_arguments
+    )
     
-    def create_get_command(self):
-        return Command(
-            u"get",
-            u"",
-            handler=user_rule.get
-            
+    list_rules = Command(
+            u"list",
+            u"Fetch existing alert rules by rule -id",
+            u"{} {}".format(usage_prefix, u"list <rule_type>  <rule_id>"),
+            handler=get_by_rule_type,
+            arg_customizer=list_arguments
         )
-    
-    def create_get_all_command(self):
-        return Command(
-            u"get-all",
-            u"",
-            handler=user_rule.get_all
-        )
-    
-    def create_get_by_name_command(self):
-        return Command(
-            u"get-by-name",
-            u"",
-            handler=user_rule.get_by_name
-        )
+
+    list_all_rules = Command(
+        u"list-all",
+        u"Fetch all existing alert rules.",
+        u"{} {}".format(usage_prefix, u"list-all"),
+        handler=get_all,
+    )
+
+    search = Command(
+        u"search",
+        u"Search a rule by its matching name.",
+        u"{} {}".format(usage_prefix, u"search <rule_name>"),
+        handler=get_by_name,
+        arg_customizer=search_arguments
+    )
+
+    return [add, remove_one, remove_all, list_rules, list_all_rules, search]
