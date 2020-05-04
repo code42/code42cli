@@ -134,7 +134,8 @@ class CliLogger(object):
         self._info_logger.info(u"\033[1m{}\033[0m".format(message))
 
     def info_to_error(self, message):
-        """For not interrupting stdout output"""
+        """For not interrupting stdout output. Excludes red text from and 'ERROR: ' from `error()`.
+        """
         self._user_error_logger.error(message)
 
     def error(self, message):
