@@ -117,6 +117,7 @@ def delete_profile(profile_name):
     cursor_store = get_file_event_cursor_store(profile_name)
     cursor_store.clean()
     config_accessor.delete_profile(profile_name)
+    get_main_cli_logger().info(u"Profile '{}' has been deleted.".format(profile_name))
 
 
 def update_profile(name, server, username, ignore_ssl_errors):

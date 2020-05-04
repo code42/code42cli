@@ -117,7 +117,7 @@ def test_create_profile_if_credentials_valid_password_saved(
 
 
 def test_create_profile_outputs_confirmation(
-    user_agreement, valid_connection, mock_cliprofile_namespace, caplog,
+     user_agreement, valid_connection, mock_cliprofile_namespace, caplog,
 ):
     with caplog.at_level(logging.INFO):
         mock_cliprofile_namespace.profile_exists.return_value = False
@@ -181,6 +181,19 @@ def test_delete_profile_warns_if_deleting_default(
         assert "mockdefault is currently the default profile!" in caplog.text
 
 
+def test_delete_profile_does_nothing_if_user_doesnt_agree(
+    user_disagreement, mock_cliprofile_namespace
+):
+    profilecmd.delete_profile("mockprofile")
+    assert mock_cliprofile_namespace.delete_profile.call_count == 0
+
+
+def test_delete_profile_outputs_success(user_agreement, mock_cliprofile_namespace, caplog):
+    with caplog.at_level(logging.INFO):
+        profilecmd.delete_profile("mockprofile")
+        assert "Profile 'mockProfile' has been deleted."
+
+
 def test_delete_all_warns_if_profiles_exist(caplog, user_agreement, mock_cliprofile_namespace):
     mock_cliprofile_namespace.get_all_profiles.return_value = [
         create_mock_profile("test1"),
@@ -191,13 +204,6 @@ def test_delete_all_warns_if_profiles_exist(caplog, user_agreement, mock_cliprof
         assert "Are you sure you want to delete the following profiles?" in caplog.text
         assert "test1" in caplog.text
         assert "test2" in caplog.text
-
-
-def test_delete_profile_does_nothing_if_user_doesnt_agree(
-    user_disagreement, mock_cliprofile_namespace
-):
-    profilecmd.delete_profile("mockprofile")
-    assert mock_cliprofile_namespace.delete_profile.call_count == 0
 
 
 def test_delete_all_profiles_does_nothing_if_user_doesnt_agree(
