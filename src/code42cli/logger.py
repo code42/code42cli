@@ -91,11 +91,10 @@ def _get_interactive_user_error_logger():
             file_handler = _create_error_file_handler()
             file_formatter = logging.Formatter(u"%(asctime)s %(message)s")
             file_handler.setFormatter(file_formatter)
-
-            handlers = [stderr_handler, file_handler]
-            for handler in handlers:
-                logger.addHandler(handler)
-
+            
+            add_handler_to_logger(logger, stderr_handler, stderr_formatter)
+            add_handler_to_logger(logger, file_handler, file_formatter)
+            
             logger.setLevel(logging.ERROR)
             return logger
     return logger
