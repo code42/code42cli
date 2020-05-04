@@ -101,7 +101,9 @@ def test_add_risk_tags_when_user_does_not_exist_exits(sdk_without_user, profile)
 def test_add_risk_tags_when_user_does_not_exist_prints_error(sdk_without_user, profile, caplog):
     with caplog.at_level(logging.ERROR):
         try:
-            add_risk_tags(sdk_without_user, profile, _EMPLOYEE, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"])
+            add_risk_tags(
+                sdk_without_user, profile, _EMPLOYEE, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"]
+            )
         except UserDoesNotExistError:
             assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text
 
@@ -128,6 +130,8 @@ def test_remove_risk_tags_when_user_does_not_exist_exits(sdk_without_user, profi
 def test_remove_risk_tags_when_user_does_not_exist_prints_error(sdk_without_user, profile, caplog):
     with caplog.at_level(logging.ERROR):
         try:
-            remove_risk_tags(sdk_without_user, profile, _EMPLOYEE, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"])
+            remove_risk_tags(
+                sdk_without_user, profile, _EMPLOYEE, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"]
+            )
         except UserDoesNotExistError:
             assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text

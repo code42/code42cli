@@ -487,7 +487,7 @@ def test_extract_when_creating_sdk_throws_causes_exit(
 
 
 def test_extract_when_errored_logs_error_occurred(
-    sdk, profile, logger, namespace_with_begin, extractor, caplog,
+    sdk, profile, logger, namespace_with_begin, extractor, caplog
 ):
     with ErrorTrackerTestHelper():
         with caplog.at_level(logging.ERROR):
@@ -497,7 +497,7 @@ def test_extract_when_errored_logs_error_occurred(
 
 
 def test_extract_when_not_errored_and_does_not_log_error_occurred(
-    sdk, profile, logger, namespace_with_begin, extractor, caplog,
+    sdk, profile, logger, namespace_with_begin, extractor, caplog
 ):
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
     with caplog.at_level(logging.ERROR):
@@ -515,9 +515,7 @@ def test_when_handle_event_raises_exception_global_variable_gets_set(
     mock_sdk.security.search_file_events.side_effect = sdk_side_effect
     mock_42.return_value = mock_sdk
 
-    mocker.patch(
-        "c42eventextractor.extractors.BaseExtractor._verify_filter_groups"
-    )
+    mocker.patch("c42eventextractor.extractors.BaseExtractor._verify_filter_groups")
     with ErrorTrackerTestHelper():
         extraction_module.extract(sdk, profile, logger, namespace_with_begin)
         assert errors.ERRORED

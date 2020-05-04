@@ -11,41 +11,6 @@ logger_deps_lock = Lock()
 ERROR_LOG_FILE_NAME = u"code42_errors.log"
 
 
-def _get_user_error_logger():
-    if is_interactive():
-        return _get_interactive_user_error_logger()
-    else:
-        return _get_error_file_logger()
-
-
-def _get_standard_logger(stream_name):
-    return logging.getLogger(u"code42_{}_main".format(stream_name))
-
-
-def _get_interactive_user_error_logger():
-    logger = logging.getLogger(u"code42_stderr_main")
-    if logger_has_handlers(logger):
-        return logger
-
-    with logger_deps_lock:
-        if not logger_has_handlers(logger):
-            stderr_handler = logging.StreamHandler(sys.stderr)
-            stderr_formatter = _get_standard_formatter()
-            stderr_handler.setFormatter(stderr_formatter)
-
-            file_handler = _create_error_file_handler()
-            file_formatter = logging.Formatter(u"%(asctime)s %(message)s")
-            file_handler.setFormatter(file_formatter)
-
-            handlers = [stderr_handler, file_handler]
-            for handler in handlers:
-                logger.addHandler(handler)
-
-            logger.setLevel(logging.ERROR)
-            return logger
-    return logger
-
-
 def get_logger_for_stdout(name_suffix=u"main", formatter=None):
     logger = logging.getLogger(u"code42_stdout_{}".format(name_suffix))
     if logger_has_handlers(logger):
@@ -98,6 +63,41 @@ def get_view_exceptions_location_message():
     """Returns the error message that is printed when errors occur."""
     path = get_user_project_path(u"log")
     return u"View exceptions that occurred at {}/{}.".format(path, ERROR_LOG_FILE_NAME)
+
+
+def _get_user_error_logger():
+    if is_interactive():
+        return _get_interactive_user_error_logger()
+    else:
+        return _get_error_file_logger()
+
+
+def _get_standard_logger(stream_name):
+    return logging.getLogger(u"code42_{}_main".format(stream_name))
+
+
+def _get_interactive_user_error_logger():
+    logger = logging.getLogger(u"code42_stderr_main")
+    if logger_has_handlers(logger):
+        return logger
+
+    with logger_deps_lock:
+        if not logger_has_handlers(logger):
+            stderr_handler = logging.StreamHandler(sys.stderr)
+            stderr_formatter = _get_standard_formatter()
+            stderr_handler.setFormatter(stderr_formatter)
+
+            file_handler = _create_error_file_handler()
+            file_formatter = logging.Formatter(u"%(asctime)s %(message)s")
+            file_handler.setFormatter(file_formatter)
+
+            handlers = [stderr_handler, file_handler]
+            for handler in handlers:
+                logger.addHandler(handler)
+
+            logger.setLevel(logging.ERROR)
+            return logger
+    return logger
 
 
 class CliLogger(object):
