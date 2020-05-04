@@ -104,11 +104,6 @@ def _get_interactive_user_error_logger():
 class CliLogger(object):
     """There are three loggers part of the CliLogger. The following table illustrates where they 
     log too in both interactive mode and non-interactive mode.
-    
-    | interactive | info     | error            | error file
-    --------------------------------------------------------
-    | True        | stdout   | stderr, log file | log file
-    | False       | no where | log file         | log file
     """
 
     def __init__(self):
@@ -120,8 +115,8 @@ class CliLogger(object):
         `self._error_file_logger` logs directly to the error file is only meant for verbose 
             debugging information, such as raw exceptions.
             
-        `self._user_error_logger` is what you want to print in red text to the user in interactive mode.
-            It also goes to the log file for debugging purposes.
+        `self._user_error_logger` is what you want to print in red text to the user. It also goes 
+            to the log file for debugging purposes.
         """
         self._info_logger = get_logger_for_stdout()
         self._user_error_logger = _get_user_error_logger()
