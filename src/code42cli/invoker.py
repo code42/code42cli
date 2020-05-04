@@ -23,6 +23,7 @@ class CommandInvoker(object):
         try:
             path_parts = self._get_path_parts(input_args)
             command = self._commands.get(u" ".join(path_parts))
+            command.inocation_str
             self._try_run_command(command, path_parts, input_args)
         except Py42ForbiddenError as err:
             logger = get_main_cli_logger()
@@ -32,6 +33,7 @@ class CommandInvoker(object):
                 u"Try using or creating a different profile."
             )
         except Exception as ex:
+            print(command)
             logger = get_main_cli_logger()
             logger.log_exception_detail_to_file(ex)
             logger.log_errors_occurred_message()
