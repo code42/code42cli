@@ -77,6 +77,7 @@ def _get_standard_logger(stream_name):
 
 
 def _get_interactive_user_error_logger():
+    """This logger has two handlers, one for stderr and one for the error log file."""
     logger = logging.getLogger(u"code42_stderr_main")
     if logger_has_handlers(logger):
         return logger
