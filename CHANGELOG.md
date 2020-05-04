@@ -14,6 +14,12 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Improved output messages.
 
+### 0.5.3 - 2020-05-04
+
+### Fixed
+
+- Issue introduced in py42 v1.1.0 that prevented `high-risk-employee` and `departing-employee` commands from working properly.
+
 ## 0.5.2 - 2020-04-29
 
 ### Fixed
