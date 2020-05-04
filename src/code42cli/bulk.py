@@ -6,6 +6,7 @@ from code42cli.compat import open, str
 from code42cli.worker import Worker
 from code42cli.logger import get_main_cli_logger
 from code42cli.args import SDK_ARG_NAME, PROFILE_ARG_NAME
+import code42cli.errors as errors
 
 
 def generate_template(handler, path=None):
@@ -47,9 +48,12 @@ def run_bulk_process(file_path, row_handler, reader=None):
         reader: (CSVReader or FlatFileReader, optional): A generator that reads rows and yields data into 
             `row_handler`. If None, it will use a CSVReader. Defaults to None.
     """
-    reader = reader or CSVReader()
-    processor = _create_bulk_processor(file_path, row_handler, reader)
-    processor.run()
+    try:
+        reader = reader or CSVReader()
+        processor = _create_bulk_processor(file_path, row_handler, reader)
+        processor.run()
+    except Exception as ex:
+        errors.ERRORED = True
 
 
 def _create_bulk_processor(file_path, row_handler, reader):

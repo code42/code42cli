@@ -135,7 +135,10 @@ class CliLogger(object):
 
     def error(self, message):
         """Logs red text to stderr and a log file."""
-        self._user_error_logger.error(u"\033[91mERROR: {}\033[0m".format(message))
+        self._user_error_logger.error(self._get_red_error_text(message))
+
+    def _get_red_error_text(self, text):
+        return u"\033[91mERROR: {}\033[0m".format(text)
 
     def log_exception_detail_to_file(self, exception):
         self._error_file_logger.error(str(exception))
@@ -148,7 +151,8 @@ class CliLogger(object):
             if additional_info
             else locations_message
         )
-        self.error(message)
+        # Use `info_to_error()` because this message is pointless in the error log.
+        self.info_to_error(self._get_red_error_text(message))
 
     def log_no_existing_profile(self):
         self.error(u"No existing profile.")

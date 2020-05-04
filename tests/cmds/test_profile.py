@@ -117,7 +117,7 @@ def test_create_profile_if_credentials_valid_password_saved(
 
 
 def test_create_profile_outputs_confirmation(
-     user_agreement, valid_connection, mock_cliprofile_namespace, caplog,
+    user_agreement, valid_connection, mock_cliprofile_namespace, caplog
 ):
     with caplog.at_level(logging.INFO):
         mock_cliprofile_namespace.profile_exists.return_value = False

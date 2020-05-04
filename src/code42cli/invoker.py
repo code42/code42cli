@@ -32,7 +32,9 @@ class CommandInvoker(object):
                 u"Try using or creating a different profile."
             )
         except Exception as ex:
-            get_main_cli_logger().log_exception_detail_to_file(ex)
+            logger = get_main_cli_logger()
+            logger.log_exception_detail_to_file(ex)
+            logger.log_errors_occurred_message()
 
     def _get_path_parts(self, input_args):
         """Gets the portion of `input_args` that refers to a
