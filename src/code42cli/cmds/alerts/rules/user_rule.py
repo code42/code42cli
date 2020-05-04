@@ -1,17 +1,14 @@
 def add_user(sdk, rule_id, user_id):
-    response = sdk.alerts.rules.add_user(rule_id, user_id)
-    print(response)
-
+    sdk.alerts.rules.add_user(rule_id, user_id)
+    
 
 def remove_user(sdk, rule_id, user_id):
-    response = sdk.alerts.rules.remove_user(rule_id, user_id)
-    print(response)
+    sdk.alerts.rules.remove_user(rule_id, user_id)
     
 
 def remove_all_users(sdk, rule_id):
-    response = sdk.alerts.rules.remove_all_users(rule_id)
-    print(response)
-
+    sdk.alerts.rules.remove_all_users(rule_id)
+    
 
 def _get_rule_category(sdk, rule_type):
     if rule_type == u"exfiltrator":
