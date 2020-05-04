@@ -48,12 +48,9 @@ def run_bulk_process(file_path, row_handler, reader=None):
         reader: (CSVReader or FlatFileReader, optional): A generator that reads rows and yields data into 
             `row_handler`. If None, it will use a CSVReader. Defaults to None.
     """
-    try:
-        reader = reader or CSVReader()
-        processor = _create_bulk_processor(file_path, row_handler, reader)
-        processor.run()
-    except Exception as ex:
-        errors.ERRORED = True
+    reader = reader or CSVReader()
+    processor = _create_bulk_processor(file_path, row_handler, reader)
+    processor.run()
 
 
 def _create_bulk_processor(file_path, row_handler, reader):
