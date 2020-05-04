@@ -173,7 +173,7 @@ def _handle_result():
     logger = get_main_cli_logger()
     _print_errors_occurred_if_needed(logger)
     if not _TOTAL_EVENTS:
-        logger.error(u"No results found\n")
+        logger.info_to_error(u"No results found\n")
 
 
 def _print_errors_occurred_if_needed(logger):
