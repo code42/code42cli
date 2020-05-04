@@ -24,7 +24,7 @@ setup(
         "c42eventextractor==0.2.7",
         "keyring==18.0.1",
         "keyrings.alt==3.2.0",
-        "py42>=1.0.0",
+        "py42>=1.1.1",
     ],
     license="MIT",
     include_package_data=True,
