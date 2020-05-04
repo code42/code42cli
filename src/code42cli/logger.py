@@ -132,7 +132,7 @@ class CliLogger(object):
 
     def info_bold(self, message):
         self._info_logger.info(u"\033[1m{}\033[0m".format(message))
-    
+
     def info_to_error(self, message):
         """For not interrupting stdout output"""
         self._user_error_logger.error(message)

@@ -116,6 +116,15 @@ def test_create_profile_if_credentials_valid_password_saved(
     mock_cliprofile_namespace.set_password.assert_called_once_with("newpassword", mocker.ANY)
 
 
+def test_create_profile_outputs_confirmation(
+    user_agreement, valid_connection, mock_cliprofile_namespace, caplog,
+):
+    with caplog.at_level(logging.INFO):
+        mock_cliprofile_namespace.profile_exists.return_value = False
+        profilecmd.create_profile("foo", "bar", "baz", True)
+        assert "Successfully created profile 'foo'." in caplog.text
+
+
 def test_update_profile_updates_existing_profile(
     mock_cliprofile_namespace, user_agreement, valid_connection, profile
 ):

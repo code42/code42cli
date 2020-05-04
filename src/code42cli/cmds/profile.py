@@ -91,6 +91,7 @@ def show_profile(name=None):
 def create_profile(profile, server, username, disable_ssl_errors=False):
     cliprofile.create_profile(profile, server, username, disable_ssl_errors)
     _prompt_for_allow_password_set(profile)
+    get_main_cli_logger().info(u"Successfully created profile '{}'.".format(profile))
 
 
 def update_profile(name=None, server=None, username=None, disable_ssl_errors=None):
