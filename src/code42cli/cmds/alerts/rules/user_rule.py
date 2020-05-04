@@ -1,3 +1,6 @@
+import csv
+
+
 def add_user(sdk, rule_id, user_id):
     sdk.alerts.rules.add_user(rule_id, user_id)
     
@@ -37,3 +40,20 @@ def get_all(sdk):
 def get_by_name(sdk, rule_name):
     rules = sdk.alerts.rules.get_by_name(rule_name)
     print(rules)
+
+
+def add_bulk_users(sdk, file_name):
+    with open(file_name) as csv_file:
+        lines = csv.reader(csv_file, delimiter=',')
+        for rule_id, user_id in lines:
+            sdk.alerts.rules.add_user(rule_id, user_id)
+
+
+def remove_bulk_users(sdk, file_name):
+    with open(file_name) as csv_file:
+        lines = csv.reader(csv_file, delimiter=',')
+        for rule_id, user_id in lines:
+            if user_id:
+                sdk.alerts.rules.remove_user(rule_id, user_id)
+            else:
+                sdk.alerts.rules.remove_all_users(rule_id)

@@ -4,6 +4,8 @@ from code42cli.cmds.alerts.rules.user_rule import (
     remove_all_users, 
     get_by_rule_type,
     get_all, get_by_name,
+    add_bulk_users,
+    remove_bulk_users,
 )
 from code42cli.commands import Command
 
@@ -42,6 +44,13 @@ def search_arguments(argument_collection):
     rule_name.set_help(u"Search for matching rules by name.")
 
 
+def bulk_arguments(argument_collection):
+    file_name = argument_collection.arg_configs[u"file_name"]
+    file_name.set_help(u"CSV file name with relative path."
+                       u"Format rule_id,user_id to update rule for specific user, "
+                       u"or rule_id, when all users need to be removed from a rule.")
+
+
 def load_subcommands():
     usage_prefix = u"code42 alert-rules"
     
@@ -52,6 +61,15 @@ def load_subcommands():
             handler=add_user,
             arg_customizer=add_arguments
         )
+
+    add_bulk = Command(
+        u"add-bulk",
+        u"Update multiple alert rules to monitor user aliases against the Uid for the given rule id."
+        u"csv file format: rule_id, user_id",
+        u"{} {}".format(usage_prefix, u"add-bulk <filenamce>"),
+        handler=add_bulk_users,
+        arg_customizer=bulk_arguments
+    )
 
     remove_one = Command(
             u"remove-user",
@@ -69,6 +87,15 @@ def load_subcommands():
         arg_customizer=remove_all_arguments
     )
     
+    remove_bulk = Command(
+        u"remove-bulk",
+        u"Update multiple alert rule criteria to remove all users and all its aliases from a rule."
+        u"csv file format: rule_id",
+        u"{} {}".format(usage_prefix, u"remove-bulk <filename>"),
+        handler=remove_bulk_users,
+        arg_customizer=bulk_arguments
+    )
+
     list_rules = Command(
             u"list",
             u"Fetch existing alert rules by rule -id",
@@ -92,4 +119,4 @@ def load_subcommands():
         arg_customizer=search_arguments
     )
 
-    return [add, remove_one, remove_all, list_rules, list_all_rules, search]
+    return [add, add_bulk, remove_one, remove_all, remove_bulk, list_rules, list_all_rules, search]
