@@ -76,7 +76,18 @@ class TestCommandInvoker(object):
             invoker.run(["testsub1", "inner1", "one", "two", "--invalid", "test"])
             assert str(ex) in caplog.text
 
-    def test_run_when_forbidden_error_occurs_prints_message(self, mocker, mock_parser, caplog):
+    def test_run_when_errors_occur_from_handler_calls_logs_command(self, mocker, mock_parser, caplog):
+        ex = Exception("test")
+        cmd = Command("", "top level desc", subcommand_loader=load_subcommands)
+        mock_parser.parse_args.side_effect = ex
+        mock_subparser = mocker.MagicMock()
+        mock_parser.prepare_command.return_value = mock_subparser
+        invoker = CommandInvoker(cmd, mock_parser)
+        with caplog.at_level(logging.ERROR):
+            invoker.run(["testsub1", "inner1", "one", "two", "--invalid", "test"])
+            assert str(ex) in caplog.text
+
+    def test_run_when_forbidden_error_occurs_logs_message(self, mocker, mock_parser, caplog):
         http_error = mocker.MagicMock(spec=HTTPError)
         http_error.response = mocker.MagicMock(spec=Response)
         cmd = Command("", "top level desc", subcommand_loader=load_subcommands)
@@ -91,3 +102,17 @@ class TestCommandInvoker(object):
                 u"You do not have the necessary permissions to perform this task. Try using or "
                 u"creating a different profile." in caplog.text
             )
+
+    def test_run_when_forbidden_error_occurs_logs_command(self, mocker, mock_parser, caplog):
+        http_error = mocker.MagicMock(spec=HTTPError)
+        http_error.response = mocker.MagicMock(spec=Response)
+        cmd = Command("", "top level desc", subcommand_loader=load_subcommands)
+        mock_parser.parse_args.side_effect = Py42ForbiddenError(http_error)
+        mock_subparser = mocker.MagicMock()
+        mock_parser.prepare_command.return_value = mock_subparser
+        invoker = CommandInvoker(cmd, mock_parser)
+
+        with caplog.at_level(logging.ERROR):
+            invoker.run(["testsub1", "inner1", "one", "two", "--invalid", "test"])
+            assert "code42 testsub1 inner1 one two --invalid test" in caplog.text
+

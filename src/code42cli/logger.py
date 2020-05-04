@@ -141,7 +141,9 @@ class CliLogger(object):
         return u"\033[91mERROR: {}\033[0m".format(text)
 
     def log_exception_detail_to_file(self, exception):
-        self._error_file_logger.error(str(exception))
+        message = str(exception) if exception else exception
+        if message:
+            self._error_file_logger.error(message)
 
     def log_errors_occurred_message(self, additional_info=None):
         """Prints a message telling the user how to retrieve error logs."""
