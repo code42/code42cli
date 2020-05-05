@@ -41,9 +41,8 @@ class ConfigAccessor(object):
         """
         name = name or self._default_profile_name
         if name not in self._get_sections() or name == self.DEFAULT_VALUE:
-            if name != self.DEFAULT_VALUE:
-                raise NoConfigProfileError(name)
-            raise NoConfigProfileError()
+            name = name if name != self.DEFAULT_VALUE else None
+            raise NoConfigProfileError(name)
         return self._get_profile(name)
 
     def get_all_profiles(self):
