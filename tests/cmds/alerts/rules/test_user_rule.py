@@ -28,5 +28,5 @@ def test_get_rules_gets_alert_rules(alert_rules_sdk):
     get_rules(alert_rules_sdk, "filetypemismatch", TEST_RULE_ID)
     alert_rules_sdk.alerts.rules.filetypemismatch.get.assert_called_once_with(TEST_RULE_ID)
     get_rules(alert_rules_sdk)
-    alert_rules_sdk.alerts.rules.get_all.assert_called_once()
+    assert alert_rules_sdk.alerts.rules.get_all.call_count == 1
 
