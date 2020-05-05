@@ -87,7 +87,7 @@ class TestCommandInvoker(object):
         invoker = CommandInvoker(cmd, mock_parser)
         with caplog.at_level(logging.ERROR):
             invoker.run(["testsub1", "inner1", "one", "two", "--invalid", "test"])
-            assert str(ex) in caplog.text
+            assert "code42 testsub1 inner1 one two --invalid test" in caplog.text
 
     def test_run_when_forbidden_error_occurs_logs_message(self, mocker, mock_parser, caplog):
         http_error = mocker.MagicMock(spec=HTTPError)
