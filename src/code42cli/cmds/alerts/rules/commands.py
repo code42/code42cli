@@ -23,11 +23,6 @@ def _customize_remove_arguments(argument_collection):
                      u"from a rule of the specified userUid")
 
 
-def _customize_remove_all_arguments(argument_collection):
-    rule_id = argument_collection.arg_configs[u"rule_id"]
-    rule_id.set_help(u"Update alert rule criteria to remove all users the from the alert rule.")
-
-
 def _customize_list_arguments(argument_collection):
     rule_type = argument_collection.arg_configs[u"rule_type"]
     rule_type.set_help(u"Type of rule, either of 'exfiltration', 'cloudshare', 'filetypemismatch'")
@@ -69,7 +64,7 @@ def load_subcommands():
     remove = Command(
             u"remove-user",
             u"Update alert rule criteria to remove a user and all its aliases.",
-            u"{} {}".format(usage_prefix, u"remove-user <rule_id>  --user-id UX"),
+            u"{} {}".format(usage_prefix, u"remove-user <rule_id>  --user-id [UX]"),
             handler=remove_user,
             arg_customizer=_customize_remove_arguments
         )
@@ -77,7 +72,7 @@ def load_subcommands():
     list_rules = Command(
             u"list",
             u"Fetch existing alert rules, optionally fetch by by rule-id",
-            u"{} {}".format(usage_prefix, u"list --rule-type [type] --rule-id UX"),
+            u"{} {}".format(usage_prefix, u"list --rule-type [type] --rule-id [UX]"),
             handler=get_rules,
             arg_customizer=_customize_list_arguments
         )
