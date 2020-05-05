@@ -6,6 +6,19 @@ from code42cli.parser import ArgumentParserError, CommandParser
 from code42cli.logger import get_main_cli_logger
 
 
+def _try_log_invocation_str_for_error(invocation_str, logger):
+    logger.log_exception_detail_to_file(
+        u"Exception occurred from input: '{}'. See error below.".format(invocation_str)
+    )
+
+
+def _log_error(err, invocation_str):
+    logger = get_main_cli_logger()
+    _try_log_invocation_str_for_error(invocation_str, logger)
+    logger.log_exception_detail_to_file(err)
+    logger.log_errors_occurred_message()
+
+
 class CommandInvoker(object):
     def __init__(self, top_command, cmd_parser=None):
         self._top_command = top_command
@@ -26,24 +39,13 @@ class CommandInvoker(object):
             command = self._commands.get(u" ".join(path_parts))
             self._try_run_command(command, path_parts, input_args)
         except Py42ForbiddenError as err:
-            self._log_error(err, invocation_str)
+            _log_error(err, invocation_str)
             get_main_cli_logger().error(
                 u"You do not have the necessary permissions to perform this task. "
                 u"Try using or creating a different profile."
             )
         except Exception as err:
-            self._log_error(err, invocation_str)
-    
-    def _log_error(self, err, invocation_str):
-        logger = get_main_cli_logger()
-        self._try_log_invocation_str_for_error(invocation_str, logger)
-        logger.log_exception_detail_to_file(err)
-        logger.log_errors_occurred_message()
-
-    def _try_log_invocation_str_for_error(self, invocation_str, logger):
-        logger.log_exception_detail_to_file(
-            u"Exception occurred from input: '{}'. See error below.".format(invocation_str)
-        )
+            _log_error(err, invocation_str)
 
     def _get_path_parts(self, input_args):
         """Gets the portion of `input_args` that refers to a
