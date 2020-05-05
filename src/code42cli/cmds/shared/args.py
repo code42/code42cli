@@ -9,7 +9,9 @@ def create_search_args(search_for, filter_args):
             metavar=u"QUERY_JSON",
             help=u"A raw JSON {0} query. "
             u"Useful for when the provided query parameters do not satisfy your requirements.\n"
-            u"WARNING: Using advanced queries is incompatible with other .".format(search_for),
+            u"WARNING: Using advanced queries is incompatible with other query-building args.".format(
+                search_for
+            ),
         ),
         SearchArguments.BEGIN_DATE: ArgConfig(
             u"-b",
