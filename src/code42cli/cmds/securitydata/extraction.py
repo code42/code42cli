@@ -60,7 +60,7 @@ def _determine_if_advanced_query(args):
             val = given_args[key]
             if not _verify_compatibility_with_advanced_query(key, val):
                 logger = get_main_cli_logger()
-                logger.error(u"You cannot use --advanced-query with additional search args.")
+                logger.print_and_log_info(u"You cannot use --advanced-query with additional search args.")
                 exit(1)
         return True
     return False
@@ -69,8 +69,8 @@ def _determine_if_advanced_query(args):
 def _verify_begin_date_requirements(args, cursor_store):
     if _begin_date_is_required(args, cursor_store) and not args.begin:
         logger = get_main_cli_logger()
-        logger.error(u"'begin date' is required.\n")
-        logger.info_bold(u"Try using  '-b' or '--begin'. Use `-h` for more info.\n")
+        logger.print_and_log_info(u"'begin date' is required.\n")
+        logger.print_bold(u"Try using  '-b' or '--begin'. Use `-h` for more info.\n")
         exit(1)
 
 
@@ -92,7 +92,7 @@ def _verify_exposure_types(exposure_types):
     for exposure_type in exposure_types:
         if exposure_type not in options:
             logger = get_main_cli_logger()
-            logger.error(u"'{0}' is not a valid exposure type.".format(exposure_type))
+            logger.print_and_log_info(u"'{0}' is not a valid exposure type.".format(exposure_type))
             exit(1)
 
 
@@ -119,7 +119,7 @@ def _get_event_timestamp_filter(begin_date, end_date):
         end_date = end_date.strip() if end_date else None
         return date_helper.create_event_timestamp_filter(begin_date, end_date)
     except date_helper.DateArgumentException as ex:
-        get_main_cli_logger().error(str(ex))
+        get_main_cli_logger().print_and_log_info(str(ex))
         exit(1)
 
 
@@ -128,7 +128,7 @@ def _create_event_handlers(output_logger, cursor_store):
     logger = get_main_cli_logger()
 
     def handle_error(exception):
-        logger.log_exception_detail_to_file(exception)
+        logger.log_error(exception)
         errors.ERRORED = True
 
     handlers.handle_error = handle_error
@@ -143,7 +143,7 @@ def _create_event_handlers(output_logger, cursor_store):
         global _TOTAL_EVENTS
         _TOTAL_EVENTS += len(events)
         for event in events:
-            output_logger.info(event)
+            output_logger.print_info(event)
 
     handlers.handle_response = handle_response
     return handlers
@@ -173,14 +173,14 @@ def _handle_result():
     logger = get_main_cli_logger()
     _print_errors_occurred_if_needed(logger)
     if not _TOTAL_EVENTS:
-        logger.info_to_error(u"No results found.")
+        logger.print_and_log_error(u"No results found.")
 
 
 def _print_errors_occurred_if_needed(logger):
     """If interactive and errors occurred, it will print a message telling the user how to retrieve 
     error logs."""
     if errors.ERRORED:
-        logger.log_errors_occurred_message()
+        logger.print_errors_occurred_message()
 
 
 def _try_append_exposure_types_filter(filters, include_non_exposure_events, exposure_types):
@@ -191,7 +191,7 @@ def _try_append_exposure_types_filter(filters, include_non_exposure_events, expo
 
 def _create_exposure_type_filter(include_non_exposure_events, exposure_types):
     if include_non_exposure_events and exposure_types:
-        get_main_cli_logger().error(u"Cannot use exposure types with `--include-non-exposure`.")
+        get_main_cli_logger().print_and_log_info(u"Cannot use exposure types with `--include-non-exposure`.")
         exit(1)
     if exposure_types:
         return ExposureType.is_in(exposure_types)

@@ -42,42 +42,42 @@ class TestCliLogger(object):
 
     _logger = CliLogger()
 
-    def test_info_logs_expected_text_at_expected_level(self, caplog):
+    def test_print_info_logs_expected_text_at_expected_level(self, caplog):
         with caplog.at_level(logging.INFO):
-            self._logger.info("TEST")
+            self._logger.print_info("TEST")
             assert "TEST" in caplog.text
 
-    def test_info_bold_logs_expected_text_at_expected_level(self, caplog):
+    def test_print_bold_logs_expected_text_at_expected_level(self, caplog):
         with caplog.at_level(logging.INFO):
-            self._logger.info_bold("TEST")
+            self._logger.print_bold("TEST")
             assert "TEST" in caplog.text
 
-    def test_error_logs_expected_text_at_expected_level(self, caplog):
+    def test_print_and_log_error_logs_expected_text_at_expected_level(self, caplog):
         with caplog.at_level(logging.ERROR):
-            self._logger.error("TEST")
+            self._logger.print_and_log_info("TEST")
             assert "TEST" in caplog.text
 
-    def test_log_exception_detail_to_file_logs_expected_text_at_expected_level(self, caplog):
+    def test_log_error_logs_expected_text_at_expected_level(self, caplog):
         with caplog.at_level(logging.ERROR):
             ex = Exception("TEST")
-            self._logger.log_exception_detail_to_file(ex)
+            self._logger.log_error(ex)
             assert str(ex) in caplog.text
 
-    def test_log_errors_occurred_message_logs_expected_text_at_expected_level(self, caplog):
+    def test_print_errors_occurred_message_logs_expected_text_at_expected_level(self, caplog):
         with caplog.at_level(logging.ERROR):
-            self._logger.log_errors_occurred_message()
+            self._logger.print_errors_occurred_message()
             assert "View exceptions that occurred at" in caplog.text
 
-    def test_log_no_existing_profile_logs_expected_text_at_expected_level(self, caplog):
+    def test_print_and_log_no_existing_profile_logs_expected_text_at_expected_level(self, caplog):
         with caplog.at_level(logging.ERROR):
-            self._logger.log_no_existing_profile()
+            self._logger.print_and_log_no_existing_profile()
             assert u"No existing profile." in caplog.text
 
-    def test_create_profile_help_logs_expected_error_text(self, caplog):
+    def test_print_create_profile_help_logs_expected_error_text(self, caplog):
         with caplog.at_level(logging.INFO):
-            self._logger.log_create_profile_help()
+            self._logger.print_create_profile_help()
             assert u"To add a profile, use: " in caplog.text
 
-    def test_log_set_default_profile_help_logs_expected_message_at_expected_level(self, caplog):
+    def test_print_set_default_profile_help_logs_expected_message_at_expected_level(self, caplog):
         with caplog.at_level(logging.INFO):
-            self._logger.log_set_default_profile_help(["p1", "p2"])
+            self._logger.print_set_default_profile_help(["p1", "p2"])

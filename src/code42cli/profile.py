@@ -54,8 +54,8 @@ def get_profile(profile_name=None):
         return _get_profile(profile_name)
     except NoConfigProfileError as ex:
         logger = get_main_cli_logger()
-        logger.error(str(ex))
-        logger.log_create_profile_help()
+        logger.print_and_log_info(str(ex))
+        logger.print_create_profile_help()
         exit(1)
 
 
@@ -78,9 +78,9 @@ def validate_default_profile():
         logger = get_main_cli_logger()
         existing_profiles = get_all_profiles()
         if not existing_profiles:
-            logger.log_no_existing_profile()
+            logger.print_and_log_no_existing_profile()
         else:
-            logger.log_set_default_profile_help(existing_profiles)
+            logger.print_set_default_profile_help(existing_profiles)
         exit(1)
 
 
@@ -100,7 +100,7 @@ def switch_default_profile(profile_name):
 def create_profile(name, server, username, ignore_ssl_errors):
     if profile_exists(name):
         logger = get_main_cli_logger()
-        logger.error(u"A profile named '{}' already exists.".format(name))
+        logger.print_and_log_info(u"A profile named '{}' already exists.".format(name))
         exit(1)
 
     config_accessor.create_profile(name, server, username, ignore_ssl_errors)
@@ -113,7 +113,7 @@ def delete_profile(profile_name):
     cursor_store = get_file_event_cursor_store(profile_name)
     cursor_store.clean()
     config_accessor.delete_profile(profile_name)
-    get_main_cli_logger().info(u"Profile '{}' has been deleted.".format(profile_name))
+    get_main_cli_logger().print_info(u"Profile '{}' has been deleted.".format(profile_name))
 
 
 def update_profile(name, server, username, ignore_ssl_errors):

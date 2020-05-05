@@ -183,7 +183,7 @@ def get_user_id(sdk, username):
     users = sdk.users.get_by_username(username)[u"users"]
     if not users:
         ex = UserDoesNotExistError(username)
-        get_main_cli_logger().error(str(ex))
+        get_main_cli_logger().print_and_log_info(str(ex))
         raise ex
     return users[0][u"userUid"]
 

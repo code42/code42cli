@@ -125,30 +125,30 @@ class CliLogger(object):
         self._user_error_logger = _get_user_error_logger()
         self._error_file_logger = _get_error_file_logger()
 
-    def info(self, message):
+    def print_info(self, message):
         self._info_logger.info(message)
 
-    def info_bold(self, message):
+    def print_bold(self, message):
         self._info_logger.info(u"\033[1m{}\033[0m".format(message))
 
-    def info_to_error(self, message):
+    def print_and_log_error(self, message):
         """For not interrupting stdout output. Excludes red text from and 'ERROR: ' from `error()`.
         """
         self._user_error_logger.error(message)
 
-    def error(self, message):
+    def print_and_log_info(self, message):
         """Logs red text to stderr and a log file."""
         self._user_error_logger.error(self._get_red_error_text(message))
 
     def _get_red_error_text(self, text):
         return u"\033[91mERROR: {}\033[0m".format(text)
 
-    def log_exception_detail_to_file(self, exception):
+    def log_error(self, exception):
         message = str(exception) if exception else exception
         if message:
             self._error_file_logger.error(message)
 
-    def log_errors_occurred_message(self, additional_info=None):
+    def print_errors_occurred_message(self, additional_info=None):
         """Prints a message telling the user how to retrieve error logs."""
         locations_message = get_view_exceptions_location_message()
         message = (
@@ -157,27 +157,27 @@ class CliLogger(object):
             else locations_message
         )
         # Use `info()` because this message is pointless in the error log.
-        self.info(self._get_red_error_text(message))
+        self.print_info(self._get_red_error_text(message))
 
-    def log_no_existing_profile(self):
-        self.error(u"No existing profile.")
-        self.log_create_profile_help()
+    def print_and_log_no_existing_profile(self):
+        self.print_and_log_info(u"No existing profile.")
+        self.print_create_profile_help()
 
-    def log_create_profile_help(self):
-        self.info(u"\nTo add a profile, use: ")
-        self.info_bold(u"\tcode42 profile create <profile-name> <authority-URL> <username>\n")
+    def print_create_profile_help(self):
+        self.print_info(u"\nTo add a profile, use: ")
+        self.print_bold(u"\tcode42 profile create <profile-name> <authority-URL> <username>\n")
 
-    def log_set_default_profile_help(self, existing_profiles):
-        self.info(
+    def print_set_default_profile_help(self, existing_profiles):
+        self.print_info(
             u"\nNo default profile set.\n"
             u"\nUse the --profile flag to specify which profile to use.\n"
             u"\nTo set the default profile (used whenever --profile argument is not provided), use:"
         )
-        self.info_bold(u"\tcode42 profile use <profile-name>")
-        self.info(u"\nExisting profiles:")
+        self.print_bold(u"\tcode42 profile use <profile-name>")
+        self.print_info(u"\nExisting profiles:")
         for profile in existing_profiles:
-            self.info("\t{}".format(profile))
-        self.info(u"")
+            self.print_info("\t{}".format(profile))
+        self.print_info(u"")
 
 
 def get_main_cli_logger():

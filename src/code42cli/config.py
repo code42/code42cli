@@ -83,7 +83,7 @@ class ConfigAccessor(object):
             raise NoConfigProfileError(new_default_name)
         self._internal[self.DEFAULT_PROFILE] = new_default_name
         self._save()
-        get_main_cli_logger().info(
+        get_main_cli_logger().print_info(
             u"{} has been set as the default profile.".format(new_default_name)
         )
 
@@ -150,7 +150,7 @@ class ConfigAccessor(object):
             return
 
         self._save()
-        get_main_cli_logger().info(u"Successfully saved profile '{}'.".format(profile.name))
+        get_main_cli_logger().print_info(u"Successfully saved profile '{}'.".format(profile.name))
 
         default_profile = self._internal.get(self.DEFAULT_PROFILE)
         if default_profile is None or default_profile == self.DEFAULT_VALUE:

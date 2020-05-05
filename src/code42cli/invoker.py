@@ -7,7 +7,7 @@ from code42cli.logger import get_main_cli_logger
 
 
 def _try_log_invocation_str_for_error(invocation_str, logger):
-    logger.log_exception_detail_to_file(
+    logger.log_error(
         u"Exception occurred from input: '{}'. See error below.".format(invocation_str)
     )
 
@@ -15,8 +15,8 @@ def _try_log_invocation_str_for_error(invocation_str, logger):
 def _log_error(err, invocation_str):
     logger = get_main_cli_logger()
     _try_log_invocation_str_for_error(invocation_str, logger)
-    logger.log_exception_detail_to_file(err)
-    logger.log_errors_occurred_message()
+    logger.log_error(err)
+    logger.print_errors_occurred_message()
 
 
 class CommandInvoker(object):
@@ -40,7 +40,7 @@ class CommandInvoker(object):
             self._try_run_command(command, path_parts, input_args)
         except Py42ForbiddenError as err:
             _log_error(err, invocation_str)
-            get_main_cli_logger().error(
+            get_main_cli_logger().print_and_log_info(
                 u"You do not have the necessary permissions to perform this task. "
                 u"Try using or creating a different profile."
             )
@@ -87,6 +87,6 @@ class CommandInvoker(object):
             parsed_args = self._cmd_parser.parse_args(input_args)
             parsed_args.func(parsed_args)
         except ArgumentParserError as err:
-            get_main_cli_logger().log_exception_detail_to_file(err)
+            get_main_cli_logger().log_error(err)
             parser.print_help(sys.stderr)
             sys.exit(2)

@@ -79,26 +79,26 @@ def show_profile(name=None):
     """Prints the given profile to stdout."""
     c42profile = cliprofile.get_profile(name)
     logger = get_main_cli_logger()
-    logger.info(u"\n{0}:".format(c42profile.name))
-    logger.info(u"\t* username = {}".format(c42profile.username))
-    logger.info(u"\t* authority url = {}".format(c42profile.authority_url))
-    logger.info(u"\t* ignore-ssl-errors = {}".format(c42profile.ignore_ssl_errors))
+    logger.print_info(u"\n{0}:".format(c42profile.name))
+    logger.print_info(u"\t* username = {}".format(c42profile.username))
+    logger.print_info(u"\t* authority url = {}".format(c42profile.authority_url))
+    logger.print_info(u"\t* ignore-ssl-errors = {}".format(c42profile.ignore_ssl_errors))
     if cliprofile.get_stored_password(c42profile.name) is not None:
-        logger.info(u"\t* A password is set.")
-    logger.info(u"")
+        logger.print_info(u"\t* A password is set.")
+    logger.print_info(u"")
 
 
 def create_profile(profile, server, username, disable_ssl_errors=False):
     cliprofile.create_profile(profile, server, username, disable_ssl_errors)
     _prompt_for_allow_password_set(profile)
-    get_main_cli_logger().info(u"Successfully created profile '{}'.".format(profile))
+    get_main_cli_logger().print_info(u"Successfully created profile '{}'.".format(profile))
 
 
 def update_profile(name=None, server=None, username=None, disable_ssl_errors=None):
     profile = cliprofile.get_profile(name)
     cliprofile.update_profile(profile.name, server, username, disable_ssl_errors)
     _prompt_for_allow_password_set(profile.name)
-    get_main_cli_logger().info(u"Profile '{}' has been updated.".format(profile.name))
+    get_main_cli_logger().print_info(u"Profile '{}' has been updated.".format(profile.name))
 
 
 def prompt_for_password_reset(name=None):
@@ -112,7 +112,7 @@ def prompt_for_password_reset(name=None):
 def _validate_connection(authority, username, password):
     if not validate_connection(authority, username, password):
         logger = get_main_cli_logger()
-        logger.error(
+        logger.print_and_log_info(
             u"Your credentials failed to validate, so your password was not stored."
             u"Check your network connection and the spelling of your username and server URL."
         )
@@ -124,10 +124,10 @@ def list_profiles(*args):
     profiles = cliprofile.get_all_profiles()
     logger = get_main_cli_logger()
     if not profiles:
-        logger.log_no_existing_profile()
+        logger.print_and_log_no_existing_profile()
         return
     for profile in profiles:
-        logger.info(str(profile))
+        logger.print_info(str(profile))
 
 
 def use_profile(profile):
@@ -138,7 +138,7 @@ def use_profile(profile):
 def delete_profile(name):
     logger = get_main_cli_logger()
     if cliprofile.is_default_profile(name):
-        logger.info(u"\n{} is currently the default profile!".format(name))
+        logger.print_info(u"\n{} is currently the default profile!".format(name))
     if not does_user_agree(
         u"\nDeleting this profile will also delete any stored passwords and checkpoints. "
         u"Are you sure? (y/n): "
@@ -151,16 +151,16 @@ def delete_all_profiles():
     existing_profiles = cliprofile.get_all_profiles()
     logger = get_main_cli_logger()
     if existing_profiles:
-        logger.info(u"\nAre you sure you want to delete the following profiles?")
+        logger.print_info(u"\nAre you sure you want to delete the following profiles?")
         for profile in existing_profiles:
-            logger.info(u"\t{}".format(profile.name))
+            logger.print_info(u"\t{}".format(profile.name))
         if does_user_agree(
             u"\nThis will also delete any stored passwords and checkpoints. (y/n): "
         ):
             for profile in existing_profiles:
                 cliprofile.delete_profile(profile.name)
     else:
-        logger.info(u"\nNo profiles exist. Nothing to delete.")
+        logger.print_info(u"\nNo profiles exist. Nothing to delete.")
 
 
 def _load_optional_profile_description(argument_collection):

@@ -77,7 +77,7 @@ class Worker(object):
                 func(*args, **kwargs)
             except Exception as ex:
                 logger = get_main_cli_logger()
-                logger.log_exception_detail_to_file(ex)
+                logger.log_error(ex)
                 self._stats.increment_total_errors()
             finally:
                 self._stats.increment_total()

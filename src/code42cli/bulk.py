@@ -22,7 +22,7 @@ def generate_template(handler, path=None):
     ]
 
     if len(args) <= 1:
-        get_main_cli_logger().info(
+        get_main_cli_logger().print_info(
             u"A blank file was generated because there are no csv headers needed for this command. "
             u"Simply enter one {} per line.".format(args[0])
         )
@@ -105,9 +105,9 @@ class BulkProcessor(object):
         stats = self.__worker.stats
         successes = stats.total - stats.total_errors
         logger = get_main_cli_logger()
-        logger.info_to_error(u"{} processed successfully out of {}.".format(successes, stats.total))
+        logger.print_and_log_error(u"{} processed successfully out of {}.".format(successes, stats.total))
         if stats.total_errors:
-            logger.log_errors_occurred_message()
+            logger.print_errors_occurred_message()
 
 
 class CSVReader(object):

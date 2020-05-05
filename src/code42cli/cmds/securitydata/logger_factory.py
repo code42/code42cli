@@ -68,7 +68,7 @@ def get_logger_for_server(hostname, protocol, output_format):
                 ).handler
             except:
                 logger = get_main_cli_logger()
-                logger.error(u"Unable to connect to {0}.".format(hostname))
+                logger.print_and_log_info(u"Unable to connect to {0}.".format(hostname))
                 exit(1)
             return _init_logger(logger, handler, output_format)
     return logger
