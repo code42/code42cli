@@ -10,14 +10,14 @@ from code42cli.cmds.alerts.rules.user_rule import (
 from code42cli.commands import Command
 
 
-def add_arguments(argument_collection):
+def _customize_add_arguments(argument_collection):
     rule_id = argument_collection.arg_configs[u"rule_id"]
     rule_id.set_help(u"Observer Id of a rule to be updated.")
     user_id = argument_collection.arg_configs[u"user_id"]
     user_id.set_help(u"The Code42 userUid  of the user to add to the alert")
 
 
-def remove_arguments(argument_collection):
+def _customize_remove_arguments(argument_collection):
 
     rule_id = argument_collection.arg_configs[u"rule_id"]
     rule_id.set_help(u"Update alert rule criteria to remove users the from the alert rule.")
@@ -26,12 +26,12 @@ def remove_arguments(argument_collection):
                      u"from a rule of the specified userUid")
 
 
-def remove_all_arguments(argument_collection):
+def _customize_remove_all_arguments(argument_collection):
     rule_id = argument_collection.arg_configs[u"rule_id"]
     rule_id.set_help(u"Update alert rule criteria to remove all users the from the alert rule.")
 
 
-def list_arguments(argument_collection):
+def _customize_list_arguments(argument_collection):
     rule_type = argument_collection.arg_configs[u"rule_type"]
     rule_type.set_help(u"Type of rule, either of 'exfiltration', 'cloudshare', 'filetypemismatch'")
     rule_type.set_choices([u"exfiltration", u"cloudshare", u"filetypemismatch"])
@@ -39,7 +39,7 @@ def list_arguments(argument_collection):
     rule_id.set_help(u"Rule id of th rule")
 
 
-def search_arguments(argument_collection):
+def _customize_search_arguments(argument_collection):
     rule_name = argument_collection.arg_configs[u"rule_name"]
     rule_name.set_help(u"Search for matching rules by name.")
 
@@ -59,7 +59,7 @@ def load_subcommands():
             u"Update alert rule to monitor user aliases against the Uid for the given rule id.",
             u"{} {}".format(usage_prefix, u"add-user <rule_id> <user_id>"),
             handler=add_user,
-            arg_customizer=add_arguments
+            arg_customizer=_customize_add_arguments
         )
 
     add_bulk = Command(
@@ -76,7 +76,7 @@ def load_subcommands():
             u"Update alert rule criteria to remove a user and all its aliases.",
             u"{} {}".format(usage_prefix, u"remove-user <rule_id>  <user_id>"),
             handler=remove_user,
-            arg_customizer=remove_arguments
+            arg_customizer=_customize_remove_arguments
         )
 
     remove_all = Command(
@@ -84,7 +84,7 @@ def load_subcommands():
         u"Update alert rule criteria to remove all users and all its aliases from a rule.",
         u"{} {}".format(usage_prefix, u"remove-all <rule_id>"),
         handler=remove_all_users,
-        arg_customizer=remove_all_arguments
+        arg_customizer=_customize_remove_all_arguments
     )
     
     remove_bulk = Command(
@@ -101,7 +101,7 @@ def load_subcommands():
             u"Fetch existing alert rules by rule -id",
             u"{} {}".format(usage_prefix, u"list <rule_type>  <rule_id>"),
             handler=get_by_rule_type,
-            arg_customizer=list_arguments
+            arg_customizer=_customize_list_arguments
         )
 
     list_all_rules = Command(
@@ -116,7 +116,7 @@ def load_subcommands():
         u"Search a rule by its matching name.",
         u"{} {}".format(usage_prefix, u"search <rule_name>"),
         handler=get_by_name,
-        arg_customizer=search_arguments
+        arg_customizer=_customize_search_arguments
     )
 
     return [add, add_bulk, remove_one, remove_all, remove_bulk, list_rules, list_all_rules, search]
