@@ -3,7 +3,7 @@ from code42cli.cmds.alerts.rules.user_rule import (
     remove_user, 
     remove_all_users, 
     get_by_rule_type,
-    get_all, get_by_name,
+    get_all,
     add_bulk_users,
     remove_bulk_users,
 )
@@ -37,11 +37,6 @@ def _customize_list_arguments(argument_collection):
     rule_type.set_choices([u"exfiltration", u"cloudshare", u"filetypemismatch"])
     rule_id = argument_collection.arg_configs[u"rule_id"]
     rule_id.set_help(u"Rule id of th rule")
-
-
-def _customize_search_arguments(argument_collection):
-    rule_name = argument_collection.arg_configs[u"rule_name"]
-    rule_name.set_help(u"Search for matching rules by name.")
 
 
 def bulk_arguments(argument_collection):
@@ -111,12 +106,4 @@ def load_subcommands():
         handler=get_all,
     )
 
-    search = Command(
-        u"search",
-        u"Search a rule by its matching name.",
-        u"{} {}".format(usage_prefix, u"search <rule_name>"),
-        handler=get_by_name,
-        arg_customizer=_customize_search_arguments
-    )
-
-    return [add, add_bulk, remove_one, remove_all, remove_bulk, list_rules, list_all_rules, search]
+    return [add, add_bulk, remove_one, remove_all, remove_bulk, list_rules, list_all_rules]
