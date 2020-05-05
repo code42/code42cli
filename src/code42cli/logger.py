@@ -91,10 +91,10 @@ def _get_interactive_user_error_logger():
             file_handler = _create_error_file_handler()
             file_formatter = _create_formatter_for_error_file()
             file_handler.setFormatter(file_formatter)
-            
+
             add_handler_to_logger(logger, stderr_handler, stderr_formatter)
             add_handler_to_logger(logger, file_handler, file_formatter)
-            
+
             logger.setLevel(logging.ERROR)
             return logger
     return logger
@@ -102,6 +102,7 @@ def _get_interactive_user_error_logger():
 
 def _create_formatter_for_error_file():
     return logging.Formatter(u"%(asctime)s %(message)s")
+
 
 class CliLogger(object):
     """There are three loggers part of the CliLogger. The following table illustrates where they 

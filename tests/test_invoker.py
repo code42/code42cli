@@ -76,7 +76,9 @@ class TestCommandInvoker(object):
             invoker.run(["testsub1", "inner1", "one", "two", "--invalid", "test"])
             assert str(ex) in caplog.text
 
-    def test_run_when_errors_occur_from_handler_calls_logs_command(self, mocker, mock_parser, caplog):
+    def test_run_when_errors_occur_from_handler_calls_logs_command(
+        self, mocker, mock_parser, caplog
+    ):
         ex = Exception("test")
         cmd = Command("", "top level desc", subcommand_loader=load_subcommands)
         mock_parser.parse_args.side_effect = ex
@@ -115,4 +117,3 @@ class TestCommandInvoker(object):
         with caplog.at_level(logging.ERROR):
             invoker.run(["testsub1", "inner1", "one", "two", "--invalid", "test"])
             assert "code42 testsub1 inner1 one two --invalid test" in caplog.text
-

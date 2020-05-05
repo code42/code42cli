@@ -39,7 +39,7 @@ class CommandInvoker(object):
             self._try_log_invocation_str_for_error(command, logger)
             logger.log_exception_detail_to_file(ex)
             logger.log_errors_occurred_message()
-    
+
     def _try_log_invocation_str_for_error(self, command, logger):
         if command and command.invocation_str:
             logger.log_exception_detail_to_file(
