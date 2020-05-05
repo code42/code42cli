@@ -55,11 +55,7 @@ def get_profile(profile_name=None):
     except NoConfigProfileError as ex:
         logger = get_main_cli_logger()
         logger.error(str(ex))
-
-        if not default_profile_exists():
-            logger.log_create_profile_help()
-        else:
-            get_all_profiles()
+        logger.log_create_profile_help()
         exit(1)
 
 
