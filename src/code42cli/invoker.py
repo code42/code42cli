@@ -20,15 +20,14 @@ class CommandInvoker(object):
             input_args (iter[str]): the full list of arguments
             supplied by the user to `code42` cli command.
         """
-        command = None
+        invocation_str = u"code42 {}".format(u" ".join(input_args))
         try:
             path_parts = self._get_path_parts(input_args)
             command = self._commands.get(u" ".join(path_parts))
-            command.invocation_str = u"code42 {}".format(u" ".join(input_args))
             self._try_run_command(command, path_parts, input_args)
         except Py42ForbiddenError as err:
             logger = get_main_cli_logger()
-            self._try_log_invocation_str_for_error(command, logger)
+            self._try_log_invocation_str_for_error(invocation_str, logger)
             logger.log_exception_detail_to_file(err)
             logger.error(
                 u"You do not have the necessary permissions to perform this task. "
@@ -36,17 +35,14 @@ class CommandInvoker(object):
             )
         except Exception as ex:
             logger = get_main_cli_logger()
-            self._try_log_invocation_str_for_error(command, logger)
+            self._try_log_invocation_str_for_error(invocation_str, logger)
             logger.log_exception_detail_to_file(ex)
             logger.log_errors_occurred_message()
 
-    def _try_log_invocation_str_for_error(self, command, logger):
-        if command and command.invocation_str:
-            logger.log_exception_detail_to_file(
-                u"Exception occurred from input: '{}'. See error below.".format(
-                    command.invocation_str
-                )
-            )
+    def _try_log_invocation_str_for_error(self, invocation_str, logger):
+        logger.log_exception_detail_to_file(
+            u"Exception occurred from input: '{}'. See error below.".format(invocation_str)
+        )
 
     def _get_path_parts(self, input_args):
         """Gets the portion of `input_args` that refers to a
