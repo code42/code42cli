@@ -79,6 +79,12 @@ class SearchArguments(object):
     ADVANCED_QUERY = u"advanced_query"
     BEGIN_DATE = u"begin"
     END_DATE = u"end"
+
+    def __iter__(self):
+        return iter([self.ADVANCED_QUERY, self.BEGIN_DATE, self.END_DATE,])
+
+
+class FileEventFilterArguments(SearchArguments):
     EXPOSURE_TYPES = u"type"
     C42_USERNAME = u"c42_username"
     ACTOR = u"actor"
@@ -94,9 +100,6 @@ class SearchArguments(object):
     def __iter__(self):
         return iter(
             [
-                self.ADVANCED_QUERY,
-                self.BEGIN_DATE,
-                self.END_DATE,
                 self.EXPOSURE_TYPES,
                 self.C42_USERNAME,
                 self.ACTOR,
@@ -112,11 +115,7 @@ class SearchArguments(object):
         )
 
 
-class AlertArguments(object):
-
-    ADVANCED_QUERY = u"advanced_query"
-    BEGIN_DATE = u"begin"
-    END_DATE = u"end"
+class AlertFilterArguments(object):
     STATE = u"state"
     SEVERITY = u"severity"
     ACTOR_IS = u"actor_is"
@@ -132,9 +131,6 @@ class AlertArguments(object):
     def __iter__(self):
         return iter(
             [
-                self.ADVANCED_QUERY,
-                self.BEGIN_DATE,
-                self.END_DATE,
                 self.STATE,
                 self.SEVERITY,
                 self.ACTOR_IS,

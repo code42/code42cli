@@ -1,7 +1,13 @@
 from code42cli.args import ArgConfig
 from code42cli.commands import Command
 from code42cli.cmds.alerts.extraction import extract
-from code42cli.cmds.shared import enums, logger_factory
+from code42cli.cmds.shared import args, logger_factory
+from code42cli.cmds.shared.enums import (
+    AlertFilterArguments,
+    AlertState,
+    AlertSeverity,
+    ServerProtocol,
+)
 from code42cli.cmds.shared.cursor_store import AlertCursorStore
 
 
@@ -84,8 +90,8 @@ def _load_send_to_args(arg_collection):
         u"protocol": ArgConfig(
             u"-p",
             u"--protocol",
-            choices=enums.ServerProtocol(),
-            default=enums.ServerProtocol.UDP,
+            choices=ServerProtocol(),
+            default=ServerProtocol.UDP,
             help=u"Protocol used to send logs to server.",
         ),
     }
@@ -95,104 +101,69 @@ def _load_send_to_args(arg_collection):
 
 
 def _load_search_args(arg_collection):
-    search_args = {
-        enums.AlertArguments.ADVANCED_QUERY: ArgConfig(
-            u"--{}".format(enums.AlertArguments.ADVANCED_QUERY.replace(u"_", u"-")),
-            help=u"A raw JSON alert query. "
-            u"Useful for when the provided query parameters do not satisfy your requirements."
-            u"WARNING: Using advanced queries ignores all other query parameters.",
-        ),
-        enums.AlertArguments.BEGIN_DATE: ArgConfig(
-            u"-b",
-            u"--{}".format(enums.AlertArguments.BEGIN_DATE),
-            help=u"The beginning of the date range in which to look for alerts, "
-            u"can be a date/time in YYYY-MM-DD (UTC) or YYYY-MM-DD HH:MM:SS (UTC+24-hr time) format "
-            u"or a short value representing days (30d), hours (24h) or minutes (15m) from current "
-            u"time.",
-        ),
-        enums.AlertArguments.END_DATE: ArgConfig(
-            u"-e",
-            u"--{}".format(enums.AlertArguments.END_DATE),
-            help=u"The end of the date range in which to look for alerts, "
-            u"can be a date/time in YYYY-MM-DD (UTC) or YYYY-MM-DD HH:MM:SS (UTC+24-hr time) format "
-            u"or a short value representing days (30d), hours (24h) or minutes (15m) from current "
-            u"time.",
-        ),
-        enums.AlertArguments.SEVERITY: ArgConfig(
-            u"--{}".format(enums.AlertArguments.SEVERITY),
+    filter_args = {
+        AlertFilterArguments.SEVERITY: ArgConfig(
+            u"--{}".format(AlertFilterArguments.SEVERITY),
             nargs=u"+",
             help=u"Filter alerts by severity. Defaults to returning all severities. Available choices={0}".format(
-                list(enums.AlertSeverity())
+                list(AlertSeverity())
             ),
         ),
-        enums.AlertArguments.STATE: ArgConfig(
-            u"--{}".format(enums.AlertArguments.STATE),
+        AlertFilterArguments.STATE: ArgConfig(
+            u"--{}".format(AlertFilterArguments.STATE),
             help=u"Filter alerts by state. Defaults to returning all states. Available choices={0}".format(
-                enums.AlertState()
+                AlertState()
             ),
         ),
-        enums.AlertArguments.ACTOR_IS: ArgConfig(
-            u"--{}".format(enums.AlertArguments.ACTOR_IS.replace("_", "-")),
+        AlertFilterArguments.ACTOR_IS: ArgConfig(
+            u"--{}".format(AlertFilterArguments.ACTOR_IS.replace("_", "-")),
             metavar=u"ACTOR",
             help=u"Filter alerts by including the given actor(s) who triggered the alert. Accepts multiple args. Args must match actor username exactly.",
             nargs=u"+",
         ),
-        enums.AlertArguments.ACTOR_CONTAINS: ArgConfig(
-            u"--{}".format(enums.AlertArguments.ACTOR_CONTAINS.replace("_", "-")),
+        AlertFilterArguments.ACTOR_CONTAINS: ArgConfig(
+            u"--{}".format(AlertFilterArguments.ACTOR_CONTAINS.replace("_", "-")),
             metavar=u"ACTOR",
             help=u"Filter alerts by including actor(s) whose username contains the given string.",
             nargs=u"+",
         ),
-        enums.AlertArguments.ACTOR_NOT: ArgConfig(
-            u"--{}".format(enums.AlertArguments.ACTOR_NOT.replace("_", "-")),
+        AlertFilterArguments.ACTOR_NOT: ArgConfig(
+            u"--{}".format(AlertFilterArguments.ACTOR_NOT.replace("_", "-")),
             metavar=u"ACTOR",
             help=u"Filter alerts by excluding the given actor(s) who triggered the alert. Accepts multiple args. Args must match actor username exactly.",
             nargs=u"+",
         ),
-        enums.AlertArguments.ACTOR_NOT_CONTAINS: ArgConfig(
-            u"--{}".format(enums.AlertArguments.ACTOR_NOT_CONTAINS.replace("_", "-")),
+        AlertFilterArguments.ACTOR_NOT_CONTAINS: ArgConfig(
+            u"--{}".format(AlertFilterArguments.ACTOR_NOT_CONTAINS.replace("_", "-")),
             metavar=u"ACTOR",
             help=u"Filter alerts by excluding actor(s) whose username contains the given string.",
         ),
-        enums.AlertArguments.RULE_NAME_IS: ArgConfig(
-            u"--{}".format(enums.AlertArguments.RULE_NAME_IS.replace("_", "-")),
+        AlertFilterArguments.RULE_NAME_IS: ArgConfig(
+            u"--{}".format(AlertFilterArguments.RULE_NAME_IS.replace("_", "-")),
             metavar=u"RULE_NAME",
             help=u"Filter alerts by including the given rule name(s). Accepts multiple args. Put a '*' at the start of an arg string to do a fuzzy search (e.g. '*search term').",
             nargs=u"+",
         ),
-        enums.AlertArguments.RULE_NAME_CONTAINS: ArgConfig(
-            u"--{}".format(enums.AlertArguments.RULE_NAME_CONTAINS.replace("_", "-")),
+        AlertFilterArguments.RULE_NAME_CONTAINS: ArgConfig(
+            u"--{}".format(AlertFilterArguments.RULE_NAME_CONTAINS.replace("_", "-")),
             metavar=u"RULE_NAME",
             help=u"Filter alerts by including rules that contain the given arg string in their name.",
         ),
-        enums.AlertArguments.RULE_NAME_NOT: ArgConfig(
-            u"--{}".format(enums.AlertArguments.RULE_NAME_NOT.replace("_", "-")),
+        AlertFilterArguments.RULE_NAME_NOT: ArgConfig(
+            u"--{}".format(AlertFilterArguments.RULE_NAME_NOT.replace("_", "-")),
             metavar=u"RULE_NAME",
             help=u"Filter alerts by excluding the given rule name(s). Accepts multiple args. Put a '*' at the start of an arg string to do a fuzzy search (e.g. '*search term').",
             nargs=u"+",
         ),
-        enums.AlertArguments.RULE_NAME_NOT_CONTAINS: ArgConfig(
-            u"--{}".format(enums.AlertArguments.RULE_NAME_NOT_CONTAINS.replace("_", "-")),
+        AlertFilterArguments.RULE_NAME_NOT_CONTAINS: ArgConfig(
+            u"--{}".format(AlertFilterArguments.RULE_NAME_NOT_CONTAINS.replace("_", "-")),
             metavar=u"RULE_NAME",
             help=u"Filter alerts by excluding rules that contain the given arg string in their name.",
         ),
-        enums.AlertArguments.DESCRIPTION: ArgConfig(
-            u"--{}".format(enums.AlertArguments.DESCRIPTION),
+        AlertFilterArguments.DESCRIPTION: ArgConfig(
+            u"--{}".format(AlertFilterArguments.DESCRIPTION),
             help=u"Filter alerts by description. Does fuzzy search by default.",
         ),
-        u"format": ArgConfig(
-            u"-f",
-            u"--format",
-            choices=enums.OutputFormat(),
-            default=enums.OutputFormat.JSON,
-            help=u"The format used for outputting events.",
-        ),
-        u"incremental": ArgConfig(
-            u"-i",
-            u"--incremental",
-            action=u"store_true",
-            help=u"Only get alerts that were not previously retrieved.",
-        ),
     }
-
+    search_args = args.create_search_args(search_for=u"alerts", filter_args=filter_args)
     arg_collection.extend(search_args)
