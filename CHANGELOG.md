@@ -13,7 +13,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Added
 
 - Success messages for `profile delete` and `profile update`.
-- Additional information in the error log file
+- Additional information in the error log file:
     - The full command path for the command that errored.
     - User-facing error messages that were you see during adhoc sessions.
 
