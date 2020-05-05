@@ -3,7 +3,11 @@ from code42cli.bulk import run_bulk_process, FlatFileReader
 
 def add_user(sdk, rule_id, user_id):
     sdk.alerts.rules.add_user(rule_id, user_id)
-    
+
+
+def _remove_all_users(sdk, rule_id):
+    sdk.alerts.rules.remove_all_users(rule_id)
+
 
 def remove_user(sdk, rule_id, user_id=None):
     if user_id:
@@ -11,10 +15,6 @@ def remove_user(sdk, rule_id, user_id=None):
     else:
         _remove_all_users(sdk, rule_id)
 
-
-def _remove_all_users(sdk, rule_id):
-    sdk.alerts.rules.remove_all_users(rule_id)
-    
 
 def _get_rule_category(sdk, rule_type):
     if rule_type == u"exfiltration":
