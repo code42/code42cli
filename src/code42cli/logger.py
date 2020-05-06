@@ -1,4 +1,4 @@
-import logging, sys, os
+import logging, sys
 from logging.handlers import RotatingFileHandler
 from threading import Lock
 

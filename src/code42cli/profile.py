@@ -1,3 +1,4 @@
+from code42cli.compat import str
 import code42cli.password as password
 from code42cli.cmds.shared.cursor_store import get_file_event_cursor_store
 from code42cli.config import ConfigAccessor, config_accessor, NoConfigProfileError

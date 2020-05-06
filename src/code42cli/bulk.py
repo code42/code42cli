@@ -6,7 +6,6 @@ from code42cli.compat import open, str
 from code42cli.worker import Worker
 from code42cli.logger import get_main_cli_logger
 from code42cli.args import SDK_ARG_NAME, PROFILE_ARG_NAME
-import code42cli.errors as errors
 
 
 def generate_template(handler, path=None):
