@@ -1,4 +1,4 @@
-import sys
+import sys, traceback
 
 from py42.exceptions import Py42ForbiddenError
 
@@ -6,16 +6,11 @@ from code42cli.parser import ArgumentParserError, CommandParser
 from code42cli.logger import get_main_cli_logger
 
 
-def _try_log_invocation_str_for_error(invocation_str, logger):
-    logger.log_error(
-        u"Exception occurred from input: '{}'. See error below.".format(invocation_str)
-    )
-
-
 def _log_error(err, invocation_str):
     logger = get_main_cli_logger()
-    _try_log_invocation_str_for_error(invocation_str, logger)
-    logger.log_error(err)
+    message = u"Exception occurred from input: '{}'. See error below.".format(invocation_str)
+    logger.log_error(message)
+    logger.log_error(traceback.format_exc())
     logger.print_errors_occurred_message()
 
 

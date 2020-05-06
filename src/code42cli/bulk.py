@@ -105,7 +105,9 @@ class BulkProcessor(object):
         stats = self.__worker.stats
         successes = stats.total - stats.total_errors
         logger = get_main_cli_logger()
-        logger.print_and_log_error(u"{} processed successfully out of {}.".format(successes, stats.total))
+        logger.print_and_log_error(
+            u"{} processed successfully out of {}.".format(successes, stats.total)
+        )
         if stats.total_errors:
             logger.print_errors_occurred_message()
 

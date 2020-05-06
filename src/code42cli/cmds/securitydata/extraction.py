@@ -60,7 +60,9 @@ def _determine_if_advanced_query(args):
             val = given_args[key]
             if not _verify_compatibility_with_advanced_query(key, val):
                 logger = get_main_cli_logger()
-                logger.print_and_log_info(u"You cannot use --advanced-query with additional search args.")
+                logger.print_and_log_info(
+                    u"You cannot use --advanced-query with additional search args."
+                )
                 exit(1)
         return True
     return False
@@ -191,7 +193,9 @@ def _try_append_exposure_types_filter(filters, include_non_exposure_events, expo
 
 def _create_exposure_type_filter(include_non_exposure_events, exposure_types):
     if include_non_exposure_events and exposure_types:
-        get_main_cli_logger().print_and_log_info(u"Cannot use exposure types with `--include-non-exposure`.")
+        get_main_cli_logger().print_and_log_info(
+            u"Cannot use exposure types with `--include-non-exposure`."
+        )
         exit(1)
     if exposure_types:
         return ExposureType.is_in(exposure_types)

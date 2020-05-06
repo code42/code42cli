@@ -198,4 +198,3 @@ def _load_profile_settings_descriptions(argument_collection):
 def _prompt_for_allow_password_set(profile_name):
     if does_user_agree(u"Would you like to set a password? (y/n): "):
         prompt_for_password_reset(profile_name)
-
