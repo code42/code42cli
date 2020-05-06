@@ -10,6 +10,14 @@ class OutputFormat(object):
         return iter([self.CEF, self.JSON, self.RAW])
 
 
+class AlertOutputFormat(object):
+    JSON = u"JSON"
+    RAW = u"RAW-JSON"
+
+    def __iter__(self):
+        return iter([self.JSON, self.RAW])
+
+
 class AlertSeverity(object):
     HIGH = u"HIGH"
     MEDIUM = u"MEDIUM"

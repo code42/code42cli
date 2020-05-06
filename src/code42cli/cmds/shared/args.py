@@ -1,4 +1,4 @@
-from code42cli.cmds.shared.enums import SearchArguments, OutputFormat
+from code42cli.cmds.shared.enums import SearchArguments, OutputFormat, AlertOutputFormat
 from code42cli.args import ArgConfig
 
 
@@ -32,12 +32,13 @@ def create_search_args(search_for, filter_args):
             u"time.".format(search_for),
         ),
     }
+    format_enum = AlertOutputFormat() if search_for == "alerts" else OutputFormat()
     format_and_incremental_args = {
         u"format": ArgConfig(
             u"-f",
             u"--format",
-            choices=OutputFormat(),
-            default=OutputFormat.JSON,
+            choices=format_enum,
+            default=format_enum.JSON,
             help=u"The format used for outputting {0}.".format(search_for),
         ),
         u"incremental": ArgConfig(
