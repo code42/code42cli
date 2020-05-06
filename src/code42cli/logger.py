@@ -71,10 +71,6 @@ def _get_user_error_logger():
         return _get_error_file_logger()
 
 
-def _get_standard_logger(stream_name):
-    return logging.getLogger(u"code42_{}_main".format(stream_name))
-
-
 def _get_interactive_user_error_logger():
     """This logger has two handlers, one for stderr and one for the error log file."""
     logger = logging.getLogger(u"code42_stderr_main")
