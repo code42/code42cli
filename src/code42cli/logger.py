@@ -28,9 +28,13 @@ def _get_standard_formatter():
     return logging.Formatter(u"%(message)s")
 
 
-def _create_error_file_handler():
+def _get_error_log_path():
     log_path = get_user_project_path(u"log")
-    log_path = u"{}/{}".format(log_path, ERROR_LOG_FILE_NAME)
+    return u"{}/{}".format(log_path, ERROR_LOG_FILE_NAME)
+
+
+def _create_error_file_handler():
+    log_path = _get_error_log_path()
     return RotatingFileHandler(log_path, maxBytes=250000000, encoding=u"utf-8")
 
 
@@ -60,8 +64,8 @@ def _get_error_file_logger():
 
 def get_view_exceptions_location_message():
     """Returns the error message that is printed when errors occur."""
-    path = get_user_project_path(u"log")
-    return u"View exceptions that occurred at {}/{}.".format(path, ERROR_LOG_FILE_NAME)
+    path = _get_error_log_path()
+    return u"View exceptions that occurred at {}.".format(path)
 
 
 def _get_user_error_logger():
