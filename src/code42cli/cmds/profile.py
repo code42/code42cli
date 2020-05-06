@@ -114,7 +114,7 @@ def prompt_for_password_reset(name=None):
 def _validate_connection(authority, username, password):
     if not validate_connection(authority, username, password):
         logger = get_main_cli_logger()
-        logger.print_and_log_info(
+        logger.print_and_log_error(
             u"Your credentials failed to validate, so your password was not stored."
             u"Check your network connection and the spelling of your username and server URL."
         )

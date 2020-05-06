@@ -55,7 +55,7 @@ def get_profile(profile_name=None):
         return _get_profile(profile_name)
     except NoConfigProfileError as ex:
         logger = get_main_cli_logger()
-        logger.print_and_log_info(str(ex))
+        logger.print_and_log_error(str(ex))
         _print_create_profile_help()
         exit(1)
 
@@ -100,7 +100,7 @@ def switch_default_profile(profile_name):
 def create_profile(name, server, username, ignore_ssl_errors):
     if profile_exists(name):
         logger = get_main_cli_logger()
-        logger.print_and_log_info(u"A profile named '{}' already exists.".format(name))
+        logger.print_and_log_error(u"A profile named '{}' already exists.".format(name))
         exit(1)
 
     config_accessor.create_profile(name, server, username, ignore_ssl_errors)
@@ -137,7 +137,7 @@ def set_password(new_password, profile_name=None):
 
 def print_and_log_no_existing_profile():
     logger = get_main_cli_logger()
-    logger.print_and_log_info(u"No existing profile.")
+    logger.print_and_log_error(u"No existing profile.")
     _print_create_profile_help()
 
 

@@ -137,11 +137,12 @@ class CliLogger(object):
     def print_and_log_error(self, message):
         """For not interrupting stdout output. Excludes red text and 'ERROR: ' from `error()`.
         """
-        self._user_error_logger.error(message)
+        """Logs red text to stderr and a log file."""
+        self._user_error_logger.error(_get_red_error_text(message))
 
     def print_and_log_info(self, message):
         """Logs red text to stderr and a log file."""
-        self._user_error_logger.error(_get_red_error_text(message))
+        self._user_error_logger.error(message)
 
     def log_error(self, exception):
         if exception:

@@ -35,7 +35,7 @@ class CommandInvoker(object):
             self._try_run_command(command, path_parts, input_args)
         except Py42ForbiddenError as err:
             _log_error(err, invocation_str)
-            get_main_cli_logger().print_and_log_info(
+            get_main_cli_logger().print_and_log_error(
                 u"You do not have the necessary permissions to perform this task. "
                 u"Try using or creating a different profile."
             )

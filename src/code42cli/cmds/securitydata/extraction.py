@@ -121,7 +121,7 @@ def _get_event_timestamp_filter(begin_date, end_date):
         end_date = end_date.strip() if end_date else None
         return date_helper.create_event_timestamp_filter(begin_date, end_date)
     except date_helper.DateArgumentException as ex:
-        get_main_cli_logger().print_and_log_info(str(ex))
+        get_main_cli_logger().print_and_log_error(str(ex))
         exit(1)
 
 
@@ -175,7 +175,7 @@ def _handle_result():
     logger = get_main_cli_logger()
     _print_errors_occurred_if_needed(logger)
     if not _TOTAL_EVENTS:
-        logger.print_and_log_error(u"No results found.")
+        logger.print_and_log_info(u"No results found.")
 
 
 def _print_errors_occurred_if_needed(logger):

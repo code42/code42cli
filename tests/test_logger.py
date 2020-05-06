@@ -54,6 +54,11 @@ class TestCliLogger(object):
 
     def test_print_and_log_error_logs_expected_text_at_expected_level(self, caplog):
         with caplog.at_level(logging.ERROR):
+            self._logger.print_and_log_error("TEST")
+            assert "TEST" in caplog.text
+
+    def test_print_and_log_info_logs_expected_text_at_expected_level(self, caplog):
+        with caplog.at_level(logging.ERROR):
             self._logger.print_and_log_info("TEST")
             assert "TEST" in caplog.text
 
