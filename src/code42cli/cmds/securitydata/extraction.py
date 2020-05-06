@@ -71,7 +71,7 @@ def _determine_if_advanced_query(args):
 def _verify_begin_date_requirements(args, cursor_store):
     if _begin_date_is_required(args, cursor_store) and not args.begin:
         logger = get_main_cli_logger()
-        logger.print_and_log_info(u"'begin date' is required.\n")
+        logger.print_and_log_error(u"'begin date' is required.\n")
         logger.print_bold(u"Try using  '-b' or '--begin'. Use `-h` for more info.\n")
         exit(1)
 
