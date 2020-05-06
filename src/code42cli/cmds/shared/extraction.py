@@ -32,7 +32,11 @@ def create_handlers(output_logger, cursor_store, event_key):
     handlers = ExtractionHandlers()
     handlers.TOTAL_EVENTS = 0
 
-    handlers.handle_error = errors.log_error
+    def handle_error(exception):
+        errors.log_error(exception)
+        errors.ERRORED = True
+
+    handlers.handle_error = handle_error
 
     if cursor_store:
         handlers.record_cursor_position = cursor_store.replace_stored_cursor_timestamp
@@ -49,7 +53,7 @@ def create_handlers(output_logger, cursor_store, event_key):
     return handlers
 
 
-def exit_if_advanced_query_used_with_other_args(args):
+def exit_if_advanced_query_used_with_other_search_args(args):
     args_dict_copy = args.__dict__.copy()
     for arg in ("advanced_query", "format", "sdk", "profile"):
         args_dict_copy.pop(arg)
