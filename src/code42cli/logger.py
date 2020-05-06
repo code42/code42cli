@@ -1,4 +1,4 @@
-import logging, sys
+import logging, sys, traceback
 from logging.handlers import RotatingFileHandler
 from threading import Lock
 
@@ -103,6 +103,12 @@ def _get_red_error_text(text):
     return u"\033[91mERROR: {}\033[0m".format(text)
 
 
+_PERMISSIONS_MESSAGE = (
+    u"You do not have the necessary permissions to perform this task. "
+    + u"Try using or creating a different profile."
+)
+
+
 class CliLogger(object):
     """There are three loggers part of the CliLogger. The following table illustrates where they 
     log too in both interactive mode and non-interactive mode.
@@ -140,9 +146,9 @@ class CliLogger(object):
         """Logs red text to stderr and a log file."""
         self._user_error_logger.error(message)
 
-    def log_error(self, exception):
-        if exception:
-            message = str(exception)  # Filter out empty string logs.
+    def log_error(self, err):
+        if err:
+            message = str(err)  # Filter out empty string logs.
             if message:
                 self._error_file_logger.error(message)
 
@@ -156,6 +162,26 @@ class CliLogger(object):
         )
         # Use `info()` because this message is pointless in the error log.
         self.print_info(_get_red_error_text(message))
+
+    def log_verbose_error(
+        self, invocation_str=None, http_request=None, print_errors_occurred_message=True
+    ):
+        prefix = (
+            u"Exception occurred."
+            if not invocation_str
+            else "Exception occurred from input: '{}'.".format(invocation_str)
+        )
+        message = u"{}. See error below.".format(prefix)
+        self.log_error(message)
+        self.log_error(traceback.format_exc())
+        if http_request:
+            self.log_error(u"Request parameters: {}".format(http_request.body))
+
+    def print_and_log_permissions_error(self):
+        self.print_and_log_error(_PERMISSIONS_MESSAGE)
+
+    def log_permissions_error(self):
+        self.log_error(_PERMISSIONS_MESSAGE)
 
 
 def get_main_cli_logger():

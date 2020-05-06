@@ -1,17 +1,9 @@
-import sys, traceback
+import sys
 
-from py42.exceptions import Py42ForbiddenError
+from py42.exceptions import Py42HTTPError, Py42ForbiddenError
 
 from code42cli.parser import ArgumentParserError, CommandParser
 from code42cli.logger import get_main_cli_logger
-
-
-def _log_error(invocation_str):
-    logger = get_main_cli_logger()
-    message = u"Exception occurred from input: '{}'. See error below.".format(invocation_str)
-    logger.log_error(message)
-    logger.log_error(traceback.format_exc())
-    logger.print_errors_occurred_message()
 
 
 class CommandInvoker(object):
@@ -34,13 +26,18 @@ class CommandInvoker(object):
             command = self._commands.get(u" ".join(path_parts))
             self._try_run_command(command, path_parts, input_args)
         except Py42ForbiddenError as err:
-            _log_error(invocation_str)
-            get_main_cli_logger().print_and_log_error(
-                u"You do not have the necessary permissions to perform this task. "
-                u"Try using or creating a different profile."
-            )
-        except Exception as err:
-            _log_error(invocation_str)
+            logger = get_main_cli_logger()
+            logger.log_verbose_error(invocation_str, err.response.request)
+            logger.print_and_log_permissions_error()
+            logger.print_errors_occurred_message()
+        except Py42HTTPError as err:
+            logger = get_main_cli_logger()
+            logger.log_verbose_error(invocation_str, err.response.request)
+            logger.print_errors_occurred_message()
+        except Exception:
+            logger = get_main_cli_logger()
+            logger.log_verbose_error(invocation_str)
+            logger.print_errors_occurred_message()
 
     def _get_path_parts(self, input_args):
         """Gets the portion of `input_args` that refers to a
@@ -74,6 +71,7 @@ class CommandInvoker(object):
     def _try_run_command(self, command, path_parts, input_args):
         """Runs a command called using `path_parts` by parsing
         `input_args` and calling the command's handler."""
+        parser = None
         try:
             if not path_parts:
                 parser = self._cmd_parser.prepare_cli_help(command)
