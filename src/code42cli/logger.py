@@ -113,12 +113,12 @@ class CliLogger(object):
         
         `self._info_logger` is what you want to display simple information with, like 
             `profile list`. This does not go to the log file.
-        
-        `self._error_file_logger` logs directly to the error file is only meant for verbose 
-            debugging information, such as raw exceptions.
             
         `self._user_error_logger` is what you want to print in red text to the user. It also goes 
             to the log file for debugging purposes.
+        
+        `self._error_file_logger` logs directly to the error file is only meant for verbose 
+            debugging information, such as raw exceptions.
         """
         self._info_logger = get_logger_for_stdout()
         self._user_error_logger = _get_user_error_logger()
