@@ -70,7 +70,7 @@ def test_get_profile_returns_expected_profile(config_accessor):
 def test_get_profile_when_config_accessor_throws_exits(config_accessor):
     config_accessor.get_profile.side_effect = NoConfigProfileError()
     with pytest.raises(SystemExit):
-        profile = cliprofile.get_profile("testprofilename")
+        cliprofile.get_profile("testprofilename")
 
 
 def test_default_profile_exists_when_exists_returns_true(config_accessor):

@@ -55,7 +55,7 @@ def get_profile(profile_name=None):
     except NoConfigProfileError as ex:
         logger = get_main_cli_logger()
         logger.print_and_log_info(str(ex))
-        logger.print_create_profile_help()
+        _print_create_profile_help()
         exit(1)
 
 
@@ -75,12 +75,11 @@ def is_default_profile(name):
 
 def validate_default_profile():
     if not default_profile_exists():
-        logger = get_main_cli_logger()
         existing_profiles = get_all_profiles()
         if not existing_profiles:
-            logger.print_and_log_no_existing_profile()
+            print_and_log_no_existing_profile()
         else:
-            logger.print_set_default_profile_help(existing_profiles)
+            _print_set_default_profile_help(existing_profiles)
         exit(1)
 
 
@@ -133,3 +132,29 @@ def get_stored_password(profile_name=None):
 def set_password(new_password, profile_name=None):
     profile = get_profile(profile_name)
     password.set_password(profile, new_password)
+
+
+def print_and_log_no_existing_profile():
+    logger = get_main_cli_logger()
+    logger.print_and_log_info(u"No existing profile.")
+    _print_create_profile_help()
+
+
+def _print_create_profile_help():
+    logger = get_main_cli_logger()
+    logger.print_info(u"\nTo add a profile, use: ")
+    logger.print_bold(u"\tcode42 profile create <profile-name> <authority-URL> <username>\n")
+
+
+def _print_set_default_profile_help(existing_profiles):
+    logger = get_main_cli_logger()
+    logger.print_info(
+        u"\nNo default profile set.\n"
+        u"\nUse the --profile flag to specify which profile to use.\n"
+        u"\nTo set the default profile (used whenever --profile argument is not provided), use:"
+    )
+    logger.print_bold(u"\tcode42 profile use <profile-name>")
+    logger.print_info(u"\nExisting profiles:")
+    for profile in existing_profiles:
+        logger.print_info("\t{}".format(profile))
+    logger.print_info(u"")

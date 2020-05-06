@@ -104,6 +104,10 @@ def _create_formatter_for_error_file():
     return logging.Formatter(u"%(asctime)s %(message)s")
 
 
+def _get_red_error_text(text):
+    return u"\033[91mERROR: {}\033[0m".format(text)
+
+
 class CliLogger(object):
     """There are three loggers part of the CliLogger. The following table illustrates where they 
     log too in both interactive mode and non-interactive mode.
@@ -138,10 +142,7 @@ class CliLogger(object):
 
     def print_and_log_info(self, message):
         """Logs red text to stderr and a log file."""
-        self._user_error_logger.error(self._get_red_error_text(message))
-
-    def _get_red_error_text(self, text):
-        return u"\033[91mERROR: {}\033[0m".format(text)
+        self._user_error_logger.error(_get_red_error_text(message))
 
     def log_error(self, exception):
         message = str(exception) if exception else exception
@@ -157,27 +158,7 @@ class CliLogger(object):
             else locations_message
         )
         # Use `info()` because this message is pointless in the error log.
-        self.print_info(self._get_red_error_text(message))
-
-    def print_and_log_no_existing_profile(self):
-        self.print_and_log_info(u"No existing profile.")
-        self.print_create_profile_help()
-
-    def print_create_profile_help(self):
-        self.print_info(u"\nTo add a profile, use: ")
-        self.print_bold(u"\tcode42 profile create <profile-name> <authority-URL> <username>\n")
-
-    def print_set_default_profile_help(self, existing_profiles):
-        self.print_info(
-            u"\nNo default profile set.\n"
-            u"\nUse the --profile flag to specify which profile to use.\n"
-            u"\nTo set the default profile (used whenever --profile argument is not provided), use:"
-        )
-        self.print_bold(u"\tcode42 profile use <profile-name>")
-        self.print_info(u"\nExisting profiles:")
-        for profile in existing_profiles:
-            self.print_info("\t{}".format(profile))
-        self.print_info(u"")
+        self.print_info(_get_red_error_text(message))
 
 
 def get_main_cli_logger():

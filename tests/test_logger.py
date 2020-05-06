@@ -67,17 +67,3 @@ class TestCliLogger(object):
         with caplog.at_level(logging.ERROR):
             self._logger.print_errors_occurred_message()
             assert "View exceptions that occurred at" in caplog.text
-
-    def test_print_and_log_no_existing_profile_logs_expected_text_at_expected_level(self, caplog):
-        with caplog.at_level(logging.ERROR):
-            self._logger.print_and_log_no_existing_profile()
-            assert u"No existing profile." in caplog.text
-
-    def test_print_create_profile_help_logs_expected_error_text(self, caplog):
-        with caplog.at_level(logging.INFO):
-            self._logger.print_create_profile_help()
-            assert u"To add a profile, use: " in caplog.text
-
-    def test_print_set_default_profile_help_logs_expected_message_at_expected_level(self, caplog):
-        with caplog.at_level(logging.INFO):
-            self._logger.print_set_default_profile_help(["p1", "p2"])

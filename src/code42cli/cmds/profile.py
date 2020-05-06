@@ -1,6 +1,7 @@
 from getpass import getpass
 
 import code42cli.profile as cliprofile
+from code42cli.profile import print_and_log_no_existing_profile
 from code42cli.args import PROFILE_HELP, PROFILE_ARG_NAME
 from code42cli.commands import Command
 from code42cli.sdk_client import validate_connection
@@ -124,7 +125,7 @@ def list_profiles(*args):
     profiles = cliprofile.get_all_profiles()
     logger = get_main_cli_logger()
     if not profiles:
-        logger.print_and_log_no_existing_profile()
+        print_and_log_no_existing_profile()
         return
     for profile in profiles:
         logger.print_info(str(profile))
@@ -197,3 +198,4 @@ def _load_profile_settings_descriptions(argument_collection):
 def _prompt_for_allow_password_set(profile_name):
     if does_user_agree(u"Would you like to set a password? (y/n): "):
         prompt_for_password_reset(profile_name)
+
