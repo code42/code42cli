@@ -13,7 +13,7 @@ from code42cli.cmds.shared.cursor_store import AlertCursorStore
 from code42cli.cmds.shared.extraction import (
     verify_begin_date_requirements,
     create_handlers,
-    exit_if_advanced_query_used_with_other_args,
+    exit_if_advanced_query_used_with_other_search_args,
     create_time_range_filter,
 )
 from code42cli.util import print_error, print_to_stderr
@@ -35,7 +35,7 @@ def extract(sdk, profile, output_logger, args):
     handlers = create_handlers(output_logger, store, event_key=u"alerts")
     extractor = AlertExtractor(sdk, handlers)
     if args.advanced_query:
-        exit_if_advanced_query_used_with_other_args(args)
+        exit_if_advanced_query_used_with_other_search_args(args)
         extractor.extract_advanced(args.advanced_query)
     else:
         verify_begin_date_requirements(args, store)
