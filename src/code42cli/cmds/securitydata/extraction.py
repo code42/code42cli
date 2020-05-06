@@ -94,7 +94,7 @@ def _verify_exposure_types(exposure_types):
     for exposure_type in exposure_types:
         if exposure_type not in options:
             logger = get_main_cli_logger()
-            logger.print_and_log_info(u"'{0}' is not a valid exposure type.".format(exposure_type))
+            logger.print_and_log_error(u"'{0}' is not a valid exposure type.".format(exposure_type))
             exit(1)
 
 
@@ -127,9 +127,9 @@ def _get_event_timestamp_filter(begin_date, end_date):
 
 def _create_event_handlers(output_logger, cursor_store):
     handlers = ExtractionHandlers()
-    logger = get_main_cli_logger()
 
     def handle_error(exception):
+        logger = get_main_cli_logger()
         logger.log_error(exception)
         errors.ERRORED = True
 
@@ -145,7 +145,7 @@ def _create_event_handlers(output_logger, cursor_store):
         global _TOTAL_EVENTS
         _TOTAL_EVENTS += len(events)
         for event in events:
-            output_logger.print_info(event)
+            output_logger.info(event)
 
     handlers.handle_response = handle_response
     return handlers
