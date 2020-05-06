@@ -111,7 +111,7 @@ _PERMISSIONS_MESSAGE = (
 
 class CliLogger(object):
     """There are three loggers part of the CliLogger. The following table illustrates where they 
-    log too in both interactive mode and non-interactive mode.
+    log to in both interactive mode and non-interactive mode.
     """
 
     def __init__(self):
