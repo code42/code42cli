@@ -1,12 +1,8 @@
+from code42cli.compat import str
 import code42cli.password as password
 from code42cli.cmds.shared.cursor_store import get_file_event_cursor_store
 from code42cli.config import ConfigAccessor, config_accessor, NoConfigProfileError
-from code42cli.util import (
-    print_error,
-    print_create_profile_help,
-    print_set_default_profile_help,
-    print_no_existing_profile_message,
-)
+from code42cli.logger import get_main_cli_logger
 
 
 class Code42Profile(object):
@@ -58,8 +54,9 @@ def get_profile(profile_name=None):
     try:
         return _get_profile(profile_name)
     except NoConfigProfileError as ex:
-        print_error(str(ex))
-        print_create_profile_help()
+        logger = get_main_cli_logger()
+        logger.print_and_log_error(str(ex))
+        _print_create_profile_help()
         exit(1)
 
 
@@ -81,9 +78,9 @@ def validate_default_profile():
     if not default_profile_exists():
         existing_profiles = get_all_profiles()
         if not existing_profiles:
-            print_no_existing_profile_message()
+            print_and_log_no_existing_profile()
         else:
-            print_set_default_profile_help(existing_profiles)
+            _print_set_default_profile_help(existing_profiles)
         exit(1)
 
 
@@ -96,12 +93,14 @@ def profile_exists(profile_name=None):
 
 
 def switch_default_profile(profile_name):
-    config_accessor.switch_default_profile(profile_name)
+    profile = get_profile(profile_name)  # Handles if profile does not exist.
+    config_accessor.switch_default_profile(profile.name)
 
 
 def create_profile(name, server, username, ignore_ssl_errors):
     if profile_exists(name):
-        print_error(u"A profile named {} already exists.".format(name))
+        logger = get_main_cli_logger()
+        logger.print_and_log_error(u"A profile named '{}' already exists.".format(name))
         exit(1)
 
     config_accessor.create_profile(name, server, username, ignore_ssl_errors)
@@ -114,6 +113,7 @@ def delete_profile(profile_name):
     cursor_store = get_file_event_cursor_store(profile_name)
     cursor_store.clean()
     config_accessor.delete_profile(profile_name)
+    get_main_cli_logger().print_info(u"Profile '{}' has been deleted.".format(profile_name))
 
 
 def update_profile(name, server, username, ignore_ssl_errors):
@@ -133,3 +133,29 @@ def get_stored_password(profile_name=None):
 def set_password(new_password, profile_name=None):
     profile = get_profile(profile_name)
     password.set_password(profile, new_password)
+
+
+def print_and_log_no_existing_profile():
+    logger = get_main_cli_logger()
+    logger.print_and_log_error(u"No existing profile.")
+    _print_create_profile_help()
+
+
+def _print_create_profile_help():
+    logger = get_main_cli_logger()
+    logger.print_info(u"\nTo add a profile, use: ")
+    logger.print_bold(u"\tcode42 profile create <profile-name> <authority-URL> <username>\n")
+
+
+def _print_set_default_profile_help(existing_profiles):
+    logger = get_main_cli_logger()
+    logger.print_info(
+        u"\nNo default profile set.\n"
+        u"\nUse the --profile flag to specify which profile to use.\n"
+        u"\nTo set the default profile (used whenever --profile argument is not provided), use:"
+    )
+    logger.print_bold(u"\tcode42 profile use <profile-name>")
+    logger.print_info(u"\nExisting profiles:")
+    for profile in existing_profiles:
+        logger.print_info("\t{}".format(profile))
+    logger.print_info(u"")

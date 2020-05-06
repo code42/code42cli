@@ -1,14 +1,83 @@
-from logging.handlers import RotatingFileHandler
+import logging
+from requests import Request
 
-import code42cli.logger as factory
+from code42cli.logger import (
+    add_handler_to_logger,
+    logger_has_handlers,
+    get_view_exceptions_location_message,
+    CliLogger,
+)
+from code42cli.util import get_user_project_path
 
 
-def test_get_error_logger_when_called_twice_only_sets_handler_once():
-    _ = factory.get_error_logger()
-    logger = factory.get_error_logger()
-    assert len(logger.handlers) == 1
+def test_add_handler_to_logger_does_as_expected():
+    logger = logging.getLogger("TEST_CODE42_CLI")
+    formatter = logging.Formatter()
+    handler = logging.Handler()
+    add_handler_to_logger(logger, handler, formatter)
+    assert handler in logger.handlers
+    assert handler.formatter == formatter
 
 
-def test_get_error_logger_uses_rotating_file_handler():
-    logger = factory.get_error_logger()
-    assert type(logger.handlers[0]) == RotatingFileHandler
+def test_logger_has_handlers_when_logger_has_handlers_returns_true():
+    logger = logging.getLogger("TEST_CODE42_CLI")
+    handler = logging.Handler()
+    logger.addHandler(handler)
+    assert logger_has_handlers(logger)
+
+
+def test_logger_has_handlers_when_logger_does_not_have_handlers_returns_false():
+    logger = logging.getLogger("TEST_CODE42_CLI")
+    logger.handlers = []
+    assert not logger_has_handlers(logger)
+
+
+def test_get_view_exceptions_location_message_returns_expected_message():
+    actual = get_view_exceptions_location_message()
+    path = get_user_project_path()
+    expected = u"View exceptions that occurred at {}log/code42_errors.log.".format(path)
+    assert actual == expected
+
+
+class TestCliLogger(object):
+
+    _logger = CliLogger()
+
+    def test_print_info_logs_expected_text_at_expected_level(self, caplog):
+        with caplog.at_level(logging.INFO):
+            self._logger.print_info("TEST")
+            assert "TEST" in caplog.text
+
+    def test_print_bold_logs_expected_text_at_expected_level(self, caplog):
+        with caplog.at_level(logging.INFO):
+            self._logger.print_bold("TEST")
+            assert "TEST" in caplog.text
+
+    def test_print_and_log_error_logs_expected_text_at_expected_level(self, caplog):
+        with caplog.at_level(logging.ERROR):
+            self._logger.print_and_log_error("TEST")
+            assert "TEST" in caplog.text
+
+    def test_print_and_log_info_logs_expected_text_at_expected_level(self, caplog):
+        with caplog.at_level(logging.ERROR):
+            self._logger.print_and_log_info("TEST")
+            assert "TEST" in caplog.text
+
+    def test_log_error_logs_expected_text_at_expected_level(self, caplog):
+        with caplog.at_level(logging.ERROR):
+            ex = Exception("TEST")
+            self._logger.log_error(ex)
+            assert str(ex) in caplog.text
+
+    def test_print_errors_occurred_message_logs_expected_text_at_expected_level(self, caplog):
+        with caplog.at_level(logging.ERROR):
+            self._logger.print_errors_occurred_message()
+            assert "View exceptions that occurred at" in caplog.text
+
+    def test_log_verbose_error_logs_expected_text_at_expected_level(self, mocker, caplog):
+        with caplog.at_level(logging.ERROR):
+            request = mocker.MagicMock(sepc=Request)
+            request.body = {"foo": "bar"}
+            self._logger.log_verbose_error("code42 dothing --flag YES", request)
+            assert "'code42 dothing --flag YES'" in caplog.text
+            assert "Request parameters: {'foo': 'bar'}" in caplog.text

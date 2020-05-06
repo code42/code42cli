@@ -1,4 +1,5 @@
 import pytest
+import logging
 
 from code42cli.cmds.detectionlists import UserDoesNotExistError
 from code42cli.cmds.detectionlists.high_risk_employee import (
@@ -49,13 +50,13 @@ def test_add_high_risk_employee_when_user_does_not_exist_exits(sdk_without_user,
 
 
 def test_add_high_risk_employee_when_user_does_not_exist_prints_error(
-    sdk_without_user, profile, capsys
+    sdk_without_user, profile, caplog
 ):
-    try:
-        add_high_risk_employee(sdk_without_user, profile, _EMPLOYEE)
-    except UserDoesNotExistError:
-        capture = capsys.readouterr()
-        assert str(UserDoesNotExistError(_EMPLOYEE)) in capture.out
+    with caplog.at_level(logging.ERROR):
+        try:
+            add_high_risk_employee(sdk_without_user, profile, _EMPLOYEE)
+        except UserDoesNotExistError:
+            assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text
 
 
 def test_remove_high_risk_employee_calls_remove(sdk_with_user, profile):
@@ -69,13 +70,13 @@ def test_remove_high_risk_employee_when_user_does_not_exist_exits(sdk_without_us
 
 
 def test_remove_high_risk_employee_when_user_does_not_exist_prints_error(
-    sdk_without_user, profile, capsys
+    sdk_without_user, profile, caplog
 ):
-    try:
-        remove_high_risk_employee(sdk_without_user, profile, _EMPLOYEE)
-    except UserDoesNotExistError:
-        capture = capsys.readouterr()
-        assert str(UserDoesNotExistError(_EMPLOYEE)) in capture.out
+    with caplog.at_level(logging.ERROR):
+        try:
+            remove_high_risk_employee(sdk_without_user, profile, _EMPLOYEE)
+        except UserDoesNotExistError:
+            assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text
 
 
 def test_add_risk_tags_adds_tags(sdk_with_user, profile):
@@ -97,12 +98,14 @@ def test_add_risk_tags_when_user_does_not_exist_exits(sdk_without_user, profile)
         add_risk_tags(sdk_without_user, profile, _EMPLOYEE, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"])
 
 
-def test_add_risk_tags_when_user_does_not_exist_prints_error(sdk_without_user, profile, capsys):
-    try:
-        add_risk_tags(sdk_without_user, profile, _EMPLOYEE, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"])
-    except UserDoesNotExistError:
-        capture = capsys.readouterr()
-        assert str(UserDoesNotExistError(_EMPLOYEE)) in capture.out
+def test_add_risk_tags_when_user_does_not_exist_prints_error(sdk_without_user, profile, caplog):
+    with caplog.at_level(logging.ERROR):
+        try:
+            add_risk_tags(
+                sdk_without_user, profile, _EMPLOYEE, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"]
+            )
+        except UserDoesNotExistError:
+            assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text
 
 
 def test_remove_risk_tags_adds_tags(sdk_with_user, profile):
@@ -124,9 +127,11 @@ def test_remove_risk_tags_when_user_does_not_exist_exits(sdk_without_user, profi
         remove_risk_tags(sdk_without_user, profile, _EMPLOYEE, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"])
 
 
-def test_remove_risk_tags_when_user_does_not_exist_prints_error(sdk_without_user, profile, capsys):
-    try:
-        remove_risk_tags(sdk_without_user, profile, _EMPLOYEE, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"])
-    except UserDoesNotExistError:
-        capture = capsys.readouterr()
-        assert str(UserDoesNotExistError(_EMPLOYEE)) in capture.out
+def test_remove_risk_tags_when_user_does_not_exist_prints_error(sdk_without_user, profile, caplog):
+    with caplog.at_level(logging.ERROR):
+        try:
+            remove_risk_tags(
+                sdk_without_user, profile, _EMPLOYEE, ["TAG_YOU_ARE_IT", "GROUND_IS_LAVA"]
+            )
+        except UserDoesNotExistError:
+            assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text

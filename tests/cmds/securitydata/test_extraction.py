@@ -1,4 +1,6 @@
 import pytest
+import logging
+
 from py42.sdk import SDKClient
 from py42.sdk.queries.fileevents.filters import *
 
@@ -6,8 +8,8 @@ import code42cli.cmds.securitydata.extraction as extraction_module
 import code42cli.errors as errors
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.securitydata.enums import ExposureType as ExposureTypeOptions
-from .conftest import SECURITYDATA_NAMESPACE, get_filter_value_from_json
-from ...conftest import get_test_date_str, begin_date_str
+from .conftest import get_filter_value_from_json
+from ...conftest import get_test_date_str, begin_date_str, ErrorTrackerTestHelper
 
 
 @pytest.fixture
@@ -23,18 +25,8 @@ def mock_42(mocker):
 @pytest.fixture
 def logger(mocker):
     mock = mocker.MagicMock()
-    mock.info = mocker.MagicMock()
+    mock.print_info = mocker.MagicMock()
     return mock
-
-
-@pytest.fixture(autouse=True)
-def error_logger(mocker):
-    return mocker.patch("{0}.extraction.get_error_logger".format(SECURITYDATA_NAMESPACE))
-
-
-@pytest.fixture
-def error_printer(mocker):
-    return mocker.patch("{}.cmds.securitydata.extraction.print_error".format(PRODUCT_NAME))
 
 
 @pytest.fixture
@@ -51,23 +43,6 @@ def extractor(mocker):
 def namespace_with_begin(namespace):
     namespace.begin = begin_date_str
     return namespace
-
-
-@pytest.fixture
-def is_interactive_function(mocker):
-    return mocker.patch("{}.cmds.securitydata.extraction.is_interactive".format(PRODUCT_NAME))
-
-
-@pytest.fixture
-def interactive_mode(is_interactive_function):
-    is_interactive_function.return_value = True
-    return is_interactive_function
-
-
-@pytest.fixture
-def non_interactive_mode(is_interactive_function):
-    is_interactive_function.return_value = False
-    return is_interactive_function
 
 
 @pytest.fixture
@@ -330,7 +305,7 @@ def test_when_given_begin_date_past_90_days_and_is_incremental_and_a_stored_curs
     assert not filter_term_is_in_call_args(extractor, EventTimestamp._term)
 
 
-def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_begin_date(
+def test_when_given_begin_date_and_not_incremental_mode_and_cursor_exists_uses_begin_date(
     sdk, profile, logger, namespace, extractor
 ):
     namespace.begin = get_test_date_str(days_ago=1)
@@ -511,46 +486,28 @@ def test_extract_when_creating_sdk_throws_causes_exit(
         extraction_module.extract(sdk, profile, logger, namespace)
 
 
-def test_extract_when_errored_and_is_interactive_prints_error(
-    mocker, sdk, profile, logger, namespace_with_begin, extractor
+def test_extract_when_errored_logs_error_occurred(
+    sdk, profile, logger, namespace_with_begin, extractor, caplog
 ):
-    errors.ERRORED = False
-    errors_error_printer = mocker.patch("{}.errors.print_error".format(PRODUCT_NAME))
-    errors_interactive_mode = mocker.patch("{}.errors.is_interactive".format(PRODUCT_NAME))
-    errors_interactive_mode.return_value = True
-    errors.ERRORED = True
+    with ErrorTrackerTestHelper():
+        with caplog.at_level(logging.ERROR):
+            extraction_module.extract(sdk, profile, logger, namespace_with_begin)
+            assert "ERROR" in caplog.text
+            assert "View exceptions that occurred at" in caplog.text
+
+
+def test_extract_when_not_errored_and_does_not_log_error_occurred(
+    sdk, profile, logger, namespace_with_begin, extractor, caplog
+):
     extraction_module.extract(sdk, profile, logger, namespace_with_begin)
-    assert errors_error_printer.call_count
-    errors.ERRORED = False
+    with caplog.at_level(logging.ERROR):
+        assert "View exceptions that occurred at" not in caplog.text
 
 
-def test_extract_when_errored_and_is_not_interactive_does_not_print_error(
-    sdk, profile, logger, namespace_with_begin, extractor, error_printer, non_interactive_mode
+def test_when_handle_event_raises_exception_global_variable_gets_set(
+    mocker, sdk, extractor, profile, logger, namespace_with_begin, mock_42
 ):
-    errors.ERRORED = True
-    extraction_module.extract(sdk, profile, logger, namespace_with_begin)
-    assert not error_printer.call_count
-    errors.ERRORED = False
-
-
-def test_extract_when_not_errored_and_is_interactive_does_not_print_error(
-    sdk, profile, logger, namespace_with_begin, extractor, error_printer, interactive_mode
-):
-    errors.ERRORED = False
-    extraction_module.extract(sdk, profile, logger, namespace_with_begin)
-    assert not error_printer.call_count
-    errors.ERRORED = False
-
-
-def test_when_sdk_raises_exception_global_variable_gets_set(
-    mocker, sdk, profile, logger, namespace_with_begin, mock_42
-):
-    errors.ERRORED = False
     mock_sdk = mocker.MagicMock()
-
-    # For ease
-    mock = mocker.patch("{}.cmds.securitydata.extraction.is_interactive".format(PRODUCT_NAME))
-    mock.return_value = False
 
     def sdk_side_effect(self, *args):
         raise Exception()
@@ -558,10 +515,7 @@ def test_when_sdk_raises_exception_global_variable_gets_set(
     mock_sdk.security.search_file_events.side_effect = sdk_side_effect
     mock_42.return_value = mock_sdk
 
-    mocker.patch(
-        "c42eventextractor.extractors.FileEventExtractor._verify_compatibility_of_filter_groups"
-    )
-
-    extraction_module.extract(sdk, profile, logger, namespace_with_begin)
-    assert errors.ERRORED
-    errors.ERRORED = False
+    mocker.patch("c42eventextractor.extractors.BaseExtractor._verify_filter_groups")
+    with ErrorTrackerTestHelper():
+        extraction_module.extract(sdk, profile, logger, namespace_with_begin)
+        assert errors.ERRORED
