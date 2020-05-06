@@ -8,6 +8,10 @@ from code42cli.util import get_user_project_path, is_interactive
 
 logger_deps_lock = Lock()
 ERROR_LOG_FILE_NAME = u"code42_errors.log"
+_PERMISSIONS_MESSAGE = (
+    u"You do not have the necessary permissions to perform this task. "
+    + u"Try using or creating a different profile."
+)
 
 
 def get_logger_for_stdout(name_suffix=u"main", formatter=None):
@@ -105,12 +109,6 @@ def _create_formatter_for_error_file():
 
 def _get_red_error_text(text):
     return u"\033[91mERROR: {}\033[0m".format(text)
-
-
-_PERMISSIONS_MESSAGE = (
-    u"You do not have the necessary permissions to perform this task. "
-    + u"Try using or creating a different profile."
-)
 
 
 class CliLogger(object):
