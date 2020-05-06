@@ -12,7 +12,7 @@ class BaseCursorStore(object):
         self._table_name = db_table_name
         if db_file_path is None:
             db_path = get_user_project_path(u"db")
-            db_file_path = u"{0}/checkpoints.db".format(db_path)
+            db_file_path = u"{0}/file_event_checkpoints.db".format(db_path)
 
         self._connection = sqlite3.connect(db_file_path)
 
