@@ -127,3 +127,10 @@ def get_file_event_cursor_store(profile_name):
 
 def get_alert_cursor_store(profile_name):
     return AlertCursorStore(profile_name)
+
+
+def get_all_cursor_stores_for_profile(profile_name):
+    return [
+        FileEventCursorStore(profile_name),
+        AlertCursorStore(profile_name),
+    ]

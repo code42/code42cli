@@ -14,7 +14,7 @@ class TestBaseCursorStore(object):
         home_dir = path.expanduser("~")
         expected_path = path.join(home_dir, ".code42cli/db")
         db_table_name = "TEST"
-        expected_db_file_path = "{0}/checkpoints.db".format(expected_path)
+        expected_db_file_path = "{0}/file_event_checkpoints.db".format(expected_path)
         BaseCursorStore(db_table_name)
         sqlite_connection.assert_called_once_with(expected_db_file_path)
 
