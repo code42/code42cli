@@ -165,9 +165,7 @@ class CliLogger(object):
         # Use `info()` because this message is pointless in the error log.
         self.print_info(_get_red_error_text(message))
 
-    def log_verbose_error(
-        self, invocation_str=None, http_request=None, print_errors_occurred_message=True
-    ):
+    def log_verbose_error(self, invocation_str=None, http_request=None):
         """For logging traces, invocation strs, and request parameters during exceptions to the 
         error log file."""
         prefix = (

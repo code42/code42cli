@@ -1,4 +1,5 @@
 import logging
+from requests import Request
 
 from code42cli.logger import (
     add_handler_to_logger,
@@ -72,3 +73,11 @@ class TestCliLogger(object):
         with caplog.at_level(logging.ERROR):
             self._logger.print_errors_occurred_message()
             assert "View exceptions that occurred at" in caplog.text
+
+    def test_log_verbose_error_logs_expected_text_at_expected_level(self, mocker, caplog):
+        with caplog.at_level(logging.ERROR):
+            request = mocker.MagicMock(sepc=Request)
+            request.body = {"foo": "bar"}
+            self._logger.log_verbose_error("code42 dothing --flag YES", request)
+            assert "'code42 dothing --flag YES'" in caplog.text
+            assert "Request parameters: {'foo': 'bar'}" in caplog.text
