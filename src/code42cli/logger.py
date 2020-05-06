@@ -136,7 +136,7 @@ class CliLogger(object):
         self._info_logger.info(u"\033[1m{}\033[0m".format(message))
 
     def print_and_log_error(self, message):
-        """For not interrupting stdout output. Excludes red text from and 'ERROR: ' from `error()`.
+        """For not interrupting stdout output. Excludes red text and 'ERROR: ' from `error()`.
         """
         self._user_error_logger.error(message)
 
@@ -145,9 +145,10 @@ class CliLogger(object):
         self._user_error_logger.error(_get_red_error_text(message))
 
     def log_error(self, exception):
-        message = str(exception) if exception else exception
-        if message:
-            self._error_file_logger.error(message)
+        if exception:
+            message = str(exception)  # Filter out empty string logs.
+            if message:
+                self._error_file_logger.error(message)
 
     def print_errors_occurred_message(self, additional_info=None):
         """Prints a message telling the user how to retrieve error logs."""
