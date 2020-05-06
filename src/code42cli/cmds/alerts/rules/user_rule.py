@@ -1,4 +1,4 @@
-from code42cli.bulk import run_bulk_process, FlatFileReader
+from code42cli.bulk import run_bulk_process, CSVReader
 
 
 def add_user(sdk, rule_id, user_id):
@@ -47,19 +47,31 @@ def get_rules(sdk, rule_type=None, rule_id=None):
         _get_by_rule_type(sdk, rule_type, rule_id)
 
 
+def _add_bulk_user(sdk, **kwargs):
+    print("kw args are", **kwargs)
+    rule_id, user_id = kwargs["rule_id"], kwargs["user_id"]
+    # add_user(sdk, rule_id, user_id)
+
+
 def _add_bulk_users(sdk, file_name):
     run_bulk_process(
         file_name, 
-        lambda rule_id, user_id: sdk.alerts.rules.add_user(rule_id, user_id),
-        FlatFileReader()
+        lambda **kwargs: _add_bulk_user(sdk, **kwargs),
+        CSVReader()
     )
+
+
+def _remove_bulk_user(sdk, **kwargs):
+    print("kw args are", **kwargs)
+    rule_id, user_id = kwargs["rule_id"], kwargs["user_id"]
+    remove_user(sdk, rule_id, user_id)
 
 
 def _remove_bulk_users(sdk, file_name):
     run_bulk_process(
         file_name,
-        lambda rule_id, user_id: remove_user(sdk, rule_id, user_id),
-        FlatFileReader()
+        lambda **kwargs: _remove_bulk_user(sdk, **kwargs),
+        CSVReader()
     )
 
 

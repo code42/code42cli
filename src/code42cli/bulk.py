@@ -128,11 +128,3 @@ class FlatFileReader(object):
     def __call__(self, *args, **kwargs):
         for row in kwargs[u"bulk_file"]:
             yield row
-
-
-class CSVTupleReader(object):
-    """A generator that yields header keys mapped to row values from a csv file."""
-
-    def __call__(self, filename):
-        for items in csv.reader(filename):
-            yield items

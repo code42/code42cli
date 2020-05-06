@@ -28,7 +28,7 @@ def _customize_list_arguments(argument_collection):
     rule_type.set_help(u"Type of rule, either of 'exfiltration', 'cloudshare', 'filetypemismatch'")
     rule_type.set_choices([u"exfiltration", u"cloudshare", u"filetypemismatch"])
     rule_id = argument_collection.arg_configs[u"rule_id"]
-    rule_id.set_help(u"Observer rule id of th rule")
+    rule_id.set_help(u"Observer rule id of the rule")
 
 
 def _customize_bulk_arguments(argument_collection):
