@@ -193,7 +193,7 @@ def _try_append_exposure_types_filter(filters, include_non_exposure_events, expo
 
 def _create_exposure_type_filter(include_non_exposure_events, exposure_types):
     if include_non_exposure_events and exposure_types:
-        get_main_cli_logger().print_and_log_info(
+        get_main_cli_logger().print_and_log_error(
             u"Cannot use exposure types with `--include-non-exposure`."
         )
         exit(1)
