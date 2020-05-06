@@ -8,14 +8,14 @@ from code42cli.cmds.shared.cursor_store import BaseCursorStore, FileEventCursorS
 
 
 class TestBaseCursorStore(object):
-    def test_init_cursor_store_when_not_given_db_file_path_uses_expected_path_with_db_table_name_as_db_file_name(
+    def test_init_cursor_store_when_not_given_db_file_path_uses_expected_default_checkpoints_path(
         self, sqlite_connection
     ):
         home_dir = path.expanduser("~")
         expected_path = path.join(home_dir, ".code42cli/db")
-        expected_db_name = "TEST"
-        expected_db_file_path = "{0}/{1}.db".format(expected_path, expected_db_name)
-        BaseCursorStore(expected_db_name)
+        db_table_name = "TEST"
+        expected_db_file_path = "{0}/checkpoints.db".format(expected_path)
+        BaseCursorStore(db_table_name)
         sqlite_connection.assert_called_once_with(expected_db_file_path)
 
     def test_init_cursor_store_when_given_db_file_path_uses_given_path(self, sqlite_connection):
