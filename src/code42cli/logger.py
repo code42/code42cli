@@ -44,7 +44,7 @@ def logger_has_handlers(logger):
     return len(logger.handlers)
 
 
-def _get_error_file_logger(handler=None):
+def _get_error_file_logger():
     """Gets the logger where raw exceptions are logged."""
     logger = logging.getLogger(u"code42_error_logger")
     if logger_has_handlers(logger):
@@ -53,7 +53,7 @@ def _get_error_file_logger(handler=None):
     with logger_deps_lock:
         if not logger_has_handlers(logger):
             formatter = _create_formatter_for_error_file()
-            handler = handler or _create_error_file_handler()
+            handler = _create_error_file_handler()
             return add_handler_to_logger(logger, handler, formatter)
     return logger
 
