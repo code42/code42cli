@@ -119,13 +119,13 @@ class CliLogger(object):
     def __init__(self):
         """The following properties explain how to log to different locations:
         
-        `self._info_logger` is what you want to display simple information with, like 
-            `profile list`. This does not go to the log file.
+        `self._info_logger` is for when you want to display simple information, like 
+            `profile list`. This does _not_ go to the log file.
             
-        `self._user_error_logger` is what you want to print in red text to the user. It also goes 
-            to the log file for debugging purposes.
+        `self._user_error_logger` is for when you want to print in red text to the user. It also 
+            goes to the log file for debugging purposes.
         
-        `self._error_file_logger` logs directly to the error file is only meant for verbose 
+        `self._error_file_logger` logs directly to the error file and is only meant for verbose 
             debugging information, such as raw exceptions.
         """
         self._info_logger = get_logger_for_stdout()
@@ -168,6 +168,8 @@ class CliLogger(object):
     def log_verbose_error(
         self, invocation_str=None, http_request=None, print_errors_occurred_message=True
     ):
+        """For logging traces, invocation strs, and request parameters during exceptions to the 
+        error log file."""
         prefix = (
             u"Exception occurred."
             if not invocation_str
