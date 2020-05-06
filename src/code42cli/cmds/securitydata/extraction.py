@@ -60,7 +60,7 @@ def _determine_if_advanced_query(args):
             val = given_args[key]
             if not _verify_compatibility_with_advanced_query(key, val):
                 logger = get_main_cli_logger()
-                logger.print_and_log_info(
+                logger.print_and_log_error(
                     u"You cannot use --advanced-query with additional search args."
                 )
                 exit(1)
