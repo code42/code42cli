@@ -3,8 +3,10 @@ import json
 from c42eventextractor import ExtractionHandlers
 from py42.sdk.queries.query_filter import QueryFilterTimestampField
 from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp, verify_timestamp_order
-from code42cli.util import print_error, print_bold, print_to_stderr
 import code42cli.errors as errors
+from code42cli.logger import get_main_cli_logger
+
+logger = get_main_cli_logger()
 
 
 def begin_date_is_required(args, cursor_store):
@@ -14,7 +16,7 @@ def begin_date_is_required(args, cursor_store):
 
     # Ignore begin date when in incremental mode, it is not required, and it was passed an argument.
     if not is_required and args.begin:
-        print_to_stderr(
+        logger.print_info(
             "Ignoring --begin value as --incremental was passed and cursor checkpoint exists.\n"
         )
         args.begin = None
@@ -23,8 +25,8 @@ def begin_date_is_required(args, cursor_store):
 
 def verify_begin_date_requirements(args, cursor_store):
     if begin_date_is_required(args, cursor_store) and not args.begin:
-        print_error(u"'begin date' is required.")
-        print_bold(u"Try using  '-b' or '--begin'. Use `-h` for more info.")
+        logger.print_and_log_error(u"'begin date' is required.\n")
+        logger.print_bold(u"Try using  '-b' or '--begin'. Use `-h` for more info.\n")
         exit(1)
 
 
@@ -33,8 +35,11 @@ def create_handlers(output_logger, cursor_store, event_key):
     handlers.TOTAL_EVENTS = 0
 
     def handle_error(exception):
-        errors.log_error(exception)
-        errors.ERRORED = True
+        if hasattr(exception, "response") and hasattr(exception.response, "text"):
+            message = u"{0}: {1}".format(exception, exception.response.text)
+        else:
+            message = exception
+        logger.print_and_log_error(message)
 
     handlers.handle_error = handle_error
 
@@ -58,7 +63,7 @@ def exit_if_advanced_query_used_with_other_search_args(args):
     for arg in ("advanced_query", "format", "sdk", "profile"):
         args_dict_copy.pop(arg)
     if any(args_dict_copy.values()):
-        print_error(u"You cannot use --advanced-query with additional search args.")
+        logger.print_and_log_error(u"You cannot use --advanced-query with additional search args.")
         exit(1)
 
 
