@@ -1,82 +1,41 @@
 from code42cli.bulk import run_bulk_process, CSVReader
+from code42cli.cmds.detectionlists import get_user_id
 
 
-def add_user(sdk, rule_id, user_id):
+def add_user(sdk, rule_id, user_name):
+    user_id = get_user_id(sdk, user_name)
     sdk.alerts.rules.add_user(rule_id, user_id)
 
 
-def _remove_all_users(sdk, rule_id):
-    sdk.alerts.rules.remove_all_users(rule_id)
-
-
-def remove_user(sdk, rule_id, user_id=None):
-    if user_id:
+def remove_user(sdk, rule_id, user_name=None):
+    if user_name:
+        user_id = get_user_id(sdk, user_name)
         sdk.alerts.rules.remove_user(rule_id, user_id)
     else:
-        _remove_all_users(sdk, rule_id)
+        sdk.alerts.rules.remove_all_users(rule_id)
 
 
-def _get_rule_category(sdk, rule_type):
-    if rule_type == u"exfiltration":
-        return sdk.alerts.rules.exfiltration
-    elif rule_type == u"cloudshare":
-        return sdk.alerts.rules.cloudshare
-    elif rule_type == u"filetypemismatch":
-        return sdk.alerts.rules.filetypemismatch
+def get_rules(sdk, rule_id=None):
+    rules_generator = sdk.alerts.rules.get_all()
+    if rule_id:
+        [print(rule) for rules in rules_generator 
+         for rule in rules["ruleMetadata"] if rule["observerRuleId"] == rule_id]
     else:
-        return None
+        for rules in rules_generator:
+            print(rules)
 
 
-def _get_by_rule_type(sdk, rule_type, rule_id):
-    rule_category = _get_rule_category(sdk, rule_type)
-    if rule_category:
-        rule = rule_category.get(rule_id)
-        print(rule)
-
-
-def _get_all(sdk):
-    rules_gen = sdk.alerts.rules.get_all()
-    for rule in rules_gen:
-        print(rule)
-
-
-def get_rules(sdk, rule_type=None, rule_id=None):
-    if not rule_type and not rule_id:
-        _get_all(sdk)
-    else:
-        _get_by_rule_type(sdk, rule_type, rule_id)
-
-
-def _add_bulk_user(sdk, **kwargs):
-    print("kw args are", **kwargs)
-    rule_id, user_id = kwargs["rule_id"], kwargs["user_id"]
-    # add_user(sdk, rule_id, user_id)
-
-
-def _add_bulk_users(sdk, file_name):
+def add_bulk_users(sdk, file_name):
     run_bulk_process(
         file_name, 
-        lambda **kwargs: _add_bulk_user(sdk, **kwargs),
+        lambda rule_id, user_name: add_user(sdk, rule_id, user_name),
         CSVReader()
     )
 
 
-def _remove_bulk_user(sdk, **kwargs):
-    print("kw args are", **kwargs)
-    rule_id, user_id = kwargs["rule_id"], kwargs["user_id"]
-    remove_user(sdk, rule_id, user_id)
-
-
-def _remove_bulk_users(sdk, file_name):
+def remove_bulk_users(sdk, file_name):
     run_bulk_process(
         file_name,
-        lambda **kwargs: _remove_bulk_user(sdk, **kwargs),
+        lambda rule_id, user_name: remove_user(sdk, rule_id, user_name),
         CSVReader()
     )
-
-
-def bulk_update(sdk, action, file_name):
-    if action == "add":
-        _add_bulk_users(sdk, file_name)
-    if action == 'remove':
-        _remove_bulk_users(sdk, file_name)
