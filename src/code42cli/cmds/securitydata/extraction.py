@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 from c42eventextractor.extractors import FileEventExtractor
 from py42.sdk.queries.fileevents.filters import *
 
@@ -11,10 +9,7 @@ from code42cli.cmds.shared.extraction import (
     exit_if_advanced_query_used_with_other_search_args,
     create_time_range_filter,
 )
-from code42cli.util import print_error, print_to_stderr
-
-
-_TOTAL_EVENTS = 0
+from code42cli.logger import get_main_cli_logger
 
 
 def extract(sdk, profile, output_logger, args):
@@ -42,7 +37,8 @@ def extract(sdk, profile, output_logger, args):
         filters = _create_file_event_filters(args)
         extractor.extract(*filters)
     if handlers.TOTAL_EVENTS == 0:
-        print_to_stderr(u"No results found\n")
+        logger = get_main_cli_logger()
+        logger.print_and_log_info(u"No results found.")
 
 
 def _verify_exposure_types(exposure_types):
@@ -51,7 +47,8 @@ def _verify_exposure_types(exposure_types):
     options = list(ExposureTypeOptions())
     for exposure_type in exposure_types:
         if exposure_type not in options:
-            print_error(u"'{0}' is not a valid exposure type.".format(exposure_type))
+            logger = get_main_cli_logger()
+            logger.print_and_log_error(u"'{0}' is not a valid exposure type.".format(exposure_type))
             exit(1)
 
 
@@ -80,7 +77,9 @@ def _try_append_exposure_types_filter(filters, include_non_exposure_events, expo
 
 def _create_exposure_type_filter(include_non_exposure_events, exposure_types):
     if include_non_exposure_events and exposure_types:
-        print_error(u"Cannot use exposure types with `--include-non-exposure`.")
+        get_main_cli_logger().print_and_log_error(
+            u"Cannot use exposure types with `--include-non-exposure`."
+        )
         exit(1)
     if exposure_types:
         return ExposureType.is_in(exposure_types)

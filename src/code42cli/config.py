@@ -1,16 +1,20 @@
-from __future__ import print_function
-
 import os
 
 from configparser import ConfigParser
 
 import code42cli.util as util
 from code42cli.compat import str
+from code42cli.logger import get_main_cli_logger
 
 
 class NoConfigProfileError(Exception):
-    def __init__(self):
-        super(NoConfigProfileError, self).__init__(u"Profile does not exist.")
+    def __init__(self, profile_arg_name=None):
+        message = (
+            u"Profile '{}' does not exist.".format(profile_arg_name)
+            if profile_arg_name
+            else u"Profile does not exist."
+        )
+        super(NoConfigProfileError, self).__init__(message)
 
 
 class ConfigAccessor(object):
@@ -37,7 +41,8 @@ class ConfigAccessor(object):
         """
         name = name or self._default_profile_name
         if name not in self._get_sections() or name == self.DEFAULT_VALUE:
-            raise NoConfigProfileError()
+            name = name if name != self.DEFAULT_VALUE else None
+            raise NoConfigProfileError(name)
         return self._get_profile(name)
 
     def get_all_profiles(self):
@@ -75,15 +80,17 @@ class ConfigAccessor(object):
     def switch_default_profile(self, new_default_name):
         """Changes what is marked as the default profile in the internal section."""
         if self.get_profile(new_default_name) is None:
-            raise NoConfigProfileError()
+            raise NoConfigProfileError(new_default_name)
         self._internal[self.DEFAULT_PROFILE] = new_default_name
         self._save()
-        print(u"{} has been set as the default profile.".format(new_default_name))
+        get_main_cli_logger().print_info(
+            u"{} has been set as the default profile.".format(new_default_name)
+        )
 
     def delete_profile(self, name):
         """Deletes a profile."""
         if self.get_profile(name) is None:
-            raise NoConfigProfileError()
+            raise NoConfigProfileError(name)
         self.parser.remove_section(name)
         if name == self._default_profile_name:
             self._internal[self.DEFAULT_PROFILE] = self.DEFAULT_VALUE
@@ -143,7 +150,7 @@ class ConfigAccessor(object):
             return
 
         self._save()
-        print(u"Successfully saved profile '{}'.".format(profile.name))
+        get_main_cli_logger().print_info(u"Successfully saved profile '{}'.".format(profile.name))
 
         default_profile = self._internal.get(self.DEFAULT_PROFILE)
         if default_profile is None or default_profile == self.DEFAULT_VALUE:

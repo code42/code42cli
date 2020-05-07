@@ -1,7 +1,9 @@
 from threading import Thread, Lock
 
+from py42.exceptions import Py42HTTPError, Py42ForbiddenError
+
 from code42cli.compat import queue
-from code42cli.logger import get_error_logger
+from code42cli.logger import get_main_cli_logger
 
 
 class WorkerStats(object):
@@ -37,7 +39,6 @@ class Worker(object):
     def __init__(self, thread_count):
         self._queue = queue.Queue()
         self._thread_count = thread_count
-        self._error_logger = get_error_logger()
         self._stats = WorkerStats()
         self.__started = False
         self.__start_lock = Lock()
@@ -76,9 +77,19 @@ class Worker(object):
                 args = task[u"args"]
                 kwargs = task[u"kwargs"]
                 func(*args, **kwargs)
-            except Exception as ex:
-                self._error_logger.error(ex)
-                self._stats.increment_total_errors()
+            except Py42ForbiddenError as err:
+                self._increment_total_errors()
+                logger = get_main_cli_logger()
+                logger.log_verbose_error(http_request=err.response.request)
+                logger.log_permissions_error()
+            except Py42HTTPError as err:
+                self._increment_total_errors()
+                logger = get_main_cli_logger()
+                logger.log_verbose_error(http_request=err.response.request)
+            except Exception:
+                self._increment_total_errors()
+                logger = get_main_cli_logger()
+                logger.log_verbose_error()
             finally:
                 self._stats.increment_total()
                 self._queue.task_done()
@@ -88,3 +99,6 @@ class Worker(object):
             t = Thread(target=self._process_queue)
             t.daemon = True
             t.start()
+
+    def _increment_total_errors(self):
+        self._stats.increment_total_errors()

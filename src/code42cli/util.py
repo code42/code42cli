@@ -1,5 +1,3 @@
-from __future__ import print_function, with_statement
-
 import sys
 from os import makedirs, path
 
@@ -39,40 +37,8 @@ def open_file(file_path, mode, action):
         return action(f)
 
 
-def print_error(error_text):
-    """Prints red text."""
-    print(u"\033[91mERROR: {}\033[0m".format(error_text))
-
-
-def print_bold(bold_text):
-    print(u"\033[1m{}\033[0m".format(bold_text))
-
-
 def is_interactive():
     return sys.stdin.isatty()
-
-
-def print_no_existing_profile_message():
-    print_error(u"No existing profile.")
-    print_create_profile_help()
-
-
-def print_create_profile_help():
-    print(u"\nTo add a profile, use: ")
-    print_bold(u"\tcode42 profile create <profile-name> <authority-URL> <username>\n")
-
-
-def print_set_default_profile_help(existing_profiles):
-    print(
-        u"\nNo default profile set.\n",
-        u"\nUse the --profile flag to specify which profile to use.\n",
-        u"\nTo set the default profile (used whenever --profile argument is not provided), use:",
-    )
-    print_bold(u"\tcode42 profile use <profile-name>")
-    print(u"\nExisting profiles:")
-    for profile in existing_profiles:
-        print("\t{}".format(profile))
-    print(u"")
 
 
 def get_url_parts(url_str):
@@ -81,7 +47,3 @@ def get_url_parts(url_str):
     if len(parts) > 1 and parts[1] != u"":
         port = int(parts[1])
     return parts[0], port
-
-
-def print_to_stderr(error_text):
-    sys.stderr.write(error_text)

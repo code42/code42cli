@@ -1,4 +1,6 @@
 import pytest
+import logging
+
 from py42.sdk import SDKClient
 from py42.sdk.queries.fileevents.filters import *
 
@@ -14,7 +16,7 @@ from .conftest import (
     get_filter_value_from_json,
 )
 from code42cli.date_helper import DateArgumentException
-from ...conftest import get_test_date_str, begin_date_str
+from ...conftest import get_test_date_str, begin_date_str, ErrorTrackerTestHelper
 
 
 @pytest.fixture
@@ -30,18 +32,8 @@ def mock_42(mocker):
 @pytest.fixture
 def logger(mocker):
     mock = mocker.MagicMock()
-    mock.info = mocker.MagicMock()
+    mock.print_info = mocker.MagicMock()
     return mock
-
-
-@pytest.fixture(autouse=True)
-def error_logger(mocker):
-    return mocker.patch("{0}.errors.log_error".format(PRODUCT_NAME))
-
-
-@pytest.fixture
-def error_printer(mocker):
-    return mocker.patch("{}.cmds.securitydata.extraction.print_error".format(PRODUCT_NAME))
 
 
 @pytest.fixture
@@ -68,23 +60,6 @@ def alert_extractor(mocker):
 def namespace_with_begin(namespace):
     namespace.begin = begin_date_str
     return namespace
-
-
-@pytest.fixture
-def is_interactive_function(mocker):
-    return mocker.patch("{}.errors.is_interactive".format(PRODUCT_NAME))
-
-
-@pytest.fixture
-def interactive_mode(is_interactive_function):
-    is_interactive_function.return_value = True
-    return is_interactive_function
-
-
-@pytest.fixture
-def non_interactive_mode(is_interactive_function):
-    is_interactive_function.return_value = False
-    return is_interactive_function
 
 
 @pytest.fixture
@@ -551,24 +526,22 @@ def test_extract_when_creating_sdk_throws_causes_exit(sdk, profile, logger, name
         sec_data_extraction_module.extract(sdk, profile, logger, namespace)
 
 
-def test_extract_when_errored_and_is_interactive_prints_error(
-    mocker, sdk, profile, logger, namespace_with_begin, error_logger
+def test_extract_when_errored_logs_error_occurred(
+    sdk, profile, logger, namespace_with_begin, file_event_extractor, caplog
 ):
-    errors_interactive_mode = mocker.patch("{}.errors.is_interactive".format(PRODUCT_NAME))
-    errors_interactive_mode.return_value = True
-    with pytest.raises(ValueError):
-        sec_data_extraction_module.extract(sdk, profile, logger, namespace_with_begin)
-        assert error_logger.call_count
-    errors.ERRORED = False
+    with ErrorTrackerTestHelper():
+        with caplog.at_level(logging.ERROR):
+            sec_data_extraction_module.extract(sdk, profile, logger, namespace_with_begin)
+            assert "ERROR" in caplog.text
+            assert "View exceptions that occurred at" in caplog.text
 
 
-def test_extract_when_errored_and_is_not_interactive_does_not_print_error(
-    sdk, profile, logger, namespace_with_begin
+def test_extract_when_not_errored_and_does_not_log_error_occurred(
+    sdk, profile, logger, namespace_with_begin, extractor, caplog
 ):
-    with pytest.raises(ValueError):
-        sec_data_extraction_module.extract(sdk, profile, logger, namespace_with_begin)
-        assert not error_logger.call_count
-    errors.ERRORED = False
+    sec_data_extraction_module.extract(sdk, profile, logger, namespace_with_begin)
+    with caplog.at_level(logging.ERROR):
+        assert "View exceptions that occurred at" not in caplog.text
 
 
 def test_extract_when_not_errored_and_is_interactive_does_not_print_error(
@@ -586,18 +559,13 @@ def test_when_sdk_raises_exception_global_variable_gets_set(
     errors.ERRORED = False
     mock_sdk = mocker.MagicMock()
 
-    # For ease
-    mock = mocker.patch("{}.errors.is_interactive".format(PRODUCT_NAME))
-    mock.return_value = False
-
     def sdk_side_effect(self, *args):
         raise Exception()
 
     mock_sdk.security.search_file_events.side_effect = sdk_side_effect
     mock_42.return_value = mock_sdk
 
-    mocker.patch("c42eventextractor.extractors.FileEventExtractor._verify_filter_groups")
-    # handlers = mocker.patch("{}.errors.log_error".format(PRODUCT_NAME))
-    sec_data_extraction_module.extract(sdk, profile, logger, namespace_with_begin)
-    assert errors.ERRORED
-    errors.ERRORED = False
+    mocker.patch("c42eventextractor.extractors.BaseExtractor._verify_filter_groups")
+    with ErrorTrackerTestHelper():
+        sec_data_extraction_module.extract(sdk, profile, logger, namespace_with_begin)
+        assert errors.ERRORED

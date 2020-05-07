@@ -53,7 +53,7 @@ class TestCommandParser(object):
         parser.prepare_command(cmd, parts)
         success = False
         try:
-            parsed_args = parser.parse_args(["runnable", "-h"])
+            parser.parse_args(["runnable", "-h"])
         except SystemExit:
             success = True
             captured = capsys.readouterr()

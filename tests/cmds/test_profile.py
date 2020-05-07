@@ -1,4 +1,5 @@
 import pytest
+import logging
 
 import code42cli.cmds.profile as profilecmd
 from code42cli import PRODUCT_NAME
@@ -47,18 +48,17 @@ def invalid_connection(mock_verify):
     return mock_verify
 
 
-def test_show_profile_outputs_profile_info(capsys, mock_cliprofile_namespace, profile):
+def test_show_profile_outputs_profile_info(caplog, mock_cliprofile_namespace, profile):
     profile.name = "testname"
     profile.authority_url = "example.com"
     profile.username = "foo"
     profile.disable_ssl_errors = True
     mock_cliprofile_namespace.get_profile.return_value = profile
     profilecmd.show_profile(profile)
-    capture = capsys.readouterr()
-    assert "testname" in capture.out
-    assert "example.com" in capture.out
-    assert "foo" in capture.out
-    assert "A password is set" in capture.out
+    assert "testname" in caplog.text
+    assert "example.com" in caplog.text
+    assert "foo" in caplog.text
+    assert "A password is set" in caplog.text
 
 
 def test_show_profile_when_password_set_outputs_password_note(
@@ -116,6 +116,15 @@ def test_create_profile_if_credentials_valid_password_saved(
     mock_cliprofile_namespace.set_password.assert_called_once_with("newpassword", mocker.ANY)
 
 
+def test_create_profile_outputs_confirmation(
+    user_agreement, valid_connection, mock_cliprofile_namespace, caplog
+):
+    with caplog.at_level(logging.INFO):
+        mock_cliprofile_namespace.profile_exists.return_value = False
+        profilecmd.create_profile("foo", "bar", "baz", True)
+        assert "Successfully created profile 'foo'." in caplog.text
+
+
 def test_update_profile_updates_existing_profile(
     mock_cliprofile_namespace, user_agreement, valid_connection, profile
 ):
@@ -164,24 +173,12 @@ def test_update_profile_if_user_agrees_and_valid_connection_sets_password(
 
 
 def test_delete_profile_warns_if_deleting_default(
-    capsys, user_agreement, mock_cliprofile_namespace
+    caplog, user_agreement, mock_cliprofile_namespace
 ):
     mock_cliprofile_namespace.is_default_profile.return_value = True
-    profilecmd.delete_profile("mockdefault")
-    capture = capsys.readouterr()
-    assert "mockdefault is currently the default profile!" in capture.out
-
-
-def test_delete_all_warns_if_profiles_exist(capsys, user_agreement, mock_cliprofile_namespace):
-    mock_cliprofile_namespace.get_all_profiles.return_value = [
-        create_mock_profile("test1"),
-        create_mock_profile("test2"),
-    ]
-    profilecmd.delete_all_profiles()
-    capture = capsys.readouterr()
-    assert "Are you sure you want to delete the following profiles?" in capture.out
-    assert "test1" in capture.out
-    assert "test2" in capture.out
+    with caplog.at_level(logging.ERROR):
+        profilecmd.delete_profile("mockdefault")
+        assert "mockdefault is currently the default profile!" in caplog.text
 
 
 def test_delete_profile_does_nothing_if_user_doesnt_agree(
@@ -189,6 +186,24 @@ def test_delete_profile_does_nothing_if_user_doesnt_agree(
 ):
     profilecmd.delete_profile("mockprofile")
     assert mock_cliprofile_namespace.delete_profile.call_count == 0
+
+
+def test_delete_profile_outputs_success(user_agreement, mock_cliprofile_namespace, caplog):
+    with caplog.at_level(logging.INFO):
+        profilecmd.delete_profile("mockprofile")
+        assert "Profile 'mockProfile' has been deleted."
+
+
+def test_delete_all_warns_if_profiles_exist(caplog, user_agreement, mock_cliprofile_namespace):
+    mock_cliprofile_namespace.get_all_profiles.return_value = [
+        create_mock_profile("test1"),
+        create_mock_profile("test2"),
+    ]
+    with caplog.at_level(logging.INFO):
+        profilecmd.delete_all_profiles()
+        assert "Are you sure you want to delete the following profiles?" in caplog.text
+        assert "test1" in caplog.text
+        assert "test2" in caplog.text
 
 
 def test_delete_all_profiles_does_nothing_if_user_doesnt_agree(
@@ -231,27 +246,27 @@ def test_prompt_for_password_reset_if_credentials_invalid_password_not_saved(
     assert success
 
 
-def test_list_profiles(capsys, mock_cliprofile_namespace):
+def test_list_profiles(caplog, mock_cliprofile_namespace):
     profiles = [
         create_mock_profile("one"),
         create_mock_profile("two"),
         create_mock_profile("three"),
     ]
     mock_cliprofile_namespace.get_all_profiles.return_value = profiles
-    profilecmd.list_profiles()
-    capture = capsys.readouterr()
-    assert "one" in capture.out
-    assert "two" in capture.out
-    assert "three" in capture.out
+    with caplog.at_level(logging.INFO):
+        profilecmd.list_profiles()
+        assert "one" in caplog.text
+        assert "two" in caplog.text
+        assert "three" in caplog.text
 
 
 def test_list_profiles_when_no_profiles_outputs_no_profiles_message(
-    capsys, mock_cliprofile_namespace
+    caplog, mock_cliprofile_namespace
 ):
     mock_cliprofile_namespace.get_all_profiles.return_value = []
     profilecmd.list_profiles()
-    capture = capsys.readouterr()
-    assert "No existing profile." in capture.out
+    with caplog.at_level(logging.ERROR):
+        assert "No existing profile." in caplog.text
 
 
 def test_use_profile(mock_cliprofile_namespace, profile):
