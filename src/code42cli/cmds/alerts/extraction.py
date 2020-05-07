@@ -16,7 +16,9 @@ from code42cli.cmds.shared.extraction import (
     exit_if_advanced_query_used_with_other_search_args,
     create_time_range_filter,
 )
-from code42cli.util import print_error, print_to_stderr
+from code42cli.logger import get_main_cli_logger
+
+logger = get_main_cli_logger()
 
 
 def extract(sdk, profile, output_logger, args):
@@ -44,13 +46,13 @@ def extract(sdk, profile, output_logger, args):
         filters = _create_alert_filters(args)
         extractor.extract(*filters)
     if handlers.TOTAL_EVENTS == 0:
-        print_to_stderr(u"No results found\n")
+        logger.print_info(u"No results found\n")
 
 
 def _verify_alert_state(alert_state):
     options = list(enums.AlertState())
     if alert_state and alert_state not in options:
-        print_error(
+        logger.print_and_log_error(
             u"'{0}' is not a valid alert state, options are {1}.".format(alert_state, options)
         )
         exit(1)
@@ -62,7 +64,9 @@ def _verify_alert_severity(severity):
     options = list(enums.AlertSeverity())
     for s in severity:
         if s not in options:
-            print_error(u"'{0}' is not a valid alert severity, options are {1}".format(s, options))
+            logger.print_and_log_error(
+                u"'{0}' is not a valid alert severity, options are {1}".format(s, options)
+            )
             exit(1)
 
 
