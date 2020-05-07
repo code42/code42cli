@@ -11,6 +11,8 @@ from code42cli.cmds.shared.extraction import (
 )
 from code42cli.logger import get_main_cli_logger
 
+logger = get_main_cli_logger()
+
 
 def extract(sdk, profile, output_logger, args):
     """Extracts file events using the given command-line arguments.
@@ -37,8 +39,7 @@ def extract(sdk, profile, output_logger, args):
         filters = _create_file_event_filters(args)
         extractor.extract(*filters)
     if handlers.TOTAL_EVENTS == 0:
-        logger = get_main_cli_logger()
-        logger.print_and_log_info(u"No results found.")
+        logger.print_info(u"No results found.")
 
 
 def _verify_exposure_types(exposure_types):
@@ -47,7 +48,6 @@ def _verify_exposure_types(exposure_types):
     options = list(ExposureTypeOptions())
     for exposure_type in exposure_types:
         if exposure_type not in options:
-            logger = get_main_cli_logger()
             logger.print_and_log_error(u"'{0}' is not a valid exposure type.".format(exposure_type))
             exit(1)
 
@@ -77,9 +77,7 @@ def _try_append_exposure_types_filter(filters, include_non_exposure_events, expo
 
 def _create_exposure_type_filter(include_non_exposure_events, exposure_types):
     if include_non_exposure_events and exposure_types:
-        get_main_cli_logger().print_and_log_error(
-            u"Cannot use exposure types with `--include-non-exposure`."
-        )
+        logger.print_and_log_error(u"Cannot use exposure types with `--include-non-exposure`.")
         exit(1)
     if exposure_types:
         return ExposureType.is_in(exposure_types)
