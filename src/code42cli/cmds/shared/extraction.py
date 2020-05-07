@@ -2,8 +2,9 @@ import json
 
 from c42eventextractor import ExtractionHandlers
 from py42.sdk.queries.query_filter import QueryFilterTimestampField
-from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp, verify_timestamp_order
+
 import code42cli.errors as errors
+from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp, verify_timestamp_order
 from code42cli.logger import get_main_cli_logger
 
 logger = get_main_cli_logger()
@@ -35,6 +36,7 @@ def create_handlers(output_logger, cursor_store, event_key):
     handlers.TOTAL_EVENTS = 0
 
     def handle_error(exception):
+        errors.ERRORED = True
         if hasattr(exception, "response") and hasattr(exception.response, "text"):
             message = u"{0}: {1}".format(exception, exception.response.text)
         else:

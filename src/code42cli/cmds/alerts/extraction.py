@@ -1,5 +1,3 @@
-import code42cli.cmds.shared.enums as enums
-
 from c42eventextractor.extractors import AlertExtractor
 from py42.sdk.queries.alerts.filters import (
     Actor,
@@ -9,6 +7,9 @@ from py42.sdk.queries.alerts.filters import (
     Description,
     RuleName,
 )
+
+import code42cli.cmds.shared.enums as enums
+import code42cli.errors as errors
 from code42cli.cmds.shared.cursor_store import AlertCursorStore
 from code42cli.cmds.shared.extraction import (
     verify_begin_date_requirements,
@@ -45,7 +46,7 @@ def extract(sdk, profile, output_logger, args):
         _verify_alert_severity(args.severity)
         filters = _create_alert_filters(args)
         extractor.extract(*filters)
-    if handlers.TOTAL_EVENTS == 0:
+    if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         logger.print_info(u"No results found\n")
 
 

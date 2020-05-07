@@ -9,6 +9,7 @@ from code42cli.cmds.shared.extraction import (
     exit_if_advanced_query_used_with_other_search_args,
     create_time_range_filter,
 )
+import code42cli.errors as errors
 from code42cli.logger import get_main_cli_logger
 
 logger = get_main_cli_logger()
@@ -38,7 +39,7 @@ def extract(sdk, profile, output_logger, args):
             _verify_exposure_types(args.type)
         filters = _create_file_event_filters(args)
         extractor.extract(*filters)
-    if handlers.TOTAL_EVENTS == 0:
+    if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         logger.print_info(u"No results found.")
 
 
