@@ -50,23 +50,37 @@ def get_url_parts(url_str):
     return parts[0], port
 
 
-def process_rules_for_formatting(rules, header):
+def process_rules_for_formatting(record, header):
+    """Fetches needed keys/items to be displayed based on header keys.
+    
+    Finds the largest string against each column so as to decided the padding size for the column.
+    
+    Args:
+        record (list of dict), data to be formatted.  
+        header (dict), key-value where key is the json key and value is the corresponding
+         column name to be displayed on the cli. 
+    
+    Returns:
+        tuple (list of dict, dict), i.e Filtered records, padding size of columns.
+    """
     column_size = {key: len(column_name) for key, column_name in header.items()}
     rows = []
     rows.append(header)
-    for rule in rules:
+    for record_row in record:
         row = {}
         for key in header.keys():
-            row[key] = rule[key]
-            if type(rule[key]) is bool:
+            row[key] = record_row[key]
+            if type(record_row[key]) is bool:
                 continue
-            if column_size[key] < len(rule[key]):
-                column_size[key] = len(rule[key])
+            if column_size[key] < len(record_row[key]):
+                column_size[key] = len(record_row[key])
         rows.append(row)
     return rows, column_size
 
 
 def format_to_table(rows, column_size):
+    """Prints result in left justified format in a tabular form.
+    """
     for row in rows:
         for key in row.keys():
             print(repr(row[key]).ljust(column_size[key] + PADDING_SIZE), end=' ')
