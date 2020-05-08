@@ -2,6 +2,7 @@ import sys
 from os import makedirs, path
 
 from code42cli.compat import open
+PADDING_SIZE = 3
 
 
 def get_input(prompt):
@@ -47,3 +48,26 @@ def get_url_parts(url_str):
     if len(parts) > 1 and parts[1] != u"":
         port = int(parts[1])
     return parts[0], port
+
+
+def process_rules_for_formatting(rules, header):
+    column_size = {key: len(column_name) for key, column_name in header.items()}
+    rows = []
+    rows.append(header)
+    for rule in rules:
+        row = {}
+        for key in header.keys():
+            row[key] = rule[key]
+            if type(rule[key]) is bool:
+                continue
+            if column_size[key] < len(rule[key]):
+                column_size[key] = len(rule[key])
+        rows.append(row)
+    return rows, column_size
+
+
+def format_to_table(rows, column_size):
+    for row in rows:
+        for key in row.keys():
+            print(repr(row[key]).ljust(column_size[key] + PADDING_SIZE), end=' ')
+        print("")

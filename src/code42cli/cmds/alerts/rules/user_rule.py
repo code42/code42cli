@@ -1,5 +1,16 @@
+from code42cli.util import format_to_table, process_rules_for_formatting
 from code42cli.bulk import run_bulk_process, CSVReader
 from code42cli.cmds.detectionlists import get_user_id
+
+HEADER_KEYS_MAP = {
+    u"observerRuleId": u"RuleId", 
+    u"name": u"Name", 
+    u"severity": u"Severity", 
+    u"type": u"Type", 
+    u"ruleSource": u"Source",
+    u"isEnabled": u"Enabled",
+}
+
 
 
 def add_user(sdk, profile, rule_id, user_name):
@@ -14,7 +25,7 @@ def remove_user(sdk, profile, rule_id, user_name=None):
     else:
         sdk.alerts.rules.remove_all_users(rule_id)
 
-
+        
 def get_rules(sdk, profile, rule_id=None):
     rules_generator = sdk.alerts.rules.get_all()
     selected_rules = []
@@ -28,7 +39,9 @@ def get_rules(sdk, profile, rule_id=None):
         for rules in rules_generator:
             for rule in rules["ruleMetadata"]:
                 selected_rules.append(rule)
-    print(selected_rules)
+    
+    rows, column_size = process_rules_for_formatting(selected_rules, HEADER_KEYS_MAP)
+    format_to_table(rows, column_size)
 
 
 def add_bulk_users(sdk, profile, file_name):
