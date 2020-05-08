@@ -17,12 +17,18 @@ def remove_user(sdk, profile, rule_id, user_name=None):
 
 def get_rules(sdk, profile, rule_id=None):
     rules_generator = sdk.alerts.rules.get_all()
+    selected_rules = []
     if rule_id:
-        [print(rule) for rules in rules_generator 
-         for rule in rules["ruleMetadata"] if rule["observerRuleId"] == rule_id]
+        selected_rules.append(
+            rule for rules in rules_generator 
+            for rule in rules["ruleMetadata"] 
+            if rule["observerRuleId"] == rule_id
+        )
     else:
         for rules in rules_generator:
-            print(rules)
+            for rule in rules["ruleMetadata"]:
+                selected_rules.append(rule)
+    print(selected_rules)
 
 
 def add_bulk_users(sdk, profile, file_name):
