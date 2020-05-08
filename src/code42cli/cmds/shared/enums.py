@@ -126,14 +126,16 @@ class FileEventFilterArguments(SearchArguments):
 class AlertFilterArguments(object):
     STATE = u"state"
     SEVERITY = u"severity"
-    ACTOR_IS = u"actor_is"
+    ACTOR = u"actor"
     ACTOR_CONTAINS = u"actor_contains"
-    ACTOR_NOT = u"actor_not"
-    ACTOR_NOT_CONTAINS = u"actor_not_contains"
-    RULE_NAME_IS = u"rule_name_is"
-    RULE_NAME_CONTAINS = u"rule_name_contains"
-    RULE_NAME_NOT = u"rule_name_not"
-    RULE_NAME_NOT_CONTAINS = u"rule_name_not_contains"
+    EXCLUDE_ACTOR = u"exclude_actor"
+    EXCLUDE_ACTOR_CONTAINS = u"exclude_actor_contains"
+    RULE_NAME = u"rule_name"
+    EXCLUDE_RULE_NAME = u"exclude_rule_name"
+    RULE_ID = u"rule_id"
+    EXCLUDE_RULE_ID = u"exclude_rule_id"
+    RULE_TYPE = u"rule_type"
+    EXCLUDE_RULE_TYPE = u"exclude_rule_type"
     DESCRIPTION = u"description"
 
     def __iter__(self):
@@ -141,14 +143,16 @@ class AlertFilterArguments(object):
             [
                 self.STATE,
                 self.SEVERITY,
-                self.ACTOR_IS,
+                self.ACTOR,
                 self.ACTOR_CONTAINS,
-                self.ACTOR_NOT,
-                self.ACTOR_NOT_CONTAINS,
-                self.RULE_NAME_IS,
-                self.RULE_NAME_CONTAINS,
-                self.RULE_NAME_NOT,
-                self.RULE_NAME_NOT_CONTAINS,
+                self.EXCLUDE_ACTOR,
+                self.EXCLUDE_ACTOR_CONTAINS,
+                self.RULE_NAME,
+                self.EXCLUDE_RULE_NAME,
+                self.RULE_ID,
+                self.EXCLUDE_RULE_ID,
+                self.RULE_TYPE,
+                self.EXCLUDE_RULE_TYPE,
                 self.DESCRIPTION,
             ]
         )

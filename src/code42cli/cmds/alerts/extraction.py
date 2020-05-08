@@ -6,6 +6,8 @@ from py42.sdk.queries.alerts.filters import (
     DateObserved,
     Description,
     RuleName,
+    RuleId,
+    RuleType,
 )
 
 import code42cli.cmds.shared.enums as enums
@@ -75,20 +77,18 @@ def _create_alert_filters(args):
     filters = []
     alert_timestamp_filter = create_time_range_filter(DateObserved, args.begin, args.end)
     not alert_timestamp_filter or filters.append(alert_timestamp_filter)
-    not args.actor_is or filters.append(Actor.is_in(args.actor_is))
+    not args.actor or filters.append(Actor.is_in(args.actor))
     not args.actor_contains or [filters.append(Actor.contains(arg)) for arg in args.actor_contains]
-    not args.actor_not or filters.append(Actor.not_in(args.actor_not))
-    not args.actor_not_contains or [
-        filters.append(Actor.not_contains(arg)) for arg in args.actor_not_contains
+    not args.exclude_actor or filters.append(Actor.not_in(args.exclude_actor))
+    not args.exclude_actor_contains or [
+        filters.append(Actor.not_contains(arg)) for arg in args.exclude_actor_contains
     ]
-    not args.rule_name_is or filters.append(RuleName.is_in(args.rule_name_is))
-    not args.rule_name_contains or [
-        filters.append(RuleName.contains(arg)) for arg in args.rule_name_contains
-    ]
-    not args.rule_name_not or filters.append(RuleName.not_in(args.rule_name_not))
-    not args.rule_name_not_contains or [
-        filters.append(RuleName.not_contains(arg)) for arg in args.rule_name_not_contains
-    ]
+    not args.rule_name or filters.append(RuleName.is_in(args.rule_name))
+    not args.exclude_rule_name or filters.append(RuleName.not_in(args.exclude_rule_name))
+    not args.rule_id or filters.append(RuleId.is_in(args.rule_id))
+    not args.exclude_rule_id or filters.append(RuleId.not_in(args.exclude_rule_id))
+    not args.rule_type or filters.append(RuleType.is_in(args.rule_type))
+    not args.exclude_rule_type or filters.append(RuleType.not_in(args.exclude_rule_type))
     not args.description or filters.append(Description.contains(args.description))
     not args.severity or filters.append(Severity.is_in(args.severity))
     not args.state or filters.append(AlertState.eq(args.state))
