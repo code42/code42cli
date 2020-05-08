@@ -118,7 +118,7 @@ def _load_search_args(arg_collection):
         AlertFilterArguments.ACTOR: ArgConfig(
             u"--{}".format(AlertFilterArguments.ACTOR.replace("_", "-")),
             metavar=u"ACTOR",
-            help=u"Filter alerts by including the given actor(s) who triggered the alert. Accepts multiple args. Args must match actor username exactly.",
+            help=u"Filter alerts by including the given actor(s) who triggered the alert. Args must match actor username exactly.",
             nargs=u"+",
         ),
         AlertFilterArguments.ACTOR_CONTAINS: ArgConfig(
@@ -130,7 +130,7 @@ def _load_search_args(arg_collection):
         AlertFilterArguments.EXCLUDE_ACTOR: ArgConfig(
             u"--{}".format(AlertFilterArguments.EXCLUDE_ACTOR.replace("_", "-")),
             metavar=u"ACTOR",
-            help=u"Filter alerts by excluding the given actor(s) who triggered the alert. Accepts multiple args. Args must match actor username exactly.",
+            help=u"Filter alerts by excluding the given actor(s) who triggered the alert. Args must match actor username exactly.",
             nargs=u"+",
         ),
         AlertFilterArguments.EXCLUDE_ACTOR_CONTAINS: ArgConfig(
@@ -142,37 +142,37 @@ def _load_search_args(arg_collection):
         AlertFilterArguments.RULE_NAME: ArgConfig(
             u"--{}".format(AlertFilterArguments.RULE_NAME.replace("_", "-")),
             metavar=u"RULE_NAME",
-            help=u"Filter alerts by including the given rule name(s). Accepts multiple args.",
+            help=u"Filter alerts by including the given rule name(s).",
             nargs=u"+",
         ),
         AlertFilterArguments.EXCLUDE_RULE_NAME: ArgConfig(
             u"--{}".format(AlertFilterArguments.EXCLUDE_RULE_NAME.replace("_", "-")),
             metavar=u"RULE_NAME",
-            help=u"Filter alerts by excluding the given rule name(s). Accepts multiple args.",
+            help=u"Filter alerts by excluding the given rule name(s).",
             nargs=u"+",
         ),
         AlertFilterArguments.RULE_ID: ArgConfig(
             u"--{}".format(AlertFilterArguments.RULE_ID.replace("_", "-")),
             metavar=u"RULE_ID",
-            help=u"Filter alerts by including the given rule id(s). Accepts multiple args.",
+            help=u"Filter alerts by including the given rule id(s).",
             nargs=u"+",
         ),
         AlertFilterArguments.EXCLUDE_RULE_ID: ArgConfig(
             u"--{}".format(AlertFilterArguments.EXCLUDE_RULE_ID.replace("_", "-")),
             metavar=u"RULE_ID",
-            help=u"Filter alerts by excluding the given rule id(s). Accepts multiple args.",
+            help=u"Filter alerts by excluding the given rule id(s).",
             nargs=u"+",
         ),
         AlertFilterArguments.RULE_TYPE: ArgConfig(
             u"--{}".format(AlertFilterArguments.RULE_TYPE.replace("_", "-")),
             metavar=u"RULE_TYPE",
-            help=u"Filter alerts by including the given rule type(s). Accepts multiple args.",
+            help=u"Filter alerts by including the given rule type(s).",
             nargs=u"+",
         ),
         AlertFilterArguments.EXCLUDE_RULE_TYPE: ArgConfig(
             u"--{}".format(AlertFilterArguments.EXCLUDE_RULE_TYPE.replace("_", "-")),
             metavar=u"RULE_TYPE",
-            help=u"Filter alerts by excluding the given rule type(s). Accepts multiple args.",
+            help=u"Filter alerts by excluding the given rule type(s).",
             nargs=u"+",
         ),
         AlertFilterArguments.DESCRIPTION: ArgConfig(
