@@ -171,7 +171,7 @@ class CliLogger(object):
         prefix = (
             u"Exception occurred."
             if not invocation_str
-            else "Exception occurred from input: '{}'.".format(invocation_str)
+            else u"Exception occurred from input: '{}'.".format(invocation_str)
         )
         message = u"{}. See error below.".format(prefix)
         self.log_error(message)
