@@ -1,8 +1,12 @@
 from code42cli.args import ArgConfig
-from code42cli.cmds.shared import logger_factory, args
-from code42cli.cmds.shared.enums import FileEventFilterArguments, ServerProtocol, ExposureType
+from code42cli.cmds.search_shared import logger_factory, args
+from code42cli.cmds.search_shared.enums import (
+    FileEventFilterArguments,
+    ServerProtocol,
+    ExposureType,
+)
 from code42cli.cmds.securitydata.extraction import extract
-from code42cli.cmds.shared.cursor_store import FileEventCursorStore
+from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore
 from code42cli.commands import Command
 
 

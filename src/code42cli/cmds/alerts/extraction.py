@@ -10,10 +10,10 @@ from py42.sdk.queries.alerts.filters import (
     RuleType,
 )
 
-import code42cli.cmds.shared.enums as enums
+import code42cli.cmds.search_shared.enums as enums
 import code42cli.errors as errors
-from code42cli.cmds.shared.cursor_store import AlertCursorStore
-from code42cli.cmds.shared.extraction import (
+from code42cli.cmds.search_shared.cursor_store import AlertCursorStore
+from code42cli.cmds.search_shared.extraction import (
     verify_begin_date_requirements,
     create_handlers,
     exit_if_advanced_query_used_with_other_search_args,

@@ -7,7 +7,7 @@ from c42eventextractor.logging.formatters import (
 )
 from c42eventextractor.logging.handlers import NoPrioritySysLogHandlerWrapper
 
-from code42cli.cmds.shared.enums import OutputFormat
+from code42cli.cmds.search_shared.enums import OutputFormat
 from code42cli.util import get_url_parts
 from code42cli.logger import (
     logger_has_handlers,

@@ -1,6 +1,6 @@
 from code42cli.compat import str
 import code42cli.password as password
-from code42cli.cmds.shared.cursor_store import get_all_cursor_stores_for_profile
+from code42cli.cmds.search_shared.cursor_store import get_all_cursor_stores_for_profile
 from code42cli.config import ConfigAccessor, config_accessor, NoConfigProfileError
 from code42cli.logger import get_main_cli_logger
 

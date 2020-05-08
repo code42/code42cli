@@ -3,7 +3,7 @@ import logging
 
 import code42cli.profile as cliprofile
 from code42cli import PRODUCT_NAME
-from code42cli.cmds.shared.cursor_store import FileEventCursorStore, AlertCursorStore
+from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore, AlertCursorStore
 from code42cli.config import ConfigAccessor, NoConfigProfileError
 from .conftest import MockSection, create_mock_profile
 

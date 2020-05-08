@@ -6,7 +6,7 @@ from py42.sdk.queries.fileevents.filters import *
 import code42cli.cmds.securitydata.extraction as extraction_module
 import code42cli.errors as errors
 from code42cli import PRODUCT_NAME
-from code42cli.cmds.shared.enums import ExposureType as ExposureTypeOptions
+from code42cli.cmds.search_shared.enums import ExposureType as ExposureTypeOptions
 from tests.cmds.conftest import get_filter_value_from_json
 from code42cli.date_helper import DateArgumentException
 from ...conftest import get_test_date_str, begin_date_str, ErrorTrackerTestHelper
@@ -31,7 +31,7 @@ def file_event_namespace_with_begin(file_event_namespace):
 @pytest.fixture
 def file_event_checkpoint(mocker):
     return mocker.patch(
-        "{}.cmds.shared.cursor_store.FileEventCursorStore.get_stored_cursor_timestamp".format(
+        "{}.cmds.search_shared.cursor_store.FileEventCursorStore.get_stored_cursor_timestamp".format(
             PRODUCT_NAME
         )
     )

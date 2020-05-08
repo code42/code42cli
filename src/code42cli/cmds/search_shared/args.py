@@ -1,4 +1,4 @@
-from code42cli.cmds.shared.enums import SearchArguments, OutputFormat, AlertOutputFormat
+from code42cli.cmds.search_shared.enums import SearchArguments, OutputFormat, AlertOutputFormat
 from code42cli.args import ArgConfig
 
 

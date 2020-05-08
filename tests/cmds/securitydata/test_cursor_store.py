@@ -1,7 +1,7 @@
 from os import path
 
 from code42cli import PRODUCT_NAME
-from code42cli.cmds.shared.cursor_store import BaseCursorStore, FileEventCursorStore
+from code42cli.cmds.search_shared.cursor_store import BaseCursorStore, FileEventCursorStore
 
 
 class TestBaseCursorStore(object):
@@ -28,7 +28,9 @@ class TestFileEventCursorStore(object):
         self, mocker, sqlite_connection
     ):
         mock = mocker.patch(
-            "{}.cmds.shared.cursor_store.FileEventCursorStore._row_exists".format(PRODUCT_NAME)
+            "{}.cmds.search_shared.cursor_store.FileEventCursorStore._row_exists".format(
+                PRODUCT_NAME
+            )
         )
         mock.return_value = False
         spy = mocker.spy(FileEventCursorStore, "_insert_new_row")

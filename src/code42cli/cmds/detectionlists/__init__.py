@@ -36,7 +36,7 @@ class DetectionListHandlers(object):
 class DetectionList(object):
     """An object representing a Code42 detection list. Use this class by passing in handlers for 
     adding and removing employees. This class will handle the bulk-related commands and some 
-    shared help texts.
+    search_shared help texts.
     
     Args:
         list_name (str or unicode): An option from the DetectionLists enum. For convenience, use one of the 
