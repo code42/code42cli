@@ -15,6 +15,8 @@ class BaseCursorStore(object):
             db_file_path = u"{0}/file_event_checkpoints.db".format(db_path)
 
         self._connection = sqlite3.connect(db_file_path)
+        if self._is_empty():
+            self._init_table()
 
     def _get(self, columns, primary_key):
         query = u"SELECT {0} FROM {1} WHERE {2}=?"
@@ -103,8 +105,6 @@ class FileEventCursorStore(BaseCursorStore):
     def __init__(self, profile_name, db_file_path=None):
         self._primary_key = profile_name
         super(FileEventCursorStore, self).__init__(u"file_event_checkpoints", db_file_path)
-        if self._is_empty():
-            self._init_table()
         if not self._row_exists(self._primary_key):
             self._insert_new_row()
 
@@ -115,8 +115,6 @@ class AlertCursorStore(BaseCursorStore):
     def __init__(self, profile_name, db_file_path=None):
         self._primary_key = profile_name
         super(AlertCursorStore, self).__init__(u"alert_checkpoints", db_file_path)
-        if self._is_empty():
-            self._init_table()
         if not self._row_exists(self._primary_key):
             self._insert_new_row()
 
