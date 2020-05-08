@@ -4,8 +4,8 @@ from code42cli.date_helper import DateArgumentException
 from code42cli.cmds.shared.extraction import create_time_range_filter
 from py42.sdk.queries.fileevents.filters import InsertionTimestamp, EventTimestamp
 from py42.sdk.queries.alerts.filters import DateObserved
-from .conftest import get_filter_value_from_json
-from ...conftest import (
+from tests.cmds.conftest import get_filter_value_from_json
+from tests.conftest import (
     begin_date_str,
     begin_date_with_time,
     end_date_str,

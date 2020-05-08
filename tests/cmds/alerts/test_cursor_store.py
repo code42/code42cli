@@ -1,7 +1,7 @@
 from os import path
 
 from code42cli import PRODUCT_NAME
-from code42cli.cmds.shared.cursor_store import BaseCursorStore, FileEventCursorStore
+from code42cli.cmds.shared.cursor_store import BaseCursorStore, AlertCursorStore
 
 
 class TestBaseCursorStore(object):
@@ -21,35 +21,33 @@ class TestBaseCursorStore(object):
         sqlite_connection.assert_called_once_with(expected_db_file_path)
 
 
-class TestFileEventCursorStore(object):
+class TestAlertCursorStore(object):
     MOCK_TEST_DB_NAME = "test_path.db"
 
     def test_init_when_called_twice_with_different_profile_names_creates_two_rows(
         self, mocker, sqlite_connection
     ):
         mock = mocker.patch(
-            "{}.cmds.shared.cursor_store.FileEventCursorStore._row_exists".format(PRODUCT_NAME)
+            "{}.cmds.shared.cursor_store.AlertCursorStore._row_exists".format(PRODUCT_NAME)
         )
         mock.return_value = False
-        spy = mocker.spy(FileEventCursorStore, "_insert_new_row")
-        FileEventCursorStore("Profile A", self.MOCK_TEST_DB_NAME)
-        FileEventCursorStore("Profile B", self.MOCK_TEST_DB_NAME)
+        spy = mocker.spy(AlertCursorStore, "_insert_new_row")
+        AlertCursorStore("Profile A", self.MOCK_TEST_DB_NAME)
+        AlertCursorStore("Profile B", self.MOCK_TEST_DB_NAME)
         assert spy.call_count == 2
 
     def test_get_stored_cursor_timestamp_executes_expected_select_query(self, sqlite_connection):
-        store = FileEventCursorStore("Profile", self.MOCK_TEST_DB_NAME)
+        store = AlertCursorStore("Profile", self.MOCK_TEST_DB_NAME)
         store.get_stored_cursor_timestamp()
         with store._connection as conn:
-            expected = "SELECT {0} FROM file_event_checkpoints WHERE cursor_id=?".format(
-                u"insertionTimestamp"
-            )
+            expected = "SELECT {0} FROM alert_checkpoints WHERE cursor_id=?".format(u"createdAt")
             actual = conn.cursor().execute.call_args[0][0]
             assert actual == expected
 
     def test_get_stored_cursor_timestamp_executes_query_with_expected_primary_key(
         self, sqlite_connection
     ):
-        store = FileEventCursorStore("Profile", self.MOCK_TEST_DB_NAME)
+        store = AlertCursorStore("Profile", self.MOCK_TEST_DB_NAME)
         store.get_stored_cursor_timestamp()
         with store._connection as conn:
             actual = conn.cursor().execute.call_args[0][1][0]
@@ -59,19 +57,17 @@ class TestFileEventCursorStore(object):
     def test_replace_stored_cursor_timestamp_executes_expected_update_query(
         self, sqlite_connection
     ):
-        store = FileEventCursorStore("Profile", self.MOCK_TEST_DB_NAME)
+        store = AlertCursorStore("Profile", self.MOCK_TEST_DB_NAME)
         store.replace_stored_cursor_timestamp(123)
         with store._connection as conn:
-            expected = "UPDATE file_event_checkpoints SET {0}=? WHERE cursor_id=?".format(
-                u"insertionTimestamp"
-            )
+            expected = "UPDATE alert_checkpoints SET {0}=? WHERE cursor_id=?".format(u"createdAt")
             actual = conn.execute.call_args[0][0]
             assert actual == expected
 
     def test_replace_stored_cursor_timestamp_executes_query_with_expected_primary_key(
         self, sqlite_connection
     ):
-        store = FileEventCursorStore("Profile", self.MOCK_TEST_DB_NAME)
+        store = AlertCursorStore("Profile", self.MOCK_TEST_DB_NAME)
         new_cursor_timestamp = 123
         store.replace_stored_cursor_timestamp(new_cursor_timestamp)
         with store._connection as conn:
@@ -80,7 +76,7 @@ class TestFileEventCursorStore(object):
 
     def test_clean_executes_query_with_expected_primary_key(self, sqlite_connection):
         profile_name = "Profile"
-        store = FileEventCursorStore(profile_name, self.MOCK_TEST_DB_NAME)
+        store = AlertCursorStore(profile_name, self.MOCK_TEST_DB_NAME)
         store.clean()
         with store._connection as conn:
             expected_query = "DELETE FROM {0} WHERE {1}=?".format(

@@ -11,7 +11,7 @@ import code42cli.errors as error_tracker
 
 
 @pytest.fixture
-def namespace():
+def file_event_namespace():
     args = DictObject(
         dict(
             sdk=mock_42,
@@ -31,6 +31,36 @@ def namespace():
             process_owner=None,
             tab_url=None,
             include_non_exposure=None,
+            format=None,
+            output_file=None,
+            server=None,
+            protocol=None,
+        )
+    )
+    return args
+
+
+@pytest.fixture
+def alert_namespace():
+    args = DictObject(
+        dict(
+            sdk=mock_42,
+            profile=create_mock_profile(),
+            incremental=None,
+            advanced_query=None,
+            begin=None,
+            end=None,
+            severity=None,
+            state=None,
+            actor_is=None,
+            actor_contains=None,
+            actor_not=None,
+            actor_not_contains=None,
+            rule_name_is=None,
+            rule_name_contains=None,
+            rule_name_not=None,
+            rule_name_not_contains=None,
+            description=None,
             format=None,
             output_file=None,
             server=None,
