@@ -72,6 +72,25 @@ class ExposureType(object):
         ]
 
 
+class RuleType(object):
+    ENDPOINT_EXFILTRATION = u"FedEndpointExfiltration"
+    CLOUD_SHARE_PERMISSIONS = u"FedCloudSharePermissions"
+    FILE_TYPE_MISMATCH = u"FedFileTypeMismatch"
+
+    def __iter__(self):
+        return iter(self._as_list())
+
+    def __len__(self):
+        return len(self._as_list())
+
+    def _as_list(self):
+        return [
+            self.ENDPOINT_EXFILTRATION,
+            self.CLOUD_SHARE_PERMISSIONS,
+            self.FILE_TYPE_MISMATCH,
+        ]
+
+
 class ServerProtocol(object):
     TCP = u"TCP"
     UDP = u"UDP"

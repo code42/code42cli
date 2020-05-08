@@ -7,6 +7,7 @@ from code42cli.cmds.shared.enums import (
     AlertState,
     AlertSeverity,
     ServerProtocol,
+    RuleType,
 )
 from code42cli.cmds.shared.cursor_store import AlertCursorStore
 
@@ -166,13 +167,17 @@ def _load_search_args(arg_collection):
         AlertFilterArguments.RULE_TYPE: ArgConfig(
             u"--{}".format(AlertFilterArguments.RULE_TYPE.replace("_", "-")),
             metavar=u"RULE_TYPE",
-            help=u"Filter alerts by including the given rule type(s).",
+            help=u"Filter alerts by including the given rule type(s). Available choices={0}".format(
+                list(RuleType())
+            ),
             nargs=u"+",
         ),
         AlertFilterArguments.EXCLUDE_RULE_TYPE: ArgConfig(
             u"--{}".format(AlertFilterArguments.EXCLUDE_RULE_TYPE.replace("_", "-")),
             metavar=u"RULE_TYPE",
-            help=u"Filter alerts by excluding the given rule type(s).",
+            help=u"Filter alerts by excluding the given rule type(s). Available choices={0}".format(
+                list(RuleType())
+            ),
             nargs=u"+",
         ),
         AlertFilterArguments.DESCRIPTION: ArgConfig(
