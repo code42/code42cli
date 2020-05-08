@@ -1,40 +1,15 @@
 import pytest
 import logging
 
-from py42.sdk import SDKClient
 from py42.sdk.queries.fileevents.filters import *
 
 import code42cli.cmds.securitydata.extraction as extraction_module
 import code42cli.errors as errors
 from code42cli import PRODUCT_NAME
-from code42cli.logger import CliLogger
 from code42cli.cmds.shared.enums import ExposureType as ExposureTypeOptions
 from tests.cmds.conftest import get_filter_value_from_json
 from code42cli.date_helper import DateArgumentException
 from ...conftest import get_test_date_str, begin_date_str, ErrorTrackerTestHelper
-
-
-@pytest.fixture
-def sdk(mocker):
-    return mocker.MagicMock(spec=SDKClient)
-
-
-@pytest.fixture()
-def mock_42(mocker):
-    return mocker.patch("py42.sdk.from_local_account")
-
-
-@pytest.fixture
-def logger(mocker):
-    mock = mocker.MagicMock()
-    mock.print_info = mocker.MagicMock()
-    return mock
-
-
-@pytest.fixture
-def cli_logger(mocker):
-    mock = mocker.MagicMock(spec=CliLogger)
-    return mock
 
 
 @pytest.fixture
@@ -48,16 +23,6 @@ def file_event_extractor(mocker):
 
 
 @pytest.fixture
-def alert_extractor(mocker):
-    mock = mocker.MagicMock()
-    mock.extract_advanced = mocker.patch(
-        "c42eventextractor.extractors.AlertExtractor.extract_advanced"
-    )
-    mock.extract = mocker.patch("c42eventextractor.extractors.AlertExtractor.extract")
-    return mock
-
-
-@pytest.fixture
 def file_event_namespace_with_begin(file_event_namespace):
     file_event_namespace.begin = begin_date_str
     return file_event_namespace
@@ -67,15 +32,6 @@ def file_event_namespace_with_begin(file_event_namespace):
 def file_event_checkpoint(mocker):
     return mocker.patch(
         "{}.cmds.shared.cursor_store.FileEventCursorStore.get_stored_cursor_timestamp".format(
-            PRODUCT_NAME
-        )
-    )
-
-
-@pytest.fixture
-def alert_checkpoint(mocker):
-    return mocker.patch(
-        "{}.cmds.shared.cursor_store.AlertEventCursorStore.get_stored_cursor_timestamp".format(
             PRODUCT_NAME
         )
     )
@@ -125,85 +81,25 @@ def test_extract_when_is_advanced_query_and_has_exposure_types_exits(
         extraction_module.extract(sdk, profile, logger, file_event_namespace)
 
 
-def test_extract_when_is_advanced_query_and_has_username_exits(
-    sdk, profile, logger, file_event_namespace
+@pytest.mark.parametrize(
+    "arg",
+    [
+        "c42_username",
+        "actor",
+        "md5",
+        "sha256",
+        "source",
+        "file_name",
+        "file_path",
+        "process_owner",
+        "tab_url",
+    ],
+)
+def test_extract_when_is_advanced_query_and_other_incompatible_multi_narg_argument_passed(
+    sdk, profile, logger, file_event_namespace, arg
 ):
     file_event_namespace.advanced_query = "some complex json"
-    file_event_namespace.c42_username = ["Someone"]
-    with pytest.raises(SystemExit):
-        extraction_module.extract(sdk, profile, logger, file_event_namespace)
-
-
-def test_extract_when_is_advanced_query_and_has_actor_exits(
-    sdk, profile, logger, file_event_namespace
-):
-    file_event_namespace.advanced_query = "some complex json"
-    file_event_namespace.actor = ["Someone"]
-    with pytest.raises(SystemExit):
-        extraction_module.extract(sdk, profile, logger, file_event_namespace)
-
-
-def test_extract_when_is_advanced_query_and_has_md5_exits(
-    sdk, profile, logger, file_event_namespace
-):
-    file_event_namespace.advanced_query = "some complex json"
-    file_event_namespace.md5 = ["098f6bcd4621d373cade4e832627b4f6"]
-    with pytest.raises(SystemExit):
-        extraction_module.extract(sdk, profile, logger, file_event_namespace)
-
-
-def test_extract_when_is_advanced_query_and_has_sha256_exits(
-    sdk, profile, logger, file_event_namespace
-):
-    file_event_namespace.advanced_query = "some complex json"
-    file_event_namespace.sha256 = [
-        "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
-    ]
-    with pytest.raises(SystemExit):
-        extraction_module.extract(sdk, profile, logger, file_event_namespace)
-
-
-def test_extract_when_is_advanced_query_and_has_source_exits(
-    sdk, profile, logger, file_event_namespace
-):
-    file_event_namespace.advanced_query = "some complex json"
-    file_event_namespace.source = ["Gmail"]
-    with pytest.raises(SystemExit):
-        extraction_module.extract(sdk, profile, logger, file_event_namespace)
-
-
-def test_extract_when_is_advanced_query_and_has_file_name_exits(
-    sdk, profile, logger, file_event_namespace
-):
-    file_event_namespace.advanced_query = "some complex json"
-    file_event_namespace.file_name = ["test.out"]
-    with pytest.raises(SystemExit):
-        extraction_module.extract(sdk, profile, logger, file_event_namespace)
-
-
-def test_extract_when_is_advanced_query_and_has_file_path_exits(
-    sdk, profile, logger, file_event_namespace
-):
-    file_event_namespace.advanced_query = "some complex json"
-    file_event_namespace.file_path = ["path/to/file"]
-    with pytest.raises(SystemExit):
-        extraction_module.extract(sdk, profile, logger, file_event_namespace)
-
-
-def test_extract_when_is_advanced_query_and_has_process_owner_exits(
-    sdk, profile, logger, file_event_namespace
-):
-    file_event_namespace.advanced_query = "some complex json"
-    file_event_namespace.process_owner = ["someone"]
-    with pytest.raises(SystemExit):
-        extraction_module.extract(sdk, profile, logger, file_event_namespace)
-
-
-def test_extract_when_is_advanced_query_and_has_tab_url_exits(
-    sdk, profile, logger, file_event_namespace
-):
-    file_event_namespace.advanced_query = "some complex json"
-    file_event_namespace.tab_url = ["https://www.example.com"]
+    setattr(file_event_namespace, arg, ["test_value"])
     with pytest.raises(SystemExit):
         extraction_module.extract(sdk, profile, logger, file_event_namespace)
 
@@ -308,6 +204,20 @@ def test_extract_when_given_end_date_and_time_uses_expected_query(
         file_event_extractor.extract.call_args[0][0], filter_index=1
     )
     expected = "{0}T{1}.000Z".format(date, time)
+    assert actual == expected
+
+
+def test_extract_when_given_end_date_and_time_without_seconds_uses_expected_query(
+    sdk, profile, logger, file_event_namespace_with_begin, file_event_extractor
+):
+    date = get_test_date_str(days_ago=10)
+    time = "12:00"
+    file_event_namespace_with_begin.end = date + " " + time
+    extraction_module.extract(sdk, profile, logger, file_event_namespace_with_begin)
+    actual = get_filter_value_from_json(
+        file_event_extractor.extract.call_args[0][0], filter_index=1
+    )
+    expected = "{0}T{1}:00.000Z".format(date, time)
     assert actual == expected
 
 

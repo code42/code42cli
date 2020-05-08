@@ -8,32 +8,8 @@ import code42cli.cmds.alerts.extraction as extraction_module
 import code42cli.errors as errors
 from code42cli import PRODUCT_NAME
 from code42cli.date_helper import DateArgumentException
-from code42cli.logger import CliLogger
 from tests.cmds.conftest import get_filter_value_from_json
 from ...conftest import get_test_date_str, begin_date_str, ErrorTrackerTestHelper
-
-
-@pytest.fixture
-def sdk(mocker):
-    return mocker.MagicMock(spec=SDKClient)
-
-
-@pytest.fixture()
-def mock_42(mocker):
-    return mocker.patch("py42.sdk.from_local_account")
-
-
-@pytest.fixture
-def logger(mocker):
-    mock = mocker.MagicMock()
-    mock.print_info = mocker.MagicMock()
-    return mock
-
-
-@pytest.fixture
-def cli_logger(mocker):
-    mock = mocker.MagicMock(spec=CliLogger)
-    return mock
 
 
 @pytest.fixture
@@ -96,36 +72,48 @@ def test_extract_when_is_advanced_query_and_has_end_date_exits(
         extraction_module.extract(sdk, profile, logger, alert_namespace)
 
 
-def test_extract_when_is_advanced_query_and_has_actor_exits(sdk, profile, logger, alert_namespace):
-    alert_namespace.advanced_query = "some complex json"
-    alert_namespace.actor_is = ["Someone"]
-    with pytest.raises(SystemExit):
-        extraction_module.extract(sdk, profile, logger, alert_namespace)
-
-
-def test_extract_when_is_advanced_query_and_has_rule_name_exits(
-    sdk, profile, logger, alert_namespace
+@pytest.mark.parametrize(
+    "arg",
+    [
+        "severity",
+        "actor",
+        "actor_contains",
+        "exclude_actor",
+        "exclude_actor_contains",
+        "rule_name",
+        "exclude_rule_name",
+        "rule_id",
+        "exclude_rule_id",
+        "rule_type",
+        "exclude_rule_type",
+    ],
+)
+def test_extract_when_is_advanced_query_and_other_incompatible_multi_narg_argument_passed(
+    sdk, profile, logger, alert_namespace, arg
 ):
     alert_namespace.advanced_query = "some complex json"
-    alert_namespace.rule_name_is = ["Someone"]
+    setattr(alert_namespace, arg, ["test_value"])
     with pytest.raises(SystemExit):
         extraction_module.extract(sdk, profile, logger, alert_namespace)
 
 
-def test_extract_when_is_advanced_query_and_has_description_exits(
-    sdk, profile, logger, alert_namespace
+@pytest.mark.parametrize("arg", ["state", "description"])
+def test_extract_when_is_advanced_query_and_other_incompatible_single_arg_argument_passed(
+    sdk, profile, logger, alert_namespace, arg
 ):
     alert_namespace.advanced_query = "some complex json"
-    alert_namespace.description = ["this rule rules!"]
+    setattr(alert_namespace, arg, "test_value")
     with pytest.raises(SystemExit):
         extraction_module.extract(sdk, profile, logger, alert_namespace)
 
 
-def test_extract_when_is_advanced_query_and_has_sha256_exits(sdk, profile, logger, alert_namespace):
-    alert_namespace.advanced_query = "some complex json"
-    alert_namespace.actor_not = ["Someone"]
+def test_extract_when_is_advanced_query_and_has_incremental_mode_exits(
+    sdk, profile, logger, file_event_namespace
+):
+    file_event_namespace.advanced_query = "some complex json"
+    file_event_namespace.incremental = True
     with pytest.raises(SystemExit):
-        extraction_module.extract(sdk, profile, logger, alert_namespace)
+        extraction_module.extract(sdk, profile, logger, file_event_namespace)
 
 
 def test_extract_when_is_advanced_query_and_has_incremental_mode_set_to_false_does_not_exit(
@@ -299,40 +287,80 @@ def test_when_not_given_begin_date_and_is_incremental_but_no_stored_checkpoint_e
 def test_extract_when_given_actor_is_uses_username_filter(
     sdk, profile, logger, alert_namespace_with_begin, alert_extractor
 ):
-    alert_namespace_with_begin.actor_is = ["test.testerson@example.com"]
+    alert_namespace_with_begin.actor = ["test.testerson@example.com"]
     extraction_module.extract(sdk, profile, logger, alert_namespace_with_begin)
     assert str(alert_extractor.extract.call_args[0][1]) == str(
-        Actor.is_in(alert_namespace_with_begin.actor_is)
+        Actor.is_in(alert_namespace_with_begin.actor)
     )
 
 
-def test_extract_when_given_actor_not_uses_actor_filter(
+def test_extract_when_given_exclude_actor_uses_actor_filter(
     sdk, profile, logger, alert_namespace_with_begin, alert_extractor
 ):
-    alert_namespace_with_begin.actor_not = ["test.testerson"]
+    alert_namespace_with_begin.exclude_actor = ["test.testerson"]
     extraction_module.extract(sdk, profile, logger, alert_namespace_with_begin)
     assert str(alert_extractor.extract.call_args[0][1]) == str(
-        Actor.not_in(alert_namespace_with_begin.actor_not)
+        Actor.not_in(alert_namespace_with_begin.exclude_actor)
     )
 
 
-def test_extract_when_given_rule_name_is_uses_rule_name_filter(
+def test_extract_when_given_rule_name_uses_rule_name_filter(
     sdk, profile, logger, alert_namespace_with_begin, alert_extractor
 ):
-    alert_namespace_with_begin.rule_name_is = ["departing employee"]
+    alert_namespace_with_begin.rule_name = ["departing employee"]
     extraction_module.extract(sdk, profile, logger, alert_namespace_with_begin)
     assert str(alert_extractor.extract.call_args[0][1]) == str(
-        RuleName.is_in(alert_namespace_with_begin.rule_name_is)
+        RuleName.is_in(alert_namespace_with_begin.rule_name)
     )
 
 
-def test_extract_when_given_rule_name_not_uses_rule_name_not_filter(
+def test_extract_when_given_exclude_rule_name_uses_rule_name_not_filter(
     sdk, profile, logger, alert_namespace_with_begin, alert_extractor
 ):
-    alert_namespace_with_begin.rule_name_not = ["departing employee"]
+    alert_namespace_with_begin.exclude_rule_name = ["departing employee"]
     extraction_module.extract(sdk, profile, logger, alert_namespace_with_begin)
     assert str(alert_extractor.extract.call_args[0][1]) == str(
-        RuleName.not_in(alert_namespace_with_begin.rule_name_not)
+        RuleName.not_in(alert_namespace_with_begin.exclude_rule_name)
+    )
+
+
+def test_extract_when_given_rule_type_uses_rule_name_filter(
+    sdk, profile, logger, alert_namespace_with_begin, alert_extractor
+):
+    alert_namespace_with_begin.rule_type = ["departing employee"]
+    extraction_module.extract(sdk, profile, logger, alert_namespace_with_begin)
+    assert str(alert_extractor.extract.call_args[0][1]) == str(
+        RuleType.is_in(alert_namespace_with_begin.rule_type)
+    )
+
+
+def test_extract_when_given_exclude_rule_type_uses_rule_name_not_filter(
+    sdk, profile, logger, alert_namespace_with_begin, alert_extractor
+):
+    alert_namespace_with_begin.exclude_rule_type = ["departing employee"]
+    extraction_module.extract(sdk, profile, logger, alert_namespace_with_begin)
+    assert str(alert_extractor.extract.call_args[0][1]) == str(
+        RuleType.not_in(alert_namespace_with_begin.exclude_rule_type)
+    )
+
+
+def test_extract_when_given_rule_id_uses_rule_name_filter(
+    sdk, profile, logger, alert_namespace_with_begin, alert_extractor
+):
+    alert_namespace_with_begin.rule_id = ["departing employee"]
+    extraction_module.extract(sdk, profile, logger, alert_namespace_with_begin)
+    assert str(alert_extractor.extract.call_args[0][1]) == str(
+        RuleId.is_in(alert_namespace_with_begin.rule_id)
+    )
+
+
+def test_extract_when_given_exclude_rule_id_uses_rule_name_not_filter(
+    sdk, profile, logger, alert_namespace_with_begin, alert_extractor
+):
+    alert_namespace_with_begin.exclude_rule_id = ["departing employee"]
+    extraction_module.extract(sdk, profile, logger, alert_namespace_with_begin)
+    assert str(alert_extractor.extract.call_args[0][1]) == str(
+        RuleId.not_in(alert_namespace_with_begin.exclude_rule_id)
     )
 
 
@@ -349,18 +377,18 @@ def test_extract_when_given_description_uses_description_filter(
 def test_extract_when_given_multiple_search_args_uses_expected_filters(
     sdk, profile, logger, alert_namespace_with_begin, alert_extractor
 ):
-    alert_namespace_with_begin.actor_is = ["test.testerson@example.com"]
-    alert_namespace_with_begin.actor_not = ["flag.flagerson@code42.com"]
-    alert_namespace_with_begin.rule_name_is = ["departing employee"]
+    alert_namespace_with_begin.actor = ["test.testerson@example.com"]
+    alert_namespace_with_begin.exclude_actor = ["flag.flagerson@code42.com"]
+    alert_namespace_with_begin.rule_name = ["departing employee"]
     extraction_module.extract(sdk, profile, logger, alert_namespace_with_begin)
     assert str(alert_extractor.extract.call_args[0][1]) == str(
-        Actor.is_in(alert_namespace_with_begin.actor_is)
+        Actor.is_in(alert_namespace_with_begin.actor)
     )
     assert str(alert_extractor.extract.call_args[0][2]) == str(
-        Actor.not_in(alert_namespace_with_begin.actor_not)
+        Actor.not_in(alert_namespace_with_begin.exclude_actor)
     )
     assert str(alert_extractor.extract.call_args[0][3]) == str(
-        RuleName.is_in(alert_namespace_with_begin.rule_name_is)
+        RuleName.is_in(alert_namespace_with_begin.rule_name)
     )
 
 
