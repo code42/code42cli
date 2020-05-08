@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 from os import makedirs, path
 
@@ -83,5 +84,5 @@ def format_to_table(rows, column_size):
     """
     for row in rows:
         for key in row.keys():
-            print(repr(row[key]).ljust(column_size[key] + PADDING_SIZE), end=' ')
+            print(repr(row[key]).ljust(column_size[key] + PADDING_SIZE), end=" ")
         print("")
