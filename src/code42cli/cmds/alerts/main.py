@@ -137,6 +137,7 @@ def _load_search_args(arg_collection):
             u"--{}".format(AlertFilterArguments.EXCLUDE_ACTOR_CONTAINS.replace("_", "-")),
             metavar=u"ACTOR",
             help=u"Filter alerts by excluding actor(s) whose username contains the given string.",
+            nargs=u"+",
         ),
         AlertFilterArguments.RULE_NAME: ArgConfig(
             u"--{}".format(AlertFilterArguments.RULE_NAME.replace("_", "-")),
