@@ -9,7 +9,7 @@ from code42cli.cmds.detectionlists import (
     update_user,
     UserDoesNotExistError,
 )
-from code42cli.cmds.detectionlists.enums import BulkCommandType
+from code42cli.bulk import BulkCommandType
 from .conftest import TEST_ID
 
 
