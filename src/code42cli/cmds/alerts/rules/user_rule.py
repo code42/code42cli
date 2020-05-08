@@ -14,7 +14,6 @@ HEADER_KEYS_MAP = {
 }
 
 
-
 def add_user(sdk, profile, rule_id, user_name):
     user_id = get_user_id(sdk, user_name)
     sdk.alerts.rules.add_user(rule_id, user_id)
