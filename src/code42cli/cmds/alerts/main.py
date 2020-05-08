@@ -1,15 +1,15 @@
 from code42cli.args import ArgConfig
 from code42cli.commands import Command
 from code42cli.cmds.alerts.extraction import extract
-from code42cli.cmds.shared import args, logger_factory
-from code42cli.cmds.shared.enums import (
+from code42cli.cmds.search_shared import args, logger_factory
+from code42cli.cmds.search_shared.enums import (
     AlertFilterArguments,
     AlertState,
     AlertSeverity,
     ServerProtocol,
     RuleType,
 )
-from code42cli.cmds.shared.cursor_store import AlertCursorStore
+from code42cli.cmds.search_shared.cursor_store import AlertCursorStore
 
 
 def load_subcommands():
