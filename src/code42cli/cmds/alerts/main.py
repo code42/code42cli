@@ -112,7 +112,7 @@ def _load_search_args(arg_collection):
         AlertFilterArguments.STATE: ArgConfig(
             u"--{}".format(AlertFilterArguments.STATE),
             help=u"Filter alerts by state. Defaults to returning all states. Available choices={0}".format(
-                AlertState()
+                list(AlertState())
             ),
         ),
         AlertFilterArguments.ACTOR: ArgConfig(
