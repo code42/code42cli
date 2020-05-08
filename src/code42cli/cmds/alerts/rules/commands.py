@@ -6,6 +6,7 @@ from code42cli.cmds.alerts.rules.user_rule import (
     get_rules,
     add_bulk_users,
     remove_bulk_users,
+    show_rules,
 )
 
 
@@ -125,10 +126,18 @@ class AlertRulesCommands(object):
                 arg_customizer=_customize_list_arguments
             )
 
+        show = Command(
+            u"show",
+            u"Fetch configured alert-rules against the rule-id",
+            u"{} {}".format(usage_prefix, u"show --rule-id"),
+            handler=show_rules,
+            arg_customizer=_customize_list_arguments
+        )
+
         bulk = Command(
             u"bulk",
             u"Tools for executing bulk commands.",
             subcommand_loader=BulkCommand.bulk_command,
         )
 
-        return [add, remove, list_rules, bulk]
+        return [add, remove, list_rules, show, bulk]
