@@ -83,6 +83,7 @@ def _get_user_error_logger():
 class RedStderrHandler(logging.StreamHandler):
     """Logging handler for logging error messages to stderr using red scary text prefixed by the 
     word `ERROR`. For logging info to stderr, it will not add the scary red text."""
+
     def __init__(self):
         super(RedStderrHandler, self).__init__(sys.stderr)
 
