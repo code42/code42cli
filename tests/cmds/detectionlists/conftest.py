@@ -23,6 +23,17 @@ def sdk_without_user(sdk):
 def bad_request_for_user_already_added(mocker):
     resp = mocker.MagicMock(spec=Response)
     resp.text = "User already on list"
+    return _create_bad_request_mock(resp)
+
+
+@pytest.fixture
+def bad_request_for_other_reasons(mocker):
+    resp = mocker.MagicMock(spec=Response)
+    resp.text = "Some other, non-supported reason for a bad request"
+    return _create_bad_request_mock(resp)
+
+
+def _create_bad_request_mock(resp):
     base_err = HTTPError()
     base_err.response = resp
     return Py42BadRequestError(base_err)

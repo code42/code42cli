@@ -10,6 +10,8 @@ from code42cli.cmds.detectionlists.high_risk_employee import (
 )
 from .conftest import TEST_ID
 
+from py42.exceptions import Py42BadRequestError
+
 
 _EMPLOYEE = "risky employee"
 
@@ -59,7 +61,7 @@ def test_add_high_risk_employee_when_user_does_not_exist_prints_error(
             assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text
 
 
-def test_add_departing_employee_when_user_already_added_prints_error(
+def test_add_high_risk_employee_when_user_already_added_prints_error(
     sdk_with_user, profile, bad_request_for_user_already_added, caplog
 ):
     sdk_with_user.detectionlists.high_risk_employee.add.side_effect = (
@@ -70,6 +72,16 @@ def test_add_departing_employee_when_user_already_added_prints_error(
         assert _EMPLOYEE in caplog.text
         assert "already on the" in caplog.text
         assert "high-risk-employee" in caplog.text
+
+
+def test_add_high_risk_employee_when_bad_request_but_not_user_already_added_raises_original(
+    sdk_with_user, profile, bad_request_for_other_reasons, caplog
+):
+    sdk_with_user.detectionlists.high_risk_employee.add.side_effect = (
+        bad_request_for_other_reasons
+    )
+    with pytest.raises(Py42BadRequestError):
+        add_high_risk_employee(sdk_with_user, profile, _EMPLOYEE)
 
 
 def test_remove_high_risk_employee_calls_remove(sdk_with_user, profile):
