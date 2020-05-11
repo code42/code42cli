@@ -74,12 +74,10 @@ def test_add_high_risk_employee_when_user_already_added_prints_error(
         assert "high-risk-employee" in caplog.text
 
 
-def test_add_high_risk_employee_when_bad_request_but_not_user_already_added_raises_original(
+def test_add_high_risk_employee_when_bad_request_but_not_user_already_added_raises_Py42BadRequestError(
     sdk_with_user, profile, bad_request_for_other_reasons, caplog
 ):
-    sdk_with_user.detectionlists.high_risk_employee.add.side_effect = (
-        bad_request_for_other_reasons
-    )
+    sdk_with_user.detectionlists.high_risk_employee.add.side_effect = bad_request_for_other_reasons
     with pytest.raises(Py42BadRequestError):
         add_high_risk_employee(sdk_with_user, profile, _EMPLOYEE)
 
