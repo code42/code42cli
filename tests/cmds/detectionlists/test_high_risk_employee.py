@@ -1,7 +1,7 @@
 import pytest
 import logging
 
-from code42cli.cmds.detectionlists import UserDoesNotExistError
+from code42cli.cmds.detectionlists import UserDoesNotExistError, UserAlreadyAddedError
 from code42cli.cmds.detectionlists.high_risk_employee import (
     add_high_risk_employee,
     remove_high_risk_employee,
@@ -61,17 +61,18 @@ def test_add_high_risk_employee_when_user_does_not_exist_prints_error(
             assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text
 
 
-def test_add_high_risk_employee_when_user_already_added_prints_error(
+def test_add_high_risk_employee_when_user_already_added_raises_UserAlreadyAddedError_with_expected_message(
     sdk_with_user, profile, bad_request_for_user_already_added, caplog
 ):
     sdk_with_user.detectionlists.high_risk_employee.add.side_effect = (
         bad_request_for_user_already_added
     )
-    add_high_risk_employee(sdk_with_user, profile, _EMPLOYEE)
-    with caplog.at_level(logging.ERROR):
-        assert _EMPLOYEE in caplog.text
-        assert "already on the" in caplog.text
-        assert "high-risk-employee" in caplog.text
+    with pytest.raises(UserAlreadyAddedError):
+        add_high_risk_employee(sdk_with_user, profile, _EMPLOYEE)
+        with caplog.at_level(logging.ERROR):
+            assert _EMPLOYEE in caplog.text
+            assert "already on the" in caplog.text
+            assert "high-risk-employee" in caplog.text
 
 
 def test_add_high_risk_employee_when_bad_request_but_not_user_already_added_raises_Py42BadRequestError(

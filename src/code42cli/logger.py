@@ -83,6 +83,7 @@ def _get_user_error_logger():
 class RedStderrHandler(logging.StreamHandler):
     """Logging handler for logging error messages to stderr using red scary text prefixed by the 
     word `ERROR`. For logging info to stderr, it will not add the scary red text."""
+
     def __init__(self):
         super(RedStderrHandler, self).__init__(sys.stderr)
 
@@ -152,6 +153,11 @@ class CliLogger(object):
 
     def print_bold(self, message):
         self._info_logger.info(u"\033[1m{}\033[0m".format(message))
+        
+    def print_error(self, message):
+        """Only should be used to prevent double-logging to the error log file. All errors should 
+        be logged to the error log file."""
+        self._info_logger.error(_get_red_error_text(message))
 
     def print_and_log_error(self, message):
         """Logs red error text to stderr and non-color messages to the log file."""
