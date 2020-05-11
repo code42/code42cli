@@ -88,11 +88,10 @@ class RedStderrHandler(logging.StreamHandler):
 
     def emit(self, record):
         if record.levelno == logging.ERROR:
-            record_copy = copy.copy(record)
-            record_copy.msg = _get_red_error_text(record.msg)
-            super(RedStderrHandler, self).emit(record_copy)
-        else:
-            super(RedStderrHandler, self).emit(record)
+            message = _get_red_error_text(record.msg)
+            record = copy.copy(record)
+            record.msg = message
+        super(RedStderrHandler, self).emit(record)
 
 
 def _get_interactive_user_error_logger():
