@@ -1,6 +1,7 @@
 import logging, sys, traceback
 from logging.handlers import RotatingFileHandler
 from threading import Lock
+import copy
 
 from code42cli.compat import str
 from code42cli.util import get_user_project_path, is_interactive
@@ -79,6 +80,20 @@ def _get_user_error_logger():
         return _get_error_file_logger()
 
 
+class RedStderrHandler(logging.StreamHandler):
+    """Logging handler for logging error messages to stderr using red scary text prefixed by the 
+    word `ERROR`. For logging info to stderr, it will not add the scary red text."""
+    def __init__(self):
+        super(RedStderrHandler, self).__init__(sys.stderr)
+
+    def emit(self, record):
+        if record.levelno == logging.ERROR:
+            message = _get_red_error_text(record.msg)
+            record = copy.copy(record)
+            record.msg = message
+        super(RedStderrHandler, self).emit(record)
+
+
 def _get_interactive_user_error_logger():
     """This logger has two handlers, one for stderr and one for the error log file."""
     logger = logging.getLogger(u"code42_stderr_main")
@@ -87,7 +102,7 @@ def _get_interactive_user_error_logger():
 
     with logger_deps_lock:
         if not logger_has_handlers(logger):
-            stderr_handler = logging.StreamHandler(sys.stderr)
+            stderr_handler = RedStderrHandler()
             stderr_formatter = _get_standard_formatter()
             stderr_handler.setFormatter(stderr_formatter)
 
@@ -98,7 +113,7 @@ def _get_interactive_user_error_logger():
             add_handler_to_logger(logger, stderr_handler, stderr_formatter)
             add_handler_to_logger(logger, file_handler, file_formatter)
 
-            logger.setLevel(logging.ERROR)
+            logger.setLevel(logging.INFO)
             return logger
     return logger
 
@@ -139,14 +154,12 @@ class CliLogger(object):
         self._info_logger.info(u"\033[1m{}\033[0m".format(message))
 
     def print_and_log_error(self, message):
-        """For not interrupting stdout output. Excludes red text and 'ERROR: ' from `error()`.
-        """
-        """Logs red text to stderr and a log file."""
-        self._user_error_logger.error(_get_red_error_text(message))
+        """Logs red error text to stderr and non-color messages to the log file."""
+        self._user_error_logger.error(message)
 
     def print_and_log_info(self, message):
-        """Logs red text to stderr and a log file."""
-        self._user_error_logger.error(message)
+        """Prints to stderr and the log file."""
+        self._user_error_logger.info(message)
 
     def log_error(self, err):
         if err:
@@ -171,7 +184,7 @@ class CliLogger(object):
         prefix = (
             u"Exception occurred."
             if not invocation_str
-            else "Exception occurred from input: '{}'.".format(invocation_str)
+            else u"Exception occurred from input: '{}'.".format(invocation_str)
         )
         message = u"{}. See error below.".format(prefix)
         self.log_error(message)

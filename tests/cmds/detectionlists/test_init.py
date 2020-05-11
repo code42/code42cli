@@ -36,7 +36,7 @@ def test_get_user_id_when_user_does_not_exist_logs_error(sdk_without_user, caplo
         try:
             get_user_id(sdk_without_user, "risky employee")
         except UserDoesNotExistError:
-            assert "ERROR: User 'risky employee' does not exist." in caplog.text
+            assert "User 'risky employee' does not exist." in caplog.text
 
 
 def test_update_user_adds_cloud_alias(sdk_with_user, profile):

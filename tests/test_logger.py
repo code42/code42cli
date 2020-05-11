@@ -1,10 +1,12 @@
 import logging
+from logging.handlers import RotatingFileHandler
 from requests import Request
 
 from code42cli.logger import (
     add_handler_to_logger,
     logger_has_handlers,
     get_view_exceptions_location_message,
+    RedStderrHandler,
     CliLogger,
 )
 from code42cli.util import get_user_project_path
@@ -39,9 +41,41 @@ def test_get_view_exceptions_location_message_returns_expected_message():
     assert actual == expected
 
 
+class TestRedStderrHandler(object):
+    def test_emit_when_error_adds_red_text(self, mocker, caplog):
+        handler = RedStderrHandler()
+        record = mocker.MagicMock(spec=logging.LogRecord)
+        record.msg = "TEST"
+        record.levelno = logging.ERROR
+
+        logger = mocker.patch("logging.StreamHandler.emit")
+        handler.emit(record)
+        actual = logger.call_args[0][0].msg
+        assert actual == "\x1b[91mERROR: TEST\x1b[0m"
+
+    def test_emit_when_info_does_not_alter(self, mocker, caplog):
+        handler = RedStderrHandler()
+        record = mocker.MagicMock(spec=logging.LogRecord)
+        record.msg = "TEST"
+        record.levelno = logging.INFO
+
+        logger = mocker.patch("logging.StreamHandler.emit")
+        handler.emit(record)
+        actual = logger.call_args[0][0].msg
+        assert actual == "TEST"
+
+
 class TestCliLogger(object):
 
     _logger = CliLogger()
+
+    def test_init_creates_user_error_logger_with_expected_handlers(self, mocker):
+        is_interactive = mocker.patch("code42cli.logger.is_interactive")
+        is_interactive.return_value = True
+        logger = CliLogger()
+        handler_types = [type(h) for h in logger._user_error_logger.handlers]
+        assert RedStderrHandler in handler_types
+        assert RotatingFileHandler in handler_types
 
     def test_print_info_logs_expected_text_at_expected_level(self, caplog):
         with caplog.at_level(logging.INFO):
@@ -59,7 +93,7 @@ class TestCliLogger(object):
             assert "TEST" in caplog.text
 
     def test_print_and_log_info_logs_expected_text_at_expected_level(self, caplog):
-        with caplog.at_level(logging.ERROR):
+        with caplog.at_level(logging.INFO):
             self._logger.print_and_log_info("TEST")
             assert "TEST" in caplog.text
 
