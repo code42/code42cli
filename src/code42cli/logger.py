@@ -1,6 +1,7 @@
 import logging, sys, traceback
 from logging.handlers import RotatingFileHandler
 from threading import Lock
+import copy
 
 from code42cli.compat import str
 from code42cli.util import get_user_project_path, is_interactive
@@ -85,8 +86,9 @@ class RedStderrHandler(logging.StreamHandler):
 
     def emit(self, record):
         # Mostly copied code from `logging.StreamHandler`
-        record.msg = _get_red_error_text(self.format(record.msg))
-        super(RedStderrHandler, self).emit(record)        
+        record_copy = copy.copy(record)
+        record_copy.msg = _get_red_error_text(record.msg)
+        super(RedStderrHandler, self).emit(record_copy)
 
 
 def _get_interactive_user_error_logger():
