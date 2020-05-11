@@ -1,6 +1,7 @@
 import logging, sys, traceback
 from logging.handlers import RotatingFileHandler
 from threading import Lock
+import copy
 
 from code42cli.compat import str
 from code42cli.util import get_user_project_path, is_interactive
@@ -79,6 +80,22 @@ def _get_user_error_logger():
         return _get_error_file_logger()
 
 
+class RedStderrHandler(logging.StreamHandler):
+    def __init__(self):
+        super(RedStderrHandler, self).__init__(sys.stderr)
+
+    def emit(self, record):
+        try:
+            msg = _get_red_error_text(self.format(record))
+            stream = self.stream
+            stream.write(msg + self.terminator)
+            self.flush()
+        except RecursionError:  # See issue 36272
+            raise
+        except Exception:
+            self.handleError(record)
+
+
 def _get_interactive_user_error_logger():
     """This logger has two handlers, one for stderr and one for the error log file."""
     logger = logging.getLogger(u"code42_stderr_main")
@@ -87,7 +104,7 @@ def _get_interactive_user_error_logger():
 
     with logger_deps_lock:
         if not logger_has_handlers(logger):
-            stderr_handler = logging.StreamHandler(sys.stderr)
+            stderr_handler = RedStderrHandler()
             stderr_formatter = _get_standard_formatter()
             stderr_handler.setFormatter(stderr_formatter)
 
@@ -141,8 +158,7 @@ class CliLogger(object):
     def print_and_log_error(self, message):
         """For not interrupting stdout output. Excludes red text and 'ERROR: ' from `error()`.
         """
-        """Logs red text to stderr and a log file."""
-        self._user_error_logger.error(_get_red_error_text(message))
+        self._user_error_logger.error(message)
 
     def print_and_log_info(self, message):
         """Logs red text to stderr and a log file."""
