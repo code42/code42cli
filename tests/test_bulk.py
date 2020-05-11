@@ -218,7 +218,7 @@ class TestBulkProcessor(object):
             processor.run()
             assert get_view_exceptions_location_message() not in caplog.text
 
-    def test_run_when_row_is_endline_does_not_process_row(self, mock_open, caplog):
+    def test_run_when_row_is_endline_does_not_process_row(self, mock_open):
         processed_rows = []
 
         def func_for_bulk(test):
@@ -229,9 +229,25 @@ class TestBulkProcessor(object):
                 return ["row1", "row2", "\n"]
 
         processor = BulkProcessor("some/path", func_for_bulk, MockRowReader())
-        with caplog.at_level(logging.INFO):
-            processor.run()
+        processor.run()
 
         assert "row1" in processed_rows
         assert "row2" in processed_rows
         assert "row3" not in processed_rows
+
+    def test_run_when_reader_returns_dict_rows_containing_empty_strs_converts_them_to_none(
+        self, mock_open
+    ):
+        processed_rows = []
+
+        def func_for_bulk(test1, test2):
+            processed_rows.append((test1, test2))
+
+        class MockDictReader(object):
+            def __call__(self, *args, **kwargs):
+                return [{"test1": "", "test2": "foo"}, {"test1": "bar", "test2": u""}]
+
+        processor = BulkProcessor("some/path", func_for_bulk, MockDictReader())
+        processor.run()
+        assert (None, "foo") in processed_rows
+        assert ("bar", None) in processed_rows
