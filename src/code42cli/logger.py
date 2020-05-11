@@ -85,9 +85,12 @@ class RedStderrHandler(logging.StreamHandler):
         super(RedStderrHandler, self).__init__(sys.stderr)
 
     def emit(self, record):
-        record_copy = copy.copy(record)
-        record_copy.msg = _get_red_error_text(record.msg)
-        super(RedStderrHandler, self).emit(record_copy)
+        if record.levelno == logging.ERROR:
+            record_copy = copy.copy(record)
+            record_copy.msg = _get_red_error_text(record.msg)
+            super(RedStderrHandler, self).emit(record_copy)
+        else:
+            super(RedStderrHandler, self).emit(record)
 
 
 def _get_interactive_user_error_logger():
@@ -109,7 +112,7 @@ def _get_interactive_user_error_logger():
             add_handler_to_logger(logger, stderr_handler, stderr_formatter)
             add_handler_to_logger(logger, file_handler, file_formatter)
 
-            logger.setLevel(logging.ERROR)
+            logger.setLevel(logging.INFO)
             return logger
     return logger
 
@@ -150,13 +153,12 @@ class CliLogger(object):
         self._info_logger.info(u"\033[1m{}\033[0m".format(message))
 
     def print_and_log_error(self, message):
-        """For not interrupting stdout output. Excludes red text and 'ERROR: ' from `error()`.
-        """
+        """Logs red error text to stderr and non-color messages to the log file."""
         self._user_error_logger.error(message)
 
     def print_and_log_info(self, message):
-        """Logs red text to stderr and a log file."""
-        self._user_error_logger.error(message)
+        """Prints to stderr and the log file."""
+        self._user_error_logger.info(message)
 
     def log_error(self, err):
         if err:
