@@ -61,10 +61,10 @@ def _load_bulk_generate_template_description(argument_collection):
     cmd_type.set_choices(BulkCommandType())
 
 
-class BulkCommand(object):
+class AlertRulesBulkCommands(object):
 
     @staticmethod
-    def bulk_command():
+    def load_commands():
         usage_prefix = u"code42 alert-rules bulk"
 
         generate_template_cmd = Command(
@@ -137,7 +137,7 @@ class AlertRulesCommands(object):
         bulk = Command(
             u"bulk",
             u"Tools for executing bulk commands.",
-            subcommand_loader=BulkCommand.bulk_command,
+            subcommand_loader=AlertRulesBulkCommands.load_commands,
         )
 
         return [add, remove, list_rules, show, bulk]

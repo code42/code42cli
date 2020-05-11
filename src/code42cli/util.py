@@ -3,7 +3,7 @@ import sys
 from os import makedirs, path
 
 from code42cli.compat import open
-PADDING_SIZE = 3
+_PADDING_SIZE = 3
 
 
 def get_input(prompt):
@@ -51,7 +51,7 @@ def get_url_parts(url_str):
     return parts[0], port
 
 
-def process_rules_for_formatting(record, header):
+def find_format_width(record, header):
     """Fetches needed keys/items to be displayed based on header keys.
     
     Finds the largest string against each column so as to decided the padding size for the column.
@@ -84,5 +84,5 @@ def format_to_table(rows, column_size):
     """
     for row in rows:
         for key in row.keys():
-            print(repr(row[key]).ljust(column_size[key] + PADDING_SIZE), end=" ")
+            print(repr(row[key]).ljust(column_size[key] + _PADDING_SIZE), end=" ")
         print("")

@@ -1,10 +1,13 @@
-from code42cli.util import format_to_table, process_rules_for_formatting
-from code42cli.bulk import run_bulk_process, CSVReader
-from code42cli.cmds.detectionlists import get_user_id
 from py42.util import format_json
 
+from code42cli.util import format_to_table, find_format_width
+from code42cli.bulk import run_bulk_process, CSVReader
+from code42cli.logger import get_main_cli_logger
+from code42cli.cmds.detectionlists import get_user_id
+from code42cli.cmds.alerts.rules.enums import AlertRuleTypes
 
-HEADER_KEYS_MAP = {
+
+_HEADER_KEYS_MAP = {
     u"observerRuleId": u"RuleId", 
     u"name": u"Name", 
     u"severity": u"Severity", 
@@ -44,7 +47,7 @@ def _get_rules_metadata(sdk, rule_id):
 
 def get_rules(sdk, profile, rule_id=None):
     selected_rules = _get_rules_metadata(sdk, rule_id)
-    rows, column_size = process_rules_for_formatting(selected_rules, HEADER_KEYS_MAP)
+    rows, column_size = find_format_width(selected_rules, _HEADER_KEYS_MAP)
     format_to_table(rows, column_size)
 
 
@@ -69,11 +72,12 @@ def show_rules(sdk, profile, rule_id):
     rule_detail = None
     if len(selected_rule):
         rule_type = selected_rule[0][u"type"]
-        if rule_type == 'FED_ENDPOINT_EXFILTRATION':
+        if rule_type == AlertRuleTypes.EXFILTRATION:
             rule_detail = sdk.alerts.rules.exfiltration.get(rule_id)
-        elif rule_type == 'FED_CLOUD_SHARE_PERMISSIONS':
+        elif rule_type == AlertRuleTypes.CLOUD_SHARE:
             rule_detail = sdk.alerts.rules.cloudshare.get(rule_id)
-        elif rule_type == 'FED_FILE_TYPE_MISMATCH':
+        elif rule_type == AlertRuleTypes.FILE_TYPE_MISMATCH:
             rule_detail = sdk.alerts.rules.filetypemismatch.get(rule_id)
     if rule_detail:
-        print(format_json(rule_detail.text))
+        logger = get_main_cli_logger()
+        logger.print_info(format_json(rule_detail.text))

@@ -47,19 +47,16 @@ def test_get_rules_gets_alert_rules(alert_rules_sdk, profile):
 def test_show_rules_calls_correct_rule_property(alert_rules_sdk, profile):
     alert_rules_sdk.alerts.rules.get_all.return_value = TEST_GET_ALL_RESPONSE_EXFILTRATION
     show_rules(alert_rules_sdk, profile, TEST_RULE_ID)
-    # assert alert_rules_sdk.alerts.rules.exfiltration.get.assert_called_once_with(TEST_RULE_ID)
-    assert alert_rules_sdk.alerts.rules.exfiltration.get.call_count == 1
+    alert_rules_sdk.alerts.rules.exfiltration.get.assert_called_once_with(TEST_RULE_ID)
 
 
 def test_show_rules_calls_correct_rule_property_cloud_share(alert_rules_sdk, profile):
     alert_rules_sdk.alerts.rules.get_all.return_value = TEST_GET_ALL_RESPONSE_CLOUD_SHARE
     show_rules(alert_rules_sdk, profile, TEST_RULE_ID)
-    # assert alert_rules_sdk.alerts.rules.cloudshare.get.assert_called_once_with(TEST_RULE_ID)
-    assert alert_rules_sdk.alerts.rules.cloudshare.get.call_count == 1
+    alert_rules_sdk.alerts.rules.cloudshare.get.assert_called_once_with(TEST_RULE_ID)
 
 
 def test_show_rules_calls_correct_rule_property_file_type_mismatch(alert_rules_sdk, profile):
     alert_rules_sdk.alerts.rules.get_all.return_value = TEST_GET_ALL_RESPONSE_FILE_TYPE_MISMATCH
     show_rules(alert_rules_sdk, profile, TEST_RULE_ID)
-    # assert alert_rules_sdk.alerts.rules.filetypemismatch.get.assert_called_once_with(TEST_RULE_ID)
-    assert alert_rules_sdk.alerts.rules.filetypemismatch.get.call_count == 1
+    alert_rules_sdk.alerts.rules.filetypemismatch.get.assert_called_once_with(TEST_RULE_ID)
