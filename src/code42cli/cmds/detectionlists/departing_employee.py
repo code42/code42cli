@@ -8,7 +8,6 @@ from code42cli.cmds.detectionlists import (
 )
 from code42cli.cmds.detectionlists.enums import DetectionLists
 
-
 from py42.exceptions import Py42BadRequestError
 
 

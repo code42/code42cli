@@ -164,7 +164,6 @@ class DetectionList(object):
     def _add_employee(self, sdk, profile, **kwargs):
         self.handlers.add_employee(sdk, profile, **kwargs)
 
-
     def _remove_employee(self, sdk, profile, *args, **kwargs):
         self.handlers.remove_employee(sdk, profile, *args, **kwargs)
 
