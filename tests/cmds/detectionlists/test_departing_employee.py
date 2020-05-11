@@ -49,18 +49,14 @@ def test_add_departing_employee_when_user_does_not_exist_prints_error(
             assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text
 
 
-def test_add_departing_employee_when_user_already_added_raises_UserAlreadyAddedError_with_expected_message(
-    sdk_with_user, profile, bad_request_for_user_already_added, caplog
+def test_add_departing_employee_when_user_already_added_raises_UserAlreadyAddedError(
+    sdk_with_user, profile, bad_request_for_user_already_added
 ):
     sdk_with_user.detectionlists.departing_employee.add.side_effect = (
         bad_request_for_user_already_added
     )
     with pytest.raises(UserAlreadyAddedError):
-        with caplog.at_level(logging.ERROR):
-            add_departing_employee(sdk_with_user, profile, _EMPLOYEE)
-            assert _EMPLOYEE in caplog.text
-            assert "already on the" in caplog.text
-            assert "departing-employee" in caplog.text
+        add_departing_employee(sdk_with_user, profile, _EMPLOYEE)
 
 
 def test_add_departing_employee_when_bad_request_but_not_user_already_added_raises_Py42BadRequestError(

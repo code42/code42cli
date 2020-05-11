@@ -17,9 +17,7 @@ class UserAlreadyAddedError(Exception):
 
 def handle_bad_request_during_add(bad_request_err, username_tried_adding, list_name):
     if _error_is_user_already_added(bad_request_err.response.text):
-        new_err = UserAlreadyAddedError(username_tried_adding, list_name)
-        get_main_cli_logger().print_error(new_err)
-        raise new_err
+        raise UserAlreadyAddedError(username_tried_adding, list_name)
     return False
 
 
