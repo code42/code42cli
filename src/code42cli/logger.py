@@ -85,7 +85,6 @@ class RedStderrHandler(logging.StreamHandler):
         super(RedStderrHandler, self).__init__(sys.stderr)
 
     def emit(self, record):
-        # Mostly copied code from `logging.StreamHandler`
         record_copy = copy.copy(record)
         record_copy.msg = _get_red_error_text(record.msg)
         super(RedStderrHandler, self).emit(record_copy)
