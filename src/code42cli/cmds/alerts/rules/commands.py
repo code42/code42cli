@@ -48,9 +48,9 @@ def _generate_template_file(cmd, path=None):
     """
     handler = None
     if cmd == BulkCommandType.ADD:
-        handler = add_bulk_users
+        handler = add_user
     elif cmd == BulkCommandType.REMOVE:
-        handler = remove_bulk_users
+        handler = remove_user
 
     generate_template(handler, path)
 
