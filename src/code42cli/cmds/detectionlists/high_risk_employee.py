@@ -5,9 +5,13 @@ from code42cli.cmds.detectionlists import (
     load_username_description,
     get_user_id,
     update_user,
+    handle_bad_request_during_add,
 )
+from code42cli.cmds.detectionlists.enums import DetectionLists
 from code42cli.cmds.detectionlists.enums import DetectionListUserKeys
 from code42cli.commands import Command
+
+from py42.exceptions import Py42BadRequestError
 
 
 def load_subcommands():
@@ -65,8 +69,13 @@ def add_high_risk_employee(sdk, profile, username, cloud_alias=None, risk_tag=No
     """
     risk_tag = _handle_list_args(risk_tag)
     user_id = get_user_id(sdk, username)
-    sdk.detectionlists.high_risk_employee.add(user_id)
-    update_user(sdk, user_id, cloud_alias, risk_tag, notes)
+    try:
+        sdk.detectionlists.high_risk_employee.add(user_id)
+    except Py42BadRequestError as err:
+        if not handle_bad_request_during_add(err, username, DetectionLists.HIGH_RISK_EMPLOYEE):
+            raise
+    finally:
+        update_user(sdk, user_id, cloud_alias, risk_tag, notes)
 
 
 def remove_high_risk_employee(sdk, profile, username):

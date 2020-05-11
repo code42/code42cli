@@ -9,6 +9,25 @@ from code42cli.cmds.detectionlists.enums import (
 )
 
 
+class UserAlreadyAddedError(Exception):
+    def __init__(self, username, list_name):
+        msg = u"'{}' is already on the {} list.".format(username, list_name)
+        super(UserAlreadyAddedError, self).__init__(msg)
+
+
+def handle_bad_request_during_add(bad_request_err, username_tried_adding, list_name):
+    if _error_is_user_already_added(bad_request_err.response.text):
+        logger = get_main_cli_logger()
+        new_err = UserAlreadyAddedError(username_tried_adding, list_name)
+        logger.print_and_log_error(new_err)
+        return True
+    return False
+
+
+def _error_is_user_already_added(bad_request_error_text):
+    return u"User already on list" in bad_request_error_text
+
+
 class UserDoesNotExistError(Exception):
     """An error to represent a username that is not in our system. The CLI shows this error when 
     the user tries to add or remove a user that does not exist. This error is not shown during 
@@ -144,6 +163,7 @@ class DetectionList(object):
 
     def _add_employee(self, sdk, profile, **kwargs):
         self.handlers.add_employee(sdk, profile, **kwargs)
+
 
     def _remove_employee(self, sdk, profile, *args, **kwargs):
         self.handlers.remove_employee(sdk, profile, *args, **kwargs)
