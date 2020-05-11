@@ -1,7 +1,6 @@
 import logging, sys, traceback
 from logging.handlers import RotatingFileHandler
 from threading import Lock
-import copy
 
 from code42cli.compat import str
 from code42cli.util import get_user_project_path, is_interactive
@@ -85,15 +84,9 @@ class RedStderrHandler(logging.StreamHandler):
         super(RedStderrHandler, self).__init__(sys.stderr)
 
     def emit(self, record):
-        try:
-            msg = _get_red_error_text(self.format(record))
-            stream = self.stream
-            stream.write(msg + self.terminator)
-            self.flush()
-        except RecursionError:  # See issue 36272
-            raise
-        except Exception:
-            self.handleError(record)
+        # Mostly copied code from `logging.StreamHandler`
+        record.msg = _get_red_error_text(self.format(record.msg))
+        super(RedStderrHandler, self).emit(record)        
 
 
 def _get_interactive_user_error_logger():
