@@ -120,16 +120,15 @@ class AlertRulesCommands(object):
 
         list_rules = Command(
                 u"list",
-                u"Fetch existing alert rules, optionally fetch by by rule-id",
-                u"{} {}".format(usage_prefix, u"list --rule-id [UX]"),
+                u"Fetch existing alert rules",
+                u"{} {}".format(usage_prefix, u"list"),
                 handler=get_rules,
-                arg_customizer=_customize_list_arguments
             )
 
         show = Command(
             u"show",
             u"Fetch configured alert-rules against the rule-id",
-            u"{} {}".format(usage_prefix, u"show --rule-id"),
+            u"{} {}".format(usage_prefix, u"show <rule-id>"),
             handler=show_rules,
             arg_customizer=_customize_list_arguments
         )

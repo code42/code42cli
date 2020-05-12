@@ -54,28 +54,30 @@ def get_url_parts(url_str):
 def find_format_width(record, header):
     """Fetches needed keys/items to be displayed based on header keys.
     
-    Finds the largest string against each column so as to decided the padding size for the column.
+    Finds the largest string against each column so as to decide the padding size for the column.
     
     Args:
         record (list of dict), data to be formatted.  
-        header (dict), key-value where key is the json key and value is the corresponding
-         column name to be displayed on the cli. 
+        header (dict), key-value where keys should map to keys of record dict and
+          value is the corresponding column name to be displayed on the cli.
     
     Returns:
         tuple (list of dict, dict), i.e Filtered records, padding size of columns.
     """
-    column_size = {key: len(column_name) for key, column_name in header.items()}
     rows = []
     rows.append(header)
+
+    # Set default max width items to column names
+    max_width_item = {key: value for key, value in header.items()}
     for record_row in record:
         row = {}
-        for key in header.keys():
-            row[key] = record_row[key]
-            if type(record_row[key]) is bool:
-                continue
-            if column_size[key] < len(record_row[key]):
-                column_size[key] = len(record_row[key])
+        for header_key in header.keys():
+            row[header_key] = record_row[header_key]
+            max_width_item[header_key] = max(
+                max_width_item[header_key], str(record_row[header_key]), key=len
+            )
         rows.append(row)
+    column_size = {key: len(value) for key, value in max_width_item.items()}
     return rows, column_size
 
 

@@ -30,23 +30,16 @@ def remove_user(sdk, profile, rule_id, user_name=None):
         sdk.alerts.rules.remove_all_users(rule_id)
 
 
-def _get_rules_metadata(sdk, rule_id):
+def _get_rules_metadata(sdk, rule_id=None):
     rules_generator = sdk.alerts.rules.get_all()
-    selected_rules = []
+    selected_rules = [rule for rules in rules_generator for rule in rules[u"ruleMetadata"]]
     if rule_id:
-        for rules in rules_generator:
-            for rule in rules[u"ruleMetadata"]:
-                if rule[u"observerRuleId"] == rule_id:
-                    selected_rules.append(rule)
-    else:
-        for rules in rules_generator:
-            for rule in rules[u"ruleMetadata"]:
-                selected_rules.append(rule)
+        selected_rules = [rule for rule in selected_rules if rule[u"observerRuleId"] == rule_id]
     return selected_rules
 
 
-def get_rules(sdk, profile, rule_id=None):
-    selected_rules = _get_rules_metadata(sdk, rule_id)
+def get_rules(sdk, profile):
+    selected_rules = _get_rules_metadata(sdk)
     rows, column_size = find_format_width(selected_rules, _HEADER_KEYS_MAP)
     format_to_table(rows, column_size)
 
