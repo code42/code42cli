@@ -68,7 +68,7 @@ def find_format_width(record, header):
     rows.append(header)
 
     # Set default max width items to column names
-    max_width_item = {key: value for key, value in header.items()}
+    max_width_item = dict(header.items())
     for record_row in record:
         row = {}
         for header_key in header.keys():
