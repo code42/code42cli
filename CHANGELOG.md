@@ -12,6 +12,18 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
+- `code42 alert-rules` commands:
+    - `add-user` takes a rule id and username.
+    - `remove-user` takes a rule id and optionally username.
+    - `list` doesn't take any arguments.
+    - `show` takes a rule id.
+    - `bulk` with subcommands:
+        - `add`: that takes a csv file with rule ids and usernames.
+        - `generate-template`: that creates the file template. And parameters:
+            - `cmd`: with options `add` and `remove`.
+            - `path`
+        - `remove`: that takes a csv file with rule ids and usernames.
+
 - Success messages for `profile delete` and `profile update`.
 - Additional information in the error log file:
     - The full command path for the command that errored.
