@@ -12,6 +12,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
+- Ability to search/poll for alerts with checkpointing and sending to console, a file, or a server in json format.
 - Success messages for `profile delete` and `profile update`.
 - Additional information in the error log file:
     - The full command path for the command that errored.
