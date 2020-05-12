@@ -6,6 +6,7 @@ from py42.sdk.queries.query_filter import QueryFilterTimestampField
 import code42cli.errors as errors
 from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp, verify_timestamp_order
 from code42cli.logger import get_main_cli_logger
+from code42cli.cmds.alerts.util import get_alert_details
 
 logger = get_main_cli_logger()
 
@@ -31,7 +32,7 @@ def verify_begin_date_requirements(args, cursor_store):
         exit(1)
 
 
-def create_handlers(output_logger, cursor_store, event_key):
+def create_handlers(output_logger, cursor_store, event_key, sdk=None):
     handlers = ExtractionHandlers()
     handlers.TOTAL_EVENTS = 0
 
@@ -52,6 +53,11 @@ def create_handlers(output_logger, cursor_store, event_key):
     def handle_response(response):
         response_dict = json.loads(response.text)
         events = response_dict.get(event_key)
+        if event_key == u"alerts":
+            try:
+                events = get_alert_details(sdk, events)
+            except Exception as ex:
+                handlers.handle_error(ex)
         handlers.TOTAL_EVENTS += len(events)
         for event in events:
             output_logger.info(event)
