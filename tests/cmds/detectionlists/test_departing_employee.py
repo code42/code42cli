@@ -1,12 +1,15 @@
 import pytest
 import logging
 
-from code42cli.cmds.detectionlists import UserDoesNotExistError
+from code42cli.cmds.detectionlists import UserDoesNotExistError, UserAlreadyAddedError
 from code42cli.cmds.detectionlists.departing_employee import (
     add_departing_employee,
     remove_departing_employee,
 )
+
 from .conftest import TEST_ID
+
+from py42.exceptions import Py42BadRequestError
 
 
 _EMPLOYEE = "departing employee"
@@ -44,6 +47,24 @@ def test_add_departing_employee_when_user_does_not_exist_prints_error(
             add_departing_employee(sdk_without_user, profile, _EMPLOYEE)
         except UserDoesNotExistError:
             assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text
+
+
+def test_add_departing_employee_when_user_already_added_raises_UserAlreadyAddedError(
+    sdk_with_user, profile, bad_request_for_user_already_added
+):
+    sdk_with_user.detectionlists.departing_employee.add.side_effect = (
+        bad_request_for_user_already_added
+    )
+    with pytest.raises(UserAlreadyAddedError):
+        add_departing_employee(sdk_with_user, profile, _EMPLOYEE)
+
+
+def test_add_departing_employee_when_bad_request_but_not_user_already_added_raises_Py42BadRequestError(
+    sdk_with_user, profile, bad_request_for_other_reasons, caplog
+):
+    sdk_with_user.detectionlists.departing_employee.add.side_effect = bad_request_for_other_reasons
+    with pytest.raises(Py42BadRequestError):
+        add_departing_employee(sdk_with_user, profile, _EMPLOYEE)
 
 
 def test_remove_departing_employee_calls_remove(sdk_with_user, profile):

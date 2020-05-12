@@ -94,7 +94,10 @@ class BulkProcessor(object):
         # Removes problems from including extra comments. Error messages from out of order args
         # are more indicative this way too.
         row.pop(None, None)
-        self.__worker.do_async(lambda *args, **kwargs: self._row_handler(*args, **kwargs), **row)
+        row_values = {key: val if val != u"" else None for key, val in row.items()}
+        self.__worker.do_async(
+            lambda *args, **kwargs: self._row_handler(*args, **kwargs), **row_values
+        )
 
     def _process_flat_file_row(self, row):
         if row:

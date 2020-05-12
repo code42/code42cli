@@ -4,7 +4,11 @@ from code42cli.cmds.detectionlists import (
     load_user_descriptions,
     get_user_id,
     update_user,
+    handle_bad_request_during_add,
 )
+from code42cli.cmds.detectionlists.enums import DetectionLists
+
+from py42.exceptions import Py42BadRequestError
 
 
 def load_subcommands():
@@ -33,8 +37,13 @@ def add_departing_employee(
         notes: (str): Notes about the employee.
     """
     user_id = get_user_id(sdk, username)
-    sdk.detectionlists.departing_employee.add(user_id, departure_date)
-    update_user(sdk, user_id, cloud_alias, notes=notes)
+
+    try:
+        sdk.detectionlists.departing_employee.add(user_id, departure_date)
+        update_user(sdk, user_id, cloud_alias, notes=notes)
+    except Py42BadRequestError as err:
+        if not handle_bad_request_during_add(err, username, DetectionLists.DEPARTING_EMPLOYEE):
+            raise
 
 
 def remove_departing_employee(sdk, profile, username):
