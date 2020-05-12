@@ -31,7 +31,7 @@ def parse_min_timestamp(begin_date_str, max_days_back=90):
 
     boundary_date = _round_datetime_to_day_start(datetime.utcnow() - timedelta(days=max_days_back))
     if dt < boundary_date:
-        raise DateArgumentException(u"'Begin date' must be within 90 days.")
+        raise DateArgumentException(u"'Begin date' must be within {0} days.".format(max_days_back))
 
     return convert_datetime_to_timestamp(dt)
 
