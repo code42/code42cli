@@ -27,9 +27,9 @@ def bad_request_for_user_already_added(mocker):
 
 
 @pytest.fixture
-def bad_request_for_other_reasons(mocker):
+def generic_bad_request(mocker):
     resp = mocker.MagicMock(spec=Response)
-    resp.text = "Some other, non-supported reason for a bad request"
+    resp.text = "TEST"
     return _create_bad_request_mock(resp)
 
 

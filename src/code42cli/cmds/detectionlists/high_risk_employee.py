@@ -5,17 +5,17 @@ from code42cli.cmds.detectionlists import (
     load_username_description,
     get_user_id,
     update_user,
-    handle_bad_request_during_add,
+    try_handle_user_already_added_error,
+    try_add_risk_tags,
+    try_remove_risk_tags,
 )
-from code42cli.cmds.detectionlists.enums import DetectionLists
-from code42cli.cmds.detectionlists.enums import DetectionListUserKeys
+from code42cli.cmds.detectionlists.enums import DetectionLists, DetectionListUserKeys, RiskTags
 from code42cli.commands import Command
 
 from py42.exceptions import Py42BadRequestError
 
 
 def load_subcommands():
-
     handlers = _create_handlers()
     detection_list = DetectionList.create_high_risk_employee_list(handlers)
     cmd_list = detection_list.load_subcommands()
@@ -47,13 +47,13 @@ def _create_handlers():
 def add_risk_tags(sdk, profile, username, risk_tag):
     risk_tag = _handle_list_args(risk_tag)
     user_id = get_user_id(sdk, username)
-    sdk.detectionlists.add_user_risk_tags(user_id, risk_tag)
+    try_add_risk_tags(sdk, user_id, risk_tag)
 
 
 def remove_risk_tags(sdk, profile, username, risk_tag):
     risk_tag = _handle_list_args(risk_tag)
     user_id = get_user_id(sdk, username)
-    sdk.detectionlists.remove_user_risk_tags(user_id, risk_tag)
+    try_remove_risk_tags(sdk, user_id, risk_tag)
 
 
 def add_high_risk_employee(sdk, profile, username, cloud_alias=None, risk_tag=None, notes=None):
@@ -74,7 +74,8 @@ def add_high_risk_employee(sdk, profile, username, cloud_alias=None, risk_tag=No
         sdk.detectionlists.high_risk_employee.add(user_id)
         update_user(sdk, user_id, cloud_alias, risk_tag, notes)
     except Py42BadRequestError as err:
-        if not handle_bad_request_during_add(err, username, DetectionLists.HIGH_RISK_EMPLOYEE):
+        list_name = DetectionLists.HIGH_RISK_EMPLOYEE
+        if not try_handle_user_already_added_error(err, username, list_name):
             raise
 
 
@@ -93,16 +94,9 @@ def remove_high_risk_employee(sdk, profile, username):
 def _load_risk_tag_description(argument_collection):
     risk_tag = argument_collection.arg_configs[DetectionListUserKeys.RISK_TAG]
     risk_tag.as_multi_val_param()
+    tags = u", ".join(list(RiskTags()))
     risk_tag.set_help(
-        u"Risk tags associated with the employee. "
-        u"Options include "
-        u"[HIGH_IMPACT_EMPLOYEE, "
-        u"ELEVATED_ACCESS_PRIVILEGES, "
-        u"PERFORMANCE_CONCERNS, "
-        u"FLIGHT_RISK, "
-        u"SUSPICIOUS_SYSTEM_ACTIVITY, "
-        u"POOR_SECURITY_PRACTICES, "
-        u"CONTRACT_EMPLOYEE]"
+        u"Risk tags associated with the employee. " u"Options include: " u"[{}]".format(tags)
     )
 
 

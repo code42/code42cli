@@ -60,9 +60,9 @@ def test_add_departing_employee_when_user_already_added_raises_UserAlreadyAddedE
 
 
 def test_add_departing_employee_when_bad_request_but_not_user_already_added_raises_Py42BadRequestError(
-    sdk_with_user, profile, bad_request_for_other_reasons, caplog
+    sdk_with_user, profile, generic_bad_request, caplog
 ):
-    sdk_with_user.detectionlists.departing_employee.add.side_effect = bad_request_for_other_reasons
+    sdk_with_user.detectionlists.departing_employee.add.side_effect = generic_bad_request
     with pytest.raises(Py42BadRequestError):
         add_departing_employee(sdk_with_user, profile, _EMPLOYEE)
 
