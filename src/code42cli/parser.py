@@ -41,7 +41,7 @@ class CommandParser(argparse.ArgumentParser):
 
     def error(self, message):
         # overrides the behavior of when an error occurs when
-        # arguments cant be successfully parsed. CommandInvoker catches this.
+        # arguments can't be successfully parsed. CommandInvoker catches this.
         raise ArgumentParserError(message)
 
     def _load_argparse_config(self, command, command_parser):
