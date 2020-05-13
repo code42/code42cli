@@ -14,7 +14,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - `code42 alert-rules` commands:
     - `add-user` with parameters `--rule-id` and `--username`.
-    - `remove-user` that takes a rule ID  and optionally `--username`.
+    - `remove-user` that takes a rule ID and optionally `--username`.
     - `list`.
     - `show` takes a rule ID.
     - `bulk` with subcommands:
