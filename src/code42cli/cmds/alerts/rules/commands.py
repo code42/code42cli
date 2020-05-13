@@ -15,7 +15,7 @@ def _customize_add_arguments(argument_collection):
     rule_id.set_help(u"Observer ID of the rule to be updated. Required.")
     rule_id.set_required(True)
     username = argument_collection.arg_configs[u"username"]
-    username.set_help(u"The username of the user to add to the alert. Required.")
+    username.set_help(u"The username of the user to add to the alert rule. Required.")
     username.set_required(True)
 
 
