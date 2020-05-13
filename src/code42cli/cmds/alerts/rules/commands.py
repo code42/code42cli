@@ -24,7 +24,7 @@ def _customize_remove_arguments(argument_collection):
     rule_id = argument_collection.arg_configs[u"rule_id"]
     rule_id.set_help(u"Observer rule ID of the rule to be updated.")
     username = argument_collection.arg_configs[u"username"]
-    username.set_help(u"The username of the user to remove from the alert.")
+    username.set_help(u"The username of the user to remove from the alert rule.")
 
 
 def _customize_list_arguments(argument_collection):
