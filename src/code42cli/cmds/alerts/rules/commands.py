@@ -80,7 +80,7 @@ class AlertRulesBulkCommands(object):
             u"add",
             u"Update alert rule criteria to add users and all their aliases. "
             u"CSV file format: rule_id, username",
-            u"{} {}".format(usage_prefix, u"add <filename>"),
+            u"{} add <filename>".format(usage_prefix),
             handler=add_bulk_users,
             arg_customizer=_customize_bulk_arguments,
         )
@@ -89,7 +89,7 @@ class AlertRulesBulkCommands(object):
             u"remove",
             u"Update alert rule criteria to remove users and all their aliases. "
             u"CSV file format: rule_id, username",
-            u"{} {}".format(usage_prefix, u"remove <filename>"),
+            u"{} remove <filename>".format(usage_prefix),
             handler=remove_bulk_users,
             arg_customizer=_customize_bulk_arguments,
         )
@@ -105,7 +105,7 @@ class AlertRulesCommands(object):
         add = Command(
             u"add-user",
             u"Update alert rule to monitor user aliases against the username for the given rule ID.",
-            u"{} {}".format(usage_prefix, u"add-user --rule-id <id>  --username <username>"),
+            u"{} add-user --rule-id <id>  --username <username>".format(usage_prefix),
             handler=add_user,
             arg_customizer=_customize_add_arguments,
         )
@@ -113,7 +113,7 @@ class AlertRulesCommands(object):
         remove = Command(
             u"remove-user",
             u"Update alert rule criteria to remove a user and all their aliases.",
-            u"{} {}".format(usage_prefix, u"remove-user <rule-id> --username <username>"),
+            u"{} remove-user <rule-id> --username <username>".format(usage_prefix),
             handler=remove_user,
             arg_customizer=_customize_remove_arguments,
         )
@@ -121,14 +121,14 @@ class AlertRulesCommands(object):
         list_rules = Command(
             u"list",
             u"Fetch existing alert rules.",
-            u"{} {}".format(usage_prefix, u"list"),
+            u"{} list".format(usage_prefix),
             handler=get_rules,
         )
 
         show = Command(
             u"show",
             u"Fetch configured alert-rules against the rule ID.",
-            u"{} {}".format(usage_prefix, u"show <rule-id>"),
+            u"{} show <rule-id>".format(usage_prefix),
             handler=show_rules,
             arg_customizer=_customize_list_arguments,
         )
