@@ -3,6 +3,7 @@ import sys
 from os import makedirs, path
 
 from code42cli.compat import open
+
 _PADDING_SIZE = 3
 
 

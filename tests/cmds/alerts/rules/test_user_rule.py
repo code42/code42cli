@@ -1,28 +1,23 @@
 import pytest
 
-from code42cli.cmds.alerts.rules.user_rule import (
-    add_user, remove_user, get_rules, show_rules
-)
+from code42cli.cmds.alerts.rules.user_rule import add_user, remove_user, get_rules, show_rules
 
 TEST_RULE_ID = u"rule-id"
 TEST_USER_ID = u"test-user-id"
 TEST_USERNAME = "test@code42.com"
 
-TEST_GET_ALL_RESPONSE_EXFILTRATION = [{u"ruleMetadata": [
-    {u"observerRuleId": TEST_RULE_ID,
-     u"type":u"FED_ENDPOINT_EXFILTRATION"}
-]}]
+TEST_GET_ALL_RESPONSE_EXFILTRATION = [
+    {u"ruleMetadata": [{u"observerRuleId": TEST_RULE_ID, u"type": u"FED_ENDPOINT_EXFILTRATION"}]}
+]
 
-TEST_GET_ALL_RESPONSE_CLOUD_SHARE = [{u"ruleMetadata": [
-    {u"observerRuleId": TEST_RULE_ID,
-     u"type":u"FED_CLOUD_SHARE_PERMISSIONS"}
-]}]
+TEST_GET_ALL_RESPONSE_CLOUD_SHARE = [
+    {u"ruleMetadata": [{u"observerRuleId": TEST_RULE_ID, u"type": u"FED_CLOUD_SHARE_PERMISSIONS"}]}
+]
 
 
-TEST_GET_ALL_RESPONSE_FILE_TYPE_MISMATCH = [{u"ruleMetadata": [
-    {u"observerRuleId": TEST_RULE_ID,
-     u"type":u"FED_FILE_TYPE_MISMATCH"}
-]}]
+TEST_GET_ALL_RESPONSE_FILE_TYPE_MISMATCH = [
+    {u"ruleMetadata": [{u"observerRuleId": TEST_RULE_ID, u"type": u"FED_FILE_TYPE_MISMATCH"}]}
+]
 
 
 def test_add_user_adds_user_list_to_alert_rules(alert_rules_sdk, profile):

@@ -2,7 +2,7 @@ from collections import OrderedDict
 import inspect
 
 
-PROFILE_HELP = u"The name of the Code42 profile use when executing this command."
+PROFILE_HELP = u"The name of the Code42 profile to use when executing this command."
 SDK_ARG_NAME = u"sdk"
 PROFILE_ARG_NAME = u"profile"
 

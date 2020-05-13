@@ -8,10 +8,10 @@ from code42cli.cmds.alerts.rules.enums import AlertRuleTypes
 
 
 _HEADER_KEYS_MAP = {
-    u"observerRuleId": u"RuleId", 
-    u"name": u"Name", 
-    u"severity": u"Severity", 
-    u"type": u"Type", 
+    u"observerRuleId": u"RuleId",
+    u"name": u"Name",
+    u"severity": u"Severity",
+    u"type": u"Type",
     u"ruleSource": u"Source",
     u"isEnabled": u"Enabled",
 }
@@ -46,9 +46,7 @@ def get_rules(sdk, profile):
 
 def add_bulk_users(sdk, profile, file_name):
     run_bulk_process(
-        file_name, 
-        lambda rule_id, username: add_user(sdk, profile, rule_id, username),
-        CSVReader()
+        file_name, lambda rule_id, username: add_user(sdk, profile, rule_id, username), CSVReader()
     )
 
 
@@ -56,7 +54,7 @@ def remove_bulk_users(sdk, profile, file_name):
     run_bulk_process(
         file_name,
         lambda rule_id, username: remove_user(sdk, profile, rule_id, username),
-        CSVReader()
+        CSVReader(),
     )
 
 
