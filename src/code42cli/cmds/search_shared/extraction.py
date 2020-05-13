@@ -19,7 +19,7 @@ def begin_date_is_required(args, cursor_store):
     # Ignore begin date when in incremental mode, it is not required, and it was passed an argument.
     if not is_required and args.begin:
         logger.print_info(
-            "Ignoring --begin value as --incremental was passed and cursor checkpoint exists.\n"
+            u"Ignoring --begin value as --incremental was passed and cursor checkpoint exists.\n"
         )
         args.begin = None
     return is_required
@@ -38,7 +38,7 @@ def create_handlers(output_logger, cursor_store, event_key, sdk=None):
 
     def handle_error(exception):
         errors.ERRORED = True
-        if hasattr(exception, "response") and hasattr(exception.response, "text"):
+        if hasattr(exception, u"response") and hasattr(exception.response, u"text"):
             message = u"{0}: {1}".format(exception, exception.response.text)
         else:
             message = exception
@@ -68,7 +68,7 @@ def create_handlers(output_logger, cursor_store, event_key, sdk=None):
 
 def exit_if_advanced_query_used_with_other_search_args(args):
     args_dict_copy = args.__dict__.copy()
-    for arg in ("advanced_query", "format", "sdk", "profile"):
+    for arg in (u"advanced_query", u"format", u"sdk", u"profile"):
         args_dict_copy.pop(arg)
     if any(args_dict_copy.values()):
         logger.print_and_log_error(u"You cannot use --advanced-query with additional search args.")
@@ -85,7 +85,7 @@ def create_time_range_filter(filter_cls, begin_date=None, end_date=None):
             end_date: The end date for the range.
     """
     if not issubclass(filter_cls, QueryFilterTimestampField):
-        raise Exception("filter_cls must be a subclass of QueryFilterTimestampField")
+        raise Exception(u"filter_cls must be a subclass of QueryFilterTimestampField")
 
     if begin_date and end_date:
         min_timestamp = parse_min_timestamp(begin_date)
