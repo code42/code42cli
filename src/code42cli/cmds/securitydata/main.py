@@ -43,7 +43,7 @@ def load_subcommands():
 
     clear = Command(
         u"clear-checkpoint",
-        u"Remove the saved checkpoint from 'incremental' (-i) mode.",
+        u"Remove the saved file event checkpoint from 'incremental' (-i) mode.",
         u"{} {}".format(usage_prefix, u"clear-checkpoint <optional-args>"),
         handler=clear_checkpoint,
     )
@@ -52,7 +52,7 @@ def load_subcommands():
 
 
 def clear_checkpoint(sdk, profile):
-    """Removes the stored checkpoint that keeps track of the last event you got.
+    """Removes the stored checkpoint that keeps track of the last file event retrieved for the given profile.
         To use, run `code42 security-data clear-checkpoint`.
         This affects `incremental` mode by causing it to behave like it has never been run before.
     """
