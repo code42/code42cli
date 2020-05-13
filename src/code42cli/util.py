@@ -65,8 +65,7 @@ def find_format_width(record, header):
     Returns:
         tuple (list of dict, dict), i.e Filtered records, padding size of columns.
     """
-    rows = []
-    rows.append(header)
+    rows = [header]
 
     # Set default max width items to column names
     max_width_item = dict(header.items())
@@ -87,5 +86,5 @@ def format_to_table(rows, column_size):
     """
     for row in rows:
         for key in row.keys():
-            print(repr(row[key]).ljust(column_size[key] + _PADDING_SIZE), end=" ")
-        print("")
+            print(repr(row[key]).ljust(column_size[key] + _PADDING_SIZE), end=u" ")
+        print(u"")
