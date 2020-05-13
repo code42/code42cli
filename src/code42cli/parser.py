@@ -23,6 +23,7 @@ class ArgumentParserError(Exception):
 
 class CommandParser(argparse.ArgumentParser):
     def __init__(self, **kwargs):
+        # noinspection PyTypeChecker
         super(CommandParser, self).__init__(formatter_class=RawDescriptionHelpFormatter, **kwargs)
 
     def prepare_command(self, command, path_parts):
