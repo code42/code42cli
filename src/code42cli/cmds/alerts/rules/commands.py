@@ -12,17 +12,19 @@ from code42cli.cmds.alerts.rules.user_rule import (
 
 def _customize_add_arguments(argument_collection):
     rule_id = argument_collection.arg_configs[u"rule_id"]
-    rule_id.set_help(u"Observer Id of the rule to be updated.")
-    user_name = argument_collection.arg_configs[u"user_name"]
-    user_name.set_help(u"The username of the user to add to the alert, email id.")
+    rule_id.set_help(u"Observer Id of the rule to be updated. Required.")
+    rule_id.set_required(True)
+    username = argument_collection.arg_configs[u"username"]
+    username.set_help(u"The username of the user to add to the alert, email id. Required.")
+    username.set_required(True)
 
 
 def _customize_remove_arguments(argument_collection):
 
     rule_id = argument_collection.arg_configs[u"rule_id"]
     rule_id.set_help(u"Observer rule id of the rule to be updated.")
-    user_name = argument_collection.arg_configs[u"user_name"]
-    user_name.set_help(u"The username of the user to remove from the alert, email id.")
+    username = argument_collection.arg_configs[u"username"]
+    username.set_help(u"The username of the user to remove from the alert, email id.")
 
 
 def _customize_list_arguments(argument_collection):
@@ -78,7 +80,7 @@ class AlertRulesBulkCommands(object):
         bulk_add = Command(
             u"add",
             u"Update multiple alert rules to monitor user aliases against the Code42 userUid "
-            u"and given rule id. CSV file format: rule_id, user_name",
+            u"and given rule id. CSV file format: rule_id, username",
             u"{} {}".format(usage_prefix, u"add <filename>"),
             handler=add_bulk_users,
             arg_customizer=_customize_bulk_arguments
@@ -87,7 +89,7 @@ class AlertRulesBulkCommands(object):
         bulk_remove = Command(
             u"remove",
             u"Update multiple alert rules to monitor user aliases against the Code42 userUid "
-            u"and given rule id. CSV file format: rule_id, user_name",
+            u"and given rule id. CSV file format: rule_id, username",
             u"{} {}".format(usage_prefix, u"remove <filename>"),
             handler=remove_bulk_users,
             arg_customizer=_customize_bulk_arguments
@@ -105,7 +107,7 @@ class AlertRulesCommands(object):
         add = Command(
                 u"add-user",
                 u"Update alert rule to monitor user aliases against the Uid for the given rule id.",
-                u"{} {}".format(usage_prefix, u"add-user <rule_id>  <user-name>"),
+                u"{} {}".format(usage_prefix, u"add-user --rule-id [id]  --username [emai-id]"),
                 handler=add_user,
                 arg_customizer=_customize_add_arguments
             )
@@ -113,7 +115,7 @@ class AlertRulesCommands(object):
         remove = Command(
                 u"remove-user",
                 u"Update alert rule criteria to remove a user and all its aliases.",
-                u"{} {}".format(usage_prefix, u"remove-user <rule_id> --user-name [email-id]"),
+                u"{} {}".format(usage_prefix, u"remove-user <rule_id> --username [email-id]"),
                 handler=remove_user,
                 arg_customizer=_customize_remove_arguments
             )

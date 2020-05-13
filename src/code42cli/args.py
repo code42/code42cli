@@ -18,6 +18,7 @@ class ArgConfig(object):
             u"help": kwargs.get(u"help"),
             u"options_list": list(args),
             u"nargs": kwargs.get(u"nargs"),
+            u"required": kwargs.get(u"required"),
         }
 
     @property
@@ -35,6 +36,9 @@ class ArgConfig(object):
 
     def as_multi_val_param(self, nargs=u"+"):
         self._settings[u"nargs"] = nargs
+
+    def set_required(self, required=False):
+        self._settings[u"required"] = required
 
 
 class ArgConfigCollection(object):

@@ -17,14 +17,14 @@ _HEADER_KEYS_MAP = {
 }
 
 
-def add_user(sdk, profile, rule_id, user_name):
-    user_id = get_user_id(sdk, user_name)
+def add_user(sdk, profile, rule_id=None, username=None):
+    user_id = get_user_id(sdk, username)
     sdk.alerts.rules.add_user(rule_id, user_id)
 
 
-def remove_user(sdk, profile, rule_id, user_name=None):
-    if user_name:
-        user_id = get_user_id(sdk, user_name)
+def remove_user(sdk, profile, rule_id, username=None):
+    if username:
+        user_id = get_user_id(sdk, username)
         sdk.alerts.rules.remove_user(rule_id, user_id)
     else:
         sdk.alerts.rules.remove_all_users(rule_id)
@@ -47,7 +47,7 @@ def get_rules(sdk, profile):
 def add_bulk_users(sdk, profile, file_name):
     run_bulk_process(
         file_name, 
-        lambda rule_id, user_name: add_user(sdk, profile, rule_id, user_name),
+        lambda rule_id, username: add_user(sdk, profile, rule_id, username),
         CSVReader()
     )
 
@@ -55,7 +55,7 @@ def add_bulk_users(sdk, profile, file_name):
 def remove_bulk_users(sdk, profile, file_name):
     run_bulk_process(
         file_name,
-        lambda rule_id, user_name: remove_user(sdk, profile, rule_id, user_name),
+        lambda rule_id, username: remove_user(sdk, profile, rule_id, username),
         CSVReader()
     )
 
