@@ -71,7 +71,7 @@ class AlertRulesBulkCommands(object):
         generate_template_cmd = Command(
             u"generate-template",
             u"Generate the necessary csv template needed for bulk adding users.",
-            u"{} {}".format(usage_prefix, u"generate-template <cmd> <optional args>"),
+            u"{} generate-template <cmd> <optional args>".format(usage_prefix),
             handler=_generate_template_file,
             arg_customizer=_load_bulk_generate_template_description,
         )
