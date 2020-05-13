@@ -180,7 +180,7 @@ def test_add_risk_tags_when_user_does_not_exist_prints_error(sdk_without_user, p
             assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text
 
 
-def test_add_risk_tags_when_bad_request_and_risk_tag_not_supported_raises_UnknownRiskTagError(
+def test_add_risk_tags_when_bad_request_and_unknown_risk_tags_raises_UnknownRiskTagError(
     sdk_with_user, profile, generic_bad_request
 ):
     sdk_with_user.detectionlists.add_user_risk_tags.side_effect = generic_bad_request
@@ -244,7 +244,7 @@ def test_remove_risk_tags_when_user_does_not_exist_prints_error(sdk_without_user
             assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text
 
 
-def test_remove_risk_tags_when_bad_request_and_risk_tag_not_supported_raises_UnknownRiskTagError(
+def test_remove_risk_tags_when_bad_request_and_unknown_risk_tags_raises_UnknownRiskTagError(
     sdk_with_user, profile, generic_bad_request
 ):
     sdk_with_user.detectionlists.remove_user_risk_tags.side_effect = generic_bad_request

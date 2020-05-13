@@ -247,8 +247,8 @@ def _try_add_or_remove_risk_tags(user_id, risk_tag, func):
     try:
         func(user_id, risk_tag)
     except Py42BadRequestError:
-        if not _try_handle_bad_risk_tag(risk_tag):
-            raise
+        _try_handle_bad_risk_tag(risk_tag)
+        raise
 
 
 def _try_handle_bad_risk_tag(tags):

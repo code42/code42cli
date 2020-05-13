@@ -77,9 +77,10 @@ def test_update_user_updates_notes(sdk_with_user, profile):
     sdk_with_user.detectionlists.update_user_notes.assert_called_once_with(TEST_ID, notes)
 
 
-def test_try_add_risk_tags_when_exception_bad_request_and_not_supported_exception_raises_error(
-    sdk, profile
+def test_try_add_risk_tags_when_sdk_raises_bad_request_and_given_unknown_tags_raises_UnknownRiskTagError(
+    sdk, profile, generic_bad_request
 ):
+    sdk.detectionlists.add_user_risk_tags.side_effect = generic_bad_request
     try:
         try_add_risk_tags(sdk, profile, ["foo", RiskTags.SUSPICIOUS_SYSTEM_ACTIVITY, "bar"])
     except UnknownRiskTagError as err:
@@ -88,9 +89,10 @@ def test_try_add_risk_tags_when_exception_bad_request_and_not_supported_exceptio
         assert "bar" in err_str
 
 
-def test_try_remove_risk_tags_when_exception_bad_request_and_not_supported_exception_raises_error(
-    sdk, profile
+def test_try_remove_risk_tags_when_sdk_raises_bad_request_and_given_unknown_tags_raises_UnknownRiskTagError(
+    sdk, profile, generic_bad_request
 ):
+    sdk.detectionlists.remove_user_risk_tags.side_effect = generic_bad_request
     try:
         try_remove_risk_tags(sdk, profile, ["foo", RiskTags.SUSPICIOUS_SYSTEM_ACTIVITY, "bar"])
     except UnknownRiskTagError as err:
