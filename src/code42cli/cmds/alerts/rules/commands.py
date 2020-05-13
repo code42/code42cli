@@ -29,7 +29,7 @@ def _customize_remove_arguments(argument_collection):
 
 def _customize_list_arguments(argument_collection):
     rule_id = argument_collection.arg_configs[u"rule_id"]
-    rule_id.set_help(u"Observer rule ID of the rule")
+    rule_id.set_help(u"Observer rule ID of the rule.")
 
 
 def _customize_bulk_arguments(argument_collection):
