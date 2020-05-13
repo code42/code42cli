@@ -1,4 +1,5 @@
 import platform
+import signal
 import sys
 
 from py42.settings import set_user_agent_suffix
@@ -12,6 +13,14 @@ from code42cli.cmds.securitydata import main as secmain
 from code42cli.cmds.alerts import main as alertmain
 from code42cli.commands import Command
 from code42cli.invoker import CommandInvoker
+
+# Handle KeyboardInterrupts by just exiting instead of printing out a stack
+def exit_on_interrupt(signal, frame):
+    sys.exit(1)
+
+
+signal.signal(signal.SIGINT, exit_on_interrupt)
+
 
 # If on Windows, configure console session to handle ANSI escape sequences correctly
 # source: https://bugs.python.org/issue29059
@@ -31,9 +40,13 @@ set_user_agent_suffix(PRODUCT_NAME)
 
 
 def main():
-    top = Command(u"", u"", subcommand_loader=_load_top_commands)
-    invoker = CommandInvoker(top)
-    invoker.run(sys.argv[1:])
+    try:
+        top = Command(u"", u"", subcommand_loader=_load_top_commands)
+        invoker = CommandInvoker(top)
+        invoker.run(sys.argv[1:])
+    except KeyboardInterrupt:
+        print("caught ya")
+        sys.exit(1)
 
 
 def _load_top_commands():

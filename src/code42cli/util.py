@@ -1,5 +1,7 @@
 import sys
+from functools import wraps
 from os import makedirs, path
+from signal import signal, getsignal, SIGINT
 
 from code42cli.compat import open
 
@@ -47,3 +49,35 @@ def get_url_parts(url_str):
     if len(parts) > 1 and parts[1] != u"":
         port = int(parts[1])
     return parts[0], port
+
+
+class warn_interrupt(object):
+    def __init__(self, warning="The code42 cli is working... "):
+        self.warning = warning
+        self.old_handler = None
+        self.interrupted = False
+        self.exit_instructions = "Hit CTRL-C again to quit anyway."
+
+    def __enter__(self):
+        self.old_handler = getsignal(SIGINT)
+        signal(SIGINT, self._handle_interrupts)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        signal(SIGINT, self.old_handler)
+        return False
+
+    def _handle_interrupts(self, sig, frame):
+        if not self.interrupted:
+            self.interrupted = True
+            print("\n{}\n{}".format(self.warning, self.exit_instructions), file=sys.stderr)
+        else:
+            exit()
+
+    def __call__(self, func):
+        @wraps(func)
+        def inner(*args, **kwds):
+            with self:
+                return func(*args, **kwds)
+
+        return inner

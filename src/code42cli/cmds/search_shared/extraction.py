@@ -7,6 +7,7 @@ import code42cli.errors as errors
 from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp, verify_timestamp_order
 from code42cli.logger import get_main_cli_logger
 from code42cli.cmds.alerts.util import get_alert_details
+from code42cli.util import warn_interrupt
 
 logger = get_main_cli_logger()
 
@@ -50,8 +51,15 @@ def create_handlers(output_logger, cursor_store, event_key, sdk=None):
         handlers.record_cursor_position = cursor_store.replace_stored_cursor_timestamp
         handlers.get_cursor_position = cursor_store.get_stored_cursor_timestamp
 
+    @warn_interrupt(
+        warning="Interrupting now could cause checkpoint data to be incorrect if using --incremental mode."
+    )
     def handle_response(response):
         response_dict = json.loads(response.text)
+        print("got it")
+        from time import sleep
+
+        sleep(10)
         events = response_dict.get(event_key)
         if event_key == u"alerts":
             try:
