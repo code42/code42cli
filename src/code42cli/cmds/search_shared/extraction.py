@@ -56,10 +56,6 @@ def create_handlers(output_logger, cursor_store, event_key, sdk=None):
     )
     def handle_response(response):
         response_dict = json.loads(response.text)
-        print("got it")
-        from time import sleep
-
-        sleep(10)
         events = response_dict.get(event_key)
         if event_key == u"alerts":
             try:
