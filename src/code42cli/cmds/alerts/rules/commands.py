@@ -104,7 +104,7 @@ class AlertRulesCommands(object):
 
         add = Command(
             u"add-user",
-            u"Update alert rule to monitor user aliases against the username for the given rule ID.",
+            u"Update alert rule criteria to monitor user aliases against the given username.",
             u"{} add-user --rule-id <id>  --username <username>".format(usage_prefix),
             handler=add_user,
             arg_customizer=_customize_add_arguments,
