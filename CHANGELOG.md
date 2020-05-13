@@ -16,6 +16,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - Additional information in the error log file:
     - The full command path for the command that errored.
     - User-facing error messages you see during adhoc sessions.
+- When you trying adding risk tags that are unknown, you will now get custom errors in the logs.
+- When you try to add a user to a detection list who is already added, you will now get a custom error in the logs.
 
 ### 0.5.3 - 2020-05-04
 
