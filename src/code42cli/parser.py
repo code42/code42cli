@@ -100,7 +100,7 @@ def _get_group_help(command):
         output.append(BANNER)
 
     output.extend([u" \nAvailable commands in <{}>:".format(name), descriptions])
-    return "\n".join(output)
+    return u"\n".join(output)
 
 
 def _build_group_command_descriptions(command):
