@@ -27,6 +27,12 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - Additional information in the error log file:
     - The full command path for the command that errored.
     - User-facing error messages you see during adhoc sessions.
+- A custom error in the error log when you try adding unknown risk tags to user.
+- A custom error in the error log when you try adding a user to a detection list who is already added.
+
+### Fixed
+
+- Fixed bug in bulk commands where value-less fields in csv files were treated as empty strings instead of None.
 
 ### 0.5.3 - 2020-05-04
 

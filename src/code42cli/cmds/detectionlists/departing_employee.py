@@ -4,7 +4,7 @@ from code42cli.cmds.detectionlists import (
     load_user_descriptions,
     get_user_id,
     update_user,
-    handle_bad_request_during_add,
+    try_handle_user_already_added_error,
 )
 from code42cli.cmds.detectionlists.enums import DetectionLists
 
@@ -42,8 +42,9 @@ def add_departing_employee(
         sdk.detectionlists.departing_employee.add(user_id, departure_date)
         update_user(sdk, user_id, cloud_alias, notes=notes)
     except Py42BadRequestError as err:
-        if not handle_bad_request_during_add(err, username, DetectionLists.DEPARTING_EMPLOYEE):
-            raise
+        list_name = DetectionLists.DEPARTING_EMPLOYEE
+        try_handle_user_already_added_error(err, username, list_name)
+        raise
 
 
 def remove_departing_employee(sdk, profile, username):
