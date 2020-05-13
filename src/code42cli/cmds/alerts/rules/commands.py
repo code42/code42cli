@@ -106,8 +106,8 @@ class AlertRulesCommands(object):
 
         add = Command(
                 u"add-user",
-                u"Update alert rule to monitor user aliases against the Uid for the given rule id.",
-                u"{} {}".format(usage_prefix, u"add-user --rule-id [id]  --username [emai-id]"),
+                u"Update alert rule to monitor user aliases against the username for the given rule id.",
+                u"{} {}".format(usage_prefix, u"add-user --rule-id <id>  --username <email-id>"),
                 handler=add_user,
                 arg_customizer=_customize_add_arguments
             )
@@ -115,21 +115,21 @@ class AlertRulesCommands(object):
         remove = Command(
                 u"remove-user",
                 u"Update alert rule criteria to remove a user and all its aliases.",
-                u"{} {}".format(usage_prefix, u"remove-user <rule_id> --username [email-id]"),
+                u"{} {}".format(usage_prefix, u"remove-user <rule_id> --username <email-id>"),
                 handler=remove_user,
                 arg_customizer=_customize_remove_arguments
             )
 
         list_rules = Command(
                 u"list",
-                u"Fetch existing alert rules",
+                u"Fetch existing alert rules.",
                 u"{} {}".format(usage_prefix, u"list"),
                 handler=get_rules,
             )
 
         show = Command(
             u"show",
-            u"Fetch configured alert-rules against the rule-id",
+            u"Fetch configured alert-rules against the rule-id.",
             u"{} {}".format(usage_prefix, u"show <rule-id>"),
             handler=show_rules,
             arg_customizer=_customize_list_arguments
