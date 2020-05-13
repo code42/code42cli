@@ -96,7 +96,7 @@ def _load_risk_tag_description(argument_collection):
     risk_tag.as_multi_val_param()
     tags = u", ".join(list(RiskTags()))
     risk_tag.set_help(
-        u"Risk tags associated with the employee. " u"Options include: " u"[{}]".format(tags)
+        u"Risk tags associated with the employee. Options include: [{}].".format(tags)
     )
 
 
