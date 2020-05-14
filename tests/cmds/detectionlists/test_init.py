@@ -14,7 +14,8 @@ from code42cli.cmds.detectionlists import (
     UnknownRiskTagError,
     UserAlreadyAddedError,
 )
-from code42cli.cmds.detectionlists.enums import BulkCommandType, RiskTags
+from code42cli.bulk import BulkCommandType
+from code42cli.cmds.detectionlists.enums import RiskTags
 from .conftest import TEST_ID
 
 

@@ -4,12 +4,8 @@ from code42cli.compat import str
 from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory
 from code42cli.bulk import generate_template, run_bulk_process, CSVReader, FlatFileReader
 from code42cli.logger import get_main_cli_logger
-from code42cli.cmds.detectionlists.enums import (
-    BulkCommandType,
-    DetectionLists,
-    DetectionListUserKeys,
-    RiskTags,
-)
+from code42cli.bulk import BulkCommandType
+from code42cli.cmds.detectionlists.enums import DetectionLists, DetectionListUserKeys, RiskTags
 
 
 class UserAlreadyAddedError(Exception):
