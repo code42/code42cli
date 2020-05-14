@@ -42,13 +42,9 @@ set_user_agent_suffix(PRODUCT_NAME)
 
 
 def main():
-    try:
-        top = Command(u"", u"", subcommand_loader=_load_top_commands)
-        invoker = CommandInvoker(top)
-        invoker.run(sys.argv[1:])
-    except KeyboardInterrupt:
-        print("caught ya")
-        sys.exit(1)
+    top = Command(u"", u"", subcommand_loader=_load_top_commands)
+    invoker = CommandInvoker(top)
+    invoker.run(sys.argv[1:])
 
 
 def _load_top_commands():
