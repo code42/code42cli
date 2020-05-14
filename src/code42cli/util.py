@@ -103,7 +103,7 @@ class warn_interrupt(object):
     def my_important_func():
         pass
     """
-    
+
     def __init__(self, warning="The code42 cli is working... "):
         self.warning = warning
         self.old_handler = None
