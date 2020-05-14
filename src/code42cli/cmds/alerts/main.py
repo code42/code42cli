@@ -27,7 +27,7 @@ def load_subcommands():
 
     write = Command(
         u"write-to",
-        u"Write file events to the file with the given name.",
+        u"Write alerts to the file with the given name.",
         u"{} {}".format(usage_prefix, u"write-to <filename> <optional-args>"),
         handler=write_to,
         arg_customizer=_load_write_to_args,
@@ -36,7 +36,7 @@ def load_subcommands():
 
     send = Command(
         u"send-to",
-        u"Send file events to the given server address.",
+        u"Send alerts to the given server address.",
         u"{} {}".format(usage_prefix, u"send-to <server-address> <optional-args>"),
         handler=send_to,
         arg_customizer=_load_send_to_args,
@@ -45,7 +45,7 @@ def load_subcommands():
 
     clear = Command(
         u"clear-checkpoint",
-        u"Remove the saved checkpoint from 'incremental' (-i) mode.",
+        u"Remove the saved alert checkpoint from 'incremental' (-i) mode.",
         u"{} {}".format(usage_prefix, u"clear-checkpoint <optional-args>"),
         handler=clear_checkpoint,
     )
@@ -54,7 +54,7 @@ def load_subcommands():
 
 
 def clear_checkpoint(sdk, profile):
-    """Removes the stored checkpoint that keeps track of the last alert you got.
+    """Removes the stored checkpoint that keeps track of the last alert retrieved for the given profile..
         To use, run `code42 alerts clear-checkpoint`.
         This affects `incremental` mode by causing it to behave like it has never been run before.
     """
@@ -62,19 +62,19 @@ def clear_checkpoint(sdk, profile):
 
 
 def print_out(sdk, profile, args):
-    """Activates 'print' command. It gets security events and prints them to stdout."""
+    """Activates 'print' command. It gets alerts and prints them to stdout."""
     logger = logger_factory.get_logger_for_stdout(args.format)
     extract(sdk, profile, logger, args)
 
 
 def write_to(sdk, profile, args):
-    """Activates 'write-to' command. It gets security events and writes them to the given file."""
+    """Activates 'write-to' command. It gets alerts and writes them to the given file."""
     logger = logger_factory.get_logger_for_file(args.output_file, args.format)
     extract(sdk, profile, logger, args)
 
 
 def send_to(sdk, profile, args):
-    """Activates 'send-to' command. It gets security events and logs them to the given server."""
+    """Activates 'send-to' command. It getsalerts and logs them to the given server."""
     logger = logger_factory.get_logger_for_server(args.server, args.protocol, args.format)
     extract(sdk, profile, logger, args)
 

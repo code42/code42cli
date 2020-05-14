@@ -13,6 +13,8 @@ from code42cli.cmds.securitydata import main as secmain
 from code42cli.cmds.alerts import main as alertmain
 from code42cli.commands import Command
 from code42cli.invoker import CommandInvoker
+from code42cli.cmds.alerts.rules.commands import AlertRulesCommands
+
 
 # Handle KeyboardInterrupts by just exiting instead of printing out a stack
 def exit_on_interrupt(signal, frame):
@@ -51,7 +53,6 @@ def main():
 
 def _load_top_commands():
     detection_lists_description = u"For adding and removing employees from the {} detection list."
-
     return [
         Command(
             u"profile", u"For managing Code42 settings.", subcommand_loader=profile.load_subcommands
@@ -75,6 +76,11 @@ def _load_top_commands():
             DetectionLists.HIGH_RISK_EMPLOYEE,
             detection_lists_description.format(u"high risk employee"),
             subcommand_loader=hre.load_subcommands,
+        ),
+        Command(
+            u"alert-rules",
+            u"Manage alert rules",
+            subcommand_loader=AlertRulesCommands.load_subcommands,
         ),
     ]
 

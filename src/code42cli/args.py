@@ -2,7 +2,7 @@ from collections import OrderedDict
 import inspect
 
 
-PROFILE_HELP = u"The name of the Code42 profile use when executing this command."
+PROFILE_HELP = u"The name of the Code42 profile to use when executing this command."
 SDK_ARG_NAME = u"sdk"
 PROFILE_ARG_NAME = u"profile"
 
@@ -19,6 +19,7 @@ class ArgConfig(object):
             u"options_list": list(args),
             u"nargs": kwargs.get(u"nargs"),
             u"metavar": kwargs.get(u"metavar"),
+            u"required": kwargs.get(u"required"),
         }
 
     @property
@@ -36,6 +37,9 @@ class ArgConfig(object):
 
     def as_multi_val_param(self, nargs=u"+"):
         self._settings[u"nargs"] = nargs
+
+    def set_required(self, required=False):
+        self._settings[u"required"] = required
 
 
 class ArgConfigCollection(object):
