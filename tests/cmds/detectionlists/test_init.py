@@ -3,13 +3,19 @@ import logging
 
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.detectionlists import (
+    try_handle_user_already_added_error,
     DetectionList,
     DetectionListHandlers,
     get_user_id,
     update_user,
     UserDoesNotExistError,
+    try_add_risk_tags,
+    try_remove_risk_tags,
+    UnknownRiskTagError,
+    UserAlreadyAddedError,
 )
-from code42cli.cmds.detectionlists.enums import BulkCommandType
+from code42cli.bulk import BulkCommandType
+from code42cli.cmds.detectionlists.enums import RiskTags
 from .conftest import TEST_ID
 
 
@@ -24,6 +30,19 @@ def bulk_template_generator(mocker):
 @pytest.fixture
 def bulk_processor(mocker):
     return mocker.patch("{}.run_bulk_process".format(_NAMESPACE))
+
+
+def test_try_handle_user_already_added_error_when_error_indicates_user_added_raises_UserAlreadyAddedError(
+    bad_request_for_user_already_added
+):
+    with pytest.raises(UserAlreadyAddedError):
+        try_handle_user_already_added_error(bad_request_for_user_already_added, "name", "listname")
+
+
+def test_try_handle_user_already_added_error_when_error_does_not_indicate_user_added_returns_false(
+    generic_bad_request
+):
+    assert not try_handle_user_already_added_error(generic_bad_request, "name", "listname")
 
 
 def test_get_user_id_when_user_does_not_raise_error(sdk_without_user):
@@ -57,6 +76,30 @@ def test_update_user_updates_notes(sdk_with_user, profile):
     notes = "notes"
     update_user(sdk_with_user, TEST_ID, notes=notes)
     sdk_with_user.detectionlists.update_user_notes.assert_called_once_with(TEST_ID, notes)
+
+
+def test_try_add_risk_tags_when_sdk_raises_bad_request_and_given_unknown_tags_raises_UnknownRiskTagError(
+    sdk, profile, generic_bad_request
+):
+    sdk.detectionlists.add_user_risk_tags.side_effect = generic_bad_request
+    try:
+        try_add_risk_tags(sdk, profile, ["foo", RiskTags.SUSPICIOUS_SYSTEM_ACTIVITY, "bar"])
+    except UnknownRiskTagError as err:
+        err_str = str(err)
+        assert "foo" in err_str
+        assert "bar" in err_str
+
+
+def test_try_remove_risk_tags_when_sdk_raises_bad_request_and_given_unknown_tags_raises_UnknownRiskTagError(
+    sdk, profile, generic_bad_request
+):
+    sdk.detectionlists.remove_user_risk_tags.side_effect = generic_bad_request
+    try:
+        try_remove_risk_tags(sdk, profile, ["foo", RiskTags.SUSPICIOUS_SYSTEM_ACTIVITY, "bar"])
+    except UnknownRiskTagError as err:
+        err_str = str(err)
+        assert "foo" in err_str
+        assert "bar" in err_str
 
 
 class TestDetectionList(object):
