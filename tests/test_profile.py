@@ -3,7 +3,7 @@ import logging
 
 import code42cli.profile as cliprofile
 from code42cli import PRODUCT_NAME
-from code42cli.cmds.shared.cursor_store import FileEventCursorStore
+from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore, AlertCursorStore
 from code42cli.config import ConfigAccessor, NoConfigProfileError
 from .conftest import MockSection, create_mock_profile
 
@@ -204,12 +204,14 @@ def test_delete_profile_deletes_password_if_exists(
     password_deleter.assert_called_once_with(profile)
 
 
-def test_delete_profile_clears_checkpoint(config_accessor, mocker):
+def test_delete_profile_clears_checkpoints(config_accessor, mocker):
     profile = create_mock_profile("deleteme")
     mock_get_profile = mocker.patch("code42cli.profile._get_profile")
     mock_get_profile.return_value = profile
-    store = mocker.MagicMock(spec=FileEventCursorStore)
-    mock_get_cursor_store = mocker.patch("code42cli.profile.get_file_event_cursor_store")
-    mock_get_cursor_store.return_value = store
+    event_store = mocker.MagicMock(spec=FileEventCursorStore)
+    alert_store = mocker.MagicMock(spec=AlertCursorStore)
+    mock_get_cursor_store = mocker.patch("code42cli.profile.get_all_cursor_stores_for_profile")
+    mock_get_cursor_store.return_value = [event_store, alert_store]
     cliprofile.delete_profile("deleteme")
-    assert store.clean.call_count == 1
+    assert event_store.clean.call_count == 1
+    assert alert_store.clean.call_count == 1

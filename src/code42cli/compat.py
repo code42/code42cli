@@ -23,6 +23,8 @@ if is_py2:
     import repr as reprlib
 
     import Queue as queue
+
+    range = xrange
 else:
     from urllib.parse import urljoin, urlparse
 
@@ -32,3 +34,5 @@ else:
     import reprlib
 
     import queue
+
+    range = range

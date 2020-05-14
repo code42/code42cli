@@ -2,10 +2,33 @@ import json as json_module
 
 import pytest
 
+from py42.sdk import SDKClient
 from code42cli import PRODUCT_NAME
-from ...conftest import convert_str_to_date
+from code42cli.logger import CliLogger
+from tests.conftest import convert_str_to_date
 
-SECURITYDATA_NAMESPACE = "{}.cmds.securitydata".format(PRODUCT_NAME)
+
+@pytest.fixture
+def sdk(mocker):
+    return mocker.MagicMock(spec=SDKClient)
+
+
+@pytest.fixture()
+def mock_42(mocker):
+    return mocker.patch("py42.sdk.from_local_account")
+
+
+@pytest.fixture
+def logger(mocker):
+    mock = mocker.MagicMock()
+    mock.print_info = mocker.MagicMock()
+    return mock
+
+
+@pytest.fixture
+def cli_logger(mocker):
+    mock = mocker.MagicMock(spec=CliLogger)
+    return mock
 
 
 def get_filter_value_from_json(json, filter_index):

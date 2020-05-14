@@ -9,6 +9,7 @@ from code42cli.cmds.detectionlists import departing_employee as de
 from code42cli.cmds.detectionlists import high_risk_employee as hre
 from code42cli.cmds.detectionlists.enums import DetectionLists
 from code42cli.cmds.securitydata import main as secmain
+from code42cli.cmds.alerts import main as alertmain
 from code42cli.commands import Command
 from code42cli.invoker import CommandInvoker
 from code42cli.cmds.alerts.rules.commands import AlertRulesCommands
@@ -47,6 +48,11 @@ def _load_top_commands():
             u"security-data",
             u"Tools for getting security related data, such as file events.",
             subcommand_loader=secmain.load_subcommands,
+        ),
+        Command(
+            u"alerts",
+            u"Tools for getting alert data.",
+            subcommand_loader=alertmain.load_subcommands,
         ),
         Command(
             DetectionLists.DEPARTING_EMPLOYEE,

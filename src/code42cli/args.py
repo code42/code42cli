@@ -18,6 +18,7 @@ class ArgConfig(object):
             u"help": kwargs.get(u"help"),
             u"options_list": list(args),
             u"nargs": kwargs.get(u"nargs"),
+            u"metavar": kwargs.get(u"metavar"),
             u"required": kwargs.get(u"required"),
         }
 

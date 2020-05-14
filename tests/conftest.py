@@ -1,4 +1,3 @@
-from argparse import Namespace
 from datetime import datetime, timedelta
 
 import pytest
@@ -6,33 +5,71 @@ from py42.sdk import SDKClient
 
 from code42cli.config import ConfigAccessor
 from code42cli.profile import Code42Profile
+from code42cli.commands import DictObject
 
 import code42cli.errors as error_tracker
 
 
 @pytest.fixture
-def namespace(mocker):
-    mock = mocker.MagicMock(spec=Namespace)
-    mock.incremental = None
-    mock.advanced_query = None
-    mock.begin = None
-    mock.end = None
-    mock.type = None
-    mock.c42_username = None
-    mock.actor = None
-    mock.md5 = None
-    mock.sha256 = None
-    mock.source = None
-    mock.file_name = None
-    mock.file_path = None
-    mock.process_owner = None
-    mock.tab_url = None
-    mock.include_non_exposure = None
-    mock.format = None
-    mock.output_file = None
-    mock.server = None
-    mock.protocol = None
-    return mock
+def file_event_namespace():
+    args = DictObject(
+        dict(
+            sdk=mock_42,
+            profile=create_mock_profile(),
+            incremental=None,
+            advanced_query=None,
+            begin=None,
+            end=None,
+            type=None,
+            c42_username=None,
+            actor=None,
+            md5=None,
+            sha256=None,
+            source=None,
+            file_name=None,
+            file_path=None,
+            process_owner=None,
+            tab_url=None,
+            include_non_exposure=None,
+            format=None,
+            output_file=None,
+            server=None,
+            protocol=None,
+        )
+    )
+    return args
+
+
+@pytest.fixture
+def alert_namespace():
+    args = DictObject(
+        dict(
+            sdk=mock_42,
+            profile=create_mock_profile(),
+            incremental=None,
+            advanced_query=None,
+            begin=None,
+            end=None,
+            severity=None,
+            state=None,
+            actor=None,
+            actor_contains=None,
+            exclude_actor=None,
+            exclude_actor_contains=None,
+            rule_name=None,
+            exclude_rule_name=None,
+            rule_id=None,
+            exclude_rule_id=None,
+            rule_type=None,
+            exclude_rule_type=None,
+            description=None,
+            format=None,
+            output_file=None,
+            server=None,
+            protocol=None,
+        )
+    )
+    return args
 
 
 def create_profile_values_dict(authority=None, username=None, ignore_ssl=False):

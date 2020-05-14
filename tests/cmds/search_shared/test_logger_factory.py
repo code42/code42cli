@@ -7,7 +7,7 @@ from c42eventextractor.logging.formatters import (
     FileEventDictToRawJSONFormatter,
 )
 
-import code42cli.cmds.securitydata.logger_factory as factory
+import code42cli.cmds.search_shared.logger_factory as factory
 
 
 @pytest.fixture
@@ -99,7 +99,7 @@ def test_get_logger_for_server_when_given_cef_format_uses_cef_formatter(no_prior
 
 
 def test_get_logger_for_server_when_given_json_format_uses_json_formatter(
-    no_priority_syslog_handler
+    no_priority_syslog_handler,
 ):
     factory.get_logger_for_server("example.com", "TCP", "JSON").handlers = []
     factory.get_logger_for_server("example.com", "TCP", "JSON")
@@ -108,7 +108,7 @@ def test_get_logger_for_server_when_given_json_format_uses_json_formatter(
 
 
 def test_get_logger_for_server_when_given_raw_json_format_uses_raw_json_formatter(
-    no_priority_syslog_handler
+    no_priority_syslog_handler,
 ):
     factory.get_logger_for_server("example.com", "TCP", "RAW-JSON").handlers = []
     factory.get_logger_for_server("example.com", "TCP", "RAW-JSON")

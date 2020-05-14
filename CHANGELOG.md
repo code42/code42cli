@@ -12,6 +12,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
+- Ability to search/poll for alerts with checkpointing and sending to console, a file, or a server in json format.
 - `code42 alert-rules` commands:
     - `add-user` with parameters `--rule-id` and `--username`.
     - `remove-user` that takes a rule ID and optionally `--username`.
