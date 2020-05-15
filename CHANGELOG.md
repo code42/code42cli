@@ -10,6 +10,10 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
+### Changed
+
+- `code42 profile create` now uses required `--name`, `--server` and `--username` flags instead of positional arguments.
+
 ### Added
 
 - `code42 alerts`:
