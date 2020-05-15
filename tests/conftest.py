@@ -131,6 +131,14 @@ def func_keyword_args(one=None, two=None, three=None, default="testdefault", nar
     pass
 
 
+def func_single_positional_arg(one):
+    pass
+
+
+def func_single_positional_arg_many_optional_args(one, two=None, three=None, four=None):
+    pass
+
+
 def func_positional_args(one, two, three):
     pass
 
