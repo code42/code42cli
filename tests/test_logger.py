@@ -1,8 +1,8 @@
 import logging
 import os
 from logging.handlers import RotatingFileHandler
-from requests import Request
 
+from requests import Request
 from code42cli.logger import (
     add_handler_to_logger,
     logger_has_handlers,
@@ -70,13 +70,17 @@ class TestCliLogger(object):
 
     _logger = CliLogger()
 
-    def test_init_creates_user_error_logger_with_expected_handlers(self, mocker):
+    def test_init_creates_user_error_logger_with_expected_handlers(
+        self, mocker, log_handlers_collection
+    ):
         is_interactive = mocker.patch("code42cli.logger.is_interactive")
         is_interactive.return_value = True
-        logger = CliLogger()
-        handler_types = [type(h) for h in logger._user_error_logger.handlers]
-        assert RedStderrHandler in handler_types
-        assert RotatingFileHandler in handler_types
+        with log_handlers_collection:
+            logger = CliLogger()
+            handlers = log_handlers_collection[logger._user_error_logger]
+            handler_types = [type(h) for h in handlers]
+            assert RedStderrHandler in handler_types
+            assert RotatingFileHandler in handler_types
 
     def test_print_info_logs_expected_text_at_expected_level(self, caplog):
         with caplog.at_level(logging.INFO):

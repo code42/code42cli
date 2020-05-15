@@ -84,11 +84,7 @@ class RuleType(object):
         return len(self._as_list())
 
     def _as_list(self):
-        return [
-            self.ENDPOINT_EXFILTRATION,
-            self.CLOUD_SHARE_PERMISSIONS,
-            self.FILE_TYPE_MISMATCH,
-        ]
+        return [self.ENDPOINT_EXFILTRATION, self.CLOUD_SHARE_PERMISSIONS, self.FILE_TYPE_MISMATCH]
 
 
 class ServerProtocol(object):
@@ -108,7 +104,7 @@ class SearchArguments(object):
     END_DATE = u"end"
 
     def __iter__(self):
-        return iter([self.ADVANCED_QUERY, self.BEGIN_DATE, self.END_DATE,])
+        return iter([self.ADVANCED_QUERY, self.BEGIN_DATE, self.END_DATE])
 
 
 class FileEventFilterArguments(SearchArguments):
