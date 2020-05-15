@@ -1,7 +1,10 @@
+from __future__ import print_function
 import sys
 from os import makedirs, path
 
 from code42cli.compat import open
+
+_PADDING_SIZE = 3
 
 
 def get_input(prompt):
@@ -47,3 +50,41 @@ def get_url_parts(url_str):
     if len(parts) > 1 and parts[1] != u"":
         port = int(parts[1])
     return parts[0], port
+
+
+def find_format_width(record, header):
+    """Fetches needed keys/items to be displayed based on header keys.
+    
+    Finds the largest string against each column so as to decide the padding size for the column.
+    
+    Args:
+        record (list of dict), data to be formatted.  
+        header (dict), key-value where keys should map to keys of record dict and
+          value is the corresponding column name to be displayed on the cli.
+    
+    Returns:
+        tuple (list of dict, dict), i.e Filtered records, padding size of columns.
+    """
+    rows = [header]
+
+    # Set default max width items to column names
+    max_width_item = dict(header.items())
+    for record_row in record:
+        row = {}
+        for header_key in header.keys():
+            row[header_key] = record_row[header_key]
+            max_width_item[header_key] = max(
+                max_width_item[header_key], str(record_row[header_key]), key=len
+            )
+        rows.append(row)
+    column_size = {key: len(value) for key, value in max_width_item.items()}
+    return rows, column_size
+
+
+def format_to_table(rows, column_size):
+    """Prints result in left justified format in a tabular form.
+    """
+    for row in rows:
+        for key in row.keys():
+            print(repr(row[key]).ljust(column_size[key] + _PADDING_SIZE), end=u" ")
+        print(u"")
