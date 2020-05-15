@@ -38,7 +38,7 @@ class ArgConfig(object):
     def as_multi_val_param(self, nargs=u"+"):
         self._settings[u"nargs"] = nargs
 
-    def set_required(self, required=False):
+    def set_required(self, required):
         self._settings[u"required"] = required
 
 
@@ -87,7 +87,7 @@ def _create_auto_args_config(arg_position, key, argspec, num_args, num_kw_args):
     param_name = key.replace(u"_", u"-")
     num_positional_args = num_args - num_kw_args
     last_positional_arg_idx = num_positional_args - 1
-    required = False
+    required = None
     option_names = [u"--{}".format(param_name)]
     # positional arguments will come first, so if the arg position
     # is greater than the index of the last positional arg, it's a kwarg.

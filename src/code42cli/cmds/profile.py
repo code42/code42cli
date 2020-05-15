@@ -47,7 +47,9 @@ def load_subcommands():
     create = Command(
         u"create",
         u"Create profile settings. The first profile created will be the default.",
-        u"{} {}".format(usage_prefix, u"create <profile-name> <server-address> <username>"),
+        u"{} {}".format(
+            usage_prefix, u"create --name <name> --server <server-address> --username <username>"
+        ),
         handler=create_profile,
         arg_customizer=_load_profile_create_descriptions,
     )
@@ -90,10 +92,10 @@ def show_profile(name=None):
     logger.print_info(u"")
 
 
-def create_profile(profile, server, username, disable_ssl_errors=False):
-    cliprofile.create_profile(profile, server, username, disable_ssl_errors)
-    _prompt_for_allow_password_set(profile)
-    get_main_cli_logger().print_info(u"Successfully created profile '{}'.".format(profile))
+def create_profile(name, server, username, disable_ssl_errors=False):
+    cliprofile.create_profile(name, server, username, disable_ssl_errors)
+    _prompt_for_allow_password_set(name)
+    get_main_cli_logger().print_info(u"Successfully created profile '{}'.".format(name))
 
 
 def update_profile(name=None, server=None, username=None, disable_ssl_errors=None):
@@ -172,7 +174,7 @@ def _load_optional_profile_description(argument_collection):
 
 
 def _load_profile_create_descriptions(argument_collection):
-    profile = argument_collection.arg_configs[PROFILE_ARG_NAME]
+    profile = argument_collection.arg_configs[u"name"]
     profile.set_help(PROFILE_HELP)
     _load_profile_settings_descriptions(argument_collection)
 

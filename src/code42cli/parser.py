@@ -46,8 +46,9 @@ class CommandParser(argparse.ArgumentParser):
 
     def _load_argparse_config(self, command, command_parser):
         arg_configs = command.get_arg_configs()
+        required_group = command_parser.add_argument_group(u"required arguments")
         for arg in arg_configs:
-            _add_argument(command_parser, arg_configs[arg].settings)
+            _add_argument(command_parser, arg_configs[arg].settings, required_group)
 
     def _get_parser(self, command, path_parts):
         usage = command.usage or SUPPRESS
@@ -84,10 +85,12 @@ def _get_parent_subparser(path_parts, part, subparsers):
     return parent_subparser
 
 
-def _add_argument(parser, arg_settings):
+def _add_argument(parser, arg_settings, required_group):
     # register the settings of an ArgConfig object to an argparse parser
     options_list = arg_settings.pop(u"options_list")
     arg_settings = {key: arg_settings[key] for key in arg_settings if arg_settings[key] is not None}
+    if arg_settings.get(u"required"):
+        parser = required_group
     parser.add_argument(*options_list, **arg_settings)
 
 
