@@ -104,7 +104,8 @@ class CommandInvoker(object):
                 possible_correct_words = self._find_incorrect_word_match(err, path_parts[0])
             if possible_correct_words:
                 logger.print_and_log_error("Did you mean one of the following?, {}".format(possible_correct_words))
-            parser.print_help(sys.stderr)
+            else:
+                parser.print_help(sys.stderr)
             sys.exit(2)
 
     def _set_argument_keywords(self, command_key, arguments):
