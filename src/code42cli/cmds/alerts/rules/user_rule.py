@@ -17,12 +17,12 @@ _HEADER_KEYS_MAP = {
 }
 
 
-def add_user(sdk, profile, rule_id=None, username=None):
+def add_user(sdk, profile, rule_id, username):
     user_id = get_user_id(sdk, username)
     sdk.alerts.rules.add_user(rule_id, user_id)
 
 
-def remove_user(sdk, profile, rule_id=None, username=None):
+def remove_user(sdk, profile, rule_id, username):
     if username:
         user_id = get_user_id(sdk, username)
         sdk.alerts.rules.remove_user(rule_id, user_id)
@@ -58,7 +58,7 @@ def remove_bulk_users(sdk, profile, file_name):
     )
 
 
-def show_rules(sdk, profile, rule_id):
+def show_rule(sdk, profile, rule_id):
     selected_rule = _get_rules_metadata(sdk, rule_id)
     rule_detail = None
     if len(selected_rule):

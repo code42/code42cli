@@ -6,26 +6,22 @@ from code42cli.cmds.alerts.rules.user_rule import (
     get_rules,
     add_bulk_users,
     remove_bulk_users,
-    show_rules,
+    show_rule,
 )
 
 
 def _customize_add_arguments(argument_collection):
     rule_id = argument_collection.arg_configs[u"rule_id"]
     rule_id.set_help(u"Observer ID of the rule to be updated. Required.")
-    rule_id.set_required(True)
     username = argument_collection.arg_configs[u"username"]
     username.set_help(u"The username of the user to add to the alert rule. Required.")
-    username.set_required(True)
 
 
 def _customize_remove_arguments(argument_collection):
     rule_id = argument_collection.arg_configs[u"rule_id"]
     rule_id.set_help(u"Observer ID of the rule to be updated.")
-    rule_id.set_required(True)
     username = argument_collection.arg_configs[u"username"]
     username.set_help(u"The username of the user to remove from the alert rule.")
-    username.set_required(True)
 
 
 def _customize_list_arguments(argument_collection):
@@ -131,7 +127,7 @@ class AlertRulesCommands(object):
             u"show",
             u"Fetch configured alert-rules against the rule ID.",
             u"{} show <rule-id>".format(usage_prefix),
-            handler=show_rules,
+            handler=show_rule,
             arg_customizer=_customize_list_arguments,
         )
 

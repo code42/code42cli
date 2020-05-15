@@ -95,23 +95,23 @@ class TestCommand(object):
     def test_get_arg_configs_when_positional_args_returns_expected_collection(self):
         command = Command("test", "test desc", "test usage", func_positional_args)
         coll = command.get_arg_configs()
-        assert "one" in coll["one"].settings["options_list"]
-        assert "two" in coll["two"].settings["options_list"]
-        assert "three" in coll["three"].settings["options_list"]
+        assert "--one" in coll["one"].settings["options_list"]
+        assert "--two" in coll["two"].settings["options_list"]
+        assert "--three" in coll["three"].settings["options_list"]
 
     def test_get_arg_configs_when_mixed_args_returns_expected_collection(self):
         command = Command("test", "test desc", "test usage", func_mixed_args)
         coll = command.get_arg_configs()
-        assert "one" in coll["one"].settings["options_list"]
-        assert "two" in coll["two"].settings["options_list"]
+        assert "--one" in coll["one"].settings["options_list"]
+        assert "--two" in coll["two"].settings["options_list"]
         assert "--three" in coll["three"].settings["options_list"]
         assert "--four" in coll["four"].settings["options_list"]
 
     def test_get_arg_configs_when_handler_with_sdk_includes_profile_and_debug(self):
         command = Command("test", "test desc", "test usage", func_with_sdk)
         coll = command.get_arg_configs()
-        assert "one" in coll["one"].settings["options_list"]
-        assert "two" in coll["two"].settings["options_list"]
+        assert "--one" in coll["one"].settings["options_list"]
+        assert "--two" in coll["two"].settings["options_list"]
         assert "--three" in coll["three"].settings["options_list"]
         assert "--four" in coll["four"].settings["options_list"]
         assert "--profile" in coll[PROFILE_ARG_NAME].settings["options_list"]

@@ -85,19 +85,23 @@ def get_auto_arg_configs(handler):
 def _create_auto_args_config(arg_position, key, argspec, num_args, num_kw_args):
     default = None
     param_name = key.replace(u"_", u"-")
-    difference = num_args - num_kw_args
-    last_positional_arg_idx = difference - 1
+    num_positional_args = num_args - num_kw_args
+    last_positional_arg_idx = num_positional_args - 1
+    required = False
+    option_names = [u"--{}".format(param_name)]
     # positional arguments will come first, so if the arg position
     # is greater than the index of the last positional arg, it's a kwarg.
     if arg_position > last_positional_arg_idx:
         # this is a keyword arg, treat it as an optional cli arg.
-        default_value = argspec.defaults[arg_position - difference]
-        option_names = [u"--{}".format(param_name)]
+        default_value = argspec.defaults[arg_position - num_positional_args]
         default = default_value
     else:
         # this is a positional arg, treat it as a required cli arg.
-        option_names = [param_name]
-    return ArgConfig(*option_names, default=default)
+        if num_positional_args > 1:
+            required = True
+        else:
+            option_names = [param_name]
+    return ArgConfig(*option_names, default=default, required=required)
 
 
 def _set_smart_defaults(arg_config):
