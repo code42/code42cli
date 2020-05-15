@@ -27,7 +27,8 @@ class ConfigAccessor(object):
 
     def __init__(self, parser):
         self.parser = parser
-        self.path = u"{}config.cfg".format(util.get_user_project_path())
+        file_name = u"config.cfg"
+        self.path = os.path.join(util.get_user_project_path(), file_name)
         if not os.path.exists(self.path):
             self._create_internal_section()
             self._save()

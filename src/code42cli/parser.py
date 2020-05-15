@@ -23,6 +23,7 @@ class ArgumentParserError(Exception):
 
 class CommandParser(argparse.ArgumentParser):
     def __init__(self, **kwargs):
+        # noinspection PyTypeChecker
         super(CommandParser, self).__init__(formatter_class=RawDescriptionHelpFormatter, **kwargs)
 
     def prepare_command(self, command, path_parts):
@@ -40,7 +41,7 @@ class CommandParser(argparse.ArgumentParser):
 
     def error(self, message):
         # overrides the behavior of when an error occurs when
-        # arguments cant be successfully parsed. CommandInvoker catches this.
+        # arguments can't be successfully parsed. CommandInvoker catches this.
         raise ArgumentParserError(message)
 
     def _load_argparse_config(self, command, command_parser):
@@ -99,7 +100,7 @@ def _get_group_help(command):
         output.append(BANNER)
 
     output.extend([u" \nAvailable commands in <{}>:".format(name), descriptions])
-    return "\n".join(output)
+    return u"\n".join(output)
 
 
 def _build_group_command_descriptions(command):

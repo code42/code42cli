@@ -7,9 +7,12 @@ from code42cli.util import does_user_agree, get_url_parts, find_format_width
 TEST_HEADER = {u"key1": u"Column 1", u"key2": u"Column 10", u"key3": u"Column 100"}
 
 
+_NAMESPACE = "{}.util".format(PRODUCT_NAME)
+
+
 @pytest.fixture
 def mock_input(mocker):
-    return mocker.patch("{}.util.get_input".format(PRODUCT_NAME))
+    return mocker.patch("{}.get_input".format(_NAMESPACE))
 
 
 def test_get_url_parts_when_given_host_and_port_returns_expected_parts():
