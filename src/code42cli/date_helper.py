@@ -19,12 +19,19 @@ class DateArgumentException(Exception):
         super(DateArgumentException, self).__init__(message)
 
 
+def verify_timestamp_order(min_timestamp, max_timestamp):
+    if min_timestamp is None or max_timestamp is None:
+        return
+    if min_timestamp >= max_timestamp:
+        raise DateArgumentException(u"Begin date cannot be after end date")
+
+
 def parse_min_timestamp(begin_date_str, max_days_back=90):
     dt = _parse_timestamp(begin_date_str, _round_datetime_to_day_start)
 
     boundary_date = _round_datetime_to_day_start(datetime.utcnow() - timedelta(days=max_days_back))
     if dt < boundary_date:
-        raise DateArgumentException(u"'Begin date' must be within 90 days.")
+        raise DateArgumentException(u"'Begin date' must be within {0} days.".format(max_days_back))
 
     return convert_datetime_to_timestamp(dt)
 

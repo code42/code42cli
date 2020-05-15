@@ -8,6 +8,14 @@ from code42cli.logger import get_main_cli_logger
 from code42cli.args import SDK_ARG_NAME, PROFILE_ARG_NAME
 
 
+class BulkCommandType(object):
+    ADD = u"add"
+    REMOVE = u"remove"
+
+    def __iter__(self):
+        return iter([self.ADD, self.REMOVE])
+
+
 def generate_template(handler, path=None):
     """Looks at the parameter names of `handler` and creates a file with the same column names. If 
     `handler` only has one parameter that is not `sdk` or `profile`, it will create a blank file. 

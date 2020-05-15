@@ -2,25 +2,36 @@
 from code42cli.main import main
 
 
-def test_securitydata_commands_load(capsys, mocker):
-    mocker.patch("sys.argv", ["code42", "security-data", "print", "-h"])
-    success = False
+def _execute_test(capsys, assert_command, assert_value=False):
     try:
         main()
     except SystemExit:
-        success = True
+        assert_value = True
         capture = capsys.readouterr()
-        assert "print" in capture.out
-    assert success
+        assert assert_command in capture.out
+    assert assert_value
+
+
+def test_securitydata_commands_load(capsys, mocker):
+    mocker.patch("sys.argv", [u"code42", u"security-data", u"print", u"-h"])
+    _execute_test(capsys, u"print")
 
 
 def test_profile_commands_load(capsys, mocker):
-    mocker.patch("sys.argv", ["code42", "profile", "show", "-h"])
-    success = False
-    try:
-        main()
-    except SystemExit:
-        success = True
-        capture = capsys.readouterr()
-        assert "show" in capture.out
-    assert success
+    mocker.patch("sys.argv", [u"code42", u"profile", u"show", u"-h"])
+    _execute_test(capsys, u"show")
+
+
+def test_departing_employee_commands_load(capsys, mocker):
+    mocker.patch("sys.argv", [u"code42", u"departing-employee", u"add", u"-h"])
+    _execute_test(capsys, u"add")
+
+
+def test_high_risk_employee_commands_load(capsys, mocker):
+    mocker.patch("sys.argv", [u"code42", u"high-risk-employee", u"bulk", u"-h"])
+    _execute_test(capsys, u"bulk")
+
+
+def test_alert_rules_commands_load(capsys, mocker):
+    mocker.patch("sys.argv", [u"code42", u"alert-rules", u"bulk", u"add", u"-h"])
+    _execute_test(capsys, u"add")

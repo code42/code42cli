@@ -1,12 +1,11 @@
+from py42.exceptions import Py42BadRequestError
+
 from code42cli.compat import str
 from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory
 from code42cli.bulk import generate_template, run_bulk_process, CSVReader, FlatFileReader
 from code42cli.logger import get_main_cli_logger
-from code42cli.cmds.detectionlists.enums import (
-    BulkCommandType,
-    DetectionLists,
-    DetectionListUserKeys,
-)
+from code42cli.bulk import BulkCommandType
+from code42cli.cmds.detectionlists.enums import DetectionLists, DetectionListUserKeys, RiskTags
 
 
 class UserAlreadyAddedError(Exception):
@@ -15,7 +14,15 @@ class UserAlreadyAddedError(Exception):
         super(UserAlreadyAddedError, self).__init__(msg)
 
 
-def handle_bad_request_during_add(bad_request_err, username_tried_adding, list_name):
+class UnknownRiskTagError(Exception):
+    def __init__(self, bad_tags):
+        tags = u", ".join(bad_tags)
+        super(UnknownRiskTagError, self).__init__(
+            u"The following risk tags are unknown: '{}'.".format(tags)
+        )
+
+
+def try_handle_user_already_added_error(bad_request_err, username_tried_adding, list_name):
     if _error_is_user_already_added(bad_request_err.response.text):
         raise UserAlreadyAddedError(username_tried_adding, list_name)
     return False
@@ -52,7 +59,7 @@ class DetectionListHandlers(object):
 class DetectionList(object):
     """An object representing a Code42 detection list. Use this class by passing in handlers for 
     adding and removing employees. This class will handle the bulk-related commands and some 
-    shared help texts.
+    search_shared help texts.
     
     Args:
         list_name (str or unicode): An option from the DetectionLists enum. For convenience, use one of the 
@@ -209,6 +216,7 @@ def update_user(sdk, user_id, cloud_alias=None, risk_tag=None, notes=None):
     """Updates a detection list user.
     
     Args:
+        sdk (py42.sdk.SDKClient): py42 sdk.
         user_id (str or unicode): The ID of the user to update. This is their `userUid` found from 
             `sdk.users.get_by_username()`.
         cloud_alias (str or unicode): A cloud alias to add to the user.
@@ -218,6 +226,29 @@ def update_user(sdk, user_id, cloud_alias=None, risk_tag=None, notes=None):
     if cloud_alias:
         sdk.detectionlists.add_user_cloud_alias(user_id, cloud_alias)
     if risk_tag:
-        sdk.detectionlists.add_user_risk_tags(user_id, risk_tag)
+        try_add_risk_tags(sdk, user_id, risk_tag)
     if notes:
         sdk.detectionlists.update_user_notes(user_id, notes)
+
+
+def try_add_risk_tags(sdk, user_id, risk_tag):
+    _try_add_or_remove_risk_tags(user_id, risk_tag, sdk.detectionlists.add_user_risk_tags)
+
+
+def try_remove_risk_tags(sdk, user_id, risk_tag):
+    _try_add_or_remove_risk_tags(user_id, risk_tag, sdk.detectionlists.remove_user_risk_tags)
+
+
+def _try_add_or_remove_risk_tags(user_id, risk_tag, func):
+    try:
+        func(user_id, risk_tag)
+    except Py42BadRequestError:
+        _try_handle_bad_risk_tag(risk_tag)
+        raise
+
+
+def _try_handle_bad_risk_tag(tags):
+    options = list(RiskTags())
+    unknowns = [tag for tag in tags if tag not in options] if tags else None
+    if unknowns:
+        raise UnknownRiskTagError(unknowns)

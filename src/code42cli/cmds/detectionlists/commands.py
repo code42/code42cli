@@ -1,4 +1,4 @@
-from code42cli.cmds.detectionlists.enums import BulkCommandType
+from code42cli.bulk import BulkCommandType
 from code42cli.commands import Command
 
 
