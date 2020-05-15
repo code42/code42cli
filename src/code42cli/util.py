@@ -2,7 +2,7 @@ from __future__ import print_function
 import sys
 from os import makedirs, path
 
-from code42cli.compat import open
+from code42cli.compat import open, str
 
 _PADDING_SIZE = 3
 
@@ -86,5 +86,5 @@ def format_to_table(rows, column_size):
     """
     for row in rows:
         for key in row.keys():
-            print(repr(row[key]).ljust(column_size[key] + _PADDING_SIZE), end=u" ")
+            print(str(row[key]).ljust(column_size[key] + _PADDING_SIZE), end=u" ")
         print(u"")
