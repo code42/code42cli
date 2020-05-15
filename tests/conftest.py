@@ -13,7 +13,6 @@ import code42cli.errors as error_tracker
 @pytest.fixture(autouse=True)
 def io_prevention(monkeypatch):
     monkeypatch.setattr("logging.FileHandler._open", lambda *args, **kwargs: None)
-    monkeypatch.setattr("logging.FileHandler.emit", lambda *args, **kwargs: None)
 
 
 @pytest.fixture
