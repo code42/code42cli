@@ -40,7 +40,7 @@ def _get_error_log_path():
 
 def _create_error_file_handler():
     log_path = _get_error_log_path()
-    return RotatingFileHandler(log_path, maxBytes=250000000, encoding=u"utf-8")
+    return RotatingFileHandler(log_path, maxBytes=250000000, encoding=u"utf-8", delay=True)
 
 
 def add_handler_to_logger(logger, handler, formatter):

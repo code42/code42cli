@@ -10,6 +10,11 @@ from code42cli.commands import DictObject
 import code42cli.errors as error_tracker
 
 
+@pytest.fixture(autouse=True)
+def io_prevention(monkeypatch):
+    monkeypatch.setattr("logging.FileHandler._open", lambda *args, **kwargs: None)
+
+
 @pytest.fixture
 def file_event_namespace():
     args = DictObject(

@@ -1,8 +1,8 @@
 import logging
 import os
 from logging.handlers import RotatingFileHandler
-from requests import Request
 
+from requests import Request
 from code42cli.logger import (
     add_handler_to_logger,
     logger_has_handlers,
