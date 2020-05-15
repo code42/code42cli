@@ -22,8 +22,10 @@ def _customize_add_arguments(argument_collection):
 def _customize_remove_arguments(argument_collection):
     rule_id = argument_collection.arg_configs[u"rule_id"]
     rule_id.set_help(u"Observer ID of the rule to be updated.")
+    rule_id.set_required(True)
     username = argument_collection.arg_configs[u"username"]
     username.set_help(u"The username of the user to remove from the alert rule.")
+    username.set_required(True)
 
 
 def _customize_list_arguments(argument_collection):
@@ -113,7 +115,7 @@ class AlertRulesCommands(object):
         remove = Command(
             u"remove-user",
             u"Update alert rule criteria to remove a user and all their aliases.",
-            u"{} remove-user <rule-id> --username <username>".format(usage_prefix),
+            u"{} remove-user --rule-id <rule-id> --username <username>".format(usage_prefix),
             handler=remove_user,
             arg_customizer=_customize_remove_arguments,
         )

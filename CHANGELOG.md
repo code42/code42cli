@@ -12,7 +12,12 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
-- Ability to search/poll for alerts with checkpointing and sending to console, a file, or a server in json format.
+- `code42 alerts`:
+    - Ability to search/poll for alerts with checkpointing using one of the following commands:
+      - `print` to output to stdout.
+      - `write-to` to output to a file.
+      - `send-to` to output to server via UDP or TCP.
+
 - `code42 alert-rules` commands:
     - `add-user` with parameters `--rule-id` and `--username`.
     - `remove-user` that takes a rule ID and optionally `--username`.
@@ -24,11 +29,15 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
             - `cmd`: with options `add` and `remove`.
             - `path`
         - `remove`: that takes a csv file with rule IDs and usernames.
+
 - Success messages for `profile delete` and `profile update`.
+
 - Additional information in the error log file:
     - The full command path for the command that errored.
     - User-facing error messages you see during adhoc sessions.
+
 - A custom error in the error log when you try adding unknown risk tags to user.
+
 - A custom error in the error log when you try adding a user to a detection list who is already added.
 
 ### Fixed
@@ -46,7 +55,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Fixed
 
-- Issue that prevented bulk csv loading. 
+- Issue that prevented bulk csv loading.
 
 ## 0.5.1 - 2020-04-27
 

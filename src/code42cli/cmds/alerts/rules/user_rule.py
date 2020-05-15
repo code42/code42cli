@@ -22,7 +22,7 @@ def add_user(sdk, profile, rule_id=None, username=None):
     sdk.alerts.rules.add_user(rule_id, user_id)
 
 
-def remove_user(sdk, profile, rule_id, username=None):
+def remove_user(sdk, profile, rule_id=None, username=None):
     if username:
         user_id = get_user_id(sdk, username)
         sdk.alerts.rules.remove_user(rule_id, user_id)

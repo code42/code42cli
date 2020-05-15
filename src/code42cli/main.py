@@ -55,6 +55,11 @@ def _load_top_commands():
             subcommand_loader=alertmain.load_subcommands,
         ),
         Command(
+            u"alert-rules",
+            u"Manage alert rules",
+            subcommand_loader=AlertRulesCommands.load_subcommands,
+        ),
+        Command(
             DetectionLists.DEPARTING_EMPLOYEE,
             detection_lists_description.format(u"departing employee"),
             subcommand_loader=de.load_subcommands,
@@ -63,11 +68,6 @@ def _load_top_commands():
             DetectionLists.HIGH_RISK_EMPLOYEE,
             detection_lists_description.format(u"high risk employee"),
             subcommand_loader=hre.load_subcommands,
-        ),
-        Command(
-            u"alert-rules",
-            u"Manage alert rules",
-            subcommand_loader=AlertRulesCommands.load_subcommands,
         ),
     ]
 

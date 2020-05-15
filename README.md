@@ -3,7 +3,7 @@
 Use the `code42` command to interact with your Code42 environment.
 
 * `code42 security-data` is a CLI tool for extracting AED events.
-    Additionally, you can choose to only get events that Code42 previously did not observe since you last recorded a 
+    Additionally, you can choose to only get events that Code42 previously did not observe since you last recorded a
     checkpoint (provided you do not change your query).
 * `code42 high-risk-employee` is a collection of tools for managing the high risk employee detection list. Similarly, 
     there is `code42 departing-employee`.
@@ -56,12 +56,15 @@ To see all your profiles, do:
 code42 profile list
 ```
 
-## Security Data
+## Security Data and Alerts
 
-Using the CLI, you can query for events and send them to three possible destination types:
+Using the CLI, you can query for security events and alerts and send them to three possible destination types:
+
 * stdout
 * A file
 * A server, such as SysLog
+
+The following examples pertain to security events, but can also be used for alerts by replacing `security-data` with `alerts`:
 
 To print events to stdout, do:
 
@@ -110,6 +113,7 @@ code42 security-data print -b 2020-02-02 -f CEF
 ```
 
 The available formats are CEF, JSON, and RAW-JSON.
+Currently, CEF format is only supported for security events.
 
 To write events to a file, do:
 
