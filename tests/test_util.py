@@ -4,9 +4,12 @@ from code42cli import PRODUCT_NAME
 from code42cli.util import does_user_agree, get_url_parts
 
 
+_NAMESPACE = "{}.util".format(PRODUCT_NAME)
+
+
 @pytest.fixture
 def mock_input(mocker):
-    return mocker.patch("{}.util.get_input".format(PRODUCT_NAME))
+    return mocker.patch("{}.get_input".format(_NAMESPACE))
 
 
 def test_get_url_parts_when_given_host_and_port_returns_expected_parts():
