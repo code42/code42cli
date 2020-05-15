@@ -34,6 +34,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Fixed
 
 - Fixed bug in bulk commands where value-less fields in csv files were treated as empty strings instead of None.
+- Fixed anomaly where the path to the error log on Windows contained mixed slashes.
 
 ### 0.5.3 - 2020-05-04
 
