@@ -7,6 +7,8 @@ from code42cli.util import get_user_project_path
 
 class BaseCursorStore(object):
     _PRIMARY_KEY_COLUMN_NAME = u"cursor_id"
+    _timestamp_column_name = u"OVERRIDE"
+    _primary_key = u"OVERRIDE"
 
     def __init__(self, db_table_name, db_file_path=None):
         self._table_name = db_table_name
@@ -128,7 +130,4 @@ def get_alert_cursor_store(profile_name):
 
 
 def get_all_cursor_stores_for_profile(profile_name):
-    return [
-        FileEventCursorStore(profile_name),
-        AlertCursorStore(profile_name),
-    ]
+    return [FileEventCursorStore(profile_name), AlertCursorStore(profile_name)]

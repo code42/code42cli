@@ -17,11 +17,11 @@ def create_search_args(search_for, filter_args):
             u"-b",
             u"--{}".format(SearchArguments.BEGIN_DATE),
             metavar=u"DATE",
-            help=u"The beginning of the date range in which to look for {1}, "
+            help=u"The beginning of the date range in which to look for {0}, "
             u"can be a date/time in yyyy-MM-dd (UTC) or yyyy-MM-dd HH:MM:SS (UTC+24-hr time) format "
             u"where the 'time' portion of the string can be partial (e.g. '2020-01-01 12' or '2020-01-01 01:15') "
             u"or a short value representing days (30d), hours (24h) or minutes (15m) from current "
-            u"time.".format(u"beginning", search_for),
+            u"time.".format(search_for),
         ),
         SearchArguments.END_DATE: ArgConfig(
             u"-e",
