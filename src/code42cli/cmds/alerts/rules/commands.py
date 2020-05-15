@@ -113,7 +113,7 @@ class AlertRulesCommands(object):
         remove = Command(
             u"remove-user",
             u"Update alert rule criteria to remove a user and all their aliases.",
-            u"{} remove-user <rule-id> --username <username>".format(usage_prefix),
+            u"{} remove-user --rule-id <rule-id> --username <username>".format(usage_prefix),
             handler=remove_user,
             arg_customizer=_customize_remove_arguments,
         )
