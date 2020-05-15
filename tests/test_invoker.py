@@ -1,6 +1,5 @@
 import pytest
 
-import sys
 from requests.exceptions import HTTPError
 from requests import Response, Request
 import logging
@@ -42,6 +41,7 @@ def load_real_sub_commands():
         subcommand_loader=AlertRulesCommands.load_subcommands,
     )
     ]
+
 
 @pytest.fixture
 def mock_parser(mocker):
@@ -162,10 +162,26 @@ class TestCommandInvoker(object):
             invoker.run(["testsub1", "inner1", "one", "two", "--invalid", "test"])
             assert "a code42cli error" in caplog.text
 
-    def test_run_incorrect_command_calls_difflib_with_correct_arguments(self, caplog):
+    def test_run_incorrect_command_suggests_proper_sub_commands(self, caplog):
         command = Command(u"", u"", subcommand_loader=load_real_sub_commands)
         cmd_invoker = CommandInvoker(command)
         with pytest.raises(SystemExit):
-            with caplog.at_level(logging.ERROR):
-                cmd_invoker.run([u"profile", u"crate"])
-                assert "Did you mean one of the following?, ['create', 'update']" in caplog.text
+            cmd_invoker.run([u"profile", u"crate"])
+        with caplog.at_level(logging.ERROR):
+            assert "Did you mean one of the following?, ['create', 'update']" in caplog.text
+
+    def test_run_incorrect_command_suggests_proper_main_commands(self, caplog):
+        command = Command(u"", u"", subcommand_loader=load_real_sub_commands)
+        cmd_invoker = CommandInvoker(command)
+        with pytest.raises(SystemExit):
+            cmd_invoker.run([u"prfile", u"crate"])
+        with caplog.at_level(logging.ERROR):
+            assert "Did you mean one of the following?, ['profile']" in caplog.text
+            
+    def test_run_incorrect_command_suggests_proper_argument_name(self, caplog):
+        command = Command(u"", u"", subcommand_loader=load_real_sub_commands)
+        cmd_invoker = CommandInvoker(command)
+        with pytest.raises(SystemExit):
+            cmd_invoker.run([u"alert-rules", u"remove-user", u"abc", u"--usrnme"])
+        with caplog.at_level(logging.ERROR):
+            assert "Did you mean one of the following?, ['username']" in caplog.text
