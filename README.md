@@ -58,7 +58,7 @@ code42 profile list
 
 ## Security Data and Alerts
 
-Using the CLI, you can query for security events and alerts send them to three possible destination types:
+Using the CLI, you can query for security events and alerts and send them to three possible destination types:
 
 * stdout
 * A file
