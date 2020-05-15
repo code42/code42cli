@@ -10,9 +10,13 @@ from code42cli.parser import ArgumentParserError, CommandParser
 from code42cli.logger import get_main_cli_logger
 
 
+_DIFFLIB_CUT_OFF = 0.4
+
+
 class CommandInvoker(object):
 
     _COMMAND_KEYWORDS = dict()
+    _COMMAND_ARG_KEYWORDS = dict()
 
     def __init__(self, top_command, cmd_parser=None):
         self._top_command = top_command
@@ -88,6 +92,7 @@ class CommandInvoker(object):
                 parser = self._cmd_parser.prepare_cli_help(command)
             else:
                 parser = self._cmd_parser.prepare_command(command, path_parts)
+                self._set_argument_keywords(path_parts[0], command.get_arg_configs())
             parsed_args = self._cmd_parser.parse_args(input_args)
             parsed_args.func(parsed_args)
         except ArgumentParserError as err:
@@ -98,6 +103,10 @@ class CommandInvoker(object):
             parser.print_help(sys.stderr)
             sys.exit(2)
 
+    def _set_argument_keywords(self, command_key, arguments):
+        self._COMMAND_ARG_KEYWORDS[command_key] = set()
+        self._COMMAND_ARG_KEYWORDS[command_key].update(arguments)
+        
     def _set_command_keywords(self, new_key):
         command_keys = new_key.split()
         if len(command_keys) == 1:
@@ -107,17 +116,23 @@ class CommandInvoker(object):
 
     def _find_incorrect_word_match(self, error, main_command_word=None):
         logger = get_main_cli_logger()
+        logger.print_and_log_error("{}".format(error))
+
         error_detail, unmatched_words = str(error).split(u":")
         unmatched_word = unmatched_words.split()[0]
-        possible_correct_words = []
         if error_detail == u"unrecognized arguments":
-            if main_command_word:
+            if not main_command_word:
                 possible_correct_words = difflib.get_close_matches(
-                    unmatched_word, self._COMMAND_KEYWORDS[main_command_word], cutoff=0.25
+                    unmatched_word, self._COMMAND_KEYWORDS.keys(), cutoff=_DIFFLIB_CUT_OFF
+                )
+            elif unmatched_word.strip().startswith('-'):
+                possible_correct_words = difflib.get_close_matches(
+                    unmatched_word, self._COMMAND_ARG_KEYWORDS[main_command_word], cutoff=_DIFFLIB_CUT_OFF
                 )
             else:
-                possible_correct_words = difflib.get_close_matches(unmatched_word, self._COMMAND_KEYWORDS.keys())
+                possible_correct_words = difflib.get_close_matches(
+                    unmatched_word, self._COMMAND_KEYWORDS[main_command_word], cutoff=_DIFFLIB_CUT_OFF
+                )
 
-        logger.print_and_log_error("{}".format(error))
-        if possible_correct_words:
-            logger.print_and_log_error("Did you mean one of the following?, {}".format(possible_correct_words))
+            if possible_correct_words:
+                logger.print_and_log_error("Did you mean one of the following?, {}".format(possible_correct_words))
