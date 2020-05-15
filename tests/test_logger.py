@@ -70,17 +70,13 @@ class TestCliLogger(object):
 
     _logger = CliLogger()
 
-    def test_init_creates_user_error_logger_with_expected_handlers(
-        self, mocker, log_handlers_collection
-    ):
+    def test_init_creates_user_error_logger_with_expected_handlers_(self, mocker):
         is_interactive = mocker.patch("code42cli.logger.is_interactive")
         is_interactive.return_value = True
-        with log_handlers_collection:
-            logger = CliLogger()
-            handlers = log_handlers_collection[logger._user_error_logger]
-            handler_types = [type(h) for h in handlers]
-            assert RedStderrHandler in handler_types
-            assert RotatingFileHandler in handler_types
+        logger = CliLogger()
+        handler_types = [type(h) for h in logger._user_error_logger.handlers]
+        assert RedStderrHandler in handler_types
+        assert RotatingFileHandler in handler_types
 
     def test_print_info_logs_expected_text_at_expected_level(self, caplog):
         with caplog.at_level(logging.INFO):

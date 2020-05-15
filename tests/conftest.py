@@ -17,32 +17,6 @@ def io_prevention(monkeypatch):
 
 
 @pytest.fixture
-def log_handlers_collection(monkeypatch):
-    collected_handlers = {}
-
-    def collect(self, handler):
-        if collected_handlers.get(self) is None:
-            collected_handlers[self] = [handler]
-        else:
-            collected_handlers[self].append(handler)
-
-    monkeypatch.setattr("logging.Logger.addHandler", collect)
-
-    class CollectLogHandlersHelper(object):
-        def __getitem__(self, item):
-            return collected_handlers[item]
-
-        def __enter__(self):
-            pass
-
-        def __exit__(self, exc_type, exc_val, exc_tb):
-            for l in collected_handlers:
-                collected_handlers[l] = []
-
-    return CollectLogHandlersHelper()
-
-
-@pytest.fixture
 def file_event_namespace():
     args = DictObject(
         dict(
