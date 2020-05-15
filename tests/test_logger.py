@@ -70,7 +70,7 @@ class TestCliLogger(object):
 
     _logger = CliLogger()
 
-    def test_init_creates_user_error_logger_with_expected_handlers_(self, mocker):
+    def test_init_creates_user_error_logger_with_expected_handlers(self, mocker):
         is_interactive = mocker.patch("code42cli.logger.is_interactive")
         is_interactive.return_value = True
         logger = CliLogger()
