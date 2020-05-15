@@ -96,17 +96,21 @@ class CommandInvoker(object):
             parsed_args = self._cmd_parser.parse_args(input_args)
             parsed_args.func(parsed_args)
         except ArgumentParserError as err:
+            logger = get_main_cli_logger()
+            logger.print_and_log_error("{}".format(err))
             if not path_parts:
-                self._find_incorrect_word_match(err)
+                possible_correct_words = self._find_incorrect_word_match(err)
             else:
-                self._find_incorrect_word_match(err, path_parts[0])
+                possible_correct_words = self._find_incorrect_word_match(err, path_parts[0])
+            if possible_correct_words:
+                logger.print_and_log_error("Did you mean one of the following?, {}".format(possible_correct_words))
             parser.print_help(sys.stderr)
             sys.exit(2)
 
     def _set_argument_keywords(self, command_key, arguments):
         self._COMMAND_ARG_KEYWORDS[command_key] = set()
         self._COMMAND_ARG_KEYWORDS[command_key].update(arguments)
-        
+
     def _set_command_keywords(self, new_key):
         command_keys = new_key.split()
         if len(command_keys) == 1:
@@ -115,24 +119,39 @@ class CommandInvoker(object):
             self._COMMAND_KEYWORDS[command_keys[0]].update(command_keys[1:])
 
     def _find_incorrect_word_match(self, error, main_command_word=None):
-        logger = get_main_cli_logger()
-        logger.print_and_log_error("{}".format(error))
+        possible_correct_words = []
 
-        error_detail, unmatched_words = str(error).split(u":")
+        try:
+            # Here we assume the error string contains ":", so exception handling for 
+            # unknown messages, in those case we assume the error is not due to 
+            # misspelled word and we return error as is.
+            error_detail, unmatched_words = str(error).split(u":")
+        except ValueError:
+            return possible_correct_words
+
+        if not unmatched_words:
+            return possible_correct_words
+
+        # Check the error to figure out whether the failure is due to incorrect word.
+        if error_detail != u"unrecognized arguments":
+            return possible_correct_words
+
+        # Arg-parser sets the first/leftmost incorrect command keyword in the error message.
         unmatched_word = unmatched_words.split()[0]
-        if error_detail == u"unrecognized arguments":
-            if not main_command_word:
-                possible_correct_words = difflib.get_close_matches(
-                    unmatched_word, self._COMMAND_KEYWORDS.keys(), cutoff=_DIFFLIB_CUT_OFF
-                )
-            elif unmatched_word.strip().startswith('-'):
-                possible_correct_words = difflib.get_close_matches(
-                    unmatched_word, self._COMMAND_ARG_KEYWORDS[main_command_word], cutoff=_DIFFLIB_CUT_OFF
-                )
-            else:
-                possible_correct_words = difflib.get_close_matches(
-                    unmatched_word, self._COMMAND_KEYWORDS[main_command_word], cutoff=_DIFFLIB_CUT_OFF
-                )
 
-            if possible_correct_words:
-                logger.print_and_log_error("Did you mean one of the following?, {}".format(possible_correct_words))
+        # Case when the topmost command keyword is incorrect.
+        if not main_command_word:
+            possible_correct_words = difflib.get_close_matches(
+                unmatched_word, self._COMMAND_KEYWORDS.keys(), cutoff=_DIFFLIB_CUT_OFF
+            )
+        # Case when invalid argument name is passed
+        elif unmatched_word.strip().startswith('-'):
+            possible_correct_words = difflib.get_close_matches(
+                unmatched_word, self._COMMAND_ARG_KEYWORDS[main_command_word], cutoff=_DIFFLIB_CUT_OFF
+            )
+        # Case when sub_command keyword is incorrect.
+        else:
+            possible_correct_words = difflib.get_close_matches(
+                unmatched_word, self._COMMAND_KEYWORDS[main_command_word], cutoff=_DIFFLIB_CUT_OFF
+            )
+        return possible_correct_words

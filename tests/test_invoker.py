@@ -1,5 +1,6 @@
 import pytest
 
+import sys
 from requests.exceptions import HTTPError
 from requests import Response, Request
 import logging
@@ -10,6 +11,8 @@ from code42cli.commands import Command
 from code42cli.errors import Code42CLIError
 from code42cli.invoker import CommandInvoker
 from code42cli.parser import ArgumentParserError, CommandParser
+from code42cli.cmds import profile
+from code42cli.cmds.alerts.rules.commands import AlertRulesCommands
 
 
 def dummy_method(one, two, three=None):
@@ -27,6 +30,18 @@ def load_subcommands(*args):
 def load_sub_subcommands():
     return [Command("inner1", "the innerdesc1", handler=dummy_method)]
 
+
+def load_real_sub_commands():
+    return [
+    Command(
+        u"profile", u"", subcommand_loader=profile.load_subcommands
+    ),
+    Command(
+        u"alert-rules",
+        u"",
+        subcommand_loader=AlertRulesCommands.load_subcommands,
+    )
+    ]
 
 @pytest.fixture
 def mock_parser(mocker):
@@ -146,3 +161,11 @@ class TestCommandInvoker(object):
         with caplog.at_level(logging.ERROR):
             invoker.run(["testsub1", "inner1", "one", "two", "--invalid", "test"])
             assert "a code42cli error" in caplog.text
+
+    def test_run_incorrect_command_calls_difflib_with_correct_arguments(self, caplog):
+        command = Command(u"", u"", subcommand_loader=load_real_sub_commands)
+        cmd_invoker = CommandInvoker(command)
+        with pytest.raises(SystemExit):
+            with caplog.at_level(logging.ERROR):
+                cmd_invoker.run([u"profile", u"crate"])
+                assert "Did you mean one of the following?, ['create', 'update']" in caplog.text
