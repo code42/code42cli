@@ -124,9 +124,8 @@ class CommandInvoker(object):
         possible_correct_words = []
 
         try:
-            # Here we assume the error string contains ":", so exception handling for 
-            # unknown messages, in those case we assume the error is not due to 
-            # misspelled word and we return error as is.
+            # Here we assume the error string contains ":", for case where it doesn't we
+            # assume the error is not due to misspelled word and we return error as is.
             error_detail, unmatched_words = str(error).split(u":")
         except ValueError:
             return possible_correct_words
