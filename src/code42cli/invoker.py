@@ -9,7 +9,6 @@ from code42cli.errors import Code42CLIError
 from code42cli.parser import ArgumentParserError, CommandParser
 from code42cli.logger import get_main_cli_logger
 
-
 _DIFFLIB_CUT_OFF = 0.4
 
 
@@ -103,7 +102,9 @@ class CommandInvoker(object):
             else:
                 possible_correct_words = self._find_incorrect_word_match(err, path_parts[0])
             if possible_correct_words:
-                logger.print_and_log_error("Did you mean one of the following?, {}".format(possible_correct_words))
+                logger.print_and_log_error(u"Did you mean one of the following?")
+                [logger.print_info(u"     {}".format(possible_correct_word)) 
+                 for possible_correct_word in possible_correct_words]
             else:
                 parser.print_help(sys.stderr)
             sys.exit(2)

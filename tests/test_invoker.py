@@ -168,7 +168,9 @@ class TestCommandInvoker(object):
         with pytest.raises(SystemExit):
             cmd_invoker.run([u"profile", u"crate"])
         with caplog.at_level(logging.ERROR):
-            assert "Did you mean one of the following?, ['create', 'update']" in caplog.text
+            assert u"Did you mean one of the following?" in caplog.text
+            assert u"create" in caplog.text
+            assert u"update" in caplog.text
 
     def test_run_incorrect_command_suggests_proper_main_commands(self, caplog):
         command = Command(u"", u"", subcommand_loader=load_real_sub_commands)
@@ -176,7 +178,8 @@ class TestCommandInvoker(object):
         with pytest.raises(SystemExit):
             cmd_invoker.run([u"prfile", u"crate"])
         with caplog.at_level(logging.ERROR):
-            assert "Did you mean one of the following?, ['profile']" in caplog.text
+            assert u"Did you mean one of the following?" in caplog.text
+            assert u"profile" in caplog.text
             
     def test_run_incorrect_command_suggests_proper_argument_name(self, caplog):
         command = Command(u"", u"", subcommand_loader=load_real_sub_commands)
@@ -184,4 +187,5 @@ class TestCommandInvoker(object):
         with pytest.raises(SystemExit):
             cmd_invoker.run([u"alert-rules", u"remove-user", u"abc", u"--usrnme"])
         with caplog.at_level(logging.ERROR):
-            assert "Did you mean one of the following?, ['username']" in caplog.text
+            assert u"Did you mean one of the following?" in caplog.text
+            assert u"username" in caplog.text
