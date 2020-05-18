@@ -33,8 +33,8 @@ def _get_standard_formatter():
     return logging.Formatter(u"%(message)s")
 
 
-def _get_error_log_path(): 
-    log_path = get_user_project_path(u"log") 
+def _get_error_log_path():
+    log_path = get_user_project_path(u"log")
     return os.path.join(log_path, ERROR_LOG_FILE_NAME)
 
 
