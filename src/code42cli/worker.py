@@ -2,6 +2,7 @@ from threading import Thread, Lock
 
 from py42.exceptions import Py42HTTPError, Py42ForbiddenError
 
+from code42cli.errors import Code42CLIError
 from code42cli.compat import queue
 from code42cli.logger import get_main_cli_logger
 
@@ -77,6 +78,10 @@ class Worker(object):
                 args = task[u"args"]
                 kwargs = task[u"kwargs"]
                 func(*args, **kwargs)
+            except Code42CLIError as err:
+                self._increment_total_errors()
+                logger = get_main_cli_logger()
+                logger.print_and_log_error(str(err))
             except Py42ForbiddenError as err:
                 self._increment_total_errors()
                 logger = get_main_cli_logger()
