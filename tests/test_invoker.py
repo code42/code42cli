@@ -11,7 +11,7 @@ from code42cli.errors import Code42CLIError
 from code42cli.invoker import CommandInvoker
 from code42cli.parser import ArgumentParserError, CommandParser
 from code42cli.cmds import profile
-from code42cli.cmds.alerts.rules.commands import AlertRulesCommands
+from code42cli.cmds.securitydata import main as secmain
 
 
 def dummy_method(one, two, three=None):
@@ -36,9 +36,9 @@ def load_real_sub_commands():
         u"profile", u"", subcommand_loader=profile.load_subcommands
     ),
     Command(
-        u"alert-rules",
+        u"security-data",
         u"",
-        subcommand_loader=AlertRulesCommands.load_subcommands,
+        subcommand_loader=secmain.load_subcommands,
     )
     ]
 
@@ -185,7 +185,8 @@ class TestCommandInvoker(object):
         command = Command(u"", u"", subcommand_loader=load_real_sub_commands)
         cmd_invoker = CommandInvoker(command)
         with pytest.raises(SystemExit):
-            cmd_invoker.run([u"alert-rules", u"remove-user", u"abc", u"--usrnme"])
+            cmd_invoker.run([u"security-data", u"write-to", u"abc", u"--name"])
         with caplog.at_level(logging.ERROR):
             assert u"Did you mean one of the following?" in caplog.text
             assert u"username" in caplog.text
+            assert u"file_name" in caplog.text
