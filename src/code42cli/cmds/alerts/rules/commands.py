@@ -36,7 +36,7 @@ def _customize_list_arguments(argument_collection):
 def _customize_bulk_arguments(argument_collection):
     file_name = argument_collection.arg_configs[u"file_name"]
     file_name.set_help(
-        u"The path to the csv file with columns 'rule_id,user_id' "
+        u"The path to the csv file with columns 'rule_id,username' "
         u"for bulk adding users to the alert rule."
     )
 
