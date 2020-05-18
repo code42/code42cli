@@ -14,8 +14,8 @@ _DIFFLIB_CUT_OFF = 0.4
 
 class CommandInvoker(object):
 
-    _COMMAND_KEYWORDS = dict()
-    _COMMAND_ARG_KEYWORDS = dict()
+    _COMMAND_KEYWORDS = {}
+    _COMMAND_ARG_KEYWORDS = {}
 
     def __init__(self, top_command, cmd_parser=None):
         self._top_command = top_command
@@ -96,15 +96,16 @@ class CommandInvoker(object):
             parsed_args.func(parsed_args)
         except ArgumentParserError as err:
             logger = get_main_cli_logger()
-            logger.print_and_log_error("{}".format(err))
+            logger.print_and_log_error(u"{}".format(err))
             if not path_parts:
                 possible_correct_words = self._find_incorrect_word_match(err)
             else:
                 possible_correct_words = self._find_incorrect_word_match(err, path_parts[0])
             if possible_correct_words:
                 logger.print_and_log_error(u"Did you mean one of the following?")
-                [logger.print_info(u"     {}".format(possible_correct_word)) 
-                 for possible_correct_word in possible_correct_words]
+                for possible_correct_word in possible_correct_words:
+                    logger.print_info(u"     {}".format(possible_correct_word))
+
             else:
                 parser.print_help(sys.stderr)
             sys.exit(2)
@@ -114,6 +115,9 @@ class CommandInvoker(object):
         self._COMMAND_ARG_KEYWORDS[command_key].update(arguments)
 
     def _set_command_keywords(self, new_key):
+        """Creates a dictionary, with top level command as key and set of all its subcommands
+        as values.
+        """
         command_keys = new_key.split()
         if len(command_keys) == 1:
             self._COMMAND_KEYWORDS[command_keys[0]] = set()
