@@ -48,7 +48,8 @@ def load_subcommands():
         u"create",
         u"Create profile settings. The first profile created will be the default.",
         u"{} {}".format(
-            usage_prefix, u"create --name <name> --server <server-address> --username <username>"
+            usage_prefix,
+            u"create --name <profile-name> --server <server-address> --username <username>",
         ),
         handler=create_profile,
         arg_customizer=_load_profile_create_descriptions,
