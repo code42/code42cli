@@ -10,6 +10,14 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
+### Changed
+
+- `code42 profile create` now uses required `--name`, `--server` and `--username` flags instead of positional arguments.
+
+- `code42 high-risk-employee add-risk-tags` now uses required `--username` and `--tag` flags instead of positional arguments.
+
+- `code42 high-risk-employee remove-risk-tags` now uses required `--username` and `--tag` flags instead of positional arguments.
+
 ### Added
 
 - `code42 alerts`:

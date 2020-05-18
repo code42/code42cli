@@ -131,6 +131,14 @@ def func_keyword_args(one=None, two=None, three=None, default="testdefault", nar
     pass
 
 
+def func_single_positional_arg(one):
+    pass
+
+
+def func_single_positional_arg_many_optional_args(one, two=None, three=None, four=None):
+    pass
+
+
 def func_positional_args(one, two, three):
     pass
 
@@ -140,6 +148,12 @@ def func_mixed_args(one, two, three=None, four=None):
 
 
 def func_with_sdk(sdk, one, two, three=None, four=None):
+    pass
+
+
+def func_single_positional_arg_with_sdk_and_profile(
+    sdk, profile, one, two=None, three=None, four=None
+):
     pass
 
 
