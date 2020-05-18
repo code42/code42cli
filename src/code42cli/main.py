@@ -56,7 +56,7 @@ def _load_top_commands():
         ),
         Command(
             u"alert-rules",
-            u"Manage alert rules",
+            u"Manage alert rules.",
             subcommand_loader=AlertRulesCommands.load_subcommands,
         ),
         Command(
