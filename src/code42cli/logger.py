@@ -1,4 +1,4 @@
-import logging, sys, traceback
+import os, logging, sys, traceback
 from logging.handlers import RotatingFileHandler
 from threading import Lock
 import copy
@@ -33,9 +33,9 @@ def _get_standard_formatter():
     return logging.Formatter(u"%(message)s")
 
 
-def _get_error_log_path():
-    log_path = get_user_project_path(u"log")
-    return u"{}/{}".format(log_path, ERROR_LOG_FILE_NAME)
+def _get_error_log_path(): 
+    log_path = get_user_project_path(u"log") 
+    return os.path.join(log_path, ERROR_LOG_FILE_NAME)
 
 
 def _create_error_file_handler():
