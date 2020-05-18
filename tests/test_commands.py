@@ -11,6 +11,7 @@ from .conftest import (
     func_positional_args,
     func_with_args,
     func_with_sdk,
+    func_single_positional_arg_with_sdk_and_profile,
     func_single_positional_arg,
     func_single_positional_arg_many_optional_args,
 )
@@ -134,6 +135,15 @@ class TestCommand(object):
         command = Command("test", "test desc", "test usage", func_with_args)
         coll = command.get_arg_configs()
         assert not coll.get("args")
+
+    def test_get_arg_configs_when_handler_has_single_positional_arg_and_sdk_and_profile_returns_expected_collection(
+        self
+    ):
+        command = Command(
+            "test", "test desc", "test usage", func_single_positional_arg_with_sdk_and_profile
+        )
+        coll = command.get_arg_configs()
+        assert "one" in coll["one"].settings["options_list"]
 
     def test_get_arg_configs_when_handler_has_single_positional_arg_returns_expected_collection(
         self

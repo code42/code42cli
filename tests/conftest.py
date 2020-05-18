@@ -151,6 +151,12 @@ def func_with_sdk(sdk, one, two, three=None, four=None):
     pass
 
 
+def func_single_positional_arg_with_sdk_and_profile(
+    sdk, profile, one, two=None, three=None, four=None
+):
+    pass
+
+
 def func_with_args(args):
     pass
 
