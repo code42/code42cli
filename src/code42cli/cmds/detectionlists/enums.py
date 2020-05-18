@@ -7,7 +7,7 @@ class DetectionListUserKeys(object):
     CLOUD_ALIAS = u"cloud_alias"
     USERNAME = u"username"
     NOTES = u"notes"
-    RISK_TAG = u"tag"
+    RISK_TAG = u"risk_tag"
 
 
 class RiskTags(object):

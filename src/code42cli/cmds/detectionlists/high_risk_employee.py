@@ -94,7 +94,10 @@ def remove_high_risk_employee(sdk, profile, username):
 
 
 def _load_risk_tag_description(argument_collection):
-    risk_tag = argument_collection.arg_configs[DetectionListUserKeys.RISK_TAG]
+    risk_tag = (
+        argument_collection.arg_configs.get(DetectionListUserKeys.RISK_TAG)
+        or argument_collection.arg_configs[u"tag"]
+    )
     risk_tag.as_multi_val_param()
     tags = u", ".join(list(RiskTags()))
     risk_tag.set_help(
