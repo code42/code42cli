@@ -24,14 +24,14 @@ def load_subcommands():
             Command(
                 u"add-risk-tags",
                 u"Associates risk tags with a user.",
-                u"code42 high-risk-employee add-risk-tags --username <username> --risk-tag <risk-tags>",
+                u"code42 high-risk-employee add-risk-tags --username <username> --tag <risk-tags>",
                 handler=add_risk_tags,
                 arg_customizer=_load_risk_tag_mgmt_descriptions,
             ),
             Command(
                 u"remove-risk-tags",
                 u"Disassociates risk tags from a user.",
-                u"code42 high-risk-employee remove-risk-tags --username <username> --risk-tag <risk-tags>",
+                u"code42 high-risk-employee remove-risk-tags --username <username> --tag <risk-tags>",
                 handler=remove_risk_tags,
                 arg_customizer=_load_risk_tag_mgmt_descriptions,
             ),
@@ -46,14 +46,14 @@ def _create_handlers():
     )
 
 
-def add_risk_tags(sdk, profile, username, risk_tag):
-    risk_tag = _handle_list_args(risk_tag)
+def add_risk_tags(sdk, profile, username, tag):
+    risk_tag = _handle_list_args(tag)
     user_id = get_user_id(sdk, username)
     try_add_risk_tags(sdk, user_id, risk_tag)
 
 
-def remove_risk_tags(sdk, profile, username, risk_tag):
-    risk_tag = _handle_list_args(risk_tag)
+def remove_risk_tags(sdk, profile, username, tag):
+    risk_tag = _handle_list_args(tag)
     user_id = get_user_id(sdk, username)
     try_remove_risk_tags(sdk, user_id, risk_tag)
 
