@@ -61,20 +61,22 @@ def get_auto_arg_configs(handler):
     """Looks at the parameter names of `handler` and builds an `ArgConfigCollection` containing
     `argparse` parameters based on them."""
     arg_configs = ArgConfigCollection()
+    excluded_args = [SDK_ARG_NAME, u"profile", u"args", u"kwargs", u"self"]
     if callable(handler):
-        # get the number of positional and keyword args
         argspec = inspect.getargspec(handler)
-        num_args = len(argspec.args)
-        num_kw_args = len(argspec.defaults) if argspec.defaults else 0
+        filtered_argspec = {
+            key: position for position, key in enumerate(argspec.args) if key not in excluded_args
+        }
+        num_optional_args = len(argspec.defaults) if argspec.defaults else 0
+        num_positional_args = len(argspec.args) - num_optional_args
+        num_required_cli_args = len(filtered_argspec) - num_optional_args
 
-        for arg_position, key in enumerate(argspec.args):
-            # do not create cli parameters for arguments named "sdk", "args", or "kwargs"
-            if not key in [SDK_ARG_NAME, u"args", u"kwargs", u"self"]:
-                arg_config = _create_auto_args_config(
-                    arg_position, key, argspec, num_args, num_kw_args
-                )
-                _set_smart_defaults(arg_config)
-                arg_configs.append(key, arg_config)
+        for key in filtered_argspec:
+            arg_config = _create_auto_args_config(
+                key, filtered_argspec[key], num_positional_args, num_required_cli_args, argspec
+            )
+            _set_smart_defaults(arg_config)
+            arg_configs.append(key, arg_config)
 
         if SDK_ARG_NAME in argspec.args:
             _build_sdk_arg_configs(arg_configs)
@@ -82,34 +84,28 @@ def get_auto_arg_configs(handler):
     return arg_configs
 
 
-def _create_auto_args_config(arg_position, key, argspec, num_args, num_kw_args):
+def _create_auto_args_config(key, position, num_positional_args, num_required_cli_args, argspec):
     default = None
-    param_name = key.replace(u"_", u"-")
-    num_positional_args = num_args - num_kw_args
-    last_positional_arg_idx = num_positional_args - 1
     required = None
+    param_name = key.replace(u"_", u"-")
+    last_positional_arg_idx = num_positional_args - 1
     option_names = [u"--{}".format(param_name)]
     # positional arguments will come first, so if the arg position
     # is greater than the index of the last positional arg, it's a kwarg.
-    if arg_position > last_positional_arg_idx:
+    if position > last_positional_arg_idx:
         # this is a keyword arg, treat it as an optional cli arg.
-        default_value = argspec.defaults[arg_position - num_positional_args]
+        default_value = argspec.defaults[position - num_positional_args]
         default = default_value
-    else:
+    elif num_required_cli_args > 1:
         # this is a positional arg, treat it as a required cli arg.
-        if num_positional_args > 1:
-            required = True
-        else:
-            option_names = [param_name]
+        required = True
+    else:
+        option_names = [param_name]
     return ArgConfig(*option_names, default=default, required=required)
 
 
 def _set_smart_defaults(arg_config):
     default = arg_config.settings.get(u"default")
-    # make a parameter allow lists as input if its default value is a list,
-    # e.g. --my-param one two three four
-    nargs = u"+" if type(default) == list else None
-    arg_config.settings[u"nargs"] = nargs
     # make the param not require a value (e.g. --enable) if the default value of
     # the param is a bool.
     if type(default) == bool:

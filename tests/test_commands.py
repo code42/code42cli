@@ -89,11 +89,6 @@ class TestCommand(object):
         coll = command.get_arg_configs()
         assert coll["default"].settings["default"] == "testdefault"
 
-    def test_get_arg_configs_when_keyword_args_with_list_defaults_has_nargs_set(self):
-        command = Command("test", "test desc", "test usage", func_keyword_args)
-        coll = command.get_arg_configs()
-        assert coll["nargstest"].settings["nargs"] == "+"
-
     def test_get_arg_configs_when_positional_args_returns_expected_collection(self):
         command = Command("test", "test desc", "test usage", func_positional_args)
         coll = command.get_arg_configs()
