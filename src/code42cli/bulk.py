@@ -206,7 +206,7 @@ class ProgressBar(object):
 
     def clear_bar_and_print_results(self):
         clear = self._LENGTH * u" "
-        sys.stdout.write("\r{}{}\n".format(self._create_stats_text(), clear))
+        sys.stdout.write(u"\r{}{}\n".format(self._create_stats_text(), clear))
         sys.stdout.flush()
         if self._stats.total_errors:
             _logger.print_errors_occurred_message()
