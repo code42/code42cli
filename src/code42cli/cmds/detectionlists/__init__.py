@@ -146,9 +146,8 @@ class DetectionList(object):
             profile (Code42Profile): The profile under which to execute this command.
             csv_file (str or unicode): The path to the csv file containing rows of users.
         """
-        run_bulk_process(
-            csv_file, lambda **kwargs: self._add_employee(sdk, profile, **kwargs), CSVReader()
-        )
+        reader = CSVReader(csv_file)
+        run_bulk_process(lambda **kwargs: self._add_employee(sdk, profile, **kwargs), reader)
 
     def bulk_remove_employees(self, sdk, profile, users_file):
         """Takes a flat file with each row containing a username and removes them all from the 
@@ -160,9 +159,8 @@ class DetectionList(object):
             users_file (str or unicode): The path to the file containing rows of user names.
         """
         run_bulk_process(
-            users_file,
             lambda *args, **kwargs: self._remove_employee(sdk, profile, *args, **kwargs),
-            FlatFileReader(),
+            FlatFileReader(users_file),
         )
 
     def _add_employee(self, sdk, profile, **kwargs):

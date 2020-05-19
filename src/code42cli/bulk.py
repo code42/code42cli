@@ -6,7 +6,6 @@ from code42cli.compat import open, str
 from code42cli.worker import Worker
 from code42cli.logger import get_main_cli_logger
 from code42cli.args import SDK_ARG_NAME, PROFILE_ARG_NAME
-from code42cli.util import color_text_red
 
 
 _PROGRESS_FILLER = u"█"
@@ -50,7 +49,7 @@ def _write_template_file(path, columns=None):
             new_file.write(u",".join(columns))
 
 
-def run_bulk_process(file_path, row_handler, reader=None):
+def run_bulk_process(row_handler, reader):
     """Runs a bulk process.
     
     Args: 
@@ -60,14 +59,13 @@ def run_bulk_process(file_path, row_handler, reader=None):
         reader: (CSVReader or FlatFileReader, optional): A generator that reads rows and yields data into 
             `row_handler`. If None, it will use a CSVReader. Defaults to None.
     """
-    reader = reader or CSVReader()
-    processor = _create_bulk_processor(file_path, row_handler, reader)
+    processor = _create_bulk_processor(row_handler, reader)
     processor.run()
 
 
-def _create_bulk_processor(file_path, row_handler, reader):
+def _create_bulk_processor(row_handler, reader):
     """A factory method to create the bulk processor, useful for testing purposes."""
-    return BulkProcessor(file_path, row_handler, reader)
+    return BulkProcessor(row_handler, reader)
 
 
 class BulkProcessor(object):
@@ -83,8 +81,8 @@ class BulkProcessor(object):
         reader (CSVReader or FlatFileReader): A generator that reads rows and yields data into `row_handler`.
     """
 
-    def __init__(self, file_path, row_handler, reader):
-        self.file_path = file_path
+    def __init__(self, row_handler, reader):
+        self.file_path = reader.file_path
         self._row_handler = row_handler
         self._reader = reader
         self.__worker = Worker(5)
@@ -99,7 +97,7 @@ class BulkProcessor(object):
         self._print_result()
 
     def _print_progress(self):
-        row_count = self._reader.get_rows_count(self.file_path)
+        row_count = self._reader.get_rows_count()
         _print_progress(self.__worker.stats, row_count)
 
     def _process_row(self, row):
@@ -122,9 +120,9 @@ class BulkProcessor(object):
             self.__worker.do_async(lambda *args, **kwargs: self._handle_row(*args, **kwargs), row)
 
     def _handle_row(self, *args, **kwargs):
-        self._row_handler(*args, **kwargs)
         self._print_progress()
-        
+        self._row_handler(*args, **kwargs)
+
     def _print_result(self):
         stats = self.__worker.stats
         self._print_progress()
@@ -135,25 +133,34 @@ class BulkProcessor(object):
 
 class BulkFileReader(object):
     _ROWS_COUNT = -1
+    
+    def __init__(self, file_path):
+        self.file_path = file_path
 
     def __call__(self, *args, **kwargs):
         pass
 
-    def get_rows_count(self, file_path):
+    def get_rows_count(self):
         if self._ROWS_COUNT == -1:
-            self._ROWS_COUNT = sum(1 for _ in open(file_path))
+            self._ROWS_COUNT = sum(1 for _ in open(self.file_path))
         return self._ROWS_COUNT
 
 
 class CSVReader(BulkFileReader):
     """A generator that yields header keys mapped to row values from a csv file."""
+    
+    def __init__(self, file_path):
+        with open(file_path) as f:
+            self.has_header = csv.Sniffer().has_header(next(f))
+        super(CSVReader, self).__init__(file_path)
 
     def __call__(self, *args, **kwargs):
         for row in csv.DictReader(kwargs.get(u"bulk_file")):
             yield row
 
-    def get_rows_count(self, file_path):
-        return super(CSVReader, self).get_rows_count(file_path) - 1
+    def get_rows_count(self):
+        rows_count = super(CSVReader, self).get_rows_count()
+        return rows_count - 1 if self.has_header else rows_count
 
 
 class FlatFileReader(BulkFileReader):

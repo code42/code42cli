@@ -45,16 +45,14 @@ def get_rules(sdk, profile):
 
 
 def add_bulk_users(sdk, profile, file_name):
-    run_bulk_process(
-        file_name, lambda rule_id, username: add_user(sdk, profile, rule_id, username), CSVReader()
-    )
+    reader = CSVReader(file_name)
+    run_bulk_process(lambda rule_id, username: add_user(sdk, profile, rule_id, username), reader)
 
 
 def remove_bulk_users(sdk, profile, file_name):
     run_bulk_process(
-        file_name,
         lambda rule_id, username: remove_user(sdk, profile, rule_id, username),
-        CSVReader(),
+        CSVReader(file_name),
     )
 
 
