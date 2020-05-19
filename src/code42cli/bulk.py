@@ -96,7 +96,7 @@ class BulkProcessor(object):
                 self._process_row(row)
             self.__worker.wait()
         self._print_result()
-    
+
     def _print_progress(self):
         row_count = self._reader.get_rows_count(self.file_path)
         _print_progress(self.__worker.stats, row_count)
@@ -134,10 +134,10 @@ class BulkProcessor(object):
 
 class BulkFileReader(object):
     _ROWS_COUNT = -1
-    
+
     def __call__(self, *args, **kwargs):
         pass
-    
+
     def get_rows_count(self, file_path):
         if self._ROWS_COUNT == -1:
             self._ROWS_COUNT = sum(1 for _ in open(file_path))
@@ -150,7 +150,7 @@ class CSVReader(BulkFileReader):
     def __call__(self, *args, **kwargs):
         for row in csv.DictReader(kwargs.get(u"bulk_file")):
             yield row
-    
+
     def get_rows_count(self, file_path):
         return super(CSVReader, self).get_rows_count(file_path) - 1
 
@@ -166,9 +166,14 @@ class FlatFileReader(BulkFileReader):
 def _print_progress(stats, total_rows):
     iteration = stats.total_processed
     length = 100
-    latency =  length / 10
-    filled_length = int(((length * iteration // total_rows) + latency))
+    latency = length / 10
+    filled_length = length * iteration // total_rows
+    if filled_length + latency < length:
+        filled_length += latency
+    filled_length = int(filled_length)
     bar = _PROGRESS_FILLER * filled_length + u"-" * (length - filled_length)
     successes = stats.total_processed - stats.total_errors
-    sys.stdout.write(u"\r{} {} successes, {} failures.".format(bar, successes, stats.total_errors, bar))
+    sys.stdout.write(
+        u"\r{} {} successes, {} failures.".format(bar, successes, stats.total_errors, bar)
+    )
     sys.stdout.flush()
