@@ -1,6 +1,6 @@
 import pytest
 
-from code42cli.date_helper import DateArgumentException
+from code42cli.errors import DateArgumentError
 from code42cli.cmds.search_shared.extraction import create_time_range_filter
 from py42.sdk.queries.fileevents.filters import InsertionTimestamp, EventTimestamp
 from py42.sdk.queries.alerts.filters import DateObserved
@@ -100,7 +100,7 @@ def test_create_event_timestamp_filter_when_begin_more_than_ninety_days_back_cau
     timestamp_filter_class,
 ):
     begin_date_str = get_test_date_str(days_ago=91)
-    with pytest.raises(DateArgumentException):
+    with pytest.raises(DateArgumentError):
         create_time_range_filter(timestamp_filter_class, begin_date_str)
 
 
@@ -110,7 +110,7 @@ def test_create_event_timestamp_filter_when_end_is_before_begin_causes_value_err
 ):
     begin_date = get_test_date_str(days_ago=5)
     end_date = get_test_date_str(days_ago=7)
-    with pytest.raises(DateArgumentException):
+    with pytest.raises(DateArgumentError):
         create_time_range_filter(timestamp_filter_class, begin_date, end_date)
 
 
@@ -143,5 +143,5 @@ def test_create_event_timestamp_filter_when_args_are_magic_days_builds_expected_
 def test_create_event_timestamp_filter_when_given_improperly_formatted_arg_raises_value_error(
     bad_date_param, timestamp_filter_class
 ):
-    with pytest.raises(DateArgumentException):
+    with pytest.raises(DateArgumentError):
         create_time_range_filter(timestamp_filter_class, bad_date_param)

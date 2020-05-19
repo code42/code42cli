@@ -1,7 +1,7 @@
 import pytest
 import logging
 
-from code42cli.cmds.detectionlists import UserDoesNotExistError, UserAlreadyAddedError
+from code42cli.errors import UserAlreadyAddedError, UserDoesNotExistError
 from code42cli.cmds.detectionlists.departing_employee import (
     add_departing_employee,
     remove_departing_employee,
@@ -39,16 +39,6 @@ def test_add_departing_employee_when_user_does_not_exist_exits(sdk_without_user,
         add_departing_employee(sdk_without_user, profile, _EMPLOYEE)
 
 
-def test_add_departing_employee_when_user_does_not_exist_prints_error(
-    sdk_without_user, profile, caplog
-):
-    with caplog.at_level(logging.ERROR):
-        try:
-            add_departing_employee(sdk_without_user, profile, _EMPLOYEE)
-        except UserDoesNotExistError:
-            assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text
-
-
 def test_add_departing_employee_when_user_already_added_raises_UserAlreadyAddedError(
     sdk_with_user, profile, bad_request_for_user_already_added
 ):
@@ -75,13 +65,3 @@ def test_remove_departing_employee_calls_remove(sdk_with_user, profile):
 def test_remove_departing_employee_when_user_does_not_exist_exits(sdk_without_user, profile):
     with pytest.raises(UserDoesNotExistError):
         remove_departing_employee(sdk_without_user, profile, _EMPLOYEE)
-
-
-def test_remove_departing_employee_when_user_does_not_exist_prints_error(
-    sdk_without_user, profile, caplog
-):
-    with caplog.at_level(logging.ERROR):
-        try:
-            remove_departing_employee(sdk_without_user, profile, _EMPLOYEE)
-        except UserDoesNotExistError:
-            assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text

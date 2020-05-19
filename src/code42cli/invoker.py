@@ -2,6 +2,8 @@ import sys
 
 from py42.exceptions import Py42HTTPError, Py42ForbiddenError
 
+from code42cli.compat import str
+from code42cli.errors import Code42CLIError
 from code42cli.parser import ArgumentParserError, CommandParser
 from code42cli.logger import get_main_cli_logger
 
@@ -25,6 +27,9 @@ class CommandInvoker(object):
             path_parts = self._get_path_parts(input_args)
             command = self._commands.get(u" ".join(path_parts))
             self._try_run_command(command, path_parts, input_args)
+        except Code42CLIError as err:
+            logger = get_main_cli_logger()
+            logger.print_and_log_error(str(err))
         except Py42ForbiddenError as err:
             logger = get_main_cli_logger()
             logger.log_verbose_error(invocation_str, err.response.request)
