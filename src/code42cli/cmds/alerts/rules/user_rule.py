@@ -22,19 +22,23 @@ _HEADER_KEYS_MAP = {
 
 def add_user(sdk, profile, rule_id, username):
     user_id = get_user_id(sdk, username)
+    rules = _get_rule_metadata(sdk, rule_id)
     try:
-        sdk.alerts.rules.add_user(rule_id, user_id)
+        if rules:
+            sdk.alerts.rules.add_user(rule_id, user_id)
     except Py42InternalServerError as e:
-        _check_if_system_rule(sdk, rule_id)
+        _check_if_system_rule(sdk, rules)
         raise
 
 
 def remove_user(sdk, profile, rule_id, username):
     user_id = get_user_id(sdk, username)
+    rules = _get_rule_metadata(sdk, rule_id)
     try:
-        sdk.alerts.rules.remove_user(rule_id, user_id)
+        if rules:
+            sdk.alerts.rules.remove_user(rule_id, user_id)
     except Py42InternalServerError as e:
-        _check_if_system_rule(sdk, rule_id)
+        _check_if_system_rule(sdk, rules)
         raise
 
 
@@ -46,19 +50,20 @@ def _get_all_rules_metadata(sdk):
 
 def _get_rule_metadata(sdk, rule_id):
     rules = sdk.alerts.rules.get_by_observer_id(rule_id)[u"ruleMetadata"]
-    return _handle_rules_results(sdk, rules)
+    return _handle_rules_results(sdk, rules, rule_id)
 
 
-def _handle_rules_results(sdk, rules):
+def _handle_rules_results(sdk, rules, rule_id=None):
+    id_msg = u"with RuleId {} ".format(rule_id) if rule_id else u""
+    msg = u"No alert rules {0}found.".format(id_msg)
     if not rules:
-        get_main_cli_logger().print_and_log_info(u"No alert rules found.")
+        get_main_cli_logger().print_and_log_info(msg)
     return rules
 
 
-def _check_if_system_rule(sdk, rule_id):
-    rules = _get_rule_metadata(sdk, rule_id)
+def _check_if_system_rule(sdk, rules):
     if rules and rules[0][u"isSystem"]:
-        raise InvalidRuleTypeError(rule_id, rules[0][u"ruleSource"])
+        raise InvalidRuleTypeError(rules[0][u"observerRuleId"], rules[0][u"ruleSource"])
 
 
 def get_rules(sdk, profile):
