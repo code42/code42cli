@@ -1,0 +1,2 @@
+class TestProgressBar(object):
+    pass

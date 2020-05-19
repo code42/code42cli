@@ -79,13 +79,13 @@ class BulkProcessor(object):
         reader (CSVReader or FlatFileReader): A generator that reads rows and yields data into `row_handler`.
     """
 
-    def __init__(self, row_handler, reader):
+    def __init__(self, row_handler, reader, worker=None, progress_bar=None):
         self.file_path = reader.file_path
         self._row_handler = row_handler
         self._reader = reader
-        self.__worker = Worker(5, reader.get_rows_count())
+        self.__worker = worker or Worker(5, reader.get_rows_count())
         self._stats = self.__worker.stats
-        self._progress_bar = ProgressBar(self._stats)
+        self._progress_bar = progress_bar or ProgressBar(self._stats)
 
     def run(self):
         """Processes the csv file specified in the ctor, calling `self.row_handler` on each row."""
