@@ -181,7 +181,7 @@ class ProgressBar(object):
         self._stats = stats
 
     def update(self):
-        iteration = self._stats.total_processed
+        iteration = self._stats.total_processed + 1
         bar = self._create_bar(iteration)
         stats_msg = self._create_stats_text()
 
