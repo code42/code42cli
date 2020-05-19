@@ -8,6 +8,9 @@ from code42cli.logger import get_main_cli_logger
 from code42cli.args import SDK_ARG_NAME, PROFILE_ARG_NAME
 
 
+_PROGRESS_FILLER = u"█"
+
+
 class BulkCommandType(object):
     ADD = u"add"
     REMOVE = u"remove"
@@ -160,13 +163,10 @@ class FlatFileReader(BulkFileReader):
             yield row
 
 
-_FILLER = u"█"
-
-
 def _print_progress(stats, total_rows):
-    iteration = stats.total
+    iteration = stats.total_processed
     length = 75
     filled_length = int(length * iteration // total_rows)
-    bar = _FILLER * filled_length + u"-" * (length - filled_length - 1)
-    successes = stats.total - stats.total_errors
+    bar = _PROGRESS_FILLER * filled_length + u"-" * (length - filled_length - 1)
+    successes = stats.total_processed - stats.total_errors
     print(u"\r  {} {} successes, {} failures.".format(bar, successes, stats.total_errors, bar), end=u"\r")

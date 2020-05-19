@@ -9,15 +9,15 @@ from code42cli.logger import get_main_cli_logger
 class WorkerStats(object):
     """Stats about the tasks that have run."""
 
-    _total = 0
+    _total_processed = 0
     _total_errors = 0
     __total_lock = Lock()
     __total_errors_lock = Lock()
 
     @property
-    def total(self):
+    def total_processed(self):
         """The total number of tasks executed."""
-        return self._total
+        return self._total_processed
 
     @property
     def total_errors(self):
@@ -27,7 +27,7 @@ class WorkerStats(object):
     def increment_total(self):
         """+1 to self.total"""
         with self.__total_lock:
-            self._total += 1
+            self._total_processed += 1
 
     def increment_total_errors(self):
         """+1 to self.total_errors"""
