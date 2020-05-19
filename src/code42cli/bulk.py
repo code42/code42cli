@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os, sys, inspect, csv, logging
+import os, inspect
 
 from code42cli.compat import open, str
 from code42cli.worker import Worker

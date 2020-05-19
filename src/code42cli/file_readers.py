@@ -1,3 +1,6 @@
+import csv
+
+
 class BadFileError(Exception):
     def __init__(self, file_path, *args, **kwargs):
         self.file_path = file_path
