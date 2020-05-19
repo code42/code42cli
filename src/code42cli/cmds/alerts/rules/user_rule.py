@@ -1,5 +1,8 @@
+from py42.exceptions import Py42InternalServerError
 from py42.util import format_json
 
+
+from code42cli.errors import InvalidRuleTypeError
 from code42cli.util import format_to_table, find_format_width
 from code42cli.bulk import run_bulk_process, CSVReader
 from code42cli.logger import get_main_cli_logger
@@ -21,16 +24,18 @@ def add_user(sdk, profile, rule_id, username):
     user_id = get_user_id(sdk, username)
     try:
         sdk.alerts.rules.add_user(rule_id, user_id)
-    except:
-        pass
+    except Py42InternalServerError as e:
+        _check_if_system_rule(sdk, rule_id)
+        raise
 
 
 def remove_user(sdk, profile, rule_id, username):
     user_id = get_user_id(sdk, username)
     try:
         sdk.alerts.rules.remove_user(rule_id, user_id)
-    except:
-        pass
+    except Py42InternalServerError as e:
+        _check_if_system_rule(sdk, rule_id)
+        raise
 
 
 def _get_all_rules_metadata(sdk):
@@ -48,6 +53,12 @@ def _handle_rules_results(sdk, rules):
     if not rules:
         get_main_cli_logger().print_and_log_info(u"No alert rules found.")
     return rules
+
+
+def _check_if_system_rule(sdk, rule_id):
+    rules = _get_rule_metadata(sdk, rule_id)
+    if rules and rules[0][u"isSystem"]:
+        raise InvalidRuleTypeError(rule_id, rules[0][u"ruleSource"])
 
 
 def get_rules(sdk, profile):
