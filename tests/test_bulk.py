@@ -9,16 +9,13 @@ from code42cli.bulk import (
     generate_template,
     BulkProcessor,
     run_bulk_process,
-    CSVReader,
-    BulkFileReader,
 )
 from code42cli.logger import get_view_exceptions_location_message
 
-from .conftest import ErrorTrackerTestHelper
+from .conftest import ErrorTrackerTestHelper, create_mock_reader
 
 
 _NAMESPACE = "{}.bulk".format(PRODUCT_NAME)
-_TEST_FILE_PATH = "some/path"
 
 
 @pytest.fixture
@@ -46,13 +43,6 @@ def func_with_multiple_args(sdk, profile, test1, test2):
 
 def func_with_one_arg(sdk, profile, test1):
     pass
-
-
-def _create_mock_dict_reader(dict_rows):
-    class MockDictReader(BulkFileReader):
-        def __call__(self, *args, **kwargs):
-            return dict_rows
-    return MockDictReader(_TEST_FILE_PATH)
 
 
 def test_generate_template_uses_expected_path_and_column_names(mock_open):
@@ -101,15 +91,9 @@ def test_run_bulk_process_calls_run(bulk_processor, bulk_processor_factory):
 
 def test_run_bulk_process_creates_processor(bulk_processor_factory):
     errors.ERRORED = False
-    reader = CSVReader("some/path")
+    reader = create_mock_reader([1, 2])
     run_bulk_process(func_with_one_arg, reader)
-    bulk_processor_factory.assert_called_once_with("some/path", func_with_one_arg, reader)
-
-
-def test_run_bulk_process_when_not_given_reader_uses_csv_reader(bulk_processor_factory):
-    errors.ERRORED = False
-    run_bulk_process("some/path", func_with_one_arg)
-    assert type(bulk_processor_factory.call_args[0][2]) == CSVReader
+    bulk_processor_factory.assert_called_once_with(func_with_one_arg, reader)
 
 
 class TestBulkProcessor(object):
@@ -119,15 +103,14 @@ class TestBulkProcessor(object):
         def func_for_bulk(test1, test2):
             processed_rows.append((test1, test2))
 
-        class MockDictReader(object):
-            def __call__(self, *args, **kwargs):
-                return [
-                    OrderedDict({"test1": 1, "test2": 2}),
-                    OrderedDict({"test1": 3, "test2": 4}),
-                    OrderedDict({"test1": 5, "test2": 6}),
-                ]
-
-        processor = BulkProcessor(func_for_bulk, MockDictReader())
+        reader = create_mock_reader(
+            [
+                OrderedDict({"test1": 1, "test2": 2}),
+                OrderedDict({"test1": 3, "test2": 4}),
+                OrderedDict({"test1": 5, "test2": 6}),
+            ]
+        )
+        processor = BulkProcessor(func_for_bulk, reader)
         processor.run()
         assert (1, 2) in processed_rows
         assert (3, 4) in processed_rows
@@ -139,15 +122,10 @@ class TestBulkProcessor(object):
         def func_for_bulk(test1, test2):
             processed_rows.append((test1, test2))
 
-        class MockDictReader(object):
-            def __call__(self, *args, **kwargs):
-                return [
-                    {"test1": 1, "test2": 2},
-                    {"test1": 3, "test2": 4},
-                    {"test1": 5, "test2": 6},
-                ]
-
-        processor = BulkProcessor(func_for_bulk, MockDictReader())
+        reader = create_mock_reader(
+            [{"test1": 1, "test2": 2}, {"test1": 3, "test2": 4}, {"test1": 5, "test2": 6}]
+        )
+        processor = BulkProcessor(func_for_bulk, reader)
         processor.run()
         assert (1, 2) in processed_rows
         assert (3, 4) in processed_rows
@@ -159,11 +137,8 @@ class TestBulkProcessor(object):
         def func_for_bulk(test1):
             processed_rows.append(test1)
 
-        class MockDictReader(object):
-            def __call__(self, *args, **kwargs):
-                return [{"test1": 1, None: 2}]
-
-        processor = BulkProcessor(func_for_bulk, MockDictReader())
+        reader = create_mock_reader([{"test1": 1, None: 2}])
+        processor = BulkProcessor(func_for_bulk, reader)
         processor.run()
         assert processed_rows == [1]
 
@@ -173,60 +148,47 @@ class TestBulkProcessor(object):
         def func_for_bulk(test):
             processed_rows.append(test)
 
-        class MockRowReader(object):
-            def __call__(self, *args, **kwargs):
-                return ["row1", "row2", "row3"]
-
-        processor = BulkProcessor(func_for_bulk, MockRowReader())
+        reader = create_mock_reader(["row1", "row2", "row3"])
+        processor = BulkProcessor(func_for_bulk, reader)
         processor.run()
         assert "row1" in processed_rows
         assert "row2" in processed_rows
         assert "row3" in processed_rows
 
-    def test_run_when_error_occurs_prints_error_messages(self, mock_open, caplog):
+    def test_run_when_error_occurs_prints_error_messages(self, mock_open, caplog, capsys):
         caplog.set_level(logging.INFO)
 
         def func_for_bulk(test):
             if test == "row2":
                 raise Exception()
 
-        class MockRowReader(object):
-            def __call__(self, *args, **kwargs):
-                return ["row1", "row2", "row3"]
-
+        reader = create_mock_reader(["row1", "row2", "row3"])
         with ErrorTrackerTestHelper():
-            processor = BulkProcessor(func_for_bulk, MockRowReader())
+            processor = BulkProcessor(func_for_bulk, reader)
             processor.run()
 
-            with caplog.at_level(logging.INFO):
-                assert "2 processed successfully out of 3." in caplog.text
+            capture_sys = capsys.readouterr()
+            assert "2 succeeded, 1 failed out of 3." in capture_sys.out
 
             with caplog.at_level(logging.ERROR):
                 assert get_view_exceptions_location_message() in caplog.text
 
-    def test_run_when_no_errors_occur_prints_success_messages(self, mock_open, caplog):
+    def test_run_when_no_errors_occur_prints_success_messages(self, mock_open, capsys):
         def func_for_bulk(test):
             pass
 
-        class MockRowReader(object):
-            def __call__(self, *args, **kwargs):
-                return ["row1", "row2", "row3"]
-
-        processor = BulkProcessor(func_for_bulk, MockRowReader())
-
-        with caplog.at_level(logging.INFO):
-            processor.run()
-            assert "3 processed successfully out of 3." in caplog.text
+        reader = create_mock_reader(["row1", "row2", "row3"])
+        processor = BulkProcessor(func_for_bulk, reader)
+        processor.run()
+        capture = capsys.readouterr()
+        assert "3 succeeded, 0 failed out of 3" in capture.out
 
     def test_run_when_no_errors_occur_does_not_print_error_message(self, mock_open, caplog):
         def func_for_bulk(test):
             pass
 
-        class MockRowReader(object):
-            def __call__(self, *args, **kwargs):
-                return ["row1", "row2", "row3"]
-
-        processor = BulkProcessor(func_for_bulk, MockRowReader())
+        reader = create_mock_reader(["row1", "row2", "row3"])
+        processor = BulkProcessor(func_for_bulk, reader)
 
         with caplog.at_level(logging.ERROR):
             processor.run()
@@ -238,11 +200,8 @@ class TestBulkProcessor(object):
         def func_for_bulk(test):
             processed_rows.append(test)
 
-        class MockRowReader(object):
-            def __call__(self, *args, **kwargs):
-                return ["row1", "row2", "\n"]
-
-        processor = BulkProcessor(func_for_bulk, MockRowReader())
+        reader = create_mock_reader(["row1", "row2", "\n"])
+        processor = BulkProcessor(func_for_bulk, reader)
         processor.run()
 
         assert "row1" in processed_rows
@@ -256,8 +215,10 @@ class TestBulkProcessor(object):
 
         def func_for_bulk(test1, test2):
             processed_rows.append((test1, test2))
-            
-        reader = _create_mock_dict_reader([{"test1": "", "test2": "foo"}, {"test1": "bar", "test2": u""}])
+
+        reader = create_mock_reader(
+            [{"test1": "", "test2": "foo"}, {"test1": "bar", "test2": u""}]
+        )
         processor = BulkProcessor(func_for_bulk, reader)
         processor.run()
         assert (None, "foo") in processed_rows

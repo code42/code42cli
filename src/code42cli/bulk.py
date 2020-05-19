@@ -165,6 +165,14 @@ class FlatFileReader(BulkFileReader):
             yield row
 
 
+def create_csv_reader(file_path):
+    return CSVReader(file_path)
+
+
+def create_flat_file_reader(file_path):
+    return FlatFileReader(file_path)
+
+
 class ProgressBar(object):
     _FILL = u"█"
     _LENGTH = 100
@@ -179,7 +187,7 @@ class ProgressBar(object):
 
         sys.stdout.write(u"\r{} {}".format(bar, stats_msg))
         sys.stdout.flush()
-            
+
     def _create_bar(self, iteration):
         fill_length = self._calculate_fill_length(iteration)
         return self._FILL * fill_length + u"-" * (self._LENGTH - fill_length)
@@ -192,7 +200,7 @@ class ProgressBar(object):
         return int(filled_length)
 
     def _create_stats_text(self):
-        return u"{0} successes, {1} failures out of {2}.".format(
+        return u"{0} succeeded, {1} failed out of {2}.".format(
             self._stats.total_successes, self._stats.total_errors, self._stats.total
         )
 

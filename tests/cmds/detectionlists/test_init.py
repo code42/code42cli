@@ -17,6 +17,7 @@ from code42cli.cmds.detectionlists import (
 from code42cli.bulk import BulkCommandType
 from code42cli.cmds.detectionlists.enums import RiskTags
 from .conftest import TEST_ID
+from ...conftest import create_mock_reader
 
 
 _NAMESPACE = "{}.cmds.detectionlists".format(PRODUCT_NAME)
@@ -136,12 +137,20 @@ class TestDetectionList(object):
         detection_list.generate_template_file(BulkCommandType.REMOVE, path)
         bulk_template_generator.assert_called_once_with(a_test_func, path)
 
-    def test_bulk_add_employees_uses_csv_path(self, sdk, profile, bulk_processor):
+    def test_bulk_add_employees_uses_expected_arguments(self, mocker, sdk, profile, bulk_processor):
+        reader = create_mock_reader([{"test": "value"}])
+        reader_factory = mocker.patch("{}.create_csv_reader".format(_NAMESPACE))
+        reader_factory.return_value = reader
         detection_list = DetectionList("TestList", DetectionListHandlers())
         detection_list.bulk_add_employees(sdk, profile, "csv_test")
-        assert bulk_processor.call_args[0][0] == "csv_test"
+        assert bulk_processor.call_args[0][1] == reader
+        reader_factory.assert_called_once_with("csv_test")
 
-    def test_bulk_remove_employees_uses_file_path(self, sdk, profile, bulk_processor):
+    def test_bulk_remove_employees_uses_expected_arguments(self, mocker, sdk, profile, bulk_processor):
+        reader = create_mock_reader(["test1", "test2"])
+        reader_factory = mocker.patch("{}.create_flat_file_reader".format(_NAMESPACE))
+        reader_factory.return_value = reader
         detection_list = DetectionList("TestList", DetectionListHandlers())
         detection_list.bulk_remove_employees(sdk, profile, "file_test")
-        assert bulk_processor.call_args[0][0] == "file_test"
+        assert bulk_processor.call_args[0][1] == reader
+        reader_factory.assert_called_once_with("file_test")

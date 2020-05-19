@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 import pytest
+from bulk import BulkFileReader
 from py42.sdk import SDKClient
 
 from code42cli.config import ConfigAccessor
@@ -182,3 +183,17 @@ class ErrorTrackerTestHelper:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         error_tracker.ERRORED = False
+
+
+TEST_FILE_PATH = "some/path"
+
+
+def create_mock_reader(rows):
+    class MockDictReader(BulkFileReader):
+        def __call__(self, *args, **kwargs):
+            return rows
+
+        def get_rows_count(self):
+            return len(rows)
+
+    return MockDictReader(TEST_FILE_PATH)

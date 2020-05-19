@@ -2,9 +2,14 @@ from py42.exceptions import Py42BadRequestError
 
 from code42cli.compat import str
 from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory
-from code42cli.bulk import generate_template, run_bulk_process, CSVReader, FlatFileReader
+from code42cli.bulk import (
+    generate_template,
+    run_bulk_process,
+    BulkCommandType,
+    create_csv_reader,
+    create_flat_file_reader,
+)
 from code42cli.logger import get_main_cli_logger
-from code42cli.bulk import BulkCommandType
 from code42cli.cmds.detectionlists.enums import DetectionLists, DetectionListUserKeys, RiskTags
 
 
@@ -146,7 +151,7 @@ class DetectionList(object):
             profile (Code42Profile): The profile under which to execute this command.
             csv_file (str or unicode): The path to the csv file containing rows of users.
         """
-        reader = CSVReader(csv_file)
+        reader = create_csv_reader(csv_file)
         run_bulk_process(lambda **kwargs: self._add_employee(sdk, profile, **kwargs), reader)
 
     def bulk_remove_employees(self, sdk, profile, users_file):
@@ -160,7 +165,7 @@ class DetectionList(object):
         """
         run_bulk_process(
             lambda *args, **kwargs: self._remove_employee(sdk, profile, *args, **kwargs),
-            FlatFileReader(users_file),
+            create_flat_file_reader(users_file),
         )
 
     def _add_employee(self, sdk, profile, **kwargs):
