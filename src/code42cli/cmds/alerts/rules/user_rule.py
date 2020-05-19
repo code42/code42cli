@@ -19,15 +19,18 @@ _HEADER_KEYS_MAP = {
 
 def add_user(sdk, profile, rule_id, username):
     user_id = get_user_id(sdk, username)
-    sdk.alerts.rules.add_user(rule_id, user_id)
+    try:
+        sdk.alerts.rules.add_user(rule_id, user_id)
+    except:
+        pass
 
 
 def remove_user(sdk, profile, rule_id, username):
-    if username:
-        user_id = get_user_id(sdk, username)
+    user_id = get_user_id(sdk, username)
+    try:
         sdk.alerts.rules.remove_user(rule_id, user_id)
-    else:
-        sdk.alerts.rules.remove_all_users(rule_id)
+    except:
+        pass
 
 
 def _get_all_rules_metadata(sdk):
