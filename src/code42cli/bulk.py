@@ -6,6 +6,7 @@ from code42cli.compat import open, str
 from code42cli.worker import Worker
 from code42cli.logger import get_main_cli_logger
 from code42cli.args import SDK_ARG_NAME, PROFILE_ARG_NAME
+from code42cli.errors import BadFileError
 
 
 _logger = get_main_cli_logger()
@@ -93,7 +94,7 @@ class BulkProcessor(object):
             for row in self._reader(bulk_file=bulk_file):
                 self._process_row(row)
             self.__worker.wait()
-        self._print_result()
+        self._progress_bar.clear_bar_and_print_results()
 
     def _process_row(self, row):
         if isinstance(row, dict):
@@ -118,11 +119,6 @@ class BulkProcessor(object):
         self._progress_bar.update()
         self._row_handler(*args, **kwargs)
 
-    def _print_result(self):
-        self._progress_bar.update()
-        if self._stats.total_errors:
-            _logger.print_errors_occurred_message()
-
 
 class BulkFileReader(object):
     _ROWS_COUNT = -1
@@ -136,6 +132,8 @@ class BulkFileReader(object):
     def get_rows_count(self):
         if self._ROWS_COUNT == -1:
             self._ROWS_COUNT = sum(1 for _ in open(self.file_path))
+        if self._ROWS_COUNT == 0:
+            raise BadFileError(u"Given empty file {}.".format(self.file_path))
         return self._ROWS_COUNT
 
 
@@ -144,7 +142,10 @@ class CSVReader(BulkFileReader):
 
     def __init__(self, file_path):
         with open(file_path) as f:
-            self.has_header = csv.Sniffer().has_header(next(f))
+            try:
+                self.has_header = csv.Sniffer().has_header(next(f))
+            except StopIteration:
+                raise BadFileError(u"Given empty file {}.".format(file_path))
         super(CSVReader, self).__init__(file_path)
 
     def __call__(self, *args, **kwargs):
@@ -169,35 +170,35 @@ class ProgressBar(object):
     _LENGTH = 100
 
     def __init__(self, stats):
-        self.stats = stats
+        self._stats = stats
 
     def update(self):
-        iteration = self.stats.total_processed
+        iteration = self._stats.total_processed
         bar = self._create_bar(iteration)
         stats_msg = self._create_stats_text()
 
         sys.stdout.write(u"\r{} {}".format(bar, stats_msg))
         sys.stdout.flush()
-        if iteration == self.stats.total:
-            self._clear_bar_and_print_results()
-
+            
     def _create_bar(self, iteration):
         fill_length = self._calculate_fill_length(iteration)
         return self._FILL * fill_length + u"-" * (self._LENGTH - fill_length)
 
     def _calculate_fill_length(self, idx):
         latency = self._LENGTH / 10
-        filled_length = self._LENGTH * idx // self.stats.total
+        filled_length = self._LENGTH * idx // self._stats.total
         if filled_length + latency < self._LENGTH:
             filled_length += latency
         return int(filled_length)
 
     def _create_stats_text(self):
         return u"{0} successes, {1} failures out of {2}.".format(
-            self.stats.total_successes, self.stats.total_errors, self.stats.total
+            self._stats.total_successes, self._stats.total_errors, self._stats.total
         )
 
-    def _clear_bar_and_print_results(self):
+    def clear_bar_and_print_results(self):
         clear = self._LENGTH * u" "
-        sys.stdout.write("\r{}{}\r".format(self._create_stats_text(), clear))
+        sys.stdout.write("\r{}{}\n".format(self._create_stats_text(), clear))
         sys.stdout.flush()
+        if self._stats.total_errors:
+            _logger.print_errors_occurred_message()
