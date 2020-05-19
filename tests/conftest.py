@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
 
 import pytest
-from bulk import BulkFileReader
 from py42.sdk import SDKClient
 
+from code42cli.bulk import BulkFileReader
 from code42cli.config import ConfigAccessor
 from code42cli.profile import Code42Profile
 from code42cli.commands import DictObject
