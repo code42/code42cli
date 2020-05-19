@@ -11,7 +11,7 @@ class WorkerStats(object):
 
     _total_processed = 0
     _total_errors = 0
-    __total_lock = Lock()
+    __total_processed_lock = Lock()
     __total_errors_lock = Lock()
 
     @property
@@ -24,9 +24,9 @@ class WorkerStats(object):
         """The amount of errors that occurred."""
         return self._total_errors
 
-    def increment_total(self):
-        """+1 to self.total"""
-        with self.__total_lock:
+    def increment_total_processed(self):
+        """+1 to self.total_processed"""
+        with self.__total_processed_lock:
             self._total_processed += 1
 
     def increment_total_errors(self):
@@ -91,7 +91,7 @@ class Worker(object):
                 logger = get_main_cli_logger()
                 logger.log_verbose_error()
             finally:
-                self._stats.increment_total()
+                self._stats.increment_total_processed()
                 self._queue.task_done()
 
     def __start(self):

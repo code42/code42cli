@@ -1,6 +1,6 @@
-import os
-import inspect
-import csv
+# -*- coding: utf-8 -*-
+
+import os, sys, inspect, csv
 
 from code42cli.compat import open, str
 from code42cli.worker import Worker
@@ -9,6 +9,7 @@ from code42cli.args import SDK_ARG_NAME, PROFILE_ARG_NAME
 
 
 _PROGRESS_FILLER = u"█"
+_logger = get_main_cli_logger()
 
 
 class BulkCommandType(object):
@@ -32,7 +33,7 @@ def generate_template(handler, path=None):
     ]
 
     if len(args) <= 1:
-        get_main_cli_logger().print_info(
+        _logger.print_info(
             u"A blank file was generated because there are no csv headers needed for this command. "
             u"Simply enter one {} per line.".format(args[0])
         )
@@ -125,11 +126,10 @@ class BulkProcessor(object):
 
     def _print_result(self):
         stats = self.__worker.stats
-        logger = get_main_cli_logger()
         self._print_progress()
         print()
         if stats.total_errors:
-            logger.print_errors_occurred_message()
+            _logger.print_errors_occurred_message()
 
 
 class BulkFileReader(object):
@@ -165,8 +165,10 @@ class FlatFileReader(BulkFileReader):
 
 def _print_progress(stats, total_rows):
     iteration = stats.total_processed
-    length = 75
-    filled_length = int(length * iteration // total_rows)
-    bar = _PROGRESS_FILLER * filled_length + u"-" * (length - filled_length - 1)
+    length = 100
+    latency =  length / 10
+    filled_length = int(((length * iteration // total_rows) + latency))
+    bar = _PROGRESS_FILLER * filled_length + u"-" * (length - filled_length)
     successes = stats.total_processed - stats.total_errors
-    print(u"\r  {} {} successes, {} failures.".format(bar, successes, stats.total_errors, bar), end=u"\r")
+    sys.stdout.write(u"\r{} {} successes, {} failures.".format(bar, successes, stats.total_errors, bar))
+    sys.stdout.flush()
