@@ -1,6 +1,8 @@
 from __future__ import print_function
 import sys
+from functools import wraps
 from os import makedirs, path
+from signal import signal, getsignal, SIGINT
 
 from code42cli.compat import open, str
 
@@ -88,3 +90,48 @@ def format_to_table(rows, column_size):
         for key in row.keys():
             print(str(row[key]).ljust(column_size[key] + _PADDING_SIZE), end=u" ")
         print(u"")
+
+
+class warn_interrupt(object):
+    """A context decorator class used to wrap functions where a keyboard interrupt could potentially
+    leave things in a bad state. Warns the user with provided message and exits when wrapped 
+    function is complete. Requires user to ctrl-c a second time to force exit.
+    
+    Usage:
+    
+    @warn_interrupt(warning="example message")
+    def my_important_func():
+        pass
+    """
+
+    def __init__(self, warning="Cancelling operation cleanly, one moment... "):
+        self.warning = warning
+        self.old_handler = None
+        self.interrupted = False
+        self.exit_instructions = "Hit CTRL-C again to force quit."
+
+    def __enter__(self):
+        self.old_handler = getsignal(SIGINT)
+        signal(SIGINT, self._handle_interrupts)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.interrupted:
+            exit(1)
+        signal(SIGINT, self.old_handler)
+        return False
+
+    def _handle_interrupts(self, sig, frame):
+        if not self.interrupted:
+            self.interrupted = True
+            print("\n{}\n{}".format(self.warning, self.exit_instructions), file=sys.stderr)
+        else:
+            exit()
+
+    def __call__(self, func):
+        @wraps(func)
+        def inner(*args, **kwds):
+            with self:
+                return func(*args, **kwds)
+
+        return inner

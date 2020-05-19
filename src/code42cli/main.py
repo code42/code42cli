@@ -1,4 +1,5 @@
 import platform
+import signal
 import sys
 
 from py42.settings import set_user_agent_suffix
@@ -13,6 +14,14 @@ from code42cli.cmds.alerts import main as alertmain
 from code42cli.commands import Command
 from code42cli.invoker import CommandInvoker
 from code42cli.cmds.alerts.rules.commands import AlertRulesCommands
+
+
+# Handle KeyboardInterrupts by just exiting instead of printing out a stack
+def exit_on_interrupt(signal, frame):
+    sys.exit(1)
+
+
+signal.signal(signal.SIGINT, exit_on_interrupt)
 
 
 # If on Windows, configure console session to handle ANSI escape sequences correctly
