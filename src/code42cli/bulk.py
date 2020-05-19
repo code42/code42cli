@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os, inspect
 
 from code42cli.compat import open, str

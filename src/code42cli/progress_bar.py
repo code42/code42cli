@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import sys, logging
 
 from code42cli.logger import (
@@ -32,7 +34,6 @@ class InPlaceStreamHandler(logging.StreamHandler):
 class ProgressBar(object):
     _FILL = u"█"
     _LENGTH = 100
-    _LATENCY = _LENGTH * 1.25
 
     def __init__(self, stats, logger=None):
         self._stats = stats
