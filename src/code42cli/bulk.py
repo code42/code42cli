@@ -9,6 +9,7 @@ from code42cli.args import SDK_ARG_NAME, PROFILE_ARG_NAME
 
 
 _PROGRESS_FILLER = u"█"
+_PROGRESS_BAR_LENGTH = 100
 _logger = get_main_cli_logger()
 
 
@@ -53,7 +54,6 @@ def run_bulk_process(row_handler, reader):
     """Runs a bulk process.
     
     Args: 
-        file_path (str or unicode): The path to the file feeding the data for the bulk process.
         row_handler (callable): A callable that you define to process values from the row as 
             either *args or **kwargs.
         reader: (CSVReader or FlatFileReader, optional): A generator that reads rows and yields data into 
@@ -72,7 +72,6 @@ class BulkProcessor(object):
     """A class for bulk processing a file. 
     
     Args:
-        file_path (str or unicode): The path to the file for processing.
         row_handler (callable): A callable that you define to process values from the row as 
             either *args or **kwargs. For example, if it's a csv file with header `prop_a,prop_b` 
             and first row `1,test`, then `row_handler` should receive kwargs 
@@ -85,8 +84,9 @@ class BulkProcessor(object):
         self.file_path = reader.file_path
         self._row_handler = row_handler
         self._reader = reader
-        self.__worker = Worker(5)
-
+        self.__worker = Worker(5, reader.get_rows_count())
+        self._stats = self.__worker.stats
+    
     def run(self):
         """Processes the csv file specified in the ctor, calling `self.row_handler` on each row."""
         self._print_progress()  # init progress bar
@@ -97,8 +97,7 @@ class BulkProcessor(object):
         self._print_result()
 
     def _print_progress(self):
-        row_count = self._reader.get_rows_count()
-        _print_progress(self.__worker.stats, row_count)
+        _print_progress(self._stats)
 
     def _process_row(self, row):
         if isinstance(row, dict):
@@ -124,10 +123,8 @@ class BulkProcessor(object):
         self._row_handler(*args, **kwargs)
 
     def _print_result(self):
-        stats = self.__worker.stats
         self._print_progress()
-        print()
-        if stats.total_errors:
+        if self._stats.total_errors:
             _logger.print_errors_occurred_message()
 
 
@@ -171,23 +168,22 @@ class FlatFileReader(BulkFileReader):
             yield row
 
 
-def _print_progress(stats, total_rows):
+def _print_progress(stats):
     iteration = stats.total_processed
-    length = 100
-    latency = length / 10
-    filled_length = length * iteration // total_rows
-    if filled_length + latency < length:
+    latency = _PROGRESS_BAR_LENGTH / 10
+    filled_length = _PROGRESS_BAR_LENGTH * iteration // stats.total
+    if filled_length + latency < _PROGRESS_BAR_LENGTH:
         filled_length += latency
     filled_length = int(filled_length)
-    bar = _PROGRESS_FILLER * filled_length + u"-" * (length - filled_length)
-    successes = stats.total_processed - stats.total_errors
+    bar = _PROGRESS_FILLER * filled_length + u"-" * (_PROGRESS_BAR_LENGTH - filled_length)
+    successes = iteration - stats.total_errors
     failures = stats.total_errors
     stats_msg = u"{0} successes, {1} failures out of {2}.".format(
-        successes, failures, total_rows
+        successes, failures, stats.total
     )
     sys.stdout.write(u"\r{} {}".format(bar, stats_msg))
     sys.stdout.flush()
-    if stats.total_processed == total_rows:
-        clear = length * u" "
+    if iteration == stats.total:
+        clear = _PROGRESS_BAR_LENGTH * u" "
         sys.stdout.write("\r{}{}\r".format(stats_msg, clear))
         sys.stdout.flush()

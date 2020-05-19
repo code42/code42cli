@@ -8,6 +8,9 @@ from code42cli.logger import get_main_cli_logger
 
 class WorkerStats(object):
     """Stats about the tasks that have run."""
+    
+    def __init__(self, total):
+        self.total = total
 
     _total_processed = 0
     _total_errors = 0
@@ -23,6 +26,10 @@ class WorkerStats(object):
     def total_errors(self):
         """The amount of errors that occurred."""
         return self._total_errors
+    
+    @property
+    def total_successes(self):
+        return self.total - self._total_errors
 
     def increment_total_processed(self):
         """+1 to self.total_processed"""
@@ -36,10 +43,10 @@ class WorkerStats(object):
 
 
 class Worker(object):
-    def __init__(self, thread_count):
+    def __init__(self, thread_count, expected_total):
         self._queue = queue.Queue()
         self._thread_count = thread_count
-        self._stats = WorkerStats()
+        self._stats = WorkerStats(expected_total)
         self.__started = False
         self.__start_lock = Lock()
 
