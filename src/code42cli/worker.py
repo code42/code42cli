@@ -82,7 +82,7 @@ class Worker(object):
             except Code42CLIError as err:
                 self._increment_total_errors()
                 logger = get_main_cli_logger()
-                logger.print_and_log_error(str(err))
+                logger.log_error(err)
             except Py42ForbiddenError as err:
                 self._increment_total_errors()
                 logger = get_main_cli_logger()
