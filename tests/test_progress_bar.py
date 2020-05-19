@@ -25,7 +25,7 @@ class TestProgressBar(object):
         bar.update()
         with caplog.at_level(logging.INFO):
             assert (
-                "\r██████████████████████████████████████████████████--------------------------------------------------"
+                u"\r██████████████████████████████████████████████████--------------------------------------------------"
                 in caplog.text
             )
 
@@ -53,4 +53,4 @@ class TestProgressBar(object):
         bar = ProgressBar(stats)
         bar.clear_bar_and_print_results()
         with caplog.at_level(logging.INFO):
-            assert "█" not in caplog.text
+            assert u"█" not in caplog.text
