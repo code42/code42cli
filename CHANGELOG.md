@@ -40,6 +40,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - A custom error in the error log when you try adding a user to a detection list who is already added.
 
+- A progress bar that displays during bulk commands.
+
 ### Fixed
 
 - Fixed bug in bulk commands where value-less fields in csv files were treated as empty strings instead of None.
