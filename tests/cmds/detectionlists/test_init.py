@@ -8,12 +8,10 @@ from code42cli.cmds.detectionlists import (
     DetectionListHandlers,
     get_user_id,
     update_user,
-    UserDoesNotExistError,
     try_add_risk_tags,
     try_remove_risk_tags,
-    UnknownRiskTagError,
-    UserAlreadyAddedError,
 )
+from code42cli.errors import UserAlreadyAddedError, UnknownRiskTagError, UserDoesNotExistError
 from code42cli.bulk import BulkCommandType
 from code42cli.cmds.detectionlists.enums import RiskTags
 from .conftest import TEST_ID
@@ -49,14 +47,6 @@ def test_try_handle_user_already_added_error_when_error_does_not_indicate_user_a
 def test_get_user_id_when_user_does_not_raise_error(sdk_without_user):
     with pytest.raises(UserDoesNotExistError):
         get_user_id(sdk_without_user, "risky employee")
-
-
-def test_get_user_id_when_user_does_not_exist_logs_error(sdk_without_user, caplog):
-    with caplog.at_level(logging.ERROR):
-        try:
-            get_user_id(sdk_without_user, "risky employee")
-        except UserDoesNotExistError:
-            assert "User 'risky employee' does not exist." in caplog.text
 
 
 def test_update_user_adds_cloud_alias(sdk_with_user, profile):

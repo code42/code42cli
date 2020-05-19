@@ -1,25 +1,10 @@
 from py42.exceptions import Py42BadRequestError
 
-from code42cli.compat import str
-from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory
 from code42cli.bulk import generate_template, run_bulk_process, BulkCommandType
 from code42cli.file_readers import create_csv_reader, create_flat_file_reader
-from code42cli.logger import get_main_cli_logger
+from code42cli.errors import UserAlreadyAddedError, UserDoesNotExistError, UnknownRiskTagError
+from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory
 from code42cli.cmds.detectionlists.enums import DetectionLists, DetectionListUserKeys, RiskTags
-
-
-class UserAlreadyAddedError(Exception):
-    def __init__(self, username, list_name):
-        msg = u"'{}' is already on the {} list.".format(username, list_name)
-        super(UserAlreadyAddedError, self).__init__(msg)
-
-
-class UnknownRiskTagError(Exception):
-    def __init__(self, bad_tags):
-        tags = u", ".join(bad_tags)
-        super(UnknownRiskTagError, self).__init__(
-            u"The following risk tags are unknown: '{}'.".format(tags)
-        )
 
 
 def try_handle_user_already_added_error(bad_request_err, username_tried_adding, list_name):
@@ -30,15 +15,6 @@ def try_handle_user_already_added_error(bad_request_err, username_tried_adding, 
 
 def _error_is_user_already_added(bad_request_error_text):
     return u"User already on list" in bad_request_error_text
-
-
-class UserDoesNotExistError(Exception):
-    """An error to represent a username that is not in our system. The CLI shows this error when 
-    the user tries to add or remove a user that does not exist. This error is not shown during 
-    bulk add or remove."""
-
-    def __init__(self, username):
-        super(UserDoesNotExistError, self).__init__(u"User '{}' does not exist.".format(username))
 
 
 class DetectionListHandlers(object):
@@ -204,9 +180,7 @@ def get_user_id(sdk, username):
     """
     users = sdk.users.get_by_username(username)[u"users"]
     if not users:
-        ex = UserDoesNotExistError(username)
-        get_main_cli_logger().log_error(str(ex))
-        raise ex
+        raise UserDoesNotExistError(username)
     return users[0][u"userUid"]
 
 

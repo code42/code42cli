@@ -1,11 +1,7 @@
 import pytest
 import logging
 
-from code42cli.cmds.detectionlists import (
-    UserDoesNotExistError,
-    UserAlreadyAddedError,
-    UnknownRiskTagError,
-)
+from code42cli.errors import UserAlreadyAddedError, UnknownRiskTagError, UserDoesNotExistError
 from code42cli.cmds.detectionlists.high_risk_employee import (
     add_high_risk_employee,
     remove_high_risk_employee,
@@ -54,16 +50,6 @@ def test_add_high_risk_employee_adds(sdk_with_user, profile):
 def test_add_high_risk_employee_when_user_does_not_exist_exits(sdk_without_user, profile):
     with pytest.raises(UserDoesNotExistError):
         add_high_risk_employee(sdk_without_user, profile, _EMPLOYEE)
-
-
-def test_add_high_risk_employee_when_user_does_not_exist_prints_error(
-    sdk_without_user, profile, caplog
-):
-    with caplog.at_level(logging.ERROR):
-        try:
-            add_high_risk_employee(sdk_without_user, profile, _EMPLOYEE)
-        except UserDoesNotExistError:
-            assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text
 
 
 def test_add_high_risk_employee_when_user_already_added_raises_UserAlreadyAddedError(
@@ -123,16 +109,6 @@ def test_remove_high_risk_employee_when_user_does_not_exist_exits(sdk_without_us
         remove_high_risk_employee(sdk_without_user, profile, _EMPLOYEE)
 
 
-def test_remove_high_risk_employee_when_user_does_not_exist_prints_error(
-    sdk_without_user, profile, caplog
-):
-    with caplog.at_level(logging.ERROR):
-        try:
-            remove_high_risk_employee(sdk_without_user, profile, _EMPLOYEE)
-        except UserDoesNotExistError:
-            assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text
-
-
 def test_add_risk_tags_adds_tags(sdk_with_user, profile):
     add_risk_tags(
         sdk_with_user,
@@ -165,19 +141,6 @@ def test_add_risk_tags_when_user_does_not_exist_exits(sdk_without_user, profile)
             _EMPLOYEE,
             [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK],
         )
-
-
-def test_add_risk_tags_when_user_does_not_exist_prints_error(sdk_without_user, profile, caplog):
-    with caplog.at_level(logging.ERROR):
-        try:
-            add_risk_tags(
-                sdk_without_user,
-                profile,
-                _EMPLOYEE,
-                [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK],
-            )
-        except UserDoesNotExistError:
-            assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text
 
 
 def test_add_risk_tags_when_bad_request_and_unknown_risk_tags_raises_UnknownRiskTagError(
@@ -229,19 +192,6 @@ def test_remove_risk_tags_when_user_does_not_exist_exits(sdk_without_user, profi
             _EMPLOYEE,
             [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK],
         )
-
-
-def test_remove_risk_tags_when_user_does_not_exist_prints_error(sdk_without_user, profile, caplog):
-    with caplog.at_level(logging.ERROR):
-        try:
-            remove_risk_tags(
-                sdk_without_user,
-                profile,
-                _EMPLOYEE,
-                [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK],
-            )
-        except UserDoesNotExistError:
-            assert str(UserDoesNotExistError(_EMPLOYEE)) in caplog.text
 
 
 def test_remove_risk_tags_when_bad_request_and_unknown_risk_tags_raises_UnknownRiskTagError(
