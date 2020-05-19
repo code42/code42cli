@@ -24,6 +24,17 @@ TEST_SYSTEM_RULE_REPONSE = {
     ]
 }
 
+TEST_USER_RULE_REPONSE = {
+    u"ruleMetadata": [
+        {
+            u"observerRuleId": TEST_RULE_ID,
+            u"type": u"FED_FILE_TYPE_MISMATCH",
+            u"isSystem": False,
+            u"ruleSource": "Testing",
+        }
+    ]
+}
+
 TEST_GET_ALL_RESPONSE_EXFILTRATION = {
     u"ruleMetadata": [{u"observerRuleId": TEST_RULE_ID, u"type": u"FED_ENDPOINT_EXFILTRATION"}]
 }
@@ -67,6 +78,16 @@ def test_add_user_when_returns_500_and_system_rule_raises_InvalidRuleTypeError(
             add_user(alert_rules_sdk, profile, TEST_RULE_ID, TEST_USERNAME)
 
 
+def test_add_user_when_returns_500_and_not_system_rule_raises_Py42InternalServerError(
+    alert_rules_sdk, profile, mock_server_error, caplog
+):
+    with caplog.at_level(logging.INFO):
+        alert_rules_sdk.alerts.rules.get_by_observer_id.return_value = TEST_USER_RULE_REPONSE
+        alert_rules_sdk.alerts.rules.add_user.side_effect = mock_server_error
+        with pytest.raises(Py42InternalServerError):
+            add_user(alert_rules_sdk, profile, TEST_RULE_ID, TEST_USERNAME)
+
+
 def test_remove_user_removes_user_list_from_alert_rules(alert_rules_sdk, profile):
     alert_rules_sdk.users.get_by_username.return_value = {u"users": [{u"userUid": TEST_USER_ID}]}
     remove_user(alert_rules_sdk, profile, TEST_RULE_ID, TEST_USERNAME)
@@ -90,6 +111,16 @@ def test_remove_user_when_returns_500_and_system_rule_raises_InvalidRuleTypeErro
         alert_rules_sdk.alerts.rules.get_by_observer_id.return_value = TEST_SYSTEM_RULE_REPONSE
         alert_rules_sdk.alerts.rules.remove_user.side_effect = mock_server_error
         with pytest.raises(InvalidRuleTypeError):
+            remove_user(alert_rules_sdk, profile, TEST_RULE_ID, TEST_USERNAME)
+
+
+def test_remove_user_when_returns_500_and_not_system_rule_raises_Py42InternalServerError(
+    alert_rules_sdk, profile, mock_server_error, caplog
+):
+    with caplog.at_level(logging.INFO):
+        alert_rules_sdk.alerts.rules.get_by_observer_id.return_value = TEST_USER_RULE_REPONSE
+        alert_rules_sdk.alerts.rules.remove_user.side_effect = mock_server_error
+        with pytest.raises(Py42InternalServerError):
             remove_user(alert_rules_sdk, profile, TEST_RULE_ID, TEST_USERNAME)
 
 
@@ -126,3 +157,11 @@ def test_show_rule_calls_correct_rule_property_file_type_mismatch(alert_rules_sd
     )
     show_rule(alert_rules_sdk, profile, TEST_RULE_ID)
     alert_rules_sdk.alerts.rules.filetypemismatch.get.assert_called_once_with(TEST_RULE_ID)
+
+
+def test_show_rule_when_no_matching_rule_prints_no_rule_message(alert_rules_sdk, profile, caplog):
+    with caplog.at_level(logging.INFO):
+        alert_rules_sdk.alerts.rules.get_by_observer_id.return_value = TEST_EMPTY_RULE_RESPONSE
+        show_rule(alert_rules_sdk, profile, TEST_RULE_ID)
+        msg = u"No alert rules with RuleId {} found".format(TEST_RULE_ID)
+        assert msg in caplog.text
