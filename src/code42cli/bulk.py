@@ -176,6 +176,7 @@ def create_flat_file_reader(file_path):
 class ProgressBar(object):
     _FILL = u"█"
     _LENGTH = 100
+    _LATENCY = _LENGTH / 10
 
     def __init__(self, stats):
         self._stats = stats
@@ -193,10 +194,9 @@ class ProgressBar(object):
         return self._FILL * fill_length + u"-" * (self._LENGTH - fill_length)
 
     def _calculate_fill_length(self, idx):
-        latency = self._LENGTH / 10
         filled_length = self._LENGTH * idx // self._stats.total
-        if filled_length + latency < self._LENGTH:
-            filled_length += latency
+        if filled_length + self._LATENCY < self._LENGTH:
+            filled_length += self._LATENCY
         return int(filled_length)
 
     def _create_stats_text(self):
