@@ -91,7 +91,7 @@ class BulkProcessor(object):
 
     def run(self):
         """Processes the csv file specified in the ctor, calling `self.row_handler` on each row."""
-        self._print_progress()
+        self._print_progress()  # init progress bar
         with open(self.file_path, newline=u"", encoding=u"utf8") as bulk_file:
             for row in self._reader(bulk_file=bulk_file):
                 self._process_row(row)
@@ -122,9 +122,9 @@ class BulkProcessor(object):
             self.__worker.do_async(lambda *args, **kwargs: self._handle_row(*args, **kwargs), row)
 
     def _handle_row(self, *args, **kwargs):
-        self._print_progress()
         self._row_handler(*args, **kwargs)
-
+        self._print_progress()
+        
     def _print_result(self):
         stats = self.__worker.stats
         self._print_progress()
