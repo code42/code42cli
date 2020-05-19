@@ -4,7 +4,7 @@ from threading import Lock
 import copy
 
 from code42cli.compat import str
-from code42cli.util import get_user_project_path, is_interactive
+from code42cli.util import get_user_project_path, is_interactive, color_text_red
 
 
 logger_deps_lock = Lock()
@@ -124,7 +124,7 @@ def _create_formatter_for_error_file():
 
 
 def _get_red_error_text(text):
-    return u"\033[91mERROR: {}\033[0m".format(text)
+    return color_text_red(u"ERROR: {}".format(text))
 
 
 class CliLogger(object):

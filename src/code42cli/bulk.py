@@ -6,6 +6,7 @@ from code42cli.compat import open, str
 from code42cli.worker import Worker
 from code42cli.logger import get_main_cli_logger
 from code42cli.args import SDK_ARG_NAME, PROFILE_ARG_NAME
+from code42cli.util import color_text_red
 
 
 _PROGRESS_FILLER = u"█"
@@ -173,7 +174,13 @@ def _print_progress(stats, total_rows):
     filled_length = int(filled_length)
     bar = _PROGRESS_FILLER * filled_length + u"-" * (length - filled_length)
     successes = stats.total_processed - stats.total_errors
-    sys.stdout.write(
-        u"\r{} {} successes, {} failures.".format(bar, successes, stats.total_errors, bar)
+    failures = stats.total_errors
+    stats_msg = u"{0} successes, {1} failures out of {2}.".format(
+        successes, failures, total_rows
     )
+    sys.stdout.write(u"\r{} {}".format(bar, stats_msg))
     sys.stdout.flush()
+    if stats.total_processed == total_rows:
+        clear = length * u" "
+        sys.stdout.write("\r{}{}\r".format(stats_msg, clear))
+        sys.stdout.flush()
