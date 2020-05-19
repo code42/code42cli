@@ -94,8 +94,8 @@ def format_to_table(rows, column_size):
 
 class warn_interrupt(object):
     """A context decorator class used to wrap functions where a keyboard interrupt could potentially
-    leave things in a bad state. Warns the user with provided message and requires them to ctrl-c 
-    a second time to force exit.
+    leave things in a bad state. Warns the user with provided message and exits when wrapped 
+    function is complete. Requires user to ctrl-c a second time to force exit.
     
     Usage:
     
@@ -104,11 +104,11 @@ class warn_interrupt(object):
         pass
     """
 
-    def __init__(self, warning="The code42 cli is working... "):
+    def __init__(self, warning="Cancelling operation cleanly, one moment... "):
         self.warning = warning
         self.old_handler = None
         self.interrupted = False
-        self.exit_instructions = "Hit CTRL-C again to quit anyway."
+        self.exit_instructions = "Hit CTRL-C again to force quit."
 
     def __enter__(self):
         self.old_handler = getsignal(SIGINT)
@@ -116,6 +116,8 @@ class warn_interrupt(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.interrupted:
+            exit(1)
         signal(SIGINT, self.old_handler)
         return False
 
