@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import os, sys, inspect, csv
+import os, sys, inspect, csv, logging
 
 from code42cli.compat import open, str
 from code42cli.worker import Worker
 from code42cli.logger import get_main_cli_logger
 from code42cli.args import SDK_ARG_NAME, PROFILE_ARG_NAME
-from code42cli.errors import BadFileError
+from code42cli.progress_bar import ProgressBar
 
 
 _logger = get_main_cli_logger()
@@ -118,95 +118,3 @@ class BulkProcessor(object):
     def _handle_row(self, *args, **kwargs):
         self._progress_bar.update()
         self._row_handler(*args, **kwargs)
-
-
-class BulkFileReader(object):
-    _ROWS_COUNT = -1
-
-    def __init__(self, file_path):
-        self.file_path = file_path
-
-    def __call__(self, *args, **kwargs):
-        pass
-
-    def get_rows_count(self):
-        if self._ROWS_COUNT == -1:
-            self._ROWS_COUNT = sum(1 for _ in open(self.file_path))
-        if self._ROWS_COUNT == 0:
-            raise BadFileError(u"Given empty file {}.".format(self.file_path))
-        return self._ROWS_COUNT
-
-
-class CSVReader(BulkFileReader):
-    """A generator that yields header keys mapped to row values from a csv file."""
-
-    def __init__(self, file_path):
-        with open(file_path) as f:
-            try:
-                self.has_header = csv.Sniffer().has_header(next(f))
-            except StopIteration:
-                raise BadFileError(u"Given empty file {}.".format(file_path))
-        super(CSVReader, self).__init__(file_path)
-
-    def __call__(self, *args, **kwargs):
-        for row in csv.DictReader(kwargs.get(u"bulk_file")):
-            yield row
-
-    def get_rows_count(self):
-        rows_count = super(CSVReader, self).get_rows_count()
-        return rows_count - 1 if self.has_header else rows_count
-
-
-class FlatFileReader(BulkFileReader):
-    """A generator that yields a single-value per row from a file."""
-
-    def __call__(self, *args, **kwargs):
-        for row in kwargs[u"bulk_file"]:
-            yield row
-
-
-def create_csv_reader(file_path):
-    return CSVReader(file_path)
-
-
-def create_flat_file_reader(file_path):
-    return FlatFileReader(file_path)
-
-
-class ProgressBar(object):
-    _FILL = u"█"
-    _LENGTH = 100
-    _LATENCY = _LENGTH / 10
-
-    def __init__(self, stats):
-        self._stats = stats
-
-    def update(self):
-        iteration = self._stats.total_processed + 1
-        bar = self._create_bar(iteration)
-        stats_msg = self._create_stats_text()
-
-        sys.stdout.write(u"\r{} {}".format(bar, stats_msg))
-        sys.stdout.flush()
-
-    def _create_bar(self, iteration):
-        fill_length = self._calculate_fill_length(iteration)
-        return self._FILL * fill_length + u"-" * (self._LENGTH - fill_length)
-
-    def _calculate_fill_length(self, idx):
-        filled_length = self._LENGTH * idx // self._stats.total
-        if filled_length + self._LATENCY < self._LENGTH:
-            filled_length += self._LATENCY
-        return int(filled_length)
-
-    def _create_stats_text(self):
-        return u"{0} succeeded, {1} failed out of {2}.".format(
-            self._stats.total_successes, self._stats.total_errors, self._stats.total
-        )
-
-    def clear_bar_and_print_results(self):
-        clear = self._LENGTH * u" "
-        sys.stdout.write(u"\r{}{}\n".format(self._create_stats_text(), clear))
-        sys.stdout.flush()
-        if self._stats.total_errors:
-            _logger.print_errors_occurred_message()

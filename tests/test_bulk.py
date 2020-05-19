@@ -5,11 +5,7 @@ import logging
 
 from code42cli import PRODUCT_NAME
 from code42cli import errors as errors
-from code42cli.bulk import (
-    generate_template,
-    BulkProcessor,
-    run_bulk_process,
-)
+from code42cli.bulk import generate_template, BulkProcessor, run_bulk_process
 from code42cli.logger import get_view_exceptions_location_message
 
 from .conftest import ErrorTrackerTestHelper, create_mock_reader
@@ -155,7 +151,7 @@ class TestBulkProcessor(object):
         assert "row2" in processed_rows
         assert "row3" in processed_rows
 
-    def test_run_when_error_occurs_prints_error_messages(self, mock_open, caplog, capsys):
+    def test_run_when_error_occurs_prints_error_messages(self, mock_open, caplog):
         caplog.set_level(logging.INFO)
 
         def func_for_bulk(test):
@@ -167,21 +163,21 @@ class TestBulkProcessor(object):
             processor = BulkProcessor(func_for_bulk, reader)
             processor.run()
 
-            capture_sys = capsys.readouterr()
-            assert "2 succeeded, 1 failed out of 3." in capture_sys.out
+            with caplog.at_level(logging.INFO):
+                assert "2 succeeded, 1 failed out of 3." in caplog.text
 
             with caplog.at_level(logging.ERROR):
                 assert get_view_exceptions_location_message() in caplog.text
 
-    def test_run_when_no_errors_occur_prints_success_messages(self, mock_open, capsys):
+    def test_run_when_no_errors_occur_prints_success_messages(self, mock_open, caplog):
         def func_for_bulk(test):
             pass
 
         reader = create_mock_reader(["row1", "row2", "row3"])
         processor = BulkProcessor(func_for_bulk, reader)
         processor.run()
-        capture = capsys.readouterr()
-        assert "3 succeeded, 0 failed out of 3" in capture.out
+        with caplog.at_level(logging.INFO):
+            assert "3 succeeded, 0 failed out of 3" in caplog.text
 
     def test_run_when_no_errors_occur_does_not_print_error_message(self, mock_open, caplog):
         def func_for_bulk(test):
@@ -216,9 +212,7 @@ class TestBulkProcessor(object):
         def func_for_bulk(test1, test2):
             processed_rows.append((test1, test2))
 
-        reader = create_mock_reader(
-            [{"test1": "", "test2": "foo"}, {"test1": "bar", "test2": u""}]
-        )
+        reader = create_mock_reader([{"test1": "", "test2": "foo"}, {"test1": "bar", "test2": u""}])
         processor = BulkProcessor(func_for_bulk, reader)
         processor.run()
         assert (None, "foo") in processed_rows

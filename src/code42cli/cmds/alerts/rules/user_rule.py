@@ -1,7 +1,8 @@
 from py42.util import format_json
 
 from code42cli.util import format_to_table, find_format_width
-from code42cli.bulk import run_bulk_process, CSVReader
+from code42cli.bulk import run_bulk_process
+from code42cli.file_readers import create_csv_reader
 from code42cli.logger import get_main_cli_logger
 from code42cli.cmds.detectionlists import get_user_id
 from code42cli.cmds.alerts.rules.enums import AlertRuleTypes
@@ -45,14 +46,13 @@ def get_rules(sdk, profile):
 
 
 def add_bulk_users(sdk, profile, file_name):
-    reader = CSVReader(file_name)
+    reader = create_csv_reader(file_name)
     run_bulk_process(lambda rule_id, username: add_user(sdk, profile, rule_id, username), reader)
 
 
 def remove_bulk_users(sdk, profile, file_name):
-    run_bulk_process(
-        lambda rule_id, username: remove_user(sdk, profile, rule_id, username), CSVReader(file_name)
-    )
+    reader = create_csv_reader(file_name)
+    run_bulk_process(lambda rule_id, username: remove_user(sdk, profile, rule_id, username), reader)
 
 
 def show_rule(sdk, profile, rule_id):

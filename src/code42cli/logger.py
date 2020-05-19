@@ -23,13 +23,13 @@ def get_logger_for_stdout(name_suffix=u"main", formatter=None):
     with logger_deps_lock:
         if not logger_has_handlers(logger):
             handler = logging.StreamHandler(sys.stdout)
-            formatter = formatter or _get_standard_formatter()
+            formatter = formatter or get_standard_formatter()
             logger.setLevel(logging.INFO)
             return add_handler_to_logger(logger, handler, formatter)
     return logger
 
 
-def _get_standard_formatter():
+def get_standard_formatter():
     return logging.Formatter(u"%(message)s")
 
 
@@ -104,7 +104,7 @@ def _get_interactive_user_error_logger():
     with logger_deps_lock:
         if not logger_has_handlers(logger):
             stderr_handler = RedStderrHandler()
-            stderr_formatter = _get_standard_formatter()
+            stderr_formatter = get_standard_formatter()
             stderr_handler.setFormatter(stderr_formatter)
 
             file_handler = _create_error_file_handler()

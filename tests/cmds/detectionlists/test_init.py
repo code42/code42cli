@@ -146,7 +146,9 @@ class TestDetectionList(object):
         assert bulk_processor.call_args[0][1] == reader
         reader_factory.assert_called_once_with("csv_test")
 
-    def test_bulk_remove_employees_uses_expected_arguments(self, mocker, sdk, profile, bulk_processor):
+    def test_bulk_remove_employees_uses_expected_arguments(
+        self, mocker, sdk, profile, bulk_processor
+    ):
         reader = create_mock_reader(["test1", "test2"])
         reader_factory = mocker.patch("{}.create_flat_file_reader".format(_NAMESPACE))
         reader_factory.return_value = reader
