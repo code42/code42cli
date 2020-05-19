@@ -185,7 +185,9 @@ class TestBulkProcessor(object):
         with caplog.at_level(logging.INFO):
             assert "3 succeeded, 0 failed out of 3" in caplog.text
 
-    def test_run_when_no_errors_occur_does_not_print_error_message(self, mock_open, caplog, progress_bar):
+    def test_run_when_no_errors_occur_does_not_print_error_message(
+        self, mock_open, caplog, progress_bar
+    ):
         def func_for_bulk(test):
             pass
 
