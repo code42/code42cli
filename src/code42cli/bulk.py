@@ -86,11 +86,16 @@ class BulkProcessor(object):
 
     def run(self):
         """Processes the csv file specified in the ctor, calling `self.row_handler` on each row."""
+        self._print_progress()
         with open(self.file_path, newline=u"", encoding=u"utf8") as bulk_file:
             for row in self._reader(bulk_file=bulk_file):
                 self._process_row(row)
             self.__worker.wait()
         self._print_result()
+    
+    def _print_progress(self):
+        row_count = self._reader.get_rows_count(self.file_path)
+        _print_progress(self.__worker.stats, row_count)
 
     def _process_row(self, row):
         if isinstance(row, dict):
@@ -104,35 +109,64 @@ class BulkProcessor(object):
         row.pop(None, None)
         row_values = {key: val if val != u"" else None for key, val in row.items()}
         self.__worker.do_async(
-            lambda *args, **kwargs: self._row_handler(*args, **kwargs), **row_values
+            lambda *args, **kwargs: self._handle_row(*args, **kwargs), **row_values
         )
 
     def _process_flat_file_row(self, row):
         if row:
-            self.__worker.do_async(lambda *args, **kwargs: self._row_handler(*args, **kwargs), row)
+            self.__worker.do_async(lambda *args, **kwargs: self._handle_row(*args, **kwargs), row)
+
+    def _handle_row(self, *args, **kwargs):
+        self._print_progress()
+        self._row_handler(*args, **kwargs)
 
     def _print_result(self):
         stats = self.__worker.stats
-        successes = stats.total - stats.total_errors
         logger = get_main_cli_logger()
-        logger.print_and_log_info(
-            u"{} processed successfully out of {}.".format(successes, stats.total)
-        )
+        self._print_progress()
+        print()
         if stats.total_errors:
             logger.print_errors_occurred_message()
 
 
-class CSVReader(object):
+class BulkFileReader(object):
+    _ROWS_COUNT = -1
+    
+    def __call__(self, *args, **kwargs):
+        pass
+    
+    def get_rows_count(self, file_path):
+        if self._ROWS_COUNT == -1:
+            self._ROWS_COUNT = sum(1 for _ in open(file_path))
+        return self._ROWS_COUNT
+
+
+class CSVReader(BulkFileReader):
     """A generator that yields header keys mapped to row values from a csv file."""
 
     def __call__(self, *args, **kwargs):
         for row in csv.DictReader(kwargs.get(u"bulk_file")):
             yield row
+    
+    def get_rows_count(self, file_path):
+        return super(CSVReader, self).get_rows_count(file_path) - 1
 
 
-class FlatFileReader(object):
+class FlatFileReader(BulkFileReader):
     """A generator that yields a single-value per row from a file."""
 
     def __call__(self, *args, **kwargs):
         for row in kwargs[u"bulk_file"]:
             yield row
+
+
+_FILLER = u"█"
+
+
+def _print_progress(stats, total_rows):
+    iteration = stats.total
+    length = 75
+    filled_length = int(length * iteration // total_rows)
+    bar = _FILLER * filled_length + u"-" * (length - filled_length - 1)
+    successes = stats.total - stats.total_errors
+    print(u"\r  {} {} successes, {} failures.".format(bar, successes, stats.total_errors, bar), end=u"\r")
