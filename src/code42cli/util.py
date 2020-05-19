@@ -89,5 +89,6 @@ def format_to_table(rows, column_size):
             print(str(row[key]).ljust(column_size[key] + _PADDING_SIZE), end=u" ")
         print(u"")
 
+
 def color_text_red(text):
     return u"\033[91m{}\033[0m".format(text)

@@ -8,8 +8,6 @@ from code42cli.logger import get_main_cli_logger
 from code42cli.args import SDK_ARG_NAME, PROFILE_ARG_NAME
 
 
-_PROGRESS_FILLER = u"█"
-_PROGRESS_BAR_LENGTH = 100
 _logger = get_main_cli_logger()
 
 
@@ -86,18 +84,16 @@ class BulkProcessor(object):
         self._reader = reader
         self.__worker = Worker(5, reader.get_rows_count())
         self._stats = self.__worker.stats
-    
+        self._progress_bar = ProgressBar(self._stats)
+
     def run(self):
         """Processes the csv file specified in the ctor, calling `self.row_handler` on each row."""
-        self._print_progress()  # init progress bar
+        self._progress_bar.update()  # init progress bar
         with open(self.file_path, newline=u"", encoding=u"utf8") as bulk_file:
             for row in self._reader(bulk_file=bulk_file):
                 self._process_row(row)
             self.__worker.wait()
         self._print_result()
-
-    def _print_progress(self):
-        _print_progress(self._stats)
 
     def _process_row(self, row):
         if isinstance(row, dict):
@@ -119,18 +115,18 @@ class BulkProcessor(object):
             self.__worker.do_async(lambda *args, **kwargs: self._handle_row(*args, **kwargs), row)
 
     def _handle_row(self, *args, **kwargs):
-        self._print_progress()
+        self._progress_bar.update()
         self._row_handler(*args, **kwargs)
 
     def _print_result(self):
-        self._print_progress()
+        self._progress_bar.update()
         if self._stats.total_errors:
             _logger.print_errors_occurred_message()
 
 
 class BulkFileReader(object):
     _ROWS_COUNT = -1
-    
+
     def __init__(self, file_path):
         self.file_path = file_path
 
@@ -145,7 +141,7 @@ class BulkFileReader(object):
 
 class CSVReader(BulkFileReader):
     """A generator that yields header keys mapped to row values from a csv file."""
-    
+
     def __init__(self, file_path):
         with open(file_path) as f:
             self.has_header = csv.Sniffer().has_header(next(f))
@@ -168,22 +164,40 @@ class FlatFileReader(BulkFileReader):
             yield row
 
 
-def _print_progress(stats):
-    iteration = stats.total_processed
-    latency = _PROGRESS_BAR_LENGTH / 10
-    filled_length = _PROGRESS_BAR_LENGTH * iteration // stats.total
-    if filled_length + latency < _PROGRESS_BAR_LENGTH:
-        filled_length += latency
-    filled_length = int(filled_length)
-    bar = _PROGRESS_FILLER * filled_length + u"-" * (_PROGRESS_BAR_LENGTH - filled_length)
-    successes = iteration - stats.total_errors
-    failures = stats.total_errors
-    stats_msg = u"{0} successes, {1} failures out of {2}.".format(
-        successes, failures, stats.total
-    )
-    sys.stdout.write(u"\r{} {}".format(bar, stats_msg))
-    sys.stdout.flush()
-    if iteration == stats.total:
-        clear = _PROGRESS_BAR_LENGTH * u" "
-        sys.stdout.write("\r{}{}\r".format(stats_msg, clear))
+class ProgressBar(object):
+    _FILL = u"█"
+    _LENGTH = 100
+
+    def __init__(self, stats):
+        self.stats = stats
+
+    def update(self):
+        iteration = self.stats.total_processed
+        bar = self._create_bar(iteration)
+        stats_msg = self._create_stats_text()
+
+        sys.stdout.write(u"\r{} {}".format(bar, stats_msg))
+        sys.stdout.flush()
+        if iteration == self.stats.total:
+            self._clear_bar_and_print_results()
+
+    def _create_bar(self, iteration):
+        fill_length = self._calculate_fill_length(iteration)
+        return self._FILL * fill_length + u"-" * (self._LENGTH - fill_length)
+
+    def _calculate_fill_length(self, idx):
+        latency = self._LENGTH / 10
+        filled_length = self._LENGTH * idx // self.stats.total
+        if filled_length + latency < self._LENGTH:
+            filled_length += latency
+        return int(filled_length)
+
+    def _create_stats_text(self):
+        return u"{0} successes, {1} failures out of {2}.".format(
+            self.stats.total_successes, self.stats.total_errors, self.stats.total
+        )
+
+    def _clear_bar_and_print_results(self):
+        clear = self._LENGTH * u" "
+        sys.stdout.write("\r{}{}\r".format(self._create_stats_text(), clear))
         sys.stdout.flush()
