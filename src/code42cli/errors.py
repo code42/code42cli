@@ -25,6 +25,13 @@ class UnknownRiskTagError(Code42CLIError):
         )
 
 
+class InvalidRuleTypeError(Code42CLIError):
+    def __init__(self, rule_id, source):
+        msg = u"Only alert rules with a source of 'Alerting' can be targeted by this command. "
+        msg += "Rule {0} has a source of '{1}'."
+        super(InvalidRuleTypeError, self).__init__(msg.format(rule_id, source))
+
+
 class UserDoesNotExistError(Code42CLIError):
     """An error to represent a username that is not in our system. The CLI shows this error when 
     the user tries to add or remove a user that does not exist. This error is not shown during 

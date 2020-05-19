@@ -30,18 +30,28 @@ def remove_user(sdk, profile, rule_id, username):
         sdk.alerts.rules.remove_all_users(rule_id)
 
 
-def _get_rules_metadata(sdk, rule_id=None):
+def _get_all_rules_metadata(sdk):
     rules_generator = sdk.alerts.rules.get_all()
     selected_rules = [rule for rules in rules_generator for rule in rules[u"ruleMetadata"]]
-    if rule_id:
-        selected_rules = [rule for rule in selected_rules if rule[u"observerRuleId"] == rule_id]
-    return selected_rules
+    return _handle_rules_results(sdk, selected_rules)
+
+
+def _get_rule_metadata(sdk, rule_id):
+    rules = sdk.alerts.rules.get_by_observer_id(rule_id)[u"ruleMetadata"]
+    return _handle_rules_results(sdk, rules)
+
+
+def _handle_rules_results(sdk, rules):
+    if not rules:
+        get_main_cli_logger().print_and_log_info(u"No alert rules found.")
+    return rules
 
 
 def get_rules(sdk, profile):
-    selected_rules = _get_rules_metadata(sdk)
-    rows, column_size = find_format_width(selected_rules, _HEADER_KEYS_MAP)
-    format_to_table(rows, column_size)
+    selected_rules = _get_all_rules_metadata(sdk)
+    if selected_rules:
+        rows, column_size = find_format_width(selected_rules, _HEADER_KEYS_MAP)
+        format_to_table(rows, column_size)
 
 
 def add_bulk_users(sdk, profile, file_name):
@@ -59,9 +69,9 @@ def remove_bulk_users(sdk, profile, file_name):
 
 
 def show_rule(sdk, profile, rule_id):
-    selected_rule = _get_rules_metadata(sdk, rule_id)
+    selected_rule = _get_rule_metadata(sdk, rule_id)
     rule_detail = None
-    if len(selected_rule):
+    if selected_rule:
         rule_type = selected_rule[0][u"type"]
         if rule_type == AlertRuleTypes.EXFILTRATION:
             rule_detail = sdk.alerts.rules.exfiltration.get(rule_id)
