@@ -11,6 +11,9 @@ from .conftest import (
     func_positional_args,
     func_with_args,
     func_with_sdk,
+    func_single_positional_arg_with_sdk_and_profile,
+    func_single_positional_arg,
+    func_single_positional_arg_many_optional_args,
 )
 
 subcommand1 = Command("sub1", "sub1 desc", "sub1 usage")
@@ -87,31 +90,41 @@ class TestCommand(object):
         coll = command.get_arg_configs()
         assert coll["default"].settings["default"] == "testdefault"
 
-    def test_get_arg_configs_when_keyword_args_with_list_defaults_has_nargs_set(self):
-        command = Command("test", "test desc", "test usage", func_keyword_args)
-        coll = command.get_arg_configs()
-        assert coll["nargstest"].settings["nargs"] == "+"
-
     def test_get_arg_configs_when_positional_args_returns_expected_collection(self):
         command = Command("test", "test desc", "test usage", func_positional_args)
         coll = command.get_arg_configs()
-        assert "one" in coll["one"].settings["options_list"]
-        assert "two" in coll["two"].settings["options_list"]
-        assert "three" in coll["three"].settings["options_list"]
+        assert "--one" in coll["one"].settings["options_list"]
+        assert "--two" in coll["two"].settings["options_list"]
+        assert "--three" in coll["three"].settings["options_list"]
+
+    def test_get_arg_configs_when_positional_args_returns_all_required_args(self):
+        command = Command("test", "test desc", "test usage", func_positional_args)
+        coll = command.get_arg_configs()
+        assert coll["one"].settings["required"] == True
+        assert coll["two"].settings["required"] == True
+        assert coll["three"].settings["required"] == True
 
     def test_get_arg_configs_when_mixed_args_returns_expected_collection(self):
         command = Command("test", "test desc", "test usage", func_mixed_args)
         coll = command.get_arg_configs()
-        assert "one" in coll["one"].settings["options_list"]
-        assert "two" in coll["two"].settings["options_list"]
+        assert "--one" in coll["one"].settings["options_list"]
+        assert "--two" in coll["two"].settings["options_list"]
         assert "--three" in coll["three"].settings["options_list"]
         assert "--four" in coll["four"].settings["options_list"]
+
+    def test_get_arg_configs_when_mixed_args_returns_positional_args_required(self):
+        command = Command("test", "test desc", "test usage", func_mixed_args)
+        coll = command.get_arg_configs()
+        assert coll["one"].settings["required"] == True
+        assert coll["two"].settings["required"] == True
+        assert not coll["three"].settings["required"]
+        assert not coll["four"].settings["required"]
 
     def test_get_arg_configs_when_handler_with_sdk_includes_profile_and_debug(self):
         command = Command("test", "test desc", "test usage", func_with_sdk)
         coll = command.get_arg_configs()
-        assert "one" in coll["one"].settings["options_list"]
-        assert "two" in coll["two"].settings["options_list"]
+        assert "--one" in coll["one"].settings["options_list"]
+        assert "--two" in coll["two"].settings["options_list"]
         assert "--three" in coll["three"].settings["options_list"]
         assert "--four" in coll["four"].settings["options_list"]
         assert "--profile" in coll[PROFILE_ARG_NAME].settings["options_list"]
@@ -122,6 +135,45 @@ class TestCommand(object):
         command = Command("test", "test desc", "test usage", func_with_args)
         coll = command.get_arg_configs()
         assert not coll.get("args")
+
+    def test_get_arg_configs_when_handler_has_single_positional_arg_and_sdk_and_profile_returns_expected_collection(
+        self
+    ):
+        command = Command(
+            "test", "test desc", "test usage", func_single_positional_arg_with_sdk_and_profile
+        )
+        coll = command.get_arg_configs()
+        assert "one" in coll["one"].settings["options_list"]
+
+    def test_get_arg_configs_when_handler_has_single_positional_arg_returns_expected_collection(
+        self
+    ):
+        command = Command("test", "test desc", "test usage", func_single_positional_arg)
+        coll = command.get_arg_configs()
+        assert "one" in coll["one"].settings["options_list"]
+
+    def test_get_arg_configs_when_handler_has_single_positional_arg_and_many_optional_args_returns_expected_collection(
+        self
+    ):
+        command = Command(
+            "test", "test desc", "test usage", func_single_positional_arg_many_optional_args
+        )
+        coll = command.get_arg_configs()
+        assert "one" in coll["one"].settings["options_list"]
+        assert "--two" in coll["two"].settings["options_list"]
+        assert "--three" in coll["three"].settings["options_list"]
+        assert "--four" in coll["four"].settings["options_list"]
+
+    def test_get_arg_configs_when_handler_has_single_positional_arg_and_many_optional_args_optional_args_are_not_required(
+        self
+    ):
+        command = Command(
+            "test", "test desc", "test usage", func_single_positional_arg_many_optional_args
+        )
+        coll = command.get_arg_configs()
+        assert not coll["two"].settings["required"]
+        assert not coll["three"].settings["required"]
+        assert not coll["four"].settings["required"]
 
     def test_call_when_keyword_args_passes_expected_values(self, mocker):
         def test_handler(one=None, two=None, three=None):

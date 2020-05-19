@@ -43,7 +43,7 @@ class TestCommandParser(object):
         parts = ["runnable"]
         parser = CommandParser()
         parser.prepare_command(cmd, parts)
-        parsed_args = parser.parse_args(["runnable", "one", "two"])
+        parsed_args = parser.parse_args(["runnable", "--one", "onetest", "--two", "twotest"])
         assert parsed_args.func(parsed_args) == "success"
 
     def test_prepare_command_when_required_args_help_outputs_help(self, capsys):

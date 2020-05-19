@@ -10,6 +10,14 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
+### Changed
+
+- `code42 profile create` now uses required `--name`, `--server` and `--username` flags instead of positional arguments.
+
+- `code42 high-risk-employee add-risk-tags` now uses required `--username` and `--tag` flags instead of positional arguments.
+
+- `code42 high-risk-employee remove-risk-tags` now uses required `--username` and `--tag` flags instead of positional arguments.
+
 ### Added
 
 - `code42 alerts`:
@@ -39,6 +47,9 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - A custom error in the error log when you try adding unknown risk tags to user.
 
 - A custom error in the error log when you try adding a user to a detection list who is already added.
+- Graceful handling of keyboard interrupts (ctrl-c) so stack traces aren't printed to console.
+- Warning message printed when ctrl-c is encountered in the middle of an operation that could cause incorrect checkpoint
+    state, a second ctrl-c is required to quit while that operation is ongoing. 
 
 - A progress bar that displays during bulk commands.
 
