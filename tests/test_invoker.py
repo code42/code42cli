@@ -7,6 +7,7 @@ import logging
 from py42.exceptions import Py42ForbiddenError
 
 from code42cli.commands import Command
+from code42cli.errors import Code42CLIError
 from code42cli.invoker import CommandInvoker
 from code42cli.parser import ArgumentParserError, CommandParser
 
@@ -134,3 +135,14 @@ class TestCommandInvoker(object):
         with caplog.at_level(logging.ERROR):
             invoker.run(["testsub1", "inner1", "one", "two", "--invalid", "test"])
             assert str(request.body) in caplog.text
+
+    def test_run_when_cli_error_occurs_logs_request(self, mocker, mock_parser, caplog):
+        cmd = Command("", "top level desc", subcommand_loader=load_subcommands)
+        mock_parser.parse_args.side_effect = Code42CLIError("a code42cli error")
+        mock_subparser = mocker.MagicMock()
+        mock_parser.prepare_command.return_value = mock_subparser
+        invoker = CommandInvoker(cmd, mock_parser)
+
+        with caplog.at_level(logging.ERROR):
+            invoker.run(["testsub1", "inner1", "one", "two", "--invalid", "test"])
+            assert "a code42cli error" in caplog.text
