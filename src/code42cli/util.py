@@ -1,5 +1,6 @@
 from __future__ import print_function
 import sys
+from collections import OrderedDict
 from functools import wraps
 from os import makedirs, path
 from signal import signal, getsignal, SIGINT
@@ -72,7 +73,7 @@ def find_format_width(record, header):
     # Set default max width items to column names
     max_width_item = dict(header.items())
     for record_row in record:
-        row = {}
+        row = OrderedDict()
         for header_key in header.keys():
             row[header_key] = record_row[header_key]
             max_width_item[header_key] = max(
