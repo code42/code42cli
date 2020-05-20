@@ -13,7 +13,7 @@ class ProgressBar(object):
 
     def update(self, iteration, message):
         bar = self._create_bar(iteration)
-        progress = u"{} {}".format(bar, message)
+        progress = u"{}  {} ".format(bar, message)
         self._logger.info(progress)
 
     def _create_bar(self, iteration):
@@ -25,5 +25,5 @@ class ProgressBar(object):
         return filled_length
 
     def clear_bar_and_print_final(self, final_message):
-        clear = self._LENGTH * u" "
+        clear = (self._LENGTH + len(final_message)) * u" "
         self._logger.info(u"{}{}\n".format(final_message, clear))

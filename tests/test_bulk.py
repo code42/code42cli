@@ -169,9 +169,6 @@ class TestBulkProcessor(object):
             processor = BulkProcessor(func_for_bulk, reader)
             processor.run()
 
-            with caplog.at_level(logging.INFO):
-                assert "2 succeeded, 1 failed out of 3." in caplog.text
-
             with caplog.at_level(logging.ERROR):
                 assert get_view_exceptions_location_message() in caplog.text
 
