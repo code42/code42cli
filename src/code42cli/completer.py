@@ -2,7 +2,6 @@ from code42cli.main import MainCmdNames
 
 
 class Completer(object):
-
     def complete(self, cmdline, point=None):
         args = cmdline[0:point].split()
         if len(args) == 2:
