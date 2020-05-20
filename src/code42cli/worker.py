@@ -33,7 +33,7 @@ class WorkerStats(object):
         return self._total_processed - self._total_errors
 
     def __str__(self):
-        return u"{0} succeeded, {1} failed out of {2}.".format(
+        return u"{0} succeeded, {1} failed out of {2}".format(
             self.total_successes, self._total_errors, self.total
         )
 

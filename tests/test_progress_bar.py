@@ -18,6 +18,7 @@ class TestProgressBar(object):
         bar.update(50, "MESSAGE")
         with caplog.at_level(logging.INFO):
             assert u"█" * 50 in caplog.text
+            assert u"█" * 51 not in caplog.text
             assert "MESSAGE" in caplog.text
 
     def test_clear_bar_and_print_result_clears_progress_bar(self, caplog):

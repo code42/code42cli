@@ -21,8 +21,8 @@ class ProgressBar(object):
         return self._FILL * fill_length + u"-" * (self._LENGTH - fill_length)
 
     def _calculate_fill_length(self, idx):
-        filled_length = self._LENGTH * idx // self._total_items
-        return int(filled_length)
+        filled_length = int(self._LENGTH * idx // self._total_items)
+        return filled_length
 
     def clear_bar_and_print_final(self, final_message):
         clear = self._LENGTH * u" "
