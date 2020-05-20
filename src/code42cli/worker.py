@@ -2,7 +2,6 @@ from threading import Thread, Lock
 
 from py42.exceptions import Py42HTTPError, Py42ForbiddenError
 
-from code42cli.compat import str
 from code42cli.errors import Code42CLIError
 from code42cli.compat import queue
 from code42cli.logger import get_main_cli_logger
@@ -32,6 +31,11 @@ class WorkerStats(object):
     @property
     def total_successes(self):
         return self._total_processed - self._total_errors
+
+    def __str__(self):
+        return u"{0} succeeded, {1} failed out of {2}.".format(
+            self.total_successes, self._total_errors, self.total
+        )
 
     def increment_total_processed(self):
         """+1 to self.total_processed"""

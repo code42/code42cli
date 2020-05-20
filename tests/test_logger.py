@@ -75,28 +75,30 @@ class TestInPlaceStreamHandler(object):
         record = mocker.MagicMock(spec=logging.LogRecord)
 
         def side_effect(*args, **kwargs):
-            raise RuntimeError("maximum recursion depth exceeded while getting the str of an object")
+            raise RuntimeError(
+                "maximum recursion depth exceeded while getting the str of an object"
+            )
 
         handler.format = mocker.MagicMock()
         handler.format = side_effect
         with pytest.raises(RuntimeError):
             handler.emit(record)
-    
+
     def test_emit_when_non_recursion_error_occurs_calls_handle_error(self, mocker):
         handler = InPlaceStreamHandler()
         record = mocker.MagicMock(spec=logging.LogRecord)
         spy = mocker.spy(handler, "handleError")
-        
+
         def side_effect(*args, **kwargs):
             raise Exception("Bad thing happened")
-        
+
         handler.format = mocker.MagicMock()
         handler.format = side_effect
         try:
             handler.emit(record)
         except Exception:
             spy.assert_called_once_with(record)
-        
+
 
 class TestCliLogger(object):
 
