@@ -78,12 +78,13 @@ class BulkProcessor(object):
     """
 
     def __init__(self, row_handler, reader, worker=None, progress_bar=None):
+        total = reader.get_rows_count()
         self.file_path = reader.file_path
         self._row_handler = row_handler
         self._reader = reader
-        self.__worker = worker or Worker(5, reader.get_rows_count())
+        self.__worker = worker or Worker(5, total)
         self._stats = self.__worker.stats
-        self._progress_bar = progress_bar or ProgressBar(self._stats.total)
+        self._progress_bar = progress_bar or ProgressBar(total)
 
     def run(self):
         """Processes the csv file specified in the ctor, calling `self.row_handler` on each row."""
