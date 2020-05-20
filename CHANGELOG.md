@@ -20,6 +20,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
+- Display, `Fuzzy suggestions`, valid keywords matching mistyped commands or arguments.
+
 - `code42 alerts`:
     - Ability to search/poll for alerts with checkpointing using one of the following commands:
       - `print` to output to stdout.
