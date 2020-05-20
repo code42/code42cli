@@ -1,8 +1,5 @@
-from code42cli.main import MainCmdNames
-from code42cli.cmds.profile import ProfileCmdNames
-
-
-_cmd_table = {"code42": MainCmdNames(), u"profile": ProfileCmdNames()}
+from code42cli import MAIN_COMMAND
+from code42cli import get_command_table
 
 
 class Completer(object):
@@ -12,8 +9,9 @@ class Completer(object):
             return []  # `code42` already completes w/o
 
         current = args[-1]
-        last = args[-2]
-        options = _cmd_table.get(last)
+        last = args[-2] if args[-2] != MAIN_COMMAND else u""
+        cmd_table = get_command_table()
+        options = cmd_table.get(last)
         return self._get_matches(current, options) if options else []
 
     def _get_matches(self, current, options):

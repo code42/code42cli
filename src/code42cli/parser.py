@@ -3,7 +3,9 @@ from argparse import RawDescriptionHelpFormatter, SUPPRESS
 
 from py42.__version__ import __version__ as py42version
 
+from code42cli import MAIN_COMMAND
 from code42cli.__version__ import __version__ as cliversion
+
 
 BANNER = u""" 
  dP""b8  dP"Yb  8888b. 888888  dP88  oP"Yb. 
@@ -27,6 +29,7 @@ class CommandParser(argparse.ArgumentParser):
         super(CommandParser, self).__init__(formatter_class=RawDescriptionHelpFormatter, **kwargs)
 
     def prepare_command(self, command, path_parts):
+        print(command.name)
         parser = self._get_parser(command, path_parts)
         self._load_argparse_config(command, parser)
         parser.set_defaults(func=lambda args: command(args, help_func=parser.print_help))
@@ -99,7 +102,7 @@ def _get_group_help(command):
     output = []
     name = command.name
     if not name:
-        name = u"code42"
+        name = MAIN_COMMAND
         output.append(BANNER)
 
     output.extend([u" \nAvailable commands in <{}>:".format(name), descriptions])
@@ -107,7 +110,7 @@ def _get_group_help(command):
 
 
 def _build_group_command_descriptions(command):
-    subs = command.subcommands
+    subs = get_command_table()[command.name]
     name_width = len(max([cmd.name for cmd in subs], key=len))
     lines = [u"  {} - {}".format(cmd.name.ljust(name_width), cmd.description) for cmd in subs]
     return u"\n".join(lines)

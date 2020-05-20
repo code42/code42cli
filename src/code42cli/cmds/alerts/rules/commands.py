@@ -1,3 +1,4 @@
+from code42cli import MAIN_COMMAND
 from code42cli.commands import Command
 from code42cli.bulk import generate_template, BulkCommandType
 from code42cli.cmds.alerts.rules.user_rule import (
@@ -64,7 +65,7 @@ def _load_bulk_generate_template_description(argument_collection):
 class AlertRulesBulkCommands(object):
     @staticmethod
     def load_commands():
-        usage_prefix = u"code42 alert-rules bulk"
+        usage_prefix = u"{} alert-rules bulk".format(MAIN_COMMAND)
 
         generate_template_cmd = Command(
             u"generate-template",
