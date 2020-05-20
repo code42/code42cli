@@ -10,13 +10,12 @@ class ProgressBar(object):
     def __init__(self, stats, logger=None):
         self._stats = stats
         self._logger = logger or get_progress_logger()
-        self._logger.terminator = u"\r"
 
     def update(self):
         iteration = self._stats.total_processed
         bar = self._create_bar(iteration)
         stats_msg = self._create_stats_text()
-        progress = u"\r{} {}".format(bar, stats_msg)
+        progress = u"{} {}".format(bar, stats_msg)
         self._logger.info(progress)
 
     def _create_bar(self, iteration):
@@ -36,6 +35,6 @@ class ProgressBar(object):
 
     def clear_bar_and_print_results(self):
         clear = self._LENGTH * u" "
-        self._logger.info(u"\r{}{}\n".format(self._create_stats_text(), clear))
+        self._logger.info(u"{}{}\n".format(self._create_stats_text(), clear))
         if self._stats.total_errors:
             get_main_cli_logger().print_errors_occurred_message()

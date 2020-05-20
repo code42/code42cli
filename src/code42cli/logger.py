@@ -23,13 +23,13 @@ def get_logger_for_stdout(name_suffix=u"main", formatter=None):
     with logger_deps_lock:
         if not logger_has_handlers(logger):
             handler = logging.StreamHandler(sys.stdout)
-            formatter = formatter or get_standard_formatter()
+            formatter = formatter or _get_standard_formatter()
             logger.setLevel(logging.INFO)
             return add_handler_to_logger(logger, handler, formatter)
     return logger
 
 
-def get_standard_formatter():
+def _get_standard_formatter():
     return logging.Formatter(u"%(message)s")
 
 
@@ -104,7 +104,7 @@ def _get_interactive_user_error_logger():
     with logger_deps_lock:
         if not logger_has_handlers(logger):
             stderr_handler = RedStderrHandler()
-            stderr_formatter = get_standard_formatter()
+            stderr_formatter = _get_standard_formatter()
             stderr_handler.setFormatter(stderr_formatter)
 
             file_handler = _create_error_file_handler()
@@ -125,6 +125,38 @@ def _create_formatter_for_error_file():
 
 def _get_red_error_text(text):
     return color_text_red(u"ERROR: {}".format(text))
+
+
+def get_progress_logger(handler=None):
+    logger = logging.getLogger(u"code42cli_progress_bar")
+    if logger_has_handlers(logger):
+        return logger
+
+    with logger_deps_lock:
+        if not logger_has_handlers(logger):
+            handler = handler or InPlaceStreamHandler()
+            formatter = _get_standard_formatter()
+            logger.setLevel(logging.INFO)
+            return add_handler_to_logger(logger, handler, formatter)
+    return logger
+
+
+class InPlaceStreamHandler(logging.StreamHandler):
+    def __init__(self):
+        super(InPlaceStreamHandler, self).__init__(sys.stdout)
+
+    def emit(self, record):
+        # Copied from python3's logging.StreamHandler to make work on python2.
+        try:
+            msg = u"\r{}\r".format(self.format(record))
+            stream = self.stream
+            stream.write(msg)
+            self.flush()
+        except RuntimeError as err:
+            if u"recursion" in str(err):
+                raise
+        except Exception:
+            self.handleError(record)
 
 
 class CliLogger(object):
@@ -198,39 +230,6 @@ class CliLogger(object):
 
     def log_permissions_error(self):
         self.log_error(_PERMISSIONS_MESSAGE)
-
-
-def get_progress_logger():
-    logger = logging.getLogger(u"code42cli_progress_bar")
-    if logger_has_handlers(logger):
-        return logger
-
-    with logger_deps_lock:
-        if not logger_has_handlers(logger):
-            handler = _InPlaceStreamHandler()
-            formatter = get_standard_formatter()
-            logger.setLevel(logging.INFO)
-            return add_handler_to_logger(logger, handler, formatter)
-    return logger
-
-
-class _InPlaceStreamHandler(logging.StreamHandler):
-    def __init__(self):
-        super(_InPlaceStreamHandler, self).__init__(sys.stdout)
-        self.terminator = u"\r"
-
-    def emit(self, record):
-        # Copied from python3's logging.StreamHandler to make work on python2.
-        try:
-            msg = self.format(record)
-            stream = self.stream
-            stream.write(msg + self.terminator)
-            self.flush()
-        except RuntimeError as err:
-            if u"recursion" in str(err):
-                raise
-        except Exception:
-            self.handleError(record)
 
 
 def get_main_cli_logger():
