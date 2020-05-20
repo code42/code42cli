@@ -14,16 +14,7 @@ class Completer(object):
         current = args[-1]
         last = args[-2]
         options = _cmd_table.get(last)
-        if options:
-            return self._get_matches(current, options)
-
-        return []
-
-    def _complete_main_cmd(self, current):
-        return self._get_matches(current, MainCmdNames())
-
-    def _complete_profile_cmd(self, current):
-        return self._get_matches(current, ProfileCmdNames())
+        return self._get_matches(current, options) if options else []
 
     def _get_matches(self, current, options):
         matches = []
