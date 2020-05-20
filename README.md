@@ -203,3 +203,15 @@ reported.
 
 If you keep getting prompted for your password, try resetting with `code42 profile reset-pw`.
 If that doesn't work, delete your credentials file located at ~/.code42cli or the entry in keychain.
+
+## Tab completion
+
+To enable tab completion, first locate the path to the completer:
+```bash
+which code42cli_completer
+```
+
+Next, call the bash `complete` command:
+```bash
+complete -C '<path/to/completer' code42
+```

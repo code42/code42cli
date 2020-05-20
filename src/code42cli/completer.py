@@ -1,14 +1,27 @@
 class Completer(object):
-    def complete(self, cmdline, point=None):
-        if point is None:
-            point = len(cmdline)
+    _cmds = [
+        "profile",
+        "security-data",
+        "alerts",
+        "alert-rules",
+        "departing-employee",
+        "high-risk-employee",
+    ]
 
-        # args = cmdline[0:point].split()
-        # current_arg = args[-1]
-        # cmd_args = [w for w in args if not w.startswith("-")]
-        # opts = [w for w in args if w.startswith("-")]
-        return ["departing-employee"]
+    def complete(self, cmdline, point=None):
+        args = cmdline[0:point].split()
+        if len(args) == 2:
+            return self._complete_main_cmd(args[-1])
+        return []
+    
+    def _complete_main_cmd(self, current):
+        matches = []
+        for c in self._cmds:
+            if c.strip().startswith(current) and c != current:
+                matches.append(c)
+        return matches
+
 
 def complete(cmdline, point):
     choices = Completer().complete(cmdline, point)
-    print(' \n'.join(choices))
+    print(" \n".join(choices))
