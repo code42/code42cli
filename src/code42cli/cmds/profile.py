@@ -3,11 +3,37 @@ from getpass import getpass
 import code42cli.profile as cliprofile
 from code42cli.compat import str
 from code42cli.profile import print_and_log_no_existing_profile
-from code42cli.args import PROFILE_HELP, PROFILE_ARG_NAME
+from code42cli.args import PROFILE_HELP
 from code42cli.commands import Command
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree
 from code42cli.logger import get_main_cli_logger
+
+
+class ProfileCmdNames(object):
+    SHOW = u"show"
+    LIST = u"list"
+    USE = u"use"
+    RESET_PW = u"reset-pw"
+    CREATE = u"create"
+    UPDATE = u"update"
+    DELETE = u"delete"
+    DELETE_ALL = u"delete-all"
+
+    def __iter__(self):
+        return iter(
+            [
+                self.SHOW,
+                self.LIST,
+                self.USE,
+                self.UPDATE,
+                self.RESET_PW,
+                self.CREATE,
+                self.UPDATE,
+                self.DELETE,
+                self.DELETE_ALL,
+            ]
+        )
 
 
 def load_subcommands():
@@ -15,7 +41,7 @@ def load_subcommands():
     usage_prefix = u"code42 profile"
 
     show = Command(
-        u"show",
+        ProfileCmdNames.SHOW,
         u"Print the details of a profile.",
         u"{} {}".format(usage_prefix, u"show <optional-args>"),
         handler=show_profile,
@@ -23,21 +49,21 @@ def load_subcommands():
     )
 
     list_all = Command(
-        u"list",
+        ProfileCmdNames.LIST,
         u"Show all existing stored profiles.",
         u"{} {}".format(usage_prefix, u"list"),
         handler=list_profiles,
     )
 
     use = Command(
-        u"use",
+        ProfileCmdNames.USE,
         u"Set a profile as the default.",
         u"{} {}".format(usage_prefix, u"use <profile-name>"),
         handler=use_profile,
     )
 
     reset_pw = Command(
-        u"reset-pw",
+        ProfileCmdNames.RESET_PW,
         u"Change the stored password for a profile.",
         u"{} {}".format(usage_prefix, u"reset-pw <optional-args>"),
         handler=prompt_for_password_reset,
@@ -45,7 +71,7 @@ def load_subcommands():
     )
 
     create = Command(
-        u"create",
+        ProfileCmdNames.CREATE,
         u"Create profile settings. The first profile created will be the default.",
         u"{} {}".format(
             usage_prefix,
@@ -56,7 +82,7 @@ def load_subcommands():
     )
 
     update = Command(
-        u"update",
+        ProfileCmdNames.UPDATE,
         u"Update an existing profile.",
         u"{} {}".format(usage_prefix, u"update <optional args>"),
         handler=update_profile,
@@ -64,14 +90,14 @@ def load_subcommands():
     )
 
     delete = Command(
-        u"delete",
+        ProfileCmdNames.DELETE,
         "Deletes a profile and its stored password (if any).",
         u"{} {}".format(usage_prefix, u"delete <profile-name>"),
         handler=delete_profile,
     )
 
     delete_all = Command(
-        u"delete-all",
+        ProfileCmdNames.DELETE_ALL,
         u"Deletes all profiles and saved passwords (if any).",
         u"{} {}".format(usage_prefix, u"delete-all"),
         handler=delete_all_profiles,
