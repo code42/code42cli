@@ -95,6 +95,7 @@ def profile_exists(profile_name=None):
 def switch_default_profile(profile_name):
     profile = get_profile(profile_name)  # Handles if profile does not exist.
     config_accessor.switch_default_profile(profile.name)
+    print("switched")
 
 
 def create_profile(name, server, username, ignore_ssl_errors):

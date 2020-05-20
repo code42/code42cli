@@ -58,4 +58,21 @@ def remove_bulk_users(sdk, profile, file_name):
 
 
 def show_matter(sdk, matter_id):
-    pass
+    matter = sdk.legalhold.get_matter_by_uid(matter_id)
+    policy_uid = matter[u"holdPolicyUid"]
+    preservation_policy = sdk.legalhold.get_policy_by_uid(policy_uid)
+    members_generator = sdk.legalhold.get_all_matter_custodians(legal_hold_uid=matter_id)
+    members_list = [
+        member
+        for page in members_generator
+        for member in page[u"legalHoldMemberships"]
+        if member[u"active"]
+    ]
+    from pprint import pprint
+
+    print("Matter:\n")
+    pprint(matter._data_root)
+    print("\nPreservation Policy:\n")
+    pprint(preservation_policy._data_root)
+    print("\nMatter members:\n")
+    pprint(members_list)
