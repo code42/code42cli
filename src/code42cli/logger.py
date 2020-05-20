@@ -146,7 +146,7 @@ class InPlaceStreamHandler(logging.StreamHandler):
         super(InPlaceStreamHandler, self).__init__(sys.stdout)
 
     def emit(self, record):
-        # Copied from python3's logging.StreamHandler to make work on python2.
+        # Borrowed some from python3's logging.StreamHandler to make work on python2.
         try:
             msg = u"\r{}\r".format(self.format(record))
             stream = self.stream
