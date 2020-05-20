@@ -18,4 +18,4 @@ class Completer(object):
 
 def complete(cmdline, point):
     choices = Completer().complete(cmdline, point)
-    print(" \n".join(choices))
+    print(u" \n".join(choices))
