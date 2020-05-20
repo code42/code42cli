@@ -24,8 +24,6 @@ class ProgressBar(object):
 
     def _calculate_fill_length(self, idx):
         filled_length = self._LENGTH * idx // self._stats.total
-        # if filled_length * self._LATENCY < self._LENGTH:
-        #     filled_length *= self._LATENCY
         return int(filled_length)
 
     def _create_stats_text(self):
