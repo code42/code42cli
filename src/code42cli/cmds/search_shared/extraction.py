@@ -52,7 +52,7 @@ def create_handlers(output_logger, cursor_store, event_key, sdk=None):
         handlers.get_cursor_position = cursor_store.get_stored_cursor_timestamp
 
     @warn_interrupt(
-        warning=u"Cancelling operation cleanly to keep checkpoint data accurate. One moment..."
+        warning=u"Attempting to cancel cleanly to keep checkpoint data accurate. One moment..."
     )
     def handle_response(response):
         response_dict = json.loads(response.text)
