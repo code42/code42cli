@@ -11,9 +11,10 @@ from code42cli.cmds.detectionlists import high_risk_employee as hre
 from code42cli.cmds.detectionlists.enums import DetectionLists
 from code42cli.cmds.securitydata import main as secmain
 from code42cli.cmds.alerts import main as alertmain
+from code42cli.cmds.alerts.rules.commands import AlertRulesCommands
+from code42cli.cmds.legal_hold.commands import LegalHoldCommands
 from code42cli.commands import Command
 from code42cli.invoker import CommandInvoker
-from code42cli.cmds.alerts.rules.commands import AlertRulesCommands
 
 
 # Handle KeyboardInterrupts by just exiting instead of printing out a stack
@@ -77,6 +78,11 @@ def _load_top_commands():
             DetectionLists.HIGH_RISK_EMPLOYEE,
             detection_lists_description.format(u"high risk employee"),
             subcommand_loader=hre.load_subcommands,
+        ),
+        Command(
+            u"legal-hold",
+            u"For adding and removing employees to legal hold matters",
+            subcommand_loader=LegalHoldCommands.load_subcommands,
         ),
     ]
 

@@ -108,7 +108,7 @@ class LegalHoldCommands(object):
 
         remove = Command(
             u"remove-user",
-            u"Remove a user to a legal hold matter.",
+            u"Remove a user from a legal hold matter.",
             u"{} remove-user --matter-id <id> --username <username>".format(usage_prefix),
             handler=remove_user,
             arg_customizer=_customize_remove_arguments,
@@ -116,14 +116,14 @@ class LegalHoldCommands(object):
 
         list_matters = Command(
             u"list",
-            u"Fetch existing legal hold members.",
+            u"Fetch existing legal hold matters.",
             u"{} list".format(usage_prefix),
             handler=get_matters,
         )
 
         show = Command(
             u"show",
-            u"Fetch legal hold custodians for a given matter.",
+            u"Fetch all legal hold custodians for a given matter.",
             u"{} show <matter-id>".format(usage_prefix),
             handler=show_matter,
             arg_customizer=_customize_list_arguments,
