@@ -52,5 +52,10 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: Implementation :: CPython",
     ],
+    scripts=[
+        "bin/code42cli_completer",
+        "bin/code42cli_bash_completer",
+        "bin/code42cli_zsh_completer.sh"
+    ],
     entry_points={"console_scripts": ["code42=code42cli.main:main"]},
 )
