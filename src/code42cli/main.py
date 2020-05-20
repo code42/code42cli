@@ -47,34 +47,57 @@ def main():
     invoker.run(sys.argv[1:])
 
 
+class MainCmdNames(object):
+    PROFILE = u"profile"
+    SECURITY_DATA = u"security-data"
+    ALERTS = u"alerts"
+    ALERT_RULES = u"alert-rules"
+    DEPARTING_EMPLOYEE = DetectionLists.DEPARTING_EMPLOYEE
+    HIGH_RISK_EMPLOYEE = DetectionLists.HIGH_RISK_EMPLOYEE
+
+    def __iter__(self):
+        return iter(
+            [
+                self.PROFILE,
+                self.SECURITY_DATA,
+                self.ALERTS,
+                self.ALERT_RULES,
+                self.DEPARTING_EMPLOYEE,
+                self.HIGH_RISK_EMPLOYEE,
+            ]
+        )
+
+
 def _load_top_commands():
     detection_lists_description = u"For adding and removing employees from the {} detection list."
     return [
         Command(
-            u"profile", u"For managing Code42 settings.", subcommand_loader=profile.load_subcommands
+            MainCmdNames.PROFILE,
+            u"For managing Code42 settings.",
+            subcommand_loader=profile.load_subcommands,
         ),
         Command(
-            u"security-data",
+            MainCmdNames.SECURITY_DATA,
             u"Tools for getting security related data, such as file events.",
             subcommand_loader=secmain.load_subcommands,
         ),
         Command(
-            u"alerts",
+            MainCmdNames.ALERTS,
             u"Tools for getting alert data.",
             subcommand_loader=alertmain.load_subcommands,
         ),
         Command(
-            u"alert-rules",
+            MainCmdNames.ALERT_RULES,
             u"Manage alert rules.",
             subcommand_loader=AlertRulesCommands.load_subcommands,
         ),
         Command(
-            DetectionLists.DEPARTING_EMPLOYEE,
+            MainCmdNames.DEPARTING_EMPLOYEE,
             detection_lists_description.format(u"departing employee"),
             subcommand_loader=de.load_subcommands,
         ),
         Command(
-            DetectionLists.HIGH_RISK_EMPLOYEE,
+            MainCmdNames.HIGH_RISK_EMPLOYEE,
             detection_lists_description.format(u"high risk employee"),
             subcommand_loader=hre.load_subcommands,
         ),
