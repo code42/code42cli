@@ -223,7 +223,7 @@ class TestBulkProcessor(object):
         assert (None, "foo") in processed_rows
         assert ("bar", None) in processed_rows
 
-    def test_run_updates_once_per_row(self, mock_open, progress_bar):
+    def test_run_updates_progress_bar_once_per_row(self, mock_open, progress_bar):
         def func_for_bulk(*args, **kwargs):
             pass
 
