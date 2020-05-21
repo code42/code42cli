@@ -24,7 +24,7 @@ class HighRiskEmployeeSubcommandLoader(DetectionListSubcommandLoader):
         self.cmd_factory = self.detection_list.subcommand_loader
 
     def load_commands(self):
-        cmds = self.detection_list.create_subcommands()
+        cmds = self.detection_list.load_subcommands()
         cmds.extend(
             [
                 Command(

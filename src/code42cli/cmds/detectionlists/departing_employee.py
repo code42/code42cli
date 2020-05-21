@@ -20,7 +20,7 @@ class DepartingEmployeeSubcommandLoader(DetectionListSubcommandLoader):
         self._cmd_factory = self.detection_list.subcommand_loader
 
     def load_commands(self):
-        return self.detection_list.create_subcommands()
+        return self.detection_list.load_subcommands()
 
 
 def _create_handlers():

@@ -79,7 +79,7 @@ class DetectionList(object):
         """
         return cls(DetectionLists.DEPARTING_EMPLOYEE, handlers)
 
-    def create_subcommands(self):
+    def load_subcommands(self):
         """Loads high risk employee related subcommands"""
         bulk = self.subcommand_loader.create_bulk_command()
         bulk.subcommand_loader.load_commands = lambda: self._load_bulk_subcommands()
