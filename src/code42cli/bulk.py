@@ -1,4 +1,4 @@
-import os, inspect
+import os, inspect, sys
 
 from code42cli.compat import open, str
 from code42cli.worker import Worker
@@ -58,6 +58,7 @@ def run_bulk_process(row_handler, reader):
     """
     processor = _create_bulk_processor(row_handler, reader)
     processor.run()
+    sys.stdout.flush()  # One last flush seems to make a difference
 
 
 def _create_bulk_processor(row_handler, reader):
