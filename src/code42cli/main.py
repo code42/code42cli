@@ -12,10 +12,8 @@ from code42cli.cmds.securitydata import main as secmain
 from code42cli.cmds.alerts import main as alertmain
 from code42cli.cmds.alerts.rules.commands import AlertRulesCommands
 from code42cli.cmds.profile import ProfileCommandController
-from code42cli.command_table import CommandTable
 from code42cli.commands import Command, CommandController
 from code42cli.invoker import CommandInvoker
-from code42cli.parser import CommandParser
 
 
 # Handle KeyboardInterrupts by just exiting instead of printing out a stack
@@ -50,6 +48,10 @@ class MainCommandController(CommandController):
     ALERT_RULES = u"alert-rules"
     DEPARTING_EMPLOYEE = DetectionLists.DEPARTING_EMPLOYEE
     HIGH_RISK_EMPLOYEE = DetectionLists.HIGH_RISK_EMPLOYEE
+    
+    @property
+    def table(self):
+        return {u"": self, self.PROFILE: self.profile_controller}
 
     @property
     def names(self):
@@ -61,6 +63,10 @@ class MainCommandController(CommandController):
             self.DEPARTING_EMPLOYEE,
             self.HIGH_RISK_EMPLOYEE,
         ]
+    
+    @property
+    def profile_controller(self):
+        return ProfileCommandController(self.PROFILE)
 
     def create_commands(self):
         detection_lists_description = u"For adding and removing employees from the {} detection list."
@@ -68,7 +74,7 @@ class MainCommandController(CommandController):
             Command(
                 self.PROFILE,
                 u"For managing Code42 settings.",
-                subcommand_loader=self._create_profile_commands(),
+                subcommand_loader=self._create_profile_commands,
             ),
             Command(
                 self.SECURITY_DATA,
@@ -101,7 +107,7 @@ class MainCommandController(CommandController):
         return ProfileCommandController(self.PROFILE).create_commands()
 
 def main():
-    top = Command(u"", u"", subcommand_loader=MainCommandController(u"").create_commands())
+    top = Command(u"", u"", subcommand_loader=MainCommandController(u"").create_commands)
     invoker = CommandInvoker(top)
     invoker.run(sys.argv[1:])
 

@@ -150,6 +150,10 @@ class CommandController(object):
     @property
     def names(self):
         return []
+    
+    @property
+    def table(self):
+        return {}
 
     def create_commands(self):
         """Override"""

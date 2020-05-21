@@ -1,17 +1,22 @@
 from code42cli import MAIN_COMMAND
-from code42cli.command_table import get_command_table
+from code42cli.main import MainCommandController
 
 
 class Completer(object):
     def complete(self, cmdline, point=None):
+        if point is None:
+            point = len(cmdline)
         args = cmdline[0:point].split()
         if len(args) < 2:
             return []  # `code42` already completes w/o
-
+        
+        controller = MainCommandController(u"")
+        if len(args) > 2:
+            for arg in args[1:-1]:
+                controller = controller.table[arg]
+            
+        options = controller.names  
         current = args[-1]
-        last = args[-2] if args[-2] != MAIN_COMMAND else u""
-        cmd_table = get_command_table()
-        options = cmd_table.get(last)
         return self._get_matches(current, options) if options else []
 
     def _get_matches(self, current, options):
