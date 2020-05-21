@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # Inspired and heavily borrowed from awscli https://github.com/aws/aws-cli/blob/develop/bin/aws_zsh_completer.sh
 # **********************************
 
