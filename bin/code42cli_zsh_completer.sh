@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Inspired and heavily borrowed from awscli https://github.com/aws/aws-cli/blob/develop/bin/aws_zsh_completer.sh
+# **********************************
+
 # Source this file to activate auto completion for zsh using the bash
 # compatibility helper.  Make sure to run `compinit` before, which should be
 # given usually.
