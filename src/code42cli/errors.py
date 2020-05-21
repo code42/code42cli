@@ -1,10 +1,22 @@
 ERRORED = False
 
+
 _FORMAT_VALUE_ERROR_MESSAGE = (
     u"input must be a date/time string (e.g. 'YYYY-MM-DD', "
     u"'YY-MM-DD HH:MM', 'YY-MM-DD HH:MM:SS'), or a short value in days, "
     u"hours, or minutes (e.g. 30d, 24h, 15m)"
 )
+
+
+class BadFileError(Exception):
+    def __init__(self, file_path, *args, **kwargs):
+        self.file_path = file_path
+        super(BadFileError, self).__init__()
+
+
+class EmptyFileError(BadFileError):
+    def __init__(self, file_path):
+        super(EmptyFileError, self).__init__(file_path, u"Given empty file {}.".format(file_path))
 
 
 class Code42CLIError(Exception):

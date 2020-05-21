@@ -1,11 +1,13 @@
-import os
-import inspect
-import csv
+import os, inspect
 
 from code42cli.compat import open, str
 from code42cli.worker import Worker
 from code42cli.logger import get_main_cli_logger
 from code42cli.args import SDK_ARG_NAME, PROFILE_ARG_NAME
+from code42cli.progress_bar import ProgressBar
+
+
+_logger = get_main_cli_logger()
 
 
 class BulkCommandType(object):
@@ -29,7 +31,7 @@ def generate_template(handler, path=None):
     ]
 
     if len(args) <= 1:
-        get_main_cli_logger().print_info(
+        _logger.print_info(
             u"A blank file was generated because there are no csv headers needed for this command. "
             u"Simply enter one {} per line.".format(args[0])
         )
@@ -45,31 +47,28 @@ def _write_template_file(path, columns=None):
             new_file.write(u",".join(columns))
 
 
-def run_bulk_process(file_path, row_handler, reader=None):
+def run_bulk_process(row_handler, reader):
     """Runs a bulk process.
     
     Args: 
-        file_path (str or unicode): The path to the file feeding the data for the bulk process.
         row_handler (callable): A callable that you define to process values from the row as 
             either *args or **kwargs.
         reader: (CSVReader or FlatFileReader, optional): A generator that reads rows and yields data into 
             `row_handler`. If None, it will use a CSVReader. Defaults to None.
     """
-    reader = reader or CSVReader()
-    processor = _create_bulk_processor(file_path, row_handler, reader)
+    processor = _create_bulk_processor(row_handler, reader)
     processor.run()
 
 
-def _create_bulk_processor(file_path, row_handler, reader):
+def _create_bulk_processor(row_handler, reader):
     """A factory method to create the bulk processor, useful for testing purposes."""
-    return BulkProcessor(file_path, row_handler, reader)
+    return BulkProcessor(row_handler, reader)
 
 
 class BulkProcessor(object):
     """A class for bulk processing a file. 
     
     Args:
-        file_path (str or unicode): The path to the file for processing.
         row_handler (callable): A callable that you define to process values from the row as 
             either *args or **kwargs. For example, if it's a csv file with header `prop_a,prop_b` 
             and first row `1,test`, then `row_handler` should receive kwargs 
@@ -78,11 +77,14 @@ class BulkProcessor(object):
         reader (CSVReader or FlatFileReader): A generator that reads rows and yields data into `row_handler`.
     """
 
-    def __init__(self, file_path, row_handler, reader):
-        self.file_path = file_path
+    def __init__(self, row_handler, reader, worker=None, progress_bar=None):
+        total = reader.get_rows_count()
+        self.file_path = reader.file_path
         self._row_handler = row_handler
         self._reader = reader
-        self.__worker = Worker(5)
+        self.__worker = worker or Worker(5, total)
+        self._stats = self.__worker.stats
+        self._progress_bar = progress_bar or ProgressBar(total)
 
     def run(self):
         """Processes the csv file specified in the ctor, calling `self.row_handler` on each row."""
@@ -90,7 +92,7 @@ class BulkProcessor(object):
             for row in self._reader(bulk_file=bulk_file):
                 self._process_row(row)
             self.__worker.wait()
-        self._print_result()
+        self._print_results()
 
     def _process_row(self, row):
         if isinstance(row, dict):
@@ -104,35 +106,20 @@ class BulkProcessor(object):
         row.pop(None, None)
         row_values = {key: val if val != u"" else None for key, val in row.items()}
         self.__worker.do_async(
-            lambda *args, **kwargs: self._row_handler(*args, **kwargs), **row_values
+            lambda *args, **kwargs: self._handle_row(*args, **kwargs), **row_values
         )
 
     def _process_flat_file_row(self, row):
         if row:
-            self.__worker.do_async(lambda *args, **kwargs: self._row_handler(*args, **kwargs), row)
+            self.__worker.do_async(lambda *args, **kwargs: self._handle_row(*args, **kwargs), row)
 
-    def _print_result(self):
-        stats = self.__worker.stats
-        successes = stats.total - stats.total_errors
-        logger = get_main_cli_logger()
-        logger.print_and_log_info(
-            u"{} processed successfully out of {}.".format(successes, stats.total)
-        )
-        if stats.total_errors:
+    def _handle_row(self, *args, **kwargs):
+        message = str(self._stats)
+        self._progress_bar.update(self._stats.total_processed, message)
+        self._row_handler(*args, **kwargs)
+
+    def _print_results(self):
+        self._progress_bar.clear_bar_and_print_final(str(self._stats))
+        if self._stats.total_errors:
+            logger = get_main_cli_logger()
             logger.print_errors_occurred_message()
-
-
-class CSVReader(object):
-    """A generator that yields header keys mapped to row values from a csv file."""
-
-    def __call__(self, *args, **kwargs):
-        for row in csv.DictReader(kwargs.get(u"bulk_file")):
-            yield row
-
-
-class FlatFileReader(object):
-    """A generator that yields a single-value per row from a file."""
-
-    def __call__(self, *args, **kwargs):
-        for row in kwargs[u"bulk_file"]:
-            yield row

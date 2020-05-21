@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import pytest
 from py42.sdk import SDKClient
 
+from code42cli.file_readers import CliFileReader
 from code42cli.config import ConfigAccessor
 from code42cli.profile import Code42Profile
 from code42cli.commands import DictObject
@@ -196,3 +197,17 @@ class ErrorTrackerTestHelper:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         error_tracker.ERRORED = False
+
+
+TEST_FILE_PATH = "some/path"
+
+
+def create_mock_reader(rows):
+    class MockDictReader(CliFileReader):
+        def __call__(self, *args, **kwargs):
+            return rows
+
+        def get_rows_count(self):
+            return len(rows)
+
+    return MockDictReader(TEST_FILE_PATH)
