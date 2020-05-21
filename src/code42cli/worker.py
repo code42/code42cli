@@ -4,7 +4,7 @@ from time import sleep
 from py42.exceptions import Py42HTTPError, Py42ForbiddenError
 
 from code42cli.errors import Code42CLIError
-from code42cli.compat import queue
+from code42cli.compat import is_py2, queue
 from code42cli.logger import get_main_cli_logger
 
 
@@ -81,13 +81,17 @@ class Worker(object):
     def wait(self):
         """Wait for the tasks in the queue to complete. This should usually be called before 
         program termination."""
-        while not self._queue.empty():
-            sleep(0.1)
+        if is_py2:
+            while not self._queue.empty():
+                sleep(0.1)
+        else:
+            self._queue.join()
 
     def _process_queue(self):
+        timeout = 600 if is_py2 else None
         while True:
             try:
-                task = self._queue.get(timeout=600)
+                task = self._queue.get(timeout=timeout)
                 func = task[u"func"]
                 args = task[u"args"]
                 kwargs = task[u"kwargs"]
