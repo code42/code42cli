@@ -177,6 +177,9 @@ def _load_optional_profile_description(argument_collection):
 def _load_profile_create_descriptions(argument_collection):
     profile = argument_collection.arg_configs[u"name"]
     profile.set_help(PROFILE_HELP)
+    profile.add_short_option_name(u"-n")
+    argument_collection.arg_configs[u"server"].add_short_option_name(u"-s")
+    argument_collection.arg_configs[u"username"].add_short_option_name(u"-u")
     _load_profile_settings_descriptions(argument_collection)
 
 
@@ -194,7 +197,7 @@ def _load_profile_settings_descriptions(argument_collection):
     server.set_help(u"The url and port of the Code42 server.")
     username.set_help(u"The username of the Code42 API user.")
     disable_ssl_errors.set_help(
-        u"For development purposes, do not validate the SSL certificates of Code42 servers."
+        u"For development purposes, do not validate the SSL certificates of Code42 servers. "
         u"This is not recommended unless it is required."
     )
 
