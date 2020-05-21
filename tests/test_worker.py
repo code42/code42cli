@@ -5,7 +5,7 @@ from code42cli.worker import Worker
 
 class TestWorker(object):
     def test_is_async(self):
-        worker = Worker(5)
+        worker = Worker(5, 2)
         demo_ls = []
 
         def async_func():

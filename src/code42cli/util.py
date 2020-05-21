@@ -92,6 +92,10 @@ def format_to_table(rows, column_size):
         print(u"")
 
 
+def color_text_red(text):
+    return u"\033[91m{}\033[0m".format(text)
+
+
 class warn_interrupt(object):
     """A context decorator class used to wrap functions where a keyboard interrupt could potentially
     leave things in a bad state. Warns the user with provided message and exits when wrapped 

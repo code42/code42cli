@@ -4,7 +4,7 @@ from threading import Lock
 import copy
 
 from code42cli.compat import str
-from code42cli.util import get_user_project_path, is_interactive
+from code42cli.util import get_user_project_path, is_interactive, color_text_red
 
 
 logger_deps_lock = Lock()
@@ -124,7 +124,39 @@ def _create_formatter_for_error_file():
 
 
 def _get_red_error_text(text):
-    return u"\033[91mERROR: {}\033[0m".format(text)
+    return color_text_red(u"ERROR: {}".format(text))
+
+
+def get_progress_logger(handler=None):
+    logger = logging.getLogger(u"code42cli_progress_bar")
+    if logger_has_handlers(logger):
+        return logger
+
+    with logger_deps_lock:
+        if not logger_has_handlers(logger):
+            handler = handler or InPlaceStreamHandler()
+            formatter = _get_standard_formatter()
+            logger.setLevel(logging.INFO)
+            return add_handler_to_logger(logger, handler, formatter)
+    return logger
+
+
+class InPlaceStreamHandler(logging.StreamHandler):
+    def __init__(self):
+        super(InPlaceStreamHandler, self).__init__(sys.stdout)
+
+    def emit(self, record):
+        # Borrowed some from python3's logging.StreamHandler to make work on python2.
+        try:
+            msg = u"\r{}\r".format(self.format(record))
+            stream = self.stream
+            stream.write(msg)
+            self.flush()
+        except RuntimeError as err:
+            if u"recursion" in str(err):
+                raise
+        except Exception:
+            self.handleError(record)
 
 
 class CliLogger(object):
