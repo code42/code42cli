@@ -85,7 +85,7 @@ See class documentation on the [Command](src/code42cli/commands.py) class for an
 
 2. If you are creating a new subcommand, find the top-level command that this will be a subcommand of in
     `load_commands()` in `code42cli.main.MainCommandController` and navigate to its controller's `load_commands()` 
-    Then, add a new instance of `Command` to the list returned by its `load_commands()` function.
+    Then, add a new instance of `Command` to the list returned.
 
 3. For commands that actually are executed (rather than just being groups), you will add a `handler` function as a constructor parameter.
    This will be the function that you want to execute when your command is run.
