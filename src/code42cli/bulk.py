@@ -1,4 +1,4 @@
-import os, inspect
+import os, inspect, sys
 
 from code42cli.compat import open, str
 from code42cli.worker import Worker
@@ -93,6 +93,8 @@ class BulkProcessor(object):
                 self._process_row(row)
             self.__worker.wait()
         self._print_results()
+        sys.stdout.flush()
+
 
     def _process_row(self, row):
         if isinstance(row, dict):
