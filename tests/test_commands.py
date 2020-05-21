@@ -3,7 +3,7 @@ from py42.sdk import SDKClient
 
 from code42cli import PRODUCT_NAME
 from code42cli.args import ArgConfig, SDK_ARG_NAME, PROFILE_ARG_NAME
-from code42cli.commands import Command, DictObject
+from code42cli.commands import Command, DictObject, CommandController
 from code42cli.profile import Code42Profile
 from .conftest import (
     func_keyword_args,
@@ -21,8 +21,9 @@ subcommand2 = Command("sub2", "sub2 desc", "sub2 usage")
 subcommand3 = Command("sub3", "sub3 desc", "sub3 usage")
 
 
-def subcommand_loader():
-    return [subcommand1, subcommand2, subcommand3]
+class SubcommandController(CommandController):
+    def load_commands(self):
+        return [subcommand1, subcommand2, subcommand3]
 
 
 def arg_customizer(arg_collection):
@@ -55,7 +56,9 @@ class TestCommand(object):
         assert command.usage == "test usage"
 
     def test_load_subcommands_makes_subcommands_accessible(self):
-        command = Command("test", "test desc", "test usage", subcommand_loader=subcommand_loader)
+        command = Command(
+            "test", "test desc", "test usage", controller=SubcommandController("test")
+        )
         command.load_subcommands()
         assert len(command.subcommands) == 3
         assert subcommand1 in command.subcommands
@@ -271,3 +274,26 @@ class TestCommand(object):
 
         command = Command("test", "test desc", "test usage")
         assert command(help_func=dummy_print_help) == "success"
+
+
+class TestCommandController(object):
+    def test_names_when_no_subcommands_returns_nothing(self):
+        controller = CommandController("")
+        assert not controller.names
+
+    def test_names_returns_expected_names(self):
+        controller = CommandController("")
+        controller.load_commands = lambda: [Command("c1", ""), Command("c2", ""), Command("c3", "")]
+        assert controller.names == ["c1", "c2", "c3"]
+
+    def test_subtrees_returns_expected_substree(self):
+        controller = CommandController("")
+        subcontroller = CommandController("sub")
+        subcontroller.load_commands = lambda: [
+            Command("c1", ""),
+            Command("c2", ""),
+            Command("c3", ""),
+        ]
+        command = Command("c1", "", controller=SubcommandController(""))
+        controller.load_commands = lambda: [command]
+        assert controller.subtrees

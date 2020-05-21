@@ -18,10 +18,6 @@ class MainAlertsCommandController(CommandController):
     SEND_TO = u"send-to"
     CLEAR_CHECKPOINT = u"clear-checkpoint"
 
-    @property
-    def names(self):
-        return [self.PRINT, self.WRITE_TO, self.SEND_TO, self.CLEAR_CHECKPOINT]
-
     def load_commands(self):
         """Sets up the `alerts` subcommand with all of its subcommands."""
         usage_prefix = u"code42 alerts"

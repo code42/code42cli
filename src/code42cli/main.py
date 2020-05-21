@@ -49,29 +49,6 @@ class MainCommandController(CommandController):
     DEPARTING_EMPLOYEE = DetectionLists.DEPARTING_EMPLOYEE
     HIGH_RISK_EMPLOYEE = DetectionLists.HIGH_RISK_EMPLOYEE
 
-    @property
-    def table(self):
-        return {
-            u"": self,
-            self.PROFILE: self._create_profile_controller(),
-            self.SECURITY_DATA: self._create_security_data_controller(),
-            self.ALERTS: self._create_alerts_controller(),
-            self.ALERT_RULES: self._create_alert_rules_controller(),
-            self.DEPARTING_EMPLOYEE: self._create_departing_employee_controller(),
-            self.HIGH_RISK_EMPLOYEE: self._create_high_risk_employee_controller(),
-        }
-
-    @property
-    def names(self):
-        return [
-            self.PROFILE,
-            self.SECURITY_DATA,
-            self.ALERTS,
-            self.ALERT_RULES,
-            self.DEPARTING_EMPLOYEE,
-            self.HIGH_RISK_EMPLOYEE,
-        ]
-
     def load_commands(self):
         detection_lists_description = (
             u"For adding and removing employees from the {} detection list."
@@ -80,32 +57,32 @@ class MainCommandController(CommandController):
             Command(
                 self.PROFILE,
                 u"For managing Code42 settings.",
-                subcommand_loader=self.table[self.PROFILE].load_commands,
+                controller=self._create_profile_controller(),
             ),
             Command(
                 self.SECURITY_DATA,
                 u"Tools for getting security related data, such as file events.",
-                subcommand_loader=self.table[self.SECURITY_DATA].load_commands,
+                controller=self._create_security_data_controller(),
             ),
             Command(
                 self.ALERTS,
                 u"Tools for getting alert data.",
-                subcommand_loader=self.table[self.ALERTS].load_commands,
+                controller=self._create_alerts_controller(),
             ),
             Command(
                 self.ALERT_RULES,
                 u"Manage alert rules.",
-                subcommand_loader=self.table[self.ALERT_RULES].load_commands,
+                controller=self._create_alert_rules_controller(),
             ),
             Command(
                 self.DEPARTING_EMPLOYEE,
                 detection_lists_description.format(u"departing employee"),
-                subcommand_loader=self.table[self.DEPARTING_EMPLOYEE].load_commands,
+                controller=self._create_departing_employee_controller(),
             ),
             Command(
                 self.HIGH_RISK_EMPLOYEE,
                 detection_lists_description.format(u"high risk employee"),
-                subcommand_loader=self.table[self.HIGH_RISK_EMPLOYEE].load_commands,
+                controller=self._create_high_risk_employee_controller(),
             ),
         ]
 
@@ -129,7 +106,7 @@ class MainCommandController(CommandController):
 
 
 def main():
-    top = Command(u"", u"", subcommand_loader=MainCommandController(u"").load_commands)
+    top = Command(u"", u"", controller=MainCommandController(u""))
     invoker = CommandInvoker(top)
     invoker.run(sys.argv[1:])
 

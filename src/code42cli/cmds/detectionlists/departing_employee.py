@@ -19,14 +19,6 @@ class DepartingEmployeeCommandController(DetectionListCommandController):
         self.detection_list = DetectionList.create_departing_employee_list(handlers)
         self._cmd_factory = self.detection_list.cmd_controller
 
-    @property
-    def names(self):
-        return self._cmd_factory.names
-
-    @property
-    def table(self):
-        return {self._cmd_factory.BULK: self._cmd_factory.bulk_controller}
-
     def load_commands(self):
         return self.detection_list.create_subcommands()
 

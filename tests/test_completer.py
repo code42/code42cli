@@ -3,7 +3,7 @@ from code42cli.completer import Completer
 
 class TestCompleter(object):
     _completer = Completer()
-    
+
     def test_complete_main_returns_empty_list(self):
         actual = self._completer.complete("code42")
         assert [] == actual
@@ -28,6 +28,10 @@ class TestCompleter(object):
     def test_complete_for_high_risk_employee(self):
         actual = self._completer.complete("code42 hi")
         assert "high-risk-employee" in actual
+
+    def test_profile_create(self):
+        actual = self._completer.complete("code42 profile cre")
+        assert "create" in actual
 
     def test_complete_for_high_risk_employee_bulk(self):
         actual = self._completer.complete("code42 high-risk-employee bu")

@@ -1,6 +1,5 @@
 from py42.exceptions import Py42BadRequestError
 
-from code42cli.compat import str
 from code42cli.cmds.detectionlists.commands import DetectionListCommandController
 from code42cli.bulk import generate_template, run_bulk_process, CSVReader, FlatFileReader
 from code42cli.errors import UserAlreadyAddedError, UnknownRiskTagError, UserDoesNotExistError
@@ -51,6 +50,7 @@ class DetectionList(object):
         self.handlers = handlers
         self.cmd_controller = cmd_controller or DetectionListCommandController(list_name)
         self.bulk_cmd_controller = self.cmd_controller.bulk_controller
+        self.bulk_cmd_controller.load_commands = lambda: self._load_bulk_subcommands
 
     @classmethod
     def create_high_risk_employee_list(cls, handlers):
@@ -80,7 +80,8 @@ class DetectionList(object):
 
     def create_subcommands(self):
         """Loads high risk employee related subcommands"""
-        bulk = self.cmd_controller.create_bulk_command(lambda: self._load_bulk_subcommands())
+        bulk = self.cmd_controller.create_bulk_command()
+        bulk.controller.load_commands = lambda: self._load_bulk_subcommands()
         add = self.cmd_controller.create_add_command(
             self.handlers.add_employee, self.handlers.load_add_description
         )

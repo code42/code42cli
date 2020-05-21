@@ -23,14 +23,6 @@ class HighRiskEmployeeCommandController(DetectionListCommandController):
         self.detection_list = DetectionList.create_departing_employee_list(handlers)
         self.cmd_factory = self.detection_list.cmd_controller
 
-    @property
-    def names(self):
-        return self.cmd_factory.names
-
-    @property
-    def table(self):
-        return {self.cmd_factory.BULK: self.cmd_factory.bulk_controller}
-
     def load_commands(self):
         cmds = self.detection_list.create_subcommands()
         cmds.extend(

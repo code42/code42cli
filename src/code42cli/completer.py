@@ -1,6 +1,15 @@
 from code42cli.main import MainCommandController
 
 
+def _get_matches(current, options):
+    matches = []
+    current = current.strip()
+    for opt in options:
+        if opt.startswith(current) and opt != current:
+            matches.append(opt)
+    return matches
+
+
 class Completer(object):
     def complete(self, cmdline, point=None):
         if point is None:
@@ -12,19 +21,14 @@ class Completer(object):
         controller = MainCommandController(u"")
         if len(args) > 2:
             for arg in args[1:-1]:
-                controller = controller.table[arg]
+                controller = controller.subtrees[arg]
+
+        if not controller:
+            return []
 
         options = controller.names
         current = args[-1]
-        return self._get_matches(current, options) if options else []
-
-    def _get_matches(self, current, options):
-        matches = []
-        current = current.strip()
-        for opt in options:
-            if opt.startswith(current) and opt != current:
-                matches.append(opt)
-        return matches
+        return _get_matches(current, options) if options else []
 
 
 def complete(cmdline, point):

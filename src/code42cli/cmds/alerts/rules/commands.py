@@ -67,10 +67,6 @@ class AlertRulesBulkCommandController(CommandController):
     ADD = u"add"
     REMOVE = u"remove"
 
-    @property
-    def names(self):
-        return [self.ADD, self.REMOVE, self.GENERATE_TEMPLATE]
-
     def load_commands(self):
         usage_prefix = u"{} alert-rules bulk".format(MAIN_COMMAND)
 
@@ -157,9 +153,7 @@ class AlertRulesCommandController(CommandController):
         )
 
         bulk = Command(
-            self.BULK,
-            u"Tools for executing bulk commands.",
-            subcommand_loader=self._bulk_controller.load_commands,
+            self.BULK, u"Tools for executing bulk commands.", controller=self._bulk_controller
         )
 
         return [add, remove, list_rules, show, bulk]

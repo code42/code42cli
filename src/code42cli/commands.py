@@ -28,8 +28,8 @@ class Command(object):
         arg_customizer (function, optional): A function accepting a single `ArgCollection`
             parameter that allows for editing the collection when `get_arg_configs` is run.
 
-        subcommand_loader (function, optional): A function returning a list of all subcommands
-            parented by this command.
+        controller (CommandController, optional): A controller that contains information about 
+        this command's subcommands.
 
         use_single_arg_obj (bool, optional): When True, causes all parameters sent to
             `__call__` to be consolidated in an object with attribute names dictated
@@ -43,7 +43,7 @@ class Command(object):
         usage=None,
         handler=None,
         arg_customizer=None,
-        subcommand_loader=None,
+        controller=None,
         use_single_arg_obj=None,
     ):
         self._name = name
@@ -51,7 +51,7 @@ class Command(object):
         self._usage = usage
         self._handler = handler
         self._arg_customizer = arg_customizer
-        self._subcommand_loader = subcommand_loader
+        self._controller = controller
         self._use_single_arg_obj = use_single_arg_obj
         self._subcommands = []
 
@@ -85,9 +85,13 @@ class Command(object):
     def subcommands(self):
         return self._subcommands
 
+    @property
+    def controller(self):
+        return self._controller
+
     def load_subcommands(self):
-        if callable(self._subcommand_loader):
-            self._subcommands = self._subcommand_loader()
+        self._subcommands = self._controller.load_commands() if self._controller else []
+        return self._subcommands
 
     def get_arg_configs(self):
         """Returns a collection of argparse configurations based on
@@ -153,8 +157,14 @@ class CommandController(object):
         return [cmd.name for cmd in sub_cmds]
 
     @property
-    def table(self):
-        return {}
+    def subtrees(self):
+        cmds = self.load_commands()
+        results = {}
+        for cmd in cmds:
+            sub_controller = cmd.controller
+            if sub_controller:
+                results[cmd.name] = sub_controller
+        return results
 
     def load_commands(self):
         return []

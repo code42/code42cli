@@ -22,25 +22,19 @@ class DetectionListCommandController(CommandController):
     REMOVE = BulkCommandType.REMOVE
     _USAGE_SUFFIX = u"<username> <optional args>"
 
-    def __init__(self, detection_list_name):
+    def __init__(self, detection_list_name, bulk_controller=None):
         super(DetectionListCommandController, self).__init__(detection_list_name)
         self._name = detection_list_name
         self._usage_prefix = create_usage_prefix(detection_list_name)
-        self.bulk_controller = DetectionListBulkCommandController(self.BULK, detection_list_name)
+        self.bulk_controller = bulk_controller or DetectionListBulkCommandController(
+            self.BULK, detection_list_name
+        )
 
-    @property
-    def names(self):
-        return [self.BULK, self.ADD, self.REMOVE]
-
-    @property
-    def table(self):
-        return {self.BULK: self.bulk_controller}
-
-    def create_bulk_command(self, subcommand_loader):
+    def create_bulk_command(self):
         return Command(
             self.BULK,
             u"Tools for executing bulk {} commands.".format(self._name),
-            subcommand_loader=subcommand_loader,
+            controller=self.bulk_controller,
         )
 
     def create_add_command(self, handler, arg_customizer):
@@ -71,14 +65,6 @@ class DetectionListBulkCommandController(CommandController):
         super(DetectionListBulkCommandController, self).__init__(root_command_name)
         self._bulk_usage_prefix = create_bulk_usage_prefix(detection_list_name)
         self._name = detection_list_name
-
-    @property
-    def names(self):
-        return [self.ADD, self.REMOVE, self.GENERATE_TEMPLATE]
-
-    @property
-    def table(self):
-        return {}
 
     def create_bulk_generate_template_command(self, handler):
         return Command(
