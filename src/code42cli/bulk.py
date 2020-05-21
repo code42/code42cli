@@ -58,7 +58,6 @@ def run_bulk_process(row_handler, reader):
     """
     processor = _create_bulk_processor(row_handler, reader)
     processor.run()
-    sys.stdout.flush()  # One last flush, seems to make a difference
 
 
 def _create_bulk_processor(row_handler, reader):
@@ -94,7 +93,7 @@ class BulkProcessor(object):
                 self._process_row(row)
             self.__worker.wait()
         self._print_results()
-        
+        sys.stdout.flush()
 
     def _process_row(self, row):
         if isinstance(row, dict):
