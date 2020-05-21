@@ -1,4 +1,4 @@
-# py42, the Code42 Python SDK
+# code42cli, the Code42 Command Line Interface
 
 [![license](https://img.shields.io/pypi/l/py42.svg)](https://pypi.org/project/py42/)
 [![versions](https://img.shields.io/pypi/pyversions/py42.svg)](https://pypi.org/project/py42/)
