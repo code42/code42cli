@@ -122,3 +122,25 @@ See class documentation on the [Command](src/code42cli/commands.py) class for an
 7. Each command accepts a `use_single_arg_obj` bool in its constructor. If set to true, this will instead cause the handler to be called with a single object
     containing all of the args as attributes, which will be passed to a variable named `args` in your handler. Since your handler will only contain the parameter `args`,
     the names of your cli parameters need to built manually in your `arg_customizer` if you use this option. An example of this can be seen in `code42cli.cmds.securitydata.main`.
+
+
+## Documentation
+
+`code42cli` uses [Sphinx](http://www.sphinx-doc.org/) to generate documentation.
+
+To build the documentation, run the following from the `docs` directory:
+
+```bash
+make html
+```
+
+To view the resulting documentation, open `docs/_build/html/index.html`.
+
+For the best viewing experience, run a local server to view the documentation.
+You can this by running the below from the `docs` directory using python 3:
+
+```bash
+python -m http.server --directory "_build/html" 1337
+```
+
+and then pointing your browser to `localhost:1337`.
