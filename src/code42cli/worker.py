@@ -3,7 +3,6 @@ from time import sleep
 
 from py42.exceptions import Py42HTTPError, Py42ForbiddenError
 
-from code42cli.compat import str
 from code42cli.errors import Code42CLIError
 from code42cli.compat import queue
 from code42cli.logger import get_main_cli_logger
@@ -12,25 +11,37 @@ from code42cli.logger import get_main_cli_logger
 class WorkerStats(object):
     """Stats about the tasks that have run."""
 
-    _total = 0
+    def __init__(self, total):
+        self.total = total
+
+    _total_processed = 0
     _total_errors = 0
-    __total_lock = Lock()
+    __total_processed_lock = Lock()
     __total_errors_lock = Lock()
 
     @property
-    def total(self):
+    def total_processed(self):
         """The total number of tasks executed."""
-        return self._total
+        return self._total_processed
 
     @property
     def total_errors(self):
         """The amount of errors that occurred."""
         return self._total_errors
 
-    def increment_total(self):
-        """+1 to self.total"""
-        with self.__total_lock:
-            self._total += 1
+    @property
+    def total_successes(self):
+        return self._total_processed - self._total_errors
+
+    def __str__(self):
+        return u"{0} succeeded, {1} failed out of {2}".format(
+            self.total_successes, self._total_errors, self.total
+        )
+
+    def increment_total_processed(self):
+        """+1 to self.total_processed"""
+        with self.__total_processed_lock:
+            self._total_processed += 1
 
     def increment_total_errors(self):
         """+1 to self.total_errors"""
@@ -39,10 +50,10 @@ class WorkerStats(object):
 
 
 class Worker(object):
-    def __init__(self, thread_count):
+    def __init__(self, thread_count, expected_total):
         self._queue = queue.Queue()
         self._thread_count = thread_count
-        self._stats = WorkerStats()
+        self._stats = WorkerStats(expected_total)
         self.__started = False
         self.__start_lock = Lock()
 
@@ -99,7 +110,7 @@ class Worker(object):
                 logger = get_main_cli_logger()
                 logger.log_verbose_error()
             finally:
-                self._stats.increment_total()
+                self._stats.increment_total_processed()
                 self._queue.task_done()
 
     def __start(self):

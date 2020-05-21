@@ -65,7 +65,7 @@ def load_subcommands():
 
     delete = Command(
         u"delete",
-        "Deletes a profile and its stored password (if any).",
+        u"Deletes a profile and its stored password (if any).",
         u"{} {}".format(usage_prefix, u"delete <profile-name>"),
         handler=delete_profile,
     )
@@ -135,9 +135,9 @@ def list_profiles(*args):
         logger.print_info(str(profile))
 
 
-def use_profile(profile):
+def use_profile(name):
     """Changes the default profile to the given one."""
-    cliprofile.switch_default_profile(profile)
+    cliprofile.switch_default_profile(name)
 
 
 def delete_profile(name):

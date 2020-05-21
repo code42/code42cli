@@ -51,6 +51,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - Warning message printed when ctrl-c is encountered in the middle of an operation that could cause incorrect checkpoint
     state, a second ctrl-c is required to quit while that operation is ongoing. 
 
+- A progress bar that displays during bulk commands.
+
 ### Fixed
 
 - Fixed bug in bulk commands where value-less fields in csv files were treated as empty strings instead of None.

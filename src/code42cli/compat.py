@@ -14,7 +14,10 @@ is_py2 = _ver[0] == 2
 if is_py2:
     from urlparse import urljoin, urlparse
 
-    str = unicode
+    def _str(obj):
+        return unicode(obj)
+
+    str = _str
 
     import io
 
