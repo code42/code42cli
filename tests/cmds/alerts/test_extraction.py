@@ -7,7 +7,7 @@ from py42.sdk.queries.alerts.filters import *
 import code42cli.cmds.alerts.extraction as extraction_module
 import code42cli.errors as errors
 from code42cli import PRODUCT_NAME
-from code42cli.date_helper import DateArgumentException
+from code42cli.errors import DateArgumentError
 from tests.cmds.conftest import get_filter_value_from_json
 from ...conftest import get_test_date_str, begin_date_str, ErrorTrackerTestHelper
 
@@ -237,7 +237,7 @@ def test_extract_when_given_min_timestamp_more_than_ninety_days_back_in_ad_hoc_m
     alert_namespace.incremental = False
     date = get_test_date_str(days_ago=91) + " 12:51:00"
     alert_namespace.begin = date
-    with pytest.raises(DateArgumentException):
+    with pytest.raises(DateArgumentError):
         extraction_module.extract(sdk, profile, logger, alert_namespace)
 
 
@@ -246,7 +246,7 @@ def test_extract_when_end_date_is_before_begin_date_causes_exit(
 ):
     alert_namespace.begin = get_test_date_str(days_ago=5)
     alert_namespace.end = get_test_date_str(days_ago=6)
-    with pytest.raises(DateArgumentException):
+    with pytest.raises(DateArgumentError):
         extraction_module.extract(sdk, profile, logger, alert_namespace)
 
 

@@ -3,27 +3,17 @@ import re
 
 from c42eventextractor.common import convert_datetime_to_timestamp
 
-
-_FORMAT_VALUE_ERROR_MESSAGE = (
-    u"input must be a date/time string (e.g. 'YYYY-MM-DD', "
-    u"'YY-MM-DD HH:MM', 'YY-MM-DD HH:MM:SS'), or a short value in days, "
-    u"hours, or minutes (e.g. 30d, 24h, 15m)"
-)
+from code42cli.errors import DateArgumentError
 
 TIMESTAMP_REGEX = re.compile(u"(\d{4}-\d{2}-\d{2})\s*(.*)?")
 MAGIC_TIME_REGEX = re.compile(u"(\d+)([dhm])$")
-
-
-class DateArgumentException(Exception):
-    def __init__(self, message=_FORMAT_VALUE_ERROR_MESSAGE):
-        super(DateArgumentException, self).__init__(message)
 
 
 def verify_timestamp_order(min_timestamp, max_timestamp):
     if min_timestamp is None or max_timestamp is None:
         return
     if min_timestamp >= max_timestamp:
-        raise DateArgumentException(u"Begin date cannot be after end date")
+        raise DateArgumentError(u"Begin date cannot be after end date")
 
 
 def parse_min_timestamp(begin_date_str, max_days_back=90):
@@ -31,7 +21,7 @@ def parse_min_timestamp(begin_date_str, max_days_back=90):
 
     boundary_date = _round_datetime_to_day_start(datetime.utcnow() - timedelta(days=max_days_back))
     if dt < boundary_date:
-        raise DateArgumentException(u"'Begin date' must be within {0} days.".format(max_days_back))
+        raise DateArgumentError(u"'Begin date' must be within {0} days.".format(max_days_back))
 
     return convert_datetime_to_timestamp(dt)
 
@@ -58,7 +48,7 @@ def _parse_timestamp(date_str, rounding_func):
             dt = rounding_func(dt)
 
     else:
-        raise DateArgumentException()
+        raise DateArgumentError()
     return dt
 
 
@@ -72,7 +62,7 @@ def _get_dt_from_date_time_pair(date, time):
     try:
         dt = datetime.strptime(date_string, date_format)
     except ValueError:
-        raise DateArgumentException()
+        raise DateArgumentError()
     else:
         return dt
 
@@ -86,7 +76,7 @@ def _get_dt_from_magic_time_pair(num, period):
     elif period == u"m":
         dt = datetime.utcnow() - timedelta(minutes=num)
     else:
-        raise DateArgumentException(u"Couldn't parse magic time string: {}{}".format(num, period))
+        raise DateArgumentError(u"Couldn't parse magic time string: {}{}".format(num, period))
     return dt
 
 

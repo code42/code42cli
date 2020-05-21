@@ -19,7 +19,7 @@ def begin_date_is_required(args, cursor_store):
 
     # Ignore begin date when in incremental mode, it is not required, and it was passed an argument.
     if not is_required and args.begin:
-        logger.print_info(
+        logger.print_and_log_info(
             u"Ignoring --begin value as --incremental was passed and cursor checkpoint exists.\n"
         )
         args.begin = None
