@@ -13,7 +13,7 @@ class Code42CLIError(Exception):
 
 class UserAlreadyAddedError(Code42CLIError):
     def __init__(self, username, list_name):
-        msg = u"'{}' is already on the {} list.".format(username, list_name)
+        msg = u"'{}' is already on the {}.".format(username, list_name)
         super(UserAlreadyAddedError, self).__init__(msg)
 
 
