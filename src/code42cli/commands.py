@@ -28,8 +28,8 @@ class Command(object):
         arg_customizer (function, optional): A function accepting a single `ArgCollection`
             parameter that allows for editing the collection when `get_arg_configs` is run.
 
-        controller (CommandController, optional): A controller that contains information about 
-        this command's subcommands.
+        controller (CommandController, optional): A controller that can load subcommands 
+            for this command.
 
         use_single_arg_obj (bool, optional): When True, causes all parameters sent to
             `__call__` to be consolidated in an object with attribute names dictated
