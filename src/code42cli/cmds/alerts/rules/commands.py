@@ -110,14 +110,6 @@ class AlertRulesCommandController(CommandController):
         super(AlertRulesCommandController, self).__init__(root_command_name)
         self._bulk_controller = AlertRulesBulkCommandController(self.BULK)
 
-    @property
-    def names(self):
-        return [self.ADD_USER, self.REMOVE_USER, self.LIST, self.SHOW, self.BULK]
-
-    @property
-    def table(self):
-        return {self.BULK: self._bulk_controller}
-
     def load_commands(self):
         usage_prefix = u"code42 alert-rules"
 
