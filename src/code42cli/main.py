@@ -57,52 +57,52 @@ class MainSubcommandLoader(SubcommandLoader):
             Command(
                 self.PROFILE,
                 u"For managing Code42 settings.",
-                subcommand_loader=self._create_profile_controller(),
+                subcommand_loader=self._create_profile_loader(),
             ),
             Command(
                 self.SECURITY_DATA,
                 u"Tools for getting security related data, such as file events.",
-                subcommand_loader=self._create_security_data_controller(),
+                subcommand_loader=self._create_security_data_loader(),
             ),
             Command(
                 self.ALERTS,
                 u"Tools for getting alert data.",
-                subcommand_loader=self._create_alerts_controller(),
+                subcommand_loader=self._create_alerts_loader(),
             ),
             Command(
                 self.ALERT_RULES,
                 u"Manage alert rules.",
-                subcommand_loader=self._create_alert_rules_controller(),
+                subcommand_loader=self._create_alert_rules_loader(),
             ),
             Command(
                 self.DEPARTING_EMPLOYEE,
                 detection_lists_description.format(u"departing employee"),
-                subcommand_loader=self._create_departing_employee_controller(),
+                subcommand_loader=self._create_departing_employee_loader(),
             ),
             Command(
                 self.HIGH_RISK_EMPLOYEE,
                 detection_lists_description.format(u"high risk employee"),
-                subcommand_loader=self._create_high_risk_employee_controller(),
+                subcommand_loader=self._create_high_risk_employee_loader(),
             ),
         ]
 
-    def _create_profile_controller(self):
+    def _create_profile_loader(self):
         return ProfileSubcommandLoader(self.PROFILE)
 
-    def _create_security_data_controller(self):
+    def _create_security_data_loader(self):
         return secmain.SecurityDataSubcommandLoader(self.SECURITY_DATA)
 
-    def _create_alerts_controller(self):
+    def _create_alerts_loader(self):
         return alertmain.MainAlertsSubcommandLoader(self.ALERTS)
 
-    def _create_alert_rules_controller(self):
+    def _create_alert_rules_loader(self):
         return alertrules.AlertRulesSubcommandLoader(self.ALERT_RULES)
 
-    def _create_departing_employee_controller(self):
-        return de.DepartingEmployeeCommandController(self.DEPARTING_EMPLOYEE)
+    def _create_departing_employee_loader(self):
+        return de.DepartingEmployeeSubcommandLoader(self.DEPARTING_EMPLOYEE)
 
-    def _create_high_risk_employee_controller(self):
-        return hre.HighRiskEmployeeCommandController(self.HIGH_RISK_EMPLOYEE)
+    def _create_high_risk_employee_loader(self):
+        return hre.HighRiskEmployeeSubcommandLoader(self.HIGH_RISK_EMPLOYEE)
 
 
 def main():

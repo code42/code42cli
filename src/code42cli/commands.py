@@ -28,7 +28,7 @@ class Command(object):
         arg_customizer (function, optional): A function accepting a single `ArgCollection`
             parameter that allows for editing the collection when `get_arg_configs` is run.
 
-        controller (CommandController, optional): A controller that can load subcommands 
+        subcommand_loader (SubcommandLoader, optional): An object that can load subcommands 
             for this command.
 
         use_single_arg_obj (bool, optional): When True, causes all parameters sent to
@@ -158,13 +158,14 @@ class SubcommandLoader(object):
 
     @property
     def names(self):
-        """The names of all the subcommands in this controller's root command."""
+        """The names of all the subcommands in this subcommabd loader's root command."""
         sub_cmds = self.load_commands()
         return [cmd.name for cmd in sub_cmds]
 
     @property
     def subtrees(self):
-        """All subcommands for this controller's root command mapped to their given controllers."""
+        """All subcommands for this subcommand loader's root command mapped to their given 
+        subcommand loaders."""
         cmds = self.load_commands()
         results = {}
         for cmd in cmds:

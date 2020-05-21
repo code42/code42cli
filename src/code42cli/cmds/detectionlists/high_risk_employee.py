@@ -16,9 +16,9 @@ from code42cli.commands import Command
 from py42.exceptions import Py42BadRequestError
 
 
-class HighRiskEmployeeCommandController(DetectionListSubcommandLoader):
+class HighRiskEmployeeSubcommandLoader(DetectionListSubcommandLoader):
     def __init__(self, root_command_name):
-        super(HighRiskEmployeeCommandController, self).__init__(root_command_name)
+        super(HighRiskEmployeeSubcommandLoader, self).__init__(root_command_name)
         handlers = _create_handlers()
         self.detection_list = DetectionList.create_departing_employee_list(handlers)
         self.cmd_factory = self.detection_list.subcommand_loader

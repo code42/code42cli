@@ -17,7 +17,7 @@ def dummy_method_optional_args(one=None, two=None):
         return "success"
 
 
-class SubcommandController(SubcommandLoader):
+class TestSubcommandLoader(SubcommandLoader):
     def load_commands(self):
         return [Command("testsub1", "the subdesc1"), Command("testsub2", "the subdesc2")]
 
@@ -105,7 +105,7 @@ class TestCommandParser(object):
 
     def test_prepare_cli_help_outputs_group_info(self, capsys):
         cmd = Command(
-            "runnable", "the desc", "the usage", subcommand_loader=SubcommandController("runnable")
+            "runnable", "the desc", "the usage", subcommand_loader=TestSubcommandLoader("runnable")
         )
         parser = CommandParser()
         parser.prepare_cli_help(cmd)

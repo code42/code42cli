@@ -18,15 +18,15 @@ class Completer(object):
         if len(args) < 2:
             return []  # `code42` already completes w/o
 
-        controller = MainSubcommandLoader(u"")
+        cmd_loader = MainSubcommandLoader(u"")
         if len(args) > 2:
             for arg in args[1:-1]:
-                controller = controller.subtrees[arg]
+                cmd_loader = cmd_loader.subtrees[arg]
 
-        if not controller:
+        if not cmd_loader:
             return []
 
-        options = controller.names
+        options = cmd_loader.names
         current = args[-1]
         return _get_matches(current, options) if options else []
 
