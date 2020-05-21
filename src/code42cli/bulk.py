@@ -58,7 +58,6 @@ def run_bulk_process(row_handler, reader):
     """
     processor = _create_bulk_processor(row_handler, reader)
     processor.run()
-    sys.stdout.flush()  # One last flush seems to make a difference
 
 
 def _create_bulk_processor(row_handler, reader):
