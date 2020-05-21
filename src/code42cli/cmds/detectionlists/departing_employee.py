@@ -42,7 +42,7 @@ def add_departing_employee(
         sdk.detectionlists.departing_employee.add(user_id, departure_date)
         update_user(sdk, user_id, cloud_alias, notes=notes)
     except Py42BadRequestError as err:
-        list_name = DetectionLists.DEPARTING_EMPLOYEE
+        list_name = u"{} list".format(DetectionLists.DEPARTING_EMPLOYEE)
         try_handle_user_already_added_error(err, username, list_name)
         raise
 

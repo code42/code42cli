@@ -1,8 +1,9 @@
 from collections import OrderedDict
 
-from py42.exceptions import Py42InternalServerError
+from py42.exceptions import Py42Error
 from py42.util import format_json
 
+from code42cli.errors import UserAlreadyAddedError
 from code42cli.util import format_to_table, find_format_width
 from code42cli.bulk import run_bulk_process, CSVReader
 from code42cli.logger import get_main_cli_logger
@@ -16,12 +17,38 @@ _HEADER_KEYS_MAP[u"description"] = u"Description"
 _HEADER_KEYS_MAP[u"creator_username"] = u"Creator"
 
 
-def add_user(sdk, profile, matter_id, username):
-    pass
+def add_user(sdk, matter_id, username):
+    user_id = get_user_id(sdk, username)
+    try:
+        sdk.legalhold.add_to_matter(user_id, matter_id)
+    except Py42Error as e:
+        error_text = e.response.text
+        if u"USER_ALREADY_IN_HOLD" in error_text:
+            matter_text = u"legal hold matter {}".format(matter_id)
+            raise UserAlreadyAddedError(username, matter_text)
+        else:
+            get_main_cli_logger().print_and_log_error(error_text)
 
 
-def remove_user(sdk, profile, matter_id, username):
-    pass
+def remove_user(sdk, matter_id, username):
+    user_id = get_user_id(sdk, username)
+    try:
+        membership_id = _get_legal_hold_membership_id_for_user_and_matter(sdk, user_id, matter_id)
+        sdk.legalhold.remove_from_matter(membership_id)
+    except Py42Error as e:
+        error_text = e.response.text
+        get_main_cli_logger().print_and_log_error(error_text)
+
+
+def _get_legal_hold_membership_id_for_user_and_matter(sdk, user_id, matter_id):
+    memberships_generator = sdk.legalhold.get_all_matter_custodians(
+        legal_hold_uid=matter_id, active=True
+    )
+    for page in memberships_generator:
+        for membership in page[u"legalHoldMemberships"]:
+            if membership[u"user"][u"userUid"] == user_id:
+                return membership[u"legalHoldMembershipUid"]
+    raise UserNotInHoldError(username, matter_id)
 
 
 def _get_all_active_matters(sdk):
