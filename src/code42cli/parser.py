@@ -37,7 +37,7 @@ class CommandParser(argparse.ArgumentParser):
 
     def prepare_cli_help(self, top_command):
         top_command.load_subcommands()
-        self.description = _get_group_help(top_command)
+        self.description = self._get_group_help(top_command)
         self.usage = SUPPRESS
         self.set_defaults(func=lambda _: self.print_help())
         return self
@@ -56,7 +56,7 @@ class CommandParser(argparse.ArgumentParser):
     def _get_parser(self, command, path_parts):
         usage = command.usage or SUPPRESS
         command.load_subcommands()
-        description = _get_group_help(command) if command.subcommands else command.description
+        description = self._get_group_help(command) if command.subcommands else command.description
         subparser = self._get_subparser(path_parts)
         return subparser.add_parser(command.name, description=description, usage=usage)
 
@@ -74,6 +74,23 @@ class CommandParser(argparse.ArgumentParser):
                 parent_subparser = _get_parent_subparser(path_parts, part, subparsers)
             subparsers[parent_path_parts] = parent_subparser
         return parent_subparser
+
+    def _get_group_help(self, command):
+        descriptions = self._build_group_command_descriptions(command)
+        output = []
+        name = command.name
+        if not name:
+            name = MAIN_COMMAND
+            output.append(BANNER)
+
+        output.extend([u" \nAvailable commands in <{}>:".format(name), descriptions])
+        return u"\n".join(output)
+
+    def _build_group_command_descriptions(self, command):
+        subs = command.subcommands
+        name_width = len(max([cmd.name for cmd in subs], key=len))
+        lines = [u"  {} - {}".format(cmd.name.ljust(name_width), cmd.description) for cmd in subs]
+        return u"\n".join(lines)
 
 
 def _get_parent_subparser(path_parts, part, subparsers):
@@ -95,22 +112,3 @@ def _add_argument(parser, arg_settings, required_group):
     if arg_settings.get(u"required"):
         parser = required_group
     parser.add_argument(*options_list, **arg_settings)
-
-
-def _get_group_help(command):
-    descriptions = _build_group_command_descriptions(command)
-    output = []
-    name = command.name
-    if not name:
-        name = MAIN_COMMAND
-        output.append(BANNER)
-
-    output.extend([u" \nAvailable commands in <{}>:".format(name), descriptions])
-    return u"\n".join(output)
-
-
-def _build_group_command_descriptions(command):
-    subs = get_command_table()[command.name]
-    name_width = len(max([cmd.name for cmd in subs], key=len))
-    lines = [u"  {} - {}".format(cmd.name.ljust(name_width), cmd.description) for cmd in subs]
-    return u"\n".join(lines)

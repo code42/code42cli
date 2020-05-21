@@ -1,5 +1,5 @@
 from code42cli import MAIN_COMMAND
-from code42cli import get_command_table
+from code42cli.command_table import get_command_table
 
 
 class Completer(object):

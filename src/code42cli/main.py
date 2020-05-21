@@ -5,15 +5,17 @@ import sys
 from py42.settings import set_user_agent_suffix
 
 from code42cli import PRODUCT_NAME
-from code42cli.cmds import profile
 from code42cli.cmds.detectionlists import departing_employee as de
 from code42cli.cmds.detectionlists import high_risk_employee as hre
 from code42cli.cmds.detectionlists.enums import DetectionLists
 from code42cli.cmds.securitydata import main as secmain
 from code42cli.cmds.alerts import main as alertmain
-from code42cli.commands import Command
-from code42cli.invoker import CommandInvoker
 from code42cli.cmds.alerts.rules.commands import AlertRulesCommands
+from code42cli.cmds.profile import ProfileCommandController
+from code42cli.command_table import CommandTable
+from code42cli.commands import Command, CommandController
+from code42cli.invoker import CommandInvoker
+from code42cli.parser import CommandParser
 
 
 # Handle KeyboardInterrupts by just exiting instead of printing out a stack
@@ -41,13 +43,7 @@ if platform.system().lower() == u"windows":
 set_user_agent_suffix(PRODUCT_NAME)
 
 
-def main():
-    top = Command(u"", u"", subcommand_loader=_load_top_commands)
-    invoker = CommandInvoker(top)
-    invoker.run(sys.argv[1:])
-
-
-class MainCmdNames(object):
+class MainCommandController(CommandController):
     PROFILE = u"profile"
     SECURITY_DATA = u"security-data"
     ALERTS = u"alerts"
@@ -55,53 +51,59 @@ class MainCmdNames(object):
     DEPARTING_EMPLOYEE = DetectionLists.DEPARTING_EMPLOYEE
     HIGH_RISK_EMPLOYEE = DetectionLists.HIGH_RISK_EMPLOYEE
 
-    def __iter__(self):
-        return iter(
-            [
+    @property
+    def names(self):
+        return [
+            self.PROFILE,
+            self.SECURITY_DATA,
+            self.ALERTS,
+            self.ALERT_RULES,
+            self.DEPARTING_EMPLOYEE,
+            self.HIGH_RISK_EMPLOYEE,
+        ]
+
+    def create_commands(self):
+        detection_lists_description = u"For adding and removing employees from the {} detection list."
+        return [
+            Command(
                 self.PROFILE,
+                u"For managing Code42 settings.",
+                subcommand_loader=self._create_profile_commands(),
+            ),
+            Command(
                 self.SECURITY_DATA,
+                u"Tools for getting security related data, such as file events.",
+                subcommand_loader=secmain.load_subcommands,
+            ),
+            Command(
                 self.ALERTS,
+                u"Tools for getting alert data.",
+                subcommand_loader=alertmain.load_subcommands,
+            ),
+            Command(
                 self.ALERT_RULES,
+                u"Manage alert rules.",
+                subcommand_loader=AlertRulesCommands.load_subcommands,
+            ),
+            Command(
                 self.DEPARTING_EMPLOYEE,
+                detection_lists_description.format(u"departing employee"),
+                subcommand_loader=de.load_subcommands,
+            ),
+            Command(
                 self.HIGH_RISK_EMPLOYEE,
-            ]
-        )
+                detection_lists_description.format(u"high risk employee"),
+                subcommand_loader=hre.load_subcommands,
+            ),
+        ]
+    
+    def _create_profile_commands(self):
+        return ProfileCommandController(self.PROFILE).create_commands()
 
-
-def _load_top_commands():
-    detection_lists_description = u"For adding and removing employees from the {} detection list."
-    return [
-        Command(
-            MainCmdNames.PROFILE,
-            u"For managing Code42 settings.",
-            subcommand_loader=profile.load_subcommands,
-        ),
-        Command(
-            MainCmdNames.SECURITY_DATA,
-            u"Tools for getting security related data, such as file events.",
-            subcommand_loader=secmain.load_subcommands,
-        ),
-        Command(
-            MainCmdNames.ALERTS,
-            u"Tools for getting alert data.",
-            subcommand_loader=alertmain.load_subcommands,
-        ),
-        Command(
-            MainCmdNames.ALERT_RULES,
-            u"Manage alert rules.",
-            subcommand_loader=AlertRulesCommands.load_subcommands,
-        ),
-        Command(
-            MainCmdNames.DEPARTING_EMPLOYEE,
-            detection_lists_description.format(u"departing employee"),
-            subcommand_loader=de.load_subcommands,
-        ),
-        Command(
-            MainCmdNames.HIGH_RISK_EMPLOYEE,
-            detection_lists_description.format(u"high risk employee"),
-            subcommand_loader=hre.load_subcommands,
-        ),
-    ]
+def main():
+    top = Command(u"", u"", subcommand_loader=MainCommandController(u"").create_commands())
+    invoker = CommandInvoker(top)
+    invoker.run(sys.argv[1:])
 
 
 if __name__ == u"__main__":

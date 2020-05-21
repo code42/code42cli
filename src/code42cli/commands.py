@@ -141,3 +141,15 @@ def _kvps_to_obj(kvps):
     new_kvps = {key: kvps[key] for key in kvps if key in [SDK_ARG_NAME, PROFILE_ARG_NAME]}
     new_kvps[u"args"] = DictObject(kvps)
     return new_kvps
+
+
+class CommandController(object):
+    def __init__(self, root_command_name):
+        self.root = root_command_name
+        
+    @property
+    def names(self):
+        return []
+
+    def create_commands(self):
+        """Override"""

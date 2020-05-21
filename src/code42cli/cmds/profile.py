@@ -1,16 +1,17 @@
 from getpass import getpass
 
+from code42cli import MAIN_COMMAND
 import code42cli.profile as cliprofile
 from code42cli.compat import str
 from code42cli.profile import print_and_log_no_existing_profile
 from code42cli.args import PROFILE_HELP
-from code42cli.commands import Command
+from code42cli.commands import Command, CommandController
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree
 from code42cli.logger import get_main_cli_logger
 
 
-class ProfileCmdNames(object):
+class ProfileCommandController(CommandController):
     SHOW = u"show"
     LIST = u"list"
     USE = u"use"
@@ -20,90 +21,88 @@ class ProfileCmdNames(object):
     DELETE = u"delete"
     DELETE_ALL = u"delete-all"
 
-    def __iter__(self):
-        return iter(
-            [
-                self.SHOW,
-                self.LIST,
-                self.USE,
-                self.UPDATE,
-                self.RESET_PW,
-                self.CREATE,
-                self.UPDATE,
-                self.DELETE,
-                self.DELETE_ALL,
-            ]
+    @property
+    def names(self):
+        return [
+            self.SHOW,
+            self.LIST,
+            self.USE,
+            self.UPDATE,
+            self.RESET_PW,
+            self.CREATE,
+            self.UPDATE,
+            self.DELETE,
+            self.DELETE_ALL,
+        ]
+    
+    def create_commands(self):
+        """Sets up the `profile` subcommand with all of its subcommands."""
+        usage_prefix = u"{} profile".format(MAIN_COMMAND)
+    
+        show = Command(
+            self.SHOW,
+            u"Print the details of a profile.",
+            u"{} {}".format(usage_prefix, u"show <optional-args>"),
+            handler=show_profile,
+            arg_customizer=_load_optional_profile_description,
         )
-
-
-def load_subcommands():
-    """Sets up the `profile` subcommand with all of its subcommands."""
-    usage_prefix = u"code42 profile"
-
-    show = Command(
-        ProfileCmdNames.SHOW,
-        u"Print the details of a profile.",
-        u"{} {}".format(usage_prefix, u"show <optional-args>"),
-        handler=show_profile,
-        arg_customizer=_load_optional_profile_description,
-    )
-
-    list_all = Command(
-        ProfileCmdNames.LIST,
-        u"Show all existing stored profiles.",
-        u"{} {}".format(usage_prefix, u"list"),
-        handler=list_profiles,
-    )
-
-    use = Command(
-        ProfileCmdNames.USE,
-        u"Set a profile as the default.",
-        u"{} {}".format(usage_prefix, u"use <profile-name>"),
-        handler=use_profile,
-    )
-
-    reset_pw = Command(
-        ProfileCmdNames.RESET_PW,
-        u"Change the stored password for a profile.",
-        u"{} {}".format(usage_prefix, u"reset-pw <optional-args>"),
-        handler=prompt_for_password_reset,
-        arg_customizer=_load_optional_profile_description,
-    )
-
-    create = Command(
-        ProfileCmdNames.CREATE,
-        u"Create profile settings. The first profile created will be the default.",
-        u"{} {}".format(
-            usage_prefix,
-            u"create --name <profile-name> --server <server-address> --username <username>",
-        ),
-        handler=create_profile,
-        arg_customizer=_load_profile_create_descriptions,
-    )
-
-    update = Command(
-        ProfileCmdNames.UPDATE,
-        u"Update an existing profile.",
-        u"{} {}".format(usage_prefix, u"update <optional args>"),
-        handler=update_profile,
-        arg_customizer=_load_profile_update_descriptions,
-    )
-
-    delete = Command(
-        ProfileCmdNames.DELETE,
-        "Deletes a profile and its stored password (if any).",
-        u"{} {}".format(usage_prefix, u"delete <profile-name>"),
-        handler=delete_profile,
-    )
-
-    delete_all = Command(
-        ProfileCmdNames.DELETE_ALL,
-        u"Deletes all profiles and saved passwords (if any).",
-        u"{} {}".format(usage_prefix, u"delete-all"),
-        handler=delete_all_profiles,
-    )
-
-    return [show, list_all, use, reset_pw, create, update, delete, delete_all]
+    
+        list_all = Command(
+            self.LIST,
+            u"Show all existing stored profiles.",
+            u"{} {}".format(usage_prefix, u"list"),
+            handler=list_profiles,
+        )
+    
+        use = Command(
+            self.USE,
+            u"Set a profile as the default.",
+            u"{} {}".format(usage_prefix, u"use <profile-name>"),
+            handler=use_profile,
+        )
+    
+        reset_pw = Command(
+            self.RESET_PW,
+            u"Change the stored password for a profile.",
+            u"{} {}".format(usage_prefix, u"reset-pw <optional-args>"),
+            handler=prompt_for_password_reset,
+            arg_customizer=_load_optional_profile_description,
+        )
+    
+        create = Command(
+            self.CREATE,
+            u"Create profile settings. The first profile created will be the default.",
+            u"{} {}".format(
+                usage_prefix,
+                u"create --name <profile-name> --server <server-address> --username <username>",
+            ),
+            handler=create_profile,
+            arg_customizer=_load_profile_create_descriptions,
+        )
+    
+        update = Command(
+            self.UPDATE,
+            u"Update an existing profile.",
+            u"{} {}".format(usage_prefix, u"update <optional args>"),
+            handler=update_profile,
+            arg_customizer=_load_profile_update_descriptions,
+        )
+    
+        delete = Command(
+            self.DELETE,
+            "Deletes a profile and its stored password (if any).",
+            u"{} {}".format(usage_prefix, u"delete <profile-name>"),
+            handler=delete_profile,
+        )
+    
+        delete_all = Command(
+            self.DELETE_ALL,
+            u"Deletes all profiles and saved passwords (if any).",
+            u"{} {}".format(usage_prefix, u"delete-all"),
+            handler=delete_all_profiles,
+        )
+    
+        return [show, list_all, use, reset_pw, create, update, delete, delete_all]
 
 
 def show_profile(name=None):
