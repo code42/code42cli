@@ -146,11 +146,11 @@ def _kvps_to_obj(kvps):
 class CommandController(object):
     def __init__(self, root_command_name):
         self.root = root_command_name
-        
+
     @property
     def names(self):
         return []
-    
+
     @property
     def table(self):
         return {}

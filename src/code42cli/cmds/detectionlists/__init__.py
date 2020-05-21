@@ -1,7 +1,7 @@
 from py42.exceptions import Py42BadRequestError
 
 from code42cli.compat import str
-from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory
+from code42cli.cmds.detectionlists.commands import DetectionListCommandController
 from code42cli.bulk import generate_template, run_bulk_process, CSVReader, FlatFileReader
 from code42cli.logger import get_main_cli_logger
 from code42cli.bulk import BulkCommandType
@@ -66,13 +66,14 @@ class DetectionList(object):
             given `classmethods`.
         handlers (DetectionListHandlers): A DTO containing implementations for adding / removing 
             users from specific lists.
-        cmd_factory (DetectionListCommandFactory): A factory that creates detection list commands.
+        cmd_factory (DetectionListCommandController): A factory that creates detection list commands.
     """
 
-    def __init__(self, list_name, handlers, cmd_factory=None):
+    def __init__(self, list_name, handlers, cmd_controller=None):
         self.name = list_name
         self.handlers = handlers
-        self.factory = cmd_factory or DetectionListCommandFactory(list_name)
+        self.cmd_controller = cmd_controller or DetectionListCommandController(list_name)
+        self.bulk_cmd_controller = self.cmd_controller.bulk_controller
 
     @classmethod
     def create_high_risk_employee_list(cls, handlers):
@@ -100,23 +101,23 @@ class DetectionList(object):
         """
         return cls(DetectionLists.DEPARTING_EMPLOYEE, handlers)
 
-    def load_subcommands(self):
+    def create_subcommands(self):
         """Loads high risk employee related subcommands"""
-        bulk = self.factory.create_bulk_command(lambda: self._load_bulk_subcommands())
-        add = self.factory.create_add_command(
+        bulk = self.cmd_controller.create_bulk_command(lambda: self._load_bulk_subcommands())
+        add = self.cmd_controller.create_add_command(
             self.handlers.add_employee, self.handlers.load_add_description
         )
-        remove = self.factory.create_remove_command(
+        remove = self.cmd_controller.create_remove_command(
             self.handlers.remove_employee, load_username_description
         )
         return [bulk, add, remove]
 
     def _load_bulk_subcommands(self):
-        generate_template_cmd = self.factory.create_bulk_generate_template_command(
+        generate_template_cmd = self.bulk_cmd_controller.create_bulk_generate_template_command(
             self.generate_template_file
         )
-        add = self.factory.create_bulk_add_command(self.bulk_add_employees)
-        remove = self.factory.create_bulk_remove_command(self.bulk_remove_employees)
+        add = self.bulk_cmd_controller.create_bulk_add_command(self.bulk_add_employees)
+        remove = self.bulk_cmd_controller.create_bulk_remove_command(self.bulk_remove_employees)
         return [generate_template_cmd, add, remove]
 
     def generate_template_file(self, cmd, path=None):

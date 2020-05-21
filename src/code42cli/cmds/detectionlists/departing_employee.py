@@ -5,16 +5,30 @@ from code42cli.cmds.detectionlists import (
     get_user_id,
     update_user,
     try_handle_user_already_added_error,
+    DetectionListCommandController,
 )
 from code42cli.cmds.detectionlists.enums import DetectionLists
 
 from py42.exceptions import Py42BadRequestError
 
 
-def load_subcommands():
-    handlers = _create_handlers()
-    detection_list = DetectionList.create_departing_employee_list(handlers)
-    return detection_list.load_subcommands()
+class DepartingEmployeeCommandController(DetectionListCommandController):
+    def __init__(self, root_command_name):
+        super(DepartingEmployeeCommandController, self).__init__(root_command_name)
+        handlers = _create_handlers()
+        self.detection_list = DetectionList.create_departing_employee_list(handlers)
+        self._cmd_factory = self.detection_list.cmd_controller
+
+    @property
+    def names(self):
+        return self._cmd_factory.names
+
+    @property
+    def table(self):
+        return {self._cmd_factory.BULK: self._cmd_factory.bulk_controller}
+
+    def create_commands(self):
+        return self.detection_list.create_subcommands()
 
 
 def _create_handlers():

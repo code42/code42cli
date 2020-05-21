@@ -34,11 +34,11 @@ class ProfileCommandController(CommandController):
             self.DELETE,
             self.DELETE_ALL,
         ]
-    
+
     def create_commands(self):
         """Sets up the `profile` subcommand with all of its subcommands."""
         usage_prefix = u"{} profile".format(MAIN_COMMAND)
-    
+
         show = Command(
             self.SHOW,
             u"Print the details of a profile.",
@@ -46,21 +46,21 @@ class ProfileCommandController(CommandController):
             handler=show_profile,
             arg_customizer=_load_optional_profile_description,
         )
-    
+
         list_all = Command(
             self.LIST,
             u"Show all existing stored profiles.",
             u"{} {}".format(usage_prefix, u"list"),
             handler=list_profiles,
         )
-    
+
         use = Command(
             self.USE,
             u"Set a profile as the default.",
             u"{} {}".format(usage_prefix, u"use <profile-name>"),
             handler=use_profile,
         )
-    
+
         reset_pw = Command(
             self.RESET_PW,
             u"Change the stored password for a profile.",
@@ -68,7 +68,7 @@ class ProfileCommandController(CommandController):
             handler=prompt_for_password_reset,
             arg_customizer=_load_optional_profile_description,
         )
-    
+
         create = Command(
             self.CREATE,
             u"Create profile settings. The first profile created will be the default.",
@@ -79,7 +79,7 @@ class ProfileCommandController(CommandController):
             handler=create_profile,
             arg_customizer=_load_profile_create_descriptions,
         )
-    
+
         update = Command(
             self.UPDATE,
             u"Update an existing profile.",
@@ -87,21 +87,21 @@ class ProfileCommandController(CommandController):
             handler=update_profile,
             arg_customizer=_load_profile_update_descriptions,
         )
-    
+
         delete = Command(
             self.DELETE,
             "Deletes a profile and its stored password (if any).",
             u"{} {}".format(usage_prefix, u"delete <profile-name>"),
             handler=delete_profile,
         )
-    
+
         delete_all = Command(
             self.DELETE_ALL,
             u"Deletes all profiles and saved passwords (if any).",
             u"{} {}".format(usage_prefix, u"delete-all"),
             handler=delete_all_profiles,
         )
-    
+
         return [show, list_all, use, reset_pw, create, update, delete, delete_all]
 
 

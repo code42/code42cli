@@ -1,5 +1,5 @@
 from code42cli import MAIN_COMMAND
-from code42cli.commands import Command
+from code42cli.commands import Command, CommandController
 from code42cli.bulk import generate_template, BulkCommandType
 from code42cli.cmds.alerts.rules.user_rule import (
     add_user,
@@ -62,13 +62,20 @@ def _load_bulk_generate_template_description(argument_collection):
     cmd_type.set_choices(BulkCommandType())
 
 
-class AlertRulesBulkCommands(object):
-    @staticmethod
-    def load_commands():
+class AlertRulesBulkCommandController(CommandController):
+    GENERATE_TEMPLATE = u"generate-template"
+    ADD = u"add"
+    REMOVE = u"remove"
+    
+    @property
+    def names(self):
+        return [self.ADD, self.REMOVE, self.GENERATE_TEMPLATE]
+    
+    def create_commands(self):
         usage_prefix = u"{} alert-rules bulk".format(MAIN_COMMAND)
 
         generate_template_cmd = Command(
-            u"generate-template",
+            self.GENERATE_TEMPLATE,
             u"Generate the necessary csv template needed for bulk adding users.",
             u"{} generate-template <cmd> <optional args>".format(usage_prefix),
             handler=_generate_template_file,
@@ -76,7 +83,7 @@ class AlertRulesBulkCommands(object):
         )
 
         bulk_add = Command(
-            u"add",
+            self.ADD,
             u"Update alert rule criteria to add users and all their aliases. "
             u"CSV file format: rule_id,username",
             u"{} add <filename>".format(usage_prefix),
@@ -85,7 +92,7 @@ class AlertRulesBulkCommands(object):
         )
 
         bulk_remove = Command(
-            u"remove",
+            self.REMOVE,
             u"Update alert rule criteria to remove users and all their aliases. "
             u"CSV file format: rule_id,username",
             u"{} remove <filename>".format(usage_prefix),
@@ -96,13 +103,30 @@ class AlertRulesBulkCommands(object):
         return [generate_template_cmd, bulk_add, bulk_remove]
 
 
-class AlertRulesCommands(object):
-    @staticmethod
-    def load_subcommands():
+class AlertRulesCommandController(CommandController):
+    ADD_USER = u"add-user"
+    REMOVE_USER = u"remove-user"
+    LIST = u"list"
+    SHOW = u"show"
+    BULK = u"bulk"
+    
+    def __init__(self, root_command_name):
+        super(AlertRulesCommandController, self).__init__(root_command_name)
+        self._bulk_controller = AlertRulesBulkCommandController(self.BULK)
+
+    @property
+    def names(self):
+        return [self.ADD_USER, self.REMOVE_USER, self.LIST, self.SHOW, self.BULK]
+    
+    @property
+    def table(self):
+        return {self.BULK: self._bulk_controller}
+    
+    def create_commands(self):
         usage_prefix = u"code42 alert-rules"
 
         add = Command(
-            u"add-user",
+            self.ADD_USER,
             u"Update alert rule criteria to monitor user aliases against the given username.",
             u"{} add-user --rule-id <id>  --username <username>".format(usage_prefix),
             handler=add_user,
@@ -110,7 +134,7 @@ class AlertRulesCommands(object):
         )
 
         remove = Command(
-            u"remove-user",
+            self.REMOVE_USER,
             u"Update alert rule criteria to remove a user and all their aliases.",
             u"{} remove-user --rule-id <rule-id> --username <username>".format(usage_prefix),
             handler=remove_user,
@@ -118,14 +142,14 @@ class AlertRulesCommands(object):
         )
 
         list_rules = Command(
-            u"list",
+            self.LIST,
             u"Fetch existing alert rules.",
             u"{} list".format(usage_prefix),
             handler=get_rules,
         )
 
         show = Command(
-            u"show",
+            self.SHOW,
             u"Fetch configured alert-rules against the rule ID.",
             u"{} show <rule-id>".format(usage_prefix),
             handler=show_rule,
@@ -133,9 +157,9 @@ class AlertRulesCommands(object):
         )
 
         bulk = Command(
-            u"bulk",
+            self.BULK,
             u"Tools for executing bulk commands.",
-            subcommand_loader=AlertRulesBulkCommands.load_commands,
+            subcommand_loader=self._bulk_controller.create_commands,
         )
 
         return [add, remove, list_rules, show, bulk]

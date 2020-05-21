@@ -10,7 +10,7 @@ from code42cli.cmds.detectionlists import high_risk_employee as hre
 from code42cli.cmds.detectionlists.enums import DetectionLists
 from code42cli.cmds.securitydata import main as secmain
 from code42cli.cmds.alerts import main as alertmain
-from code42cli.cmds.alerts.rules.commands import AlertRulesCommands
+from code42cli.cmds.alerts.rules import commands as alertrules
 from code42cli.cmds.profile import ProfileCommandController
 from code42cli.commands import Command, CommandController
 from code42cli.invoker import CommandInvoker
@@ -48,10 +48,18 @@ class MainCommandController(CommandController):
     ALERT_RULES = u"alert-rules"
     DEPARTING_EMPLOYEE = DetectionLists.DEPARTING_EMPLOYEE
     HIGH_RISK_EMPLOYEE = DetectionLists.HIGH_RISK_EMPLOYEE
-    
+
     @property
     def table(self):
-        return {u"": self, self.PROFILE: self.profile_controller}
+        return {
+            u"": self,
+            self.PROFILE: self._create_profile_controller(),
+            self.SECURITY_DATA: self._create_security_data_controller(),
+            self.ALERTS: self._create_alerts_controller(),
+            self.ALERT_RULES: self._create_alert_rules_controller(),
+            self.DEPARTING_EMPLOYEE: self._create_departing_employee_controller(),
+            self.HIGH_RISK_EMPLOYEE: self._create_high_risk_employee_controller(),
+        }
 
     @property
     def names(self):
@@ -63,48 +71,62 @@ class MainCommandController(CommandController):
             self.DEPARTING_EMPLOYEE,
             self.HIGH_RISK_EMPLOYEE,
         ]
-    
-    @property
-    def profile_controller(self):
-        return ProfileCommandController(self.PROFILE)
 
     def create_commands(self):
-        detection_lists_description = u"For adding and removing employees from the {} detection list."
+        detection_lists_description = (
+            u"For adding and removing employees from the {} detection list."
+        )
         return [
             Command(
                 self.PROFILE,
                 u"For managing Code42 settings.",
-                subcommand_loader=self._create_profile_commands,
+                subcommand_loader=self.table[self.PROFILE].create_commands,
             ),
             Command(
                 self.SECURITY_DATA,
                 u"Tools for getting security related data, such as file events.",
-                subcommand_loader=secmain.load_subcommands,
+                subcommand_loader=self.table[self.SECURITY_DATA].create_commands,
             ),
             Command(
                 self.ALERTS,
                 u"Tools for getting alert data.",
-                subcommand_loader=alertmain.load_subcommands,
+                subcommand_loader=self.table[self.ALERTS].create_commands,
             ),
             Command(
                 self.ALERT_RULES,
                 u"Manage alert rules.",
-                subcommand_loader=AlertRulesCommands.load_subcommands,
+                subcommand_loader=self.table[self.ALERT_RULES].create_commands,
             ),
             Command(
                 self.DEPARTING_EMPLOYEE,
                 detection_lists_description.format(u"departing employee"),
-                subcommand_loader=de.load_subcommands,
+                subcommand_loader=self.table[self.DEPARTING_EMPLOYEE].create_commands,
             ),
             Command(
                 self.HIGH_RISK_EMPLOYEE,
                 detection_lists_description.format(u"high risk employee"),
-                subcommand_loader=hre.load_subcommands,
+                subcommand_loader=self.table[self.HIGH_RISK_EMPLOYEE].create_commands,
             ),
         ]
+
+    def _create_profile_controller(self):
+        return ProfileCommandController(self.PROFILE)
+
+    def _create_security_data_controller(self):
+        return secmain.SecurityDataCommandController(self.SECURITY_DATA)
     
-    def _create_profile_commands(self):
-        return ProfileCommandController(self.PROFILE).create_commands()
+    def _create_alerts_controller(self):
+        return alertmain.MainAlertsCommandController(self.ALERTS)
+    
+    def _create_alert_rules_controller(self):
+        return alertrules.AlertRulesCommandController(self.ALERT_RULES)
+
+    def _create_departing_employee_controller(self):
+        return de.DepartingEmployeeCommandController(self.DEPARTING_EMPLOYEE)
+
+    def _create_high_risk_employee_controller(self):
+        return hre.HighRiskEmployeeCommandController(self.HIGH_RISK_EMPLOYEE)
+
 
 def main():
     top = Command(u"", u"", subcommand_loader=MainCommandController(u"").create_commands)

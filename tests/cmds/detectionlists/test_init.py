@@ -103,9 +103,9 @@ def test_try_remove_risk_tags_when_sdk_raises_bad_request_and_given_unknown_tags
 
 
 class TestDetectionList(object):
-    def test_load_commands_loads_expected_commands(self):
+    def test_create_subcommands_loads_expected_commands(self):
         detection_list = DetectionList("TestList", DetectionListHandlers())
-        cmds = detection_list.load_subcommands()
+        cmds = detection_list.create_subcommands()
         assert cmds[0].name == "bulk"
         assert cmds[1].name == "add"
         assert cmds[2].name == "remove"
