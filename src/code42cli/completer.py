@@ -1,4 +1,4 @@
-from code42cli.main import MainCommandController
+from code42cli.main import MainSubcommandLoader
 
 
 def _get_matches(current, options):
@@ -18,7 +18,7 @@ class Completer(object):
         if len(args) < 2:
             return []  # `code42` already completes w/o
 
-        controller = MainCommandController(u"")
+        controller = MainSubcommandLoader(u"")
         if len(args) > 2:
             for arg in args[1:-1]:
                 controller = controller.subtrees[arg]

@@ -5,13 +5,13 @@ import code42cli.profile as cliprofile
 from code42cli.compat import str
 from code42cli.profile import print_and_log_no_existing_profile
 from code42cli.args import PROFILE_HELP
-from code42cli.commands import Command, CommandController
+from code42cli.commands import Command, SubcommandLoader
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree
 from code42cli.logger import get_main_cli_logger
 
 
-class ProfileCommandController(CommandController):
+class ProfileSubcommandLoader(SubcommandLoader):
     SHOW = u"show"
     LIST = u"list"
     USE = u"use"

@@ -8,7 +8,7 @@ from code42cli.cmds.detectionlists import (
     try_handle_user_already_added_error,
     try_add_risk_tags,
     try_remove_risk_tags,
-    DetectionListCommandController,
+    DetectionListSubcommandLoader,
 )
 from code42cli.cmds.detectionlists.enums import DetectionLists, DetectionListUserKeys, RiskTags
 from code42cli.commands import Command
@@ -16,12 +16,12 @@ from code42cli.commands import Command
 from py42.exceptions import Py42BadRequestError
 
 
-class HighRiskEmployeeCommandController(DetectionListCommandController):
+class HighRiskEmployeeCommandController(DetectionListSubcommandLoader):
     def __init__(self, root_command_name):
         super(HighRiskEmployeeCommandController, self).__init__(root_command_name)
         handlers = _create_handlers()
         self.detection_list = DetectionList.create_departing_employee_list(handlers)
-        self.cmd_factory = self.detection_list.cmd_controller
+        self.cmd_factory = self.detection_list.subcommand_loader
 
     def load_commands(self):
         cmds = self.detection_list.create_subcommands()

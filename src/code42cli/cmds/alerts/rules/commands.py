@@ -1,5 +1,5 @@
 from code42cli import MAIN_COMMAND
-from code42cli.commands import Command, CommandController
+from code42cli.commands import Command, SubcommandLoader
 from code42cli.bulk import generate_template, BulkCommandType
 from code42cli.cmds.alerts.rules.user_rule import (
     add_user,
@@ -62,7 +62,7 @@ def _load_bulk_generate_template_description(argument_collection):
     cmd_type.set_choices(BulkCommandType())
 
 
-class AlertRulesBulkCommandController(CommandController):
+class AlertRulesBulkSubcommandLoader(SubcommandLoader):
     GENERATE_TEMPLATE = u"generate-template"
     ADD = u"add"
     REMOVE = u"remove"
@@ -99,7 +99,7 @@ class AlertRulesBulkCommandController(CommandController):
         return [generate_template_cmd, bulk_add, bulk_remove]
 
 
-class AlertRulesCommandController(CommandController):
+class AlertRulesSubcommandLoader(SubcommandLoader):
     ADD_USER = u"add-user"
     REMOVE_USER = u"remove-user"
     LIST = u"list"
@@ -107,8 +107,8 @@ class AlertRulesCommandController(CommandController):
     BULK = u"bulk"
 
     def __init__(self, root_command_name):
-        super(AlertRulesCommandController, self).__init__(root_command_name)
-        self._bulk_controller = AlertRulesBulkCommandController(self.BULK)
+        super(AlertRulesSubcommandLoader, self).__init__(root_command_name)
+        self._bulk_subcommand_loader = AlertRulesBulkSubcommandLoader(self.BULK)
 
     def load_commands(self):
         usage_prefix = u"code42 alert-rules"
@@ -145,7 +145,9 @@ class AlertRulesCommandController(CommandController):
         )
 
         bulk = Command(
-            self.BULK, u"Tools for executing bulk commands.", controller=self._bulk_controller
+            self.BULK,
+            u"Tools for executing bulk commands.",
+            subcommand_loader=self._bulk_subcommand_loader,
         )
 
         return [add, remove, list_rules, show, bulk]

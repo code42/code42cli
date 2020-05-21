@@ -1,6 +1,6 @@
 import pytest
 
-from code42cli.commands import Command, CommandController
+from code42cli.commands import Command, SubcommandLoader
 from code42cli.parser import ArgumentParserError, CommandParser
 
 
@@ -17,7 +17,7 @@ def dummy_method_optional_args(one=None, two=None):
         return "success"
 
 
-class SubcommandController(CommandController):
+class SubcommandController(SubcommandLoader):
     def load_commands(self):
         return [Command("testsub1", "the subdesc1"), Command("testsub2", "the subdesc2")]
 
@@ -105,7 +105,7 @@ class TestCommandParser(object):
 
     def test_prepare_cli_help_outputs_group_info(self, capsys):
         cmd = Command(
-            "runnable", "the desc", "the usage", controller=SubcommandController("runnable")
+            "runnable", "the desc", "the usage", subcommand_loader=SubcommandController("runnable")
         )
         parser = CommandParser()
         parser.prepare_cli_help(cmd)

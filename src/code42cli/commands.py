@@ -43,7 +43,7 @@ class Command(object):
         usage=None,
         handler=None,
         arg_customizer=None,
-        controller=None,
+        subcommand_loader=None,
         use_single_arg_obj=None,
     ):
         self._name = name
@@ -51,7 +51,7 @@ class Command(object):
         self._usage = usage
         self._handler = handler
         self._arg_customizer = arg_customizer
-        self._controller = controller
+        self._subcommand_loader = subcommand_loader
         self._use_single_arg_obj = use_single_arg_obj
         self._subcommands = []
 
@@ -86,11 +86,13 @@ class Command(object):
         return self._subcommands
 
     @property
-    def controller(self):
-        return self._controller
+    def subcommand_loader(self):
+        return self._subcommand_loader
 
     def load_subcommands(self):
-        self._subcommands = self._controller.load_commands() if self._controller else []
+        self._subcommands = (
+            self._subcommand_loader.load_commands() if self._subcommand_loader else []
+        )
         return self._subcommands
 
     def get_arg_configs(self):
@@ -147,7 +149,7 @@ def _kvps_to_obj(kvps):
     return new_kvps
 
 
-class CommandController(object):
+class SubcommandLoader(object):
     """Responsible for creating subcommands for it's root command. It is also useful for getting 
     command information ahead of time, as in the example of tab completion."""
 
@@ -166,9 +168,9 @@ class CommandController(object):
         cmds = self.load_commands()
         results = {}
         for cmd in cmds:
-            sub_controller = cmd.controller
-            if sub_controller:
-                results[cmd.name] = sub_controller
+            subcommand_loader = cmd.subcommand_loader
+            if subcommand_loader:
+                results[cmd.name] = subcommand_loader
         return results
 
     def load_commands(self):

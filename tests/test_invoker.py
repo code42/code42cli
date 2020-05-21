@@ -6,7 +6,7 @@ import logging
 
 from py42.exceptions import Py42ForbiddenError
 
-from code42cli.commands import Command, CommandController
+from code42cli.commands import Command, SubcommandLoader
 from code42cli.errors import Code42CLIError
 from code42cli.invoker import CommandInvoker
 from code42cli.parser import ArgumentParserError, CommandParser
@@ -17,15 +17,17 @@ def dummy_method(one, two, three=None):
         return "success"
 
 
-class SubcommandControllerTop(CommandController):
+class SubcommandControllerTop(SubcommandLoader):
     def load_commands(self):
         return [
-            Command("testsub1", "the subdesc1", controller=SubcommandControllerBottom("testsub1")),
+            Command(
+                "testsub1", "the subdesc1", subcommand_loader=SubcommandControllerBottom("testsub1")
+            ),
             Command("testsub2", "the subdesc2"),
         ]
 
 
-class SubcommandControllerBottom(CommandController):
+class SubcommandControllerBottom(SubcommandLoader):
     def load_commands(self):
         return [Command("inner1", "the innerdesc1", handler=dummy_method)]
 
@@ -41,20 +43,20 @@ def mock_parser(mocker):
 
 class TestCommandInvoker(object):
     def test_run_top_cmd(self, mock_parser):
-        cmd = Command("", "top level desc", controller=SubcommandControllerTop(""))
+        cmd = Command("", "top level desc", subcommand_loader=SubcommandControllerTop(""))
         invoker = CommandInvoker(cmd, mock_parser)
         invoker.run([])
         mock_parser.prepare_cli_help.assert_called_once_with(cmd)
 
     def test_run_nested_cmd_calls_prepare_command(self, mock_parser):
-        cmd = Command("", "top level desc", controller=SubcommandControllerTop(""))
+        cmd = Command("", "top level desc", subcommand_loader=SubcommandControllerTop(""))
         invoker = CommandInvoker(cmd, mock_parser)
         invoker.run(["testsub1", "inner1", "one", "two", "--three", "test"])
         subcommand = cmd.subcommands[0].subcommands[0]
         mock_parser.prepare_command.assert_called_once_with(subcommand, ["testsub1", "inner1"])
 
     def test_run_nested_cmd_calls_successfully(self, mocker, mock_parser):
-        cmd = Command("", "top level desc", controller=SubcommandControllerTop(""))
+        cmd = Command("", "top level desc", subcommand_loader=SubcommandControllerTop(""))
         parsed_args = mocker.MagicMock()
         mock_parser.parse_args.return_value = parsed_args
         invoker = CommandInvoker(cmd, mock_parser)
@@ -62,7 +64,7 @@ class TestCommandInvoker(object):
         assert parsed_args.func.call_count
 
     def test_run_nested_cmd_when_raises_argumentparsererror_prints_help(self, mocker, mock_parser):
-        cmd = Command("", "top level desc", controller=SubcommandControllerTop(""))
+        cmd = Command("", "top level desc", subcommand_loader=SubcommandControllerTop(""))
         mock_parser.parse_args.side_effect = ArgumentParserError()
         mock_subparser = mocker.MagicMock()
         mock_parser.prepare_command.return_value = mock_subparser
@@ -73,7 +75,7 @@ class TestCommandInvoker(object):
 
     def test_run_when_errors_occur_from_handler_calls_logs_error(self, mocker, mock_parser, caplog):
         ex = Exception("test")
-        cmd = Command("", "top level desc", controller=SubcommandControllerTop(""))
+        cmd = Command("", "top level desc", subcommand_loader=SubcommandControllerTop(""))
         mock_parser.parse_args.side_effect = ex
         mock_subparser = mocker.MagicMock()
         mock_parser.prepare_command.return_value = mock_subparser
@@ -86,7 +88,7 @@ class TestCommandInvoker(object):
         self, mocker, mock_parser, caplog
     ):
         ex = Exception("test")
-        cmd = Command("", "top level desc", controller=SubcommandControllerTop(""))
+        cmd = Command("", "top level desc", subcommand_loader=SubcommandControllerTop(""))
         mock_parser.parse_args.side_effect = ex
         mock_subparser = mocker.MagicMock()
         mock_parser.prepare_command.return_value = mock_subparser
@@ -99,7 +101,7 @@ class TestCommandInvoker(object):
         http_error = mocker.MagicMock(spec=HTTPError)
         http_error.response = mocker.MagicMock(spec=Response)
         http_error.response.request = None
-        cmd = Command("", "top level desc", controller=SubcommandControllerTop(""))
+        cmd = Command("", "top level desc", subcommand_loader=SubcommandControllerTop(""))
         mock_parser.parse_args.side_effect = Py42ForbiddenError(http_error)
         mock_subparser = mocker.MagicMock()
         mock_parser.prepare_command.return_value = mock_subparser
@@ -116,7 +118,7 @@ class TestCommandInvoker(object):
         http_error = mocker.MagicMock(spec=HTTPError)
         http_error.response = mocker.MagicMock(spec=Response)
         http_error.response.request = None
-        cmd = Command("", "top level desc", controller=SubcommandControllerTop(""))
+        cmd = Command("", "top level desc", subcommand_loader=SubcommandControllerTop(""))
         mock_parser.parse_args.side_effect = Py42ForbiddenError(http_error)
         mock_subparser = mocker.MagicMock()
         mock_parser.prepare_command.return_value = mock_subparser
@@ -132,7 +134,7 @@ class TestCommandInvoker(object):
         request = mocker.MagicMock(spec=Request)
         request.body = {"foo": "bar"}
         http_error.response.request = request
-        cmd = Command("", "top level desc", controller=SubcommandControllerTop(""))
+        cmd = Command("", "top level desc", subcommand_loader=SubcommandControllerTop(""))
         mock_parser.parse_args.side_effect = Py42ForbiddenError(http_error)
         mock_subparser = mocker.MagicMock()
         mock_parser.prepare_command.return_value = mock_subparser
@@ -143,7 +145,7 @@ class TestCommandInvoker(object):
             assert str(request.body) in caplog.text
 
     def test_run_when_cli_error_occurs_logs_request(self, mocker, mock_parser, caplog):
-        cmd = Command("", "top level desc", controller=SubcommandControllerTop(""))
+        cmd = Command("", "top level desc", subcommand_loader=SubcommandControllerTop(""))
         mock_parser.parse_args.side_effect = Code42CLIError("a code42cli error")
         mock_subparser = mocker.MagicMock()
         mock_parser.prepare_command.return_value = mock_subparser

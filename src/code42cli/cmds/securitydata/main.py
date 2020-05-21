@@ -7,10 +7,10 @@ from code42cli.cmds.search_shared.enums import (
 )
 from code42cli.cmds.securitydata.extraction import extract
 from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore
-from code42cli.commands import Command, CommandController
+from code42cli.commands import Command, SubcommandLoader
 
 
-class SecurityDataCommandController(CommandController):
+class SecurityDataSubcommandLoader(SubcommandLoader):
     PRINT = u"print"
     WRITE_TO = u"write-to"
     SEND_TO = u"send-to"

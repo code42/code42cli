@@ -1,5 +1,5 @@
 from code42cli.bulk import BulkCommandType
-from code42cli.commands import Command, CommandController
+from code42cli.commands import Command, SubcommandLoader
 
 
 def create_usage_prefix(detection_list_name):
@@ -16,17 +16,17 @@ def _load_bulk_generate_template_description(argument_collection):
     cmd_type.set_choices(BulkCommandType())
 
 
-class DetectionListCommandController(CommandController):
+class DetectionListSubcommandLoader(SubcommandLoader):
     BULK = u"bulk"
     ADD = BulkCommandType.ADD
     REMOVE = BulkCommandType.REMOVE
     _USAGE_SUFFIX = u"<username> <optional args>"
 
-    def __init__(self, detection_list_name, bulk_controller=None):
-        super(DetectionListCommandController, self).__init__(detection_list_name)
+    def __init__(self, detection_list_name, bulk_subcommand_loader=None):
+        super(DetectionListSubcommandLoader, self).__init__(detection_list_name)
         self._name = detection_list_name
         self._usage_prefix = create_usage_prefix(detection_list_name)
-        self.bulk_controller = bulk_controller or DetectionListBulkCommandController(
+        self.bulk_subcommand_loader = bulk_subcommand_loader or DetectionListBulkSubcommandLoader(
             self.BULK, detection_list_name
         )
 
@@ -34,7 +34,7 @@ class DetectionListCommandController(CommandController):
         return Command(
             self.BULK,
             u"Tools for executing bulk {} commands.".format(self._name),
-            controller=self.bulk_controller,
+            subcommand_loader=self.bulk_subcommand_loader,
         )
 
     def create_add_command(self, handler, arg_customizer):
@@ -56,13 +56,13 @@ class DetectionListCommandController(CommandController):
         )
 
 
-class DetectionListBulkCommandController(CommandController):
+class DetectionListBulkSubcommandLoader(SubcommandLoader):
     ADD = BulkCommandType.ADD
     REMOVE = BulkCommandType.REMOVE
     GENERATE_TEMPLATE = u"generate-template"
 
     def __init__(self, root_command_name, detection_list_name):
-        super(DetectionListBulkCommandController, self).__init__(root_command_name)
+        super(DetectionListBulkSubcommandLoader, self).__init__(root_command_name)
         self._bulk_usage_prefix = create_bulk_usage_prefix(detection_list_name)
         self._name = detection_list_name
 

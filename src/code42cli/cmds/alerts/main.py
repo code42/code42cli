@@ -1,5 +1,5 @@
 from code42cli.args import ArgConfig
-from code42cli.commands import Command, CommandController
+from code42cli.commands import Command, SubcommandLoader
 from code42cli.cmds.alerts.extraction import extract
 from code42cli.cmds.search_shared import args, logger_factory
 from code42cli.cmds.search_shared.enums import (
@@ -12,7 +12,7 @@ from code42cli.cmds.search_shared.enums import (
 from code42cli.cmds.search_shared.cursor_store import AlertCursorStore
 
 
-class MainAlertsCommandController(CommandController):
+class MainAlertsSubcommandLoader(SubcommandLoader):
     PRINT = u"print"
     WRITE_TO = u"write-to"
     SEND_TO = u"send-to"
