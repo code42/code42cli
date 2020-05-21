@@ -20,7 +20,7 @@ class ProfileCommandController(CommandController):
     UPDATE = u"update"
     DELETE = u"delete"
     DELETE_ALL = u"delete-all"
-    
+
     def load_commands(self):
         """Sets up the `profile` subcommand with all of its subcommands."""
         usage_prefix = u"{} profile".format(MAIN_COMMAND)

@@ -150,7 +150,7 @@ def _kvps_to_obj(kvps):
 class CommandController(object):
     """Responsible for creating subcommands for it's root command. It is also useful for getting 
     command information ahead of time, as in the example of tab completion."""
-    
+
     def __init__(self, root_command_name):
         self.root = root_command_name
 
