@@ -155,5 +155,5 @@ class CommandController(object):
     def table(self):
         return {}
 
-    def create_commands(self):
+    def load_commands(self):
         """Override"""

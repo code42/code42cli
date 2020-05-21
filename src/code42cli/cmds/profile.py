@@ -35,7 +35,7 @@ class ProfileCommandController(CommandController):
             self.DELETE_ALL,
         ]
 
-    def create_commands(self):
+    def load_commands(self):
         """Sets up the `profile` subcommand with all of its subcommands."""
         usage_prefix = u"{} profile".format(MAIN_COMMAND)
 

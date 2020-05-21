@@ -72,7 +72,7 @@ class MainCommandController(CommandController):
             self.HIGH_RISK_EMPLOYEE,
         ]
 
-    def create_commands(self):
+    def load_commands(self):
         detection_lists_description = (
             u"For adding and removing employees from the {} detection list."
         )
@@ -80,32 +80,32 @@ class MainCommandController(CommandController):
             Command(
                 self.PROFILE,
                 u"For managing Code42 settings.",
-                subcommand_loader=self.table[self.PROFILE].create_commands,
+                subcommand_loader=self.table[self.PROFILE].load_commands,
             ),
             Command(
                 self.SECURITY_DATA,
                 u"Tools for getting security related data, such as file events.",
-                subcommand_loader=self.table[self.SECURITY_DATA].create_commands,
+                subcommand_loader=self.table[self.SECURITY_DATA].load_commands,
             ),
             Command(
                 self.ALERTS,
                 u"Tools for getting alert data.",
-                subcommand_loader=self.table[self.ALERTS].create_commands,
+                subcommand_loader=self.table[self.ALERTS].load_commands,
             ),
             Command(
                 self.ALERT_RULES,
                 u"Manage alert rules.",
-                subcommand_loader=self.table[self.ALERT_RULES].create_commands,
+                subcommand_loader=self.table[self.ALERT_RULES].load_commands,
             ),
             Command(
                 self.DEPARTING_EMPLOYEE,
                 detection_lists_description.format(u"departing employee"),
-                subcommand_loader=self.table[self.DEPARTING_EMPLOYEE].create_commands,
+                subcommand_loader=self.table[self.DEPARTING_EMPLOYEE].load_commands,
             ),
             Command(
                 self.HIGH_RISK_EMPLOYEE,
                 detection_lists_description.format(u"high risk employee"),
-                subcommand_loader=self.table[self.HIGH_RISK_EMPLOYEE].create_commands,
+                subcommand_loader=self.table[self.HIGH_RISK_EMPLOYEE].load_commands,
             ),
         ]
 
@@ -129,7 +129,7 @@ class MainCommandController(CommandController):
 
 
 def main():
-    top = Command(u"", u"", subcommand_loader=MainCommandController(u"").create_commands)
+    top = Command(u"", u"", subcommand_loader=MainCommandController(u"").load_commands)
     invoker = CommandInvoker(top)
     invoker.run(sys.argv[1:])
 
