@@ -70,6 +70,24 @@ class DetectionListCommandFactory:
             arg_customizer=self._load_bulk_remove_description,
         )
 
+    def create_bulk_add_risk_tags_command(self, handler):
+        return Command(
+            u"add-risk-tags",
+            u"Associates risk tags with a user in bulk.",
+            u"{} {} <file>".format(self._bulk_usage_prefix, u"add-risk-tags"),
+            handler=handler,
+            arg_customizer=self._load_bulk_add_risk_tags_description,
+        )
+
+    def create_bulk_remove_risk_tags_command(self, handler):
+        return Command(
+            u"remove-risk-tags",
+            u"Disassociates risk tags with a user in bulk.",
+            u"{} {} <file>".format(self._bulk_usage_prefix, u"remove-risk-tags"),
+            handler=handler,
+            arg_customizer=self._load_bulk_remove_risk_tags_description,
+        )
+
     @staticmethod
     def _load_bulk_generate_template_description(argument_collection):
         cmd_type = argument_collection.arg_configs[u"cmd"]
@@ -88,6 +106,26 @@ class DetectionListCommandFactory:
         users_file = argument_collection.arg_configs[u"users_file"]
         users_file.set_help(
             u"A file containing a line-separated list of users to remove form the {} detection list".format(
+                self._name
+            )
+        )
+
+    def _load_bulk_add_risk_tags_description(self, argument_collection):
+        csv_file = argument_collection.arg_configs[u"csv_file"]
+        csv_file.set_help(
+            u"A file containing a ',' separated username with space-separated tags to add "
+            u"to the {} detection list."
+            u"e.g. test@email.com,tag1 tag2 tag3".format(
+                self._name
+            )
+        )
+
+    def _load_bulk_remove_risk_tags_description(self, argument_collection):
+        csv_file = argument_collection.arg_configs[u"csv_file"]
+        csv_file.set_help(
+            u"A file containing a ',' separated username with space-separated tags to remove "
+            u"from the {} detection list."
+            u"e.g. test@email.com,tag1 tag2 tag3".format(
                 self._name
             )
         )

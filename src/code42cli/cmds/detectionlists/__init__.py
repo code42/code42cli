@@ -5,6 +5,7 @@ from code42cli.file_readers import create_csv_reader, create_flat_file_reader
 from code42cli.errors import UserAlreadyAddedError, UserDoesNotExistError, UnknownRiskTagError
 from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory
 from code42cli.cmds.detectionlists.enums import DetectionLists, DetectionListUserKeys, RiskTags
+from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory
 
 
 def try_handle_user_already_added_error(bad_request_err, username_tried_adding, list_name):
@@ -93,7 +94,13 @@ class DetectionList(object):
         )
         add = self.factory.create_bulk_add_command(self.bulk_add_employees)
         remove = self.factory.create_bulk_remove_command(self.bulk_remove_employees)
-        return [generate_template_cmd, add, remove]
+        bulk_add_risk_tags = self.factory.create_bulk_add_risk_tags_command(
+            self.bulk_add_risk_tags
+        )
+        bulk_remove_risk_tags = self.factory.create_bulk_remove_risk_tags_command(
+            self.bulk_remove_risk_tags
+        )
+        return [generate_template_cmd, add, remove, bulk_add_risk_tags, bulk_remove_risk_tags]
 
     def generate_template_file(self, cmd, path=None):
         """Generates a template file a user would need to fill-in for bulk operating on the 
@@ -144,6 +151,14 @@ class DetectionList(object):
 
     def _remove_employee(self, sdk, profile, *args, **kwargs):
         self.handlers.remove_employee(sdk, profile, *args, **kwargs)
+
+    def bulk_add_risk_tags(self, sdk, profile, csv_file):
+        reader = create_csv_reader(csv_file)
+        run_bulk_process(lambda **kwargs: add_risk_tags(sdk, profile, **kwargs), reader)
+
+    def bulk_remove_risk_tags(self, sdk, profile, csv_file):
+        reader = create_csv_reader(csv_file)
+        run_bulk_process(lambda **kwargs: remove_risk_tags(sdk, profile, **kwargs), reader)
 
 
 def load_username_description(argument_collection):
@@ -224,3 +239,23 @@ def _try_handle_bad_risk_tag(tags):
     unknowns = [tag for tag in tags if tag not in options] if tags else None
     if unknowns:
         raise UnknownRiskTagError(unknowns)
+
+
+def handle_list_args(list_arg):
+    """Converts str args to a list. Useful for `bulk` commands which don't use `argparse` but
+    instead pass in values from files, such as in the form "item1 item2"."""
+    if list_arg and type(list_arg) != list:
+        return list_arg.split()
+    return list_arg
+
+
+def add_risk_tags(sdk, profile, username, tag):
+    risk_tag = handle_list_args(tag)
+    user_id = get_user_id(sdk, username)
+    try_add_risk_tags(sdk, user_id, risk_tag)
+
+
+def remove_risk_tags(sdk, profile, username, tag):
+    risk_tag = handle_list_args(tag)
+    user_id = get_user_id(sdk, username)
+    try_remove_risk_tags(sdk, user_id, risk_tag)
