@@ -148,16 +148,21 @@ def _kvps_to_obj(kvps):
 
 
 class CommandController(object):
+    """Responsible for creating subcommands for it's root command. It is also useful for getting 
+    command information ahead of time, as in the example of tab completion."""
+    
     def __init__(self, root_command_name):
         self.root = root_command_name
 
     @property
     def names(self):
+        """The names of all the subcommands in this controller's root command."""
         sub_cmds = self.load_commands()
         return [cmd.name for cmd in sub_cmds]
 
     @property
     def subtrees(self):
+        """All subcommands for this controller's root command mapped to their given controllers."""
         cmds = self.load_commands()
         results = {}
         for cmd in cmds:
