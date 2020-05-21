@@ -215,3 +215,22 @@ Next, call the bash `complete` command:
 ```bash
 complete -C '<path/to/completer' code42
 ```
+
+### zsh
+For `zsh`, before doing the above commands, do these commands first:
+
+Activate the `compdef` function:
+```bash
+autoload -Uz compinit
+compinit
+```
+
+Get the path to `zsh` completer script:
+```bash
+which code42cli_zsh_completer.sh
+```
+
+Source the `zsh` completer script:
+```bash
+source path/to/code42cli_zsh_completer.sh
+```

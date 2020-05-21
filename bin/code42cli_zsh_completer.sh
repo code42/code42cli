@@ -56,7 +56,6 @@ _bash_complete() {
       _directories "${suf[@]}" && ret=0
     fi
   fi
-  fi
 
   return ret
 }
