@@ -217,7 +217,7 @@ complete -C '<path/to/completer' code42
 ```
 
 ### zsh
-For `zsh`, before doing the above commands, do these commands first:
+For `zsh`, before doing the above commands, do these first:
 
 Activate the `compdef` function:
 ```bash
