@@ -149,11 +149,12 @@ class CommandController(object):
 
     @property
     def names(self):
-        return []
+        sub_cmds = self.load_commands()
+        return [cmd.name for cmd in sub_cmds]
 
     @property
     def table(self):
         return {}
 
     def load_commands(self):
-        """Override"""
+        return []
