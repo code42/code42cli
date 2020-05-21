@@ -80,7 +80,6 @@ class Worker(object):
                 func = task[u"func"]
                 args = task[u"args"]
                 kwargs = task[u"kwargs"]
-                print("starting call")
                 func(*args, **kwargs)
             except Code42CLIError as err:
                 self._increment_total_errors()
