@@ -3,11 +3,11 @@ from code42cli.completer import Completer
 
 class TestCompleter(object):
     _completer = Completer()
-    
+
     def test_complete_for_profile(self):
         actual = self._completer.complete("code42 profi")
         assert "profile" in actual
-    
+
     def test_complete_for_security_data(self):
         actual = self._completer.complete("code42 security")
         assert "security-data" in actual
@@ -19,7 +19,7 @@ class TestCompleter(object):
     def test_complete_for_alert_rules(self):
         actual = self._completer.complete("code42 al")
         assert "alert-rules" in actual
-        
+
     def test_complete_for_departing_employee(self):
         actual = self._completer.complete("code42 de")
         assert "departing-employee" in actual
@@ -27,7 +27,7 @@ class TestCompleter(object):
     def test_complete_for_high_risk_employee(self):
         actual = self._completer.complete("code42 hi")
         assert "high-risk-employee" in actual
-    
+
     def test_complete_for_high_risk_employee_bulk(self):
         actual = self._completer.complete("code42 high-risk-employee bu")
         assert "bulk" in actual

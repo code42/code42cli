@@ -114,10 +114,10 @@ class MainCommandController(CommandController):
 
     def _create_security_data_controller(self):
         return secmain.SecurityDataCommandController(self.SECURITY_DATA)
-    
+
     def _create_alerts_controller(self):
         return alertmain.MainAlertsCommandController(self.ALERTS)
-    
+
     def _create_alert_rules_controller(self):
         return alertrules.AlertRulesCommandController(self.ALERT_RULES)
 

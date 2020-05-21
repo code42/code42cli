@@ -66,11 +66,11 @@ class AlertRulesBulkCommandController(CommandController):
     GENERATE_TEMPLATE = u"generate-template"
     ADD = u"add"
     REMOVE = u"remove"
-    
+
     @property
     def names(self):
         return [self.ADD, self.REMOVE, self.GENERATE_TEMPLATE]
-    
+
     def create_commands(self):
         usage_prefix = u"{} alert-rules bulk".format(MAIN_COMMAND)
 
@@ -109,7 +109,7 @@ class AlertRulesCommandController(CommandController):
     LIST = u"list"
     SHOW = u"show"
     BULK = u"bulk"
-    
+
     def __init__(self, root_command_name):
         super(AlertRulesCommandController, self).__init__(root_command_name)
         self._bulk_controller = AlertRulesBulkCommandController(self.BULK)
@@ -117,11 +117,11 @@ class AlertRulesCommandController(CommandController):
     @property
     def names(self):
         return [self.ADD_USER, self.REMOVE_USER, self.LIST, self.SHOW, self.BULK]
-    
+
     @property
     def table(self):
         return {self.BULK: self._bulk_controller}
-    
+
     def create_commands(self):
         usage_prefix = u"code42 alert-rules"
 

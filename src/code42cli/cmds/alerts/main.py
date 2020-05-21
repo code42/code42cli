@@ -14,18 +14,18 @@ from code42cli.cmds.search_shared.cursor_store import AlertCursorStore
 
 class MainAlertsCommandController(CommandController):
     PRINT = u"print"
-    WRITE_TO =  u"write-to"
+    WRITE_TO = u"write-to"
     SEND_TO = u"send-to"
     CLEAR_CHECKPOINT = u"clear-checkpoint"
-    
+
     @property
     def names(self):
         return [self.PRINT, self.WRITE_TO, self.SEND_TO, self.CLEAR_CHECKPOINT]
-    
+
     def create_commands(self):
         """Sets up the `alerts` subcommand with all of its subcommands."""
         usage_prefix = u"code42 alerts"
-    
+
         print_func = Command(
             self.PRINT,
             u"Print alerts to stdout",
@@ -34,7 +34,7 @@ class MainAlertsCommandController(CommandController):
             arg_customizer=_load_search_args,
             use_single_arg_obj=True,
         )
-    
+
         write = Command(
             self.WRITE_TO,
             u"Write alerts to the file with the given name.",
@@ -43,7 +43,7 @@ class MainAlertsCommandController(CommandController):
             arg_customizer=_load_write_to_args,
             use_single_arg_obj=True,
         )
-    
+
         send = Command(
             self.SEND_TO,
             u"Send alerts to the given server address.",
@@ -52,14 +52,14 @@ class MainAlertsCommandController(CommandController):
             arg_customizer=_load_send_to_args,
             use_single_arg_obj=True,
         )
-    
+
         clear = Command(
             self.CLEAR_CHECKPOINT,
             u"Remove the saved alert checkpoint from 'incremental' (-i) mode.",
             u"{} {}".format(usage_prefix, u"clear-checkpoint <optional-args>"),
             handler=clear_checkpoint,
         )
-    
+
         return [print_func, write, send, clear]
 
 
