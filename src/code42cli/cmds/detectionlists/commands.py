@@ -74,7 +74,7 @@ class DetectionListBulkCommandController(CommandController):
 
     @property
     def names(self):
-        return []
+        return [self.ADD, self.REMOVE, self.GENERATE_TEMPLATE]
 
     @property
     def table(self):
