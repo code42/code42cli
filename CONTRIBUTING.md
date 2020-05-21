@@ -84,16 +84,15 @@ See class documentation on the [Command](src/code42cli/commands.py) class for an
     by `load_commands()` function in `code42cli.main.MainCommandController`.
 
 2. If you are creating a new subcommand, find the top-level command that this will be a subcommand of in
-    `load_commands()` in `code42cli.main.MainCommandController` and navigate to the function assigned to be its 
-        subcommand loader from a different subclass of `CommandController`.
-     Then, add a new instance of `Command` to the list returned by its `load_commands()` function.
+    `load_commands()` in `code42cli.main.MainCommandController` and navigate to its controller's `load_commands()` 
+    Then, add a new instance of `Command` to the list returned by its `load_commands()` function.
 
 3. For commands that actually are executed (rather than just being groups), you will add a `handler` function as a constructor parameter.
    This will be the function that you want to execute when your command is run.
    * _Positional_ arguments of the handler will automatically become _required_ cli arguments.
      * The order that the positional arguments should be entered in on the cli is the same as the order in which they appear in the handler.
    * _Keyword_ arguments of the handler will automatically become _optional_ cli arguments
-   * the cli argument name will be the same as the handler param name except with `_` replaced with `-`, and prefixed with `--` if optional
+   * the cli argument name will be the same as the handler param name except with `_` replaced with `-`, and prefixed with `--` if optional.
 
     For example, consider the following python function:
 
