@@ -11,7 +11,7 @@ logger_deps_lock = Lock()
 ERROR_LOG_FILE_NAME = u"code42_errors.log"
 _PERMISSIONS_MESSAGE = (
     u"You do not have the necessary permissions to perform this task. "
-    + u"Try using or creating a different profile.md."
+    + u"Try using or creating a different profile."
 )
 
 
@@ -168,7 +168,7 @@ class CliLogger(object):
         """The following properties explain how to log to different locations:
         
         `self._info_logger` is for when you want to display simple information, like 
-            `profile.md list`. This does _not_ go to the log file.
+            `profile list`. This does _not_ go to the log file.
             
         `self._user_error_logger` is for when you want to print in red text to the user. It also 
             goes to the log file for debugging purposes.

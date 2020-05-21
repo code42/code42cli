@@ -149,7 +149,7 @@ class TestConfigAccessor(object):
         accessor = ConfigAccessor(config_parser_for_multiple_profiles)
         with caplog.at_level(logging.INFO):
             accessor.switch_default_profile(_TEST_SECOND_PROFILE_NAME)
-            assert "set as the default profile.md" in caplog.text
+            assert "set as the default profile" in caplog.text
 
     def test_create_profile_when_given_default_name_does_not_create(self, config_parser_for_create):
         accessor = ConfigAccessor(config_parser_for_create)

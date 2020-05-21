@@ -36,9 +36,9 @@ class ConfigAccessor(object):
             self.parser.read(self.path)
 
     def get_profile(self, name=None):
-        """Returns the profile.md with the given name.
-        If name is None, returns the default profile.md.
-        If the name does not exist or there is no existing profile.md, it will throw an exception.
+        """Returns the profile with the given name.
+        If name is None, returns the default profile.
+        If the name does not exist or there is no existing profile, it will throw an exception.
         """
         name = name or self._default_profile_name
         if name not in self._get_sections() or name == self.DEFAULT_VALUE:
@@ -55,7 +55,7 @@ class ConfigAccessor(object):
         return profiles
 
     def create_profile(self, name, server, username, ignore_ssl_errors):
-        """Creates a new profile.md if one does not already exist for that name."""
+        """Creates a new profile if one does not already exist for that name."""
         try:
             self.get_profile(name)
         except NoConfigProfileError as ex:
@@ -79,17 +79,17 @@ class ConfigAccessor(object):
         self._save()
 
     def switch_default_profile(self, new_default_name):
-        """Changes what is marked as the default profile.md in the internal section."""
+        """Changes what is marked as the default profile in the internal section."""
         if self.get_profile(new_default_name) is None:
             raise NoConfigProfileError(new_default_name)
         self._internal[self.DEFAULT_PROFILE] = new_default_name
         self._save()
         get_main_cli_logger().print_info(
-            u"{} has been set as the default profile.md.".format(new_default_name)
+            u"{} has been set as the default profile.".format(new_default_name)
         )
 
     def delete_profile(self, name):
-        """Deletes a profile.md."""
+        """Deletes a profile."""
         if self.get_profile(name) is None:
             raise NoConfigProfileError(name)
         self.parser.remove_section(name)
@@ -151,7 +151,7 @@ class ConfigAccessor(object):
             return
 
         self._save()
-        get_main_cli_logger().print_info(u"Successfully saved profile.md '{}'.".format(profile.name))
+        get_main_cli_logger().print_info(u"Successfully saved profile '{}'.".format(profile.name))
 
         default_profile = self._internal.get(self.DEFAULT_PROFILE)
         if default_profile is None or default_profile == self.DEFAULT_VALUE:

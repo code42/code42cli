@@ -23,7 +23,7 @@ def test_alerts_commands_load(capsys, mocker):
 
 
 def test_profile_commands_load(capsys, mocker):
-    mocker.patch("sys.argv", [u"code42", u"profile.md", u"show", u"-h"])
+    mocker.patch("sys.argv", [u"code42", u"profile", u"show", u"-h"])
     _execute_test(capsys, u"show")
 
 

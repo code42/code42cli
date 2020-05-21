@@ -20,7 +20,7 @@ def extract(sdk, profile, output_logger, args):
 
         Args:
             sdk (py42.sdk.SDKClient): The py42 sdk.
-            profile (Code42Profile): The profile.md under which to execute this command.
+            profile (Code42Profile): The profile under which to execute this command.
             output_logger (Logger): The logger specified by which subcommand you use. For example,
                 print: uses a logger that streams to stdout.
                 write-to: uses a logger that logs to a file.

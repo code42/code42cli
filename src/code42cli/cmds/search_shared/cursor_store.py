@@ -99,7 +99,7 @@ class BaseCursorStore(object):
         )
 
     def clean(self):
-        """Removes profile.md cursor data from store."""
+        """Removes profile cursor data from store."""
         self._delete(self._primary_key)
 
 

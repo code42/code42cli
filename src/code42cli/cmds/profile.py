@@ -11,12 +11,12 @@ from code42cli.logger import get_main_cli_logger
 
 
 def load_subcommands():
-    """Sets up the `profile.md` subcommand with all of its subcommands."""
-    usage_prefix = u"code42 profile.md"
+    """Sets up the `profile` subcommand with all of its subcommands."""
+    usage_prefix = u"code42 profile"
 
     show = Command(
         u"show",
-        u"Print the details of a profile.md.",
+        u"Print the details of a profile.",
         u"{} {}".format(usage_prefix, u"show <optional-args>"),
         handler=show_profile,
         arg_customizer=_load_optional_profile_description,
@@ -31,14 +31,14 @@ def load_subcommands():
 
     use = Command(
         u"use",
-        u"Set a profile.md as the default.",
-        u"{} {}".format(usage_prefix, u"use <profile.md-name>"),
+        u"Set a profile as the default.",
+        u"{} {}".format(usage_prefix, u"use <profile-name>"),
         handler=use_profile,
     )
 
     reset_pw = Command(
         u"reset-pw",
-        u"Change the stored password for a profile.md.",
+        u"Change the stored password for a profile.",
         u"{} {}".format(usage_prefix, u"reset-pw <optional-args>"),
         handler=prompt_for_password_reset,
         arg_customizer=_load_optional_profile_description,
@@ -46,10 +46,10 @@ def load_subcommands():
 
     create = Command(
         u"create",
-        u"Create profile.md settings. The first profile.md created will be the default.",
+        u"Create profile settings. The first profile created will be the default.",
         u"{} {}".format(
             usage_prefix,
-            u"create --name <profile.md-name> --server <server-address> --username <username>",
+            u"create --name <profile-name> --server <server-address> --username <username>",
         ),
         handler=create_profile,
         arg_customizer=_load_profile_create_descriptions,
@@ -57,7 +57,7 @@ def load_subcommands():
 
     update = Command(
         u"update",
-        u"Update an existing profile.md.",
+        u"Update an existing profile.",
         u"{} {}".format(usage_prefix, u"update <optional args>"),
         handler=update_profile,
         arg_customizer=_load_profile_update_descriptions,
@@ -65,8 +65,8 @@ def load_subcommands():
 
     delete = Command(
         u"delete",
-        u"Deletes a profile.md and its stored password (if any).",
-        u"{} {}".format(usage_prefix, u"delete <profile.md-name>"),
+        u"Deletes a profile and its stored password (if any).",
+        u"{} {}".format(usage_prefix, u"delete <profile-name>"),
         handler=delete_profile,
     )
 
@@ -81,7 +81,7 @@ def load_subcommands():
 
 
 def show_profile(name=None):
-    """Prints the given profile.md to stdout."""
+    """Prints the given profile to stdout."""
     c42profile = cliprofile.get_profile(name)
     logger = get_main_cli_logger()
     logger.print_info(u"\n{0}:".format(c42profile.name))
@@ -96,7 +96,7 @@ def show_profile(name=None):
 def create_profile(name, server, username, disable_ssl_errors=False):
     cliprofile.create_profile(name, server, username, disable_ssl_errors)
     _prompt_for_allow_password_set(name)
-    get_main_cli_logger().print_info(u"Successfully created profile.md '{}'.".format(name))
+    get_main_cli_logger().print_info(u"Successfully created profile '{}'.".format(name))
 
 
 def update_profile(name=None, server=None, username=None, disable_ssl_errors=None):
@@ -136,16 +136,16 @@ def list_profiles(*args):
 
 
 def use_profile(name):
-    """Changes the default profile.md to the given one."""
+    """Changes the default profile to the given one."""
     cliprofile.switch_default_profile(name)
 
 
 def delete_profile(name):
     logger = get_main_cli_logger()
     if cliprofile.is_default_profile(name):
-        logger.print_info(u"\n{} is currently the default profile.md!".format(name))
+        logger.print_info(u"\n{} is currently the default profile!".format(name))
     if not does_user_agree(
-        u"\nDeleting this profile.md will also delete any stored passwords and checkpoints. "
+        u"\nDeleting this profile will also delete any stored passwords and checkpoints. "
         u"Are you sure? (y/n): "
     ):
         return

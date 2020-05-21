@@ -7,7 +7,7 @@ from code42cli.util import does_user_agree
 
 
 def get_stored_password(profile):
-    """Gets your currently stored password for the given profile.md name."""
+    """Gets your currently stored password for the given profile name."""
     service_name = _get_keyring_service_name(profile.name)
     return keyring.get_password(service_name, profile.username)
 
@@ -18,7 +18,7 @@ def get_password_from_prompt():
 
 
 def set_password(profile, new_password):
-    """Sets your password for the given profile.md name."""
+    """Sets your password for the given profile name."""
     service_name = _get_keyring_service_name(profile.name)
     uses_file_storage = keyring.get_keyring().priority < 1
     if uses_file_storage and not _prompt_for_alternative_store():
@@ -28,7 +28,7 @@ def set_password(profile, new_password):
 
 
 def delete_password(profile):
-    """Deletes password for the given profile.md name."""
+    """Deletes password for the given profile name."""
     service_name = _get_keyring_service_name(profile.name)
     keyring.delete_password(service_name, profile.username)
 

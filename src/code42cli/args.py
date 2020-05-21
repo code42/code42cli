@@ -2,9 +2,9 @@ from collections import OrderedDict
 import inspect
 
 
-PROFILE_HELP = u"The name of the Code42 profile.md to use when executing this command."
+PROFILE_HELP = u"The name of the Code42 profile to use when executing this command."
 SDK_ARG_NAME = u"sdk"
-PROFILE_ARG_NAME = u"profile.md"
+PROFILE_ARG_NAME = u"profile"
 
 
 class ArgConfig(object):
@@ -61,7 +61,7 @@ def get_auto_arg_configs(handler):
     """Looks at the parameter names of `handler` and builds an `ArgConfigCollection` containing
     `argparse` parameters based on them."""
     arg_configs = ArgConfigCollection()
-    excluded_args = [SDK_ARG_NAME, u"profile.md", u"args", u"kwargs", u"self"]
+    excluded_args = [SDK_ARG_NAME, u"profile", u"args", u"kwargs", u"self"]
     if callable(handler):
         argspec = inspect.getargspec(handler)
         filtered_argspec = {
@@ -114,7 +114,7 @@ def _set_smart_defaults(arg_config):
 
 def _build_sdk_arg_configs(arg_config_collection):
     """Add extra cli parameters that will always be relevant when a handler needs the sdk."""
-    profile = ArgConfig(u"--profile.md", help=PROFILE_HELP)
+    profile = ArgConfig(u"--profile", help=PROFILE_HELP)
     debug = ArgConfig(u"-d", u"--debug", action=u"store_true", help=u"Turn on Debug logging.")
     extras = {PROFILE_ARG_NAME: profile, u"debug": debug}
     arg_config_collection.extend(extras)
