@@ -31,7 +31,7 @@ def arg_customizer(arg_collection):
 
 @pytest.fixture
 def mock_profile_reader(mocker):
-    return mocker.patch("{}.profile.get_profile".format(PRODUCT_NAME))
+    return mocker.patch("{}.profile.md.get_profile".format(PRODUCT_NAME))
 
 
 @pytest.fixture
@@ -127,7 +127,7 @@ class TestCommand(object):
         assert "--two" in coll["two"].settings["options_list"]
         assert "--three" in coll["three"].settings["options_list"]
         assert "--four" in coll["four"].settings["options_list"]
-        assert "--profile" in coll[PROFILE_ARG_NAME].settings["options_list"]
+        assert "--profile.md" in coll[PROFILE_ARG_NAME].settings["options_list"]
         assert "--debug" in coll["debug"].settings["options_list"]
         assert not coll.get(SDK_ARG_NAME)
 

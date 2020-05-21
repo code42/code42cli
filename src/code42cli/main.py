@@ -51,7 +51,7 @@ def _load_top_commands():
     detection_lists_description = u"For adding and removing employees from the {} detection list."
     return [
         Command(
-            u"profile", u"For managing Code42 settings.", subcommand_loader=profile.load_subcommands
+            u"profile.md", u"For managing Code42 settings.", subcommand_loader=profile.load_subcommands
         ),
         Command(
             u"security-data",

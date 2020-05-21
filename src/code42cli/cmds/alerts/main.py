@@ -54,7 +54,7 @@ def load_subcommands():
 
 
 def clear_checkpoint(sdk, profile):
-    """Removes the stored checkpoint that keeps track of the last alert retrieved for the given profile..
+    """Removes the stored checkpoint that keeps track of the last alert retrieved for the given profile.md..
         To use, run `code42 alerts clear-checkpoint`.
         This affects `incremental` mode by causing it to behave like it has never been run before.
     """

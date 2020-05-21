@@ -63,7 +63,7 @@ def add_high_risk_employee(sdk, profile, username, cloud_alias=None, risk_tag=No
     
     Args:
         sdk (py42.sdk.SDKClient): py42.
-        profile (C42Profile): Your code42 profile.
+        profile (C42Profile): Your code42 profile.md.
         username (str): The username of the employee to add.
         cloud_alias (str): An alternative email address for another cloud service.
         risk_tag (iter[str]): Risk tags associated with the employee.
@@ -86,7 +86,7 @@ def remove_high_risk_employee(sdk, profile, username):
     
     Args:
         sdk (py42.sdk.SDKClient): py42.
-        profile (C42Profile): Your code42 profile.
+        profile (C42Profile): Your code42 profile.md.
         username (str): The username of the employee to remove.
     """
     user_id = get_user_id(sdk, username)

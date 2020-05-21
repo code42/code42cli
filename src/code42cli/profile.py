@@ -43,7 +43,7 @@ class Code42Profile(object):
 
 
 def _get_profile(profile_name=None):
-    """Returns the profile for the given name."""
+    """Returns the profile.md for the given name."""
     config_profile = config_accessor.get_profile(profile_name)
     return Code42Profile(config_profile)
 
@@ -93,14 +93,14 @@ def profile_exists(profile_name=None):
 
 
 def switch_default_profile(profile_name):
-    profile = get_profile(profile_name)  # Handles if profile does not exist.
+    profile = get_profile(profile_name)  # Handles if profile.md does not exist.
     config_accessor.switch_default_profile(profile.name)
 
 
 def create_profile(name, server, username, ignore_ssl_errors):
     if profile_exists(name):
         logger = get_main_cli_logger()
-        logger.print_and_log_error(u"A profile named '{}' already exists.".format(name))
+        logger.print_and_log_error(u"A profile.md named '{}' already exists.".format(name))
         exit(1)
 
     config_accessor.create_profile(name, server, username, ignore_ssl_errors)
@@ -138,24 +138,24 @@ def set_password(new_password, profile_name=None):
 
 def print_and_log_no_existing_profile():
     logger = get_main_cli_logger()
-    logger.print_and_log_error(u"No existing profile.")
+    logger.print_and_log_error(u"No existing profile.md.")
     _print_create_profile_help()
 
 
 def _print_create_profile_help():
     logger = get_main_cli_logger()
-    logger.print_info(u"\nTo add a profile, use: ")
-    logger.print_bold(u"\tcode42 profile create <profile-name> <authority-URL> <username>\n")
+    logger.print_info(u"\nTo add a profile.md, use: ")
+    logger.print_bold(u"\tcode42 profile.md create <profile.md-name> <authority-URL> <username>\n")
 
 
 def _print_set_default_profile_help(existing_profiles):
     logger = get_main_cli_logger()
     logger.print_info(
-        u"\nNo default profile set.\n"
-        u"\nUse the --profile flag to specify which profile to use.\n"
-        u"\nTo set the default profile (used whenever --profile argument is not provided), use:"
+        u"\nNo default profile.md set.\n"
+        u"\nUse the --profile.md flag to specify which profile.md to use.\n"
+        u"\nTo set the default profile.md (used whenever --profile.md argument is not provided), use:"
     )
-    logger.print_bold(u"\tcode42 profile use <profile-name>")
+    logger.print_bold(u"\tcode42 profile.md use <profile.md-name>")
     logger.print_info(u"\nExisting profiles:")
     for profile in existing_profiles:
         logger.print_info("\t{}".format(profile))

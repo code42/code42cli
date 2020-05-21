@@ -8,32 +8,32 @@ from ..conftest import create_mock_profile
 
 @pytest.fixture
 def user_agreement(mocker):
-    mock = mocker.patch("{}.cmds.profile.does_user_agree".format(PRODUCT_NAME))
+    mock = mocker.patch("{}.cmds.profile.md.does_user_agree".format(PRODUCT_NAME))
     mock.return_value = True
     return mocker
 
 
 @pytest.fixture
 def user_disagreement(mocker):
-    mock = mocker.patch("{}.cmds.profile.does_user_agree".format(PRODUCT_NAME))
+    mock = mocker.patch("{}.cmds.profile.md.does_user_agree".format(PRODUCT_NAME))
     mock.return_value = False
     return mocker
 
 
 @pytest.fixture
 def mock_cliprofile_namespace(mocker):
-    return mocker.patch("{}.cmds.profile.cliprofile".format(PRODUCT_NAME))
+    return mocker.patch("{}.cmds.profile.md.cliprofile".format(PRODUCT_NAME))
 
 
 @pytest.fixture(autouse=True)
 def mock_getpass(mocker):
-    mock = mocker.patch("{}.cmds.profile.getpass".format(PRODUCT_NAME))
+    mock = mocker.patch("{}.cmds.profile.md.getpass".format(PRODUCT_NAME))
     mock.return_value = "newpassword"
 
 
 @pytest.fixture
 def mock_verify(mocker):
-    return mocker.patch("{}.cmds.profile.validate_connection".format(PRODUCT_NAME))
+    return mocker.patch("{}.cmds.profile.md.validate_connection".format(PRODUCT_NAME))
 
 
 @pytest.fixture
@@ -122,7 +122,7 @@ def test_create_profile_outputs_confirmation(
     with caplog.at_level(logging.INFO):
         mock_cliprofile_namespace.profile_exists.return_value = False
         profilecmd.create_profile("foo", "bar", "baz", True)
-        assert "Successfully created profile 'foo'." in caplog.text
+        assert "Successfully created profile.md 'foo'." in caplog.text
 
 
 def test_update_profile_updates_existing_profile(
@@ -178,7 +178,7 @@ def test_delete_profile_warns_if_deleting_default(
     mock_cliprofile_namespace.is_default_profile.return_value = True
     with caplog.at_level(logging.ERROR):
         profilecmd.delete_profile("mockdefault")
-        assert "mockdefault is currently the default profile!" in caplog.text
+        assert "mockdefault is currently the default profile.md!" in caplog.text
 
 
 def test_delete_profile_does_nothing_if_user_doesnt_agree(
@@ -266,7 +266,7 @@ def test_list_profiles_when_no_profiles_outputs_no_profiles_message(
     mock_cliprofile_namespace.get_all_profiles.return_value = []
     profilecmd.list_profiles()
     with caplog.at_level(logging.ERROR):
-        assert "No existing profile." in caplog.text
+        assert "No existing profile.md." in caplog.text
 
 
 def test_use_profile(mock_cliprofile_namespace, profile):

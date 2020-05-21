@@ -11,7 +11,7 @@ from .conftest import MockSection, create_mock_profile
 @pytest.fixture
 def config_accessor(mocker):
     mock = mocker.MagicMock(spec=ConfigAccessor, name="Config Accessor")
-    attr = mocker.patch("{}.profile.config_accessor".format(PRODUCT_NAME), mock)
+    attr = mocker.patch("{}.profile.md.config_accessor".format(PRODUCT_NAME), mock)
     return attr
 
 
@@ -93,7 +93,7 @@ def test_validate_default_profile_prints_set_default_help_when_no_valid_default_
     with pytest.raises(SystemExit):
         cliprofile.validate_default_profile()
         capture = capsys.readouterr()
-        assert "No default profile set." in capture.out
+        assert "No default profile.md set." in capture.out
 
 
 def test_validate_default_profile_prints_create_profile_help_when_no_valid_default_and_no_other_profiles_exists(
@@ -104,7 +104,7 @@ def test_validate_default_profile_prints_create_profile_help_when_no_valid_defau
     with pytest.raises(SystemExit):
         cliprofile.validate_default_profile()
         capture = capsys.readouterr()
-        assert "No existing profile." in capture.out
+        assert "No existing profile.md." in capture.out
 
 
 def test_profile_exists_when_exists_returns_true(config_accessor):
@@ -197,7 +197,7 @@ def test_delete_profile_deletes_password_if_exists(
     config_accessor, mocker, password_getter, password_deleter
 ):
     profile = create_mock_profile("deleteme")
-    mock_get_profile = mocker.patch("code42cli.profile._get_profile")
+    mock_get_profile = mocker.patch("code42cli.profile.md._get_profile")
     mock_get_profile.return_value = profile
     password_getter.return_value = "i_exist"
     cliprofile.delete_profile("deleteme")
@@ -206,11 +206,11 @@ def test_delete_profile_deletes_password_if_exists(
 
 def test_delete_profile_clears_checkpoints(config_accessor, mocker):
     profile = create_mock_profile("deleteme")
-    mock_get_profile = mocker.patch("code42cli.profile._get_profile")
+    mock_get_profile = mocker.patch("code42cli.profile.md._get_profile")
     mock_get_profile.return_value = profile
     event_store = mocker.MagicMock(spec=FileEventCursorStore)
     alert_store = mocker.MagicMock(spec=AlertCursorStore)
-    mock_get_cursor_store = mocker.patch("code42cli.profile.get_all_cursor_stores_for_profile")
+    mock_get_cursor_store = mocker.patch("code42cli.profile.md.get_all_cursor_stores_for_profile")
     mock_get_cursor_store.return_value = [event_store, alert_store]
     cliprofile.delete_profile("deleteme")
     assert event_store.clean.call_count == 1

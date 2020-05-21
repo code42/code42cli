@@ -103,7 +103,7 @@ class TestCommandInvoker(object):
             invoker.run(["testsub1", "inner1", "one", "two", "--invalid", "test"])
             assert (
                 u"You do not have the necessary permissions to perform this task. Try using or "
-                u"creating a different profile." in caplog.text
+                u"creating a different profile.md." in caplog.text
             )
 
     def test_run_when_forbidden_error_occurs_logs_command(self, mocker, mock_parser, caplog):

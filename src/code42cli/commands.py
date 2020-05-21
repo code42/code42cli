@@ -17,7 +17,7 @@ class Command(object):
 
     Args:
         name (str or unicode): The name of the command. For example, in
-            `code42 profile show`, "show" is the name, while "profile"
+            `code42 profile.md show`, "show" is the name, while "profile.md"
             is the name of the parent command.
 
         description (str or unicode): Descriptive text to be displayed when using -h.
@@ -108,8 +108,8 @@ def _get_arg_kvps(parsed_args, handler):
 
 
 def _inject_params(kvps, handler):
-    """Automatically populates parameters named "sdk" or "profile" with instances of the sdk and 
-    profile, respectively.
+    """Automatically populates parameters named "sdk" or "profile.md" with instances of the sdk and 
+    profile.md, respectively.
 
     Args:
         kvps (dict): A dictionary of the parsed command line arguments.

@@ -20,7 +20,7 @@ class BulkCommandType(object):
 
 def generate_template(handler, path=None):
     """Looks at the parameter names of `handler` and creates a file with the same column names. If 
-    `handler` only has one parameter that is not `sdk` or `profile`, it will create a blank file. 
+    `handler` only has one parameter that is not `sdk` or `profile.md`, it will create a blank file. 
     This is useful for commands such as `remove` which only require a list of users.
     """
     path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))

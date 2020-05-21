@@ -72,7 +72,7 @@ def create_handlers(output_logger, cursor_store, event_key, sdk=None):
 
 def exit_if_advanced_query_used_with_other_search_args(args):
     args_dict_copy = args.__dict__.copy()
-    for arg in (u"advanced_query", u"format", u"sdk", u"profile"):
+    for arg in (u"advanced_query", u"format", u"sdk", u"profile.md"):
         args_dict_copy.pop(arg)
     if any(args_dict_copy.values()):
         logger.print_and_log_error(u"You cannot use --advanced-query with additional search args.")

@@ -35,6 +35,9 @@ setup(
             "pytest==4.6.5",
             "pytest-cov == 2.8.1",
             "pytest-mock==2.0.0",
+            "recommonmark",
+            "sphinx",
+            "sphinx_rtd_theme",
             "tox==3.14.3",
         ]
     },

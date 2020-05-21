@@ -119,7 +119,7 @@ class DetectionList(object):
 
         Args:
             sdk (py42.sdk.SDKClient): The py42 sdk.
-            profile (Code42Profile): The profile under which to execute this command.
+            profile (Code42Profile): The profile.md under which to execute this command.
             csv_file (str or unicode): The path to the csv file containing rows of users.
         """
         reader = create_csv_reader(csv_file)
@@ -131,7 +131,7 @@ class DetectionList(object):
         
         Args:
             sdk (py42.sdk.SDKClient): The py42 sdk.
-            profile (Code42Profile): The profile under which to execute this command.
+            profile (Code42Profile): The profile.md under which to execute this command.
             users_file (str or unicode): The path to the file containing rows of user names.
         """
         reader = create_flat_file_reader(users_file)
