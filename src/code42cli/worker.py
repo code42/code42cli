@@ -71,7 +71,7 @@ class Worker(object):
         """Wait for the tasks in the queue to complete. This should usually be called before 
         program termination."""
         while not self._queue.empty():
-            sleep(0.1)
+            sleep(0.5)
 
     def _process_queue(self):
         while True:
@@ -80,6 +80,7 @@ class Worker(object):
                 func = task[u"func"]
                 args = task[u"args"]
                 kwargs = task[u"kwargs"]
+                print("starting call")
                 func(*args, **kwargs)
             except Code42CLIError as err:
                 self._increment_total_errors()
