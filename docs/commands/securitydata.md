@@ -1,6 +1,6 @@
 # Security Data
 
-## Search Args
+### Search shared arguments
 
 Search args are shared between `print`, `write-to`, and `send-to` commands.
 
@@ -29,7 +29,7 @@ Search args are shared between `print`, `write-to`, and `send-to` commands.
 * `-i`, `--incremental` (optional): Only get file events that were not previously retrieved.
 
 
-### print
+### Search - print
 
 Print file events to stdout. Arguments:
 * search args (note that begin date is often required).
@@ -37,7 +37,7 @@ Print file events to stdout. Arguments:
 Usage:
 `code42 security-data print -b <begin-date> <search-args>`
 
-### write-to
+### Search - write-to
 
 Write file events to the file with the given name. Arguments:
 * `output_file`: The name of the local file to send output to.
@@ -48,7 +48,7 @@ Usage:
 code42 security-data write-to -b 2020-03-01 <search-args>
 ```
 
-### send-to
+### Search - send-to
 
 Send file events to the given server address. Arguments:
 * `server`: The server address to send output to.

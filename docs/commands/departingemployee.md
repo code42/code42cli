@@ -6,6 +6,7 @@ Add a user to the departing-employee detection list. Arguments:
 * `username`: A code42 username for an employee.
 * `--cloud-alias` (optional): An alternative email address for another cloud service.
 * `--departure-date` (optional): The date the employee is departing in format yyyy-MM-dd.
+* `--notes` (optional): Notes about the employee.
 
 Usage:
 ```bash
