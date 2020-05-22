@@ -1,11 +1,12 @@
 from collections import OrderedDict
 
-from py42.exceptions import Py42Error
+from py42.exceptions import Py42Error, Py42ForbiddenError, Py42BadRequestError
 from py42.util import format_json
 
-from code42cli.errors import UserAlreadyAddedError
+from code42cli.errors import UserAlreadyAddedError, UserNotInLegalHoldError
 from code42cli.util import format_to_table, find_format_width
-from code42cli.bulk import run_bulk_process, CSVReader
+from code42cli.bulk import run_bulk_process
+from code42cli.file_readers import create_csv_reader
 from code42cli.logger import get_main_cli_logger
 from code42cli.cmds.detectionlists import get_user_id
 
@@ -15,6 +16,8 @@ _HEADER_KEYS_MAP[u"legalHoldUid"] = u"Matter ID"
 _HEADER_KEYS_MAP[u"name"] = u"Name"
 _HEADER_KEYS_MAP[u"description"] = u"Description"
 _HEADER_KEYS_MAP[u"creator_username"] = u"Creator"
+
+logger = get_main_cli_logger()
 
 
 def add_user(sdk, matter_id, username):
@@ -27,20 +30,21 @@ def add_user(sdk, matter_id, username):
             matter_text = u"legal hold matter {}".format(matter_id)
             raise UserAlreadyAddedError(username, matter_text)
         else:
-            get_main_cli_logger().print_and_log_error(error_text)
+            logger.print_and_log_error(error_text)
 
 
 def remove_user(sdk, matter_id, username):
-    user_id = get_user_id(sdk, username)
     try:
-        membership_id = _get_legal_hold_membership_id_for_user_and_matter(sdk, user_id, matter_id)
+        membership_id = _get_legal_hold_membership_id_for_user_and_matter(sdk, username, matter_id)
         sdk.legalhold.remove_from_matter(membership_id)
     except Py42Error as e:
         error_text = e.response.text
-        get_main_cli_logger().print_and_log_error(error_text)
+        logger.print_and_log_error(error_text)
 
 
-def _get_legal_hold_membership_id_for_user_and_matter(sdk, user_id, matter_id):
+def _get_legal_hold_membership_id_for_user_and_matter(sdk, username, matter_id):
+    user_id = get_user_id(sdk, username)
+    matter = _validate_matter_is_accessible(sdk, matter_id)
     memberships_generator = sdk.legalhold.get_all_matter_custodians(
         legal_hold_uid=matter_id, active=True
     )
@@ -48,7 +52,8 @@ def _get_legal_hold_membership_id_for_user_and_matter(sdk, user_id, matter_id):
         for membership in page[u"legalHoldMemberships"]:
             if membership[u"user"][u"userUid"] == user_id:
                 return membership[u"legalHoldMembershipUid"]
-    raise UserNotInHoldError(username, matter_id)
+    matter_id_and_name_text = u"id={}, name={}".format(matter_id, matter[u"name"])
+    raise UserNotInLegalHoldError(username, matter_id_and_name_text)
 
 
 def _get_all_active_matters(sdk):
@@ -85,7 +90,7 @@ def remove_bulk_users(sdk, profile, file_name):
 
 
 def show_matter(sdk, matter_id):
-    matter = sdk.legalhold.get_matter_by_uid(matter_id)
+    matter = _validate_matter_is_accessible(sdk, matter_id)
     policy_uid = matter[u"holdPolicyUid"]
     preservation_policy = sdk.legalhold.get_policy_by_uid(policy_uid)
     members_generator = sdk.legalhold.get_all_matter_custodians(legal_hold_uid=matter_id)
@@ -103,3 +108,20 @@ def show_matter(sdk, matter_id):
     pprint(preservation_policy._data_root)
     print("\nMatter members:\n")
     pprint(members_list)
+
+
+def _validate_matter_is_accessible(sdk, matter_id):
+    try:
+        matter = sdk.legalhold.get_matter_by_uid(matter_id)
+        return matter
+    except (Py42BadRequestError, Py42ForbiddenError):
+        logger.print_and_log_error(
+            "Matter with ID={} either does not exist or your profile does not have permission to view it.".format(
+                matter_id
+            )
+        )
+        exit(1)
+    except Py42Error as e:
+        error_text = e.response.text
+        logger.print_and_log_error(error_text)
+        exit(1)

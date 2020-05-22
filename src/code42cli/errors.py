@@ -53,6 +53,15 @@ class UserDoesNotExistError(Code42CLIError):
         super(UserDoesNotExistError, self).__init__(u"User '{}' does not exist.".format(username))
 
 
+class UserNotInLegalHoldError(Code42CLIError):
+    def __init__(self, username, matter_id):
+        super(UserNotInLegalHoldError, self).__init__(
+            u"User '{}' is not an active member of legal hold matter '{}'".format(
+                username, matter_id
+            )
+        )
+
+
 class DateArgumentError(Code42CLIError):
     def __init__(self, message=_FORMAT_VALUE_ERROR_MESSAGE):
         super(DateArgumentError, self).__init__(message)
