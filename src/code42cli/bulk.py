@@ -96,7 +96,6 @@ class BulkProcessor(object):
             self.__worker.wait()
         self._print_results()
 
-
     def _process_row(self, row):
         if isinstance(row, dict):
             self._process_csv_row(row)

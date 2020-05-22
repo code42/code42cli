@@ -87,7 +87,7 @@ class DetectionListCommandFactory:
     def _load_bulk_remove_description(self, argument_collection):
         users_file = argument_collection.arg_configs[u"users_file"]
         users_file.set_help(
-            u"A file containing a line-separated list of users to remove form the {} detection list".format(
+            u"A file containing a line-separated list of users to remove form the {} detection list.".format(
                 self._name
             )
         )
