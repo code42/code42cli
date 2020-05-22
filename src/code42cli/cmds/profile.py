@@ -3,7 +3,7 @@ from getpass import getpass
 import code42cli.profile as cliprofile
 from code42cli.compat import str
 from code42cli.profile import print_and_log_no_existing_profile
-from code42cli.args import PROFILE_HELP, PROFILE_ARG_NAME
+from code42cli.args import PROFILE_HELP
 from code42cli.commands import Command
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree
@@ -65,7 +65,7 @@ def load_subcommands():
 
     delete = Command(
         u"delete",
-        "Deletes a profile and its stored password (if any).",
+        u"Deletes a profile and its stored password (if any).",
         u"{} {}".format(usage_prefix, u"delete <profile-name>"),
         handler=delete_profile,
     )
@@ -177,6 +177,9 @@ def _load_optional_profile_description(argument_collection):
 def _load_profile_create_descriptions(argument_collection):
     profile = argument_collection.arg_configs[u"name"]
     profile.set_help(PROFILE_HELP)
+    profile.add_short_option_name(u"-n")
+    argument_collection.arg_configs[u"server"].add_short_option_name(u"-s")
+    argument_collection.arg_configs[u"username"].add_short_option_name(u"-u")
     _load_profile_settings_descriptions(argument_collection)
 
 
@@ -194,7 +197,7 @@ def _load_profile_settings_descriptions(argument_collection):
     server.set_help(u"The url and port of the Code42 server.")
     username.set_help(u"The username of the Code42 API user.")
     disable_ssl_errors.set_help(
-        u"For development purposes, do not validate the SSL certificates of Code42 servers."
+        u"For development purposes, do not validate the SSL certificates of Code42 servers. "
         u"This is not recommended unless it is required."
     )
 

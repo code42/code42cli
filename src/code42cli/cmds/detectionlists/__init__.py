@@ -1,10 +1,9 @@
 from py42.exceptions import Py42BadRequestError
 
-from code42cli.compat import str
+from code42cli.bulk import generate_template, run_bulk_process, BulkCommandType
+from code42cli.file_readers import create_csv_reader, create_flat_file_reader
+from code42cli.errors import UserAlreadyAddedError, UserDoesNotExistError, UnknownRiskTagError
 from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory
-from code42cli.bulk import generate_template, run_bulk_process, CSVReader, FlatFileReader
-from code42cli.errors import UserAlreadyAddedError, UnknownRiskTagError, UserDoesNotExistError
-from code42cli.bulk import BulkCommandType
 from code42cli.cmds.detectionlists.enums import DetectionLists, DetectionListUserKeys, RiskTags
 
 
@@ -123,9 +122,8 @@ class DetectionList(object):
             profile (Code42Profile): The profile under which to execute this command.
             csv_file (str or unicode): The path to the csv file containing rows of users.
         """
-        run_bulk_process(
-            csv_file, lambda **kwargs: self._add_employee(sdk, profile, **kwargs), CSVReader()
-        )
+        reader = create_csv_reader(csv_file)
+        run_bulk_process(lambda **kwargs: self._add_employee(sdk, profile, **kwargs), reader)
 
     def bulk_remove_employees(self, sdk, profile, users_file):
         """Takes a flat file with each row containing a username and removes them all from the 
@@ -136,10 +134,9 @@ class DetectionList(object):
             profile (Code42Profile): The profile under which to execute this command.
             users_file (str or unicode): The path to the file containing rows of user names.
         """
+        reader = create_flat_file_reader(users_file)
         run_bulk_process(
-            users_file,
-            lambda *args, **kwargs: self._remove_employee(sdk, profile, *args, **kwargs),
-            FlatFileReader(),
+            lambda *args, **kwargs: self._remove_employee(sdk, profile, *args, **kwargs), reader
         )
 
     def _add_employee(self, sdk, profile, **kwargs):
