@@ -1,5 +1,7 @@
 from collections import OrderedDict
 from io import IOBase
+from time import sleep
+from random import random
 import pytest
 import logging
 
@@ -225,7 +227,7 @@ class TestBulkProcessor(object):
 
     def test_run_updates_progress_bar_once_per_row(self, mock_open, progress_bar):
         def func_for_bulk(*args, **kwargs):
-            pass
+            sleep(random() * 10)
 
         rows = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
         reader = create_mock_reader(rows)
