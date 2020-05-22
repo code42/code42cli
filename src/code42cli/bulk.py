@@ -1,4 +1,5 @@
-import os, inspect, sys
+import os, inspect
+from time import sleep
 
 from code42cli.compat import open, str
 from code42cli.worker import Worker
@@ -91,9 +92,9 @@ class BulkProcessor(object):
         with open(self.file_path, newline=u"", encoding=u"utf8") as bulk_file:
             for row in self._reader(bulk_file=bulk_file):
                 self._process_row(row)
+            sleep(0.01)
             self.__worker.wait()
         self._print_results()
-        sys.stdout.flush()
 
     def _process_row(self, row):
         if isinstance(row, dict):

@@ -232,5 +232,4 @@ class TestBulkProcessor(object):
         reader = create_mock_reader(rows)
         processor = BulkProcessor(func_for_bulk, reader, progress_bar=progress_bar)
         processor.run()
-        sleep(0.1)
         assert progress_bar.update.call_count == len(rows)
