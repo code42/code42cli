@@ -1,3 +1,4 @@
+from code42cli.args import ArgConfig
 from code42cli.commands import Command
 from code42cli.bulk import generate_template, BulkCommandType
 from code42cli.cmds.legal_hold import (
@@ -11,22 +12,40 @@ from code42cli.cmds.legal_hold import (
 
 
 def _customize_add_arguments(argument_collection):
-    rule_id = argument_collection.arg_configs[u"matter_id"]
-    rule_id.set_help(u"ID of the legal hold matter user will be added to. Required.")
+    matter_id = argument_collection.arg_configs[u"matter_id"]
+    matter_id.set_help(u"ID of the legal hold matter user will be added to. Required.")
     username = argument_collection.arg_configs[u"username"]
     username.set_help(u"The username of the user to add to the matter. Required.")
 
 
 def _customize_remove_arguments(argument_collection):
-    rule_id = argument_collection.arg_configs[u"matter_id"]
-    rule_id.set_help(u"ID of the legal hold matter user will be removed from. Required.")
+    matter_id = argument_collection.arg_configs[u"matter_id"]
+    matter_id.set_help(u"ID of the legal hold matter user will be removed from. Required.")
     username = argument_collection.arg_configs[u"username"]
     username.set_help(u"The username of the user to remove from the matter. Required.")
 
 
 def _customize_list_arguments(argument_collection):
-    rule_id = argument_collection.arg_configs[u"matter_id"]
-    rule_id.set_help(u"ID of the legal hold matter.")
+    matter_id = argument_collection.arg_configs[u"matter_id"]
+    matter_id.set_help(u"ID of the legal hold matter.")
+
+
+def _customize_show_arguments(argument_collection):
+    matter_id = argument_collection.arg_configs[u"matter_id"]
+    matter_id.set_help(u"ID of the legal hold matter.")
+    args = {
+        u"include_inactive": ArgConfig(
+            u"--include-inactive",
+            action=u"store_true",
+            help=u"Include list of users who are no longer actively on this matter.",
+        ),
+        u"include_policy": ArgConfig(
+            u"--include-policy",
+            action=u"store_true",
+            help=u"Include the preservation policy (in json format) for this matter.",
+        ),
+    }
+    argument_collection.extend(args)
 
 
 def _customize_bulk_arguments(argument_collection):
@@ -126,7 +145,7 @@ class LegalHoldCommands(object):
             u"Fetch all legal hold custodians for a given matter.",
             u"{} show <matter-id>".format(usage_prefix),
             handler=show_matter,
-            arg_customizer=_customize_list_arguments,
+            arg_customizer=_customize_show_arguments,
         )
 
         bulk = Command(
