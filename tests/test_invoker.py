@@ -170,8 +170,7 @@ class TestCommandInvoker(object):
         with caplog.at_level(logging.ERROR):
             assert u"Did you mean one of the following?" in caplog.text
             assert u"create" in caplog.text
-            assert u"update" in caplog.text
-
+            
     def test_run_incorrect_command_suggests_proper_main_commands(self, caplog):
         command = Command(u"", u"", subcommand_loader=load_real_sub_commands)
         cmd_invoker = CommandInvoker(command)
@@ -185,8 +184,7 @@ class TestCommandInvoker(object):
         command = Command(u"", u"", subcommand_loader=load_real_sub_commands)
         cmd_invoker = CommandInvoker(command)
         with pytest.raises(SystemExit):
-            cmd_invoker.run([u"security-data", u"write-to", u"abc", u"--name"])
+            cmd_invoker.run([u"security-data", u"write-to", u"abc", u"--filename"])
         with caplog.at_level(logging.ERROR):
             assert u"Did you mean one of the following?" in caplog.text
-            assert u"username" in caplog.text
             assert u"file_name" in caplog.text

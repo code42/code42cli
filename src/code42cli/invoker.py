@@ -9,7 +9,7 @@ from code42cli.errors import Code42CLIError
 from code42cli.parser import ArgumentParserError, CommandParser
 from code42cli.logger import get_main_cli_logger
 
-_DIFFLIB_CUT_OFF = 0.4
+_DIFFLIB_CUT_OFF = 0.7
 
 
 class CommandInvoker(object):
@@ -97,10 +97,7 @@ class CommandInvoker(object):
         except ArgumentParserError as err:
             logger = get_main_cli_logger()
             logger.print_and_log_error(u"{}".format(err))
-            if not path_parts:
-                possible_correct_words = self._find_incorrect_word_match(err)
-            else:
-                possible_correct_words = self._find_incorrect_word_match(err, path_parts[0])
+            possible_correct_words = self._find_incorrect_word_match(err, path_parts)
             if possible_correct_words:
                 logger.print_and_log_error(u"Did you mean one of the following?")
                 for possible_correct_word in possible_correct_words:
@@ -124,7 +121,7 @@ class CommandInvoker(object):
         else:
             self._COMMAND_KEYWORDS[command_keys[0]].update(command_keys[1:])
 
-    def _find_incorrect_word_match(self, error, main_command_word=None):
+    def _find_incorrect_word_match(self, error, path_parts):
         possible_correct_words = []
 
         try:
@@ -134,29 +131,17 @@ class CommandInvoker(object):
         except ValueError:
             return possible_correct_words
 
-        if not unmatched_words:
-            return possible_correct_words
-
-        # Check the error to figure out whether the failure is due to incorrect word.
-        if error_detail != u"unrecognized arguments":
+        if not unmatched_words or error_detail != u"unrecognized arguments":
             return possible_correct_words
 
         # Arg-parser sets the first/leftmost incorrect command keyword in the error message.
         unmatched_word = unmatched_words.split()[0]
 
-        # Case when the topmost command keyword is incorrect.
-        if not main_command_word:
-            possible_correct_words = difflib.get_close_matches(
-                unmatched_word, self._COMMAND_KEYWORDS.keys(), cutoff=_DIFFLIB_CUT_OFF
-            )
-        # Case when invalid argument name is passed
+        if not path_parts:
+            available_values = self._COMMAND_KEYWORDS.keys()
         elif unmatched_word.strip().startswith('-'):
-            possible_correct_words = difflib.get_close_matches(
-                unmatched_word, self._COMMAND_ARG_KEYWORDS[main_command_word], cutoff=_DIFFLIB_CUT_OFF
-            )
-        # Case when sub_command keyword is incorrect.
+            available_values = self._COMMAND_ARG_KEYWORDS[path_parts[0]]
         else:
-            possible_correct_words = difflib.get_close_matches(
-                unmatched_word, self._COMMAND_KEYWORDS[main_command_word], cutoff=_DIFFLIB_CUT_OFF
-            )
-        return possible_correct_words
+            available_values = self._COMMAND_KEYWORDS[path_parts[0]]
+
+        return difflib.get_close_matches(unmatched_word, available_values, cutoff=_DIFFLIB_CUT_OFF)
