@@ -16,7 +16,7 @@ def load_subcommands():
 
     print_func = Command(
         u"print",
-        u"Print file events to stdout",
+        u"Print file events to stdout.",
         u"{} {}".format(usage_prefix, u"print <optional-args>"),
         handler=print_out,
         arg_customizer=_load_search_args,
