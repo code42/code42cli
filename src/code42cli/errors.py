@@ -62,6 +62,14 @@ class UserNotInLegalHoldError(Code42CLIError):
         )
 
 
+class LegalHoldNotFoundOrPermissionDeniedError(Code42CLIError):
+    def __init__(self, matter_id):
+        super(LegalHoldNotFoundOrPermissionDeniedError, self).__init__(
+            u"Matter with id={} either does not exist or your profile does not have permission to "
+            u"view it.".format(matter_id)
+        )
+
+
 class DateArgumentError(Code42CLIError):
     def __init__(self, message=_FORMAT_VALUE_ERROR_MESSAGE):
         super(DateArgumentError, self).__init__(message)
