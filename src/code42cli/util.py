@@ -85,12 +85,24 @@ def find_format_width(record, header):
 
 
 def format_to_table(rows, column_size):
-    """Prints result in left justified format in a tabular form.
-    """
+    """Prints result in left justified format in a tabular form."""
     for row in rows:
         for key in row.keys():
             print(str(row[key]).ljust(column_size[key] + _PADDING_SIZE), end=u" ")
         print(u"")
+
+
+def format_string_list_to_columns(string_list, max_width=150):
+    """Prints a list of strings in justified columns and fits them neatly into specified width."""
+    string_list = sorted(string_list, key=lambda x: len(x))
+    largest_item = len(string_list[-1]) + 3
+    num_columns = int(max_width / largest_item)
+    format_string = u"{{:<{0}}}".format(largest_item) * num_columns
+    batches = [string_list[i : i + num_columns] for i in range(0, len(string_list), num_columns)]
+    padding = [u"" for _ in range(num_columns)]
+    for batch in batches:
+        print(format_string.format(*batch + padding))
+    print()
 
 
 def color_text_red(text):
