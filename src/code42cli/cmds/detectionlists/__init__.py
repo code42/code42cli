@@ -1,11 +1,11 @@
 from py42.exceptions import Py42BadRequestError
 
-from code42cli.bulk import generate_template, run_bulk_process, BulkCommandType
+from code42cli.bulk import generate_template, run_bulk_process
 from code42cli.file_readers import create_csv_reader, create_flat_file_reader
 from code42cli.errors import UserAlreadyAddedError, UserDoesNotExistError, UnknownRiskTagError
-from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory
 from code42cli.cmds.detectionlists.enums import DetectionLists, DetectionListUserKeys, RiskTags
 from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory
+from code42cli.cmds.detectionlists.bulk import BulkDetectionList, BulkHighRiskEmployee
 
 
 def try_handle_user_already_added_error(bad_request_err, username_tried_adding, list_name):
@@ -31,6 +31,9 @@ class DetectionListHandlers(object):
         self.add_employee = add
         self.remove_employee = remove
         self.load_add_description = load_add
+
+    def add_handler(self, attr_name, handler):
+        self.__setattr__(attr_name, handler)
 
 
 class DetectionList(object):
@@ -89,35 +92,43 @@ class DetectionList(object):
         return [bulk, add, remove]
 
     def _load_bulk_subcommands(self):
-        generate_template_cmd = self.factory.create_bulk_generate_template_command(
-            self.generate_template_file
-        )
+
         add = self.factory.create_bulk_add_command(self.bulk_add_employees)
         remove = self.factory.create_bulk_remove_command(self.bulk_remove_employees)
-        bulk_add_risk_tags = self.factory.create_bulk_add_risk_tags_command(
-            self.bulk_add_risk_tags
-        )
-        bulk_remove_risk_tags = self.factory.create_bulk_remove_risk_tags_command(
-            self.bulk_remove_risk_tags
-        )
-        return [generate_template_cmd, add, remove, bulk_add_risk_tags, bulk_remove_risk_tags]
+        commands = [add, remove]
+
+        if self.name == DetectionLists.HIGH_RISK_EMPLOYEE:
+            bulk_add_risk_tags = self.factory.create_bulk_add_risk_tags_command(self.bulk_add_risk_tags)
+            bulk_remove_risk_tags = self.factory.create_bulk_remove_risk_tags_command(self.bulk_remove_risk_tags)
+            commands.extend([bulk_add_risk_tags, bulk_remove_risk_tags])
+            self.handlers.add_handler(u"add_risk_tags", add_risk_tags)
+            self.handlers.add_handler(u"remove_risk_tags", remove_risk_tags)
+            generate_template_cmd = self.factory.create_hre_bulk_generate_template_command(
+                self.generate_template_file
+            )
+        else:
+            generate_template_cmd = self.factory.create_bulk_generate_template_command(
+                self.generate_template_file
+            )
+        commands.append(generate_template_cmd)
+        return commands
 
     def generate_template_file(self, cmd, path=None):
         """Generates a template file a user would need to fill-in for bulk operating on the 
         detection list.
-        
+
         Args:
             cmd (str or unicode): An option from the `BulkCommandType` enum specifying which type of file to 
                 generate.
             path (str or unicode, optional): A path to put the file after it's generated. If None, will use 
                 the current working directory. Defaults to None.
         """
-        handler = None
-        if cmd == BulkCommandType.ADD:
-            handler = self.handlers.add_employee
-        elif cmd == BulkCommandType.REMOVE:
-            handler = self.handlers.remove_employee
 
+        if self.name == DetectionLists.HIGH_RISK_EMPLOYEE:
+            detection_list = BulkHighRiskEmployee()
+        else:
+            detection_list = BulkDetectionList()
+        handler = detection_list.get_handler(self.handlers, cmd)
         generate_template(handler, path)
 
     def bulk_add_employees(self, sdk, profile, csv_file):

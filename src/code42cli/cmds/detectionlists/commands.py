@@ -1,5 +1,6 @@
 from code42cli.bulk import BulkCommandType
 from code42cli.commands import Command
+from code42cli.cmds.detectionlists.bulk import BulkRiskTagCommandType
 
 
 def create_usage_prefix(detection_list_name):
@@ -52,6 +53,15 @@ class DetectionListCommandFactory:
             arg_customizer=DetectionListCommandFactory._load_bulk_generate_template_description,
         )
 
+    def create_hre_bulk_generate_template_command(self, handler):
+        return Command(
+            u"generate-template",
+            u"Generate the necessary csv template needed for bulk adding users.",
+            u"{} generate-template <cmd> <optional args>".format(self._bulk_usage_prefix),
+            handler=handler,
+            arg_customizer=DetectionListCommandFactory._load_hre_bulk_generate_template_description,
+        )
+
     def create_bulk_add_command(self, handler):
         return Command(
             BulkCommandType.ADD,
@@ -74,7 +84,7 @@ class DetectionListCommandFactory:
         return Command(
             u"add-risk-tags",
             u"Associates risk tags with a user in bulk.",
-            u"{} {} <file>".format(self._bulk_usage_prefix, u"add-risk-tags"),
+            u"{} {} <file>".format(self._bulk_usage_prefix, BulkRiskTagCommandType.ADD_RISK_TAG),
             handler=handler,
             arg_customizer=self._load_bulk_add_risk_tags_description,
         )
@@ -82,8 +92,8 @@ class DetectionListCommandFactory:
     def create_bulk_remove_risk_tags_command(self, handler):
         return Command(
             u"remove-risk-tags",
-            u"Disassociates risk tags with a user in bulk.",
-            u"{} {} <file>".format(self._bulk_usage_prefix, u"remove-risk-tags"),
+            u"Disassociates risk tags from a user in bulk.",
+            u"{} {} <file>".format(self._bulk_usage_prefix, BulkRiskTagCommandType.REMOVE_RISK_TAG),
             handler=handler,
             arg_customizer=self._load_bulk_remove_risk_tags_description,
         )
@@ -91,8 +101,14 @@ class DetectionListCommandFactory:
     @staticmethod
     def _load_bulk_generate_template_description(argument_collection):
         cmd_type = argument_collection.arg_configs[u"cmd"]
-        cmd_type.set_help(u"The type of command the template with be used for.")
+        cmd_type.set_help(u"The type of command the template will be used for.")
         cmd_type.set_choices(BulkCommandType())
+
+    @staticmethod
+    def _load_hre_bulk_generate_template_description(argument_collection):
+        cmd_type = argument_collection.arg_configs[u"cmd"]
+        cmd_type.set_help(u"The type of command the template will be used for.")
+        cmd_type.set_choices(BulkRiskTagCommandType())
 
     def _load_bulk_add_description(self, argument_collection):
         csv_file = argument_collection.arg_configs[u"csv_file"]
