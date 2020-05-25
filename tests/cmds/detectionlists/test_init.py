@@ -15,6 +15,7 @@ from code42cli.cmds.detectionlists import (
 from code42cli.errors import UserAlreadyAddedError, UnknownRiskTagError, UserDoesNotExistError
 from code42cli.bulk import BulkCommandType
 from code42cli.cmds.detectionlists.enums import RiskTags
+from code42cli.cmds.detectionlists.bulk import HighRiskBulkCommandType
 from .conftest import TEST_ID
 from ...conftest import create_mock_reader
 
@@ -166,6 +167,32 @@ class TestDetectionList(object):
         detection_list.bulk_remove_risk_tags(sdk, profile, "file_test")
         assert bulk_processor.call_args[0][1] == reader
         reader_factory.assert_called_once_with("file_test")
+
+    def test_generate_template_file_when_given_add_risk_tags_generates_template_from_handler(
+        self, bulk_template_generator
+    ):
+        def a_test_func():
+            pass
+
+        handlers = DetectionListHandlers()
+        handlers.add_handler("add_risk_tags", a_test_func)
+        detection_list = DetectionList.create_high_risk_employee_list(handlers)
+        path = "some/path"
+        detection_list.generate_template_file(HighRiskBulkCommandType.ADD_RISK_TAG, path)
+        bulk_template_generator.assert_called_once_with(a_test_func, path)
+
+    def test_generate_template_file_when_given_remove_risk_tags_generates_template_from_handler(
+        self, bulk_template_generator
+    ):
+        def a_test_func():
+            pass
+
+        handlers = DetectionListHandlers()
+        handlers.add_handler("remove_risk_tags", a_test_func)
+        detection_list = DetectionList.create_high_risk_employee_list(handlers)
+        path = "some/path"
+        detection_list.generate_template_file(HighRiskBulkCommandType.REMOVE_RISK_TAG, path)
+        bulk_template_generator.assert_called_once_with(a_test_func, path)
 
 
 def test_add_risk_tags_adds_tags(sdk_with_user, profile):

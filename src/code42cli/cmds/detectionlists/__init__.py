@@ -255,7 +255,7 @@ def _try_handle_bad_risk_tag(tags):
 def handle_list_args(list_arg):
     """Converts str args to a list. Useful for `bulk` commands which don't use `argparse` but
     instead pass in values from files, such as in the form "item1 item2"."""
-    if list_arg and type(list_arg) != list:
+    if list_arg and not isinstance(list_arg, list):
         return list_arg.split()
     return list_arg
 
