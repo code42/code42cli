@@ -49,7 +49,11 @@ code42 profile use MY_SECOND_PROFILE
 ```
 
 When the `--profile` flag is available on other commands, such as those in `security-data`, it will use that profile 
-instead of the default one.
+instead of the default one. For example,
+
+```bash
+code42 security-data print -b 2020-02-02 --profile MY_SECOND_PROFILE
+```
 
 To see all your profiles, do:
 
