@@ -53,8 +53,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - A progress bar that displays during bulk commands.
 
-- Short option `-u` added for `code42 high-risk-employee add`, `remove`, `add-risk-tags` and `remove-risk-tags`.
-- Short option `-u` added for `code42 departing-employee add` and `remove`.
+- Short option `-u` added for `code42 high-risk-employee add-risk-tags` and `remove-risk-tags`.
 
 ### Fixed
 

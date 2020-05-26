@@ -111,7 +111,9 @@ def _load_add_description(argument_collection):
 
 
 def _load_risk_tag_mgmt_descriptions(argument_collection):
-    load_username_description(argument_collection)
+    username = argument_collection.arg_configs[DetectionListUserKeys.USERNAME]
+    username.add_short_option_name(u"-u")
+    username.set_help(u"A code42 username for an employee.")
     _load_risk_tag_description(argument_collection)
 
 
