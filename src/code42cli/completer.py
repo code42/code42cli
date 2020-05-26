@@ -5,8 +5,6 @@ def _get_matches(current, options):
     matches = []
     current = current.strip()
     for opt in options:
-        if current == opt:
-            return _get_matches()
         if opt.startswith(current) and opt != current:
             matches.append(opt)
     return matches
