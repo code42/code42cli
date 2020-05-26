@@ -206,7 +206,7 @@ If that doesn't work, delete your credentials file located at ~/.code42cli or th
 
 ## Tab completion
 
-For `zsh`, add these commands to your RC file:
+For `zsh`, add these commands to your `.zshrc` file:
 
 ```bash
 C42_COMPLETER=$(which code42cli_completer)
@@ -214,7 +214,7 @@ autoload bashcompinit && bashcompinit
 complete -C '$C42_COMPLETER' code42
 ```
 
-For bash, just do the first and last commands:
+For bash, add just the first and last commands to your `.bash_profile`:
 ```bash
 C42_COMPLETER=$(which code42cli_completer)
 complete -C '$C42_COMPLETER' code42
