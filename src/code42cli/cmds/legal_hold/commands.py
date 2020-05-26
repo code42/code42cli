@@ -12,22 +12,39 @@ from code42cli.cmds.legal_hold import (
 
 
 def _customize_add_arguments(argument_collection):
-    matter_id = argument_collection.arg_configs[u"matter_id"]
-    matter_id.set_help(u"ID of the legal hold matter user will be added to. Required.")
-    username = argument_collection.arg_configs[u"username"]
-    username.set_help(u"The username of the user to add to the matter. Required.")
+    args = {
+        u"matter_id": ArgConfig(
+            u"-m",
+            u"--matter-id",
+            help=u"ID of the legal hold matter user will be added to. Required.",
+            required=True,
+        ),
+        u"username": ArgConfig(
+            u"-u",
+            u"--username",
+            help=u"The username of the user to add to the matter. Required.",
+            required=True,
+        ),
+    }
+    argument_collection.extend(args)
 
 
 def _customize_remove_arguments(argument_collection):
-    matter_id = argument_collection.arg_configs[u"matter_id"]
-    matter_id.set_help(u"ID of the legal hold matter user will be removed from. Required.")
-    username = argument_collection.arg_configs[u"username"]
-    username.set_help(u"The username of the user to remove from the matter. Required.")
-
-
-def _customize_list_arguments(argument_collection):
-    matter_id = argument_collection.arg_configs[u"matter_id"]
-    matter_id.set_help(u"ID of the legal hold matter.")
+    args = {
+        u"matter_id": ArgConfig(
+            u"-m",
+            u"--matter-id",
+            help=u"ID of the legal hold matter user will be removed from. Required.",
+            required=True,
+        ),
+        u"username": ArgConfig(
+            u"-u",
+            u"--username",
+            help=u"The username of the user to remove from the matter. Required.",
+            required=True,
+        ),
+    }
+    argument_collection.extend(args)
 
 
 def _customize_show_arguments(argument_collection):
