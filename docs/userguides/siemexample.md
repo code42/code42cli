@@ -94,6 +94,13 @@ Example output for a single exposure event (in default JSON format):
 
 ## CEF Mapping
 
+The following tables map the data from the Code42 CLI to common event format (CEF).
+
+### Attribute mapping
+
+The table below maps JSON fields, CEF fields, and [Forensic Search fields](https://support.code42.com/Administrator/Cloud/Administration_console_reference/Forensic_Search_reference_guide) 
+to one another. 
+
 ```eval_rst
 
 +----------------------------+---------------------------------+----------------------------------------+
@@ -107,7 +114,7 @@ Example output for a single exposure event (in default JSON format):
 +----------------------------+---------------------------------+----------------------------------------+
 | deviceUid                  | deviceExternalId                | n/a                                    |
 +----------------------------+---------------------------------+----------------------------------------+
-| deviceUserName             |	suser                          | Username (Code42)                      |
+| deviceUserName             | suser                           | Username (Code42)                      |
 +----------------------------+---------------------------------+----------------------------------------+
 | domainName                 | dvchost                         | Fully Qualified Domain Name            |
 +----------------------------+---------------------------------+----------------------------------------+
@@ -135,5 +142,60 @@ Example output for a single exposure event (in default JSON format):
 +----------------------------+---------------------------------+----------------------------------------+
 | processName                | sproc                           | Executable Name (Browser or Other App) |
 +----------------------------+---------------------------------+----------------------------------------+
+| processOwner               | spriv                           | Process User (Browser or Other App)    |
++----------------------------+---------------------------------+----------------------------------------+
+| publiclpAddress            | src                             | IP Address (public)                    |
++----------------------------+---------------------------------+----------------------------------------+
+| removableMediaBusType      | cs1,                            | Device Bus Type (Removable Media)      |
+|                            | Code42AEDRemovableMediaBusType  |                                        |
++----------------------------+---------------------------------+----------------------------------------+
+| removableMediaCapacity     | cn1,                            | Device Capacity (Removable Media)      |
+|                            | Code42AEDRemovableMediaCapacity |                                        |
++----------------------------+---------------------------------+----------------------------------------+
+| removableMediaName         | cs3,                            | Device Media Name (Removable Media)    |
+|                            | Code42AEDRemovableMediaName     |                                        |
++----------------------------+---------------------------------+----------------------------------------+
+| removableMediaSerialNumber | cs4                             | Device Serial Number (Removable Media) |
++----------------------------+---------------------------------+----------------------------------------+
+| removableMediaVendor       | cs2,                            | Device Vendor (Removable Media)        |
+|                            | Code42AEDRemovableMediaVendor   |                                        |
++----------------------------+---------------------------------+----------------------------------------+
+| sharedWith                 | duser                           | Shared With                            |
++----------------------------+---------------------------------+----------------------------------------+
+| syncDestination            | destinationServiceName          | Sync Destination (Cloud)               |
++----------------------------+---------------------------------+----------------------------------------+
+| url                        | filePath                        | URL                                    |
++----------------------------+---------------------------------+----------------------------------------+
+| userUid                    | suid                            | n/a                                    |
++----------------------------+---------------------------------+----------------------------------------+
+| windowTitle                | requestClientApplication        | Tab/Window Title                       |
++----------------------------+---------------------------------+----------------------------------------+
+| tabUrl                     | request                         | Tab URL                                |
++----------------------------+---------------------------------+----------------------------------------+
+| emailSender                | suser                           | Sender                                 |
++----------------------------+---------------------------------+----------------------------------------+
+| emailRecipients            | duser                           | Recipients                             |
++----------------------------+---------------------------------+----------------------------------------+
+```
+
+### Event mapping
+
+See the table below to map exfiltration events to CEF signature IDs. 
+
+```eval_rst
+
++--------------------+-----------+
+| Exfiltration event | CEF field |
++====================+===========+
+| CREATED            | C42200    |
++--------------------+-----------+
+| MODIFIED           | C42201    |
++--------------------+-----------+
+| DELETED            | C42202    |
++--------------------+-----------+
+| READ_BY_APP        | C42203    |
++--------------------+-----------+
+| EMAILED            | C42204    |
++--------------------+-----------+
 ```
 
