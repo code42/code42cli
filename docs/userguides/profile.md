@@ -16,13 +16,6 @@ Your password is not shown when you do `code42 profile show`.
 However, `code42 profile show` will confirm that a password exists for your profile.
 If you do not set a password, you will be securely prompted to enter a password each time you run a command.
 
-For development purposes, you may need to ignore ssl errors. If you need to do this, use the `--disable-ssl-errors` 
-option when creating your profile:
-
-```bash
-code42 profile create MY_FIRST_PROFILE https://example.authority.com security.admin@example.com --disable-ssl-errors
-```
-
 You can add multiple profiles with different names and the change the default profile with the `use` command:
 
 ```bash

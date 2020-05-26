@@ -15,7 +15,6 @@ A Code42 Diamond or Platinum product plan
 Endpoint monitoring enabled in the Code42 console 
 Python version 2.7.x, or 3.5 and later installed
 
-
 ## Content
 
 * [User Guides](guides.md)
