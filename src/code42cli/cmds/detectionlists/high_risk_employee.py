@@ -3,12 +3,12 @@ from code42cli.cmds.detectionlists import (
     DetectionListHandlers,
     load_user_descriptions,
     load_username_description,
-    get_user_id,
     update_user,
     try_handle_user_already_added_error,
     try_add_risk_tags,
     try_remove_risk_tags,
 )
+from code42cli.util import get_user_id
 from code42cli.cmds.detectionlists.enums import DetectionLists, DetectionListUserKeys, RiskTags
 from code42cli.commands import Command
 

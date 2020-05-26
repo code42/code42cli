@@ -6,11 +6,11 @@ from code42cli.cmds.detectionlists import (
     try_handle_user_already_added_error,
     DetectionList,
     DetectionListHandlers,
-    get_user_id,
     update_user,
     try_add_risk_tags,
     try_remove_risk_tags,
 )
+from code42cli.util import get_user_id
 from code42cli.errors import UserAlreadyAddedError, UnknownRiskTagError, UserDoesNotExistError
 from code42cli.bulk import BulkCommandType
 from code42cli.cmds.detectionlists.enums import RiskTags
@@ -32,14 +32,14 @@ def bulk_processor(mocker):
 
 
 def test_try_handle_user_already_added_error_when_error_indicates_user_added_raises_UserAlreadyAddedError(
-    bad_request_for_user_already_added
+    bad_request_for_user_already_added,
 ):
     with pytest.raises(UserAlreadyAddedError):
         try_handle_user_already_added_error(bad_request_for_user_already_added, "name", "listname")
 
 
 def test_try_handle_user_already_added_error_when_error_does_not_indicate_user_added_returns_false(
-    generic_bad_request
+    generic_bad_request,
 ):
     assert not try_handle_user_already_added_error(generic_bad_request, "name", "listname")
 

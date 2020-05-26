@@ -6,6 +6,7 @@ from os import makedirs, path
 from signal import signal, getsignal, SIGINT
 
 from code42cli.compat import open, str
+from code42cli.errors import UserDoesNotExistError
 
 _PADDING_SIZE = 3
 
@@ -154,3 +155,20 @@ class warn_interrupt(object):
                 return func(*args, **kwargs)
 
         return inner
+
+
+def get_user_id(sdk, username):
+    """Returns the user's UID (referred to by `user_id` in detection lists). If the user does not 
+    exist, it prints an error and exits.
+    
+    Args:
+        sdk (py42.sdk.SDKClient): The py42 sdk.
+        username (str or unicode): The username of the user to get an ID for.
+    
+    Returns:
+         str: The user ID for the user with the given username.
+    """
+    users = sdk.users.get_by_username(username)[u"users"]
+    if not users:
+        raise UserDoesNotExistError(username)
+    return users[0][u"userUid"]

@@ -15,12 +15,11 @@ from code42cli.util import (
     find_format_width,
     format_string_list_to_columns,
     _PADDING_SIZE,
+    get_user_id,
 )
 from code42cli.bulk import run_bulk_process
 from code42cli.file_readers import create_csv_reader
 from code42cli.logger import get_main_cli_logger
-from code42cli.cmds.detectionlists import get_user_id
-
 
 _MATTER_KEYS_MAP = OrderedDict()
 _MATTER_KEYS_MAP[u"legalHoldUid"] = u"Matter ID"
