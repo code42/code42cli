@@ -1,4 +1,5 @@
 from code42cli.completer import Completer
+from code42cli.main import MainSubcommandLoader
 
 
 class TestCompleter(object):
@@ -56,3 +57,9 @@ class TestCompleter(object):
     def test_complete_for_alert_rules_bulk_gen_template(self):
         actual = self._completer.complete("code42 alert-rules bulk gen")
         assert "generate-template" in actual
+
+    def test_complete_when_error_occurs_returns_empty_list(self, mocker):
+        loader = mocker.MagicMock(spec=MainSubcommandLoader)
+        completer = Completer(loader)
+        actual = completer.complete("code42 dep")
+        assert not actual
