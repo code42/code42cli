@@ -40,7 +40,9 @@ Arguments:
 * search args (note that begin date is often required).
 
 Usage:
-`code42 alerts print -b <begin-date> <args>`
+```bash
+code42 alerts print -b <begin-date> <args>
+```
 
 ## write-to
 

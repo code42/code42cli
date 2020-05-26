@@ -37,7 +37,9 @@ Arguments:
 * search args (note that begin date is often required).
 
 Usage:
-`code42 security-data print -b <begin-date> <args>`
+```bash
+code42 security-data print -b <begin-date> <args>
+```
 
 ## write-to
 
