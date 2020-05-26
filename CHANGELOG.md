@@ -22,9 +22,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - `code42 high-risk-employee bulk` supports `add-risk-tags` and `remove-risk-tags`.
     - `code42 high-risk-employee bulk` with subcommands:
-        - `generate-template` that creates the file template. And parameters:
+        - `generate-template`
             - `cmd`: with options `add-risk-tags` and `remove-risk-tags`.
-            - `path`
         - `add-risk-tags` that takes a csv file with username and space separated risk tags
         - `remove-risk-tags` that takes a csv file with username and space separated risk tags
 

@@ -130,7 +130,7 @@ class DetectionListCommandFactory:
         csv_file = argument_collection.arg_configs[u"csv_file"]
         csv_file.set_help(
             u"A file containing a ',' separated username with space-separated tags to add "
-            u"to the {} detection list."
+            u"to the {} detection list. "
             u"e.g. test@email.com,tag1 tag2 tag3".format(
                 self._name
             )
