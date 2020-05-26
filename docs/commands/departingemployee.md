@@ -26,7 +26,7 @@ code42 departing-employee remove <username>
 
 ### bulk generate-template
 
-Generate the necessary csv template needed for bulk adding users. Arguments:
+Generate the necessary csv template needed for bulk actions. Arguments:
 * `cmd`: The type of command the template with be used for. Available choices= [add, remove].
 
 Usage:

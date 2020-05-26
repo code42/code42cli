@@ -24,7 +24,16 @@ class ArgumentParserError(Exception):
 class CommandParser(argparse.ArgumentParser):
     def __init__(self, **kwargs):
         # noinspection PyTypeChecker
-        super(CommandParser, self).__init__(formatter_class=RawDescriptionHelpFormatter, **kwargs)
+        super(CommandParser, self).__init__(
+            formatter_class=RawDescriptionHelpFormatter, add_help=False, **kwargs
+        )
+        self.add_argument(
+            "-h",
+            "--help",
+            action="help",
+            default=argparse.SUPPRESS,
+            help="Show this help message and exit.",
+        )
 
     def prepare_command(self, command, path_parts):
         parser = self._get_parser(command, path_parts)

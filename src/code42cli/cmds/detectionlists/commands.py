@@ -46,7 +46,7 @@ class DetectionListCommandFactory:
     def create_bulk_generate_template_command(self, handler):
         return Command(
             u"generate-template",
-            u"Generate the necessary csv template needed for bulk adding users.",
+            u"Generate the necessary csv template needed for bulk actions.",
             u"{} generate-template <cmd> <optional args>".format(self._bulk_usage_prefix),
             handler=handler,
             arg_customizer=DetectionListCommandFactory._load_bulk_generate_template_description,
@@ -87,7 +87,7 @@ class DetectionListCommandFactory:
     def _load_bulk_remove_description(self, argument_collection):
         users_file = argument_collection.arg_configs[u"users_file"]
         users_file.set_help(
-            u"A file containing a line-separated list of users to remove form the {} detection list".format(
+            u"A file containing a line-separated list of users to remove form the {} detection list.".format(
                 self._name
             )
         )

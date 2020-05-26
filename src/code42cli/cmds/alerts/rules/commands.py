@@ -12,15 +12,17 @@ from code42cli.cmds.alerts.rules.user_rule import (
 
 def _customize_add_arguments(argument_collection):
     rule_id = argument_collection.arg_configs[u"rule_id"]
-    rule_id.set_help(u"Observer ID of the rule to be updated. Required.")
+    rule_id.set_help(u"Observer ID of the rule to be updated.")
     username = argument_collection.arg_configs[u"username"]
-    username.set_help(u"The username of the user to add to the alert rule. Required.")
+    username.add_short_option_name("-u")
+    username.set_help(u"The username of the user to add to the alert rule.")
 
 
 def _customize_remove_arguments(argument_collection):
     rule_id = argument_collection.arg_configs[u"rule_id"]
     rule_id.set_help(u"Observer ID of the rule to be updated.")
     username = argument_collection.arg_configs[u"username"]
+    username.add_short_option_name("-u")
     username.set_help(u"The username of the user to remove from the alert rule.")
 
 
@@ -29,11 +31,19 @@ def _customize_list_arguments(argument_collection):
     rule_id.set_help(u"Observer ID of the rule.")
 
 
-def _customize_bulk_arguments(argument_collection):
+def _customize_bulk_add_arguments(argument_collection):
+    _customize_bulk_arguments(argument_collection, u"adding")
+
+
+def _customize_bulk_remove_arguments(argument_collection):
+    _customize_bulk_arguments(argument_collection, u"removing")
+
+
+def _customize_bulk_arguments(argument_collection, action):
     file_name = argument_collection.arg_configs[u"file_name"]
     file_name.set_help(
         u"The path to the csv file with columns 'rule_id,username' "
-        u"for bulk adding users to the alert rule."
+        u"for bulk {} users to the alert rule.".format(action)
     )
 
 
@@ -68,7 +78,7 @@ class AlertRulesBulkCommands(object):
 
         generate_template_cmd = Command(
             u"generate-template",
-            u"Generate the necessary csv template needed for bulk adding users.",
+            u"Generate the necessary csv template needed for bulk actions.",
             u"{} generate-template <cmd> <optional args>".format(usage_prefix),
             handler=_generate_template_file,
             arg_customizer=_load_bulk_generate_template_description,
@@ -77,19 +87,19 @@ class AlertRulesBulkCommands(object):
         bulk_add = Command(
             u"add",
             u"Update alert rule criteria to add users and all their aliases. "
-            u"CSV file format: rule_id,username",
+            u"CSV file format: `rule_id,username`.",
             u"{} add <filename>".format(usage_prefix),
             handler=add_bulk_users,
-            arg_customizer=_customize_bulk_arguments,
+            arg_customizer=_customize_bulk_add_arguments,
         )
 
         bulk_remove = Command(
             u"remove",
             u"Update alert rule criteria to remove users and all their aliases. "
-            u"CSV file format: rule_id,username",
+            u"CSV file format: `rule_id,username`.",
             u"{} remove <filename>".format(usage_prefix),
             handler=remove_bulk_users,
-            arg_customizer=_customize_bulk_arguments,
+            arg_customizer=_customize_bulk_remove_arguments,
         )
 
         return [generate_template_cmd, bulk_add, bulk_remove]
