@@ -86,7 +86,7 @@ class AlertRulesBulkCommands(object):
 
         bulk_add = Command(
             u"add",
-            u"Update alert rule criteria to add users. "
+            u"Add users to alert rules."
             u"CSV file format: `rule_id,username`.",
             u"{} add <filename>".format(usage_prefix),
             handler=add_bulk_users,
@@ -95,7 +95,7 @@ class AlertRulesBulkCommands(object):
 
         bulk_remove = Command(
             u"remove",
-            u"Update alert rule criteria to remove users. "
+            u"Remove users from alert rules."
             u"CSV file format: `rule_id,username`.",
             u"{} remove <filename>".format(usage_prefix),
             handler=remove_bulk_users,
@@ -112,7 +112,7 @@ class AlertRulesCommands(object):
 
         add = Command(
             u"add-user",
-            u"Update alert rule criteria to monitor users against the given username.",
+            u"Add a user to an alert rule.",
             u"{} add-user --rule-id <id>  --username <username>".format(usage_prefix),
             handler=add_user,
             arg_customizer=_customize_add_arguments,
@@ -120,7 +120,7 @@ class AlertRulesCommands(object):
 
         remove = Command(
             u"remove-user",
-            u"Update alert rule criteria to remove a user.",
+            u"Remove a user from an alert rule.",
             u"{} remove-user --rule-id <rule-id> --username <username>".format(usage_prefix),
             handler=remove_user,
             arg_customizer=_customize_remove_arguments,
@@ -135,7 +135,7 @@ class AlertRulesCommands(object):
 
         show = Command(
             u"show",
-            u"Fetch configured alert-rules against the rule ID.",
+            u"Print out detailed alert rule criteria.",
             u"{} show <rule-id>".format(usage_prefix),
             handler=show_rule,
             arg_customizer=_customize_list_arguments,
