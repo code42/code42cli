@@ -29,15 +29,15 @@ Search args are shared between `print`, `write-to`, and `send-to` commands.
 * `-i`, `--incremental` (optional): Only get file events that were not previously retrieved.
 
 
-### Search - print
+### print
 
 Print file events to stdout. Arguments:
 * search args (note that begin date is often required).
 
 Usage:
-`code42 security-data print -b <begin-date> <search-args>`
+`code42 security-data print -b <begin-date> <args>`
 
-### Search - write-to
+### write-to
 
 Write file events to the file with the given name. Arguments:
 * `output_file`: The name of the local file to send output to.
@@ -45,10 +45,10 @@ Write file events to the file with the given name. Arguments:
 
 Usage:
 ```bash
-code42 security-data write-to -b 2020-03-01 <search-args>
+code42 security-data write-to -b 2020-03-01 <args>
 ```
 
-### Search - send-to
+### send-to
 
 Send file events to the given server address. Arguments:
 * `server`: The server address to send output to.
@@ -57,7 +57,7 @@ Send file events to the given server address. Arguments:
 
 Usage:
 ```bash
-code42 security-data send-to <server> <optional-args> <search-args>
+code42 security-data send-to <server> <optional-server-args> <args>
 ```
 
 ### clear-checkpoint
