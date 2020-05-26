@@ -206,31 +206,16 @@ If that doesn't work, delete your credentials file located at ~/.code42cli or th
 
 ## Tab completion
 
-To enable tab completion, first locate the path to the completer:
+For `zsh`, add these commands to your RC file:
+
 ```bash
-which code42cli_completer
+C42_COMPLETER=$(which code42cli_completer)
+autoload bashcompinit && bashcompinit
+complete -C '$C42_COMPLETER' code42
 ```
 
-Next, call the bash `complete` command:
+For bash, just do the first and last commands:
 ```bash
-complete -C '<path/to/completer' code42
-```
-
-### zsh
-For `zsh`, before doing the above commands, do these first:
-
-Activate the `compdef` function:
-```bash
-autoload -Uz compinit
-compinit
-```
-
-Get the path to `zsh` completer script:
-```bash
-which code42cli_zsh_completer.sh
-```
-
-Source the `zsh` completer script:
-```bash
-source path/to/code42cli_zsh_completer.sh
+C42_COMPLETER=$(which code42cli_completer)
+complete -C '$C42_COMPLETER' code42
 ```

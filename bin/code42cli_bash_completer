@@ -1,8 +1,0 @@
-# file inspired from awscli https://github.com/aws/aws-cli/blob/develop/bin/aws_bash_completer
-
-# Typically that would be added under one of the following paths:
-# - /etc/bash_completion.d
-# - /usr/local/etc/bash_completion.d
-# - /usr/share/bash-completion/completions
-
-complete -C code42cli_completer code42
