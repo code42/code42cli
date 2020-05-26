@@ -5,11 +5,9 @@
 Print the details of a profile.
 
 Arguments:
-
 * `--name`, `-n` (optional): The name of the Code42 profile to use when executing this command.
 
 Usage:
-
 ```bash
 code42 profile show <optional-arguments>
 ```
@@ -19,7 +17,6 @@ code42 profile show <optional-arguments>
 Show all existing stored profiles.
 
 Usage:
-
 ```bash
 code42 profile list
 ```
@@ -29,11 +26,9 @@ code42 profile list
 Set a profile as the default.
 
 Arguments:
-
 * `name`: The name of the profile to set as active.
 
 Usage:
-
 ```bash
 code42 profile use <profile-name>
 ```
