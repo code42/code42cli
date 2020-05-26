@@ -57,6 +57,18 @@ class TestCompleter(object):
     def test_complete_for_alert_rules_bulk_gen_template(self):
         actual = self._completer.complete("code42 alert-rules bulk gen")
         assert "generate-template" in actual
+        
+    def test_complete_when_arg_is_complete_returns_next_options(self):
+        actual = self._completer.complete("code42 departing-employee bulk")
+        assert "generate-template" in actual
+        assert "add" in actual
+        assert "remove" in actual
+    
+    def test_complete_when_arg_is_complete_and_ends_in_space_returns_next_options(self):
+        actual = self._completer.complete("code42 departing-employee bulk ")
+        assert "generate-template" in actual
+        assert "add" in actual
+        assert "remove" in actual
 
     def test_complete_when_error_occurs_returns_empty_list(self, mocker):
         loader = mocker.MagicMock(spec=MainSubcommandLoader)
