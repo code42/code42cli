@@ -7,6 +7,7 @@ Update alert rule criteria to monitor user aliases against the given username. A
 * `--username`, `-u` The username of the user to add to the alert rule.
 
 Usage:
+
 ```bash
 code42 alert-rules add-user --rule-id <rule-id> --username <username>
 ```
@@ -15,9 +16,10 @@ code42 alert-rules add-user --rule-id <rule-id> --username <username>
 
 Update alert rule criteria to remove a user and all their aliases. Arguments:
 * `--rule-id`: Observer ID of the rule to be updated.
-* `--username`, `-u` The username of the user to remove from the alert rule.
+* `--username`, `-u`: The username of the user to remove from the alert rule.
 
 Usage:
+
 ```bash
 code42 alert-rules remove-user --rule-id <rule-id> --username <username>
 ```
@@ -27,6 +29,7 @@ code42 alert-rules remove-user --rule-id <rule-id> --username <username>
 Fetch existing alert rules. This command has no arguments.
 
 Usage:
+
 ```bash
 code42 alert-rules list
 ```
@@ -37,6 +40,7 @@ Fetch configured alert-rules against the rule ID. Arguments:
 * `rule-id`: Observer ID of the rule.
 
 Usage:
+
 ```bash
 code42 alert-rules show <rule-id>
 ```
@@ -47,6 +51,7 @@ Generate the necessary csv template needed for bulk actions. Arguments:
 * `cmd`: The type of command the template with be used for. Available choices= [add, remove].
 
 Usage:
+
 ```bash
 code42 alert-rules bulk generate-template <cmd>
 ```
@@ -57,6 +62,7 @@ Update alert rule criteria to add users and all their aliases. CSV file format: 
 * `file-name`: The path to the csv file with columns 'rule_id,username'for bulk adding users to the alert rule.
 
 Usage:
+
 ```bash
 code42 alert-rules bulk add <filename>
 ```
@@ -67,6 +73,7 @@ Update alert rule criteria to remove users and all their aliases. CSV file forma
 * `file-name`: The path to the csv file with columns 'rule_id,username' for bulk removing users to the alert rule.
 
 Usage:
+
 ```bash
 code42 alert-rules bulk remove <filename>
 ```

@@ -38,6 +38,7 @@ Print file events to stdout. Arguments:
 * search args (note that begin date is often required).
 
 Usage:
+
 `code42 alerts print -b <begin-date> <args>`
 
 ### write-to
@@ -47,6 +48,7 @@ Write file events to the file with the given name. Arguments:
 * search args (note that begin date is often required).
 
 Usage:
+
 ```bash
 code42 alerts write-to -b 2020-03-01 <rgs>
 ```
@@ -59,6 +61,7 @@ Send file events to the given server address. Arguments:
 * search args (note that begin date is often required).
 
 Usage:
+
 ```bash
 code42 alerts send-to <server> <optional-args> <args>
 ```
@@ -66,6 +69,8 @@ code42 alerts send-to <server> <optional-args> <args>
 ### clear-checkpoint
 
 Remove the saved file event checkpoint from 'incremental' (-i) mode. This command takes no arguments.
+
+Usage:
 
 ```bash
 code42 alerts clear-checkpoint

@@ -149,6 +149,7 @@ class DetectionList(object):
 def load_username_description(argument_collection):
     """Loads the arg descriptions for the `username` CLI parameter."""
     username = argument_collection.arg_configs[DetectionListUserKeys.USERNAME]
+    username.add_short_option_name(u"-u")
     username.set_help(u"A code42 username for an employee.")
 
 

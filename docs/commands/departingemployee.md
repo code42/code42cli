@@ -9,6 +9,7 @@ Add a user to the departing-employee detection list. Arguments:
 * `--notes` (optional): Notes about the employee.
 
 Usage:
+
 ```bash
 code42 departing-employee add <username> <optional-args>
 ```
@@ -20,6 +21,7 @@ Remove a user from the departing-employee detection list. Arguments:
 * `username`: A code42 username for an employee.
 
 Usage:
+
 ```bash
 code42 departing-employee remove <username>
 ```
@@ -30,6 +32,7 @@ Generate the necessary csv template needed for bulk actions. Arguments:
 * `cmd`: The type of command the template with be used for. Available choices= [add, remove].
 
 Usage:
+
 ```bash
 code42 departing-employee bulk generate-template <cmd>
 ```
@@ -40,6 +43,7 @@ Bulk add users to the departing-employee detection list using a csv file. Argume
 * `csv-file`: The path to the csv file for bulk adding users to the departing-employee detection list.
 
 Usage:
+
 ```bash
 code42 departing-employee bulk add <csv-file>
 ```
@@ -51,6 +55,7 @@ Bulk remove users from the departing-employee detection list using a file. Argum
     list.
 
 Usage:
+
 ```bash
 code42 departing-employee bulk remove <users-file>
 ```

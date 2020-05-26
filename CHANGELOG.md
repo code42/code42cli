@@ -53,6 +53,9 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - A progress bar that displays during bulk commands.
 
+- Short option `-u` added for `code42 high-risk-employee add`, `remove`, `add-risk-tags` and `remove-risk-tags`.
+- Short option `-u` added for `code42 departing-employee add` and `remove`.
+
 ### Fixed
 
 - Fixed bug in bulk commands where value-less fields in csv files were treated as empty strings instead of None.
