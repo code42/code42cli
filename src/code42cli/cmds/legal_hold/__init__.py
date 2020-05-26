@@ -14,7 +14,6 @@ from code42cli.util import (
     format_to_table,
     find_format_width,
     format_string_list_to_columns,
-    _PADDING_SIZE,
     get_user_id,
 )
 from code42cli.bulk import run_bulk_process
