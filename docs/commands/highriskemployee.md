@@ -61,7 +61,7 @@ code42 high-risk-employee remove-risk-tags --username <username> --tag <risk-tag
 
 ## bulk generate-template
 
-Generate the necessary csv template needed for bulk actions.
+Generate the necessary csv template for bulk actions.
 
 Arguments:
 * `cmd`: The type of command the template with be used for. Available choices= [add, remove].

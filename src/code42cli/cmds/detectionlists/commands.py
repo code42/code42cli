@@ -46,7 +46,7 @@ class DetectionListCommandFactory:
     def create_bulk_generate_template_command(self, handler):
         return Command(
             u"generate-template",
-            u"Generate the necessary csv template needed for bulk actions.",
+            u"Generate the necessary csv template for bulk actions.",
             u"{} generate-template <cmd> <optional args>".format(self._bulk_usage_prefix),
             handler=handler,
             arg_customizer=DetectionListCommandFactory._load_bulk_generate_template_description,

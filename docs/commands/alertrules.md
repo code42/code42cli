@@ -49,7 +49,7 @@ code42 alert-rules show <rule-id>
 
 ## bulk generate-template
 
-Generate the necessary csv template needed for bulk actions.
+Generate the necessary csv template for bulk actions.
 
 Arguments:
 * `cmd`: The type of command the template with be used for. Available choices= [add, remove].
