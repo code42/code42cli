@@ -1,7 +1,7 @@
 # Code42 console command-line interface reference
 
-[![license](https://img.shields.io/pypi/l/py42.svg)](https://pypi.org/project/py42/)
-[![versions](https://img.shields.io/pypi/pyversions/py42.svg)](https://pypi.org/project/py42/)
+[![license](https://img.shields.io/pypi/l/code42cli.svg)](https://pypi.org/project/py42/)
+[![versions](https://img.shields.io/pypi/pyversions/code42cli.svg)](https://pypi.org/project/py42/)
 
 The Code42 command-line interface (CLI) tool offers a way to interact with your Code42 environment without using the 
 Code42 console or making API calls directly. For example, you can use it to extract Code42 data for use in a security 
