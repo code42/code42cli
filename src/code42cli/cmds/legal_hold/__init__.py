@@ -1,6 +1,8 @@
 from collections import OrderedDict
 from pprint import pprint
+
 from py42.exceptions import Py42HTTPError, Py42ForbiddenError, Py42BadRequestError
+from code42cli.util import cache_results
 
 
 from code42cli.errors import (
@@ -134,6 +136,7 @@ def _get_all_active_matters(sdk):
     return matters
 
 
+@cache_results()
 def _check_matter_is_accessible(sdk, matter_id):
     try:
         matter = sdk.legalhold.get_matter_by_uid(matter_id)
