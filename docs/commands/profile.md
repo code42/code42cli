@@ -61,7 +61,6 @@ Usage:
 code42 profile create --name <profile-name> --server <server> --username <username> <optional-args>
 ```
 
-
 ## update
 
 Update an existing profile. 
@@ -89,7 +88,6 @@ Usage:
 ```bash
 code42 profile delete <profile-name>
 ```
-
 
 ## delete-all
 
