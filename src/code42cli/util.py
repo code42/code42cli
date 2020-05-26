@@ -1,5 +1,7 @@
 from __future__ import print_function
 import sys
+import os
+
 from collections import OrderedDict
 from functools import wraps
 from os import makedirs, path
@@ -93,14 +95,15 @@ def format_to_table(rows, column_size):
         print(u"")
 
 
-def format_string_list_to_columns(string_list, max_width=150):
+def format_string_list_to_columns(string_list, max_width=None):
     """Prints a list of strings in justified columns and fits them neatly into specified width."""
     if not string_list:
         return
-    string_list = sorted(string_list, key=lambda x: len(x))
-    largest_item = len(string_list[-1]) + _PADDING_SIZE
-    num_columns = int(max_width / largest_item)
-    format_string = u"{{:<{0}}}".format(largest_item) * num_columns
+    if not max_width:
+        max_width, _ = os.get_terminal_size()
+    column_width = len(max(string_list, key=len)) + _PADDING_SIZE
+    num_columns = int(max_width / column_width)
+    format_string = u"{{:<{0}}}".format(column_width) * num_columns
     batches = [string_list[i : i + num_columns] for i in range(0, len(string_list), num_columns)]
     padding = [u"" for _ in range(num_columns)]
     for batch in batches:
