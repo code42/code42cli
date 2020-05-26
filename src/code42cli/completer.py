@@ -22,14 +22,15 @@ class Completer(object):
             if len(args) < 2:
                 return []  # `code42` already completes w/o
     
+            cmd_loader = self._main_cmd_loader
             if len(args) > 2:
                 for arg in args[1:-1]:
-                    cmd_loader = self._main_cmd_loader.subtrees[arg]
+                    cmd_loader = cmd_loader.subtrees[arg]
     
-            if not self._main_cmd_loader:
+            if not cmd_loader:
                 return []
     
-            options = self._main_cmd_loader.names
+            options = cmd_loader.names
             current = args[-1]
             return _get_matches(current, options) if options else []
         except:
