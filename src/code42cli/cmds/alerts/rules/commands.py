@@ -67,7 +67,7 @@ def _generate_template_file(cmd, path=None):
 
 def _load_bulk_generate_template_description(argument_collection):
     cmd_type = argument_collection.arg_configs[u"cmd"]
-    cmd_type.set_help(u"The type of command the template with be used for.")
+    cmd_type.set_help(u"The type of command the template will be used for.")
     cmd_type.set_choices(BulkCommandType())
 
 

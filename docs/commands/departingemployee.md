@@ -32,7 +32,7 @@ code42 departing-employee remove <username>
 Generate the necessary csv template for bulk actions.
 
 Arguments:
-* `cmd`: The type of command the template with be used for. Available choices= [add, remove].
+* `cmd`: The type of command the template will be used for. Available choices= [add, remove].
 
 Usage:
 ```bash
