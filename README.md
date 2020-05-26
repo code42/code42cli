@@ -25,7 +25,7 @@ $ python setup.py install
 
 First, create your profile:
 ```bash
-code42 profile create MY_FIRST_PROFILE https://example.authority.com security.admin@example.com
+code42 profile create --name MY_FIRST_PROFILE --server example.authority.com --username security.admin@example.com
 ```
 
 Your profile contains the necessary properties for logging into Code42 servers.
@@ -36,10 +36,11 @@ Your password is not shown when you do `code42 profile show`.
 However, `code42 profile show` will confirm that a password exists for your profile.
 If you do not set a password, you will be securely prompted to enter a password each time you run a command.
 
-For development purposes, you may need to ignore ssl errors. If you need to do this, use the `--disable-ssl-errors` option when creating your profile:
+For development purposes, you may need to ignore ssl errors. If you need to do this, use the `--disable-ssl-errors` 
+option when creating your profile:
 
 ```bash
-code42 profile create MY_FIRST_PROFILE https://example.authority.com security.admin@example.com --disable-ssl-errors
+code42 profile create -n MY_FIRST_PROFILE -s https://example.authority.com -u security.admin@example.com --disable-ssl-errors
 ```
 
 You can add multiple profiles with different names and the change the default profile with the `use` command:
@@ -48,7 +49,8 @@ You can add multiple profiles with different names and the change the default pr
 code42 profile use MY_SECOND_PROFILE
 ```
 
-When the `--profile` flag is available on other commands, such as those in `security-data`, it will use that profile instead of the default one.
+When the `--profile` flag is available on other commands, such as those in `security-data`, it will use that profile 
+instead of the default one.
 
 To see all your profiles, do:
 
@@ -64,7 +66,8 @@ Using the CLI, you can query for security events and alerts and send them to thr
 * A file
 * A server, such as SysLog
 
-The following examples pertain to security events, but can also be used for alerts by replacing `security-data` with `alerts`:
+The following examples pertain to security events, but can also be used for alerts by replacing `security-data` with 
+`alerts`:
 
 To print events to stdout, do:
 

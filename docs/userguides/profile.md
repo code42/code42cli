@@ -5,7 +5,7 @@ within and your user information.
 
 First, create your profile:
 ```bash
-code42 profile create MY_FIRST_PROFILE https://example.authority.com security.admin@example.com
+code42 profile create --name MY_FIRST_PROFILE --server example.authority.com --username security.admin@example.com
 ```
 
 Your profile contains the necessary properties for logging into Code42 servers.
@@ -22,7 +22,8 @@ You can add multiple profiles with different names and the change the default pr
 code42 profile use MY_SECOND_PROFILE
 ```
 
-When the `--profile` flag is available on other commands, such as those in `security-data`, it will use that profile instead of the default one.
+When the `--profile` flag is available on other commands, such as those in `security-data`, it will use that profile 
+instead of the default one.
 
 To see all your profiles, do:
 
