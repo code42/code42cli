@@ -28,13 +28,12 @@ First, create your profile:
 code42 profile create --name MY_FIRST_PROFILE --server example.authority.com --username security.admin@example.com
 ```
 
-Your profile contains the necessary properties for logging into Code42 servers.
-After running `code42 profile create`, the program prompts you about storing a password.
-If you agree, you are then prompted to input your password.
+Your profile contains the necessary properties for logging into Code42 servers. After running `code42 profile create`, 
+the program prompts you about storing a password. If you agree, you are then prompted to input your password.
 
-Your password is not shown when you do `code42 profile show`.
-However, `code42 profile show` will confirm that a password exists for your profile.
-If you do not set a password, you will be securely prompted to enter a password each time you run a command.
+Your password is not shown when you do `code42 profile show`. However, `code42 profile show` will confirm that a 
+password exists for your profile. If you do not set a password, you will be securely prompted to enter a password each 
+time you run a command.
 
 For development purposes, you may need to ignore ssl errors. If you need to do this, use the `--disable-ssl-errors` 
 option when creating your profile:
