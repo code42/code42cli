@@ -1,37 +1,48 @@
 # Profile Commands
 
-### show
+## show
   
-Print the details of a profile. Arguments:
+Print the details of a profile.
+
+Arguments:
+
 * `--name`, `-n` (optional): The name of the Code42 profile to use when executing this command.
 
 Usage:
+
 ```bash
 code42 profile show <optional-arguments>
 ```
   
-### list
+## list
 
-Show all existing stored profiles. This command takes no arguments.
+Show all existing stored profiles.
 
 Usage:
+
 ```bash
 code42 profile list
 ```
 
-### use
+## use
 
-Set a profile as the default. Arguments:
+Set a profile as the default.
+
+Arguments:
+
 * `name`: The name of the profile to set as active.
 
 Usage:
+
 ```bash
 code42 profile use <profile-name>
 ```
   
-### reset-pw
+## reset-pw
 
-Change the stored password for a profile. Arguments:
+Change the stored password for a profile.
+
+Arguments:
 * `--name`, `-n` (optional): The name of the Code42 profile to use when executing this command.
 
 Usage:
@@ -39,9 +50,11 @@ Usage:
 code42 profile reset-pw <optional-args>
 ```
 
-### create
+## create
 
-Create profile settings. The first profile created will be the default. Arguments:
+Create profile settings. The first profile created will be the default. 
+
+Arguments:
 * `--name`, `-n`: The name of the code42cli profile to use when executing this command.
 * `--server`, `-s`: The url and port of the Code42 server.
 * `--username`, `-u`: The username of the Code42 API user.
@@ -54,9 +67,11 @@ code42 profile create --name <profile-name> --server <server> --username <userna
 ```
 
 
-### update
+## update
 
-Update an existing profile. Arguments:
+Update an existing profile. 
+
+Arguments:
 * `--name`, `-n`: The name of the code42cli profile to use when executing this command.
 * `--server`, `-s`: The url and port of the Code42 server.
 * `--username`, `-u`: The username of the Code42 API user.
@@ -68,9 +83,11 @@ Usage:
 code42 profile update <optional-args>
 ```
 
-### delete
+## delete
 
-Deletes a profile and its stored password (if any).  Arguments:
+Deletes a profile and its stored password (if any).
+
+Arguments:
 * `name`: The name of the code42cli profile you wish to delete.
 
 Usage:
@@ -79,9 +96,9 @@ code42 profile delete <profile-name>
 ```
 
 
-### delete-all
+## delete-all
 
-Deletes all profiles and saved passwords (if any). This command has no arguments.
+Deletes all profiles and saved passwords (if any).
 
 Usage:
 ```bash

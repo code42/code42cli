@@ -1,6 +1,6 @@
 # Alerts
 
-### Shared arguments
+## Shared arguments
 
 Search args are shared between `print`, `write-to`, and `send-to` commands.
 
@@ -32,46 +32,48 @@ Search args are shared between `print`, `write-to`, and `send-to` commands.
 * `-f`, `--format` (optional): The format used for outputting file events. Available choices= [CEF,JSON,RAW-JSON]. 
 * `-i`, `--incremental` (optional): Only get file events that were not previously retrieved.
 
-### print
+## print
 
-Print file events to stdout. Arguments:
+Print file events to stdout.
+
+Arguments:
 * search args (note that begin date is often required).
 
 Usage:
-
 `code42 alerts print -b <begin-date> <args>`
 
-### write-to
+## write-to
 
-Write file events to the file with the given name. Arguments:
+Write file events to the file with the given name.
+
+Arguments:
 * `output_file`: The name of the local file to send output to.
 * search args (note that begin date is often required).
 
 Usage:
-
 ```bash
 code42 alerts write-to -b 2020-03-01 <rgs>
 ```
 
-### send-to
+## send-to
 
-Send file events to the given server address. Arguments:
+Send file events to the given server address.
+
+Arguments:
 * `server`: The server address to send output to.
 * `protocol` (optional): Protocol used to send logs to server. Available choices= [TCP, UDP].
 * search args (note that begin date is often required).
 
 Usage:
-
 ```bash
 code42 alerts send-to <server> <optional-args> <args>
 ```
 
-### clear-checkpoint
+## clear-checkpoint
 
-Remove the saved file event checkpoint from 'incremental' (-i) mode. This command takes no arguments.
+Remove the saved file event checkpoint from 'incremental' (-i) mode.
 
 Usage:
-
 ```bash
 code42 alerts clear-checkpoint
 ```
