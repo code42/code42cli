@@ -2,7 +2,6 @@ from collections import OrderedDict
 from io import IOBase
 import pytest
 import logging
-from time import sleep
 
 from code42cli import PRODUCT_NAME
 from code42cli import errors as errors
@@ -224,13 +223,12 @@ class TestBulkProcessor(object):
         assert (None, "foo") in processed_rows
         assert ("bar", None) in processed_rows
 
-    @pytest.skip
-    def test_run_updates_progress_bar_once_per_row(self, mock_open, progress_bar):
-        def func_for_bulk(*args, **kwargs):
-            pass
-
-        rows = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-        reader = create_mock_reader(rows)
-        processor = BulkProcessor(func_for_bulk, reader, progress_bar=progress_bar)
-        processor.run()
-        assert progress_bar.update.call_count == len(rows)
+    # def test_run_updates_progress_bar_once_per_row(self, mock_open, progress_bar):
+    #     def func_for_bulk(*args, **kwargs):
+    #         pass
+    # 
+    #     rows = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    #     reader = create_mock_reader(rows)
+    #     processor = BulkProcessor(func_for_bulk, reader, progress_bar=progress_bar)
+    #     processor.run()
+    #     assert progress_bar.update.call_count == len(rows)
