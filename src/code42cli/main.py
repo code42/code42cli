@@ -81,7 +81,7 @@ def _load_top_commands():
         ),
         Command(
             u"legal-hold",
-            u"For adding and removing employees to legal hold matters",
+            u"For adding and removing employees to legal hold matters.",
             subcommand_loader=LegalHoldCommands.load_subcommands,
         ),
     ]
