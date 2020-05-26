@@ -86,7 +86,7 @@ class AlertRulesBulkCommands(object):
 
         bulk_add = Command(
             u"add",
-            u"Update alert rule criteria to add users and all their aliases. "
+            u"Update alert rule criteria to add users. "
             u"CSV file format: `rule_id,username`.",
             u"{} add <filename>".format(usage_prefix),
             handler=add_bulk_users,
@@ -95,7 +95,7 @@ class AlertRulesBulkCommands(object):
 
         bulk_remove = Command(
             u"remove",
-            u"Update alert rule criteria to remove users and all their aliases. "
+            u"Update alert rule criteria to remove users. "
             u"CSV file format: `rule_id,username`.",
             u"{} remove <filename>".format(usage_prefix),
             handler=remove_bulk_users,
@@ -112,7 +112,7 @@ class AlertRulesCommands(object):
 
         add = Command(
             u"add-user",
-            u"Update alert rule criteria to monitor user aliases against the given username.",
+            u"Update alert rule criteria to monitor users against the given username.",
             u"{} add-user --rule-id <id>  --username <username>".format(usage_prefix),
             handler=add_user,
             arg_customizer=_customize_add_arguments,
@@ -120,7 +120,7 @@ class AlertRulesCommands(object):
 
         remove = Command(
             u"remove-user",
-            u"Update alert rule criteria to remove a user and all their aliases.",
+            u"Update alert rule criteria to remove a user.",
             u"{} remove-user --rule-id <rule-id> --username <username>".format(usage_prefix),
             handler=remove_user,
             arg_customizer=_customize_remove_arguments,

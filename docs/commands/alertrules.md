@@ -2,7 +2,7 @@
 
 ## add-user
 
-Update alert rule criteria to monitor user aliases against the given username.
+Update alert rule criteria to monitor users against the given username.
 
 Arguments:
 * `--rule-id`: Observer ID of the rule to be updated.
@@ -15,7 +15,7 @@ code42 alert-rules add-user --rule-id <rule-id> --username <username>
 
 ##  remove-user
 
-Update alert rule criteria to remove a user and all their aliases.
+Update alert rule criteria to remove a user.
 
 Arguments:
 * `--rule-id`: Observer ID of the rule to be updated.
@@ -61,7 +61,7 @@ code42 alert-rules bulk generate-template <cmd>
 
 ## bulk add
 
-Update alert rule criteria to add users and all their aliases. CSV file format: `rule_id,username`.
+Update alert rule criteria to add users. CSV file format: `rule_id,username`.
 
 Arguments:
 * `file-name`: The path to the csv file with columns 'rule_id,username'for bulk adding users to the alert rule.
@@ -73,7 +73,7 @@ code42 alert-rules bulk add <filename>
 
 ## bulk remove
 
-Update alert rule criteria to remove users and all their aliases. CSV file format: `rule_id,username`.
+Update alert rule criteria to remove users. CSV file format: `rule_id,username`.
 
 Arguments:
 * `file-name`: The path to the csv file with columns 'rule_id,username' for bulk removing users to the alert rule.

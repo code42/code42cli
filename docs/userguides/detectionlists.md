@@ -1,20 +1,5 @@
 # Managing Detection List Users
 
-The Code42 command-line interface (CLI) tool offers a way to interact with your Code42 environment without using the 
-Code42 console or making API calls directly. For example, you can use it to manage users on the 
-[Departing Employees](https://support.code42.com/Administrator/Cloud/Administration_console_reference/Departing_Employees_reference) 
-list or [High Risk Employees](https://support.code42.com/Administrator/Cloud/Administration_console_reference/High_Risk_Employees_reference) 
-list. This article provides instructions for using the Code42 CLI to add and remove users 
-from the Departing Employees list or High Risk Employees list, as well as update the information for a user. 
-
-You can also use the Code42 CLI to extract Code42 data for use in a security information and event management (SIEM) 
-tool. For more information, see [Integrate with a SIEM tool using the Code42 command-line interface](siemexample.md).
-
-## Before you begin
-To manage users on the Departing Employees list or High Risk Employees list with the Code42 CLI, you must first install 
-and configure the Code42 CLI following the instructions in [Getting Started](gettingstarted.md). 
-
-## Manage Departing Employees list users 
 Use the departing-employee commands to add or remove employees on that that list, or update the details for a user. To 
 see a list of all the users currently in your organization, you can export a list from the 
 [Users action menu](https://support.code42.com/Administrator/Cloud/Administration_console_reference/Users_reference#Action_menu). 
@@ -29,8 +14,10 @@ Employees list. Once generated, the CSV file is saved to your current working di
 code42 departing-employee bulk generate-template add
 ``` 
 
-2. Use the CSV template to enter the employees' information. Only the Code42 username is required. If added, the departure 
-date must be in YYYY-MM-DD format. 
+2. Use the CSV template to enter the employees' information. Only the Code42 username is required. If added, 
+the departure date must be in yyyy-MM-dd format. Note: you are only able to add departure dates during the `add` 
+operation. If you don't include `--departure-date`, you can only add one later by removing and then re-adding the 
+employee.
 
 3. Save the CSV file. 
 
