@@ -94,6 +94,8 @@ def format_to_table(rows, column_size):
 
 def format_string_list_to_columns(string_list, max_width=150):
     """Prints a list of strings in justified columns and fits them neatly into specified width."""
+    if not string_list:
+        return
     string_list = sorted(string_list, key=lambda x: len(x))
     largest_item = len(string_list[-1]) + 3
     num_columns = int(max_width / largest_item)
