@@ -58,6 +58,14 @@ After it finishes building, the `.tar` ball will be located in the newly created
 pip install code42cli-[VERSION].tar.gz
 ```
 
+## Updates
+
+To update the CLI, use pip's `--upgrade` flag.
+
+```bash
+pip install code42cli --upgrade
+```
+
 ## Authentication
 
 ```eval_rst
