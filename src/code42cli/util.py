@@ -152,34 +152,3 @@ class warn_interrupt(object):
                 return func(*args, **kwargs)
 
         return inner
-
-
-class cache_results(object):
-    """Helper class to cache function call results for requests that might be called often but would 
-    return the same result each time. 
-    """
-
-    def __init__(self):
-        self.calls = dict()
-
-    def __call__(self, func):
-        @wraps(func)
-        def inner(*args, **kwargs):
-            args_key = self.make_key(args, kwargs)
-            if args_key in self.calls:
-                return self.calls[args_key]
-            else:
-                result = func(*args, **kwargs)
-                self.calls[args_key] = result
-                return result
-
-        return inner
-
-    @staticmethod
-    def make_key(args, kwargs):
-        key = args
-        if kwargs:
-            sorted_items = sorted(kwargs.items())
-            for item in sorted_items:
-                key += item
-        return key
