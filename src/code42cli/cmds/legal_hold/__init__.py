@@ -133,7 +133,7 @@ def _get_all_active_matters(sdk):
     return matters
 
 
-@lru_cache
+@lru_cache(maxsize=None)
 def _check_matter_is_accessible(sdk, matter_id):
     try:
         matter = sdk.legalhold.get_matter_by_uid(matter_id)
