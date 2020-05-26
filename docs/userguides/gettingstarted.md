@@ -18,14 +18,14 @@ You can install the Code42 CLI from PyPI, from source, or from distribution.
 The easiest and most common way is to use `pip`:
 
 ```bash
-pip install code42cli
+python3 -m pip install code42cli
 ```
 
 To install a previous version of the Code42 CLI via `pip`, add the version number. For example, to install version
 0.4.1, you would enter:
 
 ```bash
-pip install code42cli==0.5.3
+python3 -m pip install code42cli==0.5.3
 ```
 
 Visit the [project history](https://pypi.org/project/code42cli/#history) on PyPI to see all published versions.
@@ -55,7 +55,7 @@ python setup.py sdist
 After it finishes building, the `.tar` ball will be located in the newly created `dist` directory. To install it, enter:
 
 ```bash
-pip install code42cli-[VERSION].tar.gz
+python3 -m pip install code42cli-[VERSION].tar.gz
 ```
 
 ## Updates
@@ -63,7 +63,7 @@ pip install code42cli-[VERSION].tar.gz
 To update the CLI, use pip's `--upgrade` flag.
 
 ```bash
-pip install code42cli --upgrade
+python3 -m pip install code42cli --upgrade
 ```
 
 ## Authentication

@@ -44,7 +44,8 @@ code42 departing-employee bulk add /Users/astrid.ludwig/add_departing_employee.c
 ```
 
 ## Remove users 
-You can remove one or more users from the High Risk Employees list. Use remove to remove a single user. 
+You can remove one or more users from the High Risk Employees list. Use `code42 departing-employee remove` to remove a 
+single user. 
 
 To remove multiple users at once:
 
