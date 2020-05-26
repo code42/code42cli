@@ -1,6 +1,6 @@
 # Security Data
 
-### Search shared arguments
+### Shared arguments
 
 Search args are shared between `print`, `write-to`, and `send-to` commands.
 
