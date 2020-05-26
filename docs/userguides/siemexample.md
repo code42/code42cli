@@ -25,11 +25,14 @@ scheduled job or run ad-hoc queries. Learn more about [searching](../commands/se
 ## Run a query as a scheduled job
 
 Use your favorite scheduling tool, such as cron or Windows Task Scheduler, to run a query on a regular basis. Specify 
-the profile to use by including --profile. For example:  
+the profile to use by including `--profile`. For example:  
 
 ```bash
 code42 security-data send-to "https://syslog.example.com:514" -p TCP --profile profile1 -i
 ```
+
+Note that it is best practice to use a separate profile when executing a scheduled task. This way, it is harder to 
+accidentally mess up your stored checkpoints by running `--incremental` adhoc queries.
 
 This query will send to the syslog server only the new security event data since the previous request.
 
