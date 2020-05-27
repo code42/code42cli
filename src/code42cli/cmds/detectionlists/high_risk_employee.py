@@ -1,61 +1,56 @@
+from py42.exceptions import Py42BadRequestError
+
+from code42cli.cmds.detectionlists import DetectionListSubcommandLoader
+from code42cli.commands import Command
 from code42cli.cmds.detectionlists import (
     DetectionList,
     DetectionListHandlers,
     load_user_descriptions,
-    load_username_description,
     update_user,
     try_handle_user_already_added_error,
-    try_add_risk_tags,
-    try_remove_risk_tags,
+    add_risk_tags,
+    remove_risk_tags,
+    load_username_description,
+    handle_list_args,
 )
 from code42cli.util import get_user_id
 from code42cli.cmds.detectionlists.enums import DetectionLists, DetectionListUserKeys, RiskTags
-from code42cli.commands import Command
-
-from py42.exceptions import Py42BadRequestError
 
 
-def load_subcommands():
-    handlers = _create_handlers()
-    detection_list = DetectionList.create_high_risk_employee_list(handlers)
-    cmd_list = detection_list.load_subcommands()
-    cmd_list.extend(
-        [
-            Command(
-                u"add-risk-tags",
-                u"Associates risk tags with a user.",
-                u"code42 high-risk-employee add-risk-tags --username <username> --tag <risk-tags>",
-                handler=add_risk_tags,
-                arg_customizer=_load_risk_tag_mgmt_descriptions,
-            ),
-            Command(
-                u"remove-risk-tags",
-                u"Disassociates risk tags from a user.",
-                u"code42 high-risk-employee remove-risk-tags --username <username> --tag <risk-tags>",
-                handler=remove_risk_tags,
-                arg_customizer=_load_risk_tag_mgmt_descriptions,
-            ),
-        ]
-    )
-    return cmd_list
+class HighRiskEmployeeSubcommandLoader(DetectionListSubcommandLoader):
+    def __init__(self, root_command_name):
+        super(HighRiskEmployeeSubcommandLoader, self).__init__(root_command_name)
+        handlers = _create_handlers()
+        self.detection_list = DetectionList.create_high_risk_employee_list(handlers)
+        self._cmd_loader = self.detection_list.subcommand_loader
+
+    def load_commands(self):
+        cmds = self.detection_list.load_subcommands()
+        cmds.extend(
+            [
+                Command(
+                    u"add-risk-tags",
+                    u"Associates risk tags with a user.",
+                    u"code42 high-risk-employee add-risk-tags --username <username> --tag <risk-tags>",
+                    handler=add_risk_tags,
+                    arg_customizer=load_risk_tag_mgmt_descriptions,
+                ),
+                Command(
+                    u"remove-risk-tags",
+                    u"Disassociates risk tags from a user.",
+                    u"code42 high-risk-employee remove-risk-tags --username <username> --tag <risk-tags>",
+                    handler=remove_risk_tags,
+                    arg_customizer=load_risk_tag_mgmt_descriptions,
+                ),
+            ]
+        )
+        return cmds
 
 
 def _create_handlers():
     return DetectionListHandlers(
         add=add_high_risk_employee, remove=remove_high_risk_employee, load_add=_load_add_description
     )
-
-
-def add_risk_tags(sdk, profile, username, tag):
-    risk_tag = _handle_list_args(tag)
-    user_id = get_user_id(sdk, username)
-    try_add_risk_tags(sdk, user_id, risk_tag)
-
-
-def remove_risk_tags(sdk, profile, username, tag):
-    risk_tag = _handle_list_args(tag)
-    user_id = get_user_id(sdk, username)
-    try_remove_risk_tags(sdk, user_id, risk_tag)
 
 
 def add_high_risk_employee(sdk, profile, username, cloud_alias=None, risk_tag=None, notes=None):
@@ -69,7 +64,7 @@ def add_high_risk_employee(sdk, profile, username, cloud_alias=None, risk_tag=No
         risk_tag (iter[str]): Risk tags associated with the employee.
         notes: (str): Notes about the employee.
     """
-    risk_tag = _handle_list_args(risk_tag)
+    risk_tag = handle_list_args(risk_tag)
     user_id = get_user_id(sdk, username)
 
     try:
@@ -93,7 +88,12 @@ def remove_high_risk_employee(sdk, profile, username):
     sdk.detectionlists.high_risk_employee.remove(user_id)
 
 
-def _load_risk_tag_description(argument_collection):
+def _load_add_description(argument_collection):
+    load_user_descriptions(argument_collection)
+    load_risk_tag_description(argument_collection)
+
+
+def load_risk_tag_description(argument_collection):
     risk_tag = (
         argument_collection.arg_configs.get(DetectionListUserKeys.RISK_TAG)
         or argument_collection.arg_configs[u"tag"]
@@ -105,19 +105,6 @@ def _load_risk_tag_description(argument_collection):
     )
 
 
-def _load_add_description(argument_collection):
-    load_user_descriptions(argument_collection)
-    _load_risk_tag_description(argument_collection)
-
-
-def _load_risk_tag_mgmt_descriptions(argument_collection):
+def load_risk_tag_mgmt_descriptions(argument_collection):
     load_username_description(argument_collection)
-    _load_risk_tag_description(argument_collection)
-
-
-def _handle_list_args(list_arg):
-    """Converts str args to a list. Useful for `bulk` commands which don't use `argparse` but 
-    instead pass in values from files, such as in the form "item1 item2"."""
-    if list_arg and type(list_arg) != list:
-        return list_arg.split()
-    return list_arg
+    load_risk_tag_description(argument_collection)

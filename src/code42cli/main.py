@@ -5,12 +5,14 @@ import sys
 from py42.settings import set_user_agent_suffix
 
 from code42cli import PRODUCT_NAME
-from code42cli.cmds import profile
 from code42cli.cmds.detectionlists import departing_employee as de
 from code42cli.cmds.detectionlists import high_risk_employee as hre
 from code42cli.cmds.detectionlists.enums import DetectionLists
 from code42cli.cmds.securitydata import main as secmain
 from code42cli.cmds.alerts import main as alertmain
+from code42cli.cmds.alerts.rules import commands as alertrules
+from code42cli.cmds.profile import ProfileSubcommandLoader
+from code42cli.commands import Command, SubcommandLoader
 from code42cli.cmds.alerts.rules.commands import AlertRulesCommands
 from code42cli.cmds.legal_hold.commands import LegalHoldCommands
 from code42cli.commands import Command
@@ -42,49 +44,80 @@ if platform.system().lower() == u"windows":
 set_user_agent_suffix(PRODUCT_NAME)
 
 
+class MainSubcommandLoader(SubcommandLoader):
+    PROFILE = u"profile"
+    SECURITY_DATA = u"security-data"
+    ALERTS = u"alerts"
+    ALERT_RULES = u"alert-rules"
+    DEPARTING_EMPLOYEE = DetectionLists.DEPARTING_EMPLOYEE
+    HIGH_RISK_EMPLOYEE = DetectionLists.HIGH_RISK_EMPLOYEE
+    LEGAL_HOLD = u"legal-hold"
+
+    def load_commands(self):
+        detection_lists_description = (
+            u"For adding and removing employees from the {} detection list."
+        )
+        return [
+            Command(
+                self.PROFILE,
+                u"For managing Code42 settings.",
+                subcommand_loader=self._create_profile_loader(),
+            ),
+            Command(
+                self.SECURITY_DATA,
+                u"Tools for getting security related data, such as file events.",
+                subcommand_loader=self._create_security_data_loader(),
+            ),
+            Command(
+                self.ALERTS,
+                u"Tools for getting alert data.",
+                subcommand_loader=self._create_alerts_loader(),
+            ),
+            Command(
+                self.ALERT_RULES,
+                u"Manage alert rules.",
+                subcommand_loader=self._create_alert_rules_loader(),
+            ),
+            Command(
+                self.DEPARTING_EMPLOYEE,
+                detection_lists_description.format(u"departing employee"),
+                subcommand_loader=self._create_departing_employee_loader(),
+            ),
+            Command(
+                self.HIGH_RISK_EMPLOYEE,
+                detection_lists_description.format(u"high risk employee"),
+                subcommand_loader=self._create_high_risk_employee_loader(),
+            ),
+            Command(
+                self.LEGAL_HOLD,
+                u"For adding and removing employees to legal hold matters.",
+                subcommand_loader=LegalHoldCommands.load_subcommands,
+            ),
+        ]
+
+    def _create_profile_loader(self):
+        return ProfileSubcommandLoader(self.PROFILE)
+
+    def _create_security_data_loader(self):
+        return secmain.SecurityDataSubcommandLoader(self.SECURITY_DATA)
+
+    def _create_alerts_loader(self):
+        return alertmain.MainAlertsSubcommandLoader(self.ALERTS)
+
+    def _create_alert_rules_loader(self):
+        return alertrules.AlertRulesSubcommandLoader(self.ALERT_RULES)
+
+    def _create_departing_employee_loader(self):
+        return de.DepartingEmployeeSubcommandLoader(self.DEPARTING_EMPLOYEE)
+
+    def _create_high_risk_employee_loader(self):
+        return hre.HighRiskEmployeeSubcommandLoader(self.HIGH_RISK_EMPLOYEE)
+
+
 def main():
-    top = Command(u"", u"", subcommand_loader=_load_top_commands)
+    top = Command(u"", u"", subcommand_loader=MainSubcommandLoader(u""))
     invoker = CommandInvoker(top)
     invoker.run(sys.argv[1:])
-
-
-def _load_top_commands():
-    detection_lists_description = u"For adding and removing employees from the {} detection list."
-    return [
-        Command(
-            u"profile", u"For managing Code42 settings.", subcommand_loader=profile.load_subcommands
-        ),
-        Command(
-            u"security-data",
-            u"Tools for getting security related data, such as file events.",
-            subcommand_loader=secmain.load_subcommands,
-        ),
-        Command(
-            u"alerts",
-            u"Tools for getting alert data.",
-            subcommand_loader=alertmain.load_subcommands,
-        ),
-        Command(
-            u"alert-rules",
-            u"Manage alert rules.",
-            subcommand_loader=AlertRulesCommands.load_subcommands,
-        ),
-        Command(
-            DetectionLists.DEPARTING_EMPLOYEE,
-            detection_lists_description.format(u"departing employee"),
-            subcommand_loader=de.load_subcommands,
-        ),
-        Command(
-            DetectionLists.HIGH_RISK_EMPLOYEE,
-            detection_lists_description.format(u"high risk employee"),
-            subcommand_loader=hre.load_subcommands,
-        ),
-        Command(
-            u"legal-hold",
-            u"For adding and removing employees to legal hold matters.",
-            subcommand_loader=LegalHoldCommands.load_subcommands,
-        ),
-    ]
 
 
 if __name__ == u"__main__":

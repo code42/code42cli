@@ -1,6 +1,13 @@
 import time
 
-from code42cli.worker import Worker
+from code42cli.worker import Worker, WorkerStats
+
+
+class TestWorkerStats(object):
+    def test_successes_when_should_be_negative_returns_zero(self):
+        stats = WorkerStats(100)
+        stats._total_errors = 101
+        assert not stats.total_successes
 
 
 class TestWorker(object):

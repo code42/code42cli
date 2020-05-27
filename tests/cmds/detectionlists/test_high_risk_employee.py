@@ -1,13 +1,12 @@
 import pytest
-import logging
 
 from code42cli.errors import UserAlreadyAddedError, UnknownRiskTagError, UserDoesNotExistError
 from code42cli.cmds.detectionlists.high_risk_employee import (
     add_high_risk_employee,
     remove_high_risk_employee,
-    add_risk_tags,
-    remove_risk_tags,
+    HighRiskEmployeeSubcommandLoader,
 )
+
 from code42cli.cmds.detectionlists.enums import RiskTags
 from .conftest import TEST_ID
 
@@ -15,6 +14,20 @@ from py42.exceptions import Py42BadRequestError
 
 
 _EMPLOYEE = "risky employee"
+
+
+class TestHighRiskEmployeeSubcommandLoader(object):
+    def test_load_subcommands_loads_expected_commands(self):
+        loader = HighRiskEmployeeSubcommandLoader("test")
+        cmds = loader.load_commands()
+        names = [cmd.name for cmd in cmds]
+        assert "add" in names
+        assert "bulk" in names
+        assert "remove" in names
+
+    def test_loader_has_expected_detection_list_name(self):
+        loader = HighRiskEmployeeSubcommandLoader("test")
+        assert "high-risk-employee" == loader.detection_list.name
 
 
 def test_add_high_risk_employee_when_given_cloud_alias_adds_alias(sdk_with_user, profile):
@@ -107,105 +120,3 @@ def test_remove_high_risk_employee_calls_remove(sdk_with_user, profile):
 def test_remove_high_risk_employee_when_user_does_not_exist_exits(sdk_without_user, profile):
     with pytest.raises(UserDoesNotExistError):
         remove_high_risk_employee(sdk_without_user, profile, _EMPLOYEE)
-
-
-def test_add_risk_tags_adds_tags(sdk_with_user, profile):
-    add_risk_tags(
-        sdk_with_user,
-        profile,
-        _EMPLOYEE,
-        [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK],
-    )
-    sdk_with_user.detectionlists.add_user_risk_tags.assert_called_once_with(
-        TEST_ID, [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK]
-    )
-
-
-def test_add_risk_tags_when_given_space_delimited_str_adds_expected_tags(sdk_with_user, profile):
-    add_risk_tags(
-        sdk_with_user,
-        profile,
-        _EMPLOYEE,
-        "{} {}".format(RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK),
-    )
-    sdk_with_user.detectionlists.add_user_risk_tags.assert_called_once_with(
-        TEST_ID, [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK]
-    )
-
-
-def test_add_risk_tags_when_user_does_not_exist_exits(sdk_without_user, profile):
-    with pytest.raises(UserDoesNotExistError):
-        add_risk_tags(
-            sdk_without_user,
-            profile,
-            _EMPLOYEE,
-            [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK],
-        )
-
-
-def test_add_risk_tags_when_bad_request_and_unknown_risk_tags_raises_UnknownRiskTagError(
-    sdk_with_user, profile, generic_bad_request
-):
-    sdk_with_user.detectionlists.add_user_risk_tags.side_effect = generic_bad_request
-    try:
-        add_risk_tags(
-            sdk_with_user,
-            profile,
-            _EMPLOYEE,
-            "{} foo {} bar".format(RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK),
-        )
-    except UnknownRiskTagError as err:
-        err_str = str(err)
-        assert "foo" in err_str
-        assert "bar" in err_str
-
-
-def test_remove_risk_tags_adds_tags(sdk_with_user, profile):
-    remove_risk_tags(
-        sdk_with_user,
-        profile,
-        _EMPLOYEE,
-        [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK],
-    )
-    sdk_with_user.detectionlists.remove_user_risk_tags.assert_called_once_with(
-        TEST_ID, [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK]
-    )
-
-
-def test_remove_risk_tags_when_given_space_delimited_str_adds_expected_tags(sdk_with_user, profile):
-    remove_risk_tags(
-        sdk_with_user,
-        profile,
-        _EMPLOYEE,
-        "{} {}".format(RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK),
-    )
-    sdk_with_user.detectionlists.remove_user_risk_tags.assert_called_once_with(
-        TEST_ID, [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK]
-    )
-
-
-def test_remove_risk_tags_when_user_does_not_exist_exits(sdk_without_user, profile):
-    with pytest.raises(UserDoesNotExistError):
-        remove_risk_tags(
-            sdk_without_user,
-            profile,
-            _EMPLOYEE,
-            [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK],
-        )
-
-
-def test_remove_risk_tags_when_bad_request_and_unknown_risk_tags_raises_UnknownRiskTagError(
-    sdk_with_user, profile, generic_bad_request
-):
-    sdk_with_user.detectionlists.remove_user_risk_tags.side_effect = generic_bad_request
-    try:
-        remove_risk_tags(
-            sdk_with_user,
-            profile,
-            _EMPLOYEE,
-            "{} foo {} bar".format(RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK),
-        )
-    except UnknownRiskTagError as err:
-        err_str = str(err)
-        assert "foo" in err_str
-        assert "bar" in err_str

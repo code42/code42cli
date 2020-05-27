@@ -10,7 +10,7 @@ BANNER = u"""
 dP   `" dP   Yb 8I  Yb 88__   dP 88  "' dP' 
 Yb      Yb   dP 8I  dY 88""  d888888   dP'  
  YboodP  YbodP  8888Y" 888888    88  .d8888
-
+ 
 code42cli version {}, by Code42 Software.
 powered by py42 version {}.""".format(
     cliversion, py42version
