@@ -150,6 +150,11 @@ def _load_search_args(arg_collection):
             nargs=u"+",
             help=u"Limits events to file events where the file is located at one of these paths.",
         ),
+        FileEventFilterArguments.FILE_CATEGORY: ArgConfig(
+            u"--{}".format(FileEventFilterArguments.FILE_CATEGORY.replace(u"_", u"-")),
+            nargs=u"+",
+            help=u"Limits events to file events where the file category is one of these categories. Example=PDF.",
+        ),
         FileEventFilterArguments.PROCESS_OWNER: ArgConfig(
             u"--{}".format(FileEventFilterArguments.PROCESS_OWNER.replace(u"_", u"-")),
             nargs=u"+",

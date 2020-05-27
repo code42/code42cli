@@ -23,7 +23,7 @@ class TestCompleter(object):
         assert "alerts" in actual
         assert "alert-rules" in actual
         assert len(actual) == 2
-        
+
     def test_complete_for_departing_employee(self):
         actual = self._completer.complete("code42 de")
         assert "departing-employee" in actual
@@ -38,7 +38,7 @@ class TestCompleter(object):
         actual = self._completer.complete("code42 profile cre")
         assert "create" in actual
         assert len(actual) == 1
-        
+
     def test_complete_for_high_risk_employee_bulk(self):
         actual = self._completer.complete("code42 high-risk-employee bu")
         assert "bulk" in actual

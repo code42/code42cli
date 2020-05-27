@@ -116,6 +116,7 @@ class FileEventFilterArguments(SearchArguments):
     SOURCE = u"source"
     FILE_NAME = u"file_name"
     FILE_PATH = u"file_path"
+    FILE_CATEGORY = u"file_category"
     PROCESS_OWNER = u"process_owner"
     TAB_URL = u"tab_url"
     INCLUDE_NON_EXPOSURE_EVENTS = u"include_non_exposure"
@@ -131,6 +132,7 @@ class FileEventFilterArguments(SearchArguments):
                 self.SOURCE,
                 self.FILE_NAME,
                 self.FILE_PATH,
+                self.FILE_CATEGORY,
                 self.PROCESS_OWNER,
                 self.TAB_URL,
                 self.INCLUDE_NON_EXPOSURE_EVENTS,
