@@ -1,5 +1,4 @@
 import pytest
-import logging
 
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.detectionlists import (
@@ -10,15 +9,19 @@ from code42cli.cmds.detectionlists import (
     update_user,
     try_add_risk_tags,
     try_remove_risk_tags,
+    add_risk_tags,
+    remove_risk_tags,
 )
 from code42cli.errors import UserAlreadyAddedError, UnknownRiskTagError, UserDoesNotExistError
 from code42cli.bulk import BulkCommandType
 from code42cli.cmds.detectionlists.enums import RiskTags
+from code42cli.cmds.detectionlists.bulk import HighRiskBulkCommandType
 from .conftest import TEST_ID
 from ...conftest import create_mock_reader
 
 
 _NAMESPACE = "{}.cmds.detectionlists".format(PRODUCT_NAME)
+_EMPLOYEE = "risky employee"
 
 
 @pytest.fixture
@@ -146,3 +149,150 @@ class TestDetectionList(object):
         detection_list.bulk_remove_employees(sdk, profile, "file_test")
         assert bulk_processor.call_args[0][1] == reader
         reader_factory.assert_called_once_with("file_test")
+
+    def test_bulk_add_risk_tags_uses_csv_path(self, mocker, sdk, profile, bulk_processor):
+        reader = create_mock_reader([{"test": "value"}])
+        reader_factory = mocker.patch("{}.create_csv_reader".format(_NAMESPACE))
+        reader_factory.return_value = reader
+        detection_list = DetectionList("TestList", DetectionListHandlers())
+        detection_list.bulk_add_risk_tags(sdk, profile, "csv_test")
+        assert bulk_processor.call_args[0][1] == reader
+        reader_factory.assert_called_once_with("csv_test")
+
+    def test_bulk_remove_risk_tags_uses_csv_path(self, mocker, sdk, profile, bulk_processor):
+        reader = create_mock_reader([{"test": "value"}])
+        reader_factory = mocker.patch("{}.create_csv_reader".format(_NAMESPACE))
+        reader_factory.return_value = reader
+        detection_list = DetectionList("TestList", DetectionListHandlers())
+        detection_list.bulk_remove_risk_tags(sdk, profile, "file_test")
+        assert bulk_processor.call_args[0][1] == reader
+        reader_factory.assert_called_once_with("file_test")
+
+    def test_generate_template_file_when_given_add_risk_tags_generates_template_from_handler(
+        self, bulk_template_generator
+    ):
+        def a_test_func():
+            pass
+
+        handlers = DetectionListHandlers()
+        handlers.add_handler("add_risk_tags", a_test_func)
+        detection_list = DetectionList.create_high_risk_employee_list(handlers)
+        path = "some/path"
+        detection_list.generate_template_file(HighRiskBulkCommandType.ADD_RISK_TAG, path)
+        bulk_template_generator.assert_called_once_with(a_test_func, path)
+
+    def test_generate_template_file_when_given_remove_risk_tags_generates_template_from_handler(
+        self, bulk_template_generator
+    ):
+        def a_test_func():
+            pass
+
+        handlers = DetectionListHandlers()
+        handlers.add_handler("remove_risk_tags", a_test_func)
+        detection_list = DetectionList.create_high_risk_employee_list(handlers)
+        path = "some/path"
+        detection_list.generate_template_file(HighRiskBulkCommandType.REMOVE_RISK_TAG, path)
+        bulk_template_generator.assert_called_once_with(a_test_func, path)
+
+
+def test_add_risk_tags_adds_tags(sdk_with_user, profile):
+    add_risk_tags(
+        sdk_with_user,
+        profile,
+        _EMPLOYEE,
+        [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK],
+    )
+    sdk_with_user.detectionlists.add_user_risk_tags.assert_called_once_with(
+        TEST_ID, [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK]
+    )
+
+
+def test_add_risk_tags_when_given_space_delimited_str_adds_expected_tags(sdk_with_user, profile):
+    add_risk_tags(
+        sdk_with_user,
+        profile,
+        _EMPLOYEE,
+        "{} {}".format(RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK),
+    )
+    sdk_with_user.detectionlists.add_user_risk_tags.assert_called_once_with(
+        TEST_ID, [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK]
+    )
+
+
+def test_add_risk_tags_when_user_does_not_exist_exits(sdk_without_user, profile):
+    with pytest.raises(UserDoesNotExistError):
+        add_risk_tags(
+            sdk_without_user,
+            profile,
+            _EMPLOYEE,
+            [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK],
+        )
+
+
+def test_add_risk_tags_when_bad_request_and_unknown_risk_tags_raises_UnknownRiskTagError(
+    sdk_with_user, profile, generic_bad_request
+):
+    sdk_with_user.detectionlists.add_user_risk_tags.side_effect = generic_bad_request
+    try:
+        add_risk_tags(
+            sdk_with_user,
+            profile,
+            _EMPLOYEE,
+            "{} foo {} bar".format(RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK),
+        )
+    except UnknownRiskTagError as err:
+        err_str = str(err)
+        assert "foo" in err_str
+        assert "bar" in err_str
+
+
+def test_remove_risk_tags_adds_tags(sdk_with_user, profile):
+    remove_risk_tags(
+        sdk_with_user,
+        profile,
+        _EMPLOYEE,
+        [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK],
+    )
+    sdk_with_user.detectionlists.remove_user_risk_tags.assert_called_once_with(
+        TEST_ID, [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK]
+    )
+
+
+def test_remove_risk_tags_when_given_space_delimited_str_adds_expected_tags(sdk_with_user, profile):
+    remove_risk_tags(
+        sdk_with_user,
+        profile,
+        _EMPLOYEE,
+        "{} {}".format(RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK),
+    )
+    sdk_with_user.detectionlists.remove_user_risk_tags.assert_called_once_with(
+        TEST_ID, [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK]
+    )
+
+
+def test_remove_risk_tags_when_user_does_not_exist_exits(sdk_without_user, profile):
+    with pytest.raises(UserDoesNotExistError):
+        remove_risk_tags(
+            sdk_without_user,
+            profile,
+            _EMPLOYEE,
+            [RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK],
+        )
+
+
+def test_remove_risk_tags_when_bad_request_and_unknown_risk_tags_raises_UnknownRiskTagError(
+    sdk_with_user, profile, generic_bad_request
+):
+    sdk_with_user.detectionlists.remove_user_risk_tags.side_effect = generic_bad_request
+    try:
+        remove_risk_tags(
+            sdk_with_user,
+            profile,
+            _EMPLOYEE,
+            "{} foo {} bar".format(RiskTags.ELEVATED_ACCESS_PRIVILEGES, RiskTags.FLIGHT_RISK),
+        )
+    except UnknownRiskTagError as err:
+        err_str = str(err)
+        assert "foo" in err_str
+        assert "bar" in err_str
+

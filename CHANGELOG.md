@@ -20,6 +20,11 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
+- `code42 high-risk-employee bulk` supports `add-risk-tags` and `remove-risk-tags`.
+    - `code42 high-risk-employee bulk generate-template <cmd>` options `add-risk-tags` and `remove-risk-tags`.
+        - `add-risk-tags` that takes a csv file with username and space separated risk tags.
+        - `remove-risk-tags` that takes a csv file with username and space separated risk tags.
+
 - Display, `Fuzzy suggestions`, valid keywords matching mistyped commands or arguments.
 
 - `code42 alerts`:
