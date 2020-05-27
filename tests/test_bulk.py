@@ -1,6 +1,5 @@
 from collections import OrderedDict
 from io import IOBase
-from random import random
 import pytest
 import logging
 
