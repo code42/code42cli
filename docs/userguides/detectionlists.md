@@ -21,7 +21,7 @@ employee.
 
 3. Save the CSV file. 
 
-## Add users to the Departing Employees list.
+## Add users to the Departing Employees list
 
 Once you have entered the employees' information in the CSV file, use the bulk add command with the CSV file path to 
 add multiple users at once. For example: 
