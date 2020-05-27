@@ -283,7 +283,11 @@ class TestCommandSubcommandLoader(object):
 
     def test_names_returns_expected_names(self):
         subcommand_loader = SubcommandLoader("")
-        subcommand_loader.load_commands = lambda: [Command("c1", ""), Command("c2", ""), Command("c3", "")]
+        subcommand_loader.load_commands = lambda: [
+            Command("c1", ""),
+            Command("c2", ""),
+            Command("c3", ""),
+        ]
         assert subcommand_loader.names == ["c1", "c2", "c3"]
 
     def test_subtrees_returns_expected_substree(self):

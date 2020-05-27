@@ -17,7 +17,7 @@ class DepartingEmployeeSubcommandLoader(DetectionListSubcommandLoader):
         super(DepartingEmployeeSubcommandLoader, self).__init__(root_command_name)
         handlers = _create_handlers()
         self.detection_list = DetectionList.create_departing_employee_list(handlers)
-        self._cmd_factory = self.detection_list.subcommand_loader
+        self._cmd_loader = self.detection_list.subcommand_loader
 
     def load_commands(self):
         return self.detection_list.load_subcommands()

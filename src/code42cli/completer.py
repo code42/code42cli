@@ -19,7 +19,7 @@ def _get_next_full_set_of_commands(cmd_loader, current):
 class Completer(object):
     def __init__(self, main_cmd_loader=None):
         self._main_cmd_loader = main_cmd_loader or MainSubcommandLoader(u"")
-    
+
     def complete(self, cmdline, point=None):
         try:
             point = point or len(cmdline)
@@ -27,17 +27,17 @@ class Completer(object):
             if len(args) < 2:
                 # `code42` already completes w/o
                 return self._main_cmd_loader.names if args[0] == MAIN_COMMAND else []
-    
+
             current = args[-1]
             cmd_loader = self._search_trees(args)
             if not cmd_loader:
                 return []
-            
+
             # `current` is already complete
             options = cmd_loader.names
             if current in options:
                 return _get_next_full_set_of_commands(cmd_loader, current)
-            
+
             return _get_matches(current, options) if options else []
         except:
             return []

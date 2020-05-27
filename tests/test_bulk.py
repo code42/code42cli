@@ -226,7 +226,7 @@ class TestBulkProcessor(object):
     # def test_run_updates_progress_bar_once_per_row(self, mock_open, progress_bar):
     #     def func_for_bulk(*args, **kwargs):
     #         pass
-    # 
+    #
     #     rows = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
     #     reader = create_mock_reader(rows)
     #     processor = BulkProcessor(func_for_bulk, reader, progress_bar=progress_bar)

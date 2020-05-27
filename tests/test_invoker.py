@@ -6,6 +6,7 @@ import logging
 
 from py42.exceptions import Py42ForbiddenError
 
+from code42cli.main import MainSubcommandLoader
 from code42cli.commands import Command, SubcommandLoader
 from code42cli.errors import Code42CLIError
 from code42cli.invoker import CommandInvoker
@@ -30,10 +31,6 @@ class SubcommandLoaderTop(SubcommandLoader):
 class SubcommandLoaderBottom(SubcommandLoader):
     def load_commands(self):
         return [Command("inner1", "the innerdesc1", handler=dummy_method)]
-
-
-def load_sub_subcommands():
-    return [Command("inner1", "the innerdesc1", handler=dummy_method)]
 
 
 @pytest.fixture
@@ -154,3 +151,30 @@ class TestCommandInvoker(object):
         with caplog.at_level(logging.ERROR):
             invoker.run(["testsub1", "inner1", "one", "two", "--invalid", "test"])
             assert "a code42cli error" in caplog.text
+
+    def test_run_incorrect_command_suggests_proper_sub_commands(self, caplog):
+        command = Command(u"", u"", subcommand_loader=MainSubcommandLoader(u""))
+        cmd_invoker = CommandInvoker(command)
+        with pytest.raises(SystemExit):
+            cmd_invoker.run([u"profile", u"crate"])
+        with caplog.at_level(logging.ERROR):
+            assert u"Did you mean one of the following?" in caplog.text
+            assert u"create" in caplog.text
+
+    def test_run_incorrect_command_suggests_proper_main_commands(self, caplog):
+        command = Command(u"", u"", subcommand_loader=MainSubcommandLoader(u""))
+        cmd_invoker = CommandInvoker(command)
+        with pytest.raises(SystemExit):
+            cmd_invoker.run([u"prfile", u"crate"])
+        with caplog.at_level(logging.ERROR):
+            assert u"Did you mean one of the following?" in caplog.text
+            assert u"profile" in caplog.text
+
+    def test_run_incorrect_command_suggests_proper_argument_name(self, caplog):
+        command = Command(u"", u"", subcommand_loader=MainSubcommandLoader(u""))
+        cmd_invoker = CommandInvoker(command)
+        with pytest.raises(SystemExit):
+            cmd_invoker.run([u"security-data", u"write-to", u"abc", u"--filename"])
+        with caplog.at_level(logging.ERROR):
+            assert u"Did you mean one of the following?" in caplog.text
+            assert u"--file-name" in caplog.text

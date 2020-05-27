@@ -1,5 +1,6 @@
 from code42cli.bulk import BulkCommandType
 from code42cli.commands import Command, SubcommandLoader
+from code42cli.cmds.detectionlists.bulk import HighRiskBulkCommandType
 
 
 def create_usage_prefix(detection_list_name):
@@ -75,6 +76,15 @@ class DetectionListBulkSubcommandLoader(SubcommandLoader):
             arg_customizer=_load_bulk_generate_template_description,
         )
 
+    def create_hre_bulk_generate_template_command(self, handler):
+        return Command(
+            u"generate-template",
+            u"Generate the necessary csv template needed for bulk adding users.",
+            u"{} generate-template <cmd> <optional args>".format(self._bulk_usage_prefix),
+            handler=handler,
+            arg_customizer=self._load_hre_bulk_generate_template_description,
+        )
+
     def create_bulk_add_command(self, handler):
         return Command(
             self.ADD,
@@ -93,6 +103,38 @@ class DetectionListBulkSubcommandLoader(SubcommandLoader):
             arg_customizer=self._load_bulk_remove_description,
         )
 
+    def create_bulk_add_risk_tags_command(self, handler):
+        return Command(
+            u"add-risk-tags",
+            u"Associates risk tags with a user in bulk.",
+            u"{} {} <file>".format(self._bulk_usage_prefix, HighRiskBulkCommandType.ADD_RISK_TAG),
+            handler=handler,
+            arg_customizer=self._load_bulk_add_risk_tags_description,
+        )
+
+    def create_bulk_remove_risk_tags_command(self, handler):
+        return Command(
+            u"remove-risk-tags",
+            u"Disassociates risk tags from a user in bulk.",
+            u"{} {} <file>".format(
+                self._bulk_usage_prefix, HighRiskBulkCommandType.REMOVE_RISK_TAG
+            ),
+            handler=handler,
+            arg_customizer=self._load_bulk_remove_risk_tags_description,
+        )
+
+    @staticmethod
+    def _load_bulk_generate_template_description(argument_collection):
+        cmd_type = argument_collection.arg_configs[u"cmd"]
+        cmd_type.set_help(u"The type of command the template will be used for.")
+        cmd_type.set_choices(BulkCommandType())
+
+    @staticmethod
+    def _load_hre_bulk_generate_template_description(argument_collection):
+        cmd_type = argument_collection.arg_configs[u"cmd"]
+        cmd_type.set_help(u"The type of command the template will be used for.")
+        cmd_type.set_choices(HighRiskBulkCommandType())
+
     def _load_bulk_add_description(self, argument_collection):
         csv_file = argument_collection.arg_configs[u"csv_file"]
         csv_file.set_help(
@@ -107,4 +149,20 @@ class DetectionListBulkSubcommandLoader(SubcommandLoader):
             u"A file containing a line-separated list of users to remove form the {} detection list".format(
                 self._name
             )
+        )
+
+    def _load_bulk_add_risk_tags_description(self, argument_collection):
+        csv_file = argument_collection.arg_configs[u"csv_file"]
+        csv_file.set_help(
+            u"A file containing a ',' separated username with space-separated tags to add "
+            u"to the {} detection list. "
+            u"e.g. test@email.com,tag1 tag2 tag3".format(self._name)
+        )
+
+    def _load_bulk_remove_risk_tags_description(self, argument_collection):
+        csv_file = argument_collection.arg_configs[u"csv_file"]
+        csv_file.set_help(
+            u"A file containing a ',' separated username with space-separated tags to remove "
+            u"from the {} detection list. "
+            u"e.g. test@email.com,tag1 tag2 tag3".format(self._name)
         )

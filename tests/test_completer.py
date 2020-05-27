@@ -57,7 +57,7 @@ class TestCompleter(object):
     def test_complete_for_alert_rules_bulk_gen_template(self):
         actual = self._completer.complete("code42 alert-rules bulk gen")
         assert "generate-template" in actual
-    
+
     def test_complete_when_arg_is_first_and_complete_returns_first_set_of_options(self):
         actual = self._completer.complete("code42 ")
         assert "profile" in actual
@@ -66,13 +66,13 @@ class TestCompleter(object):
         assert "security-data" in actual
         assert "departing-employee" in actual
         assert "high-risk-employee" in actual
-        
+
     def test_complete_when_arg_is_complete_returns_next_options(self):
         actual = self._completer.complete("code42 departing-employee bulk")
         assert "generate-template" in actual
         assert "add" in actual
         assert "remove" in actual
-    
+
     def test_complete_when_arg_is_complete_and_ends_in_space_returns_next_options(self):
         actual = self._completer.complete("code42 departing-employee bulk ")
         assert "generate-template" in actual
