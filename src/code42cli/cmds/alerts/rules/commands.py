@@ -44,9 +44,9 @@ def _generate_template_file(cmd, path=None):
 
     Args:
         cmd (str or unicode): An option from the `BulkCommandType` enum specifying which type of 
-        file to generate.
+            file to generate.
         path (str or unicode, optional): A path to put the file after it's generated. If None, will 
-        use the current working directory. Defaults to None.
+            use the current working directory. Defaults to None.
     """
     handler = None
     filename = u"alert_rule.csv"
