@@ -25,6 +25,10 @@ class TestHighRiskEmployeeSubcommandLoader(object):
         assert "bulk" in names
         assert "remove" in names
 
+    def test_loader_has_expected_detection_list_name(self):
+        loader = HighRiskEmployeeSubcommandLoader("test")
+        assert "high-risk-employee" == loader.detection_list.name
+
 
 def test_add_high_risk_employee_when_given_cloud_alias_adds_alias(sdk_with_user, profile):
     alias = "risk employee alias"

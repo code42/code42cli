@@ -23,6 +23,10 @@ class TestDepartingEmployeeSubcommandLoader(object):
         assert "add" in names
         assert "bulk" in names
         assert "remove" in names
+    
+    def test_loader_has_expected_detection_list_name(self):
+        loader = DepartingEmployeeSubcommandLoader("test")
+        assert "departing-employee" == loader.detection_list.name
 
 
 def test_add_departing_employee_when_given_cloud_alias_adds_alias(sdk_with_user, profile):
