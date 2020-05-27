@@ -33,9 +33,9 @@ class Completer(object):
             if not cmd_loader:
                 return []
 
-            # `current` is already complete
             options = cmd_loader.names
             if current in options:
+                # `current` is already complete
                 return _get_next_full_set_of_commands(cmd_loader, current)
 
             return _get_matches(current, options) if options else []
