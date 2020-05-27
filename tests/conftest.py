@@ -34,6 +34,7 @@ def file_event_namespace():
             source=None,
             file_name=None,
             file_path=None,
+            file_category=None,
             process_owner=None,
             tab_url=None,
             include_non_exposure=None,

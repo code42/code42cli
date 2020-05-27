@@ -91,6 +91,7 @@ def test_extract_when_is_advanced_query_and_has_exposure_types_exits(
         "source",
         "file_name",
         "file_path",
+        "file_category",
         "process_owner",
         "tab_url",
     ],
