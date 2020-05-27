@@ -161,8 +161,8 @@ class warn_interrupt(object):
 
 
 def get_user_id(sdk, username):
-    """Returns the user's UID (referred to by `user_id` in detection lists). If the user does not 
-    exist, it prints an error and exits.
+    """Returns the user's UID (referred to by `user_id` in detection lists). Raises 
+    `UserDoesNotExistError` if the user doesn't exist in the Code42 server.
     
     Args:
         sdk (py42.sdk.SDKClient): The py42 sdk.

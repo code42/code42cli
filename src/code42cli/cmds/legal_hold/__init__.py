@@ -86,11 +86,17 @@ def show_matter(sdk, matter_id, include_inactive=False, include_policy=False):
     print(u"")
     format_to_table(rows, column_size)
     print(u"\nActive matter members:\n")
-    format_string_list_to_columns(active_usernames)
+    if active_usernames:
+        format_string_list_to_columns(active_usernames)
+    else:
+        print("None")
 
     if include_inactive:
         print(u"\nInactive matter members:\n")
-        format_string_list_to_columns(inactive_usernames)
+        if inactive_usernames:
+            format_string_list_to_columns(inactive_usernames)
+        else:
+            print("None")
 
     if include_policy:
         _get_and_print_preservation_policy(sdk, matter[u"holdPolicyUid"])
