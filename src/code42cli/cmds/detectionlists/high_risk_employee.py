@@ -21,7 +21,7 @@ class HighRiskEmployeeSubcommandLoader(DetectionListSubcommandLoader):
     def __init__(self, root_command_name):
         super(HighRiskEmployeeSubcommandLoader, self).__init__(root_command_name)
         handlers = _create_handlers()
-        self.detection_list = DetectionList.create_departing_employee_list(handlers)
+        self.detection_list = DetectionList.create_high_risk_employee_list(handlers)
         self._cmd_loader = self.detection_list.subcommand_loader
 
     def load_commands(self):

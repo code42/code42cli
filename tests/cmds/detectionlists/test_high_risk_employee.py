@@ -4,6 +4,7 @@ from code42cli.errors import UserAlreadyAddedError, UnknownRiskTagError, UserDoe
 from code42cli.cmds.detectionlists.high_risk_employee import (
     add_high_risk_employee,
     remove_high_risk_employee,
+    HighRiskEmployeeSubcommandLoader,
 )
 
 from code42cli.cmds.detectionlists.enums import RiskTags
@@ -13,6 +14,20 @@ from py42.exceptions import Py42BadRequestError
 
 
 _EMPLOYEE = "risky employee"
+
+
+class TestHighRiskEmployeeSubcommandLoader(object):
+    def test_load_subcommands_loads_expected_commands(self):
+        loader = HighRiskEmployeeSubcommandLoader("test")
+        cmds = loader.load_commands()
+        names = [cmd.name for cmd in cmds]
+        assert "add" in names
+        assert "bulk" in names
+        assert "remove" in names
+
+    def test_loader_has_expected_detection_list_name(self):
+        loader = HighRiskEmployeeSubcommandLoader("test")
+        assert "high-risk-employee" == loader.detection_list.name
 
 
 def test_add_high_risk_employee_when_given_cloud_alias_adds_alias(sdk_with_user, profile):
