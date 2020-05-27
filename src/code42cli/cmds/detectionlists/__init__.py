@@ -98,20 +98,26 @@ class DetectionList(object):
         commands = [add, remove]
 
         if self.name == DetectionLists.HIGH_RISK_EMPLOYEE:
-            bulk_add_risk_tags = self.factory.create_bulk_add_risk_tags_command(self.bulk_add_risk_tags)
-            bulk_remove_risk_tags = self.factory.create_bulk_remove_risk_tags_command(self.bulk_remove_risk_tags)
-            commands.extend([bulk_add_risk_tags, bulk_remove_risk_tags])
-            self.handlers.add_handler(u"add_risk_tags", add_risk_tags)
-            self.handlers.add_handler(u"remove_risk_tags", remove_risk_tags)
-            generate_template_cmd = self.factory.create_hre_bulk_generate_template_command(
-                self.generate_template_file
-            )
+            commands.extend(self._get_risk_tags_bulk_subcommands())
         else:
             generate_template_cmd = self.factory.create_bulk_generate_template_command(
                 self.generate_template_file
             )
-        commands.append(generate_template_cmd)
+            commands.append(generate_template_cmd)
         return commands
+
+    def _get_risk_tags_bulk_subcommands(self):
+        bulk_add_risk_tags = self.factory.create_bulk_add_risk_tags_command(self.bulk_add_risk_tags)
+        bulk_remove_risk_tags = self.factory.create_bulk_remove_risk_tags_command(
+            self.bulk_remove_risk_tags
+        )
+
+        self.handlers.add_handler(u"add_risk_tags", add_risk_tags)
+        self.handlers.add_handler(u"remove_risk_tags", remove_risk_tags)
+        generate_template_cmd = self.factory.create_hre_bulk_generate_template_command(
+            self.generate_template_file
+        )
+        return [bulk_add_risk_tags, bulk_remove_risk_tags, generate_template_cmd]
 
     def generate_template_file(self, cmd, path=None):
         """Generates a template file a user would need to fill-in for bulk operating on the 
