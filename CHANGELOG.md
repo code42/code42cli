@@ -60,6 +60,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - A progress bar that displays during bulk commands.
 
+- `--file-category` flag for `code42 security-data` search commands that limits events by file category.
+
 ### Fixed
 
 - Fixed bug in bulk commands where value-less fields in csv files were treated as empty strings instead of None.
