@@ -76,11 +76,11 @@ code42 high-risk-employee bulk generate-template <cmd>
 Bulk add users to the high-risk-employee detection list using a csv file.
 
 Arguments:
-* `csv-file`: The path to the csv file for bulk adding users to the high-risk-employee detection list.
+* `filename`: The path to the csv file for bulk adding users to the high-risk-employee detection list.
 
 Usage:
 ```bash
-code42 high-risk-employee bulk add <csv-file>
+code42 high-risk-employee bulk add <filename>
 ```
 
 ## bulk remove

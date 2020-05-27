@@ -44,11 +44,11 @@ code42 departing-employee bulk generate-template <cmd>
 Bulk add users to the departing-employee detection list using a csv file.
 
 Arguments:
-* `csv-file`: The path to the csv file for bulk adding users to the departing-employee detection list.
+* `filename`: The path to the csv file for bulk adding users to the departing-employee detection list.
 
 Usage:
 ```bash
-code42 departing-employee bulk add <csv-file>
+code42 departing-employee bulk add <filename>
 ```
 
 ## bulk remove
