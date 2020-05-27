@@ -187,4 +187,4 @@ class TestCommandInvoker(object):
             cmd_invoker.run([u"security-data", u"write-to", u"abc", u"--filename"])
         with caplog.at_level(logging.ERROR):
             assert u"Did you mean one of the following?" in caplog.text
-            assert u"file_name" in caplog.text
+            assert u"--file-name" in caplog.text

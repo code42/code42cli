@@ -107,9 +107,17 @@ class CommandInvoker(object):
                 parser.print_help(sys.stderr)
             sys.exit(2)
 
+    @staticmethod
+    def _get_arg_flags(arguments):
+        flag_names = []
+        for arg in arguments.values():
+            arg_flags = [name for name in arg.settings["options_list"] if name.startswith("-")]
+            flag_names.extend(arg_flags)
+        return flag_names
+
     def _set_argument_keywords(self, command_key, arguments):
         self._COMMAND_ARG_KEYWORDS[command_key] = set()
-        self._COMMAND_ARG_KEYWORDS[command_key].update(arguments)
+        self._COMMAND_ARG_KEYWORDS[command_key].update(CommandInvoker._get_arg_flags(arguments))
 
     def _set_command_keywords(self, new_key):
         """Creates a dictionary, with top level command as key and set of all its subcommands
