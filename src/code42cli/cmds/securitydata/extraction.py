@@ -64,6 +64,7 @@ def _create_file_event_filters(args):
     not args.source or filters.append(Source.is_in(args.source))
     not args.file_name or filters.append(FileName.is_in(args.file_name))
     not args.file_path or filters.append(FilePath.is_in(args.file_path))
+    not args.file_category or filters.append(FileCategory.is_in(args.file_category))
     not args.process_owner or filters.append(ProcessOwner.is_in(args.process_owner))
     not args.tab_url or filters.append(TabURL.is_in(args.tab_url))
     _try_append_exposure_types_filter(filters, args.include_non_exposure, args.type)
