@@ -90,8 +90,7 @@ class AlertRulesBulkSubcommandLoader(SubcommandLoader):
 
         bulk_add = Command(
             self.ADD,
-            u"Add users to alert rules."
-            u"CSV file format: `rule_id,username`.",
+            u"Add users to alert rules. " u"CSV file format: `rule_id,username`.",
             u"{} add <filename>".format(usage_prefix),
             handler=add_bulk_users,
             arg_customizer=_customize_bulk_add_arguments,
@@ -99,8 +98,7 @@ class AlertRulesBulkSubcommandLoader(SubcommandLoader):
 
         bulk_remove = Command(
             self.REMOVE,
-            u"Remove users from alert rules."
-            u"CSV file format: `rule_id,username`.",
+            u"Remove users from alert rules. " u"CSV file format: `rule_id,username`.",
             u"{} remove <filename>".format(usage_prefix),
             handler=remove_bulk_users,
             arg_customizer=_customize_bulk_remove_arguments,

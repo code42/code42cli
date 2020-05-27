@@ -95,7 +95,9 @@ class DetectionList(object):
         return [bulk, add, remove]
 
     def _load_bulk_subcommands(self):
-        add = self.bulk_subcommand_loader.create_bulk_add_command(self.bulk_add_employees)
+        add = self.bulk_subcommand_loader.create_bulk_add_command(
+            self.bulk_add_employees, self.handlers.add_employee
+        )
         remove = self.bulk_subcommand_loader.create_bulk_remove_command(self.bulk_remove_employees)
         commands = [add, remove]
 
@@ -110,10 +112,10 @@ class DetectionList(object):
 
     def _get_risk_tags_bulk_subcommands(self):
         bulk_add_risk_tags = self.bulk_subcommand_loader.create_bulk_add_risk_tags_command(
-            self.bulk_add_risk_tags
+            self.bulk_add_risk_tags, add_risk_tags
         )
         bulk_remove_risk_tags = self.bulk_subcommand_loader.create_bulk_remove_risk_tags_command(
-            self.bulk_remove_risk_tags
+            self.bulk_remove_risk_tags, remove_risk_tags
         )
 
         self.handlers.add_handler(u"add_risk_tags", add_risk_tags)
