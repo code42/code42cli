@@ -25,7 +25,6 @@ class DetectionListSubcommandLoader(SubcommandLoader):
 
     def __init__(self, detection_list_name, bulk_subcommand_loader=None):
         super(DetectionListSubcommandLoader, self).__init__(detection_list_name)
-        print(detection_list_name)
         self._name = detection_list_name
         self._usage_prefix = create_usage_prefix(detection_list_name)
         self.bulk_subcommand_loader = bulk_subcommand_loader or DetectionListBulkSubcommandLoader(

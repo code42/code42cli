@@ -1,10 +1,10 @@
 import pytest
-import logging
 
 from code42cli.errors import UserAlreadyAddedError, UserDoesNotExistError
 from code42cli.cmds.detectionlists.departing_employee import (
     add_departing_employee,
     remove_departing_employee,
+    DepartingEmployeeSubcommandLoader,
 )
 
 from .conftest import TEST_ID
@@ -13,6 +13,16 @@ from py42.exceptions import Py42BadRequestError
 
 
 _EMPLOYEE = "departing employee"
+
+
+class TestDepartingEmployeeSubcommandLoader(object):
+    def test_load_subcommands_loads_expected_commands(self):
+        loader = DepartingEmployeeSubcommandLoader("test")
+        cmds = loader.load_commands()
+        names = [cmd.name for cmd in cmds]
+        assert "add" in names
+        assert "bulk" in names
+        assert "remove" in names
 
 
 def test_add_departing_employee_when_given_cloud_alias_adds_alias(sdk_with_user, profile):
