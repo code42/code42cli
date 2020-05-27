@@ -64,7 +64,7 @@ code42 alert-rules bulk generate-template <cmd>
 Add users to alert rules. CSV file format: `rule_id,username`.
 
 Arguments:
-* `file-name`: The path to the csv file with columns 'rule_id,username'for bulk adding users to the alert rule.
+* `file-name`: The path to the csv file with columns 'rule_id,username' for bulk adding users to the alert rule.
 
 Usage:
 ```bash
