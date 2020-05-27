@@ -1,3 +1,4 @@
+from code42cli import MAIN_COMMAND
 from code42cli.main import MainSubcommandLoader
 
 
@@ -20,6 +21,8 @@ class Completer(object):
                 point = len(cmdline)
             args = cmdline[0:point].split()
             if len(args) < 2:
+                if args[0] == MAIN_COMMAND:
+                    return self._main_cmd_loader.names
                 return []  # `code42` already completes w/o
     
             cmd_loader = self._main_cmd_loader
