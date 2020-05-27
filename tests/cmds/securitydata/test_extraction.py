@@ -1,14 +1,16 @@
 import pytest
 import logging
+from requests import Response, HTTPError
 
 from py42.sdk.queries.fileevents.filters import *
+from py42.exceptions import Py42BadRequestError
 
-import code42cli.cmds.securitydata.extraction as extraction_module
-import code42cli.errors as errors
 from code42cli import PRODUCT_NAME
+import code42cli.errors as errors
+import code42cli.cmds.securitydata.extraction as extraction_module
 from code42cli.cmds.search_shared.enums import ExposureType as ExposureTypeOptions
-from tests.cmds.conftest import get_filter_value_from_json
-from code42cli.errors import DateArgumentError
+from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore
+from ..conftest import get_filter_value_from_json
 from ...conftest import get_test_date_str, begin_date_str, ErrorTrackerTestHelper
 
 
@@ -250,7 +252,7 @@ def test_extract_when_given_min_timestamp_more_than_ninety_days_back_in_ad_hoc_m
     file_event_namespace.incremental = False
     date = get_test_date_str(days_ago=91) + " 12:51:00"
     file_event_namespace.begin = date
-    with pytest.raises(DateArgumentError):
+    with pytest.raises(errors.DateArgumentError):
         extraction_module.extract(sdk, profile, logger, file_event_namespace)
 
 
@@ -259,7 +261,7 @@ def test_extract_when_end_date_is_before_begin_date_causes_exit(
 ):
     file_event_namespace.begin = get_test_date_str(days_ago=5)
     file_event_namespace.end = get_test_date_str(days_ago=6)
-    with pytest.raises(DateArgumentError):
+    with pytest.raises(errors.DateArgumentError):
         extraction_module.extract(sdk, profile, logger, file_event_namespace)
 
 
@@ -479,18 +481,16 @@ def test_extract_when_not_errored_and_does_not_log_error_occurred(
 def test_extract_when_not_errored_and_is_interactive_does_not_print_error(
     sdk, profile, logger, file_event_namespace_with_begin, file_event_extractor, cli_logger, mocker
 ):
-    errors.ERRORED = False
-    mocker.patch("code42cli.cmds.securitydata.extraction.logger", cli_logger)
-    extraction_module.extract(sdk, profile, logger, file_event_namespace_with_begin)
-    assert cli_logger.print_and_log_error.call_count == 0
-    assert cli_logger.log_error.call_count == 0
-    errors.ERRORED = False
+    with ErrorTrackerTestHelper():
+        mocker.patch("code42cli.cmds.securitydata.extraction.logger", cli_logger)
+        extraction_module.extract(sdk, profile, logger, file_event_namespace_with_begin)
+        assert cli_logger.print_and_log_error.call_count == 0
+        assert cli_logger.log_error.call_count == 0
 
 
 def test_when_sdk_raises_exception_global_variable_gets_set(
     mocker, sdk, profile, logger, file_event_namespace_with_begin, mock_42
 ):
-    errors.ERRORED = False
     mock_sdk = mocker.MagicMock()
 
     def sdk_side_effect(self, *args):
@@ -503,3 +503,23 @@ def test_when_sdk_raises_exception_global_variable_gets_set(
     with ErrorTrackerTestHelper():
         extraction_module.extract(sdk, profile, logger, file_event_namespace_with_begin)
         assert errors.ERRORED
+
+def test_create_handlers_creates_handler_that_handles_problematic_filters(
+    mocker, sdk, profile, logger, file_event_namespace_with_begin, mock_42, caplog
+):
+    store = mocker.MagicMock(spec=FileEventCursorStore)
+    handlers = extraction_module.create_handlers(logger, store, u"fileEvents")
+
+    mock_response = mocker.MagicMock(spec=Response)
+    mock_response.text = """{"totalCount":null,"fileEvents":null,"problems":[{"badFilter":
+    {"term":"fileCategory","operator":"IS","value":"Document","display":null},
+    "description":null,"type":"ILLEGAL_VALUE"}]}"""
+    base_err = mocker.MagicMock(spec=HTTPError)
+    base_err.response = mock_response
+    err = Py42BadRequestError(base_err)
+    
+    handlers.handle_error(err)
+
+    with caplog.at_level(logging.ERROR):
+        extraction_module.extract(sdk, profile, logger, file_event_namespace_with_begin)
+        assert u"Unknown value 'Document' for filter 'fileCategory'." in caplog.text
