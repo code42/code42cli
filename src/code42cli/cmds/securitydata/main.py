@@ -7,48 +7,54 @@ from code42cli.cmds.search_shared.enums import (
 )
 from code42cli.cmds.securitydata.extraction import extract
 from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore
-from code42cli.commands import Command
+from code42cli.commands import Command, SubcommandLoader
 
 
-def load_subcommands():
-    """Sets up the `security-data` subcommand with all of its subcommands."""
-    usage_prefix = u"code42 security-data"
+class SecurityDataSubcommandLoader(SubcommandLoader):
+    PRINT = u"print"
+    WRITE_TO = u"write-to"
+    SEND_TO = u"send-to"
+    CLEAR_CHECKPOINT = u"clear-checkpoint"
 
-    print_func = Command(
-        u"print",
-        u"Print file events to stdout.",
-        u"{} {}".format(usage_prefix, u"print <optional-args>"),
-        handler=print_out,
-        arg_customizer=_load_search_args,
-        use_single_arg_obj=True,
-    )
+    def load_commands(self):
+        """Sets up the `security-data` subcommand with all of its subcommands."""
+        usage_prefix = u"code42 security-data"
 
-    write = Command(
-        u"write-to",
-        u"Write file events to the file with the given name.",
-        u"{} {}".format(usage_prefix, u"write-to <filename> <optional-args>"),
-        handler=write_to,
-        arg_customizer=_load_write_to_args,
-        use_single_arg_obj=True,
-    )
+        print_func = Command(
+            self.PRINT,
+            u"Print file events to stdout.",
+            u"{} {}".format(usage_prefix, u"print <optional-args>"),
+            handler=print_out,
+            arg_customizer=_load_search_args,
+            use_single_arg_obj=True,
+        )
 
-    send = Command(
-        u"send-to",
-        u"Send file events to the given server address.",
-        u"{} {}".format(usage_prefix, u"send-to <server-address> <optional-args>"),
-        handler=send_to,
-        arg_customizer=_load_send_to_args,
-        use_single_arg_obj=True,
-    )
+        write = Command(
+            self.WRITE_TO,
+            u"Write file events to the file with the given name.",
+            u"{} {}".format(usage_prefix, u"write-to <filename> <optional-args>"),
+            handler=write_to,
+            arg_customizer=_load_write_to_args,
+            use_single_arg_obj=True,
+        )
 
-    clear = Command(
-        u"clear-checkpoint",
-        u"Remove the saved file event checkpoint from 'incremental' (-i) mode.",
-        u"{} {}".format(usage_prefix, u"clear-checkpoint <optional-args>"),
-        handler=clear_checkpoint,
-    )
+        send = Command(
+            self.SEND_TO,
+            u"Send file events to the given server address.",
+            u"{} {}".format(usage_prefix, u"send-to <server-address> <optional-args>"),
+            handler=send_to,
+            arg_customizer=_load_send_to_args,
+            use_single_arg_obj=True,
+        )
 
-    return [print_func, write, send, clear]
+        clear = Command(
+            self.CLEAR_CHECKPOINT,
+            u"Remove the saved file event checkpoint from 'incremental' (-i) mode.",
+            u"{} {}".format(usage_prefix, u"clear-checkpoint <optional-args>"),
+            handler=clear_checkpoint,
+        )
+
+        return [print_func, write, send, clear]
 
 
 def clear_checkpoint(sdk, profile):
