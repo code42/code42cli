@@ -1,10 +1,10 @@
 from py42.exceptions import Py42BadRequestError
 
+from code42cli.cmds.detectionlists.commands import DetectionListSubcommandLoader
 from code42cli.bulk import generate_template, run_bulk_process
 from code42cli.file_readers import create_csv_reader, create_flat_file_reader
 from code42cli.errors import UserAlreadyAddedError, UserDoesNotExistError, UnknownRiskTagError
 from code42cli.cmds.detectionlists.enums import DetectionLists, DetectionListUserKeys, RiskTags
-from code42cli.cmds.detectionlists.commands import DetectionListCommandFactory
 from code42cli.cmds.detectionlists.bulk import BulkDetectionList, BulkHighRiskEmployee
 
 
@@ -46,13 +46,15 @@ class DetectionList(object):
             given `classmethods`.
         handlers (DetectionListHandlers): A DTO containing implementations for adding / removing 
             users from specific lists.
-        cmd_factory (DetectionListCommandFactory): A factory that creates detection list commands.
+        cmd_factory (DetectionListSubcommandLoader): A factory that creates detection list commands.
     """
 
-    def __init__(self, list_name, handlers, cmd_factory=None):
+    def __init__(self, list_name, handlers, subcommand_loader=None):
         self.name = list_name
         self.handlers = handlers
-        self.factory = cmd_factory or DetectionListCommandFactory(list_name)
+        self.subcommand_loader = subcommand_loader or DetectionListSubcommandLoader(list_name)
+        self.bulk_subcommand_loader = self.subcommand_loader.bulk_subcommand_loader
+        self.bulk_subcommand_loader.load_commands = lambda: self._load_bulk_subcommands
 
     @classmethod
     def create_high_risk_employee_list(cls, handlers):
@@ -82,39 +84,41 @@ class DetectionList(object):
 
     def load_subcommands(self):
         """Loads high risk employee related subcommands"""
-        bulk = self.factory.create_bulk_command(lambda: self._load_bulk_subcommands())
-        add = self.factory.create_add_command(
+        bulk = self.subcommand_loader.create_bulk_command()
+        bulk.subcommand_loader.load_commands = lambda: self._load_bulk_subcommands()
+        add = self.subcommand_loader.create_add_command(
             self.handlers.add_employee, self.handlers.load_add_description
         )
-        remove = self.factory.create_remove_command(
+        remove = self.subcommand_loader.create_remove_command(
             self.handlers.remove_employee, load_username_description
         )
         return [bulk, add, remove]
 
     def _load_bulk_subcommands(self):
-
-        add = self.factory.create_bulk_add_command(self.bulk_add_employees)
-        remove = self.factory.create_bulk_remove_command(self.bulk_remove_employees)
+        add = self.bulk_subcommand_loader.create_bulk_add_command(self.bulk_add_employees)
+        remove = self.bulk_subcommand_loader.create_bulk_remove_command(self.bulk_remove_employees)
         commands = [add, remove]
 
         if self.name == DetectionLists.HIGH_RISK_EMPLOYEE:
             commands.extend(self._get_risk_tags_bulk_subcommands())
         else:
-            generate_template_cmd = self.factory.create_bulk_generate_template_command(
+            generate_template_cmd = self.bulk_subcommand_loader.create_bulk_generate_template_command(
                 self.generate_template_file
             )
             commands.append(generate_template_cmd)
         return commands
 
     def _get_risk_tags_bulk_subcommands(self):
-        bulk_add_risk_tags = self.factory.create_bulk_add_risk_tags_command(self.bulk_add_risk_tags)
-        bulk_remove_risk_tags = self.factory.create_bulk_remove_risk_tags_command(
+        bulk_add_risk_tags = self.bulk_subcommand_loader.create_bulk_add_risk_tags_command(
+            self.bulk_add_risk_tags
+        )
+        bulk_remove_risk_tags = self.bulk_subcommand_loader.create_bulk_remove_risk_tags_command(
             self.bulk_remove_risk_tags
         )
 
         self.handlers.add_handler(u"add_risk_tags", add_risk_tags)
         self.handlers.add_handler(u"remove_risk_tags", remove_risk_tags)
-        generate_template_cmd = self.factory.create_hre_bulk_generate_template_command(
+        generate_template_cmd = self.bulk_subcommand_loader.create_hre_bulk_generate_template_command(
             self.generate_template_file
         )
         return [bulk_add_risk_tags, bulk_remove_risk_tags, generate_template_cmd]

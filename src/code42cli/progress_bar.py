@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from code42cli.logger import get_main_cli_logger, get_progress_logger
+from code42cli.logger import get_progress_logger
 
 
 class ProgressBar(object):

@@ -11,10 +11,9 @@ class HighRiskBulkCommandType(BulkCommandType):
 
 
 class BulkDetectionList(object):
-
     def __init__(self):
         self.type = BulkCommandType
-        
+
     def get_handler(self, handlers, cmd):
         handler = None
         if cmd == self.type.ADD:
@@ -25,7 +24,6 @@ class BulkDetectionList(object):
 
 
 class BulkHighRiskEmployee(BulkDetectionList):
-
     def __init__(self):
         super(BulkHighRiskEmployee, self).__init__()
         self.type = HighRiskBulkCommandType

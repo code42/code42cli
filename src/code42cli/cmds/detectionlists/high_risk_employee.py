@@ -1,5 +1,6 @@
 from py42.exceptions import Py42BadRequestError
 
+from code42cli.cmds.detectionlists import DetectionListSubcommandLoader
 from code42cli.commands import Command
 from code42cli.cmds.detectionlists import (
     DetectionList,
@@ -16,30 +17,34 @@ from code42cli.cmds.detectionlists import (
 from code42cli.cmds.detectionlists.enums import DetectionLists, DetectionListUserKeys, RiskTags
 
 
-def load_subcommands():
-    handlers = _create_handlers()
-    detection_list = DetectionList.create_high_risk_employee_list(handlers)
+class HighRiskEmployeeSubcommandLoader(DetectionListSubcommandLoader):
+    def __init__(self, root_command_name):
+        super(HighRiskEmployeeSubcommandLoader, self).__init__(root_command_name)
+        handlers = _create_handlers()
+        self.detection_list = DetectionList.create_departing_employee_list(handlers)
+        self._cmd_loader = self.detection_list.subcommand_loader
 
-    cmd_list = detection_list.load_subcommands()
-    cmd_list.extend(
-        [
-            Command(
-                u"add-risk-tags",
-                u"Associates risk tags with a user.",
-                u"code42 high-risk-employee add-risk-tags --username <username> --tag <risk-tags>",
-                handler=add_risk_tags,
-                arg_customizer=load_risk_tag_mgmt_descriptions,
-            ),
-            Command(
-                u"remove-risk-tags",
-                u"Disassociates risk tags from a user.",
-                u"code42 high-risk-employee remove-risk-tags --username <username> --tag <risk-tags>",
-                handler=remove_risk_tags,
-                arg_customizer=load_risk_tag_mgmt_descriptions,
-            ),
-        ]
-    )
-    return cmd_list
+    def load_commands(self):
+        cmds = self.detection_list.load_subcommands()
+        cmds.extend(
+            [
+                Command(
+                    u"add-risk-tags",
+                    u"Associates risk tags with a user.",
+                    u"code42 high-risk-employee add-risk-tags --username <username> --tag <risk-tags>",
+                    handler=add_risk_tags,
+                    arg_customizer=load_risk_tag_mgmt_descriptions,
+                ),
+                Command(
+                    u"remove-risk-tags",
+                    u"Disassociates risk tags from a user.",
+                    u"code42 high-risk-employee remove-risk-tags --username <username> --tag <risk-tags>",
+                    handler=remove_risk_tags,
+                    arg_customizer=load_risk_tag_mgmt_descriptions,
+                ),
+            ]
+        )
+        return cmds
 
 
 def _create_handlers():

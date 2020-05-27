@@ -28,8 +28,8 @@ class Command(object):
         arg_customizer (function, optional): A function accepting a single `ArgCollection`
             parameter that allows for editing the collection when `get_arg_configs` is run.
 
-        subcommand_loader (function, optional): A function returning a list of all subcommands
-            parented by this command.
+        subcommand_loader (SubcommandLoader, optional): An object that can load subcommands 
+            for this command.
 
         use_single_arg_obj (bool, optional): When True, causes all parameters sent to
             `__call__` to be consolidated in an object with attribute names dictated
@@ -85,9 +85,15 @@ class Command(object):
     def subcommands(self):
         return self._subcommands
 
+    @property
+    def subcommand_loader(self):
+        return self._subcommand_loader
+
     def load_subcommands(self):
-        if callable(self._subcommand_loader):
-            self._subcommands = self._subcommand_loader()
+        self._subcommands = (
+            self._subcommand_loader.load_commands() if self._subcommand_loader else []
+        )
+        return self._subcommands
 
     def get_arg_configs(self):
         """Returns a collection of argparse configurations based on
@@ -141,3 +147,32 @@ def _kvps_to_obj(kvps):
     new_kvps = {key: kvps[key] for key in kvps if key in [SDK_ARG_NAME, PROFILE_ARG_NAME]}
     new_kvps[u"args"] = DictObject(kvps)
     return new_kvps
+
+
+class SubcommandLoader(object):
+    """Responsible for creating subcommands for it's root command. It is also useful for getting 
+    command information ahead of time, as in the example of tab completion."""
+
+    def __init__(self, root_command_name):
+        self.root = root_command_name
+
+    @property
+    def names(self):
+        """The names of all the subcommands in this subcommabd loader's root command."""
+        sub_cmds = self.load_commands()
+        return [cmd.name for cmd in sub_cmds]
+
+    @property
+    def subtrees(self):
+        """All subcommands for this subcommand loader's root command mapped to their given 
+        subcommand loaders."""
+        cmds = self.load_commands()
+        results = {}
+        for cmd in cmds:
+            subcommand_loader = cmd.subcommand_loader
+            if subcommand_loader:
+                results[cmd.name] = subcommand_loader
+        return results
+
+    def load_commands(self):
+        return []

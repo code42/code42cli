@@ -147,7 +147,7 @@ class CommandInvoker(object):
 
         if not path_parts:
             available_values = self._COMMAND_KEYWORDS.keys()
-        elif unmatched_word.strip().startswith('-'):
+        elif unmatched_word.strip().startswith("-"):
             available_values = self._COMMAND_ARG_KEYWORDS[path_parts[0]]
         else:
             available_values = self._COMMAND_KEYWORDS[path_parts[0]]

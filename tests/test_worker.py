@@ -8,7 +8,7 @@ class TestWorkerStats(object):
         stats = WorkerStats(100)
         stats._total_errors = 101
         assert not stats.total_successes
-        
+
 
 class TestWorker(object):
     def test_is_async(self):
