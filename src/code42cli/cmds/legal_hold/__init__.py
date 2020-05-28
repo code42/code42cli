@@ -35,7 +35,7 @@ def add_user(sdk, matter_id, username):
     matter = _check_matter_is_accessible(sdk, matter_id)
     try:
         sdk.legalhold.add_to_matter(user_id, matter_id)
-    except Py42HTTPError as e:
+    except Py42BadRequestError as e:
         if u"USER_ALREADY_IN_HOLD" in e.response.text:
             matter_id_and_name_text = u"legal hold matter id={}, name={}".format(
                 matter_id, matter[u"name"]
