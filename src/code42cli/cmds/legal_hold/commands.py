@@ -1,7 +1,7 @@
 import os
 
 from code42cli.args import ArgConfig
-from code42cli.commands import Command
+from code42cli.commands import Command, SubcommandLoader
 from code42cli.bulk import generate_template, BulkCommandType
 from code42cli.cmds.legal_hold import (
     add_user,
@@ -11,6 +11,93 @@ from code42cli.cmds.legal_hold import (
     remove_bulk_users,
     show_matter,
 )
+
+
+class LegalHoldSubcommandLoader(SubcommandLoader):
+    ADD_USER = "add-user"
+    REMOVE_USER = "remove-user"
+    LIST = "list"
+    SHOW = "show"
+    BULK = "bulk"
+
+    def load_commands(self):
+        """Sets up the `legal-hold` subcommand with all of its subcommands."""
+        usage_prefix = u"code42 legal-hold"
+
+        add = Command(
+            self.ADD_USER,
+            u"Add a user to a legal hold matter.",
+            u"{} add-user --matter-id <id>  --username <username>".format(usage_prefix),
+            handler=add_user,
+            arg_customizer=_customize_add_arguments,
+        )
+
+        remove = Command(
+            self.REMOVE_USER,
+            u"Remove a user from a legal hold matter.",
+            u"{} remove-user --matter-id <id> --username <username>".format(usage_prefix),
+            handler=remove_user,
+            arg_customizer=_customize_remove_arguments,
+        )
+
+        list_matters = Command(
+            self.LIST,
+            u"Fetch existing legal hold matters.",
+            u"{} list".format(usage_prefix),
+            handler=get_matters,
+        )
+
+        show = Command(
+            self.SHOW,
+            u"Fetch all legal hold custodians for a given matter.",
+            u"{} show <matter-id>".format(usage_prefix),
+            handler=show_matter,
+            arg_customizer=_customize_show_arguments,
+        )
+
+        bulk = Command(
+            self.BULK,
+            u"Tools for executing bulk commands.",
+            subcommand_loader=LegalHoldBulkSubcommandLoader.load_commands,
+        )
+
+        return [add, remove, list_matters, show, bulk]
+
+
+class LegalHoldBulkSubcommandLoader(SubcommandLoader):
+    GENERATE_TEMPLATE = u"generate-template"
+    ADD = u"add"
+    REMOVE = u"remove"
+
+    def load_commands(self):
+        """Sets up the `legal-hold bulk` subcommands."""
+        usage_prefix = u"code42 legal-hold bulk"
+
+        generate_template_cmd = Command(
+            u"generate-template",
+            u"Generate the necessary csv template needed for bulk adding users.",
+            u"{} generate-template <cmd> <optional args>".format(usage_prefix),
+            handler=_generate_template_file,
+            arg_customizer=_load_bulk_generate_template_description,
+        )
+
+        bulk_add = Command(
+            u"add",
+            u"Bulk add users to legal hold matters from a csv file. CSV file format: matter_id,username",
+            u"{} add <filename>".format(usage_prefix),
+            handler=add_bulk_users,
+            arg_customizer=_customize_bulk_arguments,
+        )
+
+        bulk_remove = Command(
+            u"remove",
+            u"Bulk remove users from legal hold matters from a csv file. CSV file format: matter_id,username",
+            u"{} remove <filename>".format(usage_prefix),
+            handler=remove_bulk_users,
+            arg_customizer=_customize_bulk_arguments,
+        )
+
+        return [generate_template_cmd, bulk_add, bulk_remove]
 
 
 def _customize_add_arguments(argument_collection):
@@ -93,80 +180,3 @@ def _load_bulk_generate_template_description(argument_collection):
     cmd_type = argument_collection.arg_configs[u"cmd"]
     cmd_type.set_help(u"The type of command the template with be used for.")
     cmd_type.set_choices(BulkCommandType())
-
-
-class LegalHoldBulkCommands(object):
-    @staticmethod
-    def load_commands():
-        usage_prefix = u"code42 legal-hold bulk"
-
-        generate_template_cmd = Command(
-            u"generate-template",
-            u"Generate the necessary csv template needed for bulk adding users.",
-            u"{} generate-template <cmd> <optional args>".format(usage_prefix),
-            handler=_generate_template_file,
-            arg_customizer=_load_bulk_generate_template_description,
-        )
-
-        bulk_add = Command(
-            u"add",
-            u"Bulk add users to legal hold matters from a csv file. CSV file format: matter_id,username",
-            u"{} add <filename>".format(usage_prefix),
-            handler=add_bulk_users,
-            arg_customizer=_customize_bulk_arguments,
-        )
-
-        bulk_remove = Command(
-            u"remove",
-            u"Bulk remove users from legal hold matters from a csv file. CSV file format: matter_id,username",
-            u"{} remove <filename>".format(usage_prefix),
-            handler=remove_bulk_users,
-            arg_customizer=_customize_bulk_arguments,
-        )
-
-        return [generate_template_cmd, bulk_add, bulk_remove]
-
-
-class LegalHoldCommands(object):
-    @staticmethod
-    def load_subcommands():
-        usage_prefix = u"code42 legal-hold"
-
-        add = Command(
-            u"add-user",
-            u"Add a user to a legal hold matter.",
-            u"{} add-user --matter-id <id>  --username <username>".format(usage_prefix),
-            handler=add_user,
-            arg_customizer=_customize_add_arguments,
-        )
-
-        remove = Command(
-            u"remove-user",
-            u"Remove a user from a legal hold matter.",
-            u"{} remove-user --matter-id <id> --username <username>".format(usage_prefix),
-            handler=remove_user,
-            arg_customizer=_customize_remove_arguments,
-        )
-
-        list_matters = Command(
-            u"list",
-            u"Fetch existing legal hold matters.",
-            u"{} list".format(usage_prefix),
-            handler=get_matters,
-        )
-
-        show = Command(
-            u"show",
-            u"Fetch all legal hold custodians for a given matter.",
-            u"{} show <matter-id>".format(usage_prefix),
-            handler=show_matter,
-            arg_customizer=_customize_show_arguments,
-        )
-
-        bulk = Command(
-            u"bulk",
-            u"Tools for executing bulk commands.",
-            subcommand_loader=LegalHoldBulkCommands.load_commands,
-        )
-
-        return [add, remove, list_matters, show, bulk]
