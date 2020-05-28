@@ -3,9 +3,10 @@ from py42.exceptions import Py42BadRequestError
 from code42cli.cmds.detectionlists.commands import DetectionListSubcommandLoader
 from code42cli.bulk import generate_template, run_bulk_process
 from code42cli.file_readers import create_csv_reader, create_flat_file_reader
-from code42cli.errors import UserAlreadyAddedError, UserDoesNotExistError, UnknownRiskTagError
+from code42cli.errors import UserAlreadyAddedError, UnknownRiskTagError
 from code42cli.cmds.detectionlists.enums import DetectionLists, DetectionListUserKeys, RiskTags
 from code42cli.cmds.detectionlists.bulk import BulkDetectionList, BulkHighRiskEmployee
+from code42cli.util import get_user_id
 
 
 def try_handle_user_already_added_error(bad_request_err, username_tried_adding, list_name):
