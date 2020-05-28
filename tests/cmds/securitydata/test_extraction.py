@@ -504,6 +504,7 @@ def test_when_sdk_raises_exception_global_variable_gets_set(
         extraction_module.extract(sdk, profile, logger, file_event_namespace_with_begin)
         assert errors.ERRORED
 
+
 def test_create_handlers_creates_handler_that_handles_problematic_filters(
     mocker, sdk, profile, logger, file_event_namespace_with_begin, mock_42, caplog
 ):
@@ -517,7 +518,7 @@ def test_create_handlers_creates_handler_that_handles_problematic_filters(
     base_err = mocker.MagicMock(spec=HTTPError)
     base_err.response = mock_response
     err = Py42BadRequestError(base_err)
-    
+
     handlers.handle_error(err)
 
     with caplog.at_level(logging.ERROR):

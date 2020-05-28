@@ -34,34 +34,6 @@ def verify_begin_date_requirements(args, cursor_store):
         exit(1)
 
 
-def _get_search_error_reason_message(error):
-    if isinstance(error, Py42BadRequestError):
-        message = _get_bad_search_request_message(error)
-        if message:
-            return message
-    if hasattr(error, u"response") and hasattr(error.response, u"text"):
-        response_text = error.response.text
-        return u"{0}: {1}".format(error, response_text)
-    return error
-
-
-def _get_bad_search_request_message(error):
-    problems = json.loads(error.response.text).get(u"problems")
-    if problems:
-        bad_filter_message = _get_first_bad_filter_from_problems(problems)
-        if bad_filter_message:
-            return bad_filter_message
-
-
-def _get_first_bad_filter_from_problems(problems):
-    for problem in problems:
-        bad_filter = problem.get(u"badFilter")
-        if bad_filter:
-            return u"Unknown value '{}' for filter '{}'.".format(
-                bad_filter[u"value"], bad_filter[u"term"]
-            )
-
-
 def create_handlers(output_logger, cursor_store, event_key, sdk=None):
     handlers = ExtractionHandlers()
     handlers.TOTAL_EVENTS = 0
@@ -94,6 +66,34 @@ def create_handlers(output_logger, cursor_store, event_key, sdk=None):
 
     handlers.handle_response = handle_response
     return handlers
+
+
+def _get_search_error_reason_message(error):
+    if isinstance(error, Py42BadRequestError):
+        message = _get_bad_search_request_message(error)
+        if message:
+            return message
+    if hasattr(error, u"response") and hasattr(error.response, u"text"):
+        response_text = error.response.text
+        return u"{0}: {1}".format(error, response_text)
+    return error
+
+
+def _get_bad_search_request_message(error):
+    problems = json.loads(error.response.text).get(u"problems")
+    if problems:
+        bad_filter_message = _get_first_bad_filter_from_problems(problems)
+        if bad_filter_message:
+            return bad_filter_message
+
+
+def _get_first_bad_filter_from_problems(problems):
+    for problem in problems:
+        bad_filter = problem.get(u"badFilter")
+        if bad_filter:
+            return u"Unknown value '{}' for filter '{}'.".format(
+                bad_filter[u"value"], bad_filter[u"term"]
+            )
 
 
 def exit_if_advanced_query_used_with_other_search_args(args):

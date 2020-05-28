@@ -56,9 +56,3 @@ class UserDoesNotExistError(Code42CLIError):
 class DateArgumentError(Code42CLIError):
     def __init__(self, message=_FORMAT_VALUE_ERROR_MESSAGE):
         super(DateArgumentError, self).__init__(message)
-
-
-class BadFilterValueError(Code42CLIError):
-    def __init__(self, filters):
-        self._filters = filters
-        super(BadFilterValueError, self).__init__(u"Unknown '{}'.".format(filters))
