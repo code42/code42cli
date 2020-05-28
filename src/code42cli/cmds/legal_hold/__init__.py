@@ -126,6 +126,7 @@ def _get_legal_hold_memberships_for_matter(sdk, matter_id, active=True):
     memberships = [
         member for page in memberships_generator for member in page[u"legalHoldMemberships"]
     ]
+    print(memberships)
     return memberships
 
 
