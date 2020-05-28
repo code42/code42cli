@@ -112,13 +112,13 @@ def _load_search_args(arg_collection):
         AlertFilterArguments.SEVERITY: ArgConfig(
             u"--{}".format(AlertFilterArguments.SEVERITY),
             nargs=u"+",
-            help=u"Filter alerts by severity. Defaults to returning all severities. Available choices={0}".format(
+            help=u"Filter alerts by severity. Defaults to returning all severities. Available choices={0}.".format(
                 list(AlertSeverity())
             ),
         ),
         AlertFilterArguments.STATE: ArgConfig(
             u"--{}".format(AlertFilterArguments.STATE),
-            help=u"Filter alerts by state. Defaults to returning all states. Available choices={0}".format(
+            help=u"Filter alerts by state. Defaults to returning all states. Available choices={0}.".format(
                 list(AlertState())
             ),
         ),
@@ -173,7 +173,7 @@ def _load_search_args(arg_collection):
         AlertFilterArguments.RULE_TYPE: ArgConfig(
             u"--{}".format(AlertFilterArguments.RULE_TYPE.replace("_", "-")),
             metavar=u"RULE_TYPE",
-            help=u"Filter alerts by including the given rule type(s). Available choices={0}".format(
+            help=u"Filter alerts by including the given rule type(s). Available choices={0}.".format(
                 list(RuleType())
             ),
             nargs=u"+",
@@ -181,7 +181,7 @@ def _load_search_args(arg_collection):
         AlertFilterArguments.EXCLUDE_RULE_TYPE: ArgConfig(
             u"--{}".format(AlertFilterArguments.EXCLUDE_RULE_TYPE.replace("_", "-")),
             metavar=u"RULE_TYPE",
-            help=u"Filter alerts by excluding the given rule type(s). Available choices={0}".format(
+            help=u"Filter alerts by excluding the given rule type(s). Available choices={0}.".format(
                 list(RuleType())
             ),
             nargs=u"+",
