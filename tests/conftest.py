@@ -91,6 +91,21 @@ def sdk(mocker):
     return mocker.MagicMock(spec=SDKClient)
 
 
+TEST_ID = "TEST_ID"
+
+
+@pytest.fixture
+def sdk_with_user(sdk):
+    sdk.users.get_by_username.return_value = {"users": [{"userUid": TEST_ID}]}
+    return sdk
+
+
+@pytest.fixture
+def sdk_without_user(sdk):
+    sdk.users.get_by_username.return_value = {"users": []}
+    return sdk
+
+
 @pytest.fixture()
 def mock_42(mocker):
     return mocker.patch("py42.sdk.from_local_account")

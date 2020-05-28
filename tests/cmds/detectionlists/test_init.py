@@ -11,13 +11,11 @@ from code42cli.cmds.detectionlists import (
     add_risk_tags,
     remove_risk_tags,
 )
-from code42cli.util import get_user_id
 from code42cli.errors import UserAlreadyAddedError, UnknownRiskTagError, UserDoesNotExistError
 from code42cli.bulk import BulkCommandType
 from code42cli.cmds.detectionlists.enums import RiskTags
 from code42cli.cmds.detectionlists.bulk import HighRiskBulkCommandType
-from .conftest import TEST_ID
-from ...conftest import create_mock_reader
+from ...conftest import create_mock_reader, TEST_ID
 
 
 _NAMESPACE = "{}.cmds.detectionlists".format(PRODUCT_NAME)
@@ -45,11 +43,6 @@ def test_try_handle_user_already_added_error_when_error_does_not_indicate_user_a
     generic_bad_request,
 ):
     assert not try_handle_user_already_added_error(generic_bad_request, "name", "listname")
-
-
-def test_get_user_id_when_user_does_not_raise_error(sdk_without_user):
-    with pytest.raises(UserDoesNotExistError):
-        get_user_id(sdk_without_user, "risky employee")
 
 
 def test_update_user_adds_cloud_alias(sdk_with_user, profile):
