@@ -419,9 +419,9 @@ def test_extract_when_given_include_non_exposure_does_not_include_exposure_type_
     mocker, sdk, profile, logger, file_event_namespace_with_begin
 ):
     file_event_namespace_with_begin.include_non_exposure = True
-    ExposureType.exists = mocker.MagicMock()
+    mock = mocker.patch("{}.cmds.securitydata.extraction.ExposureType.exists".format(PRODUCT_NAME))
     extraction_module.extract(sdk, profile, logger, file_event_namespace_with_begin)
-    assert not ExposureType.exists.call_count
+    assert not mock.call_count
 
 
 def test_extract_when_not_given_include_non_exposure_includes_exposure_type_exists(
@@ -519,7 +519,8 @@ def test_create_handlers_creates_handler_that_handles_problematic_filters(
     base_err.response = mock_response
     err = Py42BadRequestError(base_err)
 
-    handlers.handle_error(err)
+    with ErrorTrackerTestHelper():
+        handlers.handle_error(err)
 
     with caplog.at_level(logging.ERROR):
         extraction_module.extract(sdk, profile, logger, file_event_namespace_with_begin)
