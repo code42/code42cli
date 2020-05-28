@@ -13,7 +13,7 @@ class ProgressBar(object):
 
     def update(self, iteration, message):
         bar = self._create_bar(iteration)
-        progress = u"{}  {} ".format(bar, message)
+        progress = u"{}  {}".format(bar, message.strip())
         self._logger.info(progress)
 
     def _create_bar(self, iteration):
