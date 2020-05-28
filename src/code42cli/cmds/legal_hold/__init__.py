@@ -2,7 +2,7 @@ from collections import OrderedDict
 from functools import lru_cache
 from pprint import pprint
 
-from py42.exceptions import Py42HTTPError, Py42ForbiddenError, Py42BadRequestError
+from py42.exceptions import Py42ForbiddenError, Py42BadRequestError
 
 
 from code42cli.errors import (
@@ -126,7 +126,6 @@ def _get_legal_hold_memberships_for_matter(sdk, matter_id, active=True):
     memberships = [
         member for page in memberships_generator for member in page[u"legalHoldMemberships"]
     ]
-    print(memberships)
     return memberships
 
 
