@@ -1,6 +1,6 @@
 from __future__ import print_function
 import sys
-import os
+import shutil
 
 from collections import OrderedDict
 from functools import wraps
@@ -100,7 +100,7 @@ def format_string_list_to_columns(string_list, max_width=None):
     if not string_list:
         return
     if not max_width:
-        max_width, _ = os.get_terminal_size()
+        max_width, _ = shutil.get_terminal_size()
     column_width = len(max(string_list, key=len)) + _PADDING_SIZE
     num_columns = int(max_width / column_width)
     format_string = u"{{:<{0}}}".format(column_width) * num_columns
