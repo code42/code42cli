@@ -17,10 +17,14 @@ def _get_next_full_set_of_commands(loader, current):
     loader = loader[current]
 
     # Complete positional filename with list of local files
-    if isinstance(loader, ArgLoader) and loader.contains_filename and current[0] != u"-":
+    if _should_complete_with_local_files(current, loader):
         return get_local_files()
 
     return loader.names
+
+
+def _should_complete_with_local_files(current, loader):
+    return isinstance(loader, ArgLoader) and loader.contains_filename and current[0] != u"-"
 
 
 class Completer(object):
@@ -39,11 +43,15 @@ class Completer(object):
             loader = self._search_trees(args)
             options = loader.names
 
+            if _should_complete_with_local_files(current, loader):
+                return _get_matches(current, get_local_files())
+
             # Complete with full set of arg/command options
             if current in options:
                 return _get_next_full_set_of_commands(loader, current)
 
             # Complete with matching arg/commands
+
             return _get_matches(current, options) if options else []
         except:
             return []
