@@ -101,39 +101,21 @@ class LegalHoldBulkSubcommandLoader(SubcommandLoader):
 
 
 def _customize_add_arguments(argument_collection):
-    args = {
-        u"matter_id": ArgConfig(
-            u"-m",
-            u"--matter-id",
-            help=u"ID of the legal hold matter user will be added to. Required.",
-            required=True,
-        ),
-        u"username": ArgConfig(
-            u"-u",
-            u"--username",
-            help=u"The username of the user to add to the matter. Required.",
-            required=True,
-        ),
-    }
-    argument_collection.extend(args)
+    matter = argument_collection.arg_configs["matter_id"]
+    matter.add_short_option_name("-m")
+    matter.set_help("ID of the legal hold matter user will be added to. Required.")
+    username = argument_collection.arg_configs["username"]
+    username.add_short_option_name("-u")
+    username.set_help("The username of the user to add to the matter. Required.")
 
 
 def _customize_remove_arguments(argument_collection):
-    args = {
-        u"matter_id": ArgConfig(
-            u"-m",
-            u"--matter-id",
-            help=u"ID of the legal hold matter user will be removed from. Required.",
-            required=True,
-        ),
-        u"username": ArgConfig(
-            u"-u",
-            u"--username",
-            help=u"The username of the user to remove from the matter. Required.",
-            required=True,
-        ),
-    }
-    argument_collection.extend(args)
+    matter = argument_collection.arg_configs["matter_id"]
+    matter.add_short_option_name("-m")
+    matter.set_help("ID of the legal hold matter user will be removed from. Required.")
+    username = argument_collection.arg_configs["username"]
+    username.add_short_option_name("-u")
+    username.set_help("The username of the user to remove from the matter. Required.")
 
 
 def _customize_show_arguments(argument_collection):
