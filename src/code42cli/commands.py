@@ -156,6 +156,12 @@ class SubcommandLoader(object):
     def __init__(self, root_command_name):
         self.root = root_command_name
         self._cmds = None
+        
+    def __getitem__(self, item):
+        return self.subtrees[item]
+    
+    def get(self, item):
+        return self.subtrees.get(item)
 
     @property
     def names(self):
@@ -164,6 +170,8 @@ class SubcommandLoader(object):
         # Handle command groups
         if len(cmds) != 1:
             return [cmd.name for cmd in cmds]
+        # args = cmds[0].get_arg_configs()
+        # return [n for names in [a.settings[u"options_list"] for a in args] for n in names]
 
     @property
     def subtrees(self):

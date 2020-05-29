@@ -153,7 +153,7 @@ class TestCommandInvoker(object):
             assert "a code42cli error" in caplog.text
 
     def test_run_incorrect_command_suggests_proper_sub_commands(self, caplog):
-        command = Command(u"", u"", subcommand_loader=MainSubcommandLoader(u""))
+        command = Command(u"", u"", subcommand_loader=MainSubcommandLoader())
         cmd_invoker = CommandInvoker(command)
         with pytest.raises(SystemExit):
             cmd_invoker.run([u"profile", u"crate"])
@@ -162,7 +162,7 @@ class TestCommandInvoker(object):
             assert u"create" in caplog.text
 
     def test_run_incorrect_command_suggests_proper_main_commands(self, caplog):
-        command = Command(u"", u"", subcommand_loader=MainSubcommandLoader(u""))
+        command = Command(u"", u"", subcommand_loader=MainSubcommandLoader())
         cmd_invoker = CommandInvoker(command)
         with pytest.raises(SystemExit):
             cmd_invoker.run([u"prfile", u"crate"])
@@ -171,7 +171,7 @@ class TestCommandInvoker(object):
             assert u"profile" in caplog.text
 
     def test_run_incorrect_command_suggests_proper_argument_name(self, caplog):
-        command = Command(u"", u"", subcommand_loader=MainSubcommandLoader(u""))
+        command = Command(u"", u"", subcommand_loader=MainSubcommandLoader())
         cmd_invoker = CommandInvoker(command)
         with pytest.raises(SystemExit):
             cmd_invoker.run([u"security-data", u"write-to", u"abc", u"--filename"])

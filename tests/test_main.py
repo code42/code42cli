@@ -3,15 +3,15 @@ from code42cli.main import main, MainSubcommandLoader
 
 
 class TestMainSubcommandLoader(object):
-    def test_command_names_work_at_first_level(self):
+    def test_names_returns_top_level_subcommand_names(self):
         loader = MainSubcommandLoader()
         assert "alerts" in loader.names
         assert "alert-rules" in loader.names
         assert "departing-employee" in loader.names
 
-    def test_command_names_work_at_next_level(self):
+    def test_names_when_at_alert_level_returns_alerts_subcommand_names(self):
         loader = MainSubcommandLoader()
-        subloader = loader.subtrees[loader.ALERTS].names
+        subloader = loader[loader.ALERTS].names
         assert "print" in subloader
         assert "write-to" in subloader
         assert "clear-checkpoint" in subloader

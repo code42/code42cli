@@ -12,7 +12,7 @@ def _get_matches(current, options):
 
 
 def _get_next_full_set_of_commands(cmd_loader, current):
-    cmd_loader = cmd_loader.subtrees[current]
+    cmd_loader = cmd_loader[current]
     return cmd_loader.names
 
 
@@ -44,7 +44,7 @@ class Completer(object):
         cmd_loader = self._main_cmd_loader
         if len(args) > 2:
             for arg in args[1:-1]:
-                new_loader = cmd_loader.subtrees.get(arg)
+                new_loader = cmd_loader.get(arg)
                 if new_loader:
                     cmd_loader = new_loader
                 else:
