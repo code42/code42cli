@@ -13,7 +13,7 @@ def _get_matches(current, options):
     return matches
 
 
-def _get_next_full_set_of_commands(loader, current):
+def _get_next_full_set_of_options(loader, current):
     loader = loader[current]
 
     # Complete positional filename with list of local files
@@ -50,7 +50,7 @@ class Completer(object):
 
             # Complete with full set of arg/command options
             if current in options:
-                return _get_next_full_set_of_commands(loader, current)
+                return _get_next_full_set_of_options(loader, current)
 
             # Complete with matching arg/commands
             return _get_matches(current, options) if options else []
