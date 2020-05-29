@@ -99,7 +99,7 @@ class CommandInvoker(object):
             logger.print_and_log_error(u"{}".format(err))
             possible_correct_words = self._find_incorrect_word_match(err, path_parts)
             if possible_correct_words:
-                logger.print_and_log_error(u"Did you mean one of the following?")
+                logger.print_info(u"Did you mean one of the following?")
                 for possible_correct_word in possible_correct_words:
                     logger.print_info(u"     {}".format(possible_correct_word))
 
