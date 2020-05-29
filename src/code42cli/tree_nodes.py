@@ -7,7 +7,7 @@ class CLINode(object):
         return []
 
 
-class ArgOptionsNode(CLINode):
+class ChoicesNode(CLINode):
     """A node who `names` refer to choices the user can select for an argument."""
 
     def __init__(self, options):
@@ -54,7 +54,7 @@ class ArgNode(CLINode):
                 for key in self._args
                 if item in self._args[key].settings[u"options_list"]
             ][0]
-            return ArgOptionsNode(arg.settings[u"choices"])
+            return ChoicesNode(arg.settings[u"choices"])
         return ArgNode(self._args)
 
     def __iter__(self):

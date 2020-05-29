@@ -17,7 +17,7 @@ from .conftest import (
     subcommand1,
     subcommand2,
     subcommand3,
-    TestSubcommandLoader,
+    MockSubcommandLoader,
 )
 
 
@@ -52,7 +52,7 @@ class TestCommand(object):
 
     def test_load_subcommands_makes_subcommands_accessible(self):
         command = Command(
-            "test", "test desc", "test usage", subcommand_loader=TestSubcommandLoader("test")
+            "test", "test desc", "test usage", subcommand_loader=MockSubcommandLoader("test")
         )
         command.load_subcommands()
         assert len(command.subcommands) == 3
@@ -271,7 +271,7 @@ class TestCommand(object):
         assert command(help_func=dummy_print_help) == "success"
 
 
-class TestCommandSubcommandLoader(object):
+class TestSubcommandLoader(object):
     def test_names_when_no_subcommands_returns_nothing(self):
         subcommand_loader = SubcommandLoader("")
         assert not subcommand_loader.names
@@ -287,7 +287,7 @@ class TestCommandSubcommandLoader(object):
 
     def test_getitem_returns_expected_subtree(self):
         subcommand_loader = SubcommandLoader("")
-        command = Command("c1", "", subcommand_loader=TestSubcommandLoader(""))
+        command = Command("c1", "", subcommand_loader=MockSubcommandLoader(""))
         subcommand_loader.load_commands = lambda: [command]
         assert subcommand_loader.names == ["c1"]
         assert subcommand_loader["c1"].names == ["sub1", "sub2", "sub3"]

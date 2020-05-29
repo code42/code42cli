@@ -218,6 +218,6 @@ subcommand2 = Command("sub2", "sub2 desc", "sub2 usage")
 subcommand3 = Command("sub3", "sub3 desc", "sub3 usage")
 
 
-class TestSubcommandLoader(SubcommandLoader):
+class MockSubcommandLoader(SubcommandLoader):
     def load_commands(self):
         return [subcommand1, subcommand2, subcommand3]
