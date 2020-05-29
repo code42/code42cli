@@ -62,7 +62,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Short option `-u` added for `code42 high-risk-employee add-risk-tags` and `remove-risk-tags`.
 
-- Tab completion for bash an zsh.
+- Tab completion for bash and zsh for Unix based machines such.
 
 ### Fixed
 
