@@ -20,6 +20,10 @@ class LegalHoldSubcommandLoader(SubcommandLoader):
     SHOW = "show"
     BULK = "bulk"
 
+    def __init__(self, root_command_name):
+        super(LegalHoldSubcommandLoader, self).__init__(root_command_name)
+        self._bulk_subcommand_loader = LegalHoldBulkSubcommandLoader(self.BULK)
+
     def load_commands(self):
         """Sets up the `legal-hold` subcommand with all of its subcommands."""
         usage_prefix = u"code42 legal-hold"
@@ -58,7 +62,7 @@ class LegalHoldSubcommandLoader(SubcommandLoader):
         bulk = Command(
             self.BULK,
             u"Tools for executing bulk commands.",
-            subcommand_loader=LegalHoldBulkSubcommandLoader.load_commands,
+            subcommand_loader=self._bulk_subcommand_loader,
         )
 
         return [add, remove, list_matters, show, bulk]
