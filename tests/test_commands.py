@@ -287,7 +287,6 @@ class TestCommandSubcommandLoader(object):
 
     def test_getitem_returns_expected_subtree(self):
         subcommand_loader = SubcommandLoader("")
-        subcommand_loader_sub = SubcommandLoader("sub")
         command = Command("c1", "", subcommand_loader=TestSubcommandLoader(""))
         subcommand_loader.load_commands = lambda: [command]
         assert subcommand_loader.names == ["c1"]
