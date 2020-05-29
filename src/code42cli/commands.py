@@ -150,7 +150,7 @@ def _kvps_to_obj(kvps):
     return new_kvps
 
 
-class SubcommandLoader(CLINode):
+class SubcommandLoader(object):
     """Responsible for creating subcommands for it's root command. It is also useful for getting 
     command information ahead of time, as in the example of tab completion."""
 
