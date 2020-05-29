@@ -155,18 +155,19 @@ class SubcommandLoader(object):
 
     def __init__(self, root_command_name):
         self.root = root_command_name
+        self._cmds = None
 
     @property
     def names(self):
-        """The names of all the subcommands in this subcommabd loader's root command."""
-        sub_cmds = self.load_commands()
-        return [cmd.name for cmd in sub_cmds]
-
+        """The names of all the subcommands in this subcommand loader's root command."""
+        cmds = self._get_commands()
+        return [cmd.name for cmd in cmds]
+        
     @property
     def subtrees(self):
         """All subcommands for this subcommand loader's root command mapped to their given 
         subcommand loaders."""
-        cmds = self.load_commands()
+        cmds = self._get_commands()
         results = {}
         for cmd in cmds:
             subcommand_loader = cmd.subcommand_loader
@@ -175,4 +176,10 @@ class SubcommandLoader(object):
         return results
 
     def load_commands(self):
+        """Override"""
         return []
+    
+    def _get_commands(self):
+        if self._cmds is None:
+            self._cmds = self.load_commands()
+        return self._cmds
