@@ -95,3 +95,7 @@ class TestCompleter(object):
         completer = Completer(loader)
         actual = completer.complete("code42 dep")
         assert not actual
+
+    def test_complete_when_completing_arg_works(self):
+        actual = self._completer.complete("code42 security-data print --incre")
+        assert "--incremental" in actual

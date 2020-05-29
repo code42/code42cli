@@ -149,6 +149,18 @@ def _kvps_to_obj(kvps):
     return new_kvps
 
 
+class ArgLoader(object):
+    def __init__(self, args):
+        self._args = args
+
+    @property
+    def names(self):
+        return self._args
+    
+    def __iter__(self):
+        return iter(self._args)
+
+
 class SubcommandLoader(object):
     """Responsible for creating subcommands for it's root command. It is also useful for getting 
     command information ahead of time, as in the example of tab completion."""
@@ -156,12 +168,21 @@ class SubcommandLoader(object):
     def __init__(self, root_command_name):
         self.root = root_command_name
         self._cmds = None
-        
+
     def __getitem__(self, item):
-        return self._subtrees[item]
-    
-    def get(self, item):
-        return self._subtrees.get(item)
+        try:
+            return self._subtrees[item]
+        except KeyError:
+            return self._get_args(item)
+
+    def _get_args(self, item):
+        cmds = self._get_commands()
+        cmd = [c for c in cmds if c.name == item][0]
+        args = cmd.get_arg_configs()
+        names = [
+            n for names in [args[key].settings[u"options_list"] for key in args] for n in names
+        ]
+        return ArgLoader(names)
 
     @property
     def names(self):
@@ -170,8 +191,6 @@ class SubcommandLoader(object):
         # Handle command groups
         if len(cmds) != 1:
             return [cmd.name for cmd in cmds]
-        # args = cmds[0].get_arg_configs()
-        # return [n for names in [a.settings[u"options_list"] for a in args] for n in names]
 
     @property
     def _subtrees(self):

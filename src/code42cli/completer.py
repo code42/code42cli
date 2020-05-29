@@ -44,7 +44,7 @@ class Completer(object):
         cmd_loader = self._main_cmd_loader
         if len(args) > 2:
             for arg in args[1:-1]:
-                new_loader = cmd_loader.get(arg)
+                new_loader = cmd_loader[arg]
                 if new_loader:
                     cmd_loader = new_loader
                 else:
