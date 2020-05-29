@@ -22,9 +22,9 @@ from requests import Response
 TEST_MATTER_ID = "99999"
 TEST_LEGAL_HOLD_MEMBERSHIP_UID = "88888"
 TEST_LEGAL_HOLD_MEMBERSHIP_UID_2 = "77777"
-ACTIVE_TEST_USERNAME = "active_user@example.com"
+ACTIVE_TEST_USERNAME = "user@example.com"
 ACTIVE_TEST_USER_ID = "12345"
-INACTIVE_TEST_USERNAME = "inactive_user@example.com"
+INACTIVE_TEST_USERNAME = "inactive@example.com"
 INACTIVE_TEST_USER_ID = "54321"
 
 TEST_POLICY_UID = "66666"
@@ -35,7 +35,7 @@ TEST_MATTER_RESULT = {
     "description": "",
     "active": True,
     "creationDate": "2020-01-01T00:00:00.000-06:00",
-    "creator": {"userUid": "942564422882759874", "username": "legal_admin@example.com",},
+    "creator": {"userUid": "942564422882759874", "username": "legal_admin@example.com"},
     "holdPolicyUid": TEST_POLICY_UID,
 }
 
@@ -50,10 +50,14 @@ INACTIVE_LEGAL_HOLD_MEMBERSHIP = {
     "active": False,
 }
 
+
 EMPTY_LEGAL_HOLD_MEMBERSHIPS_RESULT = [{"legalHoldMemberships": []}]
 ACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT = [{"legalHoldMemberships": [ACTIVE_LEGAL_HOLD_MEMBERSHIP]}]
 ACTIVE_AND_INACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT = [
     {"legalHoldMemberships": [ACTIVE_LEGAL_HOLD_MEMBERSHIP, INACTIVE_LEGAL_HOLD_MEMBERSHIP]}
+]
+INACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT = [
+    {"legalHoldMemberships": [INACTIVE_LEGAL_HOLD_MEMBERSHIP]}
 ]
 
 TEST_PRESERVATION_POLICY_UID = "1010101010"
@@ -168,6 +172,56 @@ def test_show_matter_prints_active_and_inactive_results_when_include_inactive_fl
     assert INACTIVE_TEST_USERNAME in capture.out
 
 
+def test_show_matter_prints_active_results_only(sdk, check_matter_accessible_success, capsys):
+    sdk.legalhold.get_all_matter_custodians.return_value = (
+        ACTIVE_AND_INACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT
+    )
+    show_matter(sdk, TEST_MATTER_ID)
+    capture = capsys.readouterr()
+    assert ACTIVE_TEST_USERNAME in capture.out
+    assert INACTIVE_TEST_USERNAME not in capture.out
+
+
+def test_show_matter_prints_none_when_no_membership(sdk, check_matter_accessible_success, capsys):
+    sdk.legalhold.get_all_matter_custodians.return_value = EMPTY_LEGAL_HOLD_MEMBERSHIPS_RESULT
+    show_matter(sdk, TEST_MATTER_ID)
+    capture = capsys.readouterr()
+    assert ACTIVE_TEST_USERNAME not in capture.out
+    assert INACTIVE_TEST_USERNAME not in capture.out
+    assert "None" in capture.out
+
+
+def test_show_matter_prints_none_when_no_inactive_membership(
+    sdk, check_matter_accessible_success, capsys
+):
+    sdk.legalhold.get_all_matter_custodians.return_value = ACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT
+    show_matter(sdk, TEST_MATTER_ID, include_inactive=True)
+    capture = capsys.readouterr()
+    assert ACTIVE_TEST_USERNAME in capture.out
+    assert INACTIVE_TEST_USERNAME not in capture.out
+    assert "None" in capture.out
+
+
+def test_show_matter_prints_none_when_no_active_membership(
+    sdk, check_matter_accessible_success, capsys
+):
+    sdk.legalhold.get_all_matter_custodians.return_value = INACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT
+    show_matter(sdk, TEST_MATTER_ID, include_inactive=True)
+    capture = capsys.readouterr()
+    assert ACTIVE_TEST_USERNAME not in capture.out
+    assert INACTIVE_TEST_USERNAME in capture.out
+    assert "None" in capture.out
+
+
+def test_show_matter_prints_none_when_no_membership(sdk, check_matter_accessible_success, capsys):
+    sdk.legalhold.get_all_matter_custodians.return_value = EMPTY_LEGAL_HOLD_MEMBERSHIPS_RESULT
+    show_matter(sdk, TEST_MATTER_ID)
+    capture = capsys.readouterr()
+    assert ACTIVE_TEST_USERNAME not in capture.out
+    assert INACTIVE_TEST_USERNAME not in capture.out
+    assert "None" in capture.out
+
+
 def test_show_matter_prints_preservation_policy_when_include_policy_flag_set(
     sdk, check_matter_accessible_success, preservation_policy_response, capsys
 ):
@@ -175,3 +229,12 @@ def test_show_matter_prints_preservation_policy_when_include_policy_flag_set(
     show_matter(sdk, TEST_MATTER_ID, include_policy=True)
     capture = capsys.readouterr()
     assert TEST_PRESERVATION_POLICY_UID in capture.out
+
+
+def test_show_matter_does_not_print_preservation_policy(
+    sdk, check_matter_accessible_success, preservation_policy_response, capsys
+):
+    sdk.legalhold.get_policy_by_uid.return_value = preservation_policy_response
+    show_matter(sdk, TEST_MATTER_ID)
+    capture = capsys.readouterr()
+    assert TEST_PRESERVATION_POLICY_UID not in capture.out
