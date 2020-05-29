@@ -30,9 +30,6 @@ class Completer(object):
 
             current = args[-1]
             cmd_loader = self._search_trees(args)
-            if not cmd_loader:
-                return []
-
             options = cmd_loader.names
             if current in options:
                 # `current` is already complete
@@ -47,7 +44,11 @@ class Completer(object):
         cmd_loader = self._main_cmd_loader
         if len(args) > 2:
             for arg in args[1:-1]:
-                cmd_loader = cmd_loader.subtrees[arg]
+                new_loader = cmd_loader.subtrees.get(arg)
+                if new_loader:
+                    cmd_loader = new_loader
+                else:
+                    return cmd_loader
         return cmd_loader
 
 
