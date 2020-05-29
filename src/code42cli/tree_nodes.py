@@ -1,5 +1,14 @@
-class OptionsLoader(object):
-    """A loader's who `names` refer to choices the user can select."""
+class CLINode(object):
+    """Base class for identifying nodes in the command/argument hierarchy."""
+    
+    @property
+    def names(self):
+        """Override"""
+        return []
+
+
+class ArgOptionsNode(CLINode):
+    """A node who `names` refer to choices the user can select for an argument."""
     
     def __init__(self, options):
         self._options = options
@@ -18,8 +27,8 @@ class OptionsLoader(object):
         return self._options
 
 
-class ArgLoader(object):
-    """A loader whose `names` are a list of flagged arguments the user can select from."""
+class ArgNode(CLINode):
+    """A node whose `names` are a list of flagged arguments the user can select from."""
     
     def __init__(self, args):
         # Only cares about args that the user has to type, not positionals
@@ -45,14 +54,14 @@ class ArgLoader(object):
                 for key in self._args
                 if item in self._args[key].settings[u"options_list"]
             ][0]
-            return OptionsLoader(arg.settings[u"choices"])
-        return ArgLoader(self._args)
+            return ArgOptionsNode(arg.settings[u"choices"])
+        return ArgNode(self._args)
 
     def __iter__(self):
         return iter(self._names)
 
 
-class SubcommandLoader(object):
+class SubcommandLoader(CLINode):
     """Responsible for creating subcommands for it's root command. It is also useful for getting 
     command information ahead of time, as in the example of tab completion."""
 
@@ -70,7 +79,7 @@ class SubcommandLoader(object):
         cmds = self._get_commands()
         cmd = [c for c in cmds if c.name == item][0]
         args = cmd.get_arg_configs()
-        return ArgLoader(args)
+        return ArgNode(args)
 
     @property
     def names(self):

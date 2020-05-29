@@ -1,6 +1,6 @@
 from code42cli import MAIN_COMMAND
 from code42cli.main import MainSubcommandLoader
-from code42cli.loaders import ArgLoader
+from code42cli.tree_nodes import ArgNode
 from code42cli.util import get_local_files
 
 
@@ -24,7 +24,7 @@ def _get_next_full_set_of_options(loader, current):
 
 
 def _should_complete_with_local_files(current, loader):
-    return isinstance(loader, ArgLoader) and loader.contains_filename and current[0] != u"-"
+    return isinstance(loader, ArgNode) and loader.contains_filename and current[0] != u"-"
 
 
 class Completer(object):

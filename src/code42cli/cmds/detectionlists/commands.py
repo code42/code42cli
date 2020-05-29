@@ -2,7 +2,7 @@ import inspect
 
 from code42cli.bulk import BulkCommandType
 from code42cli.commands import Command
-from code42cli.loaders import SubcommandLoader
+from code42cli.tree_nodes import SubcommandLoader
 from code42cli.cmds.detectionlists.bulk import HighRiskBulkCommandType
 
 

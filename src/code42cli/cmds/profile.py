@@ -6,7 +6,7 @@ from code42cli.compat import str
 from code42cli.profile import print_and_log_no_existing_profile
 from code42cli.args import PROFILE_HELP
 from code42cli.commands import Command
-from code42cli.loaders import SubcommandLoader
+from code42cli.tree_nodes import SubcommandLoader
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree
 from code42cli.logger import get_main_cli_logger

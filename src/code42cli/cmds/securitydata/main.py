@@ -8,7 +8,7 @@ from code42cli.cmds.search_shared.enums import (
 from code42cli.cmds.securitydata.extraction import extract
 from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore
 from code42cli.commands import Command
-from code42cli.loaders import SubcommandLoader
+from code42cli.tree_nodes import SubcommandLoader
 
 
 class SecurityDataSubcommandLoader(SubcommandLoader):

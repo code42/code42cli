@@ -7,7 +7,7 @@ from code42cli.file_readers import CliFileReader
 from code42cli.config import ConfigAccessor
 from code42cli.profile import Code42Profile
 from code42cli.commands import DictObject, Command
-from code42cli.loaders import SubcommandLoader
+from code42cli.tree_nodes import SubcommandLoader
 
 import code42cli.errors as error_tracker
 

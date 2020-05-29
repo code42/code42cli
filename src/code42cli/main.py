@@ -13,7 +13,7 @@ from code42cli.cmds.alerts import main as alertmain
 from code42cli.cmds.alerts.rules import commands as alertrules
 from code42cli.cmds.profile import ProfileSubcommandLoader
 from code42cli.commands import Command
-from code42cli.loaders import SubcommandLoader
+from code42cli.tree_nodes import SubcommandLoader
 from code42cli.invoker import CommandInvoker
 
 
