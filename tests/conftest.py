@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import pytest
 from py42.sdk import SDKClient
 
+from code42cli.bulk import BulkProcessor
 from code42cli.file_readers import CliFileReader
 from code42cli.config import ConfigAccessor
 from code42cli.profile import Code42Profile

@@ -2,10 +2,13 @@ import pytest
 
 from requests import Response, HTTPError
 
+from code42cli import PRODUCT_NAME
 from code42cli.cmds.legal_hold import (
     add_user,
     remove_user,
     show_matter,
+    add_bulk_users,
+    remove_bulk_users,
     _check_matter_is_accessible,
 )
 from code42cli.errors import (
@@ -14,10 +17,14 @@ from code42cli.errors import (
     LegalHoldNotFoundOrPermissionDeniedError,
     UserDoesNotExistError,
 )
+
+_NAMESPACE = "{}.cmds.legal_hold".format(PRODUCT_NAME)
+
 from py42.exceptions import Py42BadRequestError
 from py42.response import Py42Response
 from requests import Response
 
+from ...conftest import create_mock_reader
 
 TEST_MATTER_ID = "99999"
 TEST_LEGAL_HOLD_MEMBERSHIP_UID = "88888"
@@ -238,3 +245,23 @@ def test_show_matter_does_not_print_preservation_policy(
     show_matter(sdk, TEST_MATTER_ID)
     capture = capsys.readouterr()
     assert TEST_PRESERVATION_POLICY_UID not in capture.out
+
+
+def test_add_bulk_users_uses_expected_arguments(mocker, sdk, profile):
+    reader = create_mock_reader([{"test": "value"}])
+    bulk_processor = mocker.patch("{}.run_bulk_process".format(_NAMESPACE))
+    reader_factory = mocker.patch("{}.create_csv_reader".format(_NAMESPACE))
+    reader_factory.return_value = reader
+    add_bulk_users(sdk, "csv_test")
+    assert bulk_processor.call_args[0][1] == reader
+    reader_factory.assert_called_once_with("csv_test")
+
+
+def test_remove_bulk_users_uses_expected_arguments(mocker, sdk, profile):
+    reader = create_mock_reader([{"test": "value"}])
+    bulk_processor = mocker.patch("{}.run_bulk_process".format(_NAMESPACE))
+    reader_factory = mocker.patch("{}.create_csv_reader".format(_NAMESPACE))
+    reader_factory.return_value = reader
+    remove_bulk_users(sdk, "csv_test")
+    assert bulk_processor.call_args[0][1] == reader
+    reader_factory.assert_called_once_with("csv_test")
