@@ -77,6 +77,22 @@ class LegalHoldBulkSubcommandLoader(SubcommandLoader):
         """Sets up the `legal-hold bulk` subcommands."""
         usage_prefix = u"code42 legal-hold bulk"
 
+        bulk_add = Command(
+            u"add-user",
+            u"Bulk add users to legal hold matters from a csv file. CSV file format: matter_id,username",
+            u"{} add-user <filename>".format(usage_prefix),
+            handler=add_bulk_users,
+            arg_customizer=_customize_bulk_arguments,
+        )
+
+        bulk_remove = Command(
+            u"remove-user",
+            u"Bulk remove users from legal hold matters from a csv file. CSV file format: matter_id,username",
+            u"{} remove-user <filename>".format(usage_prefix),
+            handler=remove_bulk_users,
+            arg_customizer=_customize_bulk_arguments,
+        )
+
         generate_template_cmd = Command(
             u"generate-template",
             u"Generate the necessary csv template needed for bulk adding users.",
@@ -85,23 +101,7 @@ class LegalHoldBulkSubcommandLoader(SubcommandLoader):
             arg_customizer=_load_bulk_generate_template_description,
         )
 
-        bulk_add = Command(
-            u"add",
-            u"Bulk add users to legal hold matters from a csv file. CSV file format: matter_id,username",
-            u"{} add <filename>".format(usage_prefix),
-            handler=add_bulk_users,
-            arg_customizer=_customize_bulk_arguments,
-        )
-
-        bulk_remove = Command(
-            u"remove",
-            u"Bulk remove users from legal hold matters from a csv file. CSV file format: matter_id,username",
-            u"{} remove <filename>".format(usage_prefix),
-            handler=remove_bulk_users,
-            arg_customizer=_customize_bulk_arguments,
-        )
-
-        return [generate_template_cmd, bulk_add, bulk_remove]
+        return [bulk_add, bulk_remove, generate_template_cmd]
 
 
 def _customize_add_arguments(argument_collection):
