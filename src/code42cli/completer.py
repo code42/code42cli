@@ -29,11 +29,12 @@ class Completer(object):
                 return self._main_cmd_loader.names if args[0] == MAIN_COMMAND else []
 
             current = args[-1]
-            cmd_loader = self._search_trees(args)
-            options = cmd_loader.names
+            loader = self._search_trees(args)
+            options = loader.names
+            
             if current in options:
                 # `current` is already complete
-                return _get_next_full_set_of_commands(cmd_loader, current)
+                return _get_next_full_set_of_commands(loader, current)
 
             return _get_matches(current, options) if options else []
         except:

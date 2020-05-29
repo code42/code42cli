@@ -151,7 +151,8 @@ def _kvps_to_obj(kvps):
 
 class ArgLoader(object):
     def __init__(self, args):
-        self._args = args
+        # Only cares about args that the user has to type, not positionals
+        self._args = [a for a in args if a[0] == u"-"]
 
     @property
     def names(self):
