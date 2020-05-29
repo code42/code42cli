@@ -53,8 +53,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
         - optional argument `--include-inactive` prints matter memberships that are no longer active
         - optional argument `--include-policy` prints out the matter's backup preservation policy in json form
     - `bulk` with subcommands:
-        - `add`: that takes a csv file with matter IDs and usernames. 
-        - `remove`: that takes a csv file with matter IDs and usernames.
+        - `add-user`: that takes a csv file with matter IDs and usernames. 
+        - `remove-user`: that takes a csv file with matter IDs and usernames.
         - `generate-template`: that creates the file templates. 
             - `cmd`: with options `add` and `remove`.
             - `path`
