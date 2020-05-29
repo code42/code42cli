@@ -25,7 +25,7 @@ class Code42CLIError(Exception):
 
 class UserAlreadyAddedError(Code42CLIError):
     def __init__(self, username, list_name):
-        msg = u"'{}' is already on the {} list.".format(username, list_name)
+        msg = u"'{}' is already on the {}.".format(username, list_name)
         super(UserAlreadyAddedError, self).__init__(msg)
 
 
@@ -51,6 +51,23 @@ class UserDoesNotExistError(Code42CLIError):
 
     def __init__(self, username):
         super(UserDoesNotExistError, self).__init__(u"User '{}' does not exist.".format(username))
+
+
+class UserNotInLegalHoldError(Code42CLIError):
+    def __init__(self, username, matter_id):
+        super(UserNotInLegalHoldError, self).__init__(
+            u"User '{}' is not an active member of legal hold matter '{}'".format(
+                username, matter_id
+            )
+        )
+
+
+class LegalHoldNotFoundOrPermissionDeniedError(Code42CLIError):
+    def __init__(self, matter_id):
+        super(LegalHoldNotFoundOrPermissionDeniedError, self).__init__(
+            u"Matter with id={} either does not exist or your profile does not have permission to "
+            u"view it.".format(matter_id)
+        )
 
 
 class DateArgumentError(Code42CLIError):

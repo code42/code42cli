@@ -1,3 +1,6 @@
+import os
+
+from code42cli.commands import Command
 from code42cli import MAIN_COMMAND
 from code42cli.commands import Command, SubcommandLoader
 from code42cli.bulk import generate_template, BulkCommandType
@@ -52,17 +55,21 @@ def _generate_template_file(cmd, path=None):
     """Generates a template file a user would need to fill-in for bulk operating.
 
     Args:
-        cmd (str or unicode): An option from the `BulkCommandType` enum specifying which type of file to
-            generate.
-        path (str or unicode, optional): A path to put the file after it's generated. If None, will use
-            the current working directory. Defaults to None.
+        cmd (str or unicode): An option from the `BulkCommandType` enum specifying which type of 
+            file to generate.
+        path (str or unicode, optional): A path to put the file after it's generated. If None, will 
+            use the current working directory. Defaults to None.
     """
     handler = None
+    filename = u"alert_rule.csv"
     if cmd == BulkCommandType.ADD:
         handler = add_user
+        filename = u"add_users_to_{}".format(filename)
     elif cmd == BulkCommandType.REMOVE:
         handler = remove_user
-
+        filename = u"remove_users_from_{}".format(filename)
+    if not path:
+        path = os.path.join(os.getcwd(), filename)
     generate_template(handler, path)
 
 
