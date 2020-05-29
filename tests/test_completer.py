@@ -107,3 +107,12 @@ class TestCompleter(object):
     def test_complete_completes_choices(self):
         actual = self._completer.complete("code42 security-data send-to 127.0.0.1 -p U")
         assert "UDP" in actual
+
+    def test_complete_when_names_contains_filename_and_current_is_positional_completes_with_local_filenames(
+        self, mocker
+    ):
+        mock_files = mocker.patch("code42cli.completer.get_local_files")
+        mock_files.return_value = ["foo.txt", "bar.csv"]
+        actual = self._completer.complete("code42 security-data write-to ")
+        assert "foo.txt" in actual
+        assert "bar.csv" in actual

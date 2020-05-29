@@ -1,5 +1,7 @@
 from code42cli import MAIN_COMMAND
 from code42cli.main import MainSubcommandLoader
+from code42cli.loaders import ArgLoader
+from code42cli.util import get_local_files
 
 
 def _get_matches(current, options):
@@ -11,9 +13,14 @@ def _get_matches(current, options):
     return matches
 
 
-def _get_next_full_set_of_commands(cmd_loader, current):
-    cmd_loader = cmd_loader[current]
-    return cmd_loader.names
+def _get_next_full_set_of_commands(loader, current):
+    loader = loader[current]
+
+    # Complete positional filename with list of local files
+    if isinstance(loader, ArgLoader) and loader.contains_filename and current[0] != u"-":
+        return get_local_files()
+
+    return loader.names
 
 
 class Completer(object):
@@ -32,10 +39,11 @@ class Completer(object):
             loader = self._search_trees(args)
             options = loader.names
 
+            # Complete with full set of arg/command options
             if current in options:
-                # `current` is already complete
                 return _get_next_full_set_of_commands(loader, current)
 
+            # Complete with matching arg/commands
             return _get_matches(current, options) if options else []
         except:
             return []
@@ -54,5 +62,5 @@ class Completer(object):
 
 
 def complete(cmdline, point):
-    choices = Completer().complete(cmdline, point)
+    choices = Completer().complete(cmdline, point) or []
     print(u" \n".join(choices))

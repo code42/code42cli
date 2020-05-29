@@ -76,7 +76,7 @@ def print_out(sdk, profile, args):
 
 def write_to(sdk, profile, args):
     """Activates 'write-to' command. It gets alerts and writes them to the given file."""
-    logger = logger_factory.get_logger_for_file(args.output_file, args.format)
+    logger = logger_factory.get_logger_for_file(args.filename, args.format)
     extract(sdk, profile, logger, args)
 
 
@@ -87,8 +87,8 @@ def send_to(sdk, profile, args):
 
 
 def _load_write_to_args(arg_collection):
-    output_file = ArgConfig(u"output_file", help=u"The name of the local file to send output to.")
-    arg_collection.append(u"output_file", output_file)
+    filename = ArgConfig(u"filename", help=u"The name of the local file to send output to.")
+    arg_collection.append(u"filename", filename)
     _load_search_args(arg_collection)
 
 

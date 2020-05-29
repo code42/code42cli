@@ -1,7 +1,7 @@
 from __future__ import print_function
 import sys
 from functools import wraps
-from os import makedirs, path
+from os import makedirs, path, getcwd, listdir
 from signal import signal, getsignal, SIGINT
 
 from code42cli.compat import open, str
@@ -139,3 +139,8 @@ class warn_interrupt(object):
                 return func(*args, **kwds)
 
         return inner
+
+
+def get_local_files():
+    cwd = getcwd()
+    return [file for file in listdir(cwd) if path.isfile(path.join(cwd, file))]

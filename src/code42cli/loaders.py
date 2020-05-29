@@ -21,12 +21,11 @@ class ArgLoader(object):
         # Only cares about args that the user has to type, not positionals
         self._args = args
         try:
-            self._names = [
-                n
-                for names in [args[key].settings[u"options_list"] for key in args]
-                for n in names
-                if n[0] == u"-"
+            arg_names = [
+                n for names in [args[key].settings[u"options_list"] for key in args] for n in names
             ]
+            self.contains_filename = u"filename" in arg_names
+            self._names = [n for n in arg_names if n[0] == u"-"]
         except TypeError:
             self._names = args
 

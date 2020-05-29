@@ -143,16 +143,16 @@ class DetectionList(object):
         handler = detection_list.get_handler(self.handlers, cmd)
         generate_template(handler, path)
 
-    def bulk_add_employees(self, sdk, profile, csv_file):
+    def bulk_add_employees(self, sdk, profile, filename):
         """Takes a csv file with each row representing an employee and adds them all to a 
         detection list in a bulk fashion.
 
         Args:
             sdk (py42.sdk.SDKClient): The py42 sdk.
             profile (Code42Profile): The profile under which to execute this command.
-            csv_file (str or unicode): The path to the csv file containing rows of users.
+            filename (str or unicode): The path to the csv file containing rows of users.
         """
-        reader = create_csv_reader(csv_file)
+        reader = create_csv_reader(filename)
         run_bulk_process(lambda **kwargs: self._add_employee(sdk, profile, **kwargs), reader)
 
     def bulk_remove_employees(self, sdk, profile, users_file):
@@ -175,12 +175,12 @@ class DetectionList(object):
     def _remove_employee(self, sdk, profile, *args, **kwargs):
         self.handlers.remove_employee(sdk, profile, *args, **kwargs)
 
-    def bulk_add_risk_tags(self, sdk, profile, csv_file):
-        reader = create_csv_reader(csv_file)
+    def bulk_add_risk_tags(self, sdk, profile, filename):
+        reader = create_csv_reader(filename)
         run_bulk_process(lambda **kwargs: add_risk_tags(sdk, profile, **kwargs), reader)
 
-    def bulk_remove_risk_tags(self, sdk, profile, csv_file):
-        reader = create_csv_reader(csv_file)
+    def bulk_remove_risk_tags(self, sdk, profile, filename):
+        reader = create_csv_reader(filename)
         run_bulk_process(lambda **kwargs: remove_risk_tags(sdk, profile, **kwargs), reader)
 
 
