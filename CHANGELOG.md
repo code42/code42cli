@@ -45,6 +45,20 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
             - `path`
         - `remove`: that takes a csv file with rule IDs and usernames.
 
+- `code42 legal-hold` commands:
+    - `add-user` with parameters `--matter-id/-m` and `--username/-u`
+    - `remove-user` with parameters `--matter-id/-m` and `--username/-u`
+    - `list` prints out existing active legal hold matters
+    - `show` takes a `matter_id` and prints details of the matter
+        - optional argument `--include-inactive` prints matter memberships that are no longer active
+        - optional argument `--include-policy` prints out the matter's backup preservation policy in json form
+    - `bulk` with subcommands:
+        - `add`: that takes a csv file with matter IDs and usernames. 
+        - `remove`: that takes a csv file with matter IDs and usernames.
+        - `generate-template`: that creates the file templates. 
+            - `cmd`: with options `add` and `remove`.
+            - `path`
+            
 - Success messages for `profile delete` and `profile update`.
 
 - Additional information in the error log file:
