@@ -1,4 +1,6 @@
 class OptionsLoader(object):
+    """A loader's who `names` refer to choices the user can select."""
+    
     def __init__(self, options):
         self._options = options
 
@@ -17,6 +19,8 @@ class OptionsLoader(object):
 
 
 class ArgLoader(object):
+    """A loader whose `names` are a list of flagged arguments the user can select from."""
+    
     def __init__(self, args):
         # Only cares about args that the user has to type, not positionals
         self._args = args
@@ -34,6 +38,7 @@ class ArgLoader(object):
         return self._names
 
     def __getitem__(self, item):
+        """Access sub loaders to navigate the argument/options tree, connected to a leaf command."""
         if item in self._names:
             arg = [
                 self._args[key]

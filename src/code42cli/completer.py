@@ -35,14 +35,16 @@ class Completer(object):
         try:
             point = point or len(cmdline)
             args = cmdline[0:point].split()
+            # Complete with main commands if `code42` is typed out.
+            # Note that the command `code42` should complete on its own.
             if len(args) < 2:
-                # `code42` already completes w/o
                 return self._main_cmd_loader.names if args[0] == MAIN_COMMAND else []
 
             current = args[-1]
             loader = self._search_trees(args)
             options = loader.names
 
+            # Complete with local files
             if _should_complete_with_local_files(current, loader):
                 return _get_matches(current, get_local_files())
 
@@ -51,7 +53,6 @@ class Completer(object):
                 return _get_next_full_set_of_commands(loader, current)
 
             # Complete with matching arg/commands
-
             return _get_matches(current, options) if options else []
         except:
             return []
