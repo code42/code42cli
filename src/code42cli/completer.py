@@ -31,7 +31,7 @@ class Completer(object):
             current = args[-1]
             loader = self._search_trees(args)
             options = loader.names
-            
+
             if current in options:
                 # `current` is already complete
                 return _get_next_full_set_of_commands(loader, current)

@@ -149,21 +149,52 @@ def _kvps_to_obj(kvps):
     return new_kvps
 
 
+class OptionsLoader(object):
+    def __init__(self, options):
+        self._options = options
+        
+    def __iter__(self):
+        return iter(self._options)
+    
+    def __getitem__(self, item):
+        return self._options[item]
+    
+    def get(self, item):
+        return self._options.get(item)
+
+    @property
+    def names(self):
+        return self._options
+
+
 class ArgLoader(object):
     def __init__(self, args):
         # Only cares about args that the user has to type, not positionals
         self._args = args
-        self._names = [
-            n for names in [args[key].settings[u"options_list"] for key in args] for n in names if n[0] == u"-"
-        ]
+        try:
+            self._names = [
+                n
+                for names in [args[key].settings[u"options_list"] for key in args]
+                for n in names
+                if n[0] == u"-"
+            ]
+        except TypeError:
+            self._names = args
 
     @property
     def names(self):
         return self._names
-    
+
     def __getitem__(self, item):
-        return ArgLoader(self._names)
-    
+        if item in self._names:
+            arg = [
+                self._args[key]
+                for key in self._args
+                if item in self._args[key].settings[u"options_list"]
+            ][0]
+            return OptionsLoader(arg.settings[u"choices"])
+        return ArgLoader(self._args)
+
     def __iter__(self):
         return iter(self._names)
 

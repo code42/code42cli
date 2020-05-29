@@ -22,6 +22,11 @@ class TestMainSubcommandLoader(object):
         assert "--incremental" in args
         assert "--actor" in args
 
+    def test_getitem_returns_choices_when_is_choiced_based_arg(self):
+        loader = MainSubcommandLoader()
+        args = loader[loader.SECURITY_DATA][u"send-to"][u"127.0.0.1"]["-p"]
+        assert "UDP" in args
+
 
 # run the help commands on some stuff to prove stuff loads
 
