@@ -161,7 +161,9 @@ class SubcommandLoader(object):
     def names(self):
         """The names of all the subcommands in this subcommand loader's root command."""
         cmds = self._get_commands()
-        return [cmd.name for cmd in cmds]
+        # Handle command groups
+        if len(cmds) != 1:
+            return [cmd.name for cmd in cmds]
         
     @property
     def subtrees(self):
