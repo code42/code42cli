@@ -1,3 +1,5 @@
+import inspect
+
 from code42cli.bulk import BulkCommandType
 from code42cli.commands import Command, SubcommandLoader
 from code42cli.cmds.detectionlists.bulk import HighRiskBulkCommandType
@@ -79,47 +81,55 @@ class DetectionListBulkSubcommandLoader(SubcommandLoader):
     def create_hre_bulk_generate_template_command(self, handler):
         return Command(
             u"generate-template",
-            u"Generate the necessary csv template needed for bulk adding users.",
+            u"Generate the necessary csv template for bulk actions.",
             u"{} generate-template <cmd> <optional args>".format(self._bulk_usage_prefix),
             handler=handler,
             arg_customizer=self._load_hre_bulk_generate_template_description,
         )
 
-    def create_bulk_add_command(self, handler):
+    def create_bulk_add_command(self, cmd_handler, row_handler):
+        file_format = _get_file_format(row_handler)
         return Command(
             self.ADD,
-            u"Bulk add users to the {} detection list using a csv file.".format(self._name),
-            u"{} {} <csv-file>".format(self._bulk_usage_prefix, BulkCommandType.ADD),
-            handler=handler,
+            u"Add users to the {} detection list. CSV file format: `{}`.".format(
+                self._name, file_format
+            ),
+            u"{} {} <filename>".format(self._bulk_usage_prefix, BulkCommandType.ADD),
+            handler=cmd_handler,
             arg_customizer=self._load_bulk_add_description,
         )
 
-    def create_bulk_remove_command(self, handler):
+    def create_bulk_remove_command(self, cmd_handler):
         return Command(
             self.REMOVE,
-            u"Bulk remove users from the {} detection list using a file.".format(self._name),
+            u"Remove users from the {} detection list. "
+            u"The file format is an end-line-delimited list of users.".format(self._name),
             u"{} {} <file>".format(self._bulk_usage_prefix, BulkCommandType.REMOVE),
-            handler=handler,
+            handler=cmd_handler,
             arg_customizer=self._load_bulk_remove_description,
         )
 
-    def create_bulk_add_risk_tags_command(self, handler):
+    def create_bulk_add_risk_tags_command(self, cmd_handler, row_handler):
+        file_format = _get_file_format(row_handler)
         return Command(
             u"add-risk-tags",
-            u"Associates risk tags with a user in bulk.",
+            u"Associates risk tags with a user in bulk. CSV file format: `{}`.".format(file_format),
             u"{} {} <file>".format(self._bulk_usage_prefix, HighRiskBulkCommandType.ADD_RISK_TAG),
-            handler=handler,
+            handler=cmd_handler,
             arg_customizer=self._load_bulk_add_risk_tags_description,
         )
 
-    def create_bulk_remove_risk_tags_command(self, handler):
+    def create_bulk_remove_risk_tags_command(self, cmd_handler, row_handler):
+        file_format = _get_file_format(row_handler)
         return Command(
             u"remove-risk-tags",
-            u"Disassociates risk tags from a user in bulk.",
+            u"Disassociates risk tags from a user in bulk. CSV file format: `{}`.".format(
+                file_format
+            ),
             u"{} {} <file>".format(
                 self._bulk_usage_prefix, HighRiskBulkCommandType.REMOVE_RISK_TAG
             ),
-            handler=handler,
+            handler=cmd_handler,
             arg_customizer=self._load_bulk_remove_risk_tags_description,
         )
 
@@ -146,7 +156,7 @@ class DetectionListBulkSubcommandLoader(SubcommandLoader):
     def _load_bulk_remove_description(self, argument_collection):
         users_file = argument_collection.arg_configs[u"users_file"]
         users_file.set_help(
-            u"A file containing a line-separated list of users to remove form the {} detection list".format(
+            u"A file containing a line-separated list of users to remove form the {} detection list.".format(
                 self._name
             )
         )
@@ -166,3 +176,10 @@ class DetectionListBulkSubcommandLoader(SubcommandLoader):
             u"from the {} detection list. "
             u"e.g. test@email.com,tag1 tag2 tag3".format(self._name)
         )
+
+
+def _get_file_format(row_handler):
+    args = inspect.getargspec(row_handler).args
+    args.remove(u"profile")
+    args.remove(u"sdk")
+    return u", ".join(args)

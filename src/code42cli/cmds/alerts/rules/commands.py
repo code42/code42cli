@@ -16,15 +16,17 @@ from code42cli.cmds.alerts.rules.user_rule import (
 
 def _customize_add_arguments(argument_collection):
     rule_id = argument_collection.arg_configs[u"rule_id"]
-    rule_id.set_help(u"Observer ID of the rule to be updated. Required.")
+    rule_id.set_help(u"Observer ID of the rule to be updated.")
     username = argument_collection.arg_configs[u"username"]
-    username.set_help(u"The username of the user to add to the alert rule. Required.")
+    username.add_short_option_name("-u")
+    username.set_help(u"The username of the user to add to the alert rule.")
 
 
 def _customize_remove_arguments(argument_collection):
     rule_id = argument_collection.arg_configs[u"rule_id"]
     rule_id.set_help(u"Observer ID of the rule to be updated.")
     username = argument_collection.arg_configs[u"username"]
+    username.add_short_option_name("-u")
     username.set_help(u"The username of the user to remove from the alert rule.")
 
 
@@ -33,11 +35,19 @@ def _customize_list_arguments(argument_collection):
     rule_id.set_help(u"Observer ID of the rule.")
 
 
-def _customize_bulk_arguments(argument_collection):
+def _customize_bulk_add_arguments(argument_collection):
+    _customize_bulk_arguments(argument_collection, u"adding")
+
+
+def _customize_bulk_remove_arguments(argument_collection):
+    _customize_bulk_arguments(argument_collection, u"removing")
+
+
+def _customize_bulk_arguments(argument_collection, action):
     file_name = argument_collection.arg_configs[u"file_name"]
     file_name.set_help(
         u"The path to the csv file with columns 'rule_id,username' "
-        u"for bulk adding users to the alert rule."
+        u"for bulk {} users to the alert rule.".format(action)
     )
 
 
@@ -65,7 +75,7 @@ def _generate_template_file(cmd, path=None):
 
 def _load_bulk_generate_template_description(argument_collection):
     cmd_type = argument_collection.arg_configs[u"cmd"]
-    cmd_type.set_help(u"The type of command the template with be used for.")
+    cmd_type.set_help(u"The type of command the template will be used for.")
     cmd_type.set_choices(BulkCommandType())
 
 
@@ -79,7 +89,7 @@ class AlertRulesBulkSubcommandLoader(SubcommandLoader):
 
         generate_template_cmd = Command(
             self.GENERATE_TEMPLATE,
-            u"Generate the necessary csv template needed for bulk adding users.",
+            u"Generate the necessary csv template for bulk actions.",
             u"{} generate-template <cmd> <optional args>".format(usage_prefix),
             handler=_generate_template_file,
             arg_customizer=_load_bulk_generate_template_description,
@@ -87,20 +97,18 @@ class AlertRulesBulkSubcommandLoader(SubcommandLoader):
 
         bulk_add = Command(
             self.ADD,
-            u"Update alert rule criteria to add users and all their aliases. "
-            u"CSV file format: rule_id,username",
+            u"Add users to alert rules. " u"CSV file format: `rule_id,username`.",
             u"{} add <filename>".format(usage_prefix),
             handler=add_bulk_users,
-            arg_customizer=_customize_bulk_arguments,
+            arg_customizer=_customize_bulk_add_arguments,
         )
 
         bulk_remove = Command(
             self.REMOVE,
-            u"Update alert rule criteria to remove users and all their aliases. "
-            u"CSV file format: rule_id,username",
+            u"Remove users from alert rules. " u"CSV file format: `rule_id,username`.",
             u"{} remove <filename>".format(usage_prefix),
             handler=remove_bulk_users,
-            arg_customizer=_customize_bulk_arguments,
+            arg_customizer=_customize_bulk_remove_arguments,
         )
 
         return [generate_template_cmd, bulk_add, bulk_remove]
@@ -122,7 +130,7 @@ class AlertRulesSubcommandLoader(SubcommandLoader):
 
         add = Command(
             self.ADD_USER,
-            u"Update alert rule criteria to monitor user aliases against the given username.",
+            u"Add a user to an alert rule.",
             u"{} add-user --rule-id <id>  --username <username>".format(usage_prefix),
             handler=add_user,
             arg_customizer=_customize_add_arguments,
@@ -130,7 +138,7 @@ class AlertRulesSubcommandLoader(SubcommandLoader):
 
         remove = Command(
             self.REMOVE_USER,
-            u"Update alert rule criteria to remove a user and all their aliases.",
+            u"Remove a user from an alert rule.",
             u"{} remove-user --rule-id <rule-id> --username <username>".format(usage_prefix),
             handler=remove_user,
             arg_customizer=_customize_remove_arguments,
@@ -145,7 +153,7 @@ class AlertRulesSubcommandLoader(SubcommandLoader):
 
         show = Command(
             self.SHOW,
-            u"Fetch configured alert-rules against the rule ID.",
+            u"Print out detailed alert rule criteria.",
             u"{} show <rule-id>".format(usage_prefix),
             handler=show_rule,
             arg_customizer=_customize_list_arguments,

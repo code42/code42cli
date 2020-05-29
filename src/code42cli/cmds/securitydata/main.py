@@ -22,7 +22,7 @@ class SecurityDataSubcommandLoader(SubcommandLoader):
 
         print_func = Command(
             self.PRINT,
-            u"Print file events to stdout",
+            u"Print file events to stdout.",
             u"{} {}".format(usage_prefix, u"print <optional-args>"),
             handler=print_out,
             arg_customizer=_load_search_args,

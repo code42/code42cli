@@ -39,7 +39,7 @@ def add_departing_employee(
         profile (C42Profile): Your code42 profile.
         username (str): The username of the employee to add.
         cloud_alias (str): An alternative email address for another cloud service.
-        departure_date (str): The date the employee is departing in format `YYYY-MM-DD`.
+        departure_date (str): The date the employee is departing in format `yyyy-MM-dd`.
         notes: (str): Notes about the employee.
     """
     user_id = get_user_id(sdk, username)
@@ -61,4 +61,4 @@ def remove_departing_employee(sdk, profile, username):
 def _load_add_description(argument_collection):
     load_user_descriptions(argument_collection)
     departure_date = argument_collection.arg_configs[u"departure_date"]
-    departure_date.set_help(u"The date the employee is departing in format YYYY-MM-DD.")
+    departure_date.set_help(u"The date the employee is departing in format yyyy-MM-dd.")
