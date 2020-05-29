@@ -7,7 +7,8 @@ import logging
 from py42.exceptions import Py42ForbiddenError
 
 from code42cli.main import MainSubcommandLoader
-from code42cli.commands import Command, SubcommandLoader
+from code42cli.commands import Command
+from code42cli.loaders import SubcommandLoader
 from code42cli.errors import Code42CLIError
 from code42cli.invoker import CommandInvoker
 from code42cli.parser import ArgumentParserError, CommandParser

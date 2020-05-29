@@ -1,5 +1,6 @@
 from code42cli.args import ArgConfig
-from code42cli.commands import Command, SubcommandLoader
+from code42cli.commands import Command
+from code42cli.loaders import SubcommandLoader
 from code42cli.cmds.alerts.extraction import extract
 from code42cli.cmds.search_shared import args, logger_factory
 from code42cli.cmds.search_shared.enums import (

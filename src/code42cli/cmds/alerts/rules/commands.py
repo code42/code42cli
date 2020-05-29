@@ -1,5 +1,6 @@
 from code42cli import MAIN_COMMAND
-from code42cli.commands import Command, SubcommandLoader
+from code42cli.commands import Command
+from code42cli.loaders import SubcommandLoader
 from code42cli.bulk import generate_template, BulkCommandType
 from code42cli.cmds.alerts.rules.user_rule import (
     add_user,

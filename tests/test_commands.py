@@ -3,7 +3,7 @@ from py42.sdk import SDKClient
 
 from code42cli import PRODUCT_NAME
 from code42cli.args import ArgConfig, SDK_ARG_NAME, PROFILE_ARG_NAME
-from code42cli.commands import Command, DictObject, SubcommandLoader
+from code42cli.commands import Command, DictObject
 from code42cli.profile import Code42Profile
 from .conftest import (
     func_keyword_args,
@@ -14,16 +14,11 @@ from .conftest import (
     func_single_positional_arg_with_sdk_and_profile,
     func_single_positional_arg,
     func_single_positional_arg_many_optional_args,
+    subcommand1,
+    subcommand2,
+    subcommand3,
+    TestSubcommandLoader,
 )
-
-subcommand1 = Command("sub1", "sub1 desc", "sub1 usage")
-subcommand2 = Command("sub2", "sub2 desc", "sub2 usage")
-subcommand3 = Command("sub3", "sub3 desc", "sub3 usage")
-
-
-class TestSubcommandLoader(SubcommandLoader):
-    def load_commands(self):
-        return [subcommand1, subcommand2, subcommand3]
 
 
 def arg_customizer(arg_collection):
@@ -274,30 +269,3 @@ class TestCommand(object):
 
         command = Command("test", "test desc", "test usage")
         assert command(help_func=dummy_print_help) == "success"
-
-
-class TestCommandSubcommandLoader(object):
-    def test_names_when_no_subcommands_returns_nothing(self):
-        subcommand_loader = SubcommandLoader("")
-        assert not subcommand_loader.names
-
-    def test_names_returns_expected_names(self):
-        subcommand_loader = SubcommandLoader("")
-        subcommand_loader.load_commands = lambda: [
-            Command("c1", ""),
-            Command("c2", ""),
-            Command("c3", ""),
-        ]
-        assert subcommand_loader.names == ["c1", "c2", "c3"]
-
-    def test_getitem_returns_expected_subtree(self):
-        subcommand_loader = SubcommandLoader("")
-        subcommand_loader_sub = SubcommandLoader("sub")
-        subcommand_loader_sub.load_commands = lambda: [
-            Command("c1", ""),
-            Command("c2", ""),
-            Command("c3", ""),
-        ]
-        command = Command("c1", "", subcommand_loader=TestSubcommandLoader(""))
-        subcommand_loader.load_commands = lambda: [command]
-        assert subcommand_loader._subtrees
