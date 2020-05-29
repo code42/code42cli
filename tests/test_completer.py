@@ -103,3 +103,4 @@ class TestCompleter(object):
     def test_complete_does_not_complete_positional_args(self):
         actual = self._completer.complete("code42 profile use nam")
         assert "name" not in actual
+

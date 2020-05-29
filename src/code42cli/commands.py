@@ -152,14 +152,20 @@ def _kvps_to_obj(kvps):
 class ArgLoader(object):
     def __init__(self, args):
         # Only cares about args that the user has to type, not positionals
-        self._args = [a for a in args if a[0] == u"-"]
+        self._args = args
+        self._names = [
+            n for names in [args[key].settings[u"options_list"] for key in args] for n in names if n[0] == u"-"
+        ]
 
     @property
     def names(self):
-        return self._args
+        return self._names
+    
+    def __getitem__(self, item):
+        return ArgLoader(self._names)
     
     def __iter__(self):
-        return iter(self._args)
+        return iter(self._names)
 
 
 class SubcommandLoader(object):
@@ -183,7 +189,7 @@ class SubcommandLoader(object):
         names = [
             n for names in [args[key].settings[u"options_list"] for key in args] for n in names
         ]
-        return ArgLoader(names)
+        return ArgLoader(args)
 
     @property
     def names(self):
