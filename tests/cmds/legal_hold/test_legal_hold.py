@@ -15,7 +15,9 @@ from code42cli.errors import (
     UserDoesNotExistError,
 )
 from py42.exceptions import Py42BadRequestError
-from code42cli.util import get_user_id
+from py42.response import Py42Response
+from requests import Response
+
 
 TEST_MATTER_ID = "99999"
 TEST_LEGAL_HOLD_MEMBERSHIP_UID = "88888"
@@ -53,6 +55,18 @@ ACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT = [{"legalHoldMemberships": [ACTIVE_LEGAL_H
 ACTIVE_AND_INACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT = [
     {"legalHoldMemberships": [ACTIVE_LEGAL_HOLD_MEMBERSHIP, INACTIVE_LEGAL_HOLD_MEMBERSHIP]}
 ]
+
+TEST_PRESERVATION_POLICY_UID = "1010101010"
+TEST_PRESERVATION_POLICY_JSON = '{{"creationDate": "2020-01-01","legalHoldPolicyUid": {}}}'.format(
+    TEST_PRESERVATION_POLICY_UID
+)
+
+
+@pytest.fixture
+def preservation_policy_response(mocker):
+    response = mocker.MagicMock(spec=Response)
+    response.text = TEST_PRESERVATION_POLICY_JSON
+    return Py42Response(response)
 
 
 @pytest.fixture
@@ -152,3 +166,12 @@ def test_show_matter_prints_active_and_inactive_results_when_include_inactive_fl
     capture = capsys.readouterr()
     assert ACTIVE_TEST_USERNAME in capture.out
     assert INACTIVE_TEST_USERNAME in capture.out
+
+
+def test_show_matter_prints_preservation_policy_when_include_policy_flag_set(
+    sdk, check_matter_accessible_success, preservation_policy_response, capsys
+):
+    sdk.legalhold.get_policy_by_uid.return_value = preservation_policy_response
+    show_matter(sdk, TEST_MATTER_ID, include_policy=True)
+    capture = capsys.readouterr()
+    assert TEST_PRESERVATION_POLICY_UID in capture.out
