@@ -61,13 +61,13 @@ class ArgNode(CLINode):
         return iter(self._names)
 
 
-class SubcommandLoader(CLINode):
+class SubcommandNode(CLINode):
     """Responsible for creating subcommands for it's root command. It is also useful for getting 
     command information ahead of time, as in the example of tab completion."""
 
-    def __init__(self, root_command_name):
+    def __init__(self, root_command_name, commands):
         self.root = root_command_name
-        self._cmds = None
+        self.commands = commands
 
     def __getitem__(self, item):
         try:
@@ -76,34 +76,22 @@ class SubcommandLoader(CLINode):
             return self._get_args(item)
 
     def _get_args(self, item):
-        cmds = self._get_commands()
-        cmd = [c for c in cmds if c.name == item][0]
+        cmd = [c for c in self.commands if c.name == item][0]
         args = cmd.get_arg_configs()
         return ArgNode(args)
 
     @property
     def names(self):
         """The names of all the subcommands in this subcommand loader's root command."""
-        cmds = self._get_commands()
-        return [cmd.name for cmd in cmds]
+        return [cmd.name for cmd in self.commands]
 
     @property
     def _subtrees(self):
         """All subcommands for this subcommand loader's root command mapped to their given 
         subcommand loaders."""
-        cmds = self._get_commands()
         results = {}
-        for cmd in cmds:
+        for cmd in self.commands:
             subcommand_loader = cmd.subcommand_loader
             if subcommand_loader:
                 results[cmd.name] = subcommand_loader
         return results
-
-    def load_commands(self):
-        """Override"""
-        return []
-
-    def _get_commands(self):
-        if self._cmds is None:
-            self._cmds = self.load_commands()
-        return self._cmds

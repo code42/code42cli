@@ -3,6 +3,7 @@ import inspect
 from code42cli import profile as cliprofile
 from code42cli.args import get_auto_arg_configs, SDK_ARG_NAME, PROFILE_ARG_NAME
 from code42cli.sdk_client import create_sdk
+from code42cli.tree_nodes import CLINode, SubcommandNode
 
 
 class DictObject(object):
@@ -147,3 +148,28 @@ def _kvps_to_obj(kvps):
     new_kvps = {key: kvps[key] for key in kvps if key in [SDK_ARG_NAME, PROFILE_ARG_NAME]}
     new_kvps[u"args"] = DictObject(kvps)
     return new_kvps
+
+
+class SubcommandLoader(CLINode):
+    """Responsible for creating subcommands for it's root command. It is also useful for getting 
+    command information ahead of time, as in the example of tab completion."""
+
+    def __init__(self, root_command_name, node=None):
+        self.root = root_command_name
+        self._node = node
+
+    def __getitem__(self, item):
+        return self._get_node()[item]
+
+    @property
+    def names(self):
+        return self._get_node().names
+
+    def load_commands(self):
+        """Override"""
+        return []
+    
+    def _get_node(self):
+        if not self._node:
+            self._node = SubcommandNode(self.root, self.load_commands())
+        return self._node

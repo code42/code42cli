@@ -3,7 +3,7 @@ from py42.sdk import SDKClient
 
 from code42cli import PRODUCT_NAME
 from code42cli.args import ArgConfig, SDK_ARG_NAME, PROFILE_ARG_NAME
-from code42cli.commands import Command, DictObject
+from code42cli.commands import Command, DictObject, SubcommandLoader
 from code42cli.profile import Code42Profile
 from .conftest import (
     func_keyword_args,
@@ -269,3 +269,26 @@ class TestCommand(object):
 
         command = Command("test", "test desc", "test usage")
         assert command(help_func=dummy_print_help) == "success"
+
+
+class TestCommandSubcommandLoader(object):
+    def test_names_when_no_subcommands_returns_nothing(self):
+        subcommand_loader = SubcommandLoader("")
+        assert not subcommand_loader.names
+
+    def test_names_returns_expected_names(self):
+        subcommand_loader = SubcommandLoader("")
+        subcommand_loader.load_commands = lambda: [
+            Command("c1", ""),
+            Command("c2", ""),
+            Command("c3", ""),
+        ]
+        assert subcommand_loader.names == ["c1", "c2", "c3"]
+
+    def test_getitem_returns_expected_subtree(self):
+        subcommand_loader = SubcommandLoader("")
+        subcommand_loader_sub = SubcommandLoader("sub")
+        command = Command("c1", "", subcommand_loader=TestSubcommandLoader(""))
+        subcommand_loader.load_commands = lambda: [command]
+        assert subcommand_loader.names == ["c1"]
+        assert subcommand_loader["c1"].names == ["sub1", "sub2", "sub3"]

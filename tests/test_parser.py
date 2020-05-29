@@ -1,7 +1,6 @@
 import pytest
 
-from code42cli.commands import Command
-from code42cli.tree_nodes import SubcommandLoader
+from code42cli.commands import Command, SubcommandLoader
 from code42cli.parser import ArgumentParserError, CommandParser
 
 
