@@ -87,11 +87,10 @@ class SubcommandNode(CLINode):
 
     @property
     def _subtrees(self):
-        """All subcommands for this subcommand loader's root command mapped to their given 
-        subcommand loaders."""
+        """Maps subcommand names to their respective subcommand nodes."""
         results = {}
         for cmd in self.commands:
-            subcommand_loader = cmd.subcommand_loader
-            if subcommand_loader:
-                results[cmd.name] = SubcommandNode(cmd.name, cmd.subcommand_loader.load_commands())
+            if cmd.subcommand_loader:
+                commands = cmd.subcommand_loader.load_commands()
+                results[cmd.name] = SubcommandNode(cmd.name, commands)
         return results
