@@ -168,7 +168,7 @@ class SubcommandLoader(CLINode):
     def load_commands(self):
         """Override"""
         return []
-    
+
     def _get_node(self):
         if not self._node:
             self._node = SubcommandNode(self.root, self.load_commands())

@@ -116,7 +116,7 @@ class TestCompleter(object):
         actual = self._completer.complete("code42 security-data write-to ")
         assert "foo.txt" in actual
         assert "bar.csv" in actual
-    
+
     def test_complete_completes_local_files(self, mocker):
         mock_files = mocker.patch("code42cli.completer.get_local_files")
         mock_files.return_value = ["foo.txt", "bar.csv"]
@@ -124,7 +124,9 @@ class TestCompleter(object):
         assert "foo.txt" in actual
         assert len(actual) == 1
 
-    def test_complete_when_current_is_prefix_to_local_file_but_is_not_arg_does_not_complete_with_local_file(self, mocker):
+    def test_complete_when_current_is_prefix_to_local_file_but_is_not_arg_does_not_complete_with_local_file(
+        self, mocker
+    ):
         mock_files = mocker.patch("code42cli.completer.get_local_files")
         mock_files.return_value = ["bulk.txt"]
         actual = self._completer.complete("code42 departing-employee bu")

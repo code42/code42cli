@@ -1,6 +1,6 @@
 class CLINode(object):
     """Base class for identifying nodes in the command/argument hierarchy."""
-    
+
     @property
     def names(self):
         """Override"""
@@ -9,7 +9,7 @@ class CLINode(object):
 
 class ArgOptionsNode(CLINode):
     """A node who `names` refer to choices the user can select for an argument."""
-    
+
     def __init__(self, options):
         self._options = options
 
@@ -29,7 +29,7 @@ class ArgOptionsNode(CLINode):
 
 class ArgNode(CLINode):
     """A node whose `names` are a list of flagged arguments the user can select from."""
-    
+
     def __init__(self, args):
         # Only cares about args that the user has to type, not positionals
         self._args = args
@@ -93,5 +93,5 @@ class SubcommandNode(CLINode):
         for cmd in self.commands:
             subcommand_loader = cmd.subcommand_loader
             if subcommand_loader:
-                results[cmd.name] = subcommand_loader
+                results[cmd.name] = SubcommandNode(cmd.name, cmd.subcommand_loader.load_commands())
         return results
