@@ -158,10 +158,10 @@ class SubcommandLoader(object):
         self._cmds = None
         
     def __getitem__(self, item):
-        return self.subtrees[item]
+        return self._subtrees[item]
     
     def get(self, item):
-        return self.subtrees.get(item)
+        return self._subtrees.get(item)
 
     @property
     def names(self):
@@ -174,7 +174,7 @@ class SubcommandLoader(object):
         # return [n for names in [a.settings[u"options_list"] for a in args] for n in names]
 
     @property
-    def subtrees(self):
+    def _subtrees(self):
         """All subcommands for this subcommand loader's root command mapped to their given 
         subcommand loaders."""
         cmds = self._get_commands()

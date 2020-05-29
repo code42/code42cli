@@ -290,7 +290,7 @@ class TestCommandSubcommandLoader(object):
         ]
         assert subcommand_loader.names == ["c1", "c2", "c3"]
 
-    def test_subtrees_returns_expected_substree(self):
+    def test_getitem_returns_expected_subtree(self):
         subcommand_loader = SubcommandLoader("")
         subcommand_loader_sub = SubcommandLoader("sub")
         subcommand_loader_sub.load_commands = lambda: [
@@ -300,4 +300,4 @@ class TestCommandSubcommandLoader(object):
         ]
         command = Command("c1", "", subcommand_loader=TestSubcommandLoader(""))
         subcommand_loader.load_commands = lambda: [command]
-        assert subcommand_loader.subtrees
+        assert subcommand_loader._subtrees
