@@ -59,15 +59,15 @@ class Completer(object):
 
     def _search_trees(self, args):
         # Find cmd_loader at lowest level from given args
-        cmd_loader = self._main_cmd_loader
+        node = self._main_cmd_loader.get_node()
         if len(args) > 2:
             for arg in args[1:-1]:
-                new_loader = cmd_loader[arg]
-                if new_loader:
-                    cmd_loader = new_loader
+                next_node = node[arg]
+                if next_node:
+                    node = next_node
                 else:
-                    return cmd_loader
-        return cmd_loader
+                    return node
+        return node
 
 
 def complete(cmdline, point):

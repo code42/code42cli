@@ -159,17 +159,17 @@ class SubcommandLoader(object):
         self._node = node
 
     def __getitem__(self, item):
-        return self._get_node()[item]
+        return self.get_node()[item]
 
     @property
     def names(self):
-        return self._get_node().names
+        return self.get_node().names
 
     def load_commands(self):
         """Override"""
         return []
 
-    def _get_node(self):
+    def get_node(self):
         if not self._node:
             self._node = SubcommandNode(self.root, self.load_commands())
         return self._node
