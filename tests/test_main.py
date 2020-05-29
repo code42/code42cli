@@ -1,5 +1,20 @@
 # run the help commands on some stuff to prove stuff loads
-from code42cli.main import main
+from code42cli.main import main, MainSubcommandLoader
+
+
+class TestMainSubcommandLoader(object):
+    def test_command_names_work_at_first_level(self):
+        loader = MainSubcommandLoader()
+        assert "alerts" in loader.names
+        assert "alert-rules" in loader.names
+        assert "departing-employee" in loader.names
+
+    def test_command_names_work_at_next_level(self):
+        loader = MainSubcommandLoader()
+        subloader = loader.subtrees[loader.ALERTS].names
+        assert "print" in subloader
+        assert "write-to" in subloader
+        assert "clear-checkpoint" in subloader
 
 
 def _execute_test(capsys, assert_command, assert_value=False):

@@ -164,7 +164,7 @@ class SubcommandLoader(object):
         # Handle command groups
         if len(cmds) != 1:
             return [cmd.name for cmd in cmds]
-        
+
     @property
     def subtrees(self):
         """All subcommands for this subcommand loader's root command mapped to their given 
@@ -180,7 +180,7 @@ class SubcommandLoader(object):
     def load_commands(self):
         """Override"""
         return []
-    
+
     def _get_commands(self):
         if self._cmds is None:
             self._cmds = self.load_commands()

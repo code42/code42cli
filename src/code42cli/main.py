@@ -49,6 +49,9 @@ class MainSubcommandLoader(SubcommandLoader):
     DEPARTING_EMPLOYEE = DetectionLists.DEPARTING_EMPLOYEE
     HIGH_RISK_EMPLOYEE = DetectionLists.HIGH_RISK_EMPLOYEE
 
+    def __init__(self):
+        super(MainSubcommandLoader, self).__init__(u"")
+
     def load_commands(self):
         detection_lists_description = (
             u"For adding and removing employees from the {} detection list."
@@ -106,7 +109,7 @@ class MainSubcommandLoader(SubcommandLoader):
 
 
 def main():
-    top = Command(u"", u"", subcommand_loader=MainSubcommandLoader(u""))
+    top = Command(u"", u"", subcommand_loader=MainSubcommandLoader())
     invoker = CommandInvoker(top)
     invoker.run(sys.argv[1:])
 

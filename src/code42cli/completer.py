@@ -18,7 +18,7 @@ def _get_next_full_set_of_commands(cmd_loader, current):
 
 class Completer(object):
     def __init__(self, main_cmd_loader=None):
-        self._main_cmd_loader = main_cmd_loader or MainSubcommandLoader(u"")
+        self._main_cmd_loader = main_cmd_loader or MainSubcommandLoader()
 
     def complete(self, cmdline, point=None):
         try:
