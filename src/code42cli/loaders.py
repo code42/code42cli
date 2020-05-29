@@ -70,9 +70,6 @@ class SubcommandLoader(object):
         cmds = self._get_commands()
         cmd = [c for c in cmds if c.name == item][0]
         args = cmd.get_arg_configs()
-        names = [
-            n for names in [args[key].settings[u"options_list"] for key in args] for n in names
-        ]
         return ArgLoader(args)
 
     @property
