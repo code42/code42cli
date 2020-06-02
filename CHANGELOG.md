@@ -50,8 +50,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `remove-user` with parameters `--matter-id/-m` and `--username/-u`.
     - `list` prints out existing active legal hold matters.
     - `show` takes a `matter_id` and prints details of the matter.
-        - optional argument `--include-inactive` prints matter memberships that are no longer active.
-        - optional argument `--include-policy` prints out the matter's backup preservation policy in json form.
+        - optional argument `--include-inactive` additionally prints matter memberships that are no longer active.
+        - optional argument `--include-policy` additionally prints out the matter's backup preservation policy in json form.
     - `bulk` with subcommands:
         - `add-user`: that takes a csv file with matter IDs and usernames. 
         - `remove-user`: that takes a csv file with matter IDs and usernames.
