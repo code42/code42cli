@@ -62,8 +62,7 @@ class ArgNode(CLINode):
 
 
 class SubcommandNode(CLINode):
-    """Responsible for creating subcommands for it's root command. It is also useful for getting 
-    command information ahead of time, as in the example of tab completion."""
+    """Gets command information ahead of command-execution."""
 
     def __init__(self, root_command_name, commands):
         self.root = root_command_name

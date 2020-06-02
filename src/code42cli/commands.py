@@ -151,8 +151,7 @@ def _kvps_to_obj(kvps):
 
 
 class SubcommandLoader(object):
-    """Responsible for creating subcommands for it's root command. It is also useful for getting 
-    command information ahead of time, as in the example of tab completion."""
+    """Responsible for creating subcommands for it's root command."""
 
     def __init__(self, root_command_name, node=None):
         self.root = root_command_name
