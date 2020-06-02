@@ -23,7 +23,7 @@ def generate_template(handler, path=None):
     `handler` only has one parameter that is not `sdk` or `profile`, it will create a blank file. 
     This is useful for commands such as `remove` which only require a list of users.
     """
-    path = path or u"{0}/{1}.csv".format(os.getcwd(), str(handler.__name__))
+    path = path or os.path.join(os.getcwd(), u"{}.csv".format(str(handler.__name__)))
     args = [
         arg
         for arg in inspect.getargspec(handler).args

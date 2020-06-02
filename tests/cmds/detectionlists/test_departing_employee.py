@@ -7,7 +7,7 @@ from code42cli.cmds.detectionlists.departing_employee import (
     DepartingEmployeeSubcommandLoader,
 )
 
-from .conftest import TEST_ID
+from ...conftest import TEST_ID
 
 from py42.exceptions import Py42BadRequestError
 
@@ -23,7 +23,7 @@ class TestDepartingEmployeeSubcommandLoader(object):
         assert "add" in names
         assert "bulk" in names
         assert "remove" in names
-    
+
     def test_loader_has_expected_detection_list_name(self):
         loader = DepartingEmployeeSubcommandLoader("test")
         assert "departing-employee" == loader.detection_list.name

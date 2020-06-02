@@ -1,10 +1,14 @@
 from __future__ import print_function
 import sys
+import shutil
+
+from collections import OrderedDict
 from functools import wraps
 from os import makedirs, path
 from signal import signal, getsignal, SIGINT
 
 from code42cli.compat import open, str
+from code42cli.errors import UserDoesNotExistError
 
 _PADDING_SIZE = 3
 
@@ -72,7 +76,7 @@ def find_format_width(record, header):
     # Set default max width items to column names
     max_width_item = dict(header.items())
     for record_row in record:
-        row = {}
+        row = OrderedDict()
         for header_key in header.keys():
             row[header_key] = record_row[header_key]
             max_width_item[header_key] = max(
@@ -84,12 +88,27 @@ def find_format_width(record, header):
 
 
 def format_to_table(rows, column_size):
-    """Prints result in left justified format in a tabular form.
-    """
+    """Prints result in left justified format in a tabular form."""
     for row in rows:
         for key in row.keys():
             print(str(row[key]).ljust(column_size[key] + _PADDING_SIZE), end=u" ")
         print(u"")
+
+
+def format_string_list_to_columns(string_list, max_width=None):
+    """Prints a list of strings in justified columns and fits them neatly into specified width."""
+    if not string_list:
+        return
+    if not max_width:
+        max_width, _ = shutil.get_terminal_size()
+    column_width = len(max(string_list, key=len)) + _PADDING_SIZE
+    num_columns = int(max_width / column_width)
+    format_string = u"{{:<{0}}}".format(column_width) * num_columns
+    batches = [string_list[i : i + num_columns] for i in range(0, len(string_list), num_columns)]
+    padding = [u"" for _ in range(num_columns)]
+    for batch in batches:
+        print(format_string.format(*batch + padding))
+    print()
 
 
 def color_text_red(text):
@@ -134,8 +153,25 @@ class warn_interrupt(object):
 
     def __call__(self, func):
         @wraps(func)
-        def inner(*args, **kwds):
+        def inner(*args, **kwargs):
             with self:
-                return func(*args, **kwds)
+                return func(*args, **kwargs)
 
         return inner
+
+
+def get_user_id(sdk, username):
+    """Returns the user's UID (referred to by `user_id` in detection lists). Raises 
+    `UserDoesNotExistError` if the user doesn't exist in the Code42 server.
+    
+    Args:
+        sdk (py42.sdk.SDKClient): The py42 sdk.
+        username (str or unicode): The username of the user to get an ID for.
+    
+    Returns:
+         str: The user ID for the user with the given username.
+    """
+    users = sdk.users.get_by_username(username)[u"users"]
+    if not users:
+        raise UserDoesNotExistError(username)
+    return users[0][u"userUid"]

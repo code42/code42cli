@@ -11,6 +11,7 @@ from code42cli.cmds.detectionlists.enums import DetectionLists
 from code42cli.cmds.securitydata import main as secmain
 from code42cli.cmds.alerts import main as alertmain
 from code42cli.cmds.alerts.rules import commands as alertrules
+from code42cli.cmds.legal_hold import commands as legalhold
 from code42cli.cmds.profile import ProfileSubcommandLoader
 from code42cli.commands import Command, SubcommandLoader
 from code42cli.invoker import CommandInvoker
@@ -48,6 +49,7 @@ class MainSubcommandLoader(SubcommandLoader):
     ALERT_RULES = u"alert-rules"
     DEPARTING_EMPLOYEE = DetectionLists.DEPARTING_EMPLOYEE
     HIGH_RISK_EMPLOYEE = DetectionLists.HIGH_RISK_EMPLOYEE
+    LEGAL_HOLD = u"legal-hold"
 
     def load_commands(self):
         detection_lists_description = (
@@ -84,6 +86,11 @@ class MainSubcommandLoader(SubcommandLoader):
                 detection_lists_description.format(u"high risk employee"),
                 subcommand_loader=self._create_high_risk_employee_loader(),
             ),
+            Command(
+                self.LEGAL_HOLD,
+                u"For adding and removing employees to legal hold matters.",
+                subcommand_loader=self._create_legal_hold_loader(),
+            ),
         ]
 
     def _create_profile_loader(self):
@@ -103,6 +110,9 @@ class MainSubcommandLoader(SubcommandLoader):
 
     def _create_high_risk_employee_loader(self):
         return hre.HighRiskEmployeeSubcommandLoader(self.HIGH_RISK_EMPLOYEE)
+
+    def _create_legal_hold_loader(self):
+        return legalhold.LegalHoldSubcommandLoader(self.LEGAL_HOLD)
 
 
 def main():

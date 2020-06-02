@@ -4,21 +4,6 @@ from requests import Response, HTTPError
 from py42.exceptions import Py42BadRequestError
 
 
-TEST_ID = "TEST_ID"
-
-
-@pytest.fixture
-def sdk_with_user(sdk):
-    sdk.users.get_by_username.return_value = {"users": [{"userUid": TEST_ID}]}
-    return sdk
-
-
-@pytest.fixture
-def sdk_without_user(sdk):
-    sdk.users.get_by_username.return_value = {"users": []}
-    return sdk
-
-
 @pytest.fixture
 def bad_request_for_user_already_added(mocker):
     resp = mocker.MagicMock(spec=Response)

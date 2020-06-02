@@ -1,24 +1,24 @@
+from collections import OrderedDict
+
 from py42.exceptions import Py42InternalServerError
 from py42.util import format_json
 
 
 from code42cli.errors import InvalidRuleTypeError
-from code42cli.util import format_to_table, find_format_width
+from code42cli.util import format_to_table, find_format_width, get_user_id
 from code42cli.bulk import run_bulk_process
 from code42cli.file_readers import create_csv_reader
 from code42cli.logger import get_main_cli_logger
-from code42cli.cmds.detectionlists import get_user_id
 from code42cli.cmds.alerts.rules.enums import AlertRuleTypes
 
 
-_HEADER_KEYS_MAP = {
-    u"observerRuleId": u"RuleId",
-    u"name": u"Name",
-    u"severity": u"Severity",
-    u"type": u"Type",
-    u"ruleSource": u"Source",
-    u"isEnabled": u"Enabled",
-}
+_HEADER_KEYS_MAP = OrderedDict()
+_HEADER_KEYS_MAP[u"observerRuleId"] = u"RuleId"
+_HEADER_KEYS_MAP[u"name"] = u"Name"
+_HEADER_KEYS_MAP[u"severity"] = u"Severity"
+_HEADER_KEYS_MAP[u"type"] = u"Type"
+_HEADER_KEYS_MAP[u"ruleSource"] = u"Source"
+_HEADER_KEYS_MAP[u"isEnabled"] = u"Enabled"
 
 
 def add_user(sdk, profile, rule_id, username):
