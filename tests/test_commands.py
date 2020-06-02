@@ -21,7 +21,7 @@ subcommand2 = Command("sub2", "sub2 desc", "sub2 usage")
 subcommand3 = Command("sub3", "sub3 desc", "sub3 usage")
 
 
-class TestSubcommandLoader(SubcommandLoader):
+class DummySubcommandLoader(SubcommandLoader):
     def load_commands(self):
         return [subcommand1, subcommand2, subcommand3]
 
@@ -57,7 +57,7 @@ class TestCommand(object):
 
     def test_load_subcommands_makes_subcommands_accessible(self):
         command = Command(
-            "test", "test desc", "test usage", subcommand_loader=TestSubcommandLoader("test")
+            "test", "test desc", "test usage", subcommand_loader=DummySubcommandLoader("test")
         )
         command.load_subcommands()
         assert len(command.subcommands) == 3
@@ -298,6 +298,6 @@ class TestCommandSubcommandLoader(object):
             Command("c2", ""),
             Command("c3", ""),
         ]
-        command = Command("c1", "", subcommand_loader=TestSubcommandLoader(""))
+        command = Command("c1", "", subcommand_loader=DummySubcommandLoader(""))
         subcommand_loader.load_commands = lambda: [command]
         assert subcommand_loader.subtrees

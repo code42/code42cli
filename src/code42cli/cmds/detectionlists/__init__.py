@@ -3,9 +3,10 @@ from py42.exceptions import Py42BadRequestError
 from code42cli.cmds.detectionlists.commands import DetectionListSubcommandLoader
 from code42cli.bulk import generate_template, run_bulk_process
 from code42cli.file_readers import create_csv_reader, create_flat_file_reader
-from code42cli.errors import UserAlreadyAddedError, UserDoesNotExistError, UnknownRiskTagError
+from code42cli.errors import UserAlreadyAddedError, UnknownRiskTagError
 from code42cli.cmds.detectionlists.enums import DetectionLists, DetectionListUserKeys, RiskTags
 from code42cli.cmds.detectionlists.bulk import BulkDetectionList, BulkHighRiskEmployee
+from code42cli.util import get_user_id
 
 
 def try_handle_user_already_added_error(bad_request_err, username_tried_adding, list_name):
@@ -203,23 +204,6 @@ def load_user_descriptions(argument_collection):
     notes = argument_collection.arg_configs[DetectionListUserKeys.NOTES]
     cloud_alias.set_help(u"An alternative email address for another cloud service.")
     notes.set_help(u"Notes about the employee.")
-
-
-def get_user_id(sdk, username):
-    """Returns the user's UID (referred to by `user_id` in detection lists). If the user does not 
-    exist, it prints an error and exits.
-    
-    Args:
-        sdk (py42.sdk.SDKClient): The py42 sdk.
-        username (str or unicode): The username of the user to get an ID for.
-    
-    Returns:
-         str: The user ID for the user with the given username.
-    """
-    users = sdk.users.get_by_username(username)[u"users"]
-    if not users:
-        raise UserDoesNotExistError(username)
-    return users[0][u"userUid"]
 
 
 def update_user(sdk, user_id, cloud_alias=None, risk_tag=None, notes=None):
