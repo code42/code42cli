@@ -31,7 +31,7 @@ class LegalHoldSubcommandLoader(SubcommandLoader):
         add = Command(
             self.ADD_USER,
             u"Add a user to a legal hold matter.",
-            u"{} add-user --matter-id <id>  --username <username>".format(usage_prefix),
+            u"{} add-user --matter-id <id> --username <username>".format(usage_prefix),
             handler=add_user,
             arg_customizer=_customize_add_arguments,
         )
