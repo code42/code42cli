@@ -189,16 +189,18 @@ def test_show_matter_prints_active_results_only(sdk, check_matter_accessible_suc
     assert INACTIVE_TEST_USERNAME not in capture.out
 
 
-def test_show_matter_prints_none_when_no_membership(sdk, check_matter_accessible_success, capsys):
+def test_show_matter_prints_no_active_members_when_no_membership(
+    sdk, check_matter_accessible_success, capsys
+):
     sdk.legalhold.get_all_matter_custodians.return_value = EMPTY_LEGAL_HOLD_MEMBERSHIPS_RESULT
     show_matter(sdk, TEST_MATTER_ID)
     capture = capsys.readouterr()
     assert ACTIVE_TEST_USERNAME not in capture.out
     assert INACTIVE_TEST_USERNAME not in capture.out
-    assert "None" in capture.out
+    assert "No active matter members." in capture.out
 
 
-def test_show_matter_prints_none_when_no_inactive_membership(
+def test_show_matter_prints_no_inactive_members_when_no_inactive_membership(
     sdk, check_matter_accessible_success, capsys
 ):
     sdk.legalhold.get_all_matter_custodians.return_value = ACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT
@@ -206,10 +208,10 @@ def test_show_matter_prints_none_when_no_inactive_membership(
     capture = capsys.readouterr()
     assert ACTIVE_TEST_USERNAME in capture.out
     assert INACTIVE_TEST_USERNAME not in capture.out
-    assert "None" in capture.out
+    assert "No inactive matter members." in capture.out
 
 
-def test_show_matter_prints_none_when_no_active_membership(
+def test_show_matter_prints_no_active_members_when_no_active_membership(
     sdk, check_matter_accessible_success, capsys
 ):
     sdk.legalhold.get_all_matter_custodians.return_value = INACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT
@@ -217,16 +219,18 @@ def test_show_matter_prints_none_when_no_active_membership(
     capture = capsys.readouterr()
     assert ACTIVE_TEST_USERNAME not in capture.out
     assert INACTIVE_TEST_USERNAME in capture.out
-    assert "None" in capture.out
+    assert "No active matter members." in capture.out
 
 
-def test_show_matter_prints_none_when_no_membership(sdk, check_matter_accessible_success, capsys):
-    sdk.legalhold.get_all_matter_custodians.return_value = EMPTY_LEGAL_HOLD_MEMBERSHIPS_RESULT
-    show_matter(sdk, TEST_MATTER_ID)
+def test_show_matter_prints_no_active_members_when_no_active_membership_and_inactive_membership_included(
+    sdk, check_matter_accessible_success, capsys
+):
+    sdk.legalhold.get_all_matter_custodians.return_value = INACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT
+    show_matter(sdk, TEST_MATTER_ID, include_inactive=True)
     capture = capsys.readouterr()
     assert ACTIVE_TEST_USERNAME not in capture.out
-    assert INACTIVE_TEST_USERNAME not in capture.out
-    assert "None" in capture.out
+    assert INACTIVE_TEST_USERNAME in capture.out
+    assert "No active matter members." in capture.out
 
 
 def test_show_matter_prints_preservation_policy_when_include_policy_flag_set(

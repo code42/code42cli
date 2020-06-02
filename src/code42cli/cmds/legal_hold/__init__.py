@@ -95,11 +95,11 @@ def show_matter(sdk, matter_id, include_inactive=False, include_policy=False):
         print("\nNo active matter members.\n")
 
     if include_inactive:
-        print(u"\nInactive matter members:\n")
         if inactive_usernames:
+            print(u"\nInactive matter members:\n")
             format_string_list_to_columns(inactive_usernames)
         else:
-            print("None")
+            print("No inactive matter members.\n")
 
     if include_policy:
         _get_and_print_preservation_policy(sdk, matter[u"holdPolicyUid"])
