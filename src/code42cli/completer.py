@@ -15,6 +15,7 @@ def _get_matches(current, options):
 
 def _get_next_full_set_of_options(loader, current):
     loader = loader[current]
+    current = u""
 
     # Complete positional filename with list of local files
     if _should_complete_with_local_files(current, loader):

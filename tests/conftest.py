@@ -39,7 +39,7 @@ def file_event_namespace():
             tab_url=None,
             include_non_exposure=None,
             format=None,
-            filename=None,
+            output_file=None,
             server=None,
             protocol=None,
         )
@@ -71,7 +71,7 @@ def alert_namespace():
             exclude_rule_type=None,
             description=None,
             format=None,
-            filename=None,
+            output_file=None,
             server=None,
             protocol=None,
         )

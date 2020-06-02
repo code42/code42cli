@@ -1,4 +1,4 @@
-from code42cli.tree_nodes import SubcommandNode
+from code42cli.tree_nodes import SubcommandNode, ArgNode, FileNameArgNode
 from code42cli.commands import Command
 from code42cli.args import ArgConfig
 
@@ -46,5 +46,37 @@ class TestSubcommandNode(object):
             arg_customizer=_customize_arg,
         )
         node = SubcommandNode("code42", [Command("foo", ""), command])
-        actual = node["test"]["--two"].names
+        test = node["test"]
+        actual = test["--two"].names
         assert choices == actual
+
+
+class TestArgNode(object):
+    def test_getitem_when_an_arg_has_choices_returns_choices_node(self):
+        arg1 = ArgConfig("-t")
+        arg2 = ArgConfig("-p")
+        choices = ["choice1, choice2, choice3"]
+        arg2.set_choices(choices)
+        
+        node = ArgNode({"arg1": arg1, "arg2": arg2})
+        actual = node["-p"].names
+        assert choices == actual
+        
+    def test_getitem_when_an_arg_is_filename_arg_returns_file_arg_node_type(self):
+        arg1 = ArgConfig("filename")
+        arg2 = ArgConfig("-p")
+        node = ArgNode({"filename": arg1, "arg2": arg2})
+        assert FileNameArgNode == type(node["filename"])
+    
+    def test_getitem_when_an_arg_is_file_name_arg_returns_file_arg_node_type(self):
+        arg1 = ArgConfig("file_name")
+        arg2 = ArgConfig("-p")
+        node = ArgNode({"file_name": arg1, "arg2": arg2})
+        assert FileNameArgNode == type(node["file_name"])
+        
+    def test_getitem_when_an_arg_is_marked_as_a_file_arg_returns_file_arg_node_type(self):
+        arg1 = ArgConfig("-t")
+        arg1.as_file_arg()
+        arg2 = ArgConfig("-p")
+        node = ArgNode({"-t": arg1, "arg2": arg2})
+        assert FileNameArgNode == type(node["-t"])

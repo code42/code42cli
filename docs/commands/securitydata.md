@@ -46,7 +46,7 @@ code42 security-data print -b <begin-date> <args>
 Write file events to the file with the given name. 
 
 Arguments:
-* `filename`: The name of the local file to send output to.
+* `output_file`: The name of the local file to send output to.
 * search args (note that begin date is often required).
 
 Usage:

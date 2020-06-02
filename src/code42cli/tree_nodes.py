@@ -61,15 +61,15 @@ class ArgNode(CLINode):
 
 
 class FileNameArgNode(ArgNode):
-    """For when an ArgNode contains a `filename` argument, a special case that may be useful for 
-    type checking against, such as in the case of the tab-completer."""
+    """For when an ArgNode contains an arg that needs file path, a special case that may be useful 
+    for type checking against, such as in the case of the tab-completer."""
 
 
 def _create_arg_node(args):
-    node = ArgNode(args)
-    if u"filename" in node.args or u"file_name" in node.args:
-        return FileNameArgNode(args)
-    return node
+    for name, arg in args.items():
+        if arg.is_file_arg:
+            return FileNameArgNode(args)
+    return ArgNode(args)
 
 
 class SubcommandNode(CLINode):
