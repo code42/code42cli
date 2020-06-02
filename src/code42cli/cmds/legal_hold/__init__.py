@@ -45,6 +45,7 @@ def add_user(sdk, matter_id, username):
 
 
 def remove_user(sdk, matter_id, username):
+    _check_matter_is_accessible(sdk, matter_id)
     membership_id = _get_legal_hold_membership_id_for_user_and_matter(sdk, username, matter_id)
     sdk.legalhold.remove_from_matter(membership_id)
 
@@ -121,7 +122,6 @@ def _get_legal_hold_membership_id_for_user_and_matter(sdk, username, matter_id):
 
 
 def _get_legal_hold_memberships_for_matter(sdk, matter_id, active=True):
-    _check_matter_is_accessible(sdk, matter_id)
     memberships_generator = sdk.legalhold.get_all_matter_custodians(
         legal_hold_uid=matter_id, active=active
     )
