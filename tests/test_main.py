@@ -69,3 +69,8 @@ def test_high_risk_employee_commands_load(capsys, mocker):
 def test_alert_rules_commands_load(capsys, mocker):
     mocker.patch("sys.argv", [u"code42", u"alert-rules", u"bulk", u"add", u"-h"])
     _execute_test(capsys, u"add")
+
+
+def test_legal_hold_commands_load(capsys, mocker):
+    mocker.patch("sys.argv", [u"code42", u"legal-hold", u"bulk", u"add", u"-h"])
+    _execute_test(capsys, u"bulk")

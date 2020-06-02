@@ -5,7 +5,6 @@ from code42cli.cmds.detectionlists import (
     try_handle_user_already_added_error,
     DetectionList,
     DetectionListHandlers,
-    get_user_id,
     update_user,
     try_add_risk_tags,
     try_remove_risk_tags,
@@ -16,8 +15,7 @@ from code42cli.errors import UserAlreadyAddedError, UnknownRiskTagError, UserDoe
 from code42cli.bulk import BulkCommandType
 from code42cli.cmds.detectionlists.enums import RiskTags
 from code42cli.cmds.detectionlists.bulk import HighRiskBulkCommandType
-from .conftest import TEST_ID
-from ...conftest import create_mock_reader
+from ...conftest import create_mock_reader, TEST_ID
 
 
 _NAMESPACE = "{}.cmds.detectionlists".format(PRODUCT_NAME)
@@ -35,21 +33,16 @@ def bulk_processor(mocker):
 
 
 def test_try_handle_user_already_added_error_when_error_indicates_user_added_raises_UserAlreadyAddedError(
-    bad_request_for_user_already_added
+    bad_request_for_user_already_added,
 ):
     with pytest.raises(UserAlreadyAddedError):
         try_handle_user_already_added_error(bad_request_for_user_already_added, "name", "listname")
 
 
 def test_try_handle_user_already_added_error_when_error_does_not_indicate_user_added_returns_false(
-    generic_bad_request
+    generic_bad_request,
 ):
     assert not try_handle_user_already_added_error(generic_bad_request, "name", "listname")
-
-
-def test_get_user_id_when_user_does_not_raise_error(sdk_without_user):
-    with pytest.raises(UserDoesNotExistError):
-        get_user_id(sdk_without_user, "risky employee")
 
 
 def test_update_user_adds_cloud_alias(sdk_with_user, profile):

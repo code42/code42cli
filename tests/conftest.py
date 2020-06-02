@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import pytest
 from py42.sdk import SDKClient
 
+from code42cli.bulk import BulkProcessor
 from code42cli.file_readers import CliFileReader
 from code42cli.config import ConfigAccessor
 from code42cli.profile import Code42Profile
@@ -89,6 +90,21 @@ def create_profile_values_dict(authority=None, username=None, ignore_ssl=False):
 @pytest.fixture
 def sdk(mocker):
     return mocker.MagicMock(spec=SDKClient)
+
+
+TEST_ID = "TEST_ID"
+
+
+@pytest.fixture
+def sdk_with_user(sdk):
+    sdk.users.get_by_username.return_value = {"users": [{"userUid": TEST_ID}]}
+    return sdk
+
+
+@pytest.fixture
+def sdk_without_user(sdk):
+    sdk.users.get_by_username.return_value = {"users": []}
+    return sdk
 
 
 @pytest.fixture()
@@ -218,6 +234,6 @@ subcommand2 = Command("sub2", "sub2 desc", "sub2 usage")
 subcommand3 = Command("sub3", "sub3 desc", "sub3 usage")
 
 
-class MockSubcommandLoader(SubcommandLoader):
+class DummySubcommandLoader(SubcommandLoader):
     def load_commands(self):
         return [subcommand1, subcommand2, subcommand3]

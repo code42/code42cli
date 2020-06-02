@@ -2,7 +2,7 @@ from code42cli.tree_nodes import SubcommandNode
 from code42cli.commands import Command
 from code42cli.args import ArgConfig
 
-from .conftest import MockSubcommandLoader, func_single_positional_arg_many_optional_args
+from .conftest import DummySubcommandLoader, func_single_positional_arg_many_optional_args
 
 
 class TestSubcommandNode(object):
@@ -13,7 +13,7 @@ class TestSubcommandNode(object):
         assert "bar" in node.names
 
     def test_getitem_when_item_is_subcommand_returns_its_node_with_expected_names(self):
-        loader = MockSubcommandLoader("test")
+        loader = DummySubcommandLoader("test")
         command = Command("test", "", subcommand_loader=loader)
         node = SubcommandNode("code42", [Command("foo", ""), command])
         actual = node["test"].names

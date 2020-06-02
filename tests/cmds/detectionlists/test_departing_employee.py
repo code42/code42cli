@@ -7,7 +7,7 @@ from code42cli.cmds.detectionlists.departing_employee import (
     DepartingEmployeeSubcommandLoader,
 )
 
-from .conftest import TEST_ID
+from ...conftest import TEST_ID
 
 from py42.exceptions import Py42BadRequestError
 

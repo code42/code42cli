@@ -1,7 +1,6 @@
 import logging
 
 import pytest
-from py42.sdk import SDKClient
 from py42.sdk.queries.alerts.filters import *
 
 import code42cli.cmds.alerts.extraction as extraction_module
