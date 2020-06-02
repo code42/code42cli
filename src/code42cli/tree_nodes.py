@@ -68,7 +68,7 @@ class FileNameArgNode(ArgNode):
 
 def _create_arg_node(args):
     node = ArgNode(args)
-    if u"filename" in node.args:
+    if u"filename" in node.args or u"file_name" in node.args:
         return FileNameArgNode(args)
     return node
 
