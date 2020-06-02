@@ -31,7 +31,8 @@ class WorkerStats(object):
 
     @property
     def total_successes(self):
-        return self._total_processed - self._total_errors
+        val = self._total_processed - self._total_errors
+        return val if val >= 0 else 0
 
     def __str__(self):
         return u"{0} succeeded, {1} failed out of {2}".format(

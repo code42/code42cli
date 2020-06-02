@@ -81,18 +81,18 @@ def test_add_one_and_one_equals_two():
 See class documentation on the [Command](src/code42cli/commands.py) class for an explanation of its constructor parameters.
 
 1. If you are creating a new top-level command, create a new instance of `Command` and add it to the list returned
-    by `_load_top_commands()` function in `code42cli.main`.
+    by `load_commands()` function in `code42cli.main.MainSubcommandLoader`.
 
 2. If you are creating a new subcommand, find the top-level command that this will be a subcommand of in
-    `_load_top_commands()` in `code42cli.main` and navigate to the function assigned to be its subcommand loader.
-     Then, add a new instance of `Command` to the list returned by that function.
+    `load_commands()` in `code42cli.main.MainSubcommandLoader` and navigate to its subcommand loader's `load_commands()` 
+    Then, add a new instance of `Command` to the list returned.
 
 3. For commands that actually are executed (rather than just being groups), you will add a `handler` function as a constructor parameter.
    This will be the function that you want to execute when your command is run.
    * _Positional_ arguments of the handler will automatically become _required_ cli arguments.
      * The order that the positional arguments should be entered in on the cli is the same as the order in which they appear in the handler.
    * _Keyword_ arguments of the handler will automatically become _optional_ cli arguments
-   * the cli argument name will be the same as the handler param name except with `_` replaced with `-`, and prefixed with `--` if optional
+   * the cli argument name will be the same as the handler param name except with `_` replaced with `-`, and prefixed with `--` if optional.
 
     For example, consider the following python function:
 
@@ -122,3 +122,25 @@ See class documentation on the [Command](src/code42cli/commands.py) class for an
 7. Each command accepts a `use_single_arg_obj` bool in its constructor. If set to true, this will instead cause the handler to be called with a single object
     containing all of the args as attributes, which will be passed to a variable named `args` in your handler. Since your handler will only contain the parameter `args`,
     the names of your cli parameters need to built manually in your `arg_customizer` if you use this option. An example of this can be seen in `code42cli.cmds.securitydata.main`.
+
+
+## Documentation
+
+`code42cli` uses [Sphinx](http://www.sphinx-doc.org/) to generate documentation.
+
+To build the documentation, run the following from the `docs` directory:
+
+```bash
+make html
+```
+
+To view the resulting documentation, open `docs/_build/html/index.html`.
+
+For the best viewing experience, run a local server to view the documentation.
+You can this by running the below from the `docs` directory using python 3:
+
+```bash
+python -m http.server --directory "_build/html" 1337
+```
+
+and then pointing your browser to `localhost:1337`.

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from code42cli.logger import get_main_cli_logger, get_progress_logger
+from code42cli.logger import get_progress_logger
 
 
 class ProgressBar(object):
@@ -13,7 +13,7 @@ class ProgressBar(object):
 
     def update(self, iteration, message):
         bar = self._create_bar(iteration)
-        progress = u"{}  {} ".format(bar, message)
+        progress = u"{}  {}".format(bar, message.strip())
         self._logger.info(progress)
 
     def _create_bar(self, iteration):

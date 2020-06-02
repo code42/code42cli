@@ -10,7 +10,7 @@ BANNER = u"""
 dP   `" dP   Yb 8I  Yb 88__   dP 88  "' dP' 
 Yb      Yb   dP 8I  dY 88""  d888888   dP'  
  YboodP  YbodP  8888Y" 888888    88  .d8888
-
+ 
 code42cli version {}, by Code42 Software.
 powered by py42 version {}.""".format(
     cliversion, py42version
@@ -24,7 +24,16 @@ class ArgumentParserError(Exception):
 class CommandParser(argparse.ArgumentParser):
     def __init__(self, **kwargs):
         # noinspection PyTypeChecker
-        super(CommandParser, self).__init__(formatter_class=RawDescriptionHelpFormatter, **kwargs)
+        super(CommandParser, self).__init__(
+            formatter_class=RawDescriptionHelpFormatter, add_help=False, **kwargs
+        )
+        self.add_argument(
+            "-h",
+            "--help",
+            action="help",
+            default=argparse.SUPPRESS,
+            help="Show this help message and exit.",
+        )
 
     def prepare_command(self, command, path_parts):
         parser = self._get_parser(command, path_parts)

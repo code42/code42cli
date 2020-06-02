@@ -35,6 +35,9 @@ setup(
             "pytest==4.6.5",
             "pytest-cov == 2.8.1",
             "pytest-mock==2.0.0",
+            "recommonmark",
+            "sphinx",
+            "sphinx_rtd_theme",
             "tox==3.14.3",
         ]
     },
@@ -52,5 +55,6 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: Implementation :: CPython",
     ],
+    scripts=["bin/code42cli_completer"],
     entry_points={"console_scripts": ["code42=code42cli.main:main"]},
 )

@@ -1,83 +1,94 @@
 from getpass import getpass
 
+from code42cli import MAIN_COMMAND
 import code42cli.profile as cliprofile
 from code42cli.compat import str
 from code42cli.profile import print_and_log_no_existing_profile
-from code42cli.args import PROFILE_HELP, PROFILE_ARG_NAME
-from code42cli.commands import Command
+from code42cli.args import PROFILE_HELP
+from code42cli.commands import Command, SubcommandLoader
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree
 from code42cli.logger import get_main_cli_logger
 
 
-def load_subcommands():
-    """Sets up the `profile` subcommand with all of its subcommands."""
-    usage_prefix = u"code42 profile"
+class ProfileSubcommandLoader(SubcommandLoader):
+    SHOW = u"show"
+    LIST = u"list"
+    USE = u"use"
+    RESET_PW = u"reset-pw"
+    CREATE = u"create"
+    UPDATE = u"update"
+    DELETE = u"delete"
+    DELETE_ALL = u"delete-all"
 
-    show = Command(
-        u"show",
-        u"Print the details of a profile.",
-        u"{} {}".format(usage_prefix, u"show <optional-args>"),
-        handler=show_profile,
-        arg_customizer=_load_optional_profile_description,
-    )
+    def load_commands(self):
+        """Sets up the `profile` subcommand with all of its subcommands."""
+        usage_prefix = u"{} profile".format(MAIN_COMMAND)
 
-    list_all = Command(
-        u"list",
-        u"Show all existing stored profiles.",
-        u"{} {}".format(usage_prefix, u"list"),
-        handler=list_profiles,
-    )
+        show = Command(
+            self.SHOW,
+            u"Print the details of a profile.",
+            u"{} {}".format(usage_prefix, u"show <optional-args>"),
+            handler=show_profile,
+            arg_customizer=_load_optional_profile_description,
+        )
 
-    use = Command(
-        u"use",
-        u"Set a profile as the default.",
-        u"{} {}".format(usage_prefix, u"use <profile-name>"),
-        handler=use_profile,
-    )
+        list_all = Command(
+            self.LIST,
+            u"Show all existing stored profiles.",
+            u"{} {}".format(usage_prefix, u"list"),
+            handler=list_profiles,
+        )
 
-    reset_pw = Command(
-        u"reset-pw",
-        u"Change the stored password for a profile.",
-        u"{} {}".format(usage_prefix, u"reset-pw <optional-args>"),
-        handler=prompt_for_password_reset,
-        arg_customizer=_load_optional_profile_description,
-    )
+        use = Command(
+            self.USE,
+            u"Set a profile as the default.",
+            u"{} {}".format(usage_prefix, u"use <profile-name>"),
+            handler=use_profile,
+        )
 
-    create = Command(
-        u"create",
-        u"Create profile settings. The first profile created will be the default.",
-        u"{} {}".format(
-            usage_prefix,
-            u"create --name <profile-name> --server <server-address> --username <username>",
-        ),
-        handler=create_profile,
-        arg_customizer=_load_profile_create_descriptions,
-    )
+        reset_pw = Command(
+            self.RESET_PW,
+            u"Change the stored password for a profile.",
+            u"{} {}".format(usage_prefix, u"reset-pw <optional-args>"),
+            handler=prompt_for_password_reset,
+            arg_customizer=_load_optional_profile_description,
+        )
 
-    update = Command(
-        u"update",
-        u"Update an existing profile.",
-        u"{} {}".format(usage_prefix, u"update <optional args>"),
-        handler=update_profile,
-        arg_customizer=_load_profile_update_descriptions,
-    )
+        create = Command(
+            self.CREATE,
+            u"Create profile settings. The first profile created will be the default.",
+            u"{} {}".format(
+                usage_prefix,
+                u"create --name <profile-name> --server <server-address> --username <username>",
+            ),
+            handler=create_profile,
+            arg_customizer=_load_profile_create_descriptions,
+        )
 
-    delete = Command(
-        u"delete",
-        u"Deletes a profile and its stored password (if any).",
-        u"{} {}".format(usage_prefix, u"delete <profile-name>"),
-        handler=delete_profile,
-    )
+        update = Command(
+            self.UPDATE,
+            u"Update an existing profile.",
+            u"{} {}".format(usage_prefix, u"update <optional args>"),
+            handler=update_profile,
+            arg_customizer=_load_profile_update_descriptions,
+        )
 
-    delete_all = Command(
-        u"delete-all",
-        u"Deletes all profiles and saved passwords (if any).",
-        u"{} {}".format(usage_prefix, u"delete-all"),
-        handler=delete_all_profiles,
-    )
+        delete = Command(
+            self.DELETE,
+            u"Deletes a profile and its stored password (if any).",
+            u"{} {}".format(usage_prefix, u"delete <profile-name>"),
+            handler=delete_profile,
+        )
 
-    return [show, list_all, use, reset_pw, create, update, delete, delete_all]
+        delete_all = Command(
+            self.DELETE_ALL,
+            u"Deletes all profiles and saved passwords (if any).",
+            u"{} {}".format(usage_prefix, u"delete-all"),
+            handler=delete_all_profiles,
+        )
+
+        return [show, list_all, use, reset_pw, create, update, delete, delete_all]
 
 
 def show_profile(name=None):
@@ -177,6 +188,9 @@ def _load_optional_profile_description(argument_collection):
 def _load_profile_create_descriptions(argument_collection):
     profile = argument_collection.arg_configs[u"name"]
     profile.set_help(PROFILE_HELP)
+    profile.add_short_option_name(u"-n")
+    argument_collection.arg_configs[u"server"].add_short_option_name(u"-s")
+    argument_collection.arg_configs[u"username"].add_short_option_name(u"-u")
     _load_profile_settings_descriptions(argument_collection)
 
 
@@ -194,7 +208,7 @@ def _load_profile_settings_descriptions(argument_collection):
     server.set_help(u"The url and port of the Code42 server.")
     username.set_help(u"The username of the Code42 API user.")
     disable_ssl_errors.set_help(
-        u"For development purposes, do not validate the SSL certificates of Code42 servers."
+        u"For development purposes, do not validate the SSL certificates of Code42 servers. "
         u"This is not recommended unless it is required."
     )
 
