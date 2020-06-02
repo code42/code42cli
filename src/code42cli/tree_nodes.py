@@ -31,7 +31,6 @@ class ArgNode(CLINode):
     """A node whose `names` are a list of flagged arguments the user can select from."""
 
     def __init__(self, args):
-        # Only cares about args that the user has to type, not positionals
         self.args = args
 
     @property
