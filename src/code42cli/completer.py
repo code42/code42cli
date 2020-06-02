@@ -1,6 +1,6 @@
 from code42cli import MAIN_COMMAND
 from code42cli.main import MainSubcommandLoader
-from code42cli.tree_nodes import ArgNode
+from code42cli.tree_nodes import FileNameArgNode
 from code42cli.util import get_local_files
 
 
@@ -24,7 +24,8 @@ def _get_next_full_set_of_options(loader, current):
 
 
 def _should_complete_with_local_files(current, loader):
-    return isinstance(loader, ArgNode) and loader.contains_filename and current[0] != u"-"
+    """If `filename` arg exists and are not typing a flag, try completing with local files."""
+    return isinstance(loader, FileNameArgNode) and current[0] != u"-"
 
 
 class Completer(object):
@@ -41,16 +42,15 @@ class Completer(object):
                 return self._main_cmd_loader.names if args[0] == MAIN_COMMAND else []
 
             current = args[-1]
-            loader = self._search_trees(args)
-            options = loader.names
+            search_results, options = self._get_completion_options(args)
 
             # Complete with local files
-            if _should_complete_with_local_files(current, loader):
+            if _should_complete_with_local_files(current, search_results):
                 return _get_matches(current, get_local_files())
 
             # Complete with full set of arg/command options
             if current in options:
-                return _get_next_full_set_of_options(loader, current)
+                return _get_next_full_set_of_options(search_results, current)
 
             # Complete with matching arg/commands
             return _get_matches(current, options) if options else []
@@ -68,6 +68,10 @@ class Completer(object):
                 else:
                     return node
         return node
+
+    def _get_completion_options(self, args):
+        search_results = self._search_trees(args)
+        return search_results, search_results.names
 
 
 def complete(cmdline, point):
