@@ -74,6 +74,8 @@ def show_matter(sdk, matter_id, include_inactive=False, include_policy=False):
     matter = _check_matter_is_accessible(sdk, matter_id)
     matter[u"creator_username"] = matter[u"creator"][u"username"]
 
+    # if `active` is None then all matters (whether active or inactive) are returned. True returns
+    # only those that are active.
     active = None if include_inactive else True
     memberships = _get_legal_hold_memberships_for_matter(sdk, matter_id, active=active)
     active_usernames = [member[u"user"][u"username"] for member in memberships if member[u"active"]]
