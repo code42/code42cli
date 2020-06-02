@@ -13,20 +13,22 @@ def _get_matches(current, options):
     return matches
 
 
-def _get_next_full_set_of_options(loader, current):
-    loader = loader[current]
-    current = u""
+def _get_next_full_set_of_options(node, current):
+    node = node[current]
 
     # Complete positional filename with list of local files
-    if _should_complete_with_local_files(current, loader):
+    if _should_complete_with_local_files(current, node):
         return get_local_files()
 
-    return loader.names
+    return node.names
 
 
-def _should_complete_with_local_files(current, loader):
+def _should_complete_with_local_files(current, node):
     """If `filename` arg exists and are not typing a flag, try completing with local files."""
-    return isinstance(loader, FileNameArgNode) and current[0] != u"-"
+    if isinstance(node, FileNameArgNode):
+        if not current:
+            return True
+        return current[0] != u"-"
 
 
 class Completer(object):

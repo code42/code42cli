@@ -32,7 +32,8 @@ class ArgConfig(object):
         return (
             self._is_file_arg
             or u"filename" in self._settings[u"options_list"]
-            or u"file_name" in self._settings[u"options_list"]
+            or u"file-name" in self._settings[u"options_list"]
+            or u"--file-name" in self._settings[u"options_list"]
         )
 
     def set_choices(self, choices):

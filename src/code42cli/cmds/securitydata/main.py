@@ -85,6 +85,7 @@ def send_to(sdk, profile, args):
 
 def _load_write_to_args(arg_collection):
     output_file = ArgConfig(u"output_file", help=u"The name of the local file to send output to.")
+    output_file.as_file_arg()
     arg_collection.append(u"output_file", output_file)
     _load_search_args(arg_collection)
 
@@ -100,7 +101,6 @@ def _load_send_to_args(arg_collection):
             help=u"Protocol used to send logs to server.",
         ),
     }
-
     arg_collection.extend(send_to_args)
     _load_search_args(arg_collection)
 
