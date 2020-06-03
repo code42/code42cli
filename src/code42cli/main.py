@@ -1,6 +1,7 @@
 import platform
 import signal
 import sys
+import os
 
 from py42.settings import set_user_agent_suffix
 
