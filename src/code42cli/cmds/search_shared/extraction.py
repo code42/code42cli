@@ -33,7 +33,8 @@ def verify_begin_date_requirements(args, cursor_store):
         exit(1)
 
 
-def create_handlers(output_logger, cursor_store, event_key, sdk=None):
+def create_handlers(sdk, extractor_class, output_logger, cursor_store):
+    extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = ExtractionHandlers()
     handlers.TOTAL_EVENTS = 0
 
@@ -52,12 +53,12 @@ def create_handlers(output_logger, cursor_store, event_key, sdk=None):
         handlers.get_cursor_position = cursor_store.get_stored_cursor_timestamp
 
     @warn_interrupt(
-        warning=u"Cancelling operation cleanly to keep checkpoint data accurate. One moment..."
+        warning=u"Attempting to cancel cleanly to keep checkpoint data accurate. One moment..."
     )
     def handle_response(response):
         response_dict = json.loads(response.text)
-        events = response_dict.get(event_key)
-        if event_key == u"alerts":
+        events = response_dict.get(extractor._key)
+        if extractor._key == u"alerts":
             try:
                 events = get_alert_details(sdk, events)
             except Exception as ex:
@@ -65,6 +66,8 @@ def create_handlers(output_logger, cursor_store, event_key, sdk=None):
         handlers.TOTAL_EVENTS += len(events)
         for event in events:
             output_logger.info(event)
+        last_event_timestamp = extractor._get_timestamp_from_item(event)
+        handlers.record_cursor_position(last_event_timestamp)
 
     handlers.handle_response = handle_response
     return handlers

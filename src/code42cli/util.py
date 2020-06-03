@@ -50,6 +50,22 @@ def is_interactive():
     return sys.stdin.isatty()
 
 
+def flush_stds_out_err_without_printing_error():
+    """Workaround for bug in python3 that causes exception to be printed on broken pipe: 
+    https://bugs.python.org/issue11380
+    """
+    try:
+        sys.stdout.flush()
+    except BrokenPipeError:
+        try:
+            sys.stdout.close()
+        except BrokenPipeError:
+            try:
+                sys.stderr.flush()
+            except BrokenPipeError:
+                sys.stderr.close()
+
+
 def get_url_parts(url_str):
     parts = url_str.split(u":")
     port = None
@@ -129,19 +145,20 @@ class warn_interrupt(object):
 
     def __init__(self, warning="Cancelling operation cleanly, one moment... "):
         self.warning = warning
-        self.old_handler = None
+        self.old_int_handler = None
         self.interrupted = False
         self.exit_instructions = "Hit CTRL-C again to force quit."
 
     def __enter__(self):
-        self.old_handler = getsignal(SIGINT)
+        self.old_int_handler = getsignal(SIGINT)
         signal(SIGINT, self._handle_interrupts)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.interrupted:
             exit(1)
-        signal(SIGINT, self.old_handler)
+        signal(SIGINT, self.old_int_handler)
+
         return False
 
     def _handle_interrupts(self, sig, frame):

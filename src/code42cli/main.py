@@ -15,10 +15,12 @@ from code42cli.cmds.legal_hold import commands as legalhold
 from code42cli.cmds.profile import ProfileSubcommandLoader
 from code42cli.commands import Command, SubcommandLoader
 from code42cli.invoker import CommandInvoker
+from code42cli.util import flush_stds_out_err_without_printing_error
 
 
 # Handle KeyboardInterrupts by just exiting instead of printing out a stack
 def exit_on_interrupt(signal, frame):
+    print()
     sys.exit(1)
 
 
@@ -118,7 +120,10 @@ class MainSubcommandLoader(SubcommandLoader):
 def main():
     top = Command(u"", u"", subcommand_loader=MainSubcommandLoader(u""))
     invoker = CommandInvoker(top)
-    invoker.run(sys.argv[1:])
+    try:
+        invoker.run(sys.argv[1:])
+    finally:
+        flush_stds_out_err_without_printing_error()
 
 
 if __name__ == u"__main__":
