@@ -6,7 +6,7 @@ from code42cli.cmds.search_shared.enums import FileEventFilterArguments, AlertFi
 
 
 def test_exit_if_advanced_query_provided_incompatible_args(
-    mocker, file_event_namespace, alert_namespace, search_arg_enum
+    mocker, file_event_namespace, alert_namespace
 ):
     mock = mocker.patch(
         "code42cli.cmds.search_shared.extraction.create_advanced_query_incompatible_search_args"
