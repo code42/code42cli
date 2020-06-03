@@ -158,7 +158,7 @@ class SubcommandLoader(object):
 
     @property
     def names(self):
-        """The names of all the subcommands in this subcommabd loader's root command."""
+        """The names of all the subcommands in this subcommand loader's root command."""
         sub_cmds = self.load_commands()
         return [cmd.name for cmd in sub_cmds]
 

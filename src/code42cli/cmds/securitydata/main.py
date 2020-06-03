@@ -8,6 +8,7 @@ from code42cli.cmds.search_shared.enums import (
 from code42cli.cmds.securitydata.extraction import extract
 from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore
 from code42cli.commands import Command, SubcommandLoader
+from .savedsearch.commands import SavedSearchSubCommandLoader
 
 
 class SecurityDataSubcommandLoader(SubcommandLoader):
@@ -15,6 +16,7 @@ class SecurityDataSubcommandLoader(SubcommandLoader):
     WRITE_TO = u"write-to"
     SEND_TO = u"send-to"
     CLEAR_CHECKPOINT = u"clear-checkpoint"
+    SAVED_SEARCH = u"saved-search"
 
     def load_commands(self):
         """Sets up the `security-data` subcommand with all of its subcommands."""
@@ -54,7 +56,14 @@ class SecurityDataSubcommandLoader(SubcommandLoader):
             handler=clear_checkpoint,
         )
 
-        return [print_func, write, send, clear]
+        saved_search = Command(
+            self.SAVED_SEARCH,
+            u"Manage saved searches.",
+            subcommand_loader= SavedSearchSubCommandLoader(self.SAVED_SEARCH)
+
+        )
+
+        return [print_func, write, send, clear, saved_search]
 
 
 def clear_checkpoint(sdk, profile):
