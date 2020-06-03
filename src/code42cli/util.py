@@ -56,13 +56,13 @@ def flush_stds_out_err_without_printing_error():
     """
     try:
         sys.stdout.flush()
-    finally:
+    except BrokenPipeError:
         try:
             sys.stdout.close()
-        finally:
+        except BrokenPipeError:
             try:
                 sys.stderr.flush()
-            finally:
+            except BrokenPipeError:
                 sys.stderr.close()
 
 
