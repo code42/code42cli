@@ -71,6 +71,7 @@ def create_handlers(output_logger, cursor_store, event_key, sdk=None):
 
 
 def exit_if_advanced_query_used_with_other_search_args(args, search_arg_enum):
+    print(args.__dict__, "\n\n\n\n")
     invalid_args = ["begin", "end", "incremental"] + list(search_arg_enum)
     for arg in invalid_args:
         if args.__dict__[arg]:

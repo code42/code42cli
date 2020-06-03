@@ -17,8 +17,6 @@ from code42cli.logger import (
     get_logger_for_stdout as get_stdout_logger,
 )
 
-logging.raiseExceptions = False
-
 
 def get_logger_for_stdout(output_format):
     """Gets the stdout logger for the given format.
