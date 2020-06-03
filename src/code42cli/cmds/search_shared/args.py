@@ -32,7 +32,7 @@ def create_search_args(search_for, filter_args):
 
 
 def create_advanced_query_incompatible_search_args(search_for=None):
-    """Returns a dict of args that are incompatible wit the --advanced-query flag. Any new 
+    """Returns a dict of args that are incompatible with the --advanced-query flag. Any new 
     incompatible args should go here as this is function is also used for arg validation."""
     args = {
         SearchArguments.BEGIN_DATE: ArgConfig(
