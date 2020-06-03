@@ -21,20 +21,10 @@ class ArgConfig(object):
             u"metavar": kwargs.get(u"metavar"),
             u"required": kwargs.get(u"required"),
         }
-        self._is_file_arg = False
 
     @property
     def settings(self):
         return self._settings
-
-    @property
-    def is_file_arg(self):
-        return (
-            self._is_file_arg
-            or u"filename" in self._settings[u"options_list"]
-            or u"file-name" in self._settings[u"options_list"]
-            or u"--file-name" in self._settings[u"options_list"]
-        )
 
     def set_choices(self, choices):
         self._settings[u"choices"] = choices
@@ -47,9 +37,6 @@ class ArgConfig(object):
 
     def as_multi_val_param(self, nargs=u"+"):
         self._settings[u"nargs"] = nargs
-
-    def as_file_arg(self):
-        self._is_file_arg = True
 
     def set_required(self, required):
         self._settings[u"required"] = required

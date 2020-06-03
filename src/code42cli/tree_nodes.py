@@ -54,23 +54,11 @@ class ArgNode(CLINode):
                     choices = arg.settings[u"choices"]
                     if choices:
                         return ChoicesNode(choices)
-        return _create_arg_node(self.args)
+        return ArgNode(self.args)
 
     def __iter__(self):
         return iter(self.names)
-
-
-class FileNameArgNode(ArgNode):
-    """For when an ArgNode contains an arg that needs file path, a special case that may be useful 
-    for type checking against, such as in the case of the tab-completer."""
-
-
-def _create_arg_node(args):
-    for name, arg in args.items():
-        if arg.is_file_arg:
-            return FileNameArgNode(args)
-    return ArgNode(args)
-
+    
 
 class SubcommandNode(CLINode):
     """Gets command information ahead of command-execution."""
@@ -89,7 +77,7 @@ class SubcommandNode(CLINode):
         cmd = self._get_command_by_name(item)
         if cmd:
             args = cmd.get_arg_configs()
-            return _create_arg_node(args)
+            return ArgNode(args)
 
     def _get_command_by_name(self, name):
         for cmd in self.commands:
