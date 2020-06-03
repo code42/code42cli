@@ -20,6 +20,7 @@ from code42cli.util import flush_stds_out_err_without_printing_error
 
 # Handle KeyboardInterrupts by just exiting instead of printing out a stack
 def exit_on_interrupt(signal, frame):
+    print()
     sys.exit(1)
 
 
