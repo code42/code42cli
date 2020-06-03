@@ -58,7 +58,7 @@ class ArgNode(CLINode):
 
     def __iter__(self):
         return iter(self.names)
-    
+
 
 class SubcommandNode(CLINode):
     """Gets command information ahead of command-execution."""

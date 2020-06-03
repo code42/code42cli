@@ -162,7 +162,7 @@ class warn_interrupt(object):
 
 def get_local_files():
     cwd = getcwd()
-    return [file for file in listdir(cwd) if path.isfile(path.join(cwd, file))]
+    return [file for file in listdir(cwd)]
 
 
 def get_user_id(sdk, username):
