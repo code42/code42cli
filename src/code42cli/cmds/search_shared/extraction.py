@@ -105,6 +105,3 @@ def create_time_range_filter(filter_cls, begin_date=None, end_date=None):
     elif end_date and not begin_date:
         max_timestamp = parse_max_timestamp(end_date)
         return filter_cls.on_or_before(max_timestamp)
-
-
-# code42 security-data send-to "127.0.0.1:65432" -f JSON -p TCP --profile skynet --advanced-query  '{"groupClause":"AND", "groups":[{"filterClause":"AND", "filters":[{"operator":"ON_OR_AFTER", "term":"eventTimestamp", "value":"2020-04-03T00:00:00.000Z"},{"operator":"ON_OR_BEFORE", "term":"eventTimestamp", "value":"2020-04-22T23:59:00.000Z"}]},{"filterClause":"AND", "filters":[{"operator":"IS", "term":"emailSender", "value":"*@*"}]}], "pgNum":1, "pgSize":10000, "srtDir":"desc", "srtKey":"insertionTimestamp"}'
