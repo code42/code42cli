@@ -3,7 +3,12 @@ from code42cli.args import ArgConfig
 
 
 def create_search_args(search_for, filter_args):
-    search_args = {
+    advanced_query_incompatible_args = create_advanced_query_incompatible_search_args(search_for)
+    filter_args.update(advanced_query_incompatible_args)
+
+    format_enum = AlertOutputFormat() if search_for == "alerts" else OutputFormat()
+
+    advanced_query_compatible_args = {
         SearchArguments.ADVANCED_QUERY: ArgConfig(
             u"--{}".format(SearchArguments.ADVANCED_QUERY.replace(u"_", u"-")),
             metavar=u"QUERY_JSON",
@@ -13,6 +18,23 @@ def create_search_args(search_for, filter_args):
                 search_for
             ),
         ),
+        u"format": ArgConfig(
+            u"-f",
+            u"--format",
+            choices=format_enum,
+            default=format_enum.JSON,
+            help=u"The format used for outputting {0}.".format(search_for),
+        ),
+    }
+    filter_args.update(advanced_query_compatible_args)
+
+    return filter_args
+
+
+def create_advanced_query_incompatible_search_args(search_for=None):
+    """Returns a dict of args that are incompatible wit the --advanced-query flag. Any new 
+    incompatible args should go here as this is function is also used for arg validation."""
+    args = {
         SearchArguments.BEGIN_DATE: ArgConfig(
             u"-b",
             u"--{}".format(SearchArguments.BEGIN_DATE),
@@ -30,16 +52,6 @@ def create_search_args(search_for, filter_args):
             help=u"The end of the date range in which to look for {0}, "
             u"argument format options are the same as --begin.".format(search_for),
         ),
-    }
-    format_enum = AlertOutputFormat() if search_for == "alerts" else OutputFormat()
-    format_and_incremental_args = {
-        u"format": ArgConfig(
-            u"-f",
-            u"--format",
-            choices=format_enum,
-            default=format_enum.JSON,
-            help=u"The format used for outputting {0}.".format(search_for),
-        ),
         u"incremental": ArgConfig(
             u"-i",
             u"--incremental",
@@ -47,6 +59,4 @@ def create_search_args(search_for, filter_args):
             help=u"Only get {0} that were not previously retrieved.".format(search_for),
         ),
     }
-    search_args.update(filter_args)
-    search_args.update(format_and_incremental_args)
-    return search_args
+    return args
