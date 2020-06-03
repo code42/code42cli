@@ -122,7 +122,8 @@ def main():
     try:
         invoker.run(sys.argv[1:])
     finally:
-        flush_stds_out_err_without_printing_error()
+        # flush_stds_out_err_without_printing_error()
+        pass
 
 
 if __name__ == u"__main__":
