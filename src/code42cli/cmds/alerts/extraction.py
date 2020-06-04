@@ -40,7 +40,7 @@ def extract(sdk, profile, output_logger, args):
     handlers = create_handlers(sdk, AlertExtractor, output_logger, store)
     extractor = AlertExtractor(sdk, handlers)
     if args.advanced_query:
-        exit_if_advanced_query_used_with_other_search_args(args)
+        exit_if_advanced_query_used_with_other_search_args(args, enums.AlertFilterArguments())
         extractor.extract_advanced(args.advanced_query)
     else:
         verify_begin_date_requirements(args, store)

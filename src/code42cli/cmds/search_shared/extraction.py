@@ -8,6 +8,7 @@ from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp, veri
 from code42cli.logger import get_main_cli_logger
 from code42cli.cmds.alerts.util import get_alert_details
 from code42cli.util import warn_interrupt
+from code42cli.cmds.search_shared.args import create_advanced_query_incompatible_search_args
 
 logger = get_main_cli_logger()
 
@@ -73,13 +74,16 @@ def create_handlers(sdk, extractor_class, output_logger, cursor_store):
     return handlers
 
 
-def exit_if_advanced_query_used_with_other_search_args(args):
-    args_dict_copy = args.__dict__.copy()
-    for arg in (u"advanced_query", u"format", u"sdk", u"profile"):
-        args_dict_copy.pop(arg)
-    if any(args_dict_copy.values()):
-        logger.print_and_log_error(u"You cannot use --advanced-query with additional search args.")
-        exit(1)
+def exit_if_advanced_query_used_with_other_search_args(args, search_arg_enum):
+    incompatible_search_args_dict = create_advanced_query_incompatible_search_args()
+    incompatible_search_args_list = list(incompatible_search_args_dict.keys())
+    invalid_args = incompatible_search_args_list + list(search_arg_enum)
+    for arg in invalid_args:
+        if args.__dict__[arg]:
+            logger.print_and_log_error(
+                u"You cannot use --advanced-query with additional search args."
+            )
+            exit(1)
 
 
 def create_time_range_filter(filter_cls, begin_date=None, end_date=None):
