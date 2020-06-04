@@ -7,7 +7,7 @@
 
 ## Licensing
 
-This project uses the [MIT License](https://github.com/code42/c42sec/blob/master/LICENSE.md).
+This project uses the [MIT License](https://github.com/code42/code42cli/blob/master/LICENSE.md).
 
 ## Installation
 
@@ -32,10 +32,10 @@ Visit the [project history](https://pypi.org/project/code42cli/#history) on PyPI
 
 ### From source
 
-Alternatively, you can install the Code42 CLI directly from [source code](https://github.com/code42/c42sec):
+Alternatively, you can install the Code42 CLI directly from [source code](https://github.com/code42/code42cli):
 
 ```bash
-git clone https://github.com/code42/c42sec.git
+git clone https://github.com/code42/code42cli.git
 ```
 
 When it finishes downloading, from the root project directory, run:
@@ -95,7 +95,7 @@ code42 <command> <subcommand> <args> -d
 ### File an issue on GitHub
 
 If you are experiencing an issue with the Code42 CLI, you can create a *New issue* at the
-[project repository](https://github.com/code42/c42sec/issues). See the Github 
+[project repository](https://github.com/code42/code42cli/issues). See the Github 
 [guide on creating an issue](https://help.github.com/en/github/managing-your-work-on-github/creating-an-issue) for more information.
 
 ### Contact Code42 Support
