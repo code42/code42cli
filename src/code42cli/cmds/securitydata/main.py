@@ -8,7 +8,7 @@ from code42cli.cmds.search_shared.enums import (
 from code42cli.cmds.securitydata.extraction import extract
 from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore
 from code42cli.commands import Command, SubcommandLoader
-from .savedsearch.commands import SavedSearchSubCommandLoader
+from code42cli.cmds.securitydata.savedsearch.commands import SavedSearchSubCommandLoader
 
 
 class SecurityDataSubcommandLoader(SubcommandLoader):
@@ -59,7 +59,7 @@ class SecurityDataSubcommandLoader(SubcommandLoader):
         saved_search = Command(
             self.SAVED_SEARCH,
             u"Manage saved searches.",
-            subcommand_loader= SavedSearchSubCommandLoader(self.SAVED_SEARCH)
+            subcommand_loader=SavedSearchSubCommandLoader(self.SAVED_SEARCH)
 
         )
 

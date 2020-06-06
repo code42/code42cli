@@ -1,3 +1,4 @@
+import json
 from c42eventextractor.extractors import FileEventExtractor
 from py42.sdk.queries.fileevents.filters import *
 
@@ -15,6 +16,29 @@ from code42cli.logger import get_main_cli_logger
 logger = get_main_cli_logger()
 
 
+def get_extractor_elements(sdk, profile, output_logger, incremental):
+
+    def _handle_saved_search_response(response):
+        response_dict = json.loads(response.text)
+        events = response_dict.get(u"fileEvents")
+        handlers.TOTAL_EVENTS = response_dict.get(u"totalCount")
+        for event in events:
+            output_logger.info(event)
+
+    store = FileEventCursorStore(profile.name) if incremental else None
+    handlers = create_handlers(output_logger, store, event_key=u"fileEvents")
+    handlers.handle_response = _handle_saved_search_response
+    extractor = FileEventExtractor(sdk, handlers)
+    return store, handlers, extractor
+
+
+def extract_saved_search(sdk, profile, output_logger, query, incremental=True):
+    _, handlers, extractor = get_extractor_elements(sdk, profile, output_logger, incremental)
+    extractor.extract_advanced(query)
+    if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
+        logger.print_info(u"No results found.")
+
+
 def extract(sdk, profile, output_logger, args):
     """Extracts file events using the given command-line arguments.
 
@@ -27,9 +51,7 @@ def extract(sdk, profile, output_logger, args):
                 send-to: uses a logger that sends logs to a server.
             args: Command line args used to build up file event query filters.
     """
-    store = FileEventCursorStore(profile.name) if args.incremental else None
-    handlers = create_handlers(output_logger, store, event_key=u"fileEvents")
-    extractor = FileEventExtractor(sdk, handlers)
+    store, handlers, extractor = get_extractor_elements(sdk, profile, output_logger, args.incremental)
     if args.advanced_query:
         exit_if_advanced_query_used_with_other_search_args(args)
         extractor.extract_advanced(args.advanced_query)
