@@ -1,5 +1,12 @@
+import pytest
+
 from code42cli.completer import Completer
 from code42cli.main import MainSubcommandLoader
+
+
+@pytest.fixture
+def files(mocker):
+    return mocker.patch("code42cli.completer.get_files_in_path")
 
 
 class TestCompleter(object):
@@ -109,35 +116,31 @@ class TestCompleter(object):
         assert "UDP" in actual
 
     def test_complete_when_names_contains_filename_and_current_is_positional_completes_with_local_filenames(
-        self, mocker
+        self, files
     ):
-        mock_files = mocker.patch("code42cli.completer.get_local_files")
-        mock_files.return_value = ["foo.txt", "bar.csv"]
+        files.return_value = ["foo.txt", "bar.csv"]
         actual = self._completer.complete("code42 security-data write-to ")
         assert "foo.txt" in actual
         assert "bar.csv" in actual
 
     def test_complete_when_names_contains_file_name_and_current_is_positional_completes_with_local_filenames(
-        self, mocker
+        self, files
     ):
-        mock_files = mocker.patch("code42cli.completer.get_local_files")
-        mock_files.return_value = ["foo.txt", "bar.csv"]
+        files.return_value = ["foo.txt", "bar.csv"]
         actual = self._completer.complete("code42 alert-rules bulk add ")
         assert "foo.txt" in actual
         assert "bar.csv" in actual
 
-    def test_complete_completes_local_files(self, mocker):
-        mock_files = mocker.patch("code42cli.completer.get_local_files")
-        mock_files.return_value = ["foo.txt", "bar.csv"]
+    def test_complete_completes_local_files(self, files):
+        files.return_value = ["foo.txt", "bar.csv"]
         actual = self._completer.complete("code42 security-data write-to foo.t")
         assert "foo.txt" in actual
         assert len(actual) == 1
 
     def test_complete_when_current_is_prefix_to_local_file_but_is_not_arg_does_not_complete_with_local_file(
-        self, mocker
+        self, files
     ):
-        mock_files = mocker.patch("code42cli.completer.get_local_files")
-        mock_files.return_value = ["bulk.txt"]
+        files.return_value = ["bulk.txt"]
         actual = self._completer.complete("code42 departing-employee bu")
         assert "bulk.txt" not in actual
         assert "bulk" in actual
@@ -158,9 +161,8 @@ class TestCompleter(object):
         actual = self._completer.complete("code42 security-data send-to -p XX")
         assert not actual
 
-    def test_complete_when_nothing_matches_files_return_nothing(self, mocker):
-        mock_files = mocker.patch("code42cli.completer.get_local_files")
-        mock_files.return_value = ["bulk.txt"]
+    def test_complete_when_nothing_matches_files_return_nothing(self, files):
+        files.return_value = ["bulk.txt"]
         actual = self._completer.complete("code42 departing-employee buX")
         assert not actual
 

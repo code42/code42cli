@@ -42,7 +42,7 @@ class ArgNode(CLINode):
                 for n in names
                 if n.startswith("--")
             ]
-            return [n for n in arg_names if n[0] == u"-"]
+            return arg_names
         except:
             return self.args
 

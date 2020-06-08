@@ -18,7 +18,6 @@ class TestMainSubcommandLoader(object):
     def test_getitem_returns_flagged_arg_names_when_is_leaf_command(self):
         loader = MainSubcommandLoader()
         args = loader[loader.ALERTS][u"print"]
-        assert "-i" in args
         assert "--incremental" in args
         assert "--actor" in args
 

@@ -1,7 +1,9 @@
+from os import path
+
 from code42cli import MAIN_COMMAND
 from code42cli.main import MainSubcommandLoader
 from code42cli.tree_nodes import ArgNode
-from code42cli.util import get_local_files
+from code42cli.util import get_files_in_path
 
 
 def _get_matches(current, options):
@@ -15,12 +17,8 @@ def _get_matches(current, options):
 
 def _get_next_full_set_of_options(node, current):
     node = node[current]
-
-    # Complete positional filename with list of local files
-    if _can_complete_with_local_files(current, node):
-        return get_local_files()
-
-    return node.names
+    files = get_files_in_path("")
+    return node.names + files
 
 
 def _can_complete_with_local_files(current, node):
@@ -43,15 +41,16 @@ class Completer(object):
             current = args[-1]
             search_results, options = self._get_completion_options(args)
 
-            # Complete with local files
-            if _can_complete_with_local_files(current, search_results):
-                return _get_matches(current, get_local_files())
-
             # Complete with full set of arg/command options
             if current in options:
                 return _get_next_full_set_of_options(search_results, current)
 
             # Complete with matching arg/commands
+
+            if _can_complete_with_local_files(current, search_results):
+                files = get_files_in_path(current)
+                options.extend(files)
+
             return _get_matches(current, options) if options else []
         except:
             return []
