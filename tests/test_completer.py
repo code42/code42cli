@@ -163,3 +163,8 @@ class TestCompleter(object):
         mock_files.return_value = ["bulk.txt"]
         actual = self._completer.complete("code42 departing-employee buX")
         assert not actual
+
+    def test_completer_ignore_shorthand_flagged_args(self):
+        actual = self._completer.complete("code42 alerts write-to -")
+        assert "-i" not in actual
+        assert "--incremental" in actual

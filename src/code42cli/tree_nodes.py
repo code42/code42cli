@@ -40,6 +40,7 @@ class ArgNode(CLINode):
                 n
                 for names in [self.args[key].settings[u"options_list"] for key in self.args]
                 for n in names
+                if n.startswith("--")
             ]
             return [n for n in arg_names if n[0] == u"-"]
         except:
@@ -54,7 +55,6 @@ class ArgNode(CLINode):
             arg = self.args[key]
             if item not in arg.settings[u"options_list"]:
                 continue
-            
             choices = arg.settings[u"choices"]
             if choices:
                 return ChoicesNode(choices)
