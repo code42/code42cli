@@ -45,10 +45,11 @@ class Completer(object):
             if current in options:
                 return _get_next_full_set_of_options(search_results, current)
 
-            # Complete with matching arg/commands
-
             if _can_complete_with_local_files(current, search_results):
                 files = get_files_in_path(current)
+                if current[0] == "~":
+                    replace = path.expanduser("~")
+                    files = [f.replace(replace, "~") for f in files]
                 options.extend(files)
 
             return _get_matches(current, options) if options else []

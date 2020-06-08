@@ -165,8 +165,8 @@ def get_files_in_path(input_path):
             replace = os.path.expanduser("~")
             input_path = input_path.replace("~", replace)
 
-        if os.path.isdir(input_path):
-            input_path += "/"
+        if os.path.isdir(input_path) and input_path[-1] != os.sep:
+            input_path += os.sep
 
         files = glob.glob(input_path + "*")
         return files
