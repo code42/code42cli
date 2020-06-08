@@ -47,13 +47,17 @@ class ArgNode(CLINode):
 
     def __getitem__(self, item):
         """Access sub loaders to navigate the argument/options tree, connected to a leaf command."""
-        if item not in self.args:
-            for key in self.args:
-                arg = self.args[key]
-                if item in arg.settings[u"options_list"]:
-                    choices = arg.settings[u"choices"]
-                    if choices:
-                        return ChoicesNode(choices)
+        if item in self.args:
+            return ArgNode(self.args)
+
+        for key in self.args:
+            arg = self.args[key]
+            if item not in arg.settings[u"options_list"]:
+                continue
+            
+            choices = arg.settings[u"choices"]
+            if choices:
+                return ChoicesNode(choices)
         return ArgNode(self.args)
 
     def __iter__(self):
