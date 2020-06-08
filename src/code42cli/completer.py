@@ -17,7 +17,8 @@ def _get_matches(current, options):
 
 def _get_next_full_set_of_options(node, current):
     node = node[current]
-    files = get_files_in_path("")
+    if _can_complete_with_local_files(current, node):
+        files = get_files_in_path("")
     return node.names + files
 
 
