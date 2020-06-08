@@ -141,3 +141,25 @@ class TestCompleter(object):
         actual = self._completer.complete("code42 departing-employee bu")
         assert "bulk.txt" not in actual
         assert "bulk" in actual
+
+    def test_complete_when_nothing_matches_top_level_command_returns_nothing(self):
+        actual = self._completer.complete("code42 XX")
+        assert not actual
+
+    def test_complete_when_nothing_matches_second_level_commands_returns_nothing(self):
+        actual = self._completer.complete("code42 security-data prX")
+        assert not actual
+
+    def test_complete_when_nothing_matches_flagged_arg_returns_nothing(self):
+        actual = self._completer.complete("code42 security-data print --begX")
+        assert not actual
+
+    def test_complete_when_nothing_matches_choice_returns_nothing(self):
+        actual = self._completer.complete("code42 security-data send-to -p XX")
+        assert not actual
+
+    def test_complete_when_nothing_matches_files_return_nothing(self, mocker):
+        mock_files = mocker.patch("code42cli.completer.get_local_files")
+        mock_files.return_value = ["bulk.txt"]
+        actual = self._completer.complete("code42 departing-employee buX")
+        assert not actual
