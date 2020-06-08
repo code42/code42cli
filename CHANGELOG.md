@@ -8,9 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-## Unreleased
+## 0.7.0 - 2020-06-08
 
 ### Changed
+
+- `code42cli` no longer supports python 2.7.
 
 - `code42 profile create` now uses required `--name`, `--server` and `--username` flags instead of positional arguments.
 
