@@ -57,7 +57,6 @@ class SavedSearchSubCommandLoader(SubcommandLoader):
     PRINT = u"print"
     WRITE_TO = u"write-to"
     SEND_TO = u"send-to"
-    CLEAR_CHECKPOINT = u"clear-checkpoint"
     SHOW = u"show"
 
     def load_commands(self):
@@ -90,8 +89,11 @@ class SavedSearchSubCommandLoader(SubcommandLoader):
         send_to_command = Command(
             self.SEND_TO,
             u"Send saved search result to the given server address.",
-            u"{} {} {}".format(usage_prefix, self.SEND_TO,
-                               u"--search-id <search-id> --filename <filename> <optional-args>"),
+            u"{} {} {}".format(
+                usage_prefix,
+                self.SEND_TO,
+                u"--search-id <search-id> --filename <filename> <optional-args>"
+            ),
             handler=send_to,
             arg_customizer=_load_send_to_args,
         )
@@ -99,8 +101,11 @@ class SavedSearchSubCommandLoader(SubcommandLoader):
         write_to_command = Command(
             self.WRITE_TO,
             u"Write saved search result to the file with the given name.",
-            u"{} {} {}".format(usage_prefix, self.WRITE_TO,
-                               u"--search-id <search-id> --server <server-address> <optional-args>"),
+            u"{} {} {}".format(
+                usage_prefix,
+                self.WRITE_TO,
+                u"--search-id <search-id> --server <server-address> <optional-args>"
+            ),
             handler=write_to,
             arg_customizer=_load_write_to_args,
         )

@@ -16,7 +16,7 @@ from code42cli.logger import get_main_cli_logger
 logger = get_main_cli_logger()
 
 
-def get_extractor_elements(sdk, profile, output_logger, incremental):
+def _get_extractor_elements(sdk, profile, output_logger, incremental):
 
     def _handle_saved_search_response(response):
         response_dict = json.loads(response.text)
@@ -33,7 +33,7 @@ def get_extractor_elements(sdk, profile, output_logger, incremental):
 
 
 def extract_saved_search(sdk, profile, output_logger, query, incremental=True):
-    _, handlers, extractor = get_extractor_elements(sdk, profile, output_logger, incremental)
+    _, handlers, extractor = _get_extractor_elements(sdk, profile, output_logger, incremental)
     extractor.extract_advanced(query)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         logger.print_info(u"No results found.")
@@ -51,7 +51,7 @@ def extract(sdk, profile, output_logger, args):
                 send-to: uses a logger that sends logs to a server.
             args: Command line args used to build up file event query filters.
     """
-    store, handlers, extractor = get_extractor_elements(sdk, profile, output_logger, args.incremental)
+    store, handlers, extractor = _get_extractor_elements(sdk, profile, output_logger, args.incremental)
     if args.advanced_query:
         exit_if_advanced_query_used_with_other_search_args(args)
         extractor.extract_advanced(args.advanced_query)
