@@ -3,7 +3,7 @@ import inspect
 from code42cli import profile as cliprofile
 from code42cli.args import get_auto_arg_configs, SDK_ARG_NAME, PROFILE_ARG_NAME
 from code42cli.sdk_client import create_sdk
-from code42cli.tree_nodes import CLINode, SubcommandNode
+from code42cli.tree_nodes import SubcommandNode
 
 
 class DictObject(object):
