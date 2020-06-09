@@ -42,6 +42,7 @@ def file_event_namespace():
             output_file=None,
             server=None,
             protocol=None,
+            saved_search=None,
         )
     )
     return args

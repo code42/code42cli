@@ -12,9 +12,6 @@ class TestSavedSearchSubCommandLoader(object):
             [
                 SavedSearchSubCommandLoader.LIST,
                 SavedSearchSubCommandLoader.SHOW,
-                SavedSearchSubCommandLoader.PRINT,
-                SavedSearchSubCommandLoader.WRITE_TO,
-                SavedSearchSubCommandLoader.SEND_TO,
             ]
         )
 

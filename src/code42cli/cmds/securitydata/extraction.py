@@ -1,4 +1,3 @@
-import json
 from c42eventextractor.extractors import FileEventExtractor
 from py42.sdk.queries.fileevents.filters import *
 
@@ -16,30 +15,7 @@ from code42cli.logger import get_main_cli_logger
 logger = get_main_cli_logger()
 
 
-def _get_extractor_elements(sdk, profile, output_logger, incremental):
-
-    def _handle_saved_search_response(response):
-        response_dict = json.loads(response.text)
-        events = response_dict.get(u"fileEvents")
-        handlers.TOTAL_EVENTS = response_dict.get(u"totalCount")
-        for event in events:
-            output_logger.info(event)
-
-    store = FileEventCursorStore(profile.name) if incremental else None
-    handlers = create_handlers(output_logger, store, event_key=u"fileEvents")
-    handlers.handle_response = _handle_saved_search_response
-    extractor = FileEventExtractor(sdk, handlers)
-    return store, handlers, extractor
-
-
-def extract_saved_search(sdk, profile, output_logger, query, incremental=True):
-    _, handlers, extractor = _get_extractor_elements(sdk, profile, output_logger, incremental)
-    extractor.extract_advanced(query)
-    if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
-        logger.print_info(u"No results found.")
-
-
-def extract(sdk, profile, output_logger, args):
+def extract(sdk, profile, output_logger, args, query=None):
     """Extracts file events using the given command-line arguments.
 
         Args:
@@ -50,16 +26,24 @@ def extract(sdk, profile, output_logger, args):
                 write-to: uses a logger that logs to a file.
                 send-to: uses a logger that sends logs to a server.
             args: Command line args used to build up file event query filters.
+            query: FileEventQuery instance created from search-id of saved search.
     """
-    store, handlers, extractor = _get_extractor_elements(sdk, profile, output_logger, args.incremental)
+    store = FileEventCursorStore(profile.name) if args.incremental else None
+    handlers = create_handlers(output_logger, store, event_key=u"fileEvents")
+    extractor = FileEventExtractor(sdk, handlers)
     if args.advanced_query:
         exit_if_advanced_query_used_with_other_search_args(args)
         extractor.extract_advanced(args.advanced_query)
     else:
+        if args.saved_search:
+            filters = query._filter_group_list
+        else:
+            filters = _create_file_event_filters(args)
+
         verify_begin_date_requirements(args, store)
         if args.type:
             _verify_exposure_types(args.type)
-        filters = _create_file_event_filters(args)
+
         extractor.extract(*filters)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         logger.print_info(u"No results found.")

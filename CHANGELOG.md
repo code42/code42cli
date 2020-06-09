@@ -20,12 +20,12 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
+- Extraction subcommands of `code42 security-data`, `print/write-to/send-to` accepts argument `--saved-search` to
+   return saved search results.
+
 - `code42 security-data saved-search` commands:
     - `list` prints out existing saved search's id and name
     - `show` takes a search id
-    - `print` to output to stdout.
-    - `write-to` to output to a file.
-    - `send-to` to output to server via UDP or TCP.
 
 - `code42 high-risk-employee bulk` supports `add-risk-tags` and `remove-risk-tags`.
     - `code42 high-risk-employee bulk generate-template <cmd>` options `add-risk-tags` and `remove-risk-tags`.

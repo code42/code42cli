@@ -2,6 +2,7 @@ import pytest
 import logging
 
 from py42.sdk.queries.fileevents.filters import *
+from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
 
 import code42cli.cmds.securitydata.extraction as extraction_module
 import code42cli.errors as errors
@@ -505,9 +506,9 @@ def test_when_sdk_raises_exception_global_variable_gets_set(
 
 
 def test_extract_saved_search_calls_extractor_extract_and_saved_search_execute(
-    sdk_with_user, profile, logger, file_event_extractor
+    sdk_with_user, profile, logger, file_event_extractor, file_event_namespace_with_begin
 ):
-    query = {"groupClause": "AND",
+    search_query = {"groupClause": "AND",
              "groups": [{"filterClause": "AND",
                         "filters": [{"operator": "ON_OR_AFTER", "term": "eventTimestamp",
                                      "value": "2020-05-01T00:00:00.000Z"}]},
@@ -518,6 +519,10 @@ def test_extract_saved_search_calls_extractor_extract_and_saved_search_execute(
                                      {"operator": "IS", "term": "eventType", "value": "READ_BY_AP"},
                                      {"operator": "IS", "term": "eventType", "value": "CREATED"}]
                          }],
-             "pgNum": 1, "pgSize": 10000, "srtDir": "asc", "srtKey": "eventId"}
-    extraction_module.extract_saved_search(sdk_with_user, profile, logger,  query, False)
-    assert file_event_extractor.extract_advanced.call_count == 1
+             "pgNum": 1, "pgSize": 10000, "srtDir": "asc", "srtKey": "eventId"
+    }
+    query = FileEventQuery.from_dict(search_query)
+    extraction_module.extract(
+        sdk_with_user, profile, logger, file_event_namespace_with_begin, query
+    )
+    assert file_event_extractor.extract.call_count == 1
