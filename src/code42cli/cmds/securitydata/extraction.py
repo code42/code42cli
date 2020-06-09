@@ -43,6 +43,9 @@ def extract(sdk, profile, output_logger, args, query=None):
         verify_begin_date_requirements(args, store)
         if args.type:
             _verify_exposure_types(args.type)
+        
+        event_timestamp_filter = create_time_range_filter(EventTimestamp, args.begin, args.end)
+        not event_timestamp_filter or filters.append(event_timestamp_filter)
 
         extractor.extract(*filters)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
@@ -61,8 +64,6 @@ def _verify_exposure_types(exposure_types):
 
 def _create_file_event_filters(args):
     filters = []
-    event_timestamp_filter = create_time_range_filter(EventTimestamp, args.begin, args.end)
-    not event_timestamp_filter or filters.append(event_timestamp_filter)
     not args.c42_username or filters.append(DeviceUsername.is_in(args.c42_username))
     not args.actor or filters.append(Actor.is_in(args.actor))
     not args.md5 or filters.append(MD5.is_in(args.md5))
