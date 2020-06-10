@@ -1,13 +1,12 @@
 import json
+
 from integration import run_command
+from integration.util import cleanup
 
 
 def _parse_response(response):
-    result = []
-    for line in response.split("\n"):
-        if len(line):
-            result.append(json.loads(line))
-    return result
+    lines = response.split("\n")
+    return [json.loads(line) for line in lines if len(line)]
 
 
 def test_alert_prints_to_stdout_and_filters_result_between_given_date():
@@ -24,10 +23,8 @@ def test_alert_writes_to_file_and_filters_result_by_severity():
               "2020-05-20 --severity MEDIUM"
     return_code, response = run_command(command)
     assert return_code is 0
-    with open("./integration/alerts", "r") as f:
+    with cleanup("./integration/alerts") as f:
         response = f.read()
         parsed_response = _parse_response(response)
         for record in parsed_response:
             assert record["severity"] == "MEDIUM"
-    # cleanup
-    run_command("rm -f ./integration/alerts")
