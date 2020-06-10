@@ -1,7 +1,12 @@
 import pytest
 
 from code42cli.commands import Command, SubcommandLoader
-from code42cli.parser import ArgumentParserError, CommandParser
+from code42cli.parser import (
+    ArgumentParserError,
+    CommandParser,
+    exit_if_advanced_query_used_with_other_search_args,
+)
+from code42cli.cmds.search_shared.enums import ExposureType as ExposureTypeOptions
 
 
 def dummy_method():
@@ -116,3 +121,61 @@ class TestCommandParser(object):
         assert "testsub1" in captured.out
         assert "the subdesc2" in captured.out
         assert "testsub2" in captured.out
+
+
+def test_parser_when_is_advanced_query_and_has_begin_date_exits(file_event_namespace):
+    file_event_namespace.advanced_query = "some complex json"
+    file_event_namespace.begin = "begin date"
+    with pytest.raises(SystemExit):
+        exit_if_advanced_query_used_with_other_search_args(file_event_namespace)
+
+
+def test_parser_when_is_advanced_query_and_has_end_date_exits(file_event_namespace):
+    file_event_namespace.advanced_query = "some complex json"
+    file_event_namespace.end = "end date"
+    with pytest.raises(SystemExit):
+        exit_if_advanced_query_used_with_other_search_args(file_event_namespace)
+
+
+def test_parser_when_is_advanced_query_and_has_exposure_types_exits(file_event_namespace):
+    file_event_namespace.advanced_query = "some complex json"
+    file_event_namespace.type = [ExposureTypeOptions.SHARED_TO_DOMAIN]
+    with pytest.raises(SystemExit):
+        exit_if_advanced_query_used_with_other_search_args(file_event_namespace)
+
+
+@pytest.mark.parametrize(
+    "arg",
+    [
+        "c42_username",
+        "actor",
+        "md5",
+        "sha256",
+        "source",
+        "file_name",
+        "file_path",
+        "process_owner",
+        "tab_url",
+    ],
+)
+def test_parser_when_is_advanced_query_and_other_incompatible_multi_narg_argument_passed(
+    file_event_namespace, arg
+):
+    file_event_namespace.advanced_query = "some complex json"
+    setattr(file_event_namespace, arg, ["test_value"])
+    with pytest.raises(SystemExit):
+        exit_if_advanced_query_used_with_other_search_args(file_event_namespace)
+
+
+def test_parser_when_is_advanced_query_and_has_incremental_mode_exits(file_event_namespace):
+    file_event_namespace.advanced_query = "some complex json"
+    file_event_namespace.incremental = True
+    with pytest.raises(SystemExit):
+        exit_if_advanced_query_used_with_other_search_args(file_event_namespace)
+
+
+def test_parser_when_is_advanced_query_and_has_include_non_exposure_exits(file_event_namespace):
+    file_event_namespace.advanced_query = "some complex json"
+    file_event_namespace.include_non_exposure = True
+    with pytest.raises(SystemExit):
+        exit_if_advanced_query_used_with_other_search_args(file_event_namespace)
