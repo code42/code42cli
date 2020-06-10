@@ -1,4 +1,5 @@
 from code42cli.args import ArgConfig
+from code42cli.parser import exit_if_advanced_query_used_with_other_search_args
 from code42cli.cmds.search_shared import logger_factory, args
 from code42cli.cmds.search_shared.enums import (
     FileEventFilterArguments,
@@ -9,7 +10,6 @@ from code42cli.cmds.securitydata.extraction import extract
 from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore
 from code42cli.commands import Command, SubcommandLoader
 from code42cli.cmds.securitydata.savedsearch.commands import SavedSearchSubCommandLoader
-from code42cli.cmds.securitydata.savedsearch import savedsearch
 
 
 class SecurityDataSubcommandLoader(SubcommandLoader):
@@ -75,28 +75,30 @@ def clear_checkpoint(sdk, profile):
     FileEventCursorStore(profile.name).replace_stored_cursor_timestamp(None)
 
 
-def print_out(sdk, profile, args):
-    """Activates 'print' command. It gets security events and prints them to stdout."""
-    logger = logger_factory.get_logger_for_stdout(args.format)
+def _extract(sdk, profile, logger, args):
+    if args.advanced_query:
+        exit_if_advanced_query_used_with_other_search_args(args)
     query = sdk.securitydata.savedsearches.get_query(args.saved_search) \
         if args.saved_search else None
     extract(sdk, profile, logger, args, query)
+
+
+def print_out(sdk, profile, args):
+    """Activates 'print' command. It gets security events and prints them to stdout."""
+    logger = logger_factory.get_logger_for_stdout(args.format)
+    _extract(sdk, profile, logger, args)
 
 
 def write_to(sdk, profile, args):
     """Activates 'write-to' command. It gets security events and writes them to the given file."""
     logger = logger_factory.get_logger_for_file(args.output_file, args.format)
-    query = sdk.securitydata.savedsearches.get_query(args.saved_search) \
-        if args.saved_search else None
-    extract(sdk, profile, logger, args, query)
+    _extract(sdk, profile, logger, args)
 
 
 def send_to(sdk, profile, args):
     """Activates 'send-to' command. It gets security events and logs them to the given server."""
     logger = logger_factory.get_logger_for_server(args.server, args.protocol, args.format)
-    query = sdk.securitydata.savedsearches.get_query(args.saved_search) \
-        if args.saved_search else None
-    extract(sdk, profile, logger, args, query)
+    _extract(sdk, profile, logger, args)
 
 
 def _load_write_to_args(arg_collection):

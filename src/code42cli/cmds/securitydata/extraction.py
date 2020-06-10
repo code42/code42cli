@@ -3,13 +3,11 @@ from py42.sdk.queries.fileevents.filters import *
 
 from code42cli.cmds.search_shared.enums import (
     ExposureType as ExposureTypeOptions,
-    FileEventFilterArguments,
 )
 from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore
 from code42cli.cmds.search_shared.extraction import (
     verify_begin_date_requirements,
     create_handlers,
-    exit_if_advanced_query_used_with_other_search_args,
     create_time_range_filter,
 )
 import code42cli.errors as errors
@@ -35,7 +33,6 @@ def extract(sdk, profile, output_logger, args, query=None):
     handlers = create_handlers(sdk, FileEventExtractor, output_logger, store)
     extractor = FileEventExtractor(sdk, handlers)
     if args.advanced_query:
-        exit_if_advanced_query_used_with_other_search_args(args, FileEventFilterArguments())
         extractor.extract_advanced(args.advanced_query)
     else:
         verify_begin_date_requirements(args, store)
