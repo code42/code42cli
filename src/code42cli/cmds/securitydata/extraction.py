@@ -18,7 +18,7 @@ from code42cli.logger import get_main_cli_logger
 logger = get_main_cli_logger()
 
 
-def extract(sdk, profile, output_logger, args):
+def extract(sdk, profile, output_logger, args, query=None):
     """Extracts file events using the given command-line arguments.
 
         Args:
@@ -29,6 +29,7 @@ def extract(sdk, profile, output_logger, args):
                 write-to: uses a logger that logs to a file.
                 send-to: uses a logger that sends logs to a server.
             args: Command line args used to build up file event query filters.
+            query: FileEventQuery instance created from search-id of saved search.
     """
     store = FileEventCursorStore(profile.name) if args.incremental else None
     handlers = create_handlers(sdk, FileEventExtractor, output_logger, store)
@@ -41,6 +42,8 @@ def extract(sdk, profile, output_logger, args):
         if args.type:
             _verify_exposure_types(args.type)
         filters = _create_file_event_filters(args)
+        if args.saved_search:
+            filters.extend(query._filter_group_list)
         extractor.extract(*filters)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         logger.print_info(u"No results found.")
