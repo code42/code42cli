@@ -31,6 +31,11 @@ def create_search_args(search_for, filter_args):
     return filter_args
 
 
+def _saved_search_args():
+    saved_search = ArgConfig(u"--saved-search", help=u"Saved search id.")
+    return {u"saved_search": saved_search}
+
+
 def create_advanced_query_incompatible_search_args(search_for=None):
     """Returns a dict of args that are incompatible with the --advanced-query flag. Any new 
     incompatible args should go here as this is function is also used for arg validation."""
@@ -59,4 +64,6 @@ def create_advanced_query_incompatible_search_args(search_for=None):
             help=u"Only get {0} that were not previously retrieved.".format(search_for),
         ),
     }
+    if search_for == "file events":
+        args.update(_saved_search_args())
     return args

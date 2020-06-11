@@ -33,3 +33,67 @@ def test_send_to(sdk, profile, alert_namespace, mocker, mock_logger_factory, moc
     mock_logger_factory.get_logger_for_server.return_value = logger
     main.send_to(sdk, profile, alert_namespace)
     mock_extract.assert_called_with(sdk, profile, logger, alert_namespace)
+
+
+def test_extract_when_is_advanced_query_and_has_begin_date_exits(alert_namespace):
+    alert_namespace.advanced_query = "some complex json"
+    alert_namespace.begin = "begin date"
+    with pytest.raises(SystemExit):
+        main._validate_args(alert_namespace)
+
+
+def test_extract_when_is_advanced_query_and_has_end_date_exits(alert_namespace):
+    alert_namespace.advanced_query = "some complex json"
+    alert_namespace.end = "end date"
+    with pytest.raises(SystemExit):
+        main._validate_args(alert_namespace)
+
+
+@pytest.mark.parametrize(
+    "arg",
+    [
+        "severity",
+        "actor",
+        "actor_contains",
+        "exclude_actor",
+        "exclude_actor_contains",
+        "rule_name",
+        "exclude_rule_name",
+        "rule_id",
+        "exclude_rule_id",
+        "rule_type",
+        "exclude_rule_type",
+    ],
+)
+def test_extract_when_is_advanced_query_and_other_incompatible_multi_narg_argument_passed(
+    alert_namespace, arg
+):
+    alert_namespace.advanced_query = "some complex json"
+    setattr(alert_namespace, arg, ["test_value"])
+    with pytest.raises(SystemExit):
+        main._validate_args(alert_namespace)
+
+
+@pytest.mark.parametrize("arg", ["state", "description"])
+def test_extract_when_is_advanced_query_and_other_incompatible_single_arg_argument_passed(
+    alert_namespace, arg
+):
+    alert_namespace.advanced_query = "some complex json"
+    setattr(alert_namespace, arg, "test_value")
+    with pytest.raises(SystemExit):
+        main._validate_args(alert_namespace)
+
+
+def test_extract_when_is_advanced_query_and_has_incremental_mode_exits(alert_namespace):
+    alert_namespace.advanced_query = "some complex json"
+    alert_namespace.incremental = True
+    with pytest.raises(SystemExit):
+        main._validate_args(alert_namespace)
+
+
+def test_extract_when_is_advanced_query_and_has_incremental_mode_set_to_false_does_not_exit(
+    alert_namespace
+):
+    alert_namespace.advanced_query = "some complex json"
+    alert_namespace.is_incremental = False
+    main._validate_args(alert_namespace)

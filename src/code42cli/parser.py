@@ -6,6 +6,8 @@ from py42.__version__ import __version__ as py42version
 from code42cli.__version__ import __version__ as cliversion
 from code42cli.logger import get_main_cli_logger
 
+
+
 BANNER = u""" 
  dP""b8  dP"Yb  8888b. 888888  dP88  oP"Yb. 
 dP   `" dP   Yb 8I  Yb 88__   dP 88  "' dP' 
@@ -123,11 +125,11 @@ def _build_group_command_descriptions(command):
     return u"\n".join(lines)
 
 
-def exit_if_advanced_query_used_with_other_search_args(args):
-    args_dict_copy = args.__dict__.copy()
-    for arg in (u"advanced_query", u"format", u"sdk", u"profile"):
-        args_dict_copy.pop(arg)
-    if any(args_dict_copy.values()):
-        logger = get_main_cli_logger()
-        logger.print_and_log_error(u"You cannot use --advanced-query with additional search args.")
-        exit(1)
+def exit_if_advanced_query_used_with_other_search_args(args, invalid_args):
+    for arg in invalid_args:
+        if args.__dict__[arg]:
+            logger = get_main_cli_logger()
+            logger.print_and_log_error(
+                u"You cannot use --advanced-query with additional search args."
+            )
+            exit(1)
