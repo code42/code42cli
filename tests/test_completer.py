@@ -1,5 +1,12 @@
+import pytest
+
 from code42cli.completer import Completer
 from code42cli.main import MainSubcommandLoader
+
+
+@pytest.fixture
+def files(mocker):
+    return mocker.patch("code42cli.completer.get_files_in_path")
 
 
 class TestCompleter(object):
@@ -23,7 +30,7 @@ class TestCompleter(object):
         assert "alerts" in actual
         assert "alert-rules" in actual
         assert len(actual) == 2
-        
+
     def test_complete_for_departing_employee(self):
         actual = self._completer.complete("code42 de")
         assert "departing-employee" in actual
@@ -38,7 +45,7 @@ class TestCompleter(object):
         actual = self._completer.complete("code42 profile cre")
         assert "create" in actual
         assert len(actual) == 1
-        
+
     def test_complete_for_high_risk_employee_bulk(self):
         actual = self._completer.complete("code42 high-risk-employee bu")
         assert "bulk" in actual
@@ -95,3 +102,71 @@ class TestCompleter(object):
         completer = Completer(loader)
         actual = completer.complete("code42 dep")
         assert not actual
+
+    def test_complete_when_completing_arg_works(self):
+        actual = self._completer.complete("code42 security-data print --incre")
+        assert "--incremental" in actual
+
+    def test_complete_does_not_complete_positional_args(self):
+        actual = self._completer.complete("code42 profile use nam")
+        assert "name" not in actual
+
+    def test_complete_completes_choices(self):
+        actual = self._completer.complete("code42 security-data send-to 127.0.0.1 -p U")
+        assert "UDP" in actual
+
+    def test_complete_when_names_contains_filename_and_current_is_positional_completes_with_local_filenames(
+        self, files
+    ):
+        files.return_value = ["foo.txt", "bar.csv"]
+        actual = self._completer.complete("code42 security-data write-to ")
+        assert "foo.txt" in actual
+        assert "bar.csv" in actual
+
+    def test_complete_when_names_contains_file_name_and_current_is_positional_completes_with_local_filenames(
+        self, files
+    ):
+        files.return_value = ["foo.txt", "bar.csv"]
+        actual = self._completer.complete("code42 alert-rules bulk add ")
+        assert "foo.txt" in actual
+        assert "bar.csv" in actual
+
+    def test_complete_completes_local_files(self, files):
+        files.return_value = ["foo.txt", "bar.csv"]
+        actual = self._completer.complete("code42 security-data write-to foo.t")
+        assert "foo.txt" in actual
+        assert len(actual) == 1
+
+    def test_complete_when_current_is_prefix_to_local_file_but_is_not_arg_does_not_complete_with_local_file(
+        self, files
+    ):
+        files.return_value = ["bulk.txt"]
+        actual = self._completer.complete("code42 departing-employee bu")
+        assert "bulk.txt" not in actual
+        assert "bulk" in actual
+
+    def test_complete_when_nothing_matches_top_level_command_returns_nothing(self):
+        actual = self._completer.complete("code42 XX")
+        assert not actual
+
+    def test_complete_when_nothing_matches_second_level_commands_returns_nothing(self):
+        actual = self._completer.complete("code42 security-data prX")
+        assert not actual
+
+    def test_complete_when_nothing_matches_flagged_arg_returns_nothing(self):
+        actual = self._completer.complete("code42 security-data print --begX")
+        assert not actual
+
+    def test_complete_when_nothing_matches_choice_returns_nothing(self):
+        actual = self._completer.complete("code42 security-data send-to -p XX")
+        assert not actual
+
+    def test_complete_when_nothing_matches_files_return_nothing(self, files):
+        files.return_value = ["bulk.txt"]
+        actual = self._completer.complete("code42 departing-employee buX")
+        assert not actual
+
+    def test_completer_ignore_shorthand_flagged_args(self):
+        actual = self._completer.complete("code42 alerts write-to -")
+        assert "-i" not in actual
+        assert "--incremental" in actual

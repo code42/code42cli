@@ -131,7 +131,7 @@ class AlertRulesSubcommandLoader(SubcommandLoader):
         add = Command(
             self.ADD_USER,
             u"Add a user to an alert rule.",
-            u"{} add-user --rule-id <id>  --username <username>".format(usage_prefix),
+            u"{} add-user --rule-id <id> --username <username>".format(usage_prefix),
             handler=add_user,
             arg_customizer=_customize_add_arguments,
         )

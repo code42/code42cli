@@ -1,5 +1,9 @@
+from os import path
+
 from code42cli import MAIN_COMMAND
 from code42cli.main import MainSubcommandLoader
+from code42cli.tree_nodes import ArgNode
+from code42cli.util import get_files_in_path
 
 
 def _get_matches(current, options):
@@ -11,32 +15,45 @@ def _get_matches(current, options):
     return matches
 
 
-def _get_next_full_set_of_commands(cmd_loader, current):
-    cmd_loader = cmd_loader.subtrees[current]
-    return cmd_loader.names
+def _get_next_full_set_of_options(node, current):
+    node = node[current]
+    names = list(node.names)
+    if _can_complete_with_local_files(current, node):
+        files = get_files_in_path("")
+        names.extend(files)
+    return names
+
+
+def _can_complete_with_local_files(current, node):
+    return isinstance(node, ArgNode) and (not current or current[0] != u"-")
 
 
 class Completer(object):
     def __init__(self, main_cmd_loader=None):
-        self._main_cmd_loader = main_cmd_loader or MainSubcommandLoader(u"")
+        self._main_cmd_loader = main_cmd_loader or MainSubcommandLoader()
 
     def complete(self, cmdline, point=None):
         try:
             point = point or len(cmdline)
             args = cmdline[0:point].split()
+            # Complete with main commands if `code42` is typed out.
+            # Note that the command `code42` should complete on its own.
             if len(args) < 2:
-                # `code42` already completes w/o
                 return self._main_cmd_loader.names if args[0] == MAIN_COMMAND else []
 
             current = args[-1]
-            cmd_loader = self._search_trees(args)
-            if not cmd_loader:
-                return []
+            search_results, options = self._get_completion_options(args)
 
-            options = cmd_loader.names
+            # Complete with full set of arg/command options
             if current in options:
-                # `current` is already complete
-                return _get_next_full_set_of_commands(cmd_loader, current)
+                return _get_next_full_set_of_options(search_results, current)
+
+            if _can_complete_with_local_files(current, search_results):
+                files = get_files_in_path(current)
+                if current[0] == "~":
+                    replace = path.expanduser("~")
+                    files = [f.replace(replace, "~") for f in files]
+                options.extend(files)
 
             return _get_matches(current, options) if options else []
         except:
@@ -44,13 +61,21 @@ class Completer(object):
 
     def _search_trees(self, args):
         # Find cmd_loader at lowest level from given args
-        cmd_loader = self._main_cmd_loader
+        node = self._main_cmd_loader.get_node()
         if len(args) > 2:
             for arg in args[1:-1]:
-                cmd_loader = cmd_loader.subtrees[arg]
-        return cmd_loader
+                next_node = node[arg]
+                if next_node:
+                    node = next_node
+                else:
+                    return node
+        return node
+
+    def _get_completion_options(self, args):
+        search_results = self._search_trees(args)
+        return search_results, search_results.names
 
 
 def complete(cmdline, point):
-    choices = Completer().complete(cmdline, point)
+    choices = Completer().complete(cmdline, point) or []
     print(u" \n".join(choices))

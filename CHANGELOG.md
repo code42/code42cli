@@ -84,6 +84,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Short option `-u` added for `code42 high-risk-employee add-risk-tags` and `remove-risk-tags`.
 
+- Tab completion for bash and zsh for Unix based machines.
+
 ### Fixed
 
 - Fixed bug in bulk commands where value-less fields in csv files were treated as empty strings instead of None.

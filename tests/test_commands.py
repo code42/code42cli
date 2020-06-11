@@ -14,16 +14,11 @@ from .conftest import (
     func_single_positional_arg_with_sdk_and_profile,
     func_single_positional_arg,
     func_single_positional_arg_many_optional_args,
+    subcommand1,
+    subcommand2,
+    subcommand3,
+    DummySubcommandLoader,
 )
-
-subcommand1 = Command("sub1", "sub1 desc", "sub1 usage")
-subcommand2 = Command("sub2", "sub2 desc", "sub2 usage")
-subcommand3 = Command("sub3", "sub3 desc", "sub3 usage")
-
-
-class DummySubcommandLoader(SubcommandLoader):
-    def load_commands(self):
-        return [subcommand1, subcommand2, subcommand3]
 
 
 def arg_customizer(arg_collection):
@@ -276,7 +271,7 @@ class TestCommand(object):
         assert command(help_func=dummy_print_help) == "success"
 
 
-class TestCommandSubcommandLoader(object):
+class TestSubcommandLoader(object):
     def test_names_when_no_subcommands_returns_nothing(self):
         subcommand_loader = SubcommandLoader("")
         assert not subcommand_loader.names
@@ -290,14 +285,9 @@ class TestCommandSubcommandLoader(object):
         ]
         assert subcommand_loader.names == ["c1", "c2", "c3"]
 
-    def test_subtrees_returns_expected_substree(self):
+    def test_getitem_returns_expected_subtree(self):
         subcommand_loader = SubcommandLoader("")
-        subcommand_loader_sub = SubcommandLoader("sub")
-        subcommand_loader_sub.load_commands = lambda: [
-            Command("c1", ""),
-            Command("c2", ""),
-            Command("c3", ""),
-        ]
         command = Command("c1", "", subcommand_loader=DummySubcommandLoader(""))
         subcommand_loader.load_commands = lambda: [command]
-        assert subcommand_loader.subtrees
+        assert subcommand_loader.names == ["c1"]
+        assert subcommand_loader["c1"].names == ["sub1", "sub2", "sub3"]

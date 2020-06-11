@@ -100,7 +100,6 @@ def _load_send_to_args(arg_collection):
             help=u"Protocol used to send logs to server.",
         ),
     }
-
     arg_collection.extend(send_to_args)
     _load_search_args(arg_collection)
 

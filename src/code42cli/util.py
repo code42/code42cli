@@ -1,10 +1,11 @@
 from __future__ import print_function
 import sys
 import shutil
-
+import os
+import glob
+from os import path
 from collections import OrderedDict
 from functools import wraps
-from os import makedirs, path
 from signal import signal, getsignal, SIGINT
 
 from code42cli.compat import open, str
@@ -14,12 +15,7 @@ _PADDING_SIZE = 3
 
 
 def get_input(prompt):
-    """Uses correct input function based on Python version."""
-    # pylint: disable=undefined-variable
-    if sys.version_info >= (3, 0):
-        return input(prompt)
-    else:
-        return raw_input(prompt)
+    return input(prompt)
 
 
 def does_user_agree(prompt):
@@ -36,7 +32,7 @@ def get_user_project_path(subdir=u""):
     hidden_package_name = u".{0}".format(package_name)
     user_project_path = path.join(home, hidden_package_name, subdir)
     if not path.exists(user_project_path):
-        makedirs(user_project_path)
+        os.makedirs(user_project_path)
     return user_project_path
 
 
@@ -175,6 +171,24 @@ class warn_interrupt(object):
                 return func(*args, **kwargs)
 
         return inner
+
+
+def get_files_in_path(input_path):
+    try:
+        if not input_path:
+            return os.listdir(os.getcwd())
+
+        if "~" in input_path:
+            replace = os.path.expanduser("~")
+            input_path = input_path.replace("~", replace)
+
+        if os.path.isdir(input_path) and input_path[-1] != os.sep:
+            input_path += os.sep
+
+        files = glob.glob(input_path + "*")
+        return files
+    except Exception:
+        return []
 
 
 def get_user_id(sdk, username):

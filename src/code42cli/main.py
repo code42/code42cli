@@ -53,6 +53,9 @@ class MainSubcommandLoader(SubcommandLoader):
     HIGH_RISK_EMPLOYEE = DetectionLists.HIGH_RISK_EMPLOYEE
     LEGAL_HOLD = u"legal-hold"
 
+    def __init__(self):
+        super(MainSubcommandLoader, self).__init__(u"")
+
     def load_commands(self):
         detection_lists_description = (
             u"For adding and removing employees from the {} detection list."
@@ -118,7 +121,7 @@ class MainSubcommandLoader(SubcommandLoader):
 
 
 def main():
-    top = Command(u"", u"", subcommand_loader=MainSubcommandLoader(u""))
+    top = Command(u"", u"", subcommand_loader=MainSubcommandLoader())
     invoker = CommandInvoker(top)
     try:
         invoker.run(sys.argv[1:])
