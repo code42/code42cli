@@ -59,16 +59,12 @@ def get_matters(sdk):
 
 def add_bulk_users(sdk, file_name):
     reader = create_csv_reader(file_name)
-    run_bulk_process(
-        lambda matter_id, username: add_user(sdk, matter_id, username), reader,
-    )
+    run_bulk_process(lambda matter_id, username: add_user(sdk, matter_id, username), reader)
 
 
 def remove_bulk_users(sdk, file_name):
     reader = create_csv_reader(file_name)
-    run_bulk_process(
-        lambda matter_id, username: remove_user(sdk, matter_id, username), reader,
-    )
+    run_bulk_process(lambda matter_id, username: remove_user(sdk, matter_id, username), reader)
 
 
 def show_matter(sdk, matter_id, include_inactive=False, include_policy=False):

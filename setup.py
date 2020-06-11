@@ -21,7 +21,7 @@ setup(
     package_dir={"": "src"},
     python_requires=">3, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4",
     install_requires=[
-        "c42eventextractor==0.3.1",
+        "c42eventextractor==0.3.2",
         "keyring==18.0.1",
         "keyrings.alt==3.2.0",
         "py42>=1.2.0",

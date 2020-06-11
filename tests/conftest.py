@@ -7,7 +7,7 @@ from code42cli.bulk import BulkProcessor
 from code42cli.file_readers import CliFileReader
 from code42cli.config import ConfigAccessor
 from code42cli.profile import Code42Profile
-from code42cli.commands import DictObject
+from code42cli.commands import DictObject, Command, SubcommandLoader
 
 import code42cli.errors as error_tracker
 
@@ -227,3 +227,13 @@ def create_mock_reader(rows):
             return len(rows)
 
     return MockDictReader(TEST_FILE_PATH)
+
+
+subcommand1 = Command("sub1", "sub1 desc", "sub1 usage")
+subcommand2 = Command("sub2", "sub2 desc", "sub2 usage")
+subcommand3 = Command("sub3", "sub3 desc", "sub3 usage")
+
+
+class DummySubcommandLoader(SubcommandLoader):
+    def load_commands(self):
+        return [subcommand1, subcommand2, subcommand3]

@@ -146,8 +146,8 @@ class DetectionListBulkSubcommandLoader(SubcommandLoader):
         cmd_type.set_choices(HighRiskBulkCommandType())
 
     def _load_bulk_add_description(self, argument_collection):
-        csv_file = argument_collection.arg_configs[u"csv_file"]
-        csv_file.set_help(
+        filename = argument_collection.arg_configs[u"filename"]
+        filename.set_help(
             u"The path to the csv file for bulk adding users to the {} detection list.".format(
                 self._name
             )
@@ -162,16 +162,16 @@ class DetectionListBulkSubcommandLoader(SubcommandLoader):
         )
 
     def _load_bulk_add_risk_tags_description(self, argument_collection):
-        csv_file = argument_collection.arg_configs[u"csv_file"]
-        csv_file.set_help(
+        filename = argument_collection.arg_configs[u"filename"]
+        filename.set_help(
             u"A file containing a ',' separated username with space-separated tags to add "
             u"to the {} detection list. "
             u"e.g. test@email.com,tag1 tag2 tag3".format(self._name)
         )
 
     def _load_bulk_remove_risk_tags_description(self, argument_collection):
-        csv_file = argument_collection.arg_configs[u"csv_file"]
-        csv_file.set_help(
+        filename = argument_collection.arg_configs[u"filename"]
+        filename.set_help(
             u"A file containing a ',' separated username with space-separated tags to remove "
             u"from the {} detection list. "
             u"e.g. test@email.com,tag1 tag2 tag3".format(self._name)

@@ -3,6 +3,7 @@ import inspect
 from code42cli import profile as cliprofile
 from code42cli.args import get_auto_arg_configs, SDK_ARG_NAME, PROFILE_ARG_NAME
 from code42cli.sdk_client import create_sdk
+from code42cli.tree_nodes import SubcommandNode
 
 
 class DictObject(object):
@@ -150,29 +151,24 @@ def _kvps_to_obj(kvps):
 
 
 class SubcommandLoader(object):
-    """Responsible for creating subcommands for it's root command. It is also useful for getting 
-    command information ahead of time, as in the example of tab completion."""
+    """Responsible for creating subcommands for it's root command."""
 
-    def __init__(self, root_command_name):
+    def __init__(self, root_command_name, node=None):
         self.root = root_command_name
+        self._node = node
+
+    def __getitem__(self, item):
+        return self.get_node()[item]
 
     @property
     def names(self):
-        """The names of all the subcommands in this subcommabd loader's root command."""
-        sub_cmds = self.load_commands()
-        return [cmd.name for cmd in sub_cmds]
-
-    @property
-    def subtrees(self):
-        """All subcommands for this subcommand loader's root command mapped to their given 
-        subcommand loaders."""
-        cmds = self.load_commands()
-        results = {}
-        for cmd in cmds:
-            subcommand_loader = cmd.subcommand_loader
-            if subcommand_loader:
-                results[cmd.name] = subcommand_loader
-        return results
+        return self.get_node().names
 
     def load_commands(self):
+        """Override"""
         return []
+
+    def get_node(self):
+        if not self._node:
+            self._node = SubcommandNode(self.root, self.load_commands())
+        return self._node

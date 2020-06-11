@@ -1,6 +1,6 @@
 from code42cli.compat import range
 
-_BATCH_SIZE = 500
+_BATCH_SIZE = 100
 
 
 def get_alert_details(sdk, alert_summary_list):
