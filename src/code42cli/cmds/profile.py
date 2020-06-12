@@ -15,7 +15,7 @@ def profile():
     pass
 
 
-@click.command()
+@profile.command()
 @click.argument("name")
 def show(name=None):
     """Print the details of a profile."""
