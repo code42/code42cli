@@ -12,11 +12,12 @@ from code42cli.cmds.securitydata import main as secmain
 from code42cli.cmds.alerts import main as alertmain
 from code42cli.cmds.alerts.rules import commands as alertrules
 from code42cli.cmds.legal_hold import commands as legalhold
-from code42cli.cmds.profile import ProfileSubcommandLoader
+from code42cli.cmds.profile import profile
 from code42cli.commands import Command, SubcommandLoader
 from code42cli.invoker import CommandInvoker
 from code42cli.util import flush_stds_out_err_without_printing_error
 
+import click
 
 # Handle KeyboardInterrupts by just exiting instead of printing out a stack
 def exit_on_interrupt(signal, frame):
@@ -120,13 +121,22 @@ class MainSubcommandLoader(SubcommandLoader):
         return legalhold.LegalHoldSubcommandLoader(self.LEGAL_HOLD)
 
 
+@click.group()
+def code42():
+    pass
+
+
+code42.add_command(profile)
+
+
 def main():
-    top = Command(u"", u"", subcommand_loader=MainSubcommandLoader())
-    invoker = CommandInvoker(top)
-    try:
-        invoker.run(sys.argv[1:])
-    finally:
-        flush_stds_out_err_without_printing_error()
+    code42()
+    # top = Command(u"", u"", subcommand_loader=MainSubcommandLoader())
+    # invoker = CommandInvoker(top)
+    # try:
+    #     invoker.run(sys.argv[1:])
+    # finally:
+    #     flush_stds_out_err_without_printing_error()
 
 
 if __name__ == u"__main__":
