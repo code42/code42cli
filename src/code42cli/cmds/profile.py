@@ -15,21 +15,6 @@ def profile():
     pass
 
 
-@profile.command()
-@click.argument("name")
-def show(name=None):
-    """Print the details of a profile."""
-    c42profile = cliprofile.get_profile(name)
-    logger = get_main_cli_logger()
-    logger.print_info(u"\n{0}:".format(c42profile.name))
-    logger.print_info(u"\t* username = {}".format(c42profile.username))
-    logger.print_info(u"\t* authority url = {}".format(c42profile.authority_url))
-    logger.print_info(u"\t* ignore-ssl-errors = {}".format(c42profile.ignore_ssl_errors))
-    if cliprofile.get_stored_password(c42profile.name) is not None:
-        logger.print_info(u"\t* A password is set.")
-    logger.print_info(u"")
-
-
 profile_name_arg = click.argument("profile_name")
 name_option = click.option(
     "-n",
@@ -50,6 +35,21 @@ disable_ssl_option = click.option(
     help="For development purposes, do not validate the SSL certificates of Code42 servers. "
     "This is not recommended unless it is required.",
 )
+
+
+@profile.command()
+@profile_name_arg
+def show(profile_name=None):
+    """Print the details of a profile."""
+    c42profile = cliprofile.get_profile(name)
+    logger = get_main_cli_logger()
+    logger.print_info(u"\n{0}:".format(c42profile.name))
+    logger.print_info(u"\t* username = {}".format(c42profile.username))
+    logger.print_info(u"\t* authority url = {}".format(c42profile.authority_url))
+    logger.print_info(u"\t* ignore-ssl-errors = {}".format(c42profile.ignore_ssl_errors))
+    if cliprofile.get_stored_password(c42profile.name) is not None:
+        logger.print_info(u"\t* A password is set.")
+    logger.print_info(u"")
 
 
 @profile.command()
@@ -79,7 +79,7 @@ def update(name=None, server=None, username=None, disable_ssl_errors=None):
 
 @profile.command()
 @profile_name_arg
-def reset_pw(name=None):
+def reset_pw(profile_name=None):
     """Change the stored password for a profile."""
     c42profile = cliprofile.get_profile(name)
     new_password = getpass()
@@ -110,14 +110,14 @@ def list():
 
 
 @profile.command()
-@click.argument("name")
-def use(name):
+@profile_name
+def use(profile_name):
     """Set a profile as the default."""
     cliprofile.switch_default_profile(name)
 
 
 @profile.command()
-@click.argument("profile_name")
+@profile_name
 def delete(profile_name):
     """Deletes a profile and its stored password (if any)."""
     logger = get_main_cli_logger()
