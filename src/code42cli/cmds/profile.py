@@ -41,7 +41,7 @@ disable_ssl_option = click.option(
 @profile_name_arg
 def show(profile_name=None):
     """Print the details of a profile."""
-    c42profile = cliprofile.get_profile(name)
+    c42profile = cliprofile.get_profile(profile_name)
     logger = get_main_cli_logger()
     logger.print_info(u"\n{0}:".format(c42profile.name))
     logger.print_info(u"\t* username = {}".format(c42profile.username))
@@ -81,7 +81,7 @@ def update(name=None, server=None, username=None, disable_ssl_errors=None):
 @profile_name_arg
 def reset_pw(profile_name=None):
     """Change the stored password for a profile."""
-    c42profile = cliprofile.get_profile(name)
+    c42profile = cliprofile.get_profile(profile_name)
     new_password = getpass()
     _validate_connection(c42profile.authority_url, c42profile.username, new_password)
     cliprofile.set_password(new_password, c42profile.name)
@@ -110,14 +110,14 @@ def list():
 
 
 @profile.command()
-@profile_name
+@profile_name_arg
 def use(profile_name):
     """Set a profile as the default."""
-    cliprofile.switch_default_profile(name)
+    cliprofile.switch_default_profile(profile_name)
 
 
 @profile.command()
-@profile_name
+@profile_name_arg
 def delete(profile_name):
     """Deletes a profile and its stored password (if any)."""
     logger = get_main_cli_logger()
