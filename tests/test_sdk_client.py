@@ -1,8 +1,10 @@
+import os
+
 import py42.sdk
 import py42.settings.debug as debug
 import pytest
 
-from code42cli.sdk_client import create_sdk, validate_connection
+from code42cli.sdk_client import create_sdk, validate_connection, PY42_PASSWORD_KEY
 from .conftest import create_mock_profile
 
 
@@ -53,3 +55,11 @@ def test_validate_connection_when_sdk_does_not_raise_returns_true(mock_sdk_facto
 def test_validate_connection_uses_given_credentials(mock_sdk_factory):
     assert validate_connection("Authority", "Test", "Password")
     mock_sdk_factory.assert_called_once_with("Authority", "Test", "Password")
+
+
+def test_create_sdk_reads_password_from_environment_variable(profile, mock_sdk_factory):
+    os.environ[PY42_PASSWORD_KEY] = "abc"
+    profile.username = "test profile"
+    profile.authority_url = "url"
+    create_sdk(profile, True)
+    mock_sdk_factory.assert_called_once_with("url", "test profile", "abc")
