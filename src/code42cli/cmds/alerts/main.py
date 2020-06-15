@@ -11,7 +11,9 @@ from code42cli.cmds.search_shared.enums import (
     RuleType,
 )
 from code42cli.cmds.search_shared.cursor_store import AlertCursorStore
-from code42cli.cmds.search_shared.args import create_advanced_query_incompatible_search_args
+from code42cli.cmds.search_shared.args import (
+    create_advanced_query_incompatible_search_args, SEARCH_FOR_ALERTS
+)
 
 
 class MainAlertsSubcommandLoader(SubcommandLoader):
@@ -71,7 +73,7 @@ def clear_checkpoint(sdk, profile):
 
 def _validate_args(args):
     if args.advanced_query:
-        incompatible_search_args_dict = create_advanced_query_incompatible_search_args(u"alerts")
+        incompatible_search_args_dict = create_advanced_query_incompatible_search_args(SEARCH_FOR_ALERTS)
         incompatible_search_args_list = list(incompatible_search_args_dict.keys())
         invalid_args = incompatible_search_args_list + list(AlertFilterArguments())
         exit_if_advanced_query_used_with_other_search_args(args, invalid_args)
@@ -204,5 +206,5 @@ def _load_search_args(arg_collection):
             help=u"Filter alerts by description. Does fuzzy search by default.",
         ),
     }
-    search_args = args.create_search_args(search_for=u"alerts", filter_args=filter_args)
+    search_args = args.create_search_args(search_for=SEARCH_FOR_ALERTS, filter_args=filter_args)
     arg_collection.extend(search_args)

@@ -10,7 +10,9 @@ from code42cli.cmds.securitydata.extraction import extract
 from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore
 from code42cli.commands import Command, SubcommandLoader
 from code42cli.cmds.securitydata.savedsearch.commands import SavedSearchSubCommandLoader
-from code42cli.cmds.search_shared.args import create_advanced_query_incompatible_search_args
+from code42cli.cmds.search_shared.args import (
+    create_advanced_query_incompatible_search_args, SEARCH_FOR_FILE_EVENTS
+)
 
 
 class SecurityDataSubcommandLoader(SubcommandLoader):
@@ -194,5 +196,5 @@ def _load_search_args(arg_collection):
             help=u"Get all events including non-exposure events.",
         ),
     }
-    search_args = args.create_search_args(search_for=u"file events", filter_args=filter_args)
+    search_args = args.create_search_args(search_for=SEARCH_FOR_FILE_EVENTS, filter_args=filter_args)
     arg_collection.extend(search_args)
