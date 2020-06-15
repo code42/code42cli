@@ -1,12 +1,15 @@
 from code42cli.cmds.search_shared.enums import SearchArguments, OutputFormat, AlertOutputFormat
 from code42cli.args import ArgConfig
 
+SEARCH_FOR_ALERTS = u"alerts"
+SEARCH_FOR_FILE_EVENTS = u"file events"
+
 
 def create_search_args(search_for, filter_args):
     advanced_query_incompatible_args = create_advanced_query_incompatible_search_args(search_for)
     filter_args.update(advanced_query_incompatible_args)
 
-    format_enum = AlertOutputFormat() if search_for == "alerts" else OutputFormat()
+    format_enum = AlertOutputFormat() if search_for == SEARCH_FOR_ALERTS else OutputFormat()
 
     advanced_query_compatible_args = {
         SearchArguments.ADVANCED_QUERY: ArgConfig(
@@ -29,6 +32,11 @@ def create_search_args(search_for, filter_args):
     filter_args.update(advanced_query_compatible_args)
 
     return filter_args
+
+
+def _saved_search_args():
+    saved_search = ArgConfig(u"--saved-search", help=u"Saved search id.")
+    return {u"saved_search": saved_search}
 
 
 def create_advanced_query_incompatible_search_args(search_for=None):
@@ -59,4 +67,6 @@ def create_advanced_query_incompatible_search_args(search_for=None):
             help=u"Only get {0} that were not previously retrieved.".format(search_for),
         ),
     }
+    if search_for == SEARCH_FOR_FILE_EVENTS:
+        args.update(_saved_search_args())
     return args
