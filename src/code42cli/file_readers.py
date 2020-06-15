@@ -3,6 +3,20 @@ import csv
 from code42cli.errors import BadFileError
 
 
+def read_csv(file, headers=None):
+    reader = csv.DictReader(file, fieldnames=headers)
+    first_row = next(reader)
+    # skip first row if it's the header
+    if tuple(first_row.keys()) == tuple(first_row.values()):
+        return list(reader)
+    else:
+        return [first_row, *list(reader)]
+
+
+def read_flat_file(file):
+    return [row.strip() for row in file]
+
+
 class CliFileReader(object):
     _ROWS_COUNT = -1
 

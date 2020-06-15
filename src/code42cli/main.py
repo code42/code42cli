@@ -12,12 +12,13 @@ from code42cli import PRODUCT_NAME
 # from code42cli.cmds.securitydata import main as secmain
 # from code42cli.cmds.alerts import main as alertmain
 # from code42cli.cmds.alerts.rules import commands as alertrules
-from code42cli.cmds.legal_hold import legal_hold
-from code42cli.cmds.profile import profile
-from code42cli.commands import Command, SubcommandLoader
+from code42cli.cmds.legal_hold import legal_hold as legal_hold_command
+from code42cli.cmds.profile import profile as profile_command
+from code42cli.commands import global_options, code42
 from code42cli.invoker import CommandInvoker
 from code42cli.util import flush_stds_out_err_without_printing_error
 from code42cli.sdk_client import create_sdk
+from code42cli.profile import get_profile
 
 import click
 
@@ -46,18 +47,8 @@ if platform.system().lower() == u"windows":
 # identifying CLI users.
 set_user_agent_suffix(PRODUCT_NAME)
 
-
-@click.group()
-@click.option("--debug", is_flag=True)
-@click.option("--profile")
-def code42(profile, debug):
-    if not profile:
-        profile = 
-    sdk = create_sdk(profile, is_debug_mode=debug)
-
-
-code42.add_command(profile)
-code42.add_command(legal_hold)
+code42.add_command(profile_command)
+code42.add_command(legal_hold_command)
 
 
 def main():

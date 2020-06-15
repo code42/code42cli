@@ -41,13 +41,13 @@ def generate_template(handler, path=None):
     _write_template_file(path, args)
 
 
-def _write_template_file(path, columns=None):
+def write_template_file(path, columns=None):
     with open(path, u"w", encoding=u"utf8") as new_file:
         if columns:
             new_file.write(u",".join(columns))
 
 
-def run_bulk_process(row_handler, reader):
+def run_bulk_process(row_handler, rows):
     """Runs a bulk process.
     
     Args: 
@@ -56,7 +56,7 @@ def run_bulk_process(row_handler, reader):
         reader: (CSVReader or FlatFileReader, optional): A generator that reads rows and yields data into 
             `row_handler`. If None, it will use a CSVReader. Defaults to None.
     """
-    processor = _create_bulk_processor(row_handler, reader)
+    processor = _create_bulk_processor(row_handler, rows)
     processor.run()
 
 
@@ -77,21 +77,19 @@ class BulkProcessor(object):
         reader (CSVReader or FlatFileReader): A generator that reads rows and yields data into `row_handler`.
     """
 
-    def __init__(self, row_handler, reader, worker=None, progress_bar=None):
-        total = reader.get_rows_count()
-        self.file_path = reader.file_path
+    def __init__(self, row_handler, rows, worker=None, progress_bar=None):
+        total = len(rows)
+        self._rows = rows
         self._row_handler = row_handler
-        self._reader = reader
         self.__worker = worker or Worker(5, total)
         self._stats = self.__worker.stats
         self._progress_bar = progress_bar or ProgressBar(total)
 
     def run(self):
         """Processes the csv file specified in the ctor, calling `self.row_handler` on each row."""
-        with open(self.file_path, newline=u"", encoding=u"utf8") as bulk_file:
-            for row in self._reader(bulk_file=bulk_file):
-                self._process_row(row)
-            self.__worker.wait()
+        for row in self._rows:
+            self._process_row(row)
+        self.__worker.wait()
         self._print_results()
 
     def _process_row(self, row):

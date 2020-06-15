@@ -152,3 +152,15 @@ def delete_all():
 def _prompt_for_allow_password_set(profile_name):
     if does_user_agree(u"Would you like to set a password? (y/n): "):
         reset_pw(profile_name)
+
+
+@profile.group()
+def test():
+    pass
+
+
+@test.command()
+@click.pass_context
+def show(ctx):
+    print("i'm showing!")
+    print(ctx.obj)

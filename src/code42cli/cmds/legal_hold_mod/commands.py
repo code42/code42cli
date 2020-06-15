@@ -150,7 +150,7 @@ def _customize_bulk_arguments(argument_collection):
 
 def _generate_template_file(cmd, path=None):
     handler = None
-    filename = u"legal_hold_mod.csv"
+    filename = u"legal_hold.csv"
     if cmd == BulkCommandType.ADD:
         handler = add_user
         filename = u"add_users_to_{}".format(filename)

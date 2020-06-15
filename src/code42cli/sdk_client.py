@@ -1,3 +1,5 @@
+import click
+
 import py42.sdk
 import py42.settings.debug as debug
 import py42.settings
@@ -5,6 +7,7 @@ import py42.settings
 from code42cli.logger import get_main_cli_logger
 
 py42.settings.items_per_page = 500
+
 
 def create_sdk(profile, is_debug_mode):
     if is_debug_mode:
@@ -27,3 +30,15 @@ def validate_connection(authority_url, username, password):
         return True
     except:
         return False
+
+
+class SDK(object):
+    def __init__(self):
+        ctx = click.get_current_context()
+        self._sdk = create_sdk(ctx.obj['profile'], ctx.obj['debug'])
+
+    def __getattr__(self, item):
+        return getattr(self._sdk, item)
+
+
+pass_sdk = click.make_pass_decorator(SDK, ensure=True)

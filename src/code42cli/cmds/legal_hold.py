@@ -1,11 +1,11 @@
 from collections import OrderedDict
 from functools import lru_cache
 from pprint import pprint
+import os
 
 import click
 
 from py42.exceptions import Py42ForbiddenError, Py42BadRequestError
-
 
 from code42cli.errors import (
     UserAlreadyAddedError,
@@ -18,50 +18,68 @@ from code42cli.util import (
     format_string_list_to_columns,
     get_user_id,
 )
-from code42cli.bulk import run_bulk_process
-from code42cli.file_readers import create_csv_reader
+from code42cli.bulk import run_bulk_process, BulkProcessor
+from code42cli.file_readers import read_csv, read_flat_file
 from code42cli.logger import get_main_cli_logger
+from code42cli.sdk_client import pass_sdk
+from code42cli.bulk import write_template_file
+from code42cli.profile import get_profile
+from code42cli.commands import global_options
 
 _MATTER_KEYS_MAP = OrderedDict()
-_MATTER_KEYS_MAP[u"legalHoldUid"] = u"Matter ID"
-_MATTER_KEYS_MAP[u"name"] = u"Name"
-_MATTER_KEYS_MAP[u"description"] = u"Description"
-_MATTER_KEYS_MAP[u"creator_username"] = u"Creator"
-_MATTER_KEYS_MAP[u"creationDate"] = u"Creation Date"
+_MATTER_KEYS_MAP["legalHoldUid"] = "Matter ID"
+_MATTER_KEYS_MAP["name"] = "Name"
+_MATTER_KEYS_MAP["description"] = "Description"
+_MATTER_KEYS_MAP["creator_username"] = "Creator"
+_MATTER_KEYS_MAP["creationDate"] = "Creation Date"
 
 logger = get_main_cli_logger()
 
 
 @click.group()
-def legal_hold():
+@global_options
+@click.pass_context
+def legal_hold(ctx):
     pass
 
 
+matter_id_option = click.option(
+    "-m",
+    "--matter-id",
+    required=True,
+    type=str,
+    help="ID of the legal hold matter user will be added to.",
+)
+user_id_option = click.option(
+    "-u",
+    "--username",
+    required=True,
+    type=str,
+    help="The username of the user to add to the matter.",
+)
+
+
 @legal_hold.command()
+@matter_id_option
+@user_id_option
+@pass_sdk
 def add_user(sdk, matter_id, username):
     """Add a user to a legal hold matter."""
-    user_id = get_user_id(sdk, username)
-    matter = _check_matter_is_accessible(sdk, matter_id)
-    try:
-        sdk.legalhold.add_to_matter(user_id, matter_id)
-    except Py42BadRequestError as e:
-        if u"USER_ALREADY_IN_HOLD" in e.response.text:
-            matter_id_and_name_text = u"legal hold matter id={}, name={}".format(
-                matter_id, matter[u"name"]
-            )
-            raise UserAlreadyAddedError(username, matter_id_and_name_text)
-        raise
+    _add_user_to_legal_hold(sdk, matter_id, username)
 
 
 @legal_hold.command()
+@matter_id_option
+@user_id_option
+@pass_sdk
 def remove_user(sdk, matter_id, username):
     """Remove a user from a legal hold matter."""
-    _check_matter_is_accessible(sdk, matter_id)
-    membership_id = _get_legal_hold_membership_id_for_user_and_matter(sdk, username, matter_id)
-    sdk.legalhold.remove_from_matter(membership_id)
+    _remove_user_from_legal_hold(sdk, matter_id, username)
 
 
 @legal_hold.command()
+@global_options
+@pass_sdk
 def list(sdk):
     """Fetch existing legal hold matters."""
     matters = _get_all_active_matters(sdk)
@@ -71,39 +89,43 @@ def list(sdk):
 
 
 @legal_hold.command()
-def show_matter(sdk, matter_id, include_inactive=False, include_policy=False):
+@click.argument("matter-id")
+@click.option("--include-inactive", is_flag=True)
+@click.option("--include-policy", is_flag=True)
+@pass_sdk
+def show(sdk, matter_id, include_inactive=False, include_policy=False):
     matter = _check_matter_is_accessible(sdk, matter_id)
-    matter[u"creator_username"] = matter[u"creator"][u"username"]
+    matter["creator_username"] = matter["creator"]["username"]
 
     # if `active` is None then all matters (whether active or inactive) are returned. True returns
     # only those that are active.
     active = None if include_inactive else True
     memberships = _get_legal_hold_memberships_for_matter(sdk, matter_id, active=active)
-    active_usernames = [member[u"user"][u"username"] for member in memberships if member[u"active"]]
+    active_usernames = [member["user"]["username"] for member in memberships if member["active"]]
     inactive_usernames = [
-        member[u"user"][u"username"] for member in memberships if not member[u"active"]
+        member["user"]["username"] for member in memberships if not member["active"]
     ]
 
     rows, column_size = find_format_width([matter], _MATTER_KEYS_MAP)
 
-    print(u"")
+    print("")
     format_to_table(rows, column_size)
     if active_usernames:
-        print(u"\nActive matter members:\n")
+        print("\nActive matter members:\n")
         format_string_list_to_columns(active_usernames)
     else:
         print("\nNo active matter members.\n")
 
     if include_inactive:
         if inactive_usernames:
-            print(u"\nInactive matter members:\n")
+            print("\nInactive matter members:\n")
             format_string_list_to_columns(inactive_usernames)
         else:
             print("No inactive matter members.\n")
 
     if include_policy:
-        _get_and_print_preservation_policy(sdk, matter[u"holdPolicyUid"])
-        print(u"")
+        _get_and_print_preservation_policy(sdk, matter["holdPolicyUid"])
+        print("")
 
 
 @legal_hold.group()
@@ -113,22 +135,63 @@ def bulk():
 
 
 @bulk.command()
-def add_user(sdk, file_name):
-    """Bulk add users to legal hold matters from a csv file. CSV file format: matter_id,username"""
-    reader = create_csv_reader(file_name)
-    run_bulk_process(lambda matter_id, username: add_user(sdk, matter_id, username), reader)
+@click.argument("cmd", type=click.Choice(["add", "remove"]))
+@click.argument(
+    "path", required=False, type=click.Path(dir_okay=False, resolve_path=True, writable=True)
+)
+def generate_template(cmd, path):
+    """Generate the necessary csv template needed for bulk adding/removing users."""
+    if not path:
+        filename = (
+            "add_users_to_legal_hold.csv" if cmd == "add" else "remove_users_from_legal_hold.csv"
+        )
+        path = os.path.join(os.getcwd(), filename)
+    write_template_file(path, columns=["matter_id", "username"])
 
 
 @bulk.command()
-def remove_user(sdk, file_name):
-    """Bulk remove users from legal hold matters from a csv file. CSV file format: matter_id,username"""
-    reader = create_csv_reader(file_name)
-    run_bulk_process(lambda matter_id, username: remove_user(sdk, matter_id, username), reader)
+@click.argument("path", type=click.File(mode="r"))
+@pass_sdk
+def add_user(sdk, path):
+    """Bulk add users to legal hold matters from a csv file. CSV file format: username,matter_id"""
+    rows = read_csv(path)
+    row_handler = lambda matter_id, username: _add_user_to_legal_hold(sdk, matter_id, username)
+    run_bulk_process(row_handler, rows)
+
+
+@bulk.command()
+@click.argument("path", type=click.File(mode="r"))
+@pass_sdk
+def remove_user(sdk, path):
+    """Bulk remove users from legal hold matters from a csv file. CSV file format: username,matter_id"""
+    rows = read_csv(path)
+    row_handler = lambda matter_id, username: _remove_user_from_legal_hold(sdk, matter_id, username)
+    run_bulk_process(row_handler, rows)
+
+
+def _add_user_to_legal_hold(sdk, matter_id, username):
+    user_id = get_user_id(sdk, username)
+    matter = _check_matter_is_accessible(sdk, matter_id)
+    try:
+        sdk.legalhold.add_to_matter(user_id, matter_id)
+    except Py42BadRequestError as e:
+        if "USER_ALREADY_IN_HOLD" in e.response.text:
+            matter_id_and_name_text = "legal hold matter id={}, name={}".format(
+                matter_id, matter["name"]
+            )
+            raise UserAlreadyAddedError(username, matter_id_and_name_text)
+        raise
+
+
+def _remove_user_from_legal_hold(sdk, matter_id, username):
+    _check_matter_is_accessible(sdk, matter_id)
+    membership_id = _get_legal_hold_membership_id_for_user_and_matter(sdk, username, matter_id)
+    sdk.legalhold.remove_from_matter(membership_id)
 
 
 def _get_and_print_preservation_policy(sdk, policy_uid):
     preservation_policy = sdk.legalhold.get_policy_by_uid(policy_uid)
-    print(u"\nPreservation Policy:\n")
+    print("\nPreservation Policy:\n")
     pprint(preservation_policy._data_root)
 
 
@@ -136,8 +199,8 @@ def _get_legal_hold_membership_id_for_user_and_matter(sdk, username, matter_id):
     user_id = get_user_id(sdk, username)
     memberships = _get_legal_hold_memberships_for_matter(sdk, matter_id, active=True)
     for member in memberships:
-        if member[u"user"][u"userUid"] == user_id:
-            return member[u"legalHoldMembershipUid"]
+        if member["user"]["userUid"] == user_id:
+            return member["legalHoldMembershipUid"]
     raise UserNotInLegalHoldError(username, matter_id)
 
 
@@ -146,7 +209,7 @@ def _get_legal_hold_memberships_for_matter(sdk, matter_id, active=True):
         legal_hold_uid=matter_id, active=active
     )
     memberships = [
-        member for page in memberships_generator for member in page[u"legalHoldMemberships"]
+        member for page in memberships_generator for member in page["legalHoldMemberships"]
     ]
     return memberships
 
@@ -154,10 +217,10 @@ def _get_legal_hold_memberships_for_matter(sdk, matter_id, active=True):
 def _get_all_active_matters(sdk):
     matters_generator = sdk.legalhold.get_all_matters()
     matters = [
-        matter for page in matters_generator for matter in page[u"legalHolds"] if matter[u"active"]
+        matter for page in matters_generator for matter in page["legalHolds"] if matter["active"]
     ]
     for matter in matters:
-        matter[u"creator_username"] = matter[u"creator"][u"username"]
+        matter["creator_username"] = matter["creator"]["username"]
     return matters
 
 
