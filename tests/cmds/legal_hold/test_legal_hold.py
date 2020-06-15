@@ -18,7 +18,7 @@ from code42cli.errors import (
     UserDoesNotExistError,
 )
 
-_NAMESPACE = "{}.cmds.legal_hold".format(PRODUCT_NAME)
+_NAMESPACE = "{}.cmds.legal_hold_mod".format(PRODUCT_NAME)
 
 from py42.exceptions import Py42BadRequestError
 from py42.response import Py42Response

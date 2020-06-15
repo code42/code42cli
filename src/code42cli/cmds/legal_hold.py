@@ -2,6 +2,8 @@ from collections import OrderedDict
 from functools import lru_cache
 from pprint import pprint
 
+import click
+
 from py42.exceptions import Py42ForbiddenError, Py42BadRequestError
 
 
@@ -30,7 +32,14 @@ _MATTER_KEYS_MAP[u"creationDate"] = u"Creation Date"
 logger = get_main_cli_logger()
 
 
+@click.group()
+def legal_hold():
+    pass
+
+
+@legal_hold.command()
 def add_user(sdk, matter_id, username):
+    """Add a user to a legal hold matter."""
     user_id = get_user_id(sdk, username)
     matter = _check_matter_is_accessible(sdk, matter_id)
     try:
@@ -44,29 +53,24 @@ def add_user(sdk, matter_id, username):
         raise
 
 
+@legal_hold.command()
 def remove_user(sdk, matter_id, username):
+    """Remove a user from a legal hold matter."""
     _check_matter_is_accessible(sdk, matter_id)
     membership_id = _get_legal_hold_membership_id_for_user_and_matter(sdk, username, matter_id)
     sdk.legalhold.remove_from_matter(membership_id)
 
 
-def get_matters(sdk):
+@legal_hold.command()
+def list(sdk):
+    """Fetch existing legal hold matters."""
     matters = _get_all_active_matters(sdk)
     if matters:
         rows, column_size = find_format_width(matters, _MATTER_KEYS_MAP)
         format_to_table(rows, column_size)
 
 
-def add_bulk_users(sdk, file_name):
-    reader = create_csv_reader(file_name)
-    run_bulk_process(lambda matter_id, username: add_user(sdk, matter_id, username), reader)
-
-
-def remove_bulk_users(sdk, file_name):
-    reader = create_csv_reader(file_name)
-    run_bulk_process(lambda matter_id, username: remove_user(sdk, matter_id, username), reader)
-
-
+@legal_hold.command()
 def show_matter(sdk, matter_id, include_inactive=False, include_policy=False):
     matter = _check_matter_is_accessible(sdk, matter_id)
     matter[u"creator_username"] = matter[u"creator"][u"username"]
@@ -100,6 +104,26 @@ def show_matter(sdk, matter_id, include_inactive=False, include_policy=False):
     if include_policy:
         _get_and_print_preservation_policy(sdk, matter[u"holdPolicyUid"])
         print(u"")
+
+
+@legal_hold.group()
+def bulk():
+    """Tools for executing bulk commands."""
+    pass
+
+
+@bulk.command()
+def add_user(sdk, file_name):
+    """Bulk add users to legal hold matters from a csv file. CSV file format: matter_id,username"""
+    reader = create_csv_reader(file_name)
+    run_bulk_process(lambda matter_id, username: add_user(sdk, matter_id, username), reader)
+
+
+@bulk.command()
+def remove_user(sdk, file_name):
+    """Bulk remove users from legal hold matters from a csv file. CSV file format: matter_id,username"""
+    reader = create_csv_reader(file_name)
+    run_bulk_process(lambda matter_id, username: remove_user(sdk, matter_id, username), reader)
 
 
 def _get_and_print_preservation_policy(sdk, policy_uid):
