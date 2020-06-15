@@ -138,7 +138,7 @@ class TestCommandParser(object):
         "tab_url",
     ],
 )
-def test_parser_when_is_advanced_query_and_other_incompatible_multi_narg_argument_passed(
+def test_exit_if_advanced_query_used_with_other_search_args_when_is_advanced_query_and_other_incompatible_multi_narg_argument_passed(
     file_event_namespace, arg
 ):
     file_event_namespace.advanced_query = "some complex json"
@@ -149,7 +149,7 @@ def test_parser_when_is_advanced_query_and_other_incompatible_multi_narg_argumen
         )
 
 
-def test_parser_when_is_advanced_query_and_has_incremental_mode_does_not_exit_as_invalid_args_does_not_contain_incremental(alert_namespace):
+def test_exit_if_advanced_query_used_with_other_search_args_when_is_advanced_query_and_has_incremental_mode_does_not_exit_as_invalid_args_does_not_contain_incremental(alert_namespace):
     alert_namespace.advanced_query = "some complex json"
     alert_namespace.incremental = True
     exit_if_advanced_query_used_with_other_search_args(
@@ -157,7 +157,7 @@ def test_parser_when_is_advanced_query_and_has_incremental_mode_does_not_exit_as
     )
 
 
-def test_parser_when_is_advanced_query_and_has_include_non_exposure_exits(file_event_namespace):
+def test_exit_if_advanced_query_used_with_other_search_args_when_is_advanced_query_and_has_include_non_exposure_exits(file_event_namespace):
     file_event_namespace.advanced_query = "some complex json"
     file_event_namespace.include_non_exposure = True
     with pytest.raises(SystemExit):
@@ -166,7 +166,7 @@ def test_parser_when_is_advanced_query_and_has_include_non_exposure_exits(file_e
         )
 
 
-def test_parser_when_is_advanced_query_and_has_format_doest_not_exit(file_event_namespace):
+def test_exit_if_advanced_query_used_with_other_search_args_when_is_advanced_query_and_has_format_does_not_exit(file_event_namespace):
     file_event_namespace.advanced_query = "some complex json"
     file_event_namespace.format = "JSON"
     exit_if_advanced_query_used_with_other_search_args(

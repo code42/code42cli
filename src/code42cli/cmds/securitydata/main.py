@@ -76,7 +76,7 @@ def clear_checkpoint(sdk, profile):
     FileEventCursorStore(profile.name).replace_stored_cursor_timestamp(None)
 
 
-def validate_args(args):
+def _validate_args(args):
     if args.advanced_query:
         incompatible_search_args_dict = create_advanced_query_incompatible_search_args(u"file events")
         incompatible_search_args_list = list(incompatible_search_args_dict.keys())
@@ -92,21 +92,21 @@ def _extract(sdk, profile, logger, args):
 
 def print_out(sdk, profile, args):
     """Activates 'print' command. It gets security events and prints them to stdout."""
-    validate_args(args)
+    _validate_args(args)
     logger = logger_factory.get_logger_for_stdout(args.format)
     _extract(sdk, profile, logger, args)
 
 
 def write_to(sdk, profile, args):
     """Activates 'write-to' command. It gets security events and writes them to the given file."""
-    validate_args(args)
+    _validate_args(args)
     logger = logger_factory.get_logger_for_file(args.output_file, args.format)
     _extract(sdk, profile, logger, args)
 
 
 def send_to(sdk, profile, args):
     """Activates 'send-to' command. It gets security events and logs them to the given server."""
-    validate_args(args)
+    _validate_args(args)
     logger = logger_factory.get_logger_for_server(args.server, args.protocol, args.format)
     _extract(sdk, profile, logger, args)
 
