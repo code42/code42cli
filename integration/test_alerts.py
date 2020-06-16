@@ -13,6 +13,7 @@ def _parse_response(response):
 
 def _validate_field_value(field, value, response):
     parsed_response = _parse_response(response)
+    assert len(parsed_response) > 0
     for record in parsed_response:
         assert record[field] == value
 
@@ -39,6 +40,7 @@ def test_alert_prints_to_stdout_and_filters_result_by_given_value(command, field
 
 def _validate_begin_date(response):
     parsed_response = _parse_response(response)
+    assert len(parsed_response) > 0
     for record in parsed_response:
         assert record["createdAt"].startswith("2020-05-18")
 
