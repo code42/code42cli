@@ -414,7 +414,7 @@ def test_extract_when_not_errored_and_is_interactive_does_not_print_error(
     sdk, profile, logger, alert_namespace_with_begin, alert_extractor, cli_logger, mocker
 ):
     errors.ERRORED = False
-    mocker.patch("code42cli.cmds.securitydata.extraction.logger", cli_logger)
+    mocker.patch("code42cli.cmds.securitydata_mod.extraction.logger", cli_logger)
     extraction_module.extract(sdk, profile, logger, alert_namespace_with_begin)
     assert cli_logger.print_and_log_error.call_count == 0
     assert cli_logger.log_error.call_count == 0

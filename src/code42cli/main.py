@@ -9,16 +9,16 @@ from code42cli import PRODUCT_NAME
 # from code42cli.cmds.detectionlists import departing_employee as de
 # from code42cli.cmds.detectionlists import high_risk_employee as hre
 # from code42cli.cmds.detectionlists.enums import DetectionLists
-# from code42cli.cmds.securitydata import main as secmain
+# from code42cli.cmds.securitydata_mod import main as secmain
 # from code42cli.cmds.alerts import main as alertmain
 # from code42cli.cmds.alerts.rules import commands as alertrules
 from code42cli.cmds.legal_hold import legal_hold as legal_hold_command
 from code42cli.cmds.profile import profile as profile_command
-from code42cli.commands import global_options, code42
+from code42cli.cmds.securitydata import security_data as sec_data_command
+from code42cli.commands import cli
 from code42cli.invoker import CommandInvoker
 from code42cli.util import flush_stds_out_err_without_printing_error
-from code42cli.sdk_client import create_sdk
-from code42cli.profile import get_profile
+
 
 import click
 
@@ -47,13 +47,14 @@ if platform.system().lower() == u"windows":
 # identifying CLI users.
 set_user_agent_suffix(PRODUCT_NAME)
 
-code42.add_command(profile_command)
-code42.add_command(legal_hold_command)
+cli.add_command(profile_command)
+cli.add_command(legal_hold_command)
+cli.add_command(sec_data_command)
 
 
 def main():
     try:
-        code42()
+        cli()
     finally:
         flush_stds_out_err_without_printing_error()
 

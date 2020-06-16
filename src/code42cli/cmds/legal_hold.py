@@ -18,13 +18,11 @@ from code42cli.util import (
     format_string_list_to_columns,
     get_user_id,
 )
-from code42cli.bulk import run_bulk_process, BulkProcessor
-from code42cli.file_readers import read_csv, read_flat_file
+from code42cli.bulk import run_bulk_process
+from code42cli.file_readers import read_csv
 from code42cli.logger import get_main_cli_logger
-from code42cli.sdk_client import pass_sdk
+from code42cli.sdk_client import sdk_options
 from code42cli.bulk import write_template_file
-from code42cli.profile import get_profile
-from code42cli.commands import global_options
 
 _MATTER_KEYS_MAP = OrderedDict()
 _MATTER_KEYS_MAP["legalHoldUid"] = "Matter ID"
@@ -37,9 +35,9 @@ logger = get_main_cli_logger()
 
 
 @click.group()
-@global_options
+@sdk_options
 @click.pass_context
-def legal_hold(ctx):
+def legal_hold(ctx, sdk):
     pass
 
 
@@ -62,7 +60,7 @@ user_id_option = click.option(
 @legal_hold.command()
 @matter_id_option
 @user_id_option
-@pass_sdk
+@sdk_options
 def add_user(sdk, matter_id, username):
     """Add a user to a legal hold matter."""
     _add_user_to_legal_hold(sdk, matter_id, username)
@@ -71,15 +69,14 @@ def add_user(sdk, matter_id, username):
 @legal_hold.command()
 @matter_id_option
 @user_id_option
-@pass_sdk
+@sdk_options
 def remove_user(sdk, matter_id, username):
     """Remove a user from a legal hold matter."""
     _remove_user_from_legal_hold(sdk, matter_id, username)
 
 
 @legal_hold.command()
-@global_options
-@pass_sdk
+@sdk_options
 def list(sdk):
     """Fetch existing legal hold matters."""
     matters = _get_all_active_matters(sdk)
@@ -92,7 +89,7 @@ def list(sdk):
 @click.argument("matter-id")
 @click.option("--include-inactive", is_flag=True)
 @click.option("--include-policy", is_flag=True)
-@pass_sdk
+@sdk_options
 def show(sdk, matter_id, include_inactive=False, include_policy=False):
     matter = _check_matter_is_accessible(sdk, matter_id)
     matter["creator_username"] = matter["creator"]["username"]
@@ -129,7 +126,8 @@ def show(sdk, matter_id, include_inactive=False, include_policy=False):
 
 
 @legal_hold.group()
-def bulk():
+@sdk_options
+def bulk(sdk):
     """Tools for executing bulk commands."""
     pass
 
@@ -142,16 +140,14 @@ def bulk():
 def generate_template(cmd, path):
     """Generate the necessary csv template needed for bulk adding/removing users."""
     if not path:
-        filename = (
-            "add_users_to_legal_hold.csv" if cmd == "add" else "remove_users_from_legal_hold.csv"
-        )
+        filename = "legal_hold_{}_users.csv".format(cmd)
         path = os.path.join(os.getcwd(), filename)
     write_template_file(path, columns=["matter_id", "username"])
 
 
 @bulk.command()
 @click.argument("path", type=click.File(mode="r"))
-@pass_sdk
+@sdk_options
 def add_user(sdk, path):
     """Bulk add users to legal hold matters from a csv file. CSV file format: username,matter_id"""
     rows = read_csv(path)
@@ -161,7 +157,7 @@ def add_user(sdk, path):
 
 @bulk.command()
 @click.argument("path", type=click.File(mode="r"))
-@pass_sdk
+@sdk_options
 def remove_user(sdk, path):
     """Bulk remove users from legal hold matters from a csv file. CSV file format: username,matter_id"""
     rows = read_csv(path)

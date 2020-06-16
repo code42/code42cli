@@ -3,7 +3,7 @@ import logging
 
 from py42.sdk.queries.fileevents.filters import *
 
-import code42cli.cmds.securitydata.extraction as extraction_module
+import code42cli.cmds.securitydata_mod.extraction as extraction_module
 import code42cli.errors as errors
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.search_shared.enums import ExposureType as ExposureTypeOptions
@@ -479,7 +479,7 @@ def test_extract_when_not_errored_and_is_interactive_does_not_print_error(
     sdk, profile, logger, file_event_namespace_with_begin, file_event_extractor, cli_logger, mocker
 ):
     errors.ERRORED = False
-    mocker.patch("code42cli.cmds.securitydata.extraction.logger", cli_logger)
+    mocker.patch("code42cli.cmds.securitydata_mod.extraction.logger", cli_logger)
     extraction_module.extract(sdk, profile, logger, file_event_namespace_with_begin)
     assert cli_logger.print_and_log_error.call_count == 0
     assert cli_logger.log_error.call_count == 0

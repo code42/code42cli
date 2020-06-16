@@ -5,6 +5,7 @@ import py42.settings.debug as debug
 import py42.settings
 
 from code42cli.logger import get_main_cli_logger
+from code42cli.profile import get_profile
 
 py42.settings.items_per_page = 500
 
@@ -32,13 +33,37 @@ def validate_connection(authority_url, username, password):
         return False
 
 
-class SDK(object):
+class SDKContext(object):
     def __init__(self):
-        ctx = click.get_current_context()
-        self._sdk = create_sdk(ctx.obj['profile'], ctx.obj['debug'])
+        self.profile = get_profile()
+        self.debug = False
+        self._sdk = None
 
     def __getattr__(self, item):
+        if self._sdk is None:
+            self._sdk = create_sdk(self.profile, self.debug)
         return getattr(self._sdk, item)
 
 
-pass_sdk = click.make_pass_decorator(SDK, ensure=True)
+def set_profile(ctx, value):
+    if not value:
+        return
+    ctx.ensure_object(SDKContext).profile = get_profile(value)
+
+
+def set_debug(ctx, value):
+    if not value:
+        return
+    ctx.ensure_object(SDKContext).debug = value
+
+
+profile_option = click.option("--profile", expose_value=False, callback=set_profile)
+debug_option = click.option("-d", "--debug", is_flag=True, expose_value=False, callback=set_debug)
+pass_sdk = click.make_pass_decorator(SDKContext, ensure=True)
+
+
+def sdk_options(f):
+    f = profile_option(f)
+    f = debug_option(f)
+    f = pass_sdk(f)
+    return f

@@ -16,17 +16,20 @@ def verify_timestamp_order(min_timestamp, max_timestamp):
         raise DateArgumentError(u"Begin date cannot be after end date")
 
 
-def parse_min_timestamp(begin_date_str, max_days_back=90):
+def parse_min_timestamp(ctx, begin_date_str):
+    if begin_date_str is None:
+        return
     dt = _parse_timestamp(begin_date_str, _round_datetime_to_day_start)
-
-    boundary_date = _round_datetime_to_day_start(datetime.utcnow() - timedelta(days=max_days_back))
+    boundary_date = _round_datetime_to_day_start(datetime.utcnow() - timedelta(days=90))
     if dt < boundary_date:
         raise DateArgumentError(u"'Begin date' must be within {0} days.".format(max_days_back))
 
     return convert_datetime_to_timestamp(dt)
 
 
-def parse_max_timestamp(end_date_str):
+def parse_max_timestamp(ctx, end_date_str):
+    if end_date_str is None:
+        return
     dt = _parse_timestamp(end_date_str, _round_datetime_to_day_end)
     return convert_datetime_to_timestamp(dt)
 

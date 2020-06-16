@@ -1,17 +1,17 @@
 import pytest
 
-import code42cli.cmds.securitydata.main as main
+import code42cli.cmds.securitydata_mod.main as main
 from code42cli import PRODUCT_NAME
 
 
 @pytest.fixture
 def mock_logger_factory(mocker):
-    return mocker.patch("{}.cmds.securitydata.main.logger_factory".format(PRODUCT_NAME))
+    return mocker.patch("{}.cmds.securitydata_mod.main.logger_factory".format(PRODUCT_NAME))
 
 
 @pytest.fixture
 def mock_extract(mocker):
-    return mocker.patch("{}.cmds.securitydata.main.extract".format(PRODUCT_NAME))
+    return mocker.patch("{}.cmds.securitydata_mod.main.extract".format(PRODUCT_NAME))
 
 
 def test_print_out(sdk, profile, file_event_namespace, mocker, mock_logger_factory, mock_extract):
