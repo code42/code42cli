@@ -22,7 +22,7 @@ def run_command(command):
         response = command_response(process.readlines())
 
     except pexpect.EOF:
-        return 1, response
+        return 0, response
     except pexpect.TIMEOUT:
         return 1, response
     return 0, response
