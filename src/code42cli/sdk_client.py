@@ -33,11 +33,12 @@ def validate_connection(authority_url, username, password):
         return False
 
 
-class SDKContext(object):
+class CLIContext(object):
     def __init__(self):
         self.profile = get_profile()
         self.debug = False
         self._sdk = None
+        self.search_filters = []
 
     def __getattr__(self, item):
         if self._sdk is None:
@@ -48,18 +49,18 @@ class SDKContext(object):
 def set_profile(ctx, value):
     if not value:
         return
-    ctx.ensure_object(SDKContext).profile = get_profile(value)
+    ctx.ensure_object(CLIContext).profile = get_profile(value)
 
 
 def set_debug(ctx, value):
     if not value:
         return
-    ctx.ensure_object(SDKContext).debug = value
+    ctx.ensure_object(CLIContext).debug = value
 
 
 profile_option = click.option("--profile", expose_value=False, callback=set_profile)
 debug_option = click.option("-d", "--debug", is_flag=True, expose_value=False, callback=set_debug)
-pass_sdk = click.make_pass_decorator(SDKContext, ensure=True)
+pass_sdk = click.make_pass_decorator(CLIContext, ensure=True)
 
 
 def sdk_options(f):

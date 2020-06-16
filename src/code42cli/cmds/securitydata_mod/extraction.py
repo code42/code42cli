@@ -46,16 +46,6 @@ def extract(sdk, profile, output_logger, args):
         logger.print_info(u"No results found.")
 
 
-def _verify_exposure_types(exposure_types):
-    if exposure_types is None:
-        return
-    options = list(ExposureTypeOptions())
-    for exposure_type in exposure_types:
-        if exposure_type not in options:
-            logger.print_and_log_error(u"'{0}' is not a valid exposure type.".format(exposure_type))
-            exit(1)
-
-
 def _create_file_event_filters(args):
     filters = []
     event_timestamp_filter = create_time_range_filter(EventTimestamp, args.begin, args.end)

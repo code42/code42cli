@@ -22,7 +22,7 @@ def parse_min_timestamp(ctx, begin_date_str):
     dt = _parse_timestamp(begin_date_str, _round_datetime_to_day_start)
     boundary_date = _round_datetime_to_day_start(datetime.utcnow() - timedelta(days=90))
     if dt < boundary_date:
-        raise DateArgumentError(u"'Begin date' must be within {0} days.".format(max_days_back))
+        raise DateArgumentError(u"'Begin date' must be within {0} days.".format(90))
 
     return convert_datetime_to_timestamp(dt)
 

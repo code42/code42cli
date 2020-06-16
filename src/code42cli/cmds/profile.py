@@ -15,7 +15,7 @@ def profile():
     pass
 
 
-profile_name_arg = click.argument("profile_name")
+profile_name_arg = click.argument("profile_name", required=False)
 name_option = click.option(
     "-n",
     "--name",
@@ -39,7 +39,7 @@ disable_ssl_option = click.option(
 
 @profile.command()
 @profile_name_arg
-def show(profile_name=None):
+def show(profile_name):
     """Print the details of a profile."""
     c42profile = cliprofile.get_profile(profile_name)
     logger = get_main_cli_logger()

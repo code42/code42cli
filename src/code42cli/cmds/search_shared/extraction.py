@@ -13,22 +13,22 @@ from code42cli.cmds.search_shared.args import create_advanced_query_incompatible
 logger = get_main_cli_logger()
 
 
-def begin_date_is_required(args, cursor_store):
-    if not args.incremental:
+def begin_date_is_required(begin, incremental, cursor_store):
+    if not incremental:
         return True
     is_required = cursor_store and cursor_store.get_stored_cursor_timestamp() is None
 
     # Ignore begin date when in incremental mode, it is not required, and it was passed an argument.
-    if not is_required and args.begin:
+    if not is_required and begin:
         logger.print_and_log_info(
             u"Ignoring --begin value as --incremental was passed and cursor checkpoint exists.\n"
         )
-        args.begin = None
+        begin = None
     return is_required
 
 
-def verify_begin_date_requirements(args, cursor_store):
-    if begin_date_is_required(args, cursor_store) and not args.begin:
+def verify_begin_date_requirements(begin, incremental, cursor_store):
+    if begin_date_is_required(begin, incremental, cursor_store) and not begin:
         logger.print_and_log_error(u"'begin date' is required.\n")
         logger.print_bold(u"Try using  '-b' or '--begin'. Use `-h` for more info.\n")
         exit(1)
@@ -99,15 +99,11 @@ def create_time_range_filter(filter_cls, begin_date=None, end_date=None):
         raise Exception(u"filter_cls must be a subclass of QueryFilterTimestampField")
 
     if begin_date and end_date:
-        min_timestamp = parse_min_timestamp(begin_date)
-        max_timestamp = parse_max_timestamp(end_date)
-        verify_timestamp_order(min_timestamp, max_timestamp)
-        return filter_cls.in_range(min_timestamp, max_timestamp)
+        verify_timestamp_order(begin_date, end_date)
+        return filter_cls.in_range(begin_date, end_date)
 
     elif begin_date and not end_date:
-        min_timestamp = parse_min_timestamp(begin_date)
-        return filter_cls.on_or_after(min_timestamp)
+        return filter_cls.on_or_after(begin_date)
 
     elif end_date and not begin_date:
-        max_timestamp = parse_max_timestamp(end_date)
-        return filter_cls.on_or_before(max_timestamp)
+        return filter_cls.on_or_before(end_date)
