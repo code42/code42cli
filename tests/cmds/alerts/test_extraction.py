@@ -3,7 +3,7 @@ import logging
 import pytest
 from py42.sdk.queries.alerts.filters import *
 
-import code42cli.cmds.alerts.extraction as extraction_module
+import code42cli.cmds.alerts_mod.extraction as extraction_module
 import code42cli.errors as errors
 from code42cli import PRODUCT_NAME
 from code42cli.errors import DateArgumentError

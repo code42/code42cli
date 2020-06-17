@@ -10,8 +10,9 @@ from code42cli import PRODUCT_NAME
 # from code42cli.cmds.detectionlists import high_risk_employee as hre
 # from code42cli.cmds.detectionlists.enums import DetectionLists
 # from code42cli.cmds.securitydata_mod import main as secmain
-# from code42cli.cmds.alerts import main as alertmain
-# from code42cli.cmds.alerts.rules import commands as alertrules
+from code42cli.cmds.alerts import alerts as alerts_command
+
+# from code42cli.cmds.alerts_mod.rules import commands as alertrules
 from code42cli.cmds.legal_hold import legal_hold as legal_hold_command
 from code42cli.cmds.profile import profile as profile_command
 from code42cli.cmds.securitydata import security_data as sec_data_command
@@ -47,6 +48,7 @@ set_user_agent_suffix(PRODUCT_NAME)
 cli.add_command(profile_command)
 cli.add_command(legal_hold_command)
 cli.add_command(sec_data_command)
+cli.add_command(alerts_command)
 
 
 def main():

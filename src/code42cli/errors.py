@@ -1,11 +1,6 @@
+from click import BadOptionUsage
+
 ERRORED = False
-
-
-_FORMAT_VALUE_ERROR_MESSAGE = (
-    u"input must be a date/time string (e.g. 'yyyy-MM-dd', "
-    u"'yy-MM-dd HH:MM', 'yy-MM-dd HH:MM:SS'), or a short value in days, "
-    u"hours, or minutes (e.g. 30d, 24h, 15m)"
-)
 
 
 class BadFileError(Exception):
@@ -70,6 +65,8 @@ class LegalHoldNotFoundOrPermissionDeniedError(Code42CLIError):
         )
 
 
-class DateArgumentError(Code42CLIError):
-    def __init__(self, message=_FORMAT_VALUE_ERROR_MESSAGE):
-        super(DateArgumentError, self).__init__(message)
+class DateArgumentError(BadOptionUsage):
+    def __init__(self, option_name=None, message=None):
+        if option_name:
+            message = "--{} {}".format(option_name, message)
+        super(DateArgumentError, self).__init__(option_name, message)

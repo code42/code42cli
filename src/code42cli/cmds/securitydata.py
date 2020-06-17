@@ -1,7 +1,7 @@
 import click
 
 from code42cli.options import global_options, incompatible_with
-from code42cli.cmds.search_shared import logger_factory, args
+from code42cli.cmds.search_shared import logger_factory
 from py42.sdk.queries.fileevents.filters import *
 from c42eventextractor.extractors import FileEventExtractor
 
@@ -10,10 +10,11 @@ from code42cli.cmds.search_shared.options import (
     AdvancedQueryIncompatible,
     is_in_filter,
     exists_filter,
+    output_file_arg,
+    server_options,
 )
 from code42cli.cmds.search_shared.enums import (
     OutputFormat,
-    ServerProtocol,
     ExposureType as ExposureTypeOptions,
 )
 from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore
@@ -134,7 +135,7 @@ def file_event_options(f):
 
 @click.group()
 @global_options
-def security_data(sdk):
+def security_data(state):
     pass
 
 
@@ -164,7 +165,7 @@ def _print(state, format, begin, end, advanced_query, incremental, **kwargs):
 
 
 @security_data.command()
-@click.argument("output_file", type=click.Path(dir_okay=False, resolve_path=True, writable=True))
+@output_file_arg
 @file_event_options
 @search_options
 @global_options
@@ -184,14 +185,7 @@ def write_to(state, format, output_file, begin, end, advanced_query, incremental
 
 
 @security_data.command()
-@click.argument("hostname")
-@click.option(
-    "-p",
-    "--protocol",
-    type=click.Choice(ServerProtocol()),
-    default=ServerProtocol.UDP,
-    help="Protocol used to send logs to server.",
-)
+@server_options
 @file_event_options
 @search_options
 @global_options

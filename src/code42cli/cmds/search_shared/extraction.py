@@ -6,7 +6,7 @@ from py42.sdk.queries.query_filter import QueryFilterTimestampField
 import code42cli.errors as errors
 from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp, verify_timestamp_order
 from code42cli.logger import get_main_cli_logger
-from code42cli.cmds.alerts.util import get_alert_details
+from code42cli.cmds.alerts_mod.util import get_alert_details
 from code42cli.util import warn_interrupt
 from code42cli.cmds.search_shared.args import create_advanced_query_incompatible_search_args
 
@@ -59,7 +59,7 @@ def create_handlers(sdk, extractor_class, output_logger, cursor_store):
     def handle_response(response):
         response_dict = json.loads(response.text)
         events = response_dict.get(extractor._key)
-        if extractor._key == u"alerts":
+        if extractor._key == u"alerts_mod":
             try:
                 events = get_alert_details(sdk, events)
             except Exception as ex:

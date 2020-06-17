@@ -4,7 +4,7 @@ from code42cli.main import main, MainSubcommandLoader
 class TestMainSubcommandLoader(object):
     def test_getitem_returns_top_level_subcommand_names(self):
         loader = MainSubcommandLoader()
-        assert "alerts" in loader.names
+        assert "alerts_mod" in loader.names
         assert "alert-rules" in loader.names
         assert "departing-employee" in loader.names
 
@@ -46,7 +46,7 @@ def test_securitydata_commands_load(capsys, mocker):
 
 
 def test_alerts_commands_load(capsys, mocker):
-    mocker.patch("sys.argv", [u"code42", u"alerts", u"print", u"-h"])
+    mocker.patch("sys.argv", [u"code42", u"alerts_mod", u"print", u"-h"])
     _execute_test(capsys, u"print")
 
 

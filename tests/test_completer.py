@@ -27,7 +27,7 @@ class TestCompleter(object):
 
     def test_complete_for_alert_and_rules(self):
         actual = self._completer.complete("code42 al")
-        assert "alerts" in actual
+        assert "alerts_mod" in actual
         assert "alert-rules" in actual
         assert len(actual) == 2
 
@@ -79,7 +79,7 @@ class TestCompleter(object):
     def test_complete_when_arg_is_first_and_complete_returns_first_set_of_options(self):
         actual = self._completer.complete("code42 ")
         assert "profile" in actual
-        assert "alerts" in actual
+        assert "alerts_mod" in actual
         assert "alert-rules" in actual
         assert "security-data" in actual
         assert "departing-employee" in actual
@@ -167,6 +167,6 @@ class TestCompleter(object):
         assert not actual
 
     def test_completer_ignore_shorthand_flagged_args(self):
-        actual = self._completer.complete("code42 alerts write-to -")
+        actual = self._completer.complete("code42 alerts_mod write-to -")
         assert "-i" not in actual
         assert "--incremental" in actual

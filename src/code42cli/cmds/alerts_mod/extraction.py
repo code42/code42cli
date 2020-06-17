@@ -25,7 +25,7 @@ logger = get_main_cli_logger()
 
 
 def extract(sdk, profile, output_logger, args):
-    """Extracts alerts using the given command-line arguments.
+    """Extracts alerts_mod using the given command-line arguments.
 
         Args:
             sdk (py42.sdk.SDKClient): The py42 sdk.

@@ -3,7 +3,7 @@ from requests import Response, HTTPError
 
 from py42.exceptions import Py42InternalServerError
 from code42cli.errors import InvalidRuleTypeError
-from code42cli.cmds.alerts.rules.user_rule import add_user, remove_user, get_rules, show_rule
+from code42cli.cmds.alerts_mod.rules.user_rule import add_user, remove_user, get_rules, show_rule
 
 import logging
 

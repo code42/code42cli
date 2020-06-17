@@ -5,32 +5,45 @@ from c42eventextractor.common import convert_datetime_to_timestamp
 
 from code42cli.errors import DateArgumentError
 
+
 TIMESTAMP_REGEX = re.compile(u"(\d{4}-\d{2}-\d{2})\s*(.*)?")
 MAGIC_TIME_REGEX = re.compile(u"(\d+)([dhm])$")
+
+_FORMAT_VALUE_ERROR_MESSAGE = (
+    u"input must be a date/time string (e.g. 'yyyy-MM-dd', "
+    u"'yy-MM-dd HH:MM', 'yy-MM-dd HH:MM:SS'), or a short value in days, "
+    u"hours, or minutes (e.g. 30d, 24h, 15m)"
+)
 
 
 def verify_timestamp_order(min_timestamp, max_timestamp):
     if min_timestamp is None or max_timestamp is None:
         return
     if min_timestamp >= max_timestamp:
-        raise DateArgumentError(u"Begin date cannot be after end date")
+        raise DateArgumentError(option_name="begin", message="date cannot be after end date.")
 
 
-def parse_min_timestamp(ctx, begin_date_str):
+def parse_min_timestamp(begin_date_str):
     if begin_date_str is None:
         return
-    dt = _parse_timestamp(begin_date_str, _round_datetime_to_day_start)
+    try:
+        dt = _parse_timestamp(begin_date_str, _round_datetime_to_day_start)
+    except Exception:
+        raise DateArgumentError(option_name="begin", message=_FORMAT_VALUE_ERROR_MESSAGE)
     boundary_date = _round_datetime_to_day_start(datetime.utcnow() - timedelta(days=90))
     if dt < boundary_date:
-        raise DateArgumentError(u"'Begin date' must be within {0} days.".format(90))
+        raise DateArgumentError(option_name="begin", message="must be within {0} days.".format(90))
 
     return convert_datetime_to_timestamp(dt)
 
 
-def parse_max_timestamp(ctx, end_date_str):
+def parse_max_timestamp(end_date_str):
     if end_date_str is None:
         return
-    dt = _parse_timestamp(end_date_str, _round_datetime_to_day_end)
+    try:
+        dt = _parse_timestamp(end_date_str, _round_datetime_to_day_end)
+    except Exception:
+        raise DateArgumentError(option_name="end", message=_FORMAT_VALUE_ERROR_MESSAGE)
     return convert_datetime_to_timestamp(dt)
 
 
@@ -51,7 +64,7 @@ def _parse_timestamp(date_str, rounding_func):
             dt = rounding_func(dt)
 
     else:
-        raise DateArgumentError()
+        raise
     return dt
 
 

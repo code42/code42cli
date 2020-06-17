@@ -1,6 +1,6 @@
 from code42cli.args import ArgConfig
 from code42cli.commands import Command, SubcommandLoader
-from code42cli.cmds.alerts.extraction import extract
+from code42cli.cmds.alerts_mod.extraction import extract
 from code42cli.cmds.search_shared import args, logger_factory
 from code42cli.cmds.search_shared.enums import (
     AlertFilterArguments,
@@ -19,12 +19,12 @@ class MainAlertsSubcommandLoader(SubcommandLoader):
     CLEAR_CHECKPOINT = u"clear-checkpoint"
 
     def load_commands(self):
-        """Sets up the `alerts` subcommand with all of its subcommands."""
-        usage_prefix = u"code42 alerts"
+        """Sets up the `alerts_mod` subcommand with all of its subcommands."""
+        usage_prefix = u"code42 alerts_mod"
 
         print_func = Command(
             self.PRINT,
-            u"Print alerts to stdout",
+            u"Print alerts_mod to stdout",
             u"{} {}".format(usage_prefix, u"print <optional-args>"),
             handler=print_out,
             arg_customizer=_load_search_args,
@@ -33,7 +33,7 @@ class MainAlertsSubcommandLoader(SubcommandLoader):
 
         write = Command(
             self.WRITE_TO,
-            u"Write alerts to the file with the given name.",
+            u"Write alerts_mod to the file with the given name.",
             u"{} {}".format(usage_prefix, u"write-to <filename> <optional-args>"),
             handler=write_to,
             arg_customizer=_load_write_to_args,
@@ -42,7 +42,7 @@ class MainAlertsSubcommandLoader(SubcommandLoader):
 
         send = Command(
             self.SEND_TO,
-            u"Send alerts to the given server address.",
+            u"Send alerts_mod to the given server address.",
             u"{} {}".format(usage_prefix, u"send-to <server-address> <optional-args>"),
             handler=send_to,
             arg_customizer=_load_send_to_args,
@@ -61,20 +61,20 @@ class MainAlertsSubcommandLoader(SubcommandLoader):
 
 def clear_checkpoint(sdk, profile):
     """Removes the stored checkpoint that keeps track of the last alert retrieved for the given profile..
-        To use, run `code42 alerts clear-checkpoint`.
+        To use, run `code42 alerts_mod clear-checkpoint`.
         This affects `incremental` mode by causing it to behave like it has never been run before.
     """
     AlertCursorStore(profile.name).replace_stored_cursor_timestamp(None)
 
 
 def print_out(sdk, profile, args):
-    """Activates 'print' command. It gets alerts and prints them to stdout."""
+    """Activates 'print' command. It gets alerts_mod and prints them to stdout."""
     logger = logger_factory.get_logger_for_stdout(args.format)
     extract(sdk, profile, logger, args)
 
 
 def write_to(sdk, profile, args):
-    """Activates 'write-to' command. It gets alerts and writes them to the given file."""
+    """Activates 'write-to' command. It gets alerts_mod and writes them to the given file."""
     logger = logger_factory.get_logger_for_file(args.output_file, args.format)
     extract(sdk, profile, logger, args)
 
@@ -112,68 +112,68 @@ def _load_search_args(arg_collection):
         AlertFilterArguments.SEVERITY: ArgConfig(
             u"--{}".format(AlertFilterArguments.SEVERITY),
             nargs=u"+",
-            help=u"Filter alerts by severity. Defaults to returning all severities. Available choices={0}.".format(
+            help=u"Filter alerts_mod by severity. Defaults to returning all severities. Available choices={0}.".format(
                 list(AlertSeverity())
             ),
         ),
         AlertFilterArguments.STATE: ArgConfig(
             u"--{}".format(AlertFilterArguments.STATE),
-            help=u"Filter alerts by state. Defaults to returning all states. Available choices={0}.".format(
+            help=u"Filter alerts_mod by state. Defaults to returning all states. Available choices={0}.".format(
                 list(AlertState())
             ),
         ),
         AlertFilterArguments.ACTOR: ArgConfig(
             u"--{}".format(AlertFilterArguments.ACTOR.replace("_", "-")),
             metavar=u"ACTOR",
-            help=u"Filter alerts by including the given actor(s) who triggered the alert. Args must match actor username exactly.",
+            help=u"Filter alerts_mod by including the given actor(s) who triggered the alert. Args must match actor username exactly.",
             nargs=u"+",
         ),
         AlertFilterArguments.ACTOR_CONTAINS: ArgConfig(
             u"--{}".format(AlertFilterArguments.ACTOR_CONTAINS.replace("_", "-")),
             metavar=u"ACTOR",
-            help=u"Filter alerts by including actor(s) whose username contains the given string.",
+            help=u"Filter alerts_mod by including actor(s) whose username contains the given string.",
             nargs=u"+",
         ),
         AlertFilterArguments.EXCLUDE_ACTOR: ArgConfig(
             u"--{}".format(AlertFilterArguments.EXCLUDE_ACTOR.replace("_", "-")),
             metavar=u"ACTOR",
-            help=u"Filter alerts by excluding the given actor(s) who triggered the alert. Args must match actor username exactly.",
+            help=u"Filter alerts_mod by excluding the given actor(s) who triggered the alert. Args must match actor username exactly.",
             nargs=u"+",
         ),
         AlertFilterArguments.EXCLUDE_ACTOR_CONTAINS: ArgConfig(
             u"--{}".format(AlertFilterArguments.EXCLUDE_ACTOR_CONTAINS.replace("_", "-")),
             metavar=u"ACTOR",
-            help=u"Filter alerts by excluding actor(s) whose username contains the given string.",
+            help=u"Filter alerts_mod by excluding actor(s) whose username contains the given string.",
             nargs=u"+",
         ),
         AlertFilterArguments.RULE_NAME: ArgConfig(
             u"--{}".format(AlertFilterArguments.RULE_NAME.replace("_", "-")),
             metavar=u"RULE_NAME",
-            help=u"Filter alerts by including the given rule name(s).",
+            help=u"Filter alerts_mod by including the given rule name(s).",
             nargs=u"+",
         ),
         AlertFilterArguments.EXCLUDE_RULE_NAME: ArgConfig(
             u"--{}".format(AlertFilterArguments.EXCLUDE_RULE_NAME.replace("_", "-")),
             metavar=u"RULE_NAME",
-            help=u"Filter alerts by excluding the given rule name(s).",
+            help=u"Filter alerts_mod by excluding the given rule name(s).",
             nargs=u"+",
         ),
         AlertFilterArguments.RULE_ID: ArgConfig(
             u"--{}".format(AlertFilterArguments.RULE_ID.replace("_", "-")),
             metavar=u"RULE_ID",
-            help=u"Filter alerts by including the given rule id(s).",
+            help=u"Filter alerts_mod by including the given rule id(s).",
             nargs=u"+",
         ),
         AlertFilterArguments.EXCLUDE_RULE_ID: ArgConfig(
             u"--{}".format(AlertFilterArguments.EXCLUDE_RULE_ID.replace("_", "-")),
             metavar=u"RULE_ID",
-            help=u"Filter alerts by excluding the given rule id(s).",
+            help=u"Filter alerts_mod by excluding the given rule id(s).",
             nargs=u"+",
         ),
         AlertFilterArguments.RULE_TYPE: ArgConfig(
             u"--{}".format(AlertFilterArguments.RULE_TYPE.replace("_", "-")),
             metavar=u"RULE_TYPE",
-            help=u"Filter alerts by including the given rule type(s). Available choices={0}.".format(
+            help=u"Filter alerts_mod by including the given rule type(s). Available choices={0}.".format(
                 list(RuleType())
             ),
             nargs=u"+",
@@ -181,15 +181,15 @@ def _load_search_args(arg_collection):
         AlertFilterArguments.EXCLUDE_RULE_TYPE: ArgConfig(
             u"--{}".format(AlertFilterArguments.EXCLUDE_RULE_TYPE.replace("_", "-")),
             metavar=u"RULE_TYPE",
-            help=u"Filter alerts by excluding the given rule type(s). Available choices={0}.".format(
+            help=u"Filter alerts_mod by excluding the given rule type(s). Available choices={0}.".format(
                 list(RuleType())
             ),
             nargs=u"+",
         ),
         AlertFilterArguments.DESCRIPTION: ArgConfig(
             u"--{}".format(AlertFilterArguments.DESCRIPTION),
-            help=u"Filter alerts by description. Does fuzzy search by default.",
+            help=u"Filter alerts_mod by description. Does fuzzy search by default.",
         ),
     }
-    search_args = args.create_search_args(search_for=u"alerts", filter_args=filter_args)
+    search_args = args.create_search_args(search_for=u"alerts_mod", filter_args=filter_args)
     arg_collection.extend(search_args)

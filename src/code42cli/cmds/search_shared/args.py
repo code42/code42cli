@@ -6,7 +6,7 @@ def create_search_args(search_for, filter_args):
     advanced_query_incompatible_args = create_advanced_query_incompatible_search_args(search_for)
     filter_args.update(advanced_query_incompatible_args)
 
-    format_enum = AlertOutputFormat() if search_for == "alerts" else OutputFormat()
+    format_enum = AlertOutputFormat() if search_for == "alerts_mod" else OutputFormat()
 
     advanced_query_compatible_args = {
         SearchArguments.ADVANCED_QUERY: ArgConfig(

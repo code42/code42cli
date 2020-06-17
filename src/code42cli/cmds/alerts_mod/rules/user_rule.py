@@ -9,7 +9,7 @@ from code42cli.util import format_to_table, find_format_width, get_user_id
 from code42cli.bulk import run_bulk_process
 from code42cli.file_readers import create_csv_reader
 from code42cli.logger import get_main_cli_logger
-from code42cli.cmds.alerts.rules.enums import AlertRuleTypes
+from code42cli.cmds.alerts_mod.rules.enums import AlertRuleTypes
 
 
 _HEADER_KEYS_MAP = OrderedDict()

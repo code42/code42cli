@@ -9,6 +9,6 @@ def get_alert_details(sdk, alert_summary_list):
     results = []
     for batch in batches:
         r = sdk.alerts.get_details(batch)
-        results.extend(r[u"alerts"])
+        results.extend(r[u"alerts_mod"])
     results = sorted(results, key=lambda x: x[u"createdAt"], reverse=True)
     return results
