@@ -1,10 +1,11 @@
 import py42.sdk
-import py42.settings.debug as debug
 import py42.settings
 
 from code42cli.logger import get_main_cli_logger
 
 py42.settings.items_per_page = 500
+debug = py42.settings.debug
+
 
 def create_sdk(profile, is_debug_mode):
     if is_debug_mode:
