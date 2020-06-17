@@ -53,7 +53,9 @@ def create_search_options(search_term):
             search_term
         ),
     )
-    incremental_option = click.option("-i", "--incremental", is_flag=True)
+    incremental_option = click.option(
+        "-i", "--incremental", is_flag=True, cls=AdvancedQueryIncompatible
+    )
 
     def search_options(f):
         f = begin_option(f)
