@@ -1,12 +1,21 @@
 import click
 
-from code42cli.sdk_client import sdk_options
+from code42cli.options import global_options, incompatible_with
 from code42cli.cmds.search_shared import logger_factory, args
-from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp
 from py42.sdk.queries.fileevents.filters import *
 from c42eventextractor.extractors import FileEventExtractor
 
-from code42cli.cmds.search_shared.enums import ExposureType as ExposureTypeOptions
+from code42cli.cmds.search_shared.options import (
+    create_search_options,
+    AdvancedQueryIncompatible,
+    is_in_filter,
+    exists_filter,
+)
+from code42cli.cmds.search_shared.enums import (
+    OutputFormat,
+    ServerProtocol,
+    ExposureType as ExposureTypeOptions,
+)
 from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore
 from code42cli.cmds.search_shared.extraction import (
     verify_begin_date_requirements,
@@ -18,135 +27,199 @@ from code42cli.logger import get_main_cli_logger
 
 logger = get_main_cli_logger()
 
+search_options = create_search_options("file events")
 
-@click.group()
-@sdk_options
-def security_data(sdk):
-    pass
-
-
-def is_in_filter(filter_cls):
-    def f(ctx, arg):
-        if arg:
-            ctx.obj.search_filters.append(filter_cls.is_in(arg))
-        return arg
-
-    return f
-
-
-def exists_filter(filter_cls):
-    def f(ctx, arg):
-        if arg:
-            ctx.obj.search_filters.append(filter_cls.exists())
-            return arg
-
-    return f
-
-
-def incompatible_with(incompatible_opts):
-    """Returns a custom click.Option subclass that is incompatible with the option names 
-    provided.
-    """
-    if isinstance(incompatible_opts, str):
-        incompatible_opts = [incompatible_opts]
-
-    class IncompatibleOption(click.Option):
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-
-        def handle_parse_result(self, ctx, opts, args):
-            found_incompatible = ", ".join(
-                ["--{}".format(opt) for opt in opts if opt in incompatible_opts]
-            )
-            if self.name in opts and found_incompatible:
-                raise click.BadOptionUsage(
-                    option_name="incompatible_opt",
-                    message="Cannot use option '--{}' with: {}".format(
-                        self.name, found_incompatible
-                    ),
-                )
-            return super().handle_parse_result(ctx, opts, args)
-
-    return IncompatibleOption
-
-
-AdvancedQueryIncompatible = incompatible_with("advanced_query")
-
-
-@security_data.command("print")
-@sdk_options
-@click.option(
+format_option = click.option(
     "-f",
     "--format",
-    type=click.Choice(["JSON", "RAW-JSON", "CEF"]),
-    default="JSON",
-    callback=lambda ctx, value: logger_factory.get_logger_for_stdout(value),
+    type=click.Choice(OutputFormat()),
+    default=OutputFormat.JSON,
+    help="The format used for outputting file events.",
 )
-@click.option("-b", "--begin", callback=parse_min_timestamp, cls=AdvancedQueryIncompatible)
-@click.option("-e", "--end", callback=parse_max_timestamp, cls=AdvancedQueryIncompatible)
-@click.option("-i", "--incremental", is_flag=True)
-@click.option("--advanced-query")
-@click.option(
+exposure_type_option = click.option(
     "-t",
     "--type",
     multiple=True,
     type=click.Choice(list(ExposureTypeOptions())),
     cls=AdvancedQueryIncompatible,
     callback=is_in_filter(ExposureType),
+    help="Limits events to those with given exposure types.",
 )
-@click.option(
+username_option = click.option(
     "--c42-username",
     multiple=True,
     callback=is_in_filter(DeviceUsername),
     cls=AdvancedQueryIncompatible,
+    help="Limits events to endpoint events for these users.",
 )
-@click.option("--actor", multiple=True, callback=is_in_filter(Actor), cls=AdvancedQueryIncompatible)
-@click.option("--md5", multiple=True, callback=is_in_filter(MD5), cls=AdvancedQueryIncompatible)
-@click.option(
-    "--sha256", multiple=True, callback=is_in_filter(SHA256), cls=AdvancedQueryIncompatible
+actor_option = click.option(
+    "--actor",
+    multiple=True,
+    callback=is_in_filter(Actor),
+    cls=AdvancedQueryIncompatible,
+    help="Limits events to only those enacted by the cloud service user of the person who caused the event.",
 )
-@click.option(
-    "--source", multiple=True, callback=is_in_filter(Source), cls=AdvancedQueryIncompatible
+md5_option = click.option(
+    "--md5",
+    multiple=True,
+    callback=is_in_filter(MD5),
+    cls=AdvancedQueryIncompatible,
+    help="Limits events to file events where the file has one of these MD5 hashes.",
 )
-@click.option(
-    "--file-name", multiple=True, callback=is_in_filter(FileName), cls=AdvancedQueryIncompatible
+sha256_option = click.option(
+    "--sha256",
+    multiple=True,
+    callback=is_in_filter(SHA256),
+    cls=AdvancedQueryIncompatible,
+    help="Limits events to file events where the file has one of these SHA256 hashes.",
 )
-@click.option(
-    "--file-path", multiple=True, callback=is_in_filter(FilePath), cls=AdvancedQueryIncompatible
+source_option = click.option(
+    "--source",
+    multiple=True,
+    callback=is_in_filter(Source),
+    cls=AdvancedQueryIncompatible,
+    help="Limits events to only those from one of these sources. Example=Gmail.",
 )
-@click.option(
+file_name_option = click.option(
+    "--file-name",
+    multiple=True,
+    callback=is_in_filter(FileName),
+    cls=AdvancedQueryIncompatible,
+    help="Limits events to file events where the file has one of these names.",
+)
+file_path_option = click.option(
+    "--file-path",
+    multiple=True,
+    callback=is_in_filter(FilePath),
+    cls=AdvancedQueryIncompatible,
+    help="Limits events to file events where the file is located at one of these paths.",
+)
+process_owner_option = click.option(
     "--process-owner",
     multiple=True,
     callback=is_in_filter(ProcessOwner),
     cls=AdvancedQueryIncompatible,
+    help="Limits events to exposure events where one of these users owns the process behind the exposure.",
 )
-@click.option(
-    "--tab-url", multiple=True, callback=is_in_filter(TabURL), cls=AdvancedQueryIncompatible
+tab_url_option = click.option(
+    "--tab-url",
+    multiple=True,
+    callback=is_in_filter(TabURL),
+    cls=AdvancedQueryIncompatible,
+    help="Limits events to be exposure events with one of these destination tab URLs.",
 )
-@click.option(
+include_non_exposure_option = click.option(
     "--include-non-exposure",
     is_flag=True,
     callback=exists_filter(ExposureType),
     cls=incompatible_with(["advanced_query", "type"]),
+    help="Get all events including non-exposure events.",
 )
-def _print(sdk, begin, end, format, advanced_query, incremental, **kwargs):
+
+
+def file_event_options(f):
+    f = exposure_type_option(f)
+    f = actor_option(f)
+    f = md5_option(f)
+    f = sha256_option(f)
+    f = source_option(f)
+    f = file_name_option(f)
+    f = file_path_option(f)
+    f = process_owner_option(f)
+    f = tab_url_option(f)
+    f = include_non_exposure_option(f)
+    f = format_option(f)
+    return f
+
+
+@click.group()
+@global_options
+def security_data(sdk):
+    pass
+
+
+@security_data.command()
+@global_options
+def clear_checkpoint(sdk):
+    FileEventCursorStore(sdk.profile.name).replace_stored_cursor_timestamp(None)
+
+
+@security_data.command("print")
+@file_event_options
+@search_options
+@global_options
+def _print(state, format, begin, end, advanced_query, incremental, **kwargs):
     """Print file events to stdout."""
-    store = FileEventCursorStore(sdk.profile.name) if incremental else None
-    handlers = create_handlers(sdk, FileEventExtractor, format, store)
+    output_logger = logger_factory.get_logger_for_stdout(format)
+    _extract(
+        state.sdk,
+        state.profile,
+        state.search_filters,
+        begin,
+        end,
+        advanced_query,
+        incremental,
+        output_logger,
+    )
+
+
+@security_data.command()
+@click.argument("output_file", type=click.Path(dir_okay=False, resolve_path=True, writable=True))
+@file_event_options
+@search_options
+@global_options
+def write_to(state, format, output_file, begin, end, advanced_query, incremental, **kwargs):
+    """Write file events to the file with the given name."""
+    output_logger = logger_factory.get_logger_for_file(output_file, format)
+    _extract(
+        state.sdk,
+        state.profile,
+        state.search_filters,
+        begin,
+        end,
+        advanced_query,
+        incremental,
+        output_logger,
+    )
+
+
+@security_data.command()
+@click.argument("hostname")
+@click.option(
+    "-p",
+    "--protocol",
+    type=click.Choice(ServerProtocol()),
+    default=ServerProtocol.UDP,
+    help="Protocol used to send logs to server.",
+)
+@file_event_options
+@search_options
+@global_options
+def send_to(state, format, hostname, protocol, begin, end, advanced_query, incremental, **kwargs):
+    """Send file events to the given server address."""
+    output_logger = logger_factory.get_logger_for_server(hostname, protocol, format)
+    _extract(
+        state.sdk,
+        state.profile,
+        state.search_filters,
+        begin,
+        end,
+        advanced_query,
+        incremental,
+        output_logger,
+    )
+
+
+def _extract(sdk, profile, filter_list, begin, end, advanced_query, incremental, output_logger):
+    store = FileEventCursorStore(profile.name) if incremental else None
+    handlers = create_handlers(sdk, FileEventExtractor, output_logger, store)
     extractor = FileEventExtractor(sdk, handlers)
     if advanced_query:
         extractor.extract_advanced(advanced_query)
     else:
         verify_begin_date_requirements(begin, incremental, store)
         if begin or end:
-            sdk.search_filters.append(create_time_range_filter(EventTimestamp, begin, end))
-    print([str(f) for f in sdk.search_filters])
-    extractor.extract(*sdk.search_filters)
+            filter_list.append(create_time_range_filter(EventTimestamp, begin, end))
+    extractor.extract(*filter_list)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         logger.print_info(u"No results found.")
-
-
-@security_data.command()
-@sdk_options
-def clear_checkpoint(sdk):
-    FileEventCursorStore(sdk.profile.name).replace_stored_cursor_timestamp(None)

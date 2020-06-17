@@ -21,7 +21,7 @@ from code42cli.util import (
 from code42cli.bulk import run_bulk_process
 from code42cli.file_readers import read_csv
 from code42cli.logger import get_main_cli_logger
-from code42cli.sdk_client import sdk_options
+from code42cli.options import global_options
 from code42cli.bulk import write_template_file
 
 _MATTER_KEYS_MAP = OrderedDict()
@@ -35,7 +35,7 @@ logger = get_main_cli_logger()
 
 
 @click.group()
-@sdk_options
+@global_options
 @click.pass_context
 def legal_hold(ctx, sdk):
     pass
@@ -60,7 +60,7 @@ user_id_option = click.option(
 @legal_hold.command()
 @matter_id_option
 @user_id_option
-@sdk_options
+@global_options
 def add_user(sdk, matter_id, username):
     """Add a user to a legal hold matter."""
     _add_user_to_legal_hold(sdk, matter_id, username)
@@ -69,14 +69,14 @@ def add_user(sdk, matter_id, username):
 @legal_hold.command()
 @matter_id_option
 @user_id_option
-@sdk_options
+@global_options
 def remove_user(sdk, matter_id, username):
     """Remove a user from a legal hold matter."""
     _remove_user_from_legal_hold(sdk, matter_id, username)
 
 
 @legal_hold.command()
-@sdk_options
+@global_options
 def list(sdk):
     """Fetch existing legal hold matters."""
     matters = _get_all_active_matters(sdk)
@@ -89,7 +89,7 @@ def list(sdk):
 @click.argument("matter-id")
 @click.option("--include-inactive", is_flag=True)
 @click.option("--include-policy", is_flag=True)
-@sdk_options
+@global_options
 def show(sdk, matter_id, include_inactive=False, include_policy=False):
     matter = _check_matter_is_accessible(sdk, matter_id)
     matter["creator_username"] = matter["creator"]["username"]
@@ -126,7 +126,7 @@ def show(sdk, matter_id, include_inactive=False, include_policy=False):
 
 
 @legal_hold.group()
-@sdk_options
+@global_options
 def bulk(sdk):
     """Tools for executing bulk commands."""
     pass
@@ -147,7 +147,7 @@ def generate_template(cmd, path):
 
 @bulk.command()
 @click.argument("path", type=click.File(mode="r"))
-@sdk_options
+@global_options
 def add_user(sdk, path):
     """Bulk add users to legal hold matters from a csv file. CSV file format: username,matter_id"""
     rows = read_csv(path)
@@ -157,7 +157,7 @@ def add_user(sdk, path):
 
 @bulk.command()
 @click.argument("path", type=click.File(mode="r"))
-@sdk_options
+@global_options
 def remove_user(sdk, path):
     """Bulk remove users from legal hold matters from a csv file. CSV file format: username,matter_id"""
     rows = read_csv(path)

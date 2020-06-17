@@ -1,11 +1,8 @@
-import click
-
 import py42.sdk
 import py42.settings.debug as debug
 import py42.settings
 
 from code42cli.logger import get_main_cli_logger
-from code42cli.profile import get_profile
 
 py42.settings.items_per_page = 500
 
@@ -31,40 +28,3 @@ def validate_connection(authority_url, username, password):
         return True
     except:
         return False
-
-
-class CLIContext(object):
-    def __init__(self):
-        self.profile = get_profile()
-        self.debug = False
-        self._sdk = None
-        self.search_filters = []
-
-    def __getattr__(self, item):
-        if self._sdk is None:
-            self._sdk = create_sdk(self.profile, self.debug)
-        return getattr(self._sdk, item)
-
-
-def set_profile(ctx, value):
-    if not value:
-        return
-    ctx.ensure_object(CLIContext).profile = get_profile(value)
-
-
-def set_debug(ctx, value):
-    if not value:
-        return
-    ctx.ensure_object(CLIContext).debug = value
-
-
-profile_option = click.option("--profile", expose_value=False, callback=set_profile)
-debug_option = click.option("-d", "--debug", is_flag=True, expose_value=False, callback=set_debug)
-pass_sdk = click.make_pass_decorator(CLIContext, ensure=True)
-
-
-def sdk_options(f):
-    f = profile_option(f)
-    f = debug_option(f)
-    f = pass_sdk(f)
-    return f

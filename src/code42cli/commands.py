@@ -1,10 +1,10 @@
 import click
 
-from code42cli.sdk_client import sdk_options
+from code42cli.options import global_options
 
 
 @click.group()
-@sdk_options
+@global_options
 @click.pass_context
 def cli(ctx, sdk):
     ctx.max_content_width = 200

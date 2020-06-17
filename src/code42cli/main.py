@@ -16,11 +16,8 @@ from code42cli.cmds.legal_hold import legal_hold as legal_hold_command
 from code42cli.cmds.profile import profile as profile_command
 from code42cli.cmds.securitydata import security_data as sec_data_command
 from code42cli.commands import cli
-from code42cli.invoker import CommandInvoker
 from code42cli.util import flush_stds_out_err_without_printing_error
 
-
-import click
 
 # Handle KeyboardInterrupts by just exiting instead of printing out a stack
 def exit_on_interrupt(signal, frame):
