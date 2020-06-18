@@ -36,8 +36,7 @@ logger = get_main_cli_logger()
 
 @click.group()
 @global_options
-@click.pass_context
-def legal_hold(ctx, sdk):
+def legal_hold(state):
     pass
 
 
@@ -61,25 +60,25 @@ user_id_option = click.option(
 @matter_id_option
 @user_id_option
 @global_options
-def add_user(sdk, matter_id, username):
+def add_user(state, matter_id, username):
     """Add a user to a legal hold matter."""
-    _add_user_to_legal_hold(sdk, matter_id, username)
+    _add_user_to_legal_hold(state.sdk, matter_id, username)
 
 
 @legal_hold.command()
 @matter_id_option
 @user_id_option
 @global_options
-def remove_user(sdk, matter_id, username):
+def remove_user(state, matter_id, username):
     """Remove a user from a legal hold matter."""
-    _remove_user_from_legal_hold(sdk, matter_id, username)
+    _remove_user_from_legal_hold(state.sdk, matter_id, username)
 
 
 @legal_hold.command()
 @global_options
-def list(sdk):
+def list(state):
     """Fetch existing legal hold matters."""
-    matters = _get_all_active_matters(sdk)
+    matters = _get_all_active_matters(state.sdk)
     if matters:
         rows, column_size = find_format_width(matters, _MATTER_KEYS_MAP)
         format_to_table(rows, column_size)
@@ -90,14 +89,14 @@ def list(sdk):
 @click.option("--include-inactive", is_flag=True)
 @click.option("--include-policy", is_flag=True)
 @global_options
-def show(sdk, matter_id, include_inactive=False, include_policy=False):
-    matter = _check_matter_is_accessible(sdk, matter_id)
+def show(state, matter_id, include_inactive=False, include_policy=False):
+    matter = _check_matter_is_accessible(state.sdk, matter_id)
     matter["creator_username"] = matter["creator"]["username"]
 
     # if `active` is None then all matters (whether active or inactive) are returned. True returns
     # only those that are active.
     active = None if include_inactive else True
-    memberships = _get_legal_hold_memberships_for_matter(sdk, matter_id, active=active)
+    memberships = _get_legal_hold_memberships_for_matter(state.sdk, matter_id, active=active)
     active_usernames = [member["user"]["username"] for member in memberships if member["active"]]
     inactive_usernames = [
         member["user"]["username"] for member in memberships if not member["active"]
@@ -121,13 +120,13 @@ def show(sdk, matter_id, include_inactive=False, include_policy=False):
             print("No inactive matter members.\n")
 
     if include_policy:
-        _get_and_print_preservation_policy(sdk, matter["holdPolicyUid"])
+        _get_and_print_preservation_policy(state.sdk, matter["holdPolicyUid"])
         print("")
 
 
 @legal_hold.group()
 @global_options
-def bulk(sdk):
+def bulk(state):
     """Tools for executing bulk commands."""
     pass
 
@@ -148,20 +147,24 @@ def generate_template(cmd, path):
 @bulk.command()
 @click.argument("path", type=click.File(mode="r"))
 @global_options
-def add_user(sdk, path):
+def add_user(state, path):
     """Bulk add users to legal hold matters from a csv file. CSV file format: username,matter_id"""
     rows = read_csv(path)
-    row_handler = lambda matter_id, username: _add_user_to_legal_hold(sdk, matter_id, username)
+    row_handler = lambda matter_id, username: _add_user_to_legal_hold(
+        state.sdk, matter_id, username
+    )
     run_bulk_process(row_handler, rows)
 
 
 @bulk.command()
 @click.argument("path", type=click.File(mode="r"))
 @global_options
-def remove_user(sdk, path):
+def remove_user(state, path):
     """Bulk remove users from legal hold matters from a csv file. CSV file format: username,matter_id"""
     rows = read_csv(path)
-    row_handler = lambda matter_id, username: _remove_user_from_legal_hold(sdk, matter_id, username)
+    row_handler = lambda matter_id, username: _remove_user_from_legal_hold(
+        state.sdk, matter_id, username
+    )
     run_bulk_process(row_handler, rows)
 
 

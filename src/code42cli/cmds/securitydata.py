@@ -19,7 +19,6 @@ from code42cli.cmds.search_shared.enums import (
 )
 from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore
 from code42cli.cmds.search_shared.extraction import (
-    verify_begin_date_requirements,
     create_handlers,
     create_time_range_filter,
 )
@@ -211,9 +210,8 @@ def _extract(sdk, profile, filter_list, begin, end, advanced_query, incremental,
     if advanced_query:
         extractor.extract_advanced(advanced_query)
     else:
-        verify_begin_date_requirements(begin, incremental, store)
         if begin or end:
             filter_list.append(create_time_range_filter(EventTimestamp, begin, end))
-    extractor.extract(*filter_list)
+        extractor.extract(*filter_list)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         logger.print_info(u"No results found.")

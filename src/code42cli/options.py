@@ -59,8 +59,11 @@ def global_options(f):
 
 
 def incompatible_with(incompatible_opts):
-    """Returns a custom click.Option subclass that is incompatible with the option names 
-    provided.
+    """Helper function to build click.Options that are incompatible with other specific options 
+    on the same command.
+    
+    :param (str|list(str)) incompatible_opts
+    :returns click.Option
     """
     if isinstance(incompatible_opts, str):
         incompatible_opts = [incompatible_opts]

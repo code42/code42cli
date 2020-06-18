@@ -8,28 +8,8 @@ from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp, veri
 from code42cli.logger import get_main_cli_logger
 from code42cli.cmds.alerts_mod.util import get_alert_details
 from code42cli.util import warn_interrupt
-from code42cli.cmds.search_shared.args import create_advanced_query_incompatible_search_args
 
 logger = get_main_cli_logger()
-
-
-def begin_date_is_required(begin, incremental, cursor_store):
-    if not incremental:
-        return True
-    is_required = cursor_store and cursor_store.get_stored_cursor_timestamp() is None
-
-    # Ignore begin date when in incremental mode, it is not required, and it was passed an argument.
-    if not is_required and begin:
-        logger.print_and_log_info(
-            u"Ignoring --begin value as --incremental was passed and cursor checkpoint exists.\n"
-        )
-        begin = None
-    return is_required
-
-
-def verify_begin_date_requirements(begin, incremental, cursor_store):
-    if begin_date_is_required(begin, incremental, cursor_store) and not begin:
-        raise errors.DateArgumentError(option_name="begin", message="date required.")
 
 
 def create_handlers(sdk, extractor_class, output_logger, cursor_store):
@@ -70,18 +50,6 @@ def create_handlers(sdk, extractor_class, output_logger, cursor_store):
 
     handlers.handle_response = handle_response
     return handlers
-
-
-def exit_if_advanced_query_used_with_other_search_args(args, search_arg_enum):
-    incompatible_search_args_dict = create_advanced_query_incompatible_search_args()
-    incompatible_search_args_list = list(incompatible_search_args_dict.keys())
-    invalid_args = incompatible_search_args_list + list(search_arg_enum)
-    for arg in invalid_args:
-        if args.__dict__[arg]:
-            logger.print_and_log_error(
-                u"You cannot use --advanced-query with additional search args."
-            )
-            exit(1)
 
 
 def create_time_range_filter(filter_cls, begin_date=None, end_date=None):

@@ -24,7 +24,6 @@ from code42cli.cmds.search_shared.enums import (
 )
 from code42cli.cmds.search_shared.cursor_store import AlertCursorStore
 from code42cli.cmds.search_shared.extraction import (
-    verify_begin_date_requirements,
     create_handlers,
     create_time_range_filter,
 )
