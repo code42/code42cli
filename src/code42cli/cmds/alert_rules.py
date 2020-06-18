@@ -12,10 +12,16 @@ from code42cli.util import format_to_table, find_format_width, get_user_id
 from code42cli.bulk import run_bulk_process
 from code42cli.file_readers import read_csv_arg
 from code42cli.logger import get_main_cli_logger
-from code42cli.cmds.alerts_mod.rules.enums import AlertRuleTypes
 from code42cli.options import global_options, OrderedGroup
 
 from code42cli.bulk import write_template_file, template_args
+
+
+class AlertRuleTypes(object):
+    EXFILTRATION = u"FED_ENDPOINT_EXFILTRATION"
+    CLOUD_SHARE = u"FED_CLOUD_SHARE_PERMISSIONS"
+    FILE_TYPE_MISMATCH = u"FED_FILE_TYPE_MISMATCH"
+
 
 _HEADER_KEYS_MAP = OrderedDict()
 _HEADER_KEYS_MAP[u"observerRuleId"] = u"RuleId"
@@ -62,9 +68,9 @@ def remove_user(state, rule_id, username):
     _remove_user(state.sdk, rule_id, username)
 
 
-@alert_rules.command()
+@alert_rules.command("list")
 @global_options
-def list(state):
+def _list(state):
     """Fetch existing alert rules."""
     selected_rules = _get_all_rules_metadata(state.sdk)
     if selected_rules:
@@ -147,7 +153,7 @@ def _add_user(sdk, rule_id, username):
         if rules:
             sdk.alerts.rules.add_user(rule_id, user_id)
     except Py42InternalServerError as e:
-        _check_if_system_rule(sdk, rules)
+        _check_if_system_rule(rules)
         raise
 
 
@@ -158,22 +164,22 @@ def _remove_user(sdk, rule_id, username):
         if rules:
             sdk.alerts.rules.remove_user(rule_id, user_id)
     except Py42InternalServerError as e:
-        _check_if_system_rule(sdk, rules)
+        _check_if_system_rule(rules)
         raise
 
 
 def _get_all_rules_metadata(sdk):
     rules_generator = sdk.alerts.rules.get_all()
     selected_rules = [rule for rules in rules_generator for rule in rules[u"ruleMetadata"]]
-    return _handle_rules_results(sdk, selected_rules)
+    return _handle_rules_results(selected_rules)
 
 
 def _get_rule_metadata(sdk, rule_id):
     rules = sdk.alerts.rules.get_by_observer_id(rule_id)[u"ruleMetadata"]
-    return _handle_rules_results(sdk, rules, rule_id)
+    return _handle_rules_results(rules, rule_id)
 
 
-def _handle_rules_results(sdk, rules, rule_id=None):
+def _handle_rules_results(rules, rule_id=None):
     id_msg = u"with RuleId {} ".format(rule_id) if rule_id else u""
     msg = u"No alert rules {0}found.".format(id_msg)
     if not rules:
@@ -181,6 +187,6 @@ def _handle_rules_results(sdk, rules, rule_id=None):
     return rules
 
 
-def _check_if_system_rule(sdk, rules):
+def _check_if_system_rule(rules):
     if rules and rules[0][u"isSystem"]:
         raise InvalidRuleTypeError(rules[0][u"observerRuleId"], rules[0][u"ruleSource"])

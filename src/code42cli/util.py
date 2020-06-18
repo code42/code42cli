@@ -8,7 +8,6 @@ from collections import OrderedDict
 from functools import wraps
 from signal import signal, getsignal, SIGINT
 
-from code42cli.compat import open, str
 from code42cli.errors import UserDoesNotExistError
 
 _PADDING_SIZE = 3

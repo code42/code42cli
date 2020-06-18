@@ -1,6 +1,5 @@
 import click
 
-from code42cli.compat import open, str
 from code42cli.worker import Worker
 from code42cli.logger import get_main_cli_logger
 from code42cli.progress_bar import ProgressBar

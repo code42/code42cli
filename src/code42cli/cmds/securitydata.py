@@ -57,7 +57,8 @@ actor_option = click.option(
     multiple=True,
     callback=is_in_filter(Actor),
     cls=AdvancedQueryIncompatible,
-    help="Limits events to only those enacted by the cloud service user of the person who caused the event.",
+    help="Limits events to only those enacted by the cloud service user "
+    "of the person who caused the event.",
 )
 md5_option = click.option(
     "--md5",
@@ -99,7 +100,8 @@ process_owner_option = click.option(
     multiple=True,
     callback=is_in_filter(ProcessOwner),
     cls=AdvancedQueryIncompatible,
-    help="Limits events to exposure events where one of these users owns the process behind the exposure.",
+    help="Limits events to exposure events where one of these users owns "
+    "the process behind the exposure.",
 )
 tab_url_option = click.option(
     "--tab-url",

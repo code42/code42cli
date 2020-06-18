@@ -21,7 +21,7 @@ from code42cli.util import (
 from code42cli.bulk import run_bulk_process
 from code42cli.file_readers import read_csv_arg
 from code42cli.logger import get_main_cli_logger
-from code42cli.options import global_options
+from code42cli.options import global_options, OrderedGroup
 from code42cli.bulk import write_template_file, template_args
 
 _MATTER_KEYS_MAP = OrderedDict()
@@ -34,7 +34,7 @@ _MATTER_KEYS_MAP["creationDate"] = "Creation Date"
 logger = get_main_cli_logger()
 
 
-@click.group()
+@click.group(cls=OrderedGroup)
 @global_options
 def legal_hold(state):
     pass
@@ -74,9 +74,9 @@ def remove_user(state, matter_id, username):
     _remove_user_from_legal_hold(state.sdk, matter_id, username)
 
 
-@legal_hold.command()
+@legal_hold.command("list")
 @global_options
-def list(state):
+def _list(state):
     """Fetch existing legal hold matters."""
     matters = _get_all_active_matters(state.sdk)
     if matters:
@@ -124,7 +124,7 @@ def show(state, matter_id, include_inactive=False, include_policy=False):
         print("")
 
 
-@legal_hold.group()
+@legal_hold.group(cls=OrderedGroup)
 @global_options
 def bulk(state):
     """Tools for executing bulk commands."""

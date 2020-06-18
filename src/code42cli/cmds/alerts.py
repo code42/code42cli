@@ -1,6 +1,6 @@
 import click
 
-from code42cli.options import global_options
+from code42cli.options import global_options, OrderedGroup
 from code42cli.cmds.search_shared import logger_factory
 from py42.sdk.queries.alerts.filters import *
 from c42eventextractor.extractors import AlertExtractor
@@ -159,7 +159,7 @@ def alert_options(f):
     return f
 
 
-@click.group()
+@click.group(cls=OrderedGroup)
 @global_options
 def alerts(state):
     """Tools for getting alert data."""

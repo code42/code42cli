@@ -3,7 +3,6 @@ from logging.handlers import RotatingFileHandler
 from threading import Lock
 import copy
 
-from code42cli.compat import str
 from code42cli.util import get_user_project_path, is_interactive, color_text_red
 
 # prevent loggers from printing stacks to stderr if a pipe is broken

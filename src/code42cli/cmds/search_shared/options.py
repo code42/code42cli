@@ -85,7 +85,8 @@ class BeginOption(AdvancedQueryIncompatible):
                 message="date is required for --incremental when no checkpoint exists yet.",
             )
         if not incremental_present and not begin_present:
-            raise DateArgumentError(option_name="begin", message="date is required.")
+            raise click.BadParameter(message="date is required.", param=self)
+            # raise DateArgumentError(option_name="begin", message="date is required.")
         return super().handle_parse_result(ctx, opts, args)
 
 

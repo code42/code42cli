@@ -3,7 +3,6 @@ import os
 from configparser import ConfigParser
 
 import code42cli.util as util
-from code42cli.compat import str
 from code42cli.logger import get_main_cli_logger
 
 
