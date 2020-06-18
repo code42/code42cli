@@ -2,10 +2,10 @@ from code42cli.cmds.detectionlists import (
     DetectionList,
     DetectionListHandlers,
     load_user_descriptions,
-    update_user,
     try_handle_user_already_added_error,
     DetectionListSubcommandLoader,
 )
+from code42cli.cmds.detectionlists_shared import update_user
 from code42cli.util import get_user_id
 from code42cli.cmds.detectionlists.enums import DetectionLists
 

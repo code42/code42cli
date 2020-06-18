@@ -5,6 +5,8 @@ from code42cli.cmds.detectionlists import (
     try_handle_user_already_added_error,
     DetectionList,
     DetectionListHandlers,
+)
+from code42cli.cmds.detectionlists_shared import (
     update_user,
     try_add_risk_tags,
     try_remove_risk_tags,

@@ -1,3 +1,4 @@
+import code42cli.cmds.detectionlists_shared
 from code42cli.bulk import BulkCommandType
 
 
@@ -32,8 +33,8 @@ class BulkHighRiskEmployee(BulkDetectionList):
         handler = super(BulkHighRiskEmployee, self).get_handler(handlers, cmd)
         if not handler:
             if cmd == self.type.ADD_RISK_TAG:
-                handler = handlers.add_risk_tags
+                handler = code42cli.cmds.detectionlists_shared.add_risk_tags
             elif cmd == self.type.REMOVE_RISK_TAG:
-                handler = handlers.remove_risk_tags
+                handler = code42cli.cmds.detectionlists_shared.remove_risk_tags
 
         return handler
