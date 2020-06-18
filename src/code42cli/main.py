@@ -6,10 +6,6 @@ from py42.settings import set_user_agent_suffix
 
 from code42cli import PRODUCT_NAME
 
-# from code42cli.cmds.detectionlists import departing_employee as de
-# from code42cli.cmds.detectionlists import high_risk_employee as hre
-# from code42cli.cmds.detectionlists.enums import DetectionLists
-# from code42cli.cmds.securitydata_mod import main as secmain
 
 from code42cli.commands import cli
 from code42cli.util import flush_stds_out_err_without_printing_error

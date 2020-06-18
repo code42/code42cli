@@ -12,6 +12,7 @@ from code42cli.logger import get_main_cli_logger
 
 @click.group()
 def profile():
+    """For managing Code42 settings."""
     pass
 
 
@@ -97,8 +98,8 @@ def _validate_connection(authority, username, password):
         exit(1)
 
 
-@profile.command()
-def list():
+@profile.command("list")
+def _list():
     """Show all existing stored profiles."""
     profiles = cliprofile.get_all_profiles()
     logger = get_main_cli_logger()
@@ -152,15 +153,3 @@ def delete_all():
 def _prompt_for_allow_password_set(profile_name):
     if does_user_agree(u"Would you like to set a password? (y/n): "):
         reset_pw(profile_name)
-
-
-@profile.group()
-def test():
-    pass
-
-
-@test.command()
-@click.pass_context
-def show(ctx):
-    print("i'm showing!")
-    print(ctx.obj)

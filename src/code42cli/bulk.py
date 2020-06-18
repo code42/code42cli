@@ -1,9 +1,8 @@
-import os, inspect
+import click
 
 from code42cli.compat import open, str
 from code42cli.worker import Worker
 from code42cli.logger import get_main_cli_logger
-from code42cli.args import SDK_ARG_NAME, PROFILE_ARG_NAME
 from code42cli.progress_bar import ProgressBar
 
 
@@ -18,33 +17,20 @@ class BulkCommandType(object):
         return iter([self.ADD, self.REMOVE])
 
 
-def generate_template(handler, path=None):
-    """Looks at the parameter names of `handler` and creates a file with the same column names. If 
-    `handler` only has one parameter that is not `sdk` or `profile`, it will create a blank file. 
-    This is useful for commands such as `remove` which only require a list of users.
-    """
-    path = path or os.path.join(os.getcwd(), u"{}.csv".format(str(handler.__name__)))
-    args = [
-        arg
-        for arg in inspect.getargspec(handler).args
-        if arg != SDK_ARG_NAME and arg != PROFILE_ARG_NAME
-    ]
-
-    if len(args) <= 1:
-        _logger.print_info(
-            u"A blank file was generated because there are no csv headers needed for this command. "
-            u"Simply enter one {} per line.".format(args[0])
-        )
-        # Set args to None so that we don't make a header out of the single arg.
-        args = None
-
-    _write_template_file(path, args)
-
-
 def write_template_file(path, columns=None):
     with open(path, u"w", encoding=u"utf8") as new_file:
         if columns:
             new_file.write(u",".join(columns))
+
+
+def template_args(f):
+    bulk_cmd = click.argument("cmd", type=click.Choice(BulkCommandType()))
+    template_path = click.argument(
+        "path", required=False, type=click.Path(dir_okay=False, resolve_path=True, writable=True)
+    )
+    f = template_path(f)
+    f = bulk_cmd(f)
+    return f
 
 
 def run_bulk_process(row_handler, rows):

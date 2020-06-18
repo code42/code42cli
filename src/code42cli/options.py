@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import click
 
 from code42cli.profile import get_profile
@@ -84,3 +85,17 @@ def incompatible_with(incompatible_opts):
             return super().handle_parse_result(ctx, opts, args)
 
     return IncompatibleOption
+
+
+class OrderedGroup(click.Group):
+    """A click.Group subclass that uses OrderedDict to store commands so help text lists them 
+    in the order they were defined/added to the group.
+    """
+
+    def __init__(self, name=None, commands=None, **attrs):
+        super(OrderedGroup, self).__init__(name, commands, **attrs)
+        #: the registered subcommands by their exported names.
+        self.commands = commands or OrderedDict()
+
+    def list_commands(self, ctx):
+        return self.commands

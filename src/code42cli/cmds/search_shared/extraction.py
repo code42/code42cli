@@ -52,7 +52,7 @@ def create_handlers(sdk, extractor_class, output_logger, cursor_store):
     def handle_response(response):
         response_dict = json.loads(response.text)
         events = response_dict.get(extractor._key)
-        if extractor._key == u"alerts_mod":
+        if extractor._key == u"alerts":
             try:
                 events = _get_alert_details(sdk, events)
             except Exception as ex:

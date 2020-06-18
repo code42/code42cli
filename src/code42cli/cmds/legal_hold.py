@@ -19,10 +19,10 @@ from code42cli.util import (
     get_user_id,
 )
 from code42cli.bulk import run_bulk_process
-from code42cli.file_readers import read_csv
+from code42cli.file_readers import read_csv_arg
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import global_options
-from code42cli.bulk import write_template_file
+from code42cli.bulk import write_template_file, template_args
 
 _MATTER_KEYS_MAP = OrderedDict()
 _MATTER_KEYS_MAP["legalHoldUid"] = "Matter ID"
@@ -132,12 +132,13 @@ def bulk(state):
 
 
 @bulk.command()
-@click.argument("cmd", type=click.Choice(["add", "remove"]))
-@click.argument(
-    "path", required=False, type=click.Path(dir_okay=False, resolve_path=True, writable=True)
-)
+@template_args
 def generate_template(cmd, path):
-    """Generate the necessary csv template needed for bulk adding/removing users."""
+    """\b
+    Generate the csv template needed for bulk adding/removing users.
+    
+    Optional PATH argument can be provided to write to a specific file path/name.
+    """
     if not path:
         filename = "legal_hold_bulk_{}_users.csv".format(cmd)
         path = os.path.join(os.getcwd(), filename)
@@ -146,29 +147,35 @@ def generate_template(cmd, path):
 
 path_arg = click.argument("path", type=click.File(mode="r"))
 
+LEGAL_HOLD_CSV_HEADERS = ["matter_id", "username"]
 
-@bulk.command()
-@path_arg
+
+@bulk.command(
+    help="Bulk add users to legal hold matters from a csv file. CSV file format: {}".format(
+        ",".join(LEGAL_HOLD_CSV_HEADERS)
+    )
+)
+@read_csv_arg(headers=LEGAL_HOLD_CSV_HEADERS)
 @global_options
-def add_user(state, path):
-    """Bulk add users to legal hold matters from a csv file. CSV file format: username,matter_id"""
-    rows = read_csv(path)
+def add_user(state, csv_rows):
     row_handler = lambda matter_id, username: _add_user_to_legal_hold(
         state.sdk, matter_id, username
     )
-    run_bulk_process(row_handler, rows)
+    run_bulk_process(row_handler, csv_rows)
 
 
-@bulk.command()
-@path_arg
+@bulk.command(
+    help="Bulk remove users from legal hold matters from a csv file. CSV file format: {}".format(
+        ",".join(LEGAL_HOLD_CSV_HEADERS)
+    )
+)
+@read_csv_arg(headers=LEGAL_HOLD_CSV_HEADERS)
 @global_options
-def remove_user(state, path):
-    """Bulk remove users from legal hold matters from a csv file. CSV file format: username,matter_id"""
-    rows = read_csv(path)
+def remove_user(state, csv_rows):
     row_handler = lambda matter_id, username: _remove_user_from_legal_hold(
         state.sdk, matter_id, username
     )
-    run_bulk_process(row_handler, rows)
+    run_bulk_process(row_handler, csv_rows)
 
 
 def _add_user_to_legal_hold(sdk, matter_id, username):

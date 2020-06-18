@@ -10,11 +10,12 @@ from py42.util import format_json
 from code42cli.errors import InvalidRuleTypeError
 from code42cli.util import format_to_table, find_format_width, get_user_id
 from code42cli.bulk import run_bulk_process
-from code42cli.file_readers import read_csv
+from code42cli.file_readers import read_csv_arg
 from code42cli.logger import get_main_cli_logger
 from code42cli.cmds.alerts_mod.rules.enums import AlertRuleTypes
-from code42cli.options import global_options
-from code42cli.bulk import write_template_file
+from code42cli.options import global_options, OrderedGroup
+
+from code42cli.bulk import write_template_file, template_args
 
 _HEADER_KEYS_MAP = OrderedDict()
 _HEADER_KEYS_MAP[u"observerRuleId"] = u"RuleId"
@@ -25,9 +26,10 @@ _HEADER_KEYS_MAP[u"ruleSource"] = u"Source"
 _HEADER_KEYS_MAP[u"isEnabled"] = u"Enabled"
 
 
-@click.group()
+@click.group(cls=OrderedGroup)
 @global_options
 def alert_rules(state):
+    """Manage alert rules."""
     pass
 
 
@@ -90,7 +92,7 @@ def show(state, rule_id):
         logger.print_info(format_json(rule_detail.text))
 
 
-@alert_rules.group()
+@alert_rules.group(cls=OrderedGroup)
 @global_options
 def bulk(state):
     """Tools for executing bulk commands."""
@@ -98,37 +100,44 @@ def bulk(state):
 
 
 @bulk.command()
-@click.argument("cmd", type=click.Choice(["add", "remove"]))
-@click.argument(
-    "path", required=False, type=click.Path(dir_okay=False, resolve_path=True, writable=True)
-)
+@template_args
 def generate_template(cmd, path):
-    """Generate the necessary csv template needed for bulk adding/removing users."""
+    """\b
+    Generate the csv template needed for bulk adding/removing users.
+    
+    Optional PATH argument can be provided to write to a specific file path/name.
+    """
     if not path:
         filename = "alert_rules_bulk_{}_users.csv".format(cmd)
         path = os.path.join(os.getcwd(), filename)
     write_template_file(path, columns=["rule_id", "username"])
 
 
-path_arg = click.argument("path", type=click.File(mode="r"))
+ALERT_RULES_CSV_HEADERS = ["rule_id", "username"]
 
 
-@bulk.command()
-@path_arg
+@bulk.command(
+    help="Bulk add users to alert rules from a csv file. CSV file format: {}".format(
+        ",".join(ALERT_RULES_CSV_HEADERS)
+    )
+)
+@read_csv_arg(headers=ALERT_RULES_CSV_HEADERS)
 @global_options
-def add_bulk_users(state, path):
-    rows = read_csv(path)
+def add(state, csv_rows):
     row_handler = lambda rule_id, username: _add_user(state.sdk, rule_id, username)
-    run_bulk_process(row_handler, rows)
+    run_bulk_process(row_handler, csv_rows)
 
 
-@bulk.command()
-@path_arg
+@bulk.command(
+    help="Bulk remove users from alert rules from a csv file. CSV file format: {}".format(
+        ",".join(ALERT_RULES_CSV_HEADERS)
+    )
+)
+@read_csv_arg(headers=ALERT_RULES_CSV_HEADERS)
 @global_options
-def remove_bulk_users(state, path):
-    rows = read_csv(path)
+def remove(state, csv_rows):
     row_handler = lambda rule_id, username: _remove_user(state.sdk, rule_id, username)
-    run_bulk_process(row_handler, rows)
+    run_bulk_process(row_handler, csv_rows)
 
 
 def _add_user(sdk, rule_id, username):

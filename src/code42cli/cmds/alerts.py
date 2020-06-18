@@ -162,12 +162,14 @@ def alert_options(f):
 @click.group()
 @global_options
 def alerts(state):
+    """Tools for getting alert data."""
     state.cursor = AlertCursorStore(state.profile.name)
 
 
 @alerts.command()
 @global_options
 def clear_checkpoint(state):
+    """"Remove the saved alert checkpoint from 'incremental' (-i) mode."""
     state.cursor.replace_stored_cursor_timestamp(None)
 
 
@@ -176,6 +178,7 @@ def clear_checkpoint(state):
 @search_options
 @global_options
 def _print(cli_state, format, begin, end, advanced_query, incremental, **kwargs):
+    """Print alerts to stdout."""
     output_logger = logger_factory.get_logger_for_stdout(format)
     _extract(
         cli_state.sdk,
@@ -195,6 +198,7 @@ def _print(cli_state, format, begin, end, advanced_query, incremental, **kwargs)
 @search_options
 @global_options
 def write_to(cli_state, format, output_file, begin, end, advanced_query, incremental, **kwargs):
+    """Write alerts to the file with the given name."""
     output_logger = logger_factory.get_logger_for_file(output_file, format)
     _extract(
         cli_state.sdk,
@@ -216,6 +220,7 @@ def write_to(cli_state, format, output_file, begin, end, advanced_query, increme
 def send_to(
     cli_state, format, hostname, protocol, begin, end, advanced_query, incremental, **kwargs
 ):
+    """Send alerts to the given server address."""
     output_logger = logger_factory.get_logger_for_server(hostname, protocol, format)
     _extract(
         cli_state.sdk,

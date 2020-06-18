@@ -1,9 +1,26 @@
 import csv
+import click
 
 from code42cli.errors import BadFileError
 
 
+def read_csv_arg(headers):
+    """Helper for defining arguments that read from a csv file. Automatically converts 
+    the file name provided on command line to a list of csv rows (passed to command 
+    function as `csv_rows` param).
+    """
+    return click.argument(
+        "csv_rows",
+        metavar="CSV_FILE",
+        type=click.File("r"),
+        callback=lambda ctx, arg: read_csv(arg, headers=headers),
+    )
+
+
 def read_csv(file, headers=None):
+    """Helper to read a csv file object into dict rows, automatically removing header row
+    if it exists.
+    """
     reader = csv.DictReader(file, fieldnames=headers)
     first_row = next(reader)
     # skip first row if it's the header

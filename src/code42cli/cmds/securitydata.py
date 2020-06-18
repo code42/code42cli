@@ -135,12 +135,14 @@ def file_event_options(f):
 @click.group()
 @global_options
 def security_data(state):
+    """Tools for getting security related data, such as file events."""
     state.cursor = FileEventCursorStore(state.profile.name)
 
 
 @security_data.command()
 @global_options
 def clear_checkpoint(state):
+    """Remove the saved file event checkpoint from 'incremental' (-i) mode."""
     state.cursor.replace_stored_cursor_timestamp(None)
 
 
