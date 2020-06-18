@@ -163,13 +163,13 @@ def alert_options(f):
 @click.group()
 @global_options
 def alerts(state):
-    pass
+    state.cursor = AlertCursorStore(state.profile.name)
 
 
 @alerts.command()
 @global_options
-def clear_checkpoint(sdk):
-    AlertCursorStore(sdk.profile.name).replace_stored_cursor_timestamp(None)
+def clear_checkpoint(state):
+    state.cursor.replace_stored_cursor_timestamp(None)
 
 
 @alerts.command("print")
@@ -237,10 +237,8 @@ def _extract(sdk, profile, filter_list, begin, end, advanced_query, incremental,
     if advanced_query:
         extractor.extract_advanced(advanced_query)
     else:
-        verify_begin_date_requirements(begin, incremental, store)
         if begin or end:
             filter_list.append(create_time_range_filter(DateObserved, begin, end))
-    print([str(f) for f in filter_list])
-    extractor.extract(*filter_list)
+        extractor.extract(*filter_list)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         logger.print_info(u"No results found.")

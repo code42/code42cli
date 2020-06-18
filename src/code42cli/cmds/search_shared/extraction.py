@@ -29,9 +29,7 @@ def begin_date_is_required(begin, incremental, cursor_store):
 
 def verify_begin_date_requirements(begin, incremental, cursor_store):
     if begin_date_is_required(begin, incremental, cursor_store) and not begin:
-        logger.print_and_log_error(u"'begin date' is required.\n")
-        logger.print_bold(u"Try using  '-b' or '--begin'. Use `-h` for more info.\n")
-        exit(1)
+        raise errors.DateArgumentError(option_name="begin", message="date required.")
 
 
 def create_handlers(sdk, extractor_class, output_logger, cursor_store):

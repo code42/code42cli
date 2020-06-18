@@ -1,9 +1,14 @@
+import sys
+
 import click
 
 from code42cli.options import incompatible_with
 from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp
 from code42cli.cmds.search_shared.enums import ServerProtocol
 from code42cli.errors import DateArgumentError
+from code42cli.logger import get_main_cli_logger
+
+logger = get_main_cli_logger()
 
 
 def is_in_filter(filter_cls):
@@ -56,12 +61,40 @@ def not_contains_filter(filter_cls):
 AdvancedQueryIncompatible = incompatible_with("advanced_query")
 
 
+class BeginOption(AdvancedQueryIncompatible):
+    """click.Option subclass that enforces correct --begin option usage."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def handle_parse_result(self, ctx, opts, args):
+        incremental_present = "incremental" in opts
+        begin_present = "begin" in opts
+        checkpoint_exists = (
+            ctx.obj.cursor and ctx.obj.cursor.get_stored_cursor_timestamp() is not None
+        )
+        if incremental_present and checkpoint_exists and begin_present:
+            opts.pop("begin")
+            print(
+                "Ignoring --begin value as --incremental was passed and checkpoint exists.\n",
+                file=sys.stderr,
+            )
+        if incremental_present and not checkpoint_exists and not begin_present:
+            raise DateArgumentError(
+                option_name="begin",
+                message="date is required for --incremental when no checkpoint exists yet.",
+            )
+        if not incremental_present and not begin_present:
+            raise DateArgumentError(option_name="begin", message="date is required.")
+        return super().handle_parse_result(ctx, opts, args)
+
+
 def create_search_options(search_term):
     begin_option = click.option(
         "-b",
         "--begin",
         callback=lambda ctx, arg: parse_min_timestamp(arg),
-        cls=AdvancedQueryIncompatible,
+        cls=BeginOption,
         help="The beginning of the date range in which to look for {}, can be a date/time in "
         "yyyy-MM-dd (UTC) or yyyy-MM-dd HH:MM:SS (UTC+24-hr time) format where the 'time' "
         "portion of the string can be partial (e.g. '2020-01-01 12' or '2020-01-01 01:15') "
