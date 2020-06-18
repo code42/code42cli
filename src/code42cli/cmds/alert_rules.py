@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import os
 
 import click
 
@@ -94,6 +95,19 @@ def show(state, rule_id):
 def bulk(state):
     """Tools for executing bulk commands."""
     pass
+
+
+@bulk.command()
+@click.argument("cmd", type=click.Choice(["add", "remove"]))
+@click.argument(
+    "path", required=False, type=click.Path(dir_okay=False, resolve_path=True, writable=True)
+)
+def generate_template(cmd, path):
+    """Generate the necessary csv template needed for bulk adding/removing users."""
+    if not path:
+        filename = "alert_rules_bulk_{}_users.csv".format(cmd)
+        path = os.path.join(os.getcwd(), filename)
+    write_template_file(path, columns=["rule_id", "username"])
 
 
 path_arg = click.argument("path", type=click.File(mode="r"))

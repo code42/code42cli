@@ -139,7 +139,7 @@ def bulk(state):
 def generate_template(cmd, path):
     """Generate the necessary csv template needed for bulk adding/removing users."""
     if not path:
-        filename = "legal_hold_{}_users.csv".format(cmd)
+        filename = "legal_hold_bulk_{}_users.csv".format(cmd)
         path = os.path.join(os.getcwd(), filename)
     write_template_file(path, columns=["matter_id", "username"])
 

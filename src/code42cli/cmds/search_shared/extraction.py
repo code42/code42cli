@@ -4,9 +4,8 @@ from c42eventextractor import ExtractionHandlers
 from py42.sdk.queries.query_filter import QueryFilterTimestampField
 
 import code42cli.errors as errors
-from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp, verify_timestamp_order
+from code42cli.date_helper import verify_timestamp_order
 from code42cli.logger import get_main_cli_logger
-from code42cli.cmds.alerts_mod.util import get_alert_details
 from code42cli.util import warn_interrupt
 
 logger = get_main_cli_logger()

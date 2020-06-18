@@ -135,13 +135,13 @@ def file_event_options(f):
 @click.group()
 @global_options
 def security_data(state):
-    pass
+    state.cursor = FileEventCursorStore(state.profile.name)
 
 
 @security_data.command()
 @global_options
-def clear_checkpoint(sdk):
-    FileEventCursorStore(sdk.profile.name).replace_stored_cursor_timestamp(None)
+def clear_checkpoint(state):
+    state.cursor.replace_stored_cursor_timestamp(None)
 
 
 @security_data.command("print")
