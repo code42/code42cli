@@ -11,6 +11,22 @@ from code42cli.util import warn_interrupt
 
 logger = get_main_cli_logger()
 
+_ALERT_DETAIL_BATCH_SIZE = 100
+
+
+def _get_alert_details(sdk, alert_summary_list):
+    alert_ids = [alert[u"id"] for alert in alert_summary_list]
+    batches = [
+        alert_ids[i : i + _ALERT_DETAIL_BATCH_SIZE]
+        for i in range(0, len(alert_ids), _ALERT_DETAIL_BATCH_SIZE)
+    ]
+    results = []
+    for batch in batches:
+        r = sdk.alerts.get_details(batch)
+        results.extend(r[u"alerts"])
+    results = sorted(results, key=lambda x: x[u"createdAt"], reverse=True)
+    return results
+
 
 def create_handlers(sdk, extractor_class, output_logger, cursor_store):
     extractor = extractor_class(sdk, ExtractionHandlers())
@@ -39,7 +55,7 @@ def create_handlers(sdk, extractor_class, output_logger, cursor_store):
         events = response_dict.get(extractor._key)
         if extractor._key == u"alerts_mod":
             try:
-                events = get_alert_details(sdk, events)
+                events = _get_alert_details(sdk, events)
             except Exception as ex:
                 handlers.handle_error(ex)
         handlers.TOTAL_EVENTS += len(events)

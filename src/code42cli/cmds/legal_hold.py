@@ -144,8 +144,11 @@ def generate_template(cmd, path):
     write_template_file(path, columns=["matter_id", "username"])
 
 
+path_arg = click.argument("path", type=click.File(mode="r"))
+
+
 @bulk.command()
-@click.argument("path", type=click.File(mode="r"))
+@path_arg
 @global_options
 def add_user(state, path):
     """Bulk add users to legal hold matters from a csv file. CSV file format: username,matter_id"""
@@ -157,7 +160,7 @@ def add_user(state, path):
 
 
 @bulk.command()
-@click.argument("path", type=click.File(mode="r"))
+@path_arg
 @global_options
 def remove_user(state, path):
     """Bulk remove users from legal hold matters from a csv file. CSV file format: username,matter_id"""
