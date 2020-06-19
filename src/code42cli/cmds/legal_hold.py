@@ -18,11 +18,10 @@ from code42cli.util import (
     format_string_list_to_columns,
     get_user_id,
 )
-from code42cli.bulk import run_bulk_process
 from code42cli.file_readers import read_csv_arg
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import global_options, OrderedGroup
-from code42cli.bulk import write_template_file, template_args
+from code42cli.bulk import run_bulk_process, template_args, write_template_file
 
 _MATTER_KEYS_MAP = OrderedDict()
 _MATTER_KEYS_MAP["legalHoldUid"] = "Matter ID"
@@ -131,6 +130,9 @@ def bulk(state):
     pass
 
 
+LEGAL_HOLD_CSV_HEADERS = ["matter_id", "username"]
+
+
 @bulk.command()
 @template_args
 def generate_template(cmd, path):
@@ -142,12 +144,7 @@ def generate_template(cmd, path):
     if not path:
         filename = "legal_hold_bulk_{}_users.csv".format(cmd)
         path = os.path.join(os.getcwd(), filename)
-    write_template_file(path, columns=["matter_id", "username"])
-
-
-path_arg = click.argument("path", type=click.File(mode="r"))
-
-LEGAL_HOLD_CSV_HEADERS = ["matter_id", "username"]
+    write_template_file(path, columns=LEGAL_HOLD_CSV_HEADERS)
 
 
 @bulk.command(

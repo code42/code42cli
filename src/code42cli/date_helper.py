@@ -4,8 +4,6 @@ import re
 import click
 from c42eventextractor.common import convert_datetime_to_timestamp
 
-from code42cli.errors import DateArgumentError
-
 
 TIMESTAMP_REGEX = re.compile(u"(\d{4}-\d{2}-\d{2})\s*(.*)?")
 MAGIC_TIME_REGEX = re.compile(u"(\d+)([dhm])$")
@@ -88,7 +86,7 @@ def _get_dt_from_magic_time_pair(num, period):
     elif period == "m":
         dt = datetime.utcnow() - timedelta(minutes=num)
     else:
-        raise DateArgumentError("Couldn't parse magic time string: {}{}".format(num, period))
+        raise click.ClickException("Couldn't parse magic time string: {}{}".format(num, period))
     return dt
 
 

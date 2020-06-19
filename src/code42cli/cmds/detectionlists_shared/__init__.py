@@ -7,7 +7,7 @@ from code42cli.util import get_user_id
 
 def update_user(sdk, user_id, cloud_alias=None, risk_tag=None, notes=None):
     """Updates a detection list user.
-    
+
     Args:
         sdk (py42.sdk.SDKClient): py42 sdk.
         user_id (str or unicode): The ID of the user to update. This is their `userUid` found from 

@@ -1,11 +1,8 @@
-import sys
-
 import click
 
 from code42cli.options import incompatible_with
 from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp
 from code42cli.cmds.search_shared.enums import ServerProtocol
-from code42cli.errors import DateArgumentError
 from code42cli.logger import get_main_cli_logger
 
 logger = get_main_cli_logger()
@@ -75,18 +72,16 @@ class BeginOption(AdvancedQueryIncompatible):
         )
         if incremental_present and checkpoint_exists and begin_present:
             opts.pop("begin")
-            print(
+            click.echo(
                 "Ignoring --begin value as --incremental was passed and checkpoint exists.\n",
-                file=sys.stderr,
+                err=True,
             )
         if incremental_present and not checkpoint_exists and not begin_present:
-            raise DateArgumentError(
-                option_name="begin",
-                message="date is required for --incremental when no checkpoint exists yet.",
+            raise click.UsageError(
+                message="--begin date is required for --incremental when no checkpoint exists yet.",
             )
         if not incremental_present and not begin_present:
-            raise click.BadParameter(message="date is required.", param=self)
-            # raise DateArgumentError(option_name="begin", message="date is required.")
+            raise click.UsageError(message="--begin date is required.")
         return super().handle_parse_result(ctx, opts, args)
 
 
