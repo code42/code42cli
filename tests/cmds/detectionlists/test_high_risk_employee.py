@@ -7,7 +7,7 @@ from code42cli.cmds.detectionlists.high_risk_employee import (
     HighRiskEmployeeSubcommandLoader,
 )
 
-from code42cli.cmds.detectionlists.enums import RiskTags
+from code42cli.cmds.detectionlists_shared.enums import RiskTags
 from ...conftest import TEST_ID
 
 from py42.exceptions import Py42BadRequestError

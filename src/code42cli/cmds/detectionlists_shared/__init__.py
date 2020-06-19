@@ -1,7 +1,7 @@
 from py42.exceptions import Py42BadRequestError
 
-from code42cli.cmds.detectionlists import RiskTags, handle_list_args
-from code42cli.errors import UnknownRiskTagError
+from code42cli.cmds.detectionlists import RiskTags
+from code42cli.errors import UnknownRiskTagError, UserAlreadyAddedError
 from code42cli.util import get_user_id
 
 
@@ -57,3 +57,21 @@ def remove_risk_tags(sdk, profile, username, tag):
     risk_tag = handle_list_args(tag)
     user_id = get_user_id(sdk, username)
     try_remove_risk_tags(sdk, user_id, risk_tag)
+
+
+def try_handle_user_already_added_error(bad_request_err, username_tried_adding, list_name):
+    if _error_is_user_already_added(bad_request_err.response.text):
+        raise UserAlreadyAddedError(username_tried_adding, list_name)
+    return False
+
+
+def _error_is_user_already_added(bad_request_error_text):
+    return u"User already on list" in bad_request_error_text
+
+
+def handle_list_args(list_arg):
+    """Converts str args to a list. Useful for `bulk` commands which don't use `argparse` but
+    instead pass in values from files, such as in the form "item1 item2"."""
+    if list_arg and not isinstance(list_arg, list):
+        return list_arg.split()
+    return list_arg

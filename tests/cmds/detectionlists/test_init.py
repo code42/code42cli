@@ -2,7 +2,6 @@ import pytest
 
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.detectionlists import (
-    try_handle_user_already_added_error,
     DetectionList,
     DetectionListHandlers,
 )
@@ -12,10 +11,11 @@ from code42cli.cmds.detectionlists_shared import (
     try_remove_risk_tags,
     add_risk_tags,
     remove_risk_tags,
+    try_handle_user_already_added_error,
 )
 from code42cli.errors import UserAlreadyAddedError, UnknownRiskTagError, UserDoesNotExistError
 from code42cli.bulk import BulkCommandType
-from code42cli.cmds.detectionlists.enums import RiskTags
+from code42cli.cmds.detectionlists_shared.enums import RiskTags
 from code42cli.cmds.detectionlists.bulk import HighRiskBulkCommandType
 from ...conftest import create_mock_reader, TEST_ID
 

@@ -34,6 +34,11 @@ def read_flat_file(file):
     return [row.strip() for row in file]
 
 
+read_flat_file_arg = click.argument(
+    "file_rows", metavar="FILE", type=click.File("r"), callback=read_flat_file
+)
+
+
 class CliFileReader(object):
     _ROWS_COUNT = -1
 
