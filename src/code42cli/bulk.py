@@ -9,17 +9,17 @@ _logger = get_main_cli_logger()
 
 
 class BulkCommandType(object):
-    ADD = u"add"
-    REMOVE = u"remove"
+    ADD = "add"
+    REMOVE = "remove"
 
     def __iter__(self):
         return iter([self.ADD, self.REMOVE])
 
 
 def write_template_file(path, columns=None):
-    with open(path, u"w", encoding=u"utf8") as new_file:
+    with open(path, "w", encoding="utf8") as new_file:
         if columns:
-            new_file.write(u",".join(columns))
+            new_file.write(",".join(columns))
 
 
 def template_args(f):
@@ -45,9 +45,9 @@ def run_bulk_process(row_handler, rows):
     processor.run()
 
 
-def _create_bulk_processor(row_handler, reader):
+def _create_bulk_processor(row_handler, rows):
     """A factory method to create the bulk processor, useful for testing purposes."""
-    return BulkProcessor(row_handler, reader)
+    return BulkProcessor(row_handler, rows)
 
 
 class BulkProcessor(object):
@@ -71,7 +71,7 @@ class BulkProcessor(object):
         self._progress_bar = progress_bar or ProgressBar(total)
 
     def run(self):
-        """Processes the csv file specified in the ctor, calling `self.row_handler` on each row."""
+        """Processes the csv rows specified in the ctor, calling `self.row_handler` on each row."""
         for row in self._rows:
             self._process_row(row)
         self.__worker.wait()
@@ -84,10 +84,11 @@ class BulkProcessor(object):
             self._process_flat_file_row(row.strip())
 
     def _process_csv_row(self, row):
-        # Removes problems from including extra comments. Error messages from out of order args
+        # Removes problems from including extra columns. Error messages from out of order args
         # are more indicative this way too.
         row.pop(None, None)
-        row_values = {key: val if val != u"" else None for key, val in row.items()}
+
+        row_values = {key: val if val != "" else None for key, val in row.items()}
         self.__worker.do_async(
             lambda *args, **kwargs: self._handle_row(*args, **kwargs), **row_values
         )

@@ -1,7 +1,7 @@
+import os
 from collections import OrderedDict
 from functools import lru_cache
 from pprint import pprint
-import os
 
 import click
 

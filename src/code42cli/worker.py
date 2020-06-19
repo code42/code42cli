@@ -1,5 +1,6 @@
 from threading import Thread, Lock
 from time import sleep
+import queue
 
 from py42.exceptions import Py42HTTPError, Py42ForbiddenError
 
@@ -82,7 +83,7 @@ class Worker(object):
         """Wait for the tasks in the queue to complete. This should usually be called before 
         program termination."""
         while not self._queue.empty():
-            sleep(0.5)
+            sleep(1)
 
     def _process_queue(self):
         while True:

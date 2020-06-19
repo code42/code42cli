@@ -21,6 +21,7 @@ setup(
     package_dir={"": "src"},
     python_requires=">3, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4",
     install_requires=[
+        "Click",
         "c42eventextractor==0.3.2",
         "keyring==18.0.1",
         "keyrings.alt==3.2.0",
@@ -54,5 +55,5 @@ setup(
         "Programming Language :: Python :: Implementation :: CPython",
     ],
     scripts=["bin/code42cli_completer"],
-    entry_points={"console_scripts": ["code42=code42cli.main:main"]},
+    entry_points={"console_scripts": ["code42=code42cli.main:cli"]},
 )

@@ -11,7 +11,6 @@ from code42cli.cmds.detectionlists_shared.options import (
 from code42cli.bulk import template_args, write_template_file, run_bulk_process
 from code42cli.file_readers import read_csv_arg, read_flat_file_arg
 from code42cli.util import get_user_id
-from code42cli.cmds.detectionlists_shared.enums import DetectionLists
 from code42cli.options import global_options, OrderedGroup
 
 from py42.exceptions import Py42BadRequestError
@@ -23,13 +22,13 @@ def departing_employee(state):
     pass
 
 
-@departing_employee.command()
+@departing_employee.command("add")
 @username_arg
 @click.option("--departure-date", help="The date the employee is departing. Format: yyyy-MM-dd.")
 @cloud_alias_option
 @notes_option
 @global_options
-def add(state, username, cloud_alias, departure_date, notes):
+def add_departing_employee(state, username, cloud_alias, departure_date, notes):
     _add_departing_employee(state.sdk, username, cloud_alias, departure_date, notes)
 
 
@@ -91,7 +90,7 @@ def _add_departing_employee(sdk, username, cloud_alias, departure_date, notes):
     user_id = get_user_id(sdk, username)
     try:
         sdk.detectionlists.departing_employee.add(user_id, departure_date)
-        update_user(sdk, user_id, cloud_alias, notes=notes)
+        update_user(sdk, user_id, cloud_alias=cloud_alias, notes=notes)
     except Py42BadRequestError as err:
         try_handle_user_already_added_error(err, username, "departing-employee list")
         raise

@@ -121,6 +121,7 @@ include_non_exposure_option = click.option(
 
 def file_event_options(f):
     f = exposure_type_option(f)
+    f = username_option(f)
     f = actor_option(f)
     f = md5_option(f)
     f = sha256_option(f)

@@ -1,6 +1,6 @@
 import click
 
-username_arg = click.argument("username", help="The Code42 username of the employee.")
+username_arg = click.argument("username")
 cloud_alias_option = click.option(
     "--cloud-alias",
     help="If the employee has an email alias other than their Code42 username "
