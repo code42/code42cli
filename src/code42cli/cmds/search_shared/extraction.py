@@ -16,7 +16,7 @@ logger = get_main_cli_logger()
 def begin_date_is_required(args, cursor_store):
     if not args.incremental:
         return True
-    is_required = cursor_store and cursor_store.get_stored_cursor_timestamp() is None
+    is_required = cursor_store and cursor_store.get("TODO") is None
 
     # Ignore begin date when in incremental mode, it is not required, and it was passed an argument.
     if not is_required and args.begin:

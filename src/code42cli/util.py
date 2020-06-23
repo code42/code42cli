@@ -27,13 +27,15 @@ def does_user_agree(prompt):
 
 def get_user_project_path(*subdirs):
     """The path on your user dir to /.code42cli/[subdir]."""
+    print(str(subdirs))
     package_name = __name__.split(u".")[0]
     home = path.expanduser(u"~")
     hidden_package_name = u".{0}".format(package_name)
-    user_project_path = path.join(home, hidden_package_name, *subdirs)
-    if not path.exists(user_project_path):
-        os.makedirs(user_project_path)
-    return user_project_path
+    user_project_path = path.join(home, hidden_package_name)
+    result_path = path.join(user_project_path, *subdirs)
+    if not path.exists(result_path):
+        os.makedirs(result_path)
+    return result_path
 
 
 def open_file(file_path, mode, action):

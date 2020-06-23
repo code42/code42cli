@@ -30,9 +30,7 @@ def alert_namespace_with_begin(alert_namespace):
 @pytest.fixture
 def alert_checkpoint(mocker):
     return mocker.patch(
-        "{}.cmds.search_shared.cursor_store.AlertCursorStore.get_stored_cursor_timestamp".format(
-            PRODUCT_NAME
-        )
+        "{}.cmds.search_shared.cursor_store.AlertCursorStore.get".format(PRODUCT_NAME)
     )
 
 

@@ -141,7 +141,9 @@ def setup_mock_accessor(mock_accessor, name=None, values_dict=None):
 
 @pytest.fixture
 def profile(mocker):
-    return mocker.MagicMock(spec=Code42Profile)
+    mock = mocker.MagicMock(spec=Code42Profile)
+    mock.name = "testcliprofile"
+    return mock
 
 
 def func_keyword_args(one=None, two=None, three=None, default="testdefault", nargstest=[]):
