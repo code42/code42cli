@@ -1,4 +1,4 @@
-from integration import run_command
+import os
 
 
 class cleanup(object):
@@ -9,7 +9,7 @@ class cleanup(object):
         return open(self.filename, "r")
     
     def __exit__(self, exc_type, exc_val, exc_tb):
-        run_command("rm -f {}".format(self.filename))
+        os.remove(self.filename)
 
 
 def cleanup_after_validation(filename):
