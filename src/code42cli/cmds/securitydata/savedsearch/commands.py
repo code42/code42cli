@@ -24,7 +24,7 @@ class SavedSearchSubCommandLoader(SubcommandLoader):
 
         show_command = Command(
             self.SHOW,
-            "Get details of saved searches.",
+            "Get the details of a saved search.",
             u"{} {} {}".format(usage_prefix, self.SHOW, u"<search-id>"),
             handler=show_detail,
             arg_customizer=_load_search_id_args,

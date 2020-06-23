@@ -35,7 +35,10 @@ def create_search_args(search_for, filter_args):
 
 
 def _saved_search_args():
-    saved_search = ArgConfig(u"--saved-search", help=u"Saved search id.")
+    saved_search = ArgConfig(
+        u"--saved-search",
+        help=u"Limits events to those discoverable with the saved search "
+             u"filters for the saved search with the given ID.")
     return {u"saved_search": saved_search}
 
 

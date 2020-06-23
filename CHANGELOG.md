@@ -44,7 +44,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
    return saved search results.
 
 - `code42 security-data saved-search` commands:
-    - `list` prints out existing saved search's id and name
+    - `list` prints out existing saved searches' id and name
     - `show` takes a search id
 
 - `code42 high-risk-employee bulk` supports `add-risk-tags` and `remove-risk-tags`.
