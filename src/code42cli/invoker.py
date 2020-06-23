@@ -4,7 +4,6 @@ import difflib
 
 from py42.exceptions import Py42HTTPError, Py42ForbiddenError
 
-from code42cli.compat import str
 from code42cli.errors import Code42CLIError
 from code42cli.parser import ArgumentParserError, CommandParser
 from code42cli.logger import get_main_cli_logger

@@ -65,23 +65,27 @@ class BeginOption(AdvancedQueryIncompatible):
         super().__init__(*args, **kwargs)
 
     def handle_parse_result(self, ctx, opts, args):
-        incremental_present = "incremental" in opts
-        begin_present = "begin" in opts
-        checkpoint_exists = (
-            ctx.obj.cursor and ctx.obj.cursor.get_stored_cursor_timestamp() is not None
-        )
-        if incremental_present and checkpoint_exists and begin_present:
-            opts.pop("begin")
-            click.echo(
-                "Ignoring --begin value as --incremental was passed and checkpoint exists.\n",
-                err=True,
+        # if None it means we're in autocomplete mode and don't want to validate
+        if ctx.obj is not None:
+            incremental_present = "incremental" in opts
+            begin_present = "begin" in opts
+            checkpoint_exists = (
+                ctx.obj
+                and ctx.obj.cursor
+                and ctx.obj.cursor.get_stored_cursor_timestamp() is not None
             )
-        if incremental_present and not checkpoint_exists and not begin_present:
-            raise click.UsageError(
-                message="--begin date is required for --incremental when no checkpoint exists yet.",
-            )
-        if not incremental_present and not begin_present:
-            raise click.UsageError(message="--begin date is required.")
+            if incremental_present and checkpoint_exists and begin_present:
+                opts.pop("begin")
+                click.echo(
+                    "Ignoring --begin value as --incremental was passed and checkpoint exists.\n",
+                    err=True,
+                )
+            if incremental_present and not checkpoint_exists and not begin_present:
+                raise click.UsageError(
+                    message="--begin date is required for --incremental when no checkpoint exists yet.",
+                )
+            if not incremental_present and not begin_present:
+                raise click.UsageError(message="--begin date is required.")
         return super().handle_parse_result(ctx, opts, args)
 
 

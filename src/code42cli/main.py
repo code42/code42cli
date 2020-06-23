@@ -45,7 +45,10 @@ if platform.system().lower() == u"windows":
 # identifying CLI users.
 set_user_agent_suffix(PRODUCT_NAME)
 
-CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"], "max_content_width": 200}
+CONTEXT_SETTINGS = {
+    "help_option_names": ["-h", "--help"],
+    "max_content_width": 200,
+}
 
 
 @click.group(cls=OrderedGroup, context_settings=CONTEXT_SETTINGS)

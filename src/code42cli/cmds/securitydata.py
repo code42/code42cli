@@ -156,15 +156,9 @@ def clear_checkpoint(state):
 def _print(state, format, begin, end, advanced_query, incremental, **kwargs):
     """Print file events to stdout."""
     output_logger = logger_factory.get_logger_for_stdout(format)
+    cursor = state.cursor if incremental else None
     _extract(
-        state.sdk,
-        state.profile,
-        state.search_filters,
-        begin,
-        end,
-        advanced_query,
-        incremental,
-        output_logger,
+        state.sdk, cursor, state.search_filters, begin, end, advanced_query, output_logger,
     )
 
 
@@ -176,15 +170,9 @@ def _print(state, format, begin, end, advanced_query, incremental, **kwargs):
 def write_to(state, format, output_file, begin, end, advanced_query, incremental, **kwargs):
     """Write file events to the file with the given name."""
     output_logger = logger_factory.get_logger_for_file(output_file, format)
+    cursor = state.cursor if incremental else None
     _extract(
-        state.sdk,
-        state.profile,
-        state.search_filters,
-        begin,
-        end,
-        advanced_query,
-        incremental,
-        output_logger,
+        state.sdk, cursor, state.search_filters, begin, end, advanced_query, output_logger,
     )
 
 
@@ -196,21 +184,14 @@ def write_to(state, format, output_file, begin, end, advanced_query, incremental
 def send_to(state, format, hostname, protocol, begin, end, advanced_query, incremental, **kwargs):
     """Send file events to the given server address."""
     output_logger = logger_factory.get_logger_for_server(hostname, protocol, format)
+    cursor = state.cursor if incremental else None
     _extract(
-        state.sdk,
-        state.profile,
-        state.search_filters,
-        begin,
-        end,
-        advanced_query,
-        incremental,
-        output_logger,
+        state.sdk, cursor, state.search_filters, begin, end, advanced_query, output_logger,
     )
 
 
-def _extract(sdk, profile, filter_list, begin, end, advanced_query, incremental, output_logger):
-    store = FileEventCursorStore(profile.name) if incremental else None
-    handlers = create_handlers(sdk, FileEventExtractor, output_logger, store)
+def _extract(sdk, cursor, filter_list, begin, end, advanced_query, output_logger):
+    handlers = create_handlers(sdk, FileEventExtractor, output_logger, cursor)
     extractor = FileEventExtractor(sdk, handlers)
     if advanced_query:
         extractor.extract_advanced(advanced_query)

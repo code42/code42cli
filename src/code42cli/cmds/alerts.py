@@ -180,9 +180,10 @@ def clear_checkpoint(state):
 def _print(cli_state, format, begin, end, advanced_query, incremental, **kwargs):
     """Print alerts to stdout."""
     output_logger = logger_factory.get_logger_for_stdout(format)
+    cursor = cli_state.cursor if incremental else None
     _extract(
         cli_state.sdk,
-        cli_state.profile,
+        cursor,
         cli_state.search_filters,
         begin,
         end,
@@ -200,9 +201,10 @@ def _print(cli_state, format, begin, end, advanced_query, incremental, **kwargs)
 def write_to(cli_state, format, output_file, begin, end, advanced_query, incremental, **kwargs):
     """Write alerts to the file with the given name."""
     output_logger = logger_factory.get_logger_for_file(output_file, format)
+    cursor = cli_state.cursor if incremental else None
     _extract(
         cli_state.sdk,
-        cli_state.profile,
+        cursor,
         cli_state.search_filters,
         begin,
         end,
@@ -222,9 +224,10 @@ def send_to(
 ):
     """Send alerts to the given server address."""
     output_logger = logger_factory.get_logger_for_server(hostname, protocol, format)
+    cursor = cli_state.cursor if incremental else None
     _extract(
         cli_state.sdk,
-        cli_state.profile,
+        cursor,
         cli_state.search_filters,
         begin,
         end,
@@ -234,9 +237,8 @@ def send_to(
     )
 
 
-def _extract(sdk, profile, filter_list, begin, end, advanced_query, incremental, output_logger):
-    store = AlertCursorStore(profile.name) if incremental else None
-    handlers = create_handlers(sdk, AlertExtractor, output_logger, store)
+def _extract(sdk, cursor, filter_list, begin, end, advanced_query, incremental, output_logger):
+    handlers = create_handlers(sdk, AlertExtractor, output_logger, cursor)
     extractor = AlertExtractor(sdk, handlers)
     if advanced_query:
         extractor.extract_advanced(advanced_query)
