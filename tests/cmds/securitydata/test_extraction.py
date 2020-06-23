@@ -31,9 +31,7 @@ def file_event_namespace_with_begin(file_event_namespace):
 @pytest.fixture
 def file_event_checkpoint(mocker):
     return mocker.patch(
-        "{}.cmds.search_shared.cursor_store.FileEventCursorStore.get_stored_cursor_timestamp".format(
-            PRODUCT_NAME
-        )
+        "{}.cmds.search_shared.cursor_store.FileEventCursorStore.get".format(PRODUCT_NAME)
     )
 
 

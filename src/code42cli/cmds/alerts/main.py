@@ -59,12 +59,12 @@ class MainAlertsSubcommandLoader(SubcommandLoader):
         return [print_func, write, send, clear]
 
 
-def clear_checkpoint(sdk, profile):
+def clear_checkpoint(sdk, profile, cursor_name):
     """Removes the stored checkpoint that keeps track of the last alert retrieved for the given profile..
         To use, run `code42 alerts clear-checkpoint`.
         This affects `incremental` mode by causing it to behave like it has never been run before.
     """
-    AlertCursorStore(profile.name).replace_stored_cursor_timestamp(None)
+    AlertCursorStore(profile.name).delete(cursor_name)
 
 
 def print_out(sdk, profile, args):

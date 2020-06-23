@@ -34,7 +34,7 @@ def verify_begin_date_requirements(args, cursor_store):
         exit(1)
 
 
-def create_handlers(sdk, extractor_class, output_logger, cursor_store):
+def create_handlers(sdk, extractor_class, output_logger, cursor_store, profile_name):
     extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = ExtractionHandlers()
     handlers.TOTAL_EVENTS = 0
@@ -50,8 +50,8 @@ def create_handlers(sdk, extractor_class, output_logger, cursor_store):
     handlers.handle_error = handle_error
 
     if cursor_store:
-        handlers.record_cursor_position = cursor_store.replace_stored_cursor_timestamp
-        handlers.get_cursor_position = cursor_store.get_stored_cursor_timestamp
+        handlers.record_cursor_position = lambda value: cursor_store.replace(profile_name, value)
+        handlers.get_cursor_position = lambda: cursor_store.get(profile_name)
 
     @warn_interrupt(
         warning=u"Attempting to cancel cleanly to keep checkpoint data accurate. One moment..."

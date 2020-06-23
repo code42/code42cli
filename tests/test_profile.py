@@ -213,5 +213,5 @@ def test_delete_profile_clears_checkpoints(config_accessor, mocker):
     mock_get_cursor_store = mocker.patch("code42cli.profile.get_all_cursor_stores_for_profile")
     mock_get_cursor_store.return_value = [event_store, alert_store]
     cliprofile.delete_profile("deleteme")
-    assert event_store.clean.call_count == 1
-    assert alert_store.clean.call_count == 1
+    assert event_store.delete.call_count == 1
+    assert alert_store.delete.call_count == 1
