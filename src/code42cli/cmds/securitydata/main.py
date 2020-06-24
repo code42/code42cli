@@ -49,8 +49,8 @@ class SecurityDataSubcommandLoader(SubcommandLoader):
 
         clear = Command(
             self.CLEAR_CHECKPOINT,
-            u"Remove the saved file event checkpoint from 'incremental' (-i) mode.",
-            u"{} {}".format(usage_prefix, u"clear-checkpoint <optional-args>"),
+            u"Remove the saved file event checkpoint from 'use-checkpoint' (-c) mode.",
+            u"{} {}".format(usage_prefix, u"clear-checkpoint <name>"),
             handler=clear_checkpoint,
         )
 
@@ -60,7 +60,7 @@ class SecurityDataSubcommandLoader(SubcommandLoader):
 def clear_checkpoint(sdk, profile, cursor_name):
     """Removes the stored checkpoint that keeps track of the last file event retrieved for the given profile.
         To use, run `code42 security-data clear-checkpoint`.
-        This affects `incremental` mode by causing it to behave like it has never been run before.
+        This affects `use-checkpoint` mode by resetting the checkpoint, causing it to behave like it has never been run before.
     """
     FileEventCursorStore(profile.name).delete(cursor_name)
 

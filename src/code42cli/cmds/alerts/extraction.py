@@ -36,7 +36,7 @@ def extract(sdk, profile, output_logger, args):
                 send-to: uses a logger that sends logs to a server.
             args: Command line args used to build up alert query filters.
     """
-    store = AlertCursorStore(profile.name) if args.incremental else None
+    store = AlertCursorStore(profile.name) if args.use_checkpoint else None
     handlers = create_handlers(sdk, AlertExtractor, output_logger, store, profile.name)
     extractor = AlertExtractor(sdk, handlers)
     if args.advanced_query:

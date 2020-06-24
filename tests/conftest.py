@@ -23,7 +23,7 @@ def file_event_namespace():
         dict(
             sdk=mock_42,
             profile=create_mock_profile(),
-            incremental=None,
+            use_checkpoint=None,
             advanced_query=None,
             begin=None,
             end=None,
@@ -53,7 +53,7 @@ def alert_namespace():
         dict(
             sdk=mock_42,
             profile=create_mock_profile(),
-            incremental=None,
+            use_checkpoint=None,
             advanced_query=None,
             begin=None,
             end=None,

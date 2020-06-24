@@ -14,14 +14,14 @@ logger = get_main_cli_logger()
 
 
 def begin_date_is_required(args, cursor_store):
-    if not args.incremental:
+    if not args.use_checkpoint:
         return True
     is_required = cursor_store and cursor_store.get("TODO") is None
 
-    # Ignore begin date when in incremental mode, it is not required, and it was passed an argument.
+    # Ignore begin date when in use-checkpoint mode, it is not required, and it was passed an argument.
     if not is_required and args.begin:
         logger.print_and_log_info(
-            u"Ignoring --begin value as --incremental was passed and cursor checkpoint exists.\n"
+            u"Ignoring --begin value as --use-checkpoint was passed and cursor checkpoint exists.\n"
         )
         args.begin = None
     return is_required

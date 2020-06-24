@@ -6,7 +6,7 @@ Search args are shared between `print`, `write-to`, and `send-to` commands.
 
 * `--advanced-query` (optional): A raw JSON file events query. Useful for when the provided query parameters do not 
     satisfy your requirements. WARNING: Using advanced queries is incompatible with other query-building args.
-* `-b`, `--begin` (required except for non-first runs in incremental mode): The beginning of the date range in which to 
+* `-b`, `--begin` (required except for non-first runs in checkpoint mode): The beginning of the date range in which to 
     look for file events, can be a date/time in yyyy-MM-dd (UTC) or yyyy-MM-dd HH:MM:SS (UTC+24-hr time) format where 
     the 'time' portion of the string can be partial (e.g. '2020-01-01 12' or '2020-01-01 01:15') or a short value 
     representing days (30d), hours (24h) or minutes (15m) from current time.
@@ -26,7 +26,7 @@ Search args are shared between `print`, `write-to`, and `send-to` commands.
 * `--tab-url` (optional): Limits events to be exposure events with one of these destination tab URLs.
 * `--include-non-exposure` (optional): Get all events including non-exposure events.
 * `-f`, `--format` (optional): The format used for outputting file events. Available choices= [CEF,JSON,RAW-JSON]. 
-* `-i`, `--incremental` (optional): Only get file events that were not previously retrieved.
+* `-c`, `--use-checkpoint` (optional): Get only file events that were not previously retrieved by writing the timestamp of the last event retrieved to a named checkpoint.
 
 
 ## print
@@ -70,9 +70,12 @@ code42 security-data send-to <server> <optional-server-args> <args>
 
 ## clear-checkpoint
 
-Remove the saved file event checkpoint from 'incremental' (-i) mode.
+Arguments:
+* `name`: The name to save this checkpoint as for later reuse.
+
+Remove the saved file event checkpoint from 'use-checkpoint' (-c) mode.
 
 Usage:
 ```bash
-code42 security-data clear-checkpoint
+code42 security-data clear-checkpoint <name>
 ```

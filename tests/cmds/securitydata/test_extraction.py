@@ -102,11 +102,11 @@ def test_extract_when_is_advanced_query_and_other_incompatible_multi_narg_argume
         extraction_module.extract(sdk, profile, logger, file_event_namespace)
 
 
-def test_extract_when_is_advanced_query_and_has_incremental_mode_exits(
+def test_extract_when_is_advanced_query_and_has_use_checkpoint_mode_exits(
     sdk, profile, logger, file_event_namespace
 ):
     file_event_namespace.advanced_query = "some complex json"
-    file_event_namespace.incremental = True
+    file_event_namespace.use_checkpoint = "foo"
     with pytest.raises(SystemExit):
         extraction_module.extract(sdk, profile, logger, file_event_namespace)
 
@@ -132,7 +132,7 @@ def test_extract_when_is_advanced_query_and_has_incremental_mode_set_to_false_do
     sdk, profile, logger, file_event_namespace
 ):
     file_event_namespace.advanced_query = "some complex json"
-    file_event_namespace.is_incremental = False
+    file_event_namespace.use_checkpoint = None
     extraction_module.extract(sdk, profile, logger, file_event_namespace)
 
 
@@ -260,11 +260,11 @@ def test_extract_when_end_date_is_before_begin_date_causes_exit(
         extraction_module.extract(sdk, profile, logger, file_event_namespace)
 
 
-def test_when_given_begin_date_past_90_days_and_is_incremental_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
+def test_when_given_begin_date_past_90_days_and_uses_checkpoint_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
     sdk, profile, logger, file_event_namespace, file_event_extractor, file_event_checkpoint
 ):
     file_event_namespace.begin = "2019-01-01"
-    file_event_namespace.incremental = True
+    file_event_namespace.use_checkpoint = "foo"
     file_event_checkpoint.return_value = 22624624
     extraction_module.extract(sdk, profile, logger, file_event_namespace)
     assert not filter_term_is_in_call_args(file_event_extractor, EventTimestamp._term)
@@ -274,7 +274,7 @@ def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_b
     sdk, profile, logger, file_event_namespace, file_event_extractor, file_event_checkpoint
 ):
     file_event_namespace.begin = get_test_date_str(days_ago=1)
-    file_event_namespace.incremental = False
+    file_event_namespace.use_checkpoint = None
     file_event_checkpoint.return_value = 22624624
     extraction_module.extract(sdk, profile, logger, file_event_namespace)
 
@@ -286,11 +286,11 @@ def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_b
     assert filter_term_is_in_call_args(file_event_extractor, EventTimestamp._term)
 
 
-def test_when_not_given_begin_date_and_is_incremental_but_no_stored_checkpoint_exists_causes_exit(
+def test_when_not_given_begin_date_and_uses_checkpoint_but_no_stored_checkpoint_exists_causes_exit(
     sdk, profile, logger, file_event_namespace, file_event_checkpoint
 ):
     file_event_namespace.begin = None
-    file_event_namespace.is_incremental = True
+    file_event_namespace.use_checkpoint = "foo"
     file_event_checkpoint.return_value = None
     with pytest.raises(SystemExit):
         extraction_module.extract(sdk, profile, logger, file_event_namespace)

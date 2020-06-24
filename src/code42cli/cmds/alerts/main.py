@@ -51,7 +51,7 @@ class MainAlertsSubcommandLoader(SubcommandLoader):
 
         clear = Command(
             self.CLEAR_CHECKPOINT,
-            u"Remove the saved alert checkpoint from 'incremental' (-i) mode.",
+            u"Remove the saved alert checkpoint from 'use-checkpoint' (-c) mode.",
             u"{} {}".format(usage_prefix, u"clear-checkpoint <optional-args>"),
             handler=clear_checkpoint,
         )
@@ -62,7 +62,7 @@ class MainAlertsSubcommandLoader(SubcommandLoader):
 def clear_checkpoint(sdk, profile, cursor_name):
     """Removes the stored checkpoint that keeps track of the last alert retrieved for the given profile..
         To use, run `code42 alerts clear-checkpoint`.
-        This affects `incremental` mode by causing it to behave like it has never been run before.
+        This affects `use-checkpoint` mode by resetting the checkpoint, causing it to behave like it has never been run before.
     """
     AlertCursorStore(profile.name).delete(cursor_name)
 

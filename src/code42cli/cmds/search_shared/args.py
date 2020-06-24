@@ -52,9 +52,9 @@ def create_advanced_query_incompatible_search_args(search_for=None):
             help=u"The end of the date range in which to look for {0}, "
             u"argument format options are the same as --begin.".format(search_for),
         ),
-        u"incremental": ArgConfig(
-            u"-i",
-            u"--incremental",
+        u"use_checkpoint": ArgConfig(
+            u"-c",
+            u"--use-checkpoint",
             action=u"store_true",
             help=u"Only get {0} that were not previously retrieved.".format(search_for),
         ),

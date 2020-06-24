@@ -35,6 +35,21 @@ def mock_isfile(mocker):
     return mock
 
 
+class TestCursor(object):
+    def test_name_returns_expected_name(self):
+        cursor = Cursor("bogus/path")
+        assert cursor.name == "path"
+
+    def test_value_returns_expected_value(self, mock_open):
+        cursor = Cursor("bogus/path")
+        assert cursor.value == "TESTCHECKPOINT"
+
+    def test_value_reads_expected_file(self, mock_open):
+        cursor = Cursor("bogus/path")
+        _ = cursor.value
+        mock_open.assert_called_once_with("bogus/path")
+
+
 class TestAlertCursorStore(object):
     def test_get_returns_expected_timestamp(self, mock_open):
         store = AlertCursorStore(PROFILE_NAME)

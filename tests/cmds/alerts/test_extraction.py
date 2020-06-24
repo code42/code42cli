@@ -104,20 +104,20 @@ def test_extract_when_is_advanced_query_and_other_incompatible_single_arg_argume
         extraction_module.extract(sdk, profile, logger, alert_namespace)
 
 
-def test_extract_when_is_advanced_query_and_has_incremental_mode_exits(
+def test_extract_when_is_advanced_query_and_has_use_checkpoint_mode_exits(
     sdk, profile, logger, file_event_namespace
 ):
     file_event_namespace.advanced_query = "some complex json"
-    file_event_namespace.incremental = True
+    file_event_namespace.use_checkpoint = "foo"
     with pytest.raises(SystemExit):
         extraction_module.extract(sdk, profile, logger, file_event_namespace)
 
 
-def test_extract_when_is_advanced_query_and_has_incremental_mode_set_to_false_does_not_exit(
+def test_extract_when_is_advanced_query_and_use_checkpoint_mode_set_to_false_does_not_exit(
     sdk, profile, logger, alert_namespace
 ):
     alert_namespace.advanced_query = "some complex json"
-    alert_namespace.is_incremental = False
+    alert_namespace.use_checkpoint = None
     extraction_module.extract(sdk, profile, logger, alert_namespace)
 
 
@@ -231,7 +231,7 @@ def test_extract_when_using_both_min_and_max_dates_uses_expected_timestamps(
 def test_extract_when_given_min_timestamp_more_than_ninety_days_back_in_ad_hoc_mode_causes_exit(
     sdk, profile, logger, alert_namespace
 ):
-    alert_namespace.incremental = False
+    alert_namespace.use_checkpoint = None
     date = get_test_date_str(days_ago=91) + " 12:51:00"
     alert_namespace.begin = date
     with pytest.raises(DateArgumentError):
@@ -247,21 +247,21 @@ def test_extract_when_end_date_is_before_begin_date_causes_exit(
         extraction_module.extract(sdk, profile, logger, alert_namespace)
 
 
-def test_when_given_begin_date_past_90_days_and_is_incremental_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
+def test_when_given_begin_date_past_90_days_and_uses_checkpoint_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
     sdk, profile, logger, alert_namespace, alert_extractor, alert_checkpoint
 ):
     alert_namespace.begin = "2019-01-01"
-    alert_namespace.incremental = True
+    alert_namespace.use_checkpoint = "foo"
     alert_checkpoint.return_value = 22624624
     extraction_module.extract(sdk, profile, logger, alert_namespace)
     assert not filter_term_is_in_call_args(alert_extractor, DateObserved._term)
 
 
-def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_begin_date(
+def test_when_given_begin_date_and_not_use_checkpoint_mode_and_cursor_exists_uses_begin_date(
     sdk, profile, logger, alert_namespace, alert_extractor, alert_checkpoint
 ):
     alert_namespace.begin = get_test_date_str(days_ago=1)
-    alert_namespace.incremental = False
+    alert_namespace.use_checkpoint = None
     alert_checkpoint.return_value = 22624624
     extraction_module.extract(sdk, profile, logger, alert_namespace)
 
@@ -271,11 +271,11 @@ def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_b
     assert filter_term_is_in_call_args(alert_extractor, DateObserved._term)
 
 
-def test_when_not_given_begin_date_and_is_incremental_but_no_stored_checkpoint_exists_causes_exit(
+def test_when_not_given_begin_date_and_uses_checkpoint_but_no_stored_checkpoint_exists_causes_exit(
     sdk, profile, logger, alert_namespace, alert_checkpoint
 ):
     alert_namespace.begin = None
-    alert_namespace.is_incremental = True
+    alert_namespace.use_checkpoint = "foo"
     alert_checkpoint.return_value = None
     with pytest.raises(SystemExit):
         extraction_module.extract(sdk, profile, logger, alert_namespace)
