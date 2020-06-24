@@ -1,7 +1,8 @@
 import pytest
 
 from code42cli import PRODUCT_NAME
-from code42cli.util import does_user_agree, get_url_parts, find_format_width, get_user_id
+from code42cli.util import does_user_agree, get_url_parts, find_format_width
+from code42cli.sdk_client import get_user_id
 from code42cli.errors import UserDoesNotExistError
 
 

@@ -3,7 +3,6 @@ from getpass import getpass
 import click
 
 import code42cli.profile as cliprofile
-from code42cli.compat import str
 from code42cli.profile import print_and_log_no_existing_profile
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree
@@ -82,10 +81,7 @@ def update(name=None, server=None, username=None, disable_ssl_errors=None):
 @profile_name_arg
 def reset_pw(profile_name=None):
     """Change the stored password for a profile."""
-    c42profile = cliprofile.get_profile(profile_name)
-    new_password = getpass()
-    _validate_connection(c42profile.authority_url, c42profile.username, new_password)
-    cliprofile.set_password(new_password, c42profile.name)
+    _reset_pw(profile_name)
 
 
 def _validate_connection(authority, username, password):
@@ -152,4 +148,11 @@ def delete_all():
 
 def _prompt_for_allow_password_set(profile_name):
     if does_user_agree(u"Would you like to set a password? (y/n): "):
-        reset_pw(profile_name)
+        _reset_pw(profile_name)
+
+
+def _reset_pw(profile_name):
+    c42profile = cliprofile.get_profile(profile_name)
+    new_password = getpass()
+    _validate_connection(c42profile.authority_url, c42profile.username, new_password)
+    cliprofile.set_password(new_password, c42profile.name)

@@ -12,6 +12,7 @@ from code42cli.cmds.securitydata import security_data
 from code42cli.cmds.departing_employee import departing_employee
 from code42cli.cmds.high_risk_employee import high_risk_employee
 from code42cli.cmds.legal_hold import legal_hold
+from code42cli.cmds.profile import profile
 
 
 from py42.settings import set_user_agent_suffix
@@ -21,6 +22,8 @@ from code42cli.util import flush_stds_out_err_without_printing_error
 from py42.__version__ import __version__ as py42version
 
 from code42cli.__version__ import __version__ as cliversion
+
+from code42cli.invoker import ExceptionHandlingGroup
 
 BANNER = """\b
  dP""b8  dP"Yb  8888b. 888888  dP88  oP"Yb. 
@@ -65,7 +68,7 @@ CONTEXT_SETTINGS = {
 }
 
 
-@click.group(cls=OrderedGroup, context_settings=CONTEXT_SETTINGS, help=BANNER)
+@click.group(cls=ExceptionHandlingGroup, context_settings=CONTEXT_SETTINGS, help=BANNER)
 @global_options
 def cli(state):
     pass
@@ -77,6 +80,7 @@ cli.add_command(security_data)
 cli.add_command(departing_employee)
 cli.add_command(high_risk_employee)
 cli.add_command(legal_hold)
+cli.add_command(profile)
 
 
 def main():

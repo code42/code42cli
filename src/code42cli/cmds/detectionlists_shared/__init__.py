@@ -1,7 +1,7 @@
 from py42.exceptions import Py42BadRequestError
 
 from code42cli.errors import UnknownRiskTagError, UserAlreadyAddedError
-from code42cli.util import get_user_id
+from code42cli.sdk_client import get_user_id
 
 
 def update_user(sdk, user_id, cloud_alias=None, risk_tag=None, notes=None):

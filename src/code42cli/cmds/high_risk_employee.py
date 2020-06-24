@@ -15,7 +15,7 @@ from code42cli.cmds.detectionlists_shared.options import (
     username_arg,
 )
 from code42cli.options import global_options, OrderedGroup
-from code42cli.util import get_user_id
+from code42cli.sdk_client import get_user_id
 from code42cli.cmds.detectionlists_shared.enums import RiskTags
 from code42cli.bulk import run_bulk_process, generate_template_cmd_factory
 from code42cli.file_readers import read_csv_arg, read_flat_file_arg
