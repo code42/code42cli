@@ -169,7 +169,7 @@ def alerts(state):
 @alerts.command()
 @global_options
 def clear_checkpoint(state):
-    """"Remove the saved alert checkpoint from 'incremental' (-i) mode."""
+    """Remove the saved alert checkpoint from 'incremental' (-i) mode."""
     state.cursor.replace_stored_cursor_timestamp(None)
 
 

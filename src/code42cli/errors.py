@@ -37,7 +37,7 @@ class InvalidRuleTypeError(Code42CLIError):
         super().__init__(msg.format(rule_id, source))
 
 
-class UserDoesNotExistError(Code42CLIError):
+class UserDoesNotExistError(ClickException):
     """An error to represent a username that is not in our system. The CLI shows this error when 
     the user tries to add or remove a user that does not exist. This error is not shown during 
     bulk add or remove."""

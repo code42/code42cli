@@ -28,6 +28,7 @@ def departing_employee(state):
 @notes_option
 @global_options
 def add_departing_employee(state, username, cloud_alias, departure_date, notes):
+    """Add a user to the departing-employee detection list."""
     _add_departing_employee(state.sdk, username, cloud_alias, departure_date, notes)
 
 
@@ -35,12 +36,14 @@ def add_departing_employee(state, username, cloud_alias, departure_date, notes):
 @username_arg
 @global_options
 def remove(state, username):
+    """Remove a user from the departing-employee detection list."""
     _remove_departing_employee(state.sdk, username)
 
 
 @departing_employee.group(cls=OrderedGroup)
 @global_options
 def bulk(state):
+    """Tools for executing bulk commands."""
     pass
 
 

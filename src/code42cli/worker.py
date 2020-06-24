@@ -2,6 +2,7 @@ from threading import Thread, Lock
 from time import sleep
 import queue
 
+from click import ClickException
 from py42.exceptions import Py42HTTPError, Py42ForbiddenError
 
 from code42cli.errors import Code42CLIError
@@ -93,7 +94,7 @@ class Worker(object):
                 args = task[u"args"]
                 kwargs = task[u"kwargs"]
                 func(*args, **kwargs)
-            except Code42CLIError as err:
+            except ClickException as err:
                 self._increment_total_errors()
                 logger = get_main_cli_logger()
                 logger.log_error(err)

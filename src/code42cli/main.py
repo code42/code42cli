@@ -18,6 +18,20 @@ from py42.settings import set_user_agent_suffix
 
 from code42cli import PRODUCT_NAME
 from code42cli.util import flush_stds_out_err_without_printing_error
+from py42.__version__ import __version__ as py42version
+
+from code42cli.__version__ import __version__ as cliversion
+
+BANNER = """\b
+ dP""b8  dP"Yb  8888b. 888888  dP88  oP"Yb. 
+dP   `" dP   Yb 8I  Yb 88__   dP 88  "' dP' 
+Yb      Yb   dP 8I  dY 88""  d888888   dP'  
+ YboodP  YbodP  8888Y" 888888    88  .d8888
+
+code42cli version {}, by Code42 Software.
+powered by py42 version {}.""".format(
+    cliversion, py42version
+)
 
 
 # Handle KeyboardInterrupts by just exiting instead of printing out a stack
@@ -31,7 +45,7 @@ signal.signal(signal.SIGINT, exit_on_interrupt)
 
 # If on Windows, configure console session to handle ANSI escape sequences correctly
 # source: https://bugs.python.org/issue29059
-if platform.system().lower() == u"windows":
+if platform.system().lower() == "windows":
     from ctypes import windll, c_int, byref
 
     stdout_handle = windll.kernel32.GetStdHandle(c_int(-11))
@@ -51,7 +65,7 @@ CONTEXT_SETTINGS = {
 }
 
 
-@click.group(cls=OrderedGroup, context_settings=CONTEXT_SETTINGS)
+@click.group(cls=OrderedGroup, context_settings=CONTEXT_SETTINGS, help=BANNER)
 @global_options
 def cli(state):
     pass
@@ -72,5 +86,5 @@ def main():
         flush_stds_out_err_without_printing_error()
 
 
-if __name__ == u"__main__":
+if __name__ == "__main__":
     main()

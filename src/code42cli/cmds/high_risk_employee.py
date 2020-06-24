@@ -44,6 +44,7 @@ def high_risk_employee(state):
 @username_arg
 @global_options
 def add(state, username, cloud_alias, risk_tag, notes):
+    """Add a user to the high-risk-employee detection list."""
     _add_high_risk_employee(state.sdk, username, cloud_alias, risk_tag, notes)
 
 
@@ -51,6 +52,7 @@ def add(state, username, cloud_alias, risk_tag, notes):
 @username_arg
 @global_options
 def remove(state, username):
+    """Remove a user from the high-risk-employee detection list."""
     _remove_high_risk_employee(state.sdk, username)
 
 
@@ -59,6 +61,7 @@ def remove(state, username):
 @risk_tag_option
 @global_options
 def add_risk_tags(state, username, risk_tag):
+    """Associates risk tags with a user."""
     _add_risk_tags(state.sdk, username, risk_tag)
 
 
@@ -67,12 +70,14 @@ def add_risk_tags(state, username, risk_tag):
 @risk_tag_option
 @global_options
 def remove_risk_tags(state, username, risk_tag):
+    """Disassociates risk tags from a user."""
     _remove_risk_tags(state.sdk, username, risk_tag)
 
 
 @high_risk_employee.group()
 @global_options
 def bulk(state):
+    """Tools for executing bulk commands."""
     pass
 
 
