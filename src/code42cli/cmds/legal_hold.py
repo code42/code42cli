@@ -89,6 +89,7 @@ def _list(state):
 @click.option("--include-policy", is_flag=True)
 @global_options
 def show(state, matter_id, include_inactive=False, include_policy=False):
+    """Display details of a given legal hold matter."""
     matter = _check_matter_is_accessible(state.sdk, matter_id)
     matter["creator_username"] = matter["creator"]["username"]
 
@@ -229,9 +230,3 @@ def _check_matter_is_accessible(sdk, matter_id):
         return matter
     except (Py42BadRequestError, Py42ForbiddenError):
         raise LegalHoldNotFoundOrPermissionDeniedError(matter_id)
-
-
-@legal_hold.command()
-@click.pass_context
-def test(ctx):
-    print(ctx.parent.command.name)
