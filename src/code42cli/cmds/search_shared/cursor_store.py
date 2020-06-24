@@ -1,7 +1,7 @@
 from __future__ import with_statement
 
 import os
-from os import listdir, path
+from os import path
 
 from code42cli.util import get_user_project_path
 
@@ -50,7 +50,7 @@ class BaseCursorStore(object):
 
     def get_all_cursors(self):
         """Returns a list of all cursors stored in this directory (which istypically scoped to a profile)."""
-        dir_contents = listdir(self._dir_path)
+        dir_contents = os.listdir(self._dir_path)
         return [Cursor(f) for f in dir_contents if self._is_file(f)]
 
     def _is_file(self, node_name):

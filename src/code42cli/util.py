@@ -27,7 +27,6 @@ def does_user_agree(prompt):
 
 def get_user_project_path(*subdirs):
     """The path on your user dir to /.code42cli/[subdir]."""
-    print(str(subdirs))
     package_name = __name__.split(u".")[0]
     home = path.expanduser(u"~")
     hidden_package_name = u".{0}".format(package_name)
