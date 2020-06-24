@@ -1,5 +1,3 @@
-import os
-
 import click
 
 from py42.exceptions import Py42BadRequestError
@@ -19,7 +17,7 @@ from code42cli.cmds.detectionlists_shared.options import (
 from code42cli.options import global_options, OrderedGroup
 from code42cli.util import get_user_id
 from code42cli.cmds.detectionlists_shared.enums import RiskTags
-from code42cli.bulk import run_bulk_process, create_generate_template_cmd
+from code42cli.bulk import run_bulk_process, generate_template_cmd_factory
 from code42cli.file_readers import read_csv_arg, read_flat_file_arg
 
 
@@ -35,6 +33,7 @@ risk_tag_option = click.option(
 @click.group(cls=OrderedGroup)
 @global_options
 def high_risk_employee(state):
+    """For adding and removing employees from the high risk employee detection list."""
     pass
 
 
@@ -78,6 +77,11 @@ def bulk(state):
 
 
 HIGH_RISK_EMPLOYEE_CSV_HEADERS = ["username", "cloud_alias", "risk_tag", "notes"]
+
+high_risk_employee_generate_template = generate_template_cmd_factory(
+    csv_columns=HIGH_RISK_EMPLOYEE_CSV_HEADERS, cmd_name="high_risk_employee"
+)
+bulk.add_command(high_risk_employee_generate_template)
 
 
 @bulk.command()

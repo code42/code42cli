@@ -1,4 +1,3 @@
-import os
 from collections import OrderedDict
 from functools import lru_cache
 from pprint import pprint
@@ -21,7 +20,7 @@ from code42cli.util import (
 from code42cli.file_readers import read_csv_arg
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import global_options, OrderedGroup
-from code42cli.bulk import run_bulk_process, create_generate_template_cmd
+from code42cli.bulk import run_bulk_process, generate_template_cmd_factory
 
 _MATTER_KEYS_MAP = OrderedDict()
 _MATTER_KEYS_MAP["legalHoldUid"] = "Matter ID"
@@ -36,6 +35,7 @@ logger = get_main_cli_logger()
 @click.group(cls=OrderedGroup)
 @global_options
 def legal_hold(state):
+    """For adding and removing employees to legal hold matters."""
     pass
 
 
@@ -133,10 +133,10 @@ def bulk(state):
 LEGAL_HOLD_CSV_HEADERS = ["matter_id", "username"]
 
 
-generate_legal_hold_template = create_generate_template_cmd(
+legal_hold_generate_template = generate_template_cmd_factory(
     csv_columns=LEGAL_HOLD_CSV_HEADERS, cmd_name="legal_hold"
 )
-bulk.add_command(generate_legal_hold_template)
+bulk.add_command(legal_hold_generate_template)
 
 
 @bulk.command(

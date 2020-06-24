@@ -1,5 +1,3 @@
-import os
-
 import click
 
 from code42cli.cmds.detectionlists_shared import update_user, try_handle_user_already_added_error
@@ -8,7 +6,7 @@ from code42cli.cmds.detectionlists_shared.options import (
     cloud_alias_option,
     notes_option,
 )
-from code42cli.bulk import write_template_file, run_bulk_process
+from code42cli.bulk import generate_template_cmd_factory, run_bulk_process
 from code42cli.file_readers import read_csv_arg, read_flat_file_arg
 from code42cli.util import get_user_id
 from code42cli.options import global_options, OrderedGroup
@@ -19,6 +17,7 @@ from py42.exceptions import Py42BadRequestError
 @click.group(cls=OrderedGroup)
 @global_options
 def departing_employee(state):
+    """For adding and removing employees from the departing employee detection list."""
     pass
 
 
@@ -47,19 +46,10 @@ def bulk(state):
 
 DEPARTING_EMPLOYEE_CSV_HEADERS = ["username", "cloud_alias", "departure_date", "notes"]
 
-
-# @bulk.command()
-# @template_args
-# def generate_template(cmd, path):
-#     """\b
-#     Generate the csv template needed for bulk adding/removing users.
-#
-#     Optional PATH argument can be provided to write to a specific file path/name.
-#     """
-#     if not path:
-#         filename = "departing_employee_bulk_{}_users.csv".format(cmd)
-#         path = os.path.join(os.getcwd(), filename)
-#     write_template_file(path, columns=DEPARTING_EMPLOYEE_CSV_HEADERS)
+departing_employee_generate_template = generate_template_cmd_factory(
+    csv_columns=DEPARTING_EMPLOYEE_CSV_HEADERS, cmd_name="departing_employee"
+)
+bulk.add_command(departing_employee_generate_template)
 
 
 @bulk.command(

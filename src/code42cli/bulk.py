@@ -24,7 +24,11 @@ def write_template_file(path, columns=None):
             new_file.write(",".join(columns))
 
 
-def create_generate_template_cmd(csv_columns, cmd_name):
+def generate_template_cmd_factory(csv_columns, cmd_name):
+    """Helper function that creates a `generate-template` click command that can be added to `bulk`
+    sub-command groups.
+    """
+
     @click.command()
     @click.argument("cmd", type=click.Choice(BulkCommandType()))
     @click.argument(
