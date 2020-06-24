@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## 0.7.3 - 2020-06-23
+
+### Fixed
+
+- Fixed bug that caused the last few entries in csv files to sometimes not be processed when performing bulk processing actions.
+
 ## 0.7.2 - 2020-06-11
 
 ### Fixed
