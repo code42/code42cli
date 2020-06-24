@@ -12,6 +12,7 @@ class CLIState(object):
         self._sdk = None
         self.search_filters = []
         self.cursor = None
+        self.error = None
 
     @property
     def sdk(self):
@@ -60,12 +61,7 @@ def global_options(f):
 
 
 def incompatible_with(incompatible_opts):
-    """Helper function to build click.Options that are incompatible with other specific options 
-    on the same command.
-    
-    :param (str|list(str)) incompatible_opts
-    :returns click.Option
-    """
+
     if isinstance(incompatible_opts, str):
         incompatible_opts = [incompatible_opts]
 
@@ -74,14 +70,16 @@ def incompatible_with(incompatible_opts):
             super().__init__(*args, **kwargs)
 
         def handle_parse_result(self, ctx, opts, args):
-            found_incompatible = ", ".join(
-                ["--{}".format(opt) for opt in opts if opt in incompatible_opts]
-            )
-            if self.name in opts and found_incompatible:
-                raise click.BadOptionUsage(
-                    option_name=self.name,
-                    message="--{} can't be used with: {}".format(self.name, found_incompatible),
+            # if None it means we're in autocomplete mode and don't want to validate
+            if ctx.obj is not None:
+                found_incompatible = ", ".join(
+                    ["--{}".format(opt) for opt in opts if opt in incompatible_opts]
                 )
+                if self.name in opts and found_incompatible:
+                    raise click.BadOptionUsage(
+                        option_name=self.name,
+                        message="--{} can't be used with: {}".format(self.name, found_incompatible),
+                    )
             return super().handle_parse_result(ctx, opts, args)
 
     return IncompatibleOption
@@ -93,8 +91,8 @@ class OrderedGroup(click.Group):
     """
 
     def __init__(self, name=None, commands=None, **attrs):
-        super(OrderedGroup, self).__init__(name, commands, **attrs)
-        #: the registered subcommands by their exported names.
+        super().__init__(name, commands, **attrs)
+        # the registered subcommands by their exported names.
         self.commands = commands or OrderedDict()
 
     def list_commands(self, ctx):
