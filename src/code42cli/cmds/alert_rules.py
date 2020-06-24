@@ -14,7 +14,7 @@ from code42cli.file_readers import read_csv_arg
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import global_options, OrderedGroup
 
-from code42cli.bulk import write_template_file, template_args
+from code42cli.bulk import write_template_file
 
 
 class AlertRuleTypes(object):
@@ -105,18 +105,18 @@ def bulk(state):
     pass
 
 
-@bulk.command()
-@template_args
-def generate_template(cmd, path):
-    """\b
-    Generate the csv template needed for bulk adding/removing users.
-    
-    Optional PATH argument can be provided to write to a specific file path/name.
-    """
-    if not path:
-        filename = "alert_rules_bulk_{}_users.csv".format(cmd)
-        path = os.path.join(os.getcwd(), filename)
-    write_template_file(path, columns=["rule_id", "username"])
+# @bulk.command()
+# @template_args
+# def generate_template(cmd, path):
+#     """\b
+#     Generate the csv template needed for bulk adding/removing users.
+#
+#     Optional PATH argument can be provided to write to a specific file path/name.
+#     """
+#     if not path:
+#         filename = "alert_rules_bulk_{}_users.csv".format(cmd)
+#         path = os.path.join(os.getcwd(), filename)
+#     write_template_file(path, columns=["rule_id", "username"])
 
 
 ALERT_RULES_CSV_HEADERS = ["rule_id", "username"]

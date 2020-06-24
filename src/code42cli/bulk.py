@@ -1,3 +1,5 @@
+import os
+
 import click
 
 from code42cli.worker import Worker
@@ -22,14 +24,24 @@ def write_template_file(path, columns=None):
             new_file.write(",".join(columns))
 
 
-def template_args(f):
-    bulk_cmd = click.argument("cmd", type=click.Choice(BulkCommandType()))
-    template_path = click.argument(
+def create_generate_template_cmd(csv_columns, cmd_name):
+    @click.command()
+    @click.argument("cmd", type=click.Choice(BulkCommandType()))
+    @click.argument(
         "path", required=False, type=click.Path(dir_okay=False, resolve_path=True, writable=True)
     )
-    f = template_path(f)
-    f = bulk_cmd(f)
-    return f
+    def generate_template(cmd, path):
+        """\b
+        Generate the csv template needed for bulk adding/removing users.
+        
+        Optional PATH argument can be provided to write to a specific file path/name.
+        """
+        if not path:
+            filename = "{}_bulk_{}.csv".format(cmd_name, cmd)
+            path = os.path.join(os.getcwd(), filename)
+        write_template_file(path, columns=csv_columns)
+
+    return generate_template
 
 
 def run_bulk_process(row_handler, rows):
@@ -38,8 +50,7 @@ def run_bulk_process(row_handler, rows):
     Args: 
         row_handler (callable): A callable that you define to process values from the row as 
             either *args or **kwargs.
-        reader: (CSVReader or FlatFileReader, optional): A generator that reads rows and yields data into 
-            `row_handler`. If None, it will use a CSVReader. Defaults to None.
+        rows (iterable): the rows to process.
     """
     processor = _create_bulk_processor(row_handler, rows)
     processor.run()

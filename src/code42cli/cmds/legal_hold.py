@@ -21,7 +21,7 @@ from code42cli.util import (
 from code42cli.file_readers import read_csv_arg
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import global_options, OrderedGroup
-from code42cli.bulk import run_bulk_process, template_args, write_template_file
+from code42cli.bulk import run_bulk_process, create_generate_template_cmd
 
 _MATTER_KEYS_MAP = OrderedDict()
 _MATTER_KEYS_MAP["legalHoldUid"] = "Matter ID"
@@ -133,18 +133,10 @@ def bulk(state):
 LEGAL_HOLD_CSV_HEADERS = ["matter_id", "username"]
 
 
-@bulk.command()
-@template_args
-def generate_template(cmd, path):
-    """\b
-    Generate the csv template needed for bulk adding/removing users.
-    
-    Optional PATH argument can be provided to write to a specific file path/name.
-    """
-    if not path:
-        filename = "legal_hold_bulk_{}_users.csv".format(cmd)
-        path = os.path.join(os.getcwd(), filename)
-    write_template_file(path, columns=LEGAL_HOLD_CSV_HEADERS)
+generate_legal_hold_template = create_generate_template_cmd(
+    csv_columns=LEGAL_HOLD_CSV_HEADERS, cmd_name="legal_hold"
+)
+bulk.add_command(generate_legal_hold_template)
 
 
 @bulk.command(
@@ -154,7 +146,7 @@ def generate_template(cmd, path):
 )
 @read_csv_arg(headers=LEGAL_HOLD_CSV_HEADERS)
 @global_options
-def add_user(state, csv_rows):
+def add(state, csv_rows):
     row_handler = lambda matter_id, username: _add_user_to_legal_hold(
         state.sdk, matter_id, username
     )
@@ -168,7 +160,7 @@ def add_user(state, csv_rows):
 )
 @read_csv_arg(headers=LEGAL_HOLD_CSV_HEADERS)
 @global_options
-def remove_user(state, csv_rows):
+def remove(state, csv_rows):
     row_handler = lambda matter_id, username: _remove_user_from_legal_hold(
         state.sdk, matter_id, username
     )
@@ -237,3 +229,9 @@ def _check_matter_is_accessible(sdk, matter_id):
         return matter
     except (Py42BadRequestError, Py42ForbiddenError):
         raise LegalHoldNotFoundOrPermissionDeniedError(matter_id)
+
+
+@legal_hold.command()
+@click.pass_context
+def test(ctx):
+    print(ctx.parent.command.name)

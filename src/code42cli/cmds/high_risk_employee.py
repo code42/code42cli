@@ -19,7 +19,7 @@ from code42cli.cmds.detectionlists_shared.options import (
 from code42cli.options import global_options, OrderedGroup
 from code42cli.util import get_user_id
 from code42cli.cmds.detectionlists_shared.enums import RiskTags
-from code42cli.bulk import run_bulk_process, write_template_file, template_args
+from code42cli.bulk import run_bulk_process, create_generate_template_cmd
 from code42cli.file_readers import read_csv_arg, read_flat_file_arg
 
 
@@ -78,20 +78,6 @@ def bulk(state):
 
 
 HIGH_RISK_EMPLOYEE_CSV_HEADERS = ["username", "cloud_alias", "risk_tag", "notes"]
-
-
-@bulk.command()
-@template_args
-def generate_template(cmd, path):
-    """\b
-    Generate the csv template needed for bulk adding/removing users.
-
-    Optional PATH argument can be provided to write to a specific file path/name.
-    """
-    if not path:
-        filename = "high_risk_employee_bulk_{}_users.csv".format(cmd)
-        path = os.path.join(os.getcwd(), filename)
-    write_template_file(path, columns=HIGH_RISK_EMPLOYEE_CSV_HEADERS)
 
 
 @bulk.command()
