@@ -55,6 +55,7 @@ class Worker(object):
         self._queue = queue.Queue()
         self._thread_count = thread_count
         self._stats = WorkerStats(expected_total)
+        self._tasks = 0
         self.__started = False
         self.__start_lock = Lock()
 
@@ -72,6 +73,7 @@ class Worker(object):
                     self.__start()
                     self.__started = True
         self._queue.put({u"func": func, u"args": args, u"kwargs": kwargs})
+        self._tasks += 1
 
     @property
     def stats(self):
@@ -82,8 +84,8 @@ class Worker(object):
     def wait(self):
         """Wait for the tasks in the queue to complete. This should usually be called before 
         program termination."""
-        while not self._queue.empty():
-            sleep(1)
+        while not self._stats.total_processed >= self._tasks:
+            sleep(0.5)
 
     def _process_queue(self):
         while True:
