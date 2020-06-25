@@ -39,6 +39,7 @@ class LoggedCLIError(Code42CLIError):
 
     def __init__(self, message=None):
         self.message = message
+        super().__init__(message)
 
     def format_message(self):
         locations_message = get_view_error_details_message()
@@ -108,25 +109,37 @@ class ExceptionHandlingGroup(click.Group):
     def invoke(self, ctx):
         try:
             return super().invoke(ctx)
+
         except click.UsageError as err:
             self._suggest_cmd(err)
-        except LoggedCLIError as err:
+
+        except LoggedCLIError:
             raise
+
         except Code42CLIError as err:
             self.logger.log_error(str(err))
             raise
+
+        except click.ClickException:
+            raise
+
+        except click.exceptions.Exit:
+            raise
+
         except Py42ForbiddenError as err:
             self.logger.log_verbose_error(self._original_args, err.response.request)
             raise LoggedCLIError(
                 "You do not have the necessary permissions to perform this task. "
                 "Try using or creating a different profile."
             )
+
         except Py42HTTPError as err:
             self.logger.log_verbose_error(self._original_args, err.response.request)
             raise LoggedCLIError("Problem making request to server.")
-        except Exception as err:
-            self.logger.log_error(str(err))
-            raise LoggedCLIError("Unknown problem occurred.")
+
+        # except Exception as err:
+        #     self.logger.log_error("{}: {}".format(type(err), str(err)))
+        #     raise LoggedCLIError("Unknown problem occurred.")
 
     @staticmethod
     def _suggest_cmd(usage_err):

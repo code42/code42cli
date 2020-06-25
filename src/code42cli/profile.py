@@ -79,8 +79,9 @@ def validate_default_profile():
         if not existing_profiles:
             raise Code42CLIError("No existing profile.", help=CREATE_PROFILE_HELP)
         else:
-            _print_set_default_profile_help(existing_profiles)
-        exit(1)
+            raise Code42CLIError(
+                "No default profile set.", help=_get_set_default_profile_help(existing_profiles)
+            )
 
 
 def profile_exists(profile_name=None):
@@ -133,31 +134,21 @@ def set_password(new_password, profile_name=None):
     password.set_password(profile, new_password)
 
 
-def print_and_log_no_existing_profile():
-    logger = get_main_cli_logger()
-    logger.print_and_log_error("No existing profile.")
-    _print_create_profile_help()
-
-
 CREATE_PROFILE_HELP = "\nTo add a profile, use:\n{}".format(
     style("\tcode42 profile create <profile-name> <authority-URL> <username>\n", bold=True)
 )
 
 
-def _print_create_profile_help():
-    logger = get_main_cli_logger()
-    logger.print_info("\nTo add a profile, use: ")
-    logger.print_bold("\tcode42 profile create <profile-name> <authority-URL> <username>\n")
+def _get_set_default_profile_help(existing_profiles):
+    existing_profiles = [str(profile) for profile in existing_profiles]
+    help_msg = """
+Use the --profile flag to specify which profile to use.
 
-
-def _print_set_default_profile_help(existing_profiles):
-    echo(
-        "\nNo default profile set.\n"
-        "\nUse the --profile flag to specify which profile to use.\n"
-        "\nTo set the default profile (used whenever --profile argument is not provided), use:"
+To set the default profile (used whenever --profile argument is not provided), use:
+    {}
+    
+Existing profiles:
+\t{}""".format(
+        style("code42 profile use <profile-name>", bold=True), "\n\t".join(existing_profiles)
     )
-    secho("\tcode42 profile use <profile-name>", bold=True)
-    echo("\nExisting profiles:")
-    for profile in existing_profiles:
-        logger.print_info("\t{}".format(profile))
-    logger.print_info("")
+    return help_msg

@@ -142,12 +142,12 @@ class InPlaceStreamHandler(logging.StreamHandler):
     def emit(self, record):
         # Borrowed some from python3's logging.StreamHandler to make work on python2.
         try:
-            msg = u"\r{}\r".format(self.format(record))
+            msg = "\r{}\r".format(self.format(record))
             stream = self.stream
             stream.write(msg)
             self.flush()
         except RuntimeError as err:
-            if u"recursion" in str(err):
+            if "recursion" in str(err):
                 raise
         except Exception:
             self.handleError(record)
@@ -172,41 +172,25 @@ class CliLogger(object):
         """
         self._logger = _get_error_file_logger()
 
-    def print_info(self, message):
-        echo(message, err=True)
-
-    def print_bold(self, message):
-        secho(message, bold=True, err=True)
-
-    def print_and_log_error(self, message):
-        """Logs red error text to stderr and non-color messages to the log file."""
-        secho(message, fg="red")
-        self._logger.error(message)
-
-    def print_and_log_info(self, message):
-        """Prints to stderr and the log file."""
-        echo()
-        self._user_error_logger.info(message)
-
     def log_error(self, err):
         if err:
             message = str(err)  # Filter out empty string logs.
             if message:
-                self._error_file_logger.error(message)
+                self._logger.error(message)
 
     def log_verbose_error(self, invocation_str=None, http_request=None):
         """For logging traces, invocation strs, and request parameters during exceptions to the 
         error log file."""
         prefix = (
-            u"Exception occurred."
+            "Exception occurred."
             if not invocation_str
-            else u"Exception occurred from input: '{}'.".format(invocation_str)
+            else "Exception occurred from input: '{}'.".format(invocation_str)
         )
-        message = u"{}. See error below.".format(prefix)
+        message = "{}. See error below.".format(prefix)
         self.log_error(message)
         self.log_error(traceback.format_exc())
         if http_request:
-            self.log_error(u"Request parameters: {}".format(http_request.body))
+            self.log_error("Request parameters: {}".format(http_request.body))
 
 
 def get_main_cli_logger():

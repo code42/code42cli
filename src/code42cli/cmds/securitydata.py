@@ -1,4 +1,5 @@
 import click
+from click import echo
 
 from code42cli.options import global_options, incompatible_with
 from code42cli.cmds.search_shared import logger_factory
@@ -200,4 +201,4 @@ def _extract(sdk, cursor, filter_list, begin, end, advanced_query, output_logger
             filter_list.append(create_time_range_filter(EventTimestamp, begin, end))
         extractor.extract(*filter_list)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
-        logger.print_info(u"No results found.")
+        echo("No results found.")

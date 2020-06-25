@@ -7,10 +7,7 @@ import code42cli.profile as cliprofile
 from code42cli.profile import CREATE_PROFILE_HELP
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree
-from code42cli.logger import get_main_cli_logger
 from code42cli.errors import Code42CLIError
-
-logger = get_main_cli_logger()
 
 
 @click.group()
@@ -46,13 +43,13 @@ disable_ssl_option = click.option(
 def show(profile_name):
     """Print the details of a profile."""
     c42profile = cliprofile.get_profile(profile_name)
-    logger.print_info("\n{0}:".format(c42profile.name))
-    logger.print_info("\t* username = {}".format(c42profile.username))
-    logger.print_info("\t* authority url = {}".format(c42profile.authority_url))
-    logger.print_info("\t* ignore-ssl-errors = {}".format(c42profile.ignore_ssl_errors))
+    echo("\n{0}:".format(c42profile.name))
+    echo("\t* username = {}".format(c42profile.username))
+    echo("\t* authority url = {}".format(c42profile.authority_url))
+    echo("\t* ignore-ssl-errors = {}".format(c42profile.ignore_ssl_errors))
     if cliprofile.get_stored_password(c42profile.name) is not None:
-        logger.print_info("\t* A password is set.")
-    logger.print_info("")
+        echo("\t* A password is set.")
+    echo("")
 
 
 @profile.command()
@@ -64,7 +61,7 @@ def create(name, server, username, disable_ssl_errors=False):
     """Create profile settings. The first profile created will be the default."""
     cliprofile.create_profile(name, server, username, disable_ssl_errors)
     _prompt_for_allow_password_set(name)
-    logger.print_info("Successfully created profile '{}'.".format(name))
+    echo("Successfully created profile '{}'.".format(name))
 
 
 @profile.command()
@@ -77,7 +74,7 @@ def update(name=None, server=None, username=None, disable_ssl_errors=None):
     profile = cliprofile.get_profile(name)
     cliprofile.update_profile(profile.name, server, username, disable_ssl_errors)
     _prompt_for_allow_password_set(profile.name)
-    logger.print_info("Profile '{}' has been updated.".format(profile.name))
+    echo("Profile '{}' has been updated.".format(profile.name))
 
 
 @profile.command()
@@ -87,16 +84,6 @@ def reset_pw(profile_name=None):
     _reset_pw(profile_name)
 
 
-# def _validate_connection(authority, username, password):
-#     if not validate_connection(authority, username, password):
-#         logger = get_main_cli_logger()
-#         logger.print_and_log_error(
-#             u"Your credentials failed to validate, so your password was not stored."
-#             u"Check your network connection and the spelling of your username and server URL."
-#         )
-#         exit(1)
-
-
 @profile.command("list")
 def _list():
     """Show all existing stored profiles."""
@@ -104,7 +91,7 @@ def _list():
     if not profiles:
         raise Code42CLIError("No existing profile.", help=CREATE_PROFILE_HELP)
     for profile in profiles:
-        logger.print_info(str(profile))
+        echo(str(profile))
 
 
 @profile.command()
@@ -119,7 +106,7 @@ def use(profile_name):
 def delete(profile_name):
     """Deletes a profile and its stored password (if any)."""
     if cliprofile.is_default_profile(profile_name):
-        logger.print_info("\n{} is currently the default profile!".format(profile_name))
+        echo("\n{} is currently the default profile!".format(profile_name))
     if not does_user_agree(
         "\nDeleting this profile will also delete any stored passwords and checkpoints. "
         "Are you sure? (y/n): "
@@ -133,14 +120,14 @@ def delete_all():
     """Deletes all profiles and saved passwords (if any)."""
     existing_profiles = cliprofile.get_all_profiles()
     if existing_profiles:
-        logger.print_info("\nAre you sure you want to delete the following profiles?")
+        echo("\nAre you sure you want to delete the following profiles?")
         for profile in existing_profiles:
-            logger.print_info("\t{}".format(profile.name))
+            echo("\t{}".format(profile.name))
         if does_user_agree("\nThis will also delete any stored passwords and checkpoints. (y/n): "):
             for profile in existing_profiles:
                 cliprofile.delete_profile(profile.name)
     else:
-        logger.print_info("\nNo profiles exist. Nothing to delete.")
+        echo("\nNo profiles exist. Nothing to delete.")
 
 
 def _prompt_for_allow_password_set(profile_name):

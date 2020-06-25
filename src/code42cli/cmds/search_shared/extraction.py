@@ -1,5 +1,7 @@
 import json
 
+from click import secho
+
 from c42eventextractor import ExtractionHandlers
 from py42.sdk.queries.query_filter import QueryFilterTimestampField
 
@@ -38,7 +40,8 @@ def create_handlers(sdk, extractor_class, output_logger, cursor_store):
             message = u"{0}: {1}".format(exception, exception.response.text)
         else:
             message = exception
-        logger.print_and_log_error(message)
+        logger.log_error(message)
+        secho(message, err=True, fg="red")
 
     handlers.handle_error = handle_error
 

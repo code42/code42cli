@@ -410,15 +410,15 @@ def test_extract_when_not_errored_and_does_not_log_error_occurred(
         assert "View exceptions that occurred at" not in caplog.text
 
 
-def test_extract_when_not_errored_and_is_interactive_does_not_print_error(
-    sdk, profile, logger, alert_namespace_with_begin, alert_extractor, cli_logger, mocker
-):
-    errors.ERRORED = False
-    mocker.patch("code42cli.cmds.securitydata_mod.extraction.logger", cli_logger)
-    extraction_module.extract(sdk, profile, logger, alert_namespace_with_begin)
-    assert cli_logger.print_and_log_error.call_count == 0
-    assert cli_logger.log_error.call_count == 0
-    errors.ERRORED = False
+# def test_extract_when_not_errored_and_is_interactive_does_not_print_error(
+#     sdk, profile, logger, alert_namespace_with_begin, alert_extractor, cli_logger, mocker
+# ):
+#     errors.ERRORED = False
+#     mocker.patch("code42cli.cmds.securitydata_mod.extraction.logger", cli_logger)
+#     extraction_module.extract(sdk, profile, logger, alert_namespace_with_begin)
+#     assert cli_logger.print_and_log_error.call_count == 0
+#     assert cli_logger.log_error.call_count == 0
+#     errors.ERRORED = False
 
 
 def test_when_sdk_raises_exception_global_variable_gets_set(

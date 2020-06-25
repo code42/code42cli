@@ -1,4 +1,5 @@
 import click
+from click import echo
 
 from code42cli.options import global_options, OrderedGroup
 from code42cli.cmds.search_shared import logger_factory
@@ -182,14 +183,7 @@ def _print(cli_state, format, begin, end, advanced_query, incremental, **kwargs)
     output_logger = logger_factory.get_logger_for_stdout(format)
     cursor = cli_state.cursor if incremental else None
     _extract(
-        cli_state.sdk,
-        cursor,
-        cli_state.search_filters,
-        begin,
-        end,
-        advanced_query,
-        incremental,
-        output_logger,
+        cli_state.sdk, cursor, cli_state.search_filters, begin, end, advanced_query, output_logger,
     )
 
 
@@ -203,14 +197,7 @@ def write_to(cli_state, format, output_file, begin, end, advanced_query, increme
     output_logger = logger_factory.get_logger_for_file(output_file, format)
     cursor = cli_state.cursor if incremental else None
     _extract(
-        cli_state.sdk,
-        cursor,
-        cli_state.search_filters,
-        begin,
-        end,
-        advanced_query,
-        incremental,
-        output_logger,
+        cli_state.sdk, cursor, cli_state.search_filters, begin, end, advanced_query, output_logger,
     )
 
 
@@ -226,18 +213,11 @@ def send_to(
     output_logger = logger_factory.get_logger_for_server(hostname, protocol, format)
     cursor = cli_state.cursor if incremental else None
     _extract(
-        cli_state.sdk,
-        cursor,
-        cli_state.search_filters,
-        begin,
-        end,
-        advanced_query,
-        incremental,
-        output_logger,
+        cli_state.sdk, cursor, cli_state.search_filters, begin, end, advanced_query, output_logger,
     )
 
 
-def _extract(sdk, cursor, filter_list, begin, end, advanced_query, incremental, output_logger):
+def _extract(sdk, cursor, filter_list, begin, end, advanced_query, output_logger):
     handlers = create_handlers(sdk, AlertExtractor, output_logger, cursor)
     extractor = AlertExtractor(sdk, handlers)
     if advanced_query:
@@ -247,4 +227,4 @@ def _extract(sdk, cursor, filter_list, begin, end, advanced_query, incremental, 
             filter_list.append(create_time_range_filter(DateObserved, begin, end))
         extractor.extract(*filter_list)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
-        logger.print_info(u"No results found.")
+        echo("No results found.")

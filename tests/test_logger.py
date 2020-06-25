@@ -112,26 +112,6 @@ class TestCliLogger(object):
         assert RedStderrHandler in handler_types
         assert RotatingFileHandler in handler_types
 
-    def test_print_info_logs_expected_text_at_expected_level(self, caplog):
-        with caplog.at_level(logging.INFO):
-            self._logger.print_info("TEST")
-            assert "TEST" in caplog.text
-
-    def test_print_bold_logs_expected_text_at_expected_level(self, caplog):
-        with caplog.at_level(logging.INFO):
-            self._logger.print_bold("TEST")
-            assert "TEST" in caplog.text
-
-    def test_print_and_log_error_logs_expected_text_at_expected_level(self, caplog):
-        with caplog.at_level(logging.ERROR):
-            self._logger.print_and_log_error("TEST")
-            assert "TEST" in caplog.text
-
-    def test_print_and_log_info_logs_expected_text_at_expected_level(self, caplog):
-        with caplog.at_level(logging.INFO):
-            self._logger.print_and_log_info("TEST")
-            assert "TEST" in caplog.text
-
     def test_log_error_logs_expected_text_at_expected_level(self, caplog):
         with caplog.at_level(logging.ERROR):
             ex = Exception("TEST")

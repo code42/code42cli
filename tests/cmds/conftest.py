@@ -21,7 +21,6 @@ def mock_42(mocker):
 @pytest.fixture
 def logger(mocker):
     mock = mocker.MagicMock()
-    mock.print_info = mocker.MagicMock()
     return mock
 
 
