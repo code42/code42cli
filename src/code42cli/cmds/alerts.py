@@ -30,10 +30,7 @@ from code42cli.cmds.search_shared.extraction import (
 )
 
 import code42cli.errors as errors
-from code42cli.logger import get_main_cli_logger
 
-
-logger = get_main_cli_logger()
 
 search_options = create_search_options("alerts")
 

@@ -10,7 +10,6 @@ from code42cli.errors import (
     UserAlreadyAddedError,
     UserNotInLegalHoldError,
     LegalHoldNotFoundOrPermissionDeniedError,
-    LoggedCLIError,
 )
 from code42cli.util import (
     format_to_table,
@@ -19,7 +18,6 @@ from code42cli.util import (
 )
 from code42cli.cmds.shared import get_user_id
 from code42cli.file_readers import read_csv_arg
-from code42cli.logger import get_main_cli_logger
 from code42cli.options import global_options, OrderedGroup
 from code42cli.bulk import run_bulk_process, generate_template_cmd_factory
 
@@ -29,8 +27,6 @@ _MATTER_KEYS_MAP["name"] = "Name"
 _MATTER_KEYS_MAP["description"] = "Description"
 _MATTER_KEYS_MAP["creator_username"] = "Creator"
 _MATTER_KEYS_MAP["creationDate"] = "Creation Date"
-
-logger = get_main_cli_logger()
 
 
 @click.group(cls=OrderedGroup)

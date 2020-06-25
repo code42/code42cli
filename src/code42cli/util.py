@@ -6,6 +6,8 @@ from collections import OrderedDict
 from functools import wraps
 from signal import signal, getsignal, SIGINT
 
+from click import echo, style
+
 _PADDING_SIZE = 3
 
 
@@ -94,8 +96,8 @@ def format_to_table(rows, column_size):
     """Prints result in left justified format in a tabular form."""
     for row in rows:
         for key in row.keys():
-            print(str(row[key]).ljust(column_size[key] + _PADDING_SIZE), end=u" ")
-        print("")
+            echo(str(row[key]).ljust(column_size[key] + _PADDING_SIZE), end=u" ")
+        echo("")
 
 
 def format_string_list_to_columns(string_list, max_width=None):
@@ -110,8 +112,8 @@ def format_string_list_to_columns(string_list, max_width=None):
     batches = [string_list[i : i + num_columns] for i in range(0, len(string_list), num_columns)]
     padding = ["" for _ in range(num_columns)]
     for batch in batches:
-        print(format_string.format(*batch + padding))
-    print()
+        echo(format_string.format(*batch + padding))
+    echo()
 
 
 class warn_interrupt(object):
@@ -130,7 +132,7 @@ class warn_interrupt(object):
         self.warning = warning
         self.old_int_handler = None
         self.interrupted = False
-        self.exit_instructions = "Hit CTRL-C again to force quit."
+        self.exit_instructions = style("Hit CTRL-C again to force quit.", fg="red")
 
     def __enter__(self):
         self.old_int_handler = getsignal(SIGINT)
@@ -147,7 +149,7 @@ class warn_interrupt(object):
     def _handle_interrupts(self, sig, frame):
         if not self.interrupted:
             self.interrupted = True
-            print("\n{}\n{}".format(self.warning, self.exit_instructions), file=sys.stderr)
+            echo("\n{}\n{}".format(self.warning, self.exit_instructions), err=True)
         else:
             exit()
 
