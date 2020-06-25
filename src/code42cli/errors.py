@@ -12,11 +12,13 @@ _DIFFLIB_CUT_OFF = 0.6
 
 
 class Code42CLIError(click.ClickException):
-    """Base CLI exception. These automatically get logged and printed to stderr by 
-    the click.Group sub-class `ExceptionHandlingGroup`.
+    """Base CLI exception. The `message` param automatically gets logged to error file and printed
+    to stderr in red text. If `help` param is provided, it will also be printed to stderr after the
+    message but not logged to file. 
     """
 
-    def __init__(self, message):
+    def __init__(self, message, help=None):
+        self.help = help
         super().__init__(message)
 
     def show(self, file=None):
@@ -24,6 +26,8 @@ class Code42CLIError(click.ClickException):
         if file is None:
             file = get_text_stderr()
         click.secho("Error: {}".format(self.format_message()), file=file, fg="red")
+        if self.help:
+            click.echo(self.help, err=True)
 
 
 class LoggedCLIError(Code42CLIError):

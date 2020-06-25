@@ -1,7 +1,10 @@
+from click import echo, secho, style
+
 import code42cli.password as password
 from code42cli.cmds.search_shared.cursor_store import get_all_cursor_stores_for_profile
 from code42cli.config import ConfigAccessor, config_accessor, NoConfigProfileError
 from code42cli.logger import get_main_cli_logger
+from code42cli.errors import Code42CLIError
 
 
 class Code42Profile(object):
@@ -53,10 +56,7 @@ def get_profile(profile_name=None):
     try:
         return _get_profile(profile_name)
     except NoConfigProfileError as ex:
-        logger = get_main_cli_logger()
-        logger.print_and_log_error(str(ex))
-        _print_create_profile_help()
-        exit(1)
+        raise Code42CLIError(str(ex), help=CREATE_PROFILE_HELP)
 
 
 def default_profile_exists():
@@ -77,7 +77,7 @@ def validate_default_profile():
     if not default_profile_exists():
         existing_profiles = get_all_profiles()
         if not existing_profiles:
-            print_and_log_no_existing_profile()
+            raise Code42CLIError("No existing profile.", help=CREATE_PROFILE_HELP)
         else:
             _print_set_default_profile_help(existing_profiles)
         exit(1)
@@ -98,9 +98,7 @@ def switch_default_profile(profile_name):
 
 def create_profile(name, server, username, ignore_ssl_errors):
     if profile_exists(name):
-        logger = get_main_cli_logger()
-        logger.print_and_log_error("A profile named '{}' already exists.".format(name))
-        exit(1)
+        raise Code42CLIError("A profile named '{}' already exists.".format(name))
 
     config_accessor.create_profile(name, server, username, ignore_ssl_errors)
 
@@ -113,7 +111,7 @@ def delete_profile(profile_name):
     for store in cursor_stores:
         store.clean()
     config_accessor.delete_profile(profile_name)
-    get_main_cli_logger().print_info(u"Profile '{}' has been deleted.".format(profile_name))
+    echo("Profile '{}' has been deleted.".format(profile_name))
 
 
 def update_profile(name, server, username, ignore_ssl_errors):
@@ -141,6 +139,11 @@ def print_and_log_no_existing_profile():
     _print_create_profile_help()
 
 
+CREATE_PROFILE_HELP = "\nTo add a profile, use:\n{}".format(
+    style("\tcode42 profile create <profile-name> <authority-URL> <username>\n", bold=True)
+)
+
+
 def _print_create_profile_help():
     logger = get_main_cli_logger()
     logger.print_info("\nTo add a profile, use: ")
@@ -148,14 +151,13 @@ def _print_create_profile_help():
 
 
 def _print_set_default_profile_help(existing_profiles):
-    logger = get_main_cli_logger()
-    logger.print_info(
+    echo(
         "\nNo default profile set.\n"
         "\nUse the --profile flag to specify which profile to use.\n"
         "\nTo set the default profile (used whenever --profile argument is not provided), use:"
     )
-    logger.print_bold("\tcode42 profile use <profile-name>")
-    logger.print_info("\nExisting profiles:")
+    secho("\tcode42 profile use <profile-name>", bold=True)
+    echo("\nExisting profiles:")
     for profile in existing_profiles:
         logger.print_info("\t{}".format(profile))
     logger.print_info("")

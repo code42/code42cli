@@ -4,10 +4,11 @@ import click
 from click import echo, secho
 
 import code42cli.profile as cliprofile
-from code42cli.profile import print_and_log_no_existing_profile
+from code42cli.profile import CREATE_PROFILE_HELP
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree
 from code42cli.logger import get_main_cli_logger
+from code42cli.errors import Code42CLIError
 
 logger = get_main_cli_logger()
 
@@ -101,8 +102,7 @@ def _list():
     """Show all existing stored profiles."""
     profiles = cliprofile.get_all_profiles()
     if not profiles:
-        print_and_log_no_existing_profile()
-        return
+        raise Code42CLIError("No existing profile.", help=CREATE_PROFILE_HELP)
     for profile in profiles:
         logger.print_info(str(profile))
 
@@ -154,6 +154,6 @@ def _reset_pw(profile_name):
     try:
         validate_connection(c42profile.authority_url, c42profile.username, new_password)
     except Exception:
-        logger.print_bold("Password not stored!")
+        secho("Password not stored!", bold=True)
         raise
     cliprofile.set_password(new_password, c42profile.name)

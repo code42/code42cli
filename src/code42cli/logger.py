@@ -170,22 +170,22 @@ class CliLogger(object):
         `self._error_file_logger` logs directly to the error file and is only meant for verbose 
             debugging information, such as raw exceptions.
         """
-        self._info_logger = get_logger_for_stdout()
-        self._user_error_logger = _get_user_error_logger()
-        self._error_file_logger = _get_error_file_logger()
+        self._logger = _get_error_file_logger()
 
     def print_info(self, message):
-        echo(message)
+        echo(message, err=True)
 
     def print_bold(self, message):
-        secho(message, bold=True)
+        secho(message, bold=True, err=True)
 
     def print_and_log_error(self, message):
         """Logs red error text to stderr and non-color messages to the log file."""
-        self._user_error_logger.error(message)
+        secho(message, fg="red")
+        self._logger.error(message)
 
     def print_and_log_info(self, message):
         """Prints to stderr and the log file."""
+        echo()
         self._user_error_logger.info(message)
 
     def log_error(self, err):
