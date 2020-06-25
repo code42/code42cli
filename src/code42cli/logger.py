@@ -3,17 +3,14 @@ from logging.handlers import RotatingFileHandler
 from threading import Lock
 import copy
 
-from code42cli.util import get_user_project_path, is_interactive, color_text_red
+from click import echo, secho
+from code42cli.util import get_user_project_path, is_interactive
 
 # prevent loggers from printing stacks to stderr if a pipe is broken
 logging.raiseExceptions = False
 
 logger_deps_lock = Lock()
 ERROR_LOG_FILE_NAME = u"code42_errors.log"
-_PERMISSIONS_MESSAGE = (
-    u"You do not have the necessary permissions to perform this task. "
-    + u"Try using or creating a different profile."
-)
 
 
 def get_logger_for_stdout(name_suffix=u"main", formatter=None):
@@ -68,10 +65,10 @@ def _get_error_file_logger():
     return logger
 
 
-def get_view_exceptions_location_message():
+def get_view_error_details_message():
     """Returns the error message that is printed when errors occur."""
     path = _get_error_log_path()
-    return u"View exceptions that occurred at {}.".format(path)
+    return u"View details in {}".format(path)
 
 
 def _get_user_error_logger():
@@ -122,10 +119,6 @@ def _get_interactive_user_error_logger():
 
 def _create_formatter_for_error_file():
     return logging.Formatter(u"%(asctime)s %(message)s")
-
-
-def _get_red_error_text(text):
-    return color_text_red(u"ERROR: {}".format(text))
 
 
 def get_progress_logger(handler=None):
@@ -182,10 +175,10 @@ class CliLogger(object):
         self._error_file_logger = _get_error_file_logger()
 
     def print_info(self, message):
-        self._info_logger.info(message)
+        echo(message)
 
     def print_bold(self, message):
-        self._info_logger.info(u"\033[1m{}\033[0m".format(message))
+        secho(message, bold=True)
 
     def print_and_log_error(self, message):
         """Logs red error text to stderr and non-color messages to the log file."""
@@ -201,17 +194,6 @@ class CliLogger(object):
             if message:
                 self._error_file_logger.error(message)
 
-    def print_errors_occurred_message(self, additional_info=None):
-        """Prints a message telling the user how to retrieve error logs."""
-        locations_message = get_view_exceptions_location_message()
-        message = (
-            u"{}\n{}".format(additional_info, locations_message)
-            if additional_info
-            else locations_message
-        )
-        # Use `info()` because this message is pointless in the error log.
-        self.print_info(_get_red_error_text(message))
-
     def log_verbose_error(self, invocation_str=None, http_request=None):
         """For logging traces, invocation strs, and request parameters during exceptions to the 
         error log file."""
@@ -225,12 +207,6 @@ class CliLogger(object):
         self.log_error(traceback.format_exc())
         if http_request:
             self.log_error(u"Request parameters: {}".format(http_request.body))
-
-    def print_and_log_permissions_error(self):
-        self.print_and_log_error(_PERMISSIONS_MESSAGE)
-
-    def log_permissions_error(self):
-        self.log_error(_PERMISSIONS_MESSAGE)
 
 
 def get_main_cli_logger():

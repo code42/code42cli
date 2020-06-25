@@ -99,7 +99,7 @@ def switch_default_profile(profile_name):
 def create_profile(name, server, username, ignore_ssl_errors):
     if profile_exists(name):
         logger = get_main_cli_logger()
-        logger.print_and_log_error(u"A profile named '{}' already exists.".format(name))
+        logger.print_and_log_error("A profile named '{}' already exists.".format(name))
         exit(1)
 
     config_accessor.create_profile(name, server, username, ignore_ssl_errors)
@@ -137,25 +137,25 @@ def set_password(new_password, profile_name=None):
 
 def print_and_log_no_existing_profile():
     logger = get_main_cli_logger()
-    logger.print_and_log_error(u"No existing profile.")
+    logger.print_and_log_error("No existing profile.")
     _print_create_profile_help()
 
 
 def _print_create_profile_help():
     logger = get_main_cli_logger()
-    logger.print_info(u"\nTo add a profile, use: ")
-    logger.print_bold(u"\tcode42 profile create <profile-name> <authority-URL> <username>\n")
+    logger.print_info("\nTo add a profile, use: ")
+    logger.print_bold("\tcode42 profile create <profile-name> <authority-URL> <username>\n")
 
 
 def _print_set_default_profile_help(existing_profiles):
     logger = get_main_cli_logger()
     logger.print_info(
-        u"\nNo default profile set.\n"
-        u"\nUse the --profile flag to specify which profile to use.\n"
-        u"\nTo set the default profile (used whenever --profile argument is not provided), use:"
+        "\nNo default profile set.\n"
+        "\nUse the --profile flag to specify which profile to use.\n"
+        "\nTo set the default profile (used whenever --profile argument is not provided), use:"
     )
-    logger.print_bold(u"\tcode42 profile use <profile-name>")
-    logger.print_info(u"\nExisting profiles:")
+    logger.print_bold("\tcode42 profile use <profile-name>")
+    logger.print_info("\nExisting profiles:")
     for profile in existing_profiles:
         logger.print_info("\t{}".format(profile))
-    logger.print_info(u"")
+    logger.print_info("")

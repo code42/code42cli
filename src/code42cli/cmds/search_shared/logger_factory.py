@@ -16,6 +16,7 @@ from code42cli.logger import (
     get_main_cli_logger,
     get_logger_for_stdout as get_stdout_logger,
 )
+from code42cli.errors import Code42CLIError
 
 
 def get_logger_for_stdout(output_format):
@@ -66,9 +67,7 @@ def get_logger_for_server(hostname, protocol, output_format):
                     url_parts[0], port=port, protocol=protocol
                 ).handler
             except:
-                logger = get_main_cli_logger()
-                logger.print_and_log_error(u"Unable to connect to {0}.".format(hostname))
-                exit(1)
+                raise Code42CLIError("Unable to connect to {0}.".format(hostname))
             return _init_logger(logger, handler, output_format)
     return logger
 

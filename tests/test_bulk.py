@@ -6,7 +6,7 @@ import logging
 from code42cli import PRODUCT_NAME
 from code42cli import errors as errors
 from code42cli.bulk import generate_template, BulkProcessor, run_bulk_process
-from code42cli.logger import get_view_exceptions_location_message
+from code42cli.logger import get_view_error_details_message
 from code42cli.progress_bar import ProgressBar
 
 from .conftest import ErrorTrackerTestHelper, create_mock_reader
@@ -170,7 +170,7 @@ class TestBulkProcessor(object):
             processor.run()
 
             with caplog.at_level(logging.ERROR):
-                assert get_view_exceptions_location_message() in caplog.text
+                assert get_view_error_details_message() in caplog.text
 
     def test_run_when_no_errors_occur_prints_success_messages(self, mock_open, caplog):
         def func_for_bulk(test):
@@ -193,7 +193,7 @@ class TestBulkProcessor(object):
 
         with caplog.at_level(logging.ERROR):
             processor.run()
-            assert get_view_exceptions_location_message() not in caplog.text
+            assert get_view_error_details_message() not in caplog.text
 
     def test_run_when_row_is_endline_does_not_process_row(self, mock_open, progress_bar):
         processed_rows = []

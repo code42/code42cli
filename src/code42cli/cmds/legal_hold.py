@@ -10,13 +10,14 @@ from code42cli.errors import (
     UserAlreadyAddedError,
     UserNotInLegalHoldError,
     LegalHoldNotFoundOrPermissionDeniedError,
+    LoggedCLIError,
 )
 from code42cli.util import (
     format_to_table,
     find_format_width,
     format_string_list_to_columns,
 )
-from code42cli.sdk_client import get_user_id
+from code42cli.cmds.shared import get_user_id
 from code42cli.file_readers import read_csv_arg
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import global_options, OrderedGroup

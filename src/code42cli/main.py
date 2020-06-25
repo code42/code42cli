@@ -23,7 +23,7 @@ from py42.__version__ import __version__ as py42version
 
 from code42cli.__version__ import __version__ as cliversion
 
-from code42cli.invoker import ExceptionHandlingGroup
+from code42cli.errors import ExceptionHandlingGroup
 
 BANNER = """\b
  dP""b8  dP"Yb  8888b. 888888  dP88  oP"Yb. 

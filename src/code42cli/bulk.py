@@ -5,6 +5,7 @@ import click
 from code42cli.worker import Worker
 from code42cli.logger import get_main_cli_logger
 from code42cli.progress_bar import ProgressBar
+from code42cli.errors import LoggedCLIError
 
 
 _logger = get_main_cli_logger()
@@ -120,5 +121,4 @@ class BulkProcessor(object):
     def _print_results(self):
         self._progress_bar.clear_bar_and_print_final(str(self._stats))
         if self._stats.total_errors:
-            logger = get_main_cli_logger()
-            logger.print_errors_occurred_message()
+            raise LoggedCLIError("Some problems occurred during bulk processing.")

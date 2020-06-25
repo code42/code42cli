@@ -7,7 +7,7 @@ from requests import Request
 from code42cli.logger import (
     add_handler_to_logger,
     logger_has_handlers,
-    get_view_exceptions_location_message,
+    get_view_error_details_message,
     RedStderrHandler,
     InPlaceStreamHandler,
     get_progress_logger,
@@ -39,7 +39,7 @@ def test_logger_has_handlers_when_logger_does_not_have_handlers_returns_false():
 
 
 def test_get_view_exceptions_location_message_returns_expected_message():
-    actual = get_view_exceptions_location_message()
+    actual = get_view_error_details_message()
     path = os.path.join(get_user_project_path("log"), "code42_errors.log")
     expected = u"View exceptions that occurred at {}.".format(path)
     assert actual == expected

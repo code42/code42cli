@@ -1,7 +1,6 @@
 import sys
 import shutil
 import os
-import glob
 from os import path
 from collections import OrderedDict
 from functools import wraps
@@ -10,22 +9,18 @@ from signal import signal, getsignal, SIGINT
 _PADDING_SIZE = 3
 
 
-def get_input(prompt):
-    return input(prompt)
-
-
 def does_user_agree(prompt):
     """Prompts the user and checks if they said yes."""
-    ans = get_input(prompt)
+    ans = input(prompt)
     ans = ans.strip().lower()
-    return ans == u"y"
+    return ans == "y"
 
 
-def get_user_project_path(subdir=u""):
+def get_user_project_path(subdir=""):
     """The path on your user dir to /.code42cli/[subdir]."""
-    package_name = __name__.split(u".")[0]
-    home = path.expanduser(u"~")
-    hidden_package_name = u".{0}".format(package_name)
+    package_name = __name__.split(".")[0]
+    home = path.expanduser("~")
+    hidden_package_name = ".{0}".format(package_name)
     user_project_path = path.join(home, hidden_package_name, subdir)
     if not path.exists(user_project_path):
         os.makedirs(user_project_path)
@@ -34,7 +29,7 @@ def get_user_project_path(subdir=u""):
 
 def open_file(file_path, mode, action):
     """Wrapper for opening files, useful for testing purposes."""
-    with open(file_path, mode, encoding=u"utf-8") as f:
+    with open(file_path, mode, encoding="utf-8") as f:
         return action(f)
 
 
@@ -59,9 +54,9 @@ def flush_stds_out_err_without_printing_error():
 
 
 def get_url_parts(url_str):
-    parts = url_str.split(u":")
+    parts = url_str.split(":")
     port = None
-    if len(parts) > 1 and parts[1] != u"":
+    if len(parts) > 1 and parts[1] != "":
         port = int(parts[1])
     return parts[0], port
 
@@ -100,7 +95,7 @@ def format_to_table(rows, column_size):
     for row in rows:
         for key in row.keys():
             print(str(row[key]).ljust(column_size[key] + _PADDING_SIZE), end=u" ")
-        print(u"")
+        print("")
 
 
 def format_string_list_to_columns(string_list, max_width=None):
@@ -111,16 +106,12 @@ def format_string_list_to_columns(string_list, max_width=None):
         max_width, _ = shutil.get_terminal_size()
     column_width = len(max(string_list, key=len)) + _PADDING_SIZE
     num_columns = int(max_width / column_width)
-    format_string = u"{{:<{0}}}".format(column_width) * num_columns
+    format_string = "{{:<{0}}}".format(column_width) * num_columns
     batches = [string_list[i : i + num_columns] for i in range(0, len(string_list), num_columns)]
-    padding = [u"" for _ in range(num_columns)]
+    padding = ["" for _ in range(num_columns)]
     for batch in batches:
         print(format_string.format(*batch + padding))
     print()
-
-
-def color_text_red(text):
-    return u"\033[91m{}\033[0m".format(text)
 
 
 class warn_interrupt(object):
@@ -167,21 +158,3 @@ class warn_interrupt(object):
                 return func(*args, **kwargs)
 
         return inner
-
-
-def get_files_in_path(input_path):
-    try:
-        if not input_path:
-            return os.listdir(os.getcwd())
-
-        if "~" in input_path:
-            replace = os.path.expanduser("~")
-            input_path = input_path.replace("~", replace)
-
-        if os.path.isdir(input_path) and input_path[-1] != os.sep:
-            input_path += os.sep
-
-        files = glob.glob(input_path + "*")
-        return files
-    except Exception:
-        return []

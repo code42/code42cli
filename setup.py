@@ -22,6 +22,7 @@ setup(
     python_requires=">3, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4",
     install_requires=[
         "Click",
+        "colorama",
         "c42eventextractor==0.3.2",
         "keyring==18.0.1",
         "keyrings.alt==3.2.0",
