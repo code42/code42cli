@@ -16,7 +16,7 @@ logger = get_main_cli_logger()
 def begin_date_is_required(args, cursor_store):
     if not args.use_checkpoint:
         return True
-    is_required = cursor_store and cursor_store.get("TODO") is None
+    is_required = cursor_store and cursor_store.get(args.use_checkpoint) is None
 
     # Ignore begin date when in use-checkpoint mode, it is not required, and it was passed an argument.
     if not is_required and args.begin:
@@ -34,7 +34,7 @@ def verify_begin_date_requirements(args, cursor_store):
         exit(1)
 
 
-def create_handlers(sdk, extractor_class, output_logger, cursor_store, profile_name):
+def create_handlers(sdk, extractor_class, output_logger, cursor_store, checkpoint_name):
     extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = ExtractionHandlers()
     handlers.TOTAL_EVENTS = 0
@@ -50,8 +50,8 @@ def create_handlers(sdk, extractor_class, output_logger, cursor_store, profile_n
     handlers.handle_error = handle_error
 
     if cursor_store:
-        handlers.record_cursor_position = lambda value: cursor_store.replace(profile_name, value)
-        handlers.get_cursor_position = lambda: cursor_store.get(profile_name)
+        handlers.record_cursor_position = lambda value: cursor_store.replace(checkpoint_name, value)
+        handlers.get_cursor_position = lambda: cursor_store.get(checkpoint_name)
 
     @warn_interrupt(
         warning=u"Attempting to cancel cleanly to keep checkpoint data accurate. One moment..."

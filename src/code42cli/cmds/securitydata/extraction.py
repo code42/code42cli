@@ -31,7 +31,7 @@ def extract(sdk, profile, output_logger, args):
             args: Command line args used to build up file event query filters.
     """
     store = FileEventCursorStore(profile.name) if args.use_checkpoint else None
-    handlers = create_handlers(sdk, FileEventExtractor, output_logger, store, profile.name)
+    handlers = create_handlers(sdk, FileEventExtractor, output_logger, store, args.use_checkpoint)
     extractor = FileEventExtractor(sdk, handlers)
     if args.advanced_query:
         exit_if_advanced_query_used_with_other_search_args(args, FileEventFilterArguments())

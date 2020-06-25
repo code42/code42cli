@@ -27,15 +27,18 @@ class BaseCursorStore(object):
 
     def get(self, cursor_name):
         """Gets the last stored date observed timestamp."""
-        location = path.join(self._dir_path, cursor_name)
-        with (open(location)) as checkpoint:
-            return checkpoint.read()
+        try:
+            location = path.join(self._dir_path, cursor_name)
+            with (open(location)) as checkpoint:
+                return float(checkpoint.read())
+        except FileNotFoundError:
+            return None
 
     def replace(self, cursor_name, new_timestamp):
         """Replaces the last stored date observed timestamp with the given one."""
         location = path.join(self._dir_path, cursor_name)
         with (open(location, "w")) as checkpoint:
-            return checkpoint.write(new_timestamp)
+            return checkpoint.write(str(new_timestamp))
 
     def delete(self, cursor_name):
         """Removes a single cursor from the store."""

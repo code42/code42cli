@@ -55,7 +55,6 @@ def create_advanced_query_incompatible_search_args(search_for=None):
         u"use_checkpoint": ArgConfig(
             u"-c",
             u"--use-checkpoint",
-            action=u"store_true",
             help=u"Only get {0} that were not previously retrieved.".format(search_for),
         ),
     }
