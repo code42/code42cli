@@ -3,6 +3,7 @@ from __future__ import with_statement
 import os
 from os import path
 
+from code42cli.errors import Code42CLIError
 from code42cli.util import get_user_project_path
 
 
@@ -42,8 +43,12 @@ class BaseCursorStore(object):
 
     def delete(self, cursor_name):
         """Removes a single cursor from the store."""
-        location = path.join(self._dir_path, cursor_name)
-        os.remove(location)
+        try:
+            location = path.join(self._dir_path, cursor_name)
+            os.remove(location)
+        except FileNotFoundError:
+            msg = "No checkpoint named {0} exists for this profile.".format(cursor_name)
+            raise Code42CLIError(msg)
 
     def clean(self):
         """Removes all cursors from this store."""
