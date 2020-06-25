@@ -27,6 +27,7 @@ setup(
         "keyring==18.0.1",
         "keyrings.alt==3.2.0",
         "py42>=1.2.0",
+        "pexpect>=4.8"
     ],
     license="MIT",
     include_package_data=True,
