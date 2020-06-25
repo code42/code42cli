@@ -32,12 +32,13 @@ def extract(sdk, profile, output_logger, args, query=None):
     store = FileEventCursorStore(profile.name) if args.incremental else None
     handlers = create_handlers(sdk, FileEventExtractor, output_logger, store)
     extractor = FileEventExtractor(sdk, handlers)
-    if args.advanced_query:
-        extractor.extract_advanced(args.advanced_query)
-    else:
+    if not args.advanced_query and not args.saved_search:
         verify_begin_date_requirements(args, store)
         if args.type:
             _verify_exposure_types(args.type)
+    if args.advanced_query:
+        extractor.extract_advanced(args.advanced_query)
+    else:
         filters = _create_file_event_filters(args)
         if args.saved_search:
             filters.extend(query._filter_group_list)

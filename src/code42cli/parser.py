@@ -125,11 +125,13 @@ def _build_group_command_descriptions(command):
     return u"\n".join(lines)
 
 
-def exit_if_advanced_query_used_with_other_search_args(args, invalid_args):
+def exit_if_mutually_exclusive_args_used_together(
+    args, invalid_args, incompatible_with=u"--advanced-query"
+):
     for arg in invalid_args:
         if args.__dict__[arg]:
             logger = get_main_cli_logger()
             logger.print_and_log_error(
-                u"You cannot use --advanced-query with additional search args."
+                u"You cannot use {0} with additional search args.".format(incompatible_with)
             )
             exit(1)

@@ -1,6 +1,6 @@
 from code42cli.args import ArgConfig
 from code42cli.commands import Command, SubcommandLoader
-from code42cli.parser import exit_if_advanced_query_used_with_other_search_args
+from code42cli.parser import exit_if_mutually_exclusive_args_used_together
 from code42cli.cmds.alerts.extraction import extract
 from code42cli.cmds.search_shared import args, logger_factory
 from code42cli.cmds.search_shared.enums import (
@@ -12,7 +12,7 @@ from code42cli.cmds.search_shared.enums import (
 )
 from code42cli.cmds.search_shared.cursor_store import AlertCursorStore
 from code42cli.cmds.search_shared.args import (
-    create_advanced_query_incompatible_search_args, SEARCH_FOR_ALERTS
+    create_incompatible_search_args, SEARCH_FOR_ALERTS
 )
 
 
@@ -73,10 +73,10 @@ def clear_checkpoint(sdk, profile):
 
 def _validate_args(args):
     if args.advanced_query:
-        incompatible_search_args_dict = create_advanced_query_incompatible_search_args(SEARCH_FOR_ALERTS)
+        incompatible_search_args_dict = create_incompatible_search_args(SEARCH_FOR_ALERTS)
         incompatible_search_args_list = list(incompatible_search_args_dict.keys())
         invalid_args = incompatible_search_args_list + list(AlertFilterArguments())
-        exit_if_advanced_query_used_with_other_search_args(args, invalid_args)
+        exit_if_mutually_exclusive_args_used_together(args, invalid_args)
 
 
 def print_out(sdk, profile, args):

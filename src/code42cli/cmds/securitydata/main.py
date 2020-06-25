@@ -1,5 +1,5 @@
 from code42cli.args import ArgConfig
-from code42cli.parser import exit_if_advanced_query_used_with_other_search_args
+from code42cli.parser import exit_if_mutually_exclusive_args_used_together
 from code42cli.cmds.search_shared import logger_factory, args
 from code42cli.cmds.search_shared.enums import (
     FileEventFilterArguments,
@@ -11,7 +11,9 @@ from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore
 from code42cli.commands import Command, SubcommandLoader
 from code42cli.cmds.securitydata.savedsearch.commands import SavedSearchSubCommandLoader
 from code42cli.cmds.search_shared.args import (
-    create_advanced_query_incompatible_search_args, SEARCH_FOR_FILE_EVENTS
+    SEARCH_FOR_FILE_EVENTS,
+    get_advanced_query_incompatible_search_args,
+    get_saved_search_incompatible_search_args,
 )
 
 
@@ -78,12 +80,21 @@ def clear_checkpoint(sdk, profile):
     FileEventCursorStore(profile.name).replace_stored_cursor_timestamp(None)
 
 
+def _get_incompatible_search_args(incompatible_search_args_dict):
+    incompatible_search_args_list = list(incompatible_search_args_dict.keys())
+    return incompatible_search_args_list + list(FileEventFilterArguments())
+
+
 def _validate_args(args):
+
     if args.advanced_query:
-        incompatible_search_args_dict = create_advanced_query_incompatible_search_args(SEARCH_FOR_FILE_EVENTS)
-        incompatible_search_args_list = list(incompatible_search_args_dict.keys())
-        invalid_args = incompatible_search_args_list + list(FileEventFilterArguments())
-        exit_if_advanced_query_used_with_other_search_args(args, invalid_args)
+        incompatible_search_args_dict = get_advanced_query_incompatible_search_args(SEARCH_FOR_FILE_EVENTS)
+        incompatible_search_args = _get_incompatible_search_args(incompatible_search_args_dict)
+        exit_if_mutually_exclusive_args_used_together(args, incompatible_search_args)
+    if args.saved_search:
+        incompatible_search_args_dict = get_saved_search_incompatible_search_args(SEARCH_FOR_FILE_EVENTS)
+        incompatible_search_args = _get_incompatible_search_args(incompatible_search_args_dict)
+        exit_if_mutually_exclusive_args_used_together(args, incompatible_search_args, u"--saved-search")
 
 
 def _extract(sdk, profile, logger, args):

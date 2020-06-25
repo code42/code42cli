@@ -6,9 +6,10 @@ SEARCH_FOR_FILE_EVENTS = u"file events"
 
 
 def create_search_args(search_for, filter_args):
-    advanced_query_incompatible_args = create_advanced_query_incompatible_search_args(search_for)
-    filter_args.update(advanced_query_incompatible_args)
-
+    incompatible_args = create_incompatible_search_args(search_for)
+    filter_args.update(incompatible_args)
+    if search_for == SEARCH_FOR_FILE_EVENTS:
+        filter_args.update(_saved_search_args())
     format_enum = AlertOutputFormat() if search_for == SEARCH_FOR_ALERTS else OutputFormat()
 
     advanced_query_compatible_args = {
@@ -38,11 +39,12 @@ def _saved_search_args():
     saved_search = ArgConfig(
         u"--saved-search",
         help=u"Limits events to those discoverable with the saved search "
-             u"filters for the saved search with the given ID.")
+             u"filters for the saved search with the given ID.\n"
+             u"WARNING: Using saved search is incompatible with other query-building args.")
     return {u"saved_search": saved_search}
 
 
-def create_advanced_query_incompatible_search_args(search_for=None):
+def create_incompatible_search_args(search_for=None):
     """Returns a dict of args that are incompatible with the --advanced-query flag. Any new 
     incompatible args should go here as this is function is also used for arg validation."""
     args = {
@@ -70,6 +72,14 @@ def create_advanced_query_incompatible_search_args(search_for=None):
             help=u"Only get {0} that were not previously retrieved.".format(search_for),
         ),
     }
-    if search_for == SEARCH_FOR_FILE_EVENTS:
-        args.update(_saved_search_args())
     return args
+
+
+def get_advanced_query_incompatible_search_args(search_for):
+    incompatible_args = create_incompatible_search_args(search_for)
+    incompatible_args.update(_saved_search_args())
+    return incompatible_args
+
+
+def get_saved_search_incompatible_search_args(search_for):
+    return create_incompatible_search_args(search_for)
