@@ -74,7 +74,7 @@ def remove_risk_tags(state, username, risk_tag):
     _remove_risk_tags(state.sdk, username, risk_tag)
 
 
-@high_risk_employee.group()
+@high_risk_employee.group(cls=OrderedGroup)
 @global_options
 def bulk(state):
     """Tools for executing bulk commands."""
@@ -89,22 +89,34 @@ high_risk_employee_generate_template = generate_template_cmd_factory(
 bulk.add_command(high_risk_employee_generate_template)
 
 
-@bulk.command()
+@bulk.command(
+    help="Bulk add users to the high-risk-employee detection list using a csv file with "
+    "format: {}".format(",".join(HIGH_RISK_EMPLOYEE_CSV_HEADERS))
+)
 @read_csv_arg(headers=HIGH_RISK_EMPLOYEE_CSV_HEADERS)
 @global_options
 def add(state, csv_rows):
     row_handler = lambda username, cloud_alias, risk_tag, notes: _add_high_risk_employee(
         state.sdk, username, cloud_alias, risk_tag, notes
     )
-    run_bulk_process(row_handler, csv_rows)
+    run_bulk_process(
+        row_handler, csv_rows, progress_label="Adding users to high risk employee detection list:"
+    )
 
 
-@bulk.command()
+@bulk.command(
+    help="Bulk remove users from the high-risk-employee detection list using a newline separated "
+    "file of usernames."
+)
 @read_flat_file_arg
 @global_options
 def remove(state, file_rows):
     row_handler = lambda username: _remove_high_risk_employee(state.sdk, username)
-    run_bulk_process(row_handler, file_rows)
+    run_bulk_process(
+        row_handler,
+        file_rows,
+        progress_label="Removing users from high risk employee detection list:",
+    )
 
 
 def _add_high_risk_employee(sdk, username, cloud_alias, risk_tag, notes):

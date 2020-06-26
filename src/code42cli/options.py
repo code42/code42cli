@@ -85,7 +85,7 @@ def incompatible_with(incompatible_opts):
 
 
 class OrderedGroup(click.Group):
-    """A click.Group subclass that uses OrderedDict to store commands so help text lists them 
+    """A click.Group subclass that uses OrderedDict to store commands so the help text lists them 
     in the order they were defined/added to the group.
     """
 

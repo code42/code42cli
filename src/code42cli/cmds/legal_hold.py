@@ -3,6 +3,7 @@ from functools import lru_cache
 from pprint import pprint
 
 import click
+from click import echo
 
 from py42.exceptions import Py42ForbiddenError, Py42BadRequestError
 
@@ -101,24 +102,24 @@ def show(state, matter_id, include_inactive=False, include_policy=False):
 
     rows, column_size = find_format_width([matter], _MATTER_KEYS_MAP)
 
-    print("")
+    echo("")
     format_to_table(rows, column_size)
     if active_usernames:
-        print("\nActive matter members:\n")
+        echo("\nActive matter members:\n")
         format_string_list_to_columns(active_usernames)
     else:
-        print("\nNo active matter members.\n")
+        echo("\nNo active matter members.\n")
 
     if include_inactive:
         if inactive_usernames:
-            print("\nInactive matter members:\n")
+            echo("\nInactive matter members:\n")
             format_string_list_to_columns(inactive_usernames)
         else:
-            print("No inactive matter members.\n")
+            echo("No inactive matter members.\n")
 
     if include_policy:
         _get_and_print_preservation_policy(state.sdk, matter["holdPolicyUid"])
-        print("")
+        echo("")
 
 
 @legal_hold.group(cls=OrderedGroup)
@@ -148,7 +149,7 @@ def add(state, csv_rows):
     row_handler = lambda matter_id, username: _add_user_to_legal_hold(
         state.sdk, matter_id, username
     )
-    run_bulk_process(row_handler, csv_rows)
+    run_bulk_process(row_handler, csv_rows, progress_label="Adding users to legal hold: ")
 
 
 @bulk.command(
@@ -162,7 +163,7 @@ def remove(state, csv_rows):
     row_handler = lambda matter_id, username: _remove_user_from_legal_hold(
         state.sdk, matter_id, username
     )
-    run_bulk_process(row_handler, csv_rows)
+    run_bulk_process(row_handler, csv_rows, progress_label="Removing users from legal hold:")
 
 
 def _add_user_to_legal_hold(sdk, matter_id, username):

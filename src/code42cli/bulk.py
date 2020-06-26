@@ -4,7 +4,6 @@ import click
 
 from code42cli.worker import Worker
 from code42cli.logger import get_main_cli_logger
-from code42cli.progress_bar import ProgressBar
 from code42cli.errors import LoggedCLIError
 
 
@@ -49,7 +48,7 @@ def generate_template_cmd_factory(csv_columns, cmd_name):
     return generate_template
 
 
-def run_bulk_process(row_handler, rows):
+def run_bulk_process(row_handler, rows, progress_label=None):
     """Runs a bulk process.
     
     Args: 
@@ -57,13 +56,13 @@ def run_bulk_process(row_handler, rows):
             either *args or **kwargs.
         rows (iterable): the rows to process.
     """
-    processor = _create_bulk_processor(row_handler, rows)
+    processor = _create_bulk_processor(row_handler, rows, progress_label)
     processor.run()
 
 
-def _create_bulk_processor(row_handler, rows):
+def _create_bulk_processor(row_handler, rows, progress_label):
     """A factory method to create the bulk processor, useful for testing purposes."""
-    return BulkProcessor(row_handler, rows)
+    return BulkProcessor(row_handler, rows, progress_label=progress_label)
 
 
 class BulkProcessor(object):
@@ -78,12 +77,12 @@ class BulkProcessor(object):
         reader (CSVReader or FlatFileReader): A generator that reads rows and yields data into `row_handler`.
     """
 
-    def __init__(self, row_handler, rows, worker=None):
+    def __init__(self, row_handler, rows, worker=None, progress_label=None):
         total = len(rows)
         self._rows = rows
         self._row_handler = row_handler
         self._progress_bar = click.progressbar(
-            length=len(self._rows), item_show_func=self._show_stats
+            length=len(self._rows), item_show_func=self._show_stats, label=progress_label
         )
         self.__worker = worker or Worker(5, total, bar=self._progress_bar)
         self._stats = self.__worker.stats

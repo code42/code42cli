@@ -21,13 +21,13 @@ def departing_employee(state):
     pass
 
 
-@departing_employee.command("add")
+@departing_employee.command()
 @username_arg
 @click.option("--departure-date", help="The date the employee is departing. Format: yyyy-MM-dd.")
 @cloud_alias_option
 @notes_option
 @global_options
-def add_departing_employee(state, username, cloud_alias, departure_date, notes):
+def add(state, username, cloud_alias, departure_date, notes):
     """Add a user to the departing-employee detection list."""
     _add_departing_employee(state.sdk, username, cloud_alias, departure_date, notes)
 
@@ -56,16 +56,18 @@ bulk.add_command(departing_employee_generate_template)
 
 
 @bulk.command(
-    help="Bulk add users to the departing-employee detection list using a csv file. "
-    "CSV file format: {}".format(",".join(DEPARTING_EMPLOYEE_CSV_HEADERS))
+    help="Bulk add users to the departing-employee detection list using a csv file with "
+    "format: {}".format(",".join(DEPARTING_EMPLOYEE_CSV_HEADERS))
 )
 @read_csv_arg(headers=DEPARTING_EMPLOYEE_CSV_HEADERS)
 @global_options
-def add_user(state, csv_rows):
+def add(state, csv_rows):
     row_handler = lambda username, cloud_alias, departure_date, notes: _add_departing_employee(
         state.sdk, username, cloud_alias, departure_date, notes
     )
-    run_bulk_process(row_handler, csv_rows)
+    run_bulk_process(
+        row_handler, csv_rows, progress_label="Adding users to departing employee detection list:"
+    )
 
 
 @bulk.command(
@@ -74,9 +76,13 @@ def add_user(state, csv_rows):
 )
 @read_flat_file_arg
 @global_options
-def remove_user(state, file_rows):
+def remove(state, file_rows):
     row_handler = lambda username: _remove_departing_employee(state.sdk, username)
-    run_bulk_process(row_handler, file_rows)
+    run_bulk_process(
+        row_handler,
+        file_rows,
+        progress_label="Removing users from departing employee detection list:",
+    )
 
 
 def _add_departing_employee(sdk, username, cloud_alias, departure_date, notes):

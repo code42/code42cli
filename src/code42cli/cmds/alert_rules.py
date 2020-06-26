@@ -121,7 +121,7 @@ bulk.add_command(alert_rules_generate_template)
 @global_options
 def add(state, csv_rows):
     row_handler = lambda rule_id, username: _add_user(state.sdk, rule_id, username)
-    run_bulk_process(row_handler, csv_rows)
+    run_bulk_process(row_handler, csv_rows, progress_label="Adding users to alert-rules:")
 
 
 @bulk.command(
@@ -133,7 +133,7 @@ def add(state, csv_rows):
 @global_options
 def remove(state, csv_rows):
     row_handler = lambda rule_id, username: _remove_user(state.sdk, rule_id, username)
-    run_bulk_process(row_handler, csv_rows)
+    run_bulk_process(row_handler, csv_rows, progress_label="Removing users from alert-rules:")
 
 
 def _add_user(sdk, rule_id, username):
