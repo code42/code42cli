@@ -3,13 +3,11 @@ from py42.sdk.queries.fileevents.filters import *
 
 from code42cli.cmds.search_shared.enums import (
     ExposureType as ExposureTypeOptions,
-    FileEventFilterArguments,
 )
 from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore
 from code42cli.cmds.search_shared.extraction import (
     verify_begin_date_requirements,
     create_handlers,
-    exit_if_advanced_query_used_with_other_search_args,
     create_time_range_filter,
 )
 import code42cli.errors as errors
@@ -18,7 +16,7 @@ from code42cli.logger import get_main_cli_logger
 logger = get_main_cli_logger()
 
 
-def extract(sdk, profile, output_logger, args):
+def extract(sdk, profile, output_logger, args, query=None):
     """Extracts file events using the given command-line arguments.
 
         Args:
@@ -29,18 +27,21 @@ def extract(sdk, profile, output_logger, args):
                 write-to: uses a logger that logs to a file.
                 send-to: uses a logger that sends logs to a server.
             args: Command line args used to build up file event query filters.
+            query: FileEventQuery instance created from search-id of saved search.
     """
     store = FileEventCursorStore(profile.name) if args.incremental else None
     handlers = create_handlers(sdk, FileEventExtractor, output_logger, store)
     extractor = FileEventExtractor(sdk, handlers)
-    if args.advanced_query:
-        exit_if_advanced_query_used_with_other_search_args(args, FileEventFilterArguments())
-        extractor.extract_advanced(args.advanced_query)
-    else:
+    if not args.advanced_query and not args.saved_search:
         verify_begin_date_requirements(args, store)
         if args.type:
             _verify_exposure_types(args.type)
+    if args.advanced_query:
+        extractor.extract_advanced(args.advanced_query)
+    else:
         filters = _create_file_event_filters(args)
+        if args.saved_search:
+            filters.extend(query._filter_group_list)
         extractor.extract(*filters)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         logger.print_info(u"No results found.")

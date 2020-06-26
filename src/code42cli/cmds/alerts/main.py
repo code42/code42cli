@@ -1,5 +1,6 @@
 from code42cli.args import ArgConfig
 from code42cli.commands import Command, SubcommandLoader
+from code42cli.parser import exit_if_mutually_exclusive_args_used_together
 from code42cli.cmds.alerts.extraction import extract
 from code42cli.cmds.search_shared import args, logger_factory
 from code42cli.cmds.search_shared.enums import (
@@ -10,6 +11,9 @@ from code42cli.cmds.search_shared.enums import (
     RuleType,
 )
 from code42cli.cmds.search_shared.cursor_store import AlertCursorStore
+from code42cli.cmds.search_shared.args import (
+    create_incompatible_search_args, SEARCH_FOR_ALERTS
+)
 
 
 class MainAlertsSubcommandLoader(SubcommandLoader):
@@ -67,20 +71,31 @@ def clear_checkpoint(sdk, profile):
     AlertCursorStore(profile.name).replace_stored_cursor_timestamp(None)
 
 
+def _validate_args(args):
+    if args.advanced_query:
+        incompatible_search_args_dict = create_incompatible_search_args(SEARCH_FOR_ALERTS)
+        incompatible_search_args_list = list(incompatible_search_args_dict.keys())
+        invalid_args = incompatible_search_args_list + list(AlertFilterArguments())
+        exit_if_mutually_exclusive_args_used_together(args, invalid_args)
+
+
 def print_out(sdk, profile, args):
     """Activates 'print' command. It gets alerts and prints them to stdout."""
+    _validate_args(args)
     logger = logger_factory.get_logger_for_stdout(args.format)
     extract(sdk, profile, logger, args)
 
 
 def write_to(sdk, profile, args):
     """Activates 'write-to' command. It gets alerts and writes them to the given file."""
+    _validate_args(args)
     logger = logger_factory.get_logger_for_file(args.output_file, args.format)
     extract(sdk, profile, logger, args)
 
 
 def send_to(sdk, profile, args):
     """Activates 'send-to' command. It getsalerts and logs them to the given server."""
+    _validate_args(args)
     logger = logger_factory.get_logger_for_server(args.server, args.protocol, args.format)
     extract(sdk, profile, logger, args)
 
@@ -191,5 +206,5 @@ def _load_search_args(arg_collection):
             help=u"Filter alerts by description. Does fuzzy search by default.",
         ),
     }
-    search_args = args.create_search_args(search_for=u"alerts", filter_args=filter_args)
+    search_args = args.create_search_args(search_for=SEARCH_FOR_ALERTS, filter_args=filter_args)
     arg_collection.extend(search_args)
