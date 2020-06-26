@@ -1,4 +1,5 @@
 from code42cli.args import ArgConfig
+from code42cli.parser import exit_if_mutually_exclusive_args_used_together
 from code42cli.cmds.search_shared import logger_factory, args
 from code42cli.cmds.search_shared.enums import (
     FileEventFilterArguments,
@@ -8,6 +9,12 @@ from code42cli.cmds.search_shared.enums import (
 from code42cli.cmds.securitydata.extraction import extract
 from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore
 from code42cli.commands import Command, SubcommandLoader
+from code42cli.cmds.securitydata.savedsearch.commands import SavedSearchSubCommandLoader
+from code42cli.cmds.search_shared.args import (
+    SEARCH_FOR_FILE_EVENTS,
+    get_advanced_query_incompatible_search_args,
+    get_saved_search_incompatible_search_args,
+)
 
 
 class SecurityDataSubcommandLoader(SubcommandLoader):
@@ -15,6 +22,7 @@ class SecurityDataSubcommandLoader(SubcommandLoader):
     WRITE_TO = u"write-to"
     SEND_TO = u"send-to"
     CLEAR_CHECKPOINT = u"clear-checkpoint"
+    SAVED_SEARCH = u"saved-search"
 
     def load_commands(self):
         """Sets up the `security-data` subcommand with all of its subcommands."""
@@ -54,7 +62,13 @@ class SecurityDataSubcommandLoader(SubcommandLoader):
             handler=clear_checkpoint,
         )
 
-        return [print_func, write, send, clear]
+        saved_search = Command(
+            self.SAVED_SEARCH,
+            u"Manage saved searches.",
+            subcommand_loader=SavedSearchSubCommandLoader(self.SAVED_SEARCH),
+        )
+
+        return [print_func, write, send, clear, saved_search]
 
 
 def clear_checkpoint(sdk, profile, cursor_name):
@@ -65,22 +79,55 @@ def clear_checkpoint(sdk, profile, cursor_name):
     FileEventCursorStore(profile.name).delete(cursor_name)
 
 
+def _get_incompatible_search_args(incompatible_search_args_dict):
+    incompatible_search_args_list = list(incompatible_search_args_dict.keys())
+    return incompatible_search_args_list + list(FileEventFilterArguments())
+
+
+def _validate_args(args):
+
+    if args.advanced_query:
+        incompatible_search_args_dict = get_advanced_query_incompatible_search_args(
+            SEARCH_FOR_FILE_EVENTS
+        )
+        incompatible_search_args = _get_incompatible_search_args(incompatible_search_args_dict)
+        exit_if_mutually_exclusive_args_used_together(args, incompatible_search_args)
+    if args.saved_search:
+        incompatible_search_args_dict = get_saved_search_incompatible_search_args(
+            SEARCH_FOR_FILE_EVENTS
+        )
+        incompatible_search_args = _get_incompatible_search_args(incompatible_search_args_dict)
+        exit_if_mutually_exclusive_args_used_together(
+            args, incompatible_search_args, u"--saved-search"
+        )
+
+
+def _extract(sdk, profile, logger, args):
+    query = (
+        sdk.securitydata.savedsearches.get_query(args.saved_search) if args.saved_search else None
+    )
+    extract(sdk, profile, logger, args, query)
+
+
 def print_out(sdk, profile, args):
     """Activates 'print' command. It gets security events and prints them to stdout."""
+    _validate_args(args)
     logger = logger_factory.get_logger_for_stdout(args.format)
-    extract(sdk, profile, logger, args)
+    _extract(sdk, profile, logger, args)
 
 
 def write_to(sdk, profile, args):
     """Activates 'write-to' command. It gets security events and writes them to the given file."""
+    _validate_args(args)
     logger = logger_factory.get_logger_for_file(args.output_file, args.format)
-    extract(sdk, profile, logger, args)
+    _extract(sdk, profile, logger, args)
 
 
 def send_to(sdk, profile, args):
     """Activates 'send-to' command. It gets security events and logs them to the given server."""
+    _validate_args(args)
     logger = logger_factory.get_logger_for_server(args.server, args.protocol, args.format)
-    extract(sdk, profile, logger, args)
+    _extract(sdk, profile, logger, args)
 
 
 def _load_write_to_args(arg_collection):
@@ -166,5 +213,7 @@ def _load_search_args(arg_collection):
             help=u"Get all events including non-exposure events.",
         ),
     }
-    search_args = args.create_search_args(search_for=u"file events", filter_args=filter_args)
+    search_args = args.create_search_args(
+        search_for=SEARCH_FOR_FILE_EVENTS, filter_args=filter_args
+    )
     arg_collection.extend(search_args)

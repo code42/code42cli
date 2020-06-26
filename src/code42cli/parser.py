@@ -4,6 +4,9 @@ from argparse import RawDescriptionHelpFormatter, SUPPRESS
 from py42.__version__ import __version__ as py42version
 
 from code42cli.__version__ import __version__ as cliversion
+from code42cli.logger import get_main_cli_logger
+
+
 
 BANNER = u""" 
  dP""b8  dP"Yb  8888b. 888888  dP88  oP"Yb. 
@@ -120,3 +123,15 @@ def _build_group_command_descriptions(command):
     name_width = len(max([cmd.name for cmd in subs], key=len))
     lines = [u"  {} - {}".format(cmd.name.ljust(name_width), cmd.description) for cmd in subs]
     return u"\n".join(lines)
+
+
+def exit_if_mutually_exclusive_args_used_together(
+    args, invalid_args, incompatible_with=u"--advanced-query"
+):
+    for arg in invalid_args:
+        if args.__dict__[arg]:
+            logger = get_main_cli_logger()
+            logger.print_and_log_error(
+                u"You cannot use {0} with additional search args.".format(incompatible_with)
+            )
+            exit(1)

@@ -2,6 +2,7 @@ import pytest
 import logging
 
 from py42.sdk.queries.fileevents.filters import *
+from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
 
 import code42cli.cmds.securitydata.extraction as extraction_module
 import code42cli.errors as errors
@@ -52,74 +53,6 @@ def test_extract_when_is_advanced_query_uses_only_the_extract_advanced(
     assert file_event_extractor.extract.call_count == 0
 
 
-def test_extract_when_is_advanced_query_and_has_begin_date_exits(
-    sdk, profile, logger, file_event_namespace
-):
-    file_event_namespace.advanced_query = "some complex json"
-    file_event_namespace.begin = "begin date"
-    with pytest.raises(SystemExit):
-        extraction_module.extract(sdk, profile, logger, file_event_namespace)
-
-
-def test_extract_when_is_advanced_query_and_has_end_date_exits(
-    sdk, profile, logger, file_event_namespace
-):
-    file_event_namespace.advanced_query = "some complex json"
-    file_event_namespace.end = "end date"
-    with pytest.raises(SystemExit):
-        extraction_module.extract(sdk, profile, logger, file_event_namespace)
-
-
-def test_extract_when_is_advanced_query_and_has_exposure_types_exits(
-    sdk, profile, logger, file_event_namespace
-):
-    file_event_namespace.advanced_query = "some complex json"
-    file_event_namespace.type = [ExposureTypeOptions.SHARED_TO_DOMAIN]
-    with pytest.raises(SystemExit):
-        extraction_module.extract(sdk, profile, logger, file_event_namespace)
-
-
-@pytest.mark.parametrize(
-    "arg",
-    [
-        "c42_username",
-        "actor",
-        "md5",
-        "sha256",
-        "source",
-        "file_name",
-        "file_path",
-        "process_owner",
-        "tab_url",
-    ],
-)
-def test_extract_when_is_advanced_query_and_other_incompatible_multi_narg_argument_passed(
-    sdk, profile, logger, file_event_namespace, arg
-):
-    file_event_namespace.advanced_query = "some complex json"
-    setattr(file_event_namespace, arg, ["test_value"])
-    with pytest.raises(SystemExit):
-        extraction_module.extract(sdk, profile, logger, file_event_namespace)
-
-
-def test_extract_when_is_advanced_query_and_has_use_checkpoint_mode_exits(
-    sdk, profile, logger, file_event_namespace
-):
-    file_event_namespace.advanced_query = "some complex json"
-    file_event_namespace.use_checkpoint = "foo"
-    with pytest.raises(SystemExit):
-        extraction_module.extract(sdk, profile, logger, file_event_namespace)
-
-
-def test_extract_when_is_advanced_query_and_has_include_non_exposure_exits(
-    sdk, profile, logger, file_event_namespace
-):
-    file_event_namespace.advanced_query = "some complex json"
-    file_event_namespace.include_non_exposure = True
-    with pytest.raises(SystemExit):
-        extraction_module.extract(sdk, profile, logger, file_event_namespace)
-
-
 def test_extract_when_is_advanced_query_and_include_non_exposure_is_false_does_not_exit(
     sdk, profile, logger, file_event_namespace
 ):
@@ -128,7 +61,7 @@ def test_extract_when_is_advanced_query_and_include_non_exposure_is_false_does_n
     extraction_module.extract(sdk, profile, logger, file_event_namespace)
 
 
-def test_extract_when_is_advanced_query_and_has_incremental_mode_set_to_false_does_not_exit(
+def test_extract_when_is_advanced_query_and_has_does_not_use_checkpoint_does_not_exit(
     sdk, profile, logger, file_event_namespace
 ):
     file_event_namespace.advanced_query = "some complex json"
@@ -244,7 +177,7 @@ def test_extract_when_using_both_min_and_max_dates_uses_expected_timestamps(
 def test_extract_when_given_min_timestamp_more_than_ninety_days_back_in_ad_hoc_mode_causes_exit(
     sdk, profile, logger, file_event_namespace
 ):
-    file_event_namespace.incremental = False
+    file_event_namespace.use_checkpoint = None
     date = get_test_date_str(days_ago=91) + " 12:51:00"
     file_event_namespace.begin = date
     with pytest.raises(DateArgumentError):
@@ -500,3 +433,42 @@ def test_when_sdk_raises_exception_global_variable_gets_set(
     with ErrorTrackerTestHelper():
         extraction_module.extract(sdk, profile, logger, file_event_namespace_with_begin)
         assert errors.ERRORED
+
+
+def test_extract_saved_search_calls_extractor_extract_and_saved_search_execute(
+    sdk_with_user, profile, logger, file_event_extractor, file_event_namespace_with_begin
+):
+    search_query = {
+        "groupClause": "AND",
+        "groups": [
+            {
+                "filterClause": "AND",
+                "filters": [
+                    {
+                        "operator": "ON_OR_AFTER",
+                        "term": "eventTimestamp",
+                        "value": "2020-05-01T00:00:00.000Z",
+                    }
+                ],
+            },
+            {
+                "filterClause": "OR",
+                "filters": [
+                    {"operator": "IS", "term": "eventType", "value": "DELETED"},
+                    {"operator": "IS", "term": "eventType", "value": "EMAILED"},
+                    {"operator": "IS", "term": "eventType", "value": "MODIFIED"},
+                    {"operator": "IS", "term": "eventType", "value": "READ_BY_AP"},
+                    {"operator": "IS", "term": "eventType", "value": "CREATED"},
+                ],
+            },
+        ],
+        "pgNum": 1,
+        "pgSize": 10000,
+        "srtDir": "asc",
+        "srtKey": "eventId",
+    }
+    query = FileEventQuery.from_dict(search_query)
+    extraction_module.extract(
+        sdk_with_user, profile, logger, file_event_namespace_with_begin, query
+    )
+    assert file_event_extractor.extract.call_count == 1

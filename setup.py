@@ -24,7 +24,6 @@ setup(
         "c42eventextractor==0.3.2",
         "keyring==18.0.1",
         "keyrings.alt==3.2.0",
-        "py42>=1.2.0",
     ],
     license="MIT",
     include_package_data=True,
@@ -39,6 +38,7 @@ setup(
             "sphinx",
             "sphinx_rtd_theme",
             "tox==3.14.3",
+            "pexpect>=4.8",
         ]
     },
     classifiers=[

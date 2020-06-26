@@ -16,7 +16,6 @@ from code42cli.cmds.search_shared.cursor_store import AlertCursorStore
 from code42cli.cmds.search_shared.extraction import (
     verify_begin_date_requirements,
     create_handlers,
-    exit_if_advanced_query_used_with_other_search_args,
     create_time_range_filter,
 )
 from code42cli.logger import get_main_cli_logger
@@ -40,7 +39,6 @@ def extract(sdk, profile, output_logger, args):
     handlers = create_handlers(sdk, AlertExtractor, output_logger, store, args.use_checkpoint)
     extractor = AlertExtractor(sdk, handlers)
     if args.advanced_query:
-        exit_if_advanced_query_used_with_other_search_args(args, enums.AlertFilterArguments())
         extractor.extract_advanced(args.advanced_query)
     else:
         verify_begin_date_requirements(args, store)
