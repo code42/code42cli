@@ -146,6 +146,21 @@ def profile(mocker):
     return mock
 
 
+@pytest.fixture(autouse=True)
+def mock_makedirs(mocker):
+    return mocker.patch("os.makedirs")
+
+
+@pytest.fixture(autouse=True)
+def mock_remove(mocker):
+    return mocker.patch("os.remove")
+
+
+@pytest.fixture(autouse=True)
+def mock_listdir(mocker):
+    return mocker.patch("os.listdir")
+
+
 def func_keyword_args(one=None, two=None, three=None, default="testdefault", nargstest=[]):
     pass
 
