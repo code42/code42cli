@@ -13,7 +13,6 @@ from code42cli.logger import (
     logger_has_handlers,
     logger_deps_lock,
     add_handler_to_logger,
-    get_main_cli_logger,
     get_logger_for_stdout as get_stdout_logger,
 )
 from code42cli.errors import Code42CLIError
@@ -35,7 +34,7 @@ def get_logger_for_file(filename, output_format):
             filename: The name of the file to write logs to.
             output_format: CEF, JSON, or RAW_JSON. Each type results in a different logger instance.
     """
-    logger = logging.getLogger(u"code42_file_{0}".format(output_format.lower()))
+    logger = logging.getLogger("code42_file_{0}".format(output_format.lower()))
     if logger_has_handlers(logger):
         return logger
 

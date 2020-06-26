@@ -30,7 +30,7 @@ class Code42Profile(object):
     @property
     def has_stored_password(self):
         stored_password = password.get_stored_password(self)
-        return stored_password is not None and stored_password != u""
+        return stored_password is not None and stored_password != ""
 
     def get_password(self):
         pwd = password.get_stored_password(self)
@@ -39,7 +39,7 @@ class Code42Profile(object):
         return pwd
 
     def __str__(self):
-        return u"{0}: Username={1}, Authority URL={2}".format(
+        return "{0}: Username={1}, Authority URL={2}".format(
             self.name, self.username, self.authority_url
         )
 

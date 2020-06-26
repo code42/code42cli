@@ -70,9 +70,7 @@ class BeginOption(AdvancedQueryIncompatible):
             incremental_present = "incremental" in opts
             begin_present = "begin" in opts
             checkpoint_exists = (
-                ctx.obj
-                and ctx.obj.cursor
-                and ctx.obj.cursor.get_stored_cursor_timestamp() is not None
+                ctx.obj.cursor and ctx.obj.cursor.get_stored_cursor_timestamp() is not None
             )
             if incremental_present and checkpoint_exists and begin_present:
                 opts.pop("begin")

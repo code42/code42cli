@@ -2,9 +2,9 @@ import os
 import pexpect
 
 
-LINE_FEED = b'\r\n'
-PASSWORD_PROMPT = b'Password: '
-ENCODING_TYPE = 'utf-8'
+LINE_FEED = b"\r\n"
+PASSWORD_PROMPT = b"Password: "
+ENCODING_TYPE = "utf-8"
 
 
 def encode_response(line, encoding_type=ENCODING_TYPE):

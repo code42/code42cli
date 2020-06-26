@@ -44,25 +44,25 @@ class LoggedCLIError(Code42CLIError):
     def format_message(self):
         locations_message = get_view_error_details_message()
         return (
-            u"{}\n{}".format(self.message, locations_message) if self.message else locations_message
+            "{}\n{}".format(self.message, locations_message) if self.message else locations_message
         )
 
 
 class UserAlreadyAddedError(Code42CLIError):
     def __init__(self, username, list_name):
-        msg = u"'{}' is already on the {}.".format(username, list_name)
+        msg = "'{}' is already on the {}.".format(username, list_name)
         super().__init__(msg)
 
 
 class UnknownRiskTagError(Code42CLIError):
     def __init__(self, bad_tags):
-        tags = u", ".join(bad_tags)
-        super().__init__(u"The following risk tags are unknown: '{}'.".format(tags))
+        tags = ", ".join(bad_tags)
+        super().__init__("The following risk tags are unknown: '{}'.".format(tags))
 
 
 class InvalidRuleTypeError(Code42CLIError):
     def __init__(self, rule_id, source):
-        msg = u"Only alert rules with a source of 'Alerting' can be targeted by this command. "
+        msg = "Only alert rules with a source of 'Alerting' can be targeted by this command. "
         msg += "Rule {0} has a source of '{1}'."
         super().__init__(msg.format(rule_id, source))
 
@@ -73,13 +73,13 @@ class UserDoesNotExistError(Code42CLIError):
     bulk add or remove."""
 
     def __init__(self, username):
-        super().__init__(u"User '{}' does not exist.".format(username))
+        super().__init__("User '{}' does not exist.".format(username))
 
 
 class UserNotInLegalHoldError(Code42CLIError):
     def __init__(self, username, matter_id):
         super().__init__(
-            u"User '{}' is not an active member of legal hold matter '{}'".format(
+            "User '{}' is not an active member of legal hold matter '{}'".format(
                 username, matter_id
             )
         )
@@ -88,8 +88,8 @@ class UserNotInLegalHoldError(Code42CLIError):
 class LegalHoldNotFoundOrPermissionDeniedError(Code42CLIError):
     def __init__(self, matter_id):
         super().__init__(
-            u"Matter with id={} either does not exist or your profile does not have permission to "
-            u"view it.".format(matter_id)
+            "Matter with id={} either does not exist or your profile does not have permission to "
+            "view it.".format(matter_id)
         )
 
 
@@ -137,9 +137,9 @@ class ExceptionHandlingGroup(click.Group):
             self.logger.log_verbose_error(self._original_args, err.response.request)
             raise LoggedCLIError("Problem making request to server.")
 
-        # except Exception as err:
-        #     self.logger.log_error("{}: {}".format(type(err), str(err)))
-        #     raise LoggedCLIError("Unknown problem occurred.")
+        except Exception as err:
+            self.logger.log_verbose_error()
+            raise LoggedCLIError("Unknown problem occurred.")
 
     @staticmethod
     def _suggest_cmd(usage_err):

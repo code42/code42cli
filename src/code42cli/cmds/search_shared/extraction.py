@@ -16,7 +16,7 @@ _ALERT_DETAIL_BATCH_SIZE = 100
 
 
 def _get_alert_details(sdk, alert_summary_list):
-    alert_ids = [alert[u"id"] for alert in alert_summary_list]
+    alert_ids = [alert["id"] for alert in alert_summary_list]
     batches = [
         alert_ids[i : i + _ALERT_DETAIL_BATCH_SIZE]
         for i in range(0, len(alert_ids), _ALERT_DETAIL_BATCH_SIZE)
@@ -24,8 +24,8 @@ def _get_alert_details(sdk, alert_summary_list):
     results = []
     for batch in batches:
         r = sdk.alerts.get_details(batch)
-        results.extend(r[u"alerts"])
-    results = sorted(results, key=lambda x: x[u"createdAt"], reverse=True)
+        results.extend(r["alerts_orig"])
+    results = sorted(results, key=lambda x: x["createdAt"], reverse=True)
     return results
 
 
@@ -36,8 +36,8 @@ def create_handlers(sdk, extractor_class, output_logger, cursor_store):
 
     def handle_error(exception):
         errors.ERRORED = True
-        if hasattr(exception, u"response") and hasattr(exception.response, u"text"):
-            message = u"{0}: {1}".format(exception, exception.response.text)
+        if hasattr(exception, "response") and hasattr(exception.response, "text"):
+            message = "{0}: {1}".format(exception, exception.response.text)
         else:
             message = exception
         logger.log_error(message)
@@ -50,12 +50,12 @@ def create_handlers(sdk, extractor_class, output_logger, cursor_store):
         handlers.get_cursor_position = cursor_store.get_stored_cursor_timestamp
 
     @warn_interrupt(
-        warning=u"Attempting to cancel cleanly to keep checkpoint data accurate. One moment..."
+        warning="Attempting to cancel cleanly to keep checkpoint data accurate. One moment..."
     )
     def handle_response(response):
         response_dict = json.loads(response.text)
         events = response_dict.get(extractor._key)
-        if extractor._key == u"alerts":
+        if extractor._key == "alerts_orig":
             try:
                 events = _get_alert_details(sdk, events)
             except Exception as ex:
@@ -80,7 +80,7 @@ def create_time_range_filter(filter_cls, begin_date=None, end_date=None):
             end_date: The end date for the range.
     """
     if not issubclass(filter_cls, QueryFilterTimestampField):
-        raise Exception(u"filter_cls must be a subclass of QueryFilterTimestampField")
+        raise Exception("filter_cls must be a subclass of QueryFilterTimestampField")
 
     if begin_date and end_date:
         verify_timestamp_order(begin_date, end_date)

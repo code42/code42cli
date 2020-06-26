@@ -4,10 +4,9 @@ import pytest
 from py42.sdk import SDKClient
 
 from code42cli.bulk import BulkProcessor
-from code42cli.file_readers import CliFileReader
 from code42cli.config import ConfigAccessor
 from code42cli.profile import Code42Profile
-
+from code42cli.options import CLIState
 import code42cli.errors as error_tracker
 
 
@@ -105,6 +104,15 @@ def sdk_without_user(sdk):
 @pytest.fixture()
 def mock_42(mocker):
     return mocker.patch("py42.sdk.from_local_account")
+
+
+@pytest.fixture()
+def cli_state(mocker, sdk, profile):
+    mock_state = mocker.MagicMock(spec=CLIState)
+    mock_state._sdk = sdk
+    mock_state.profile = profile
+    mock_state.search_filters = []
+    return mock_state
 
 
 class MockSection(object):

@@ -1,6 +1,4 @@
-from py42.exceptions import Py42BadRequestError
-
-from code42cli.errors import UnknownRiskTagError, UserAlreadyAddedError
+from code42cli.errors import UserAlreadyAddedError
 from code42cli.cmds.shared import get_user_id
 
 
@@ -40,7 +38,7 @@ def try_handle_user_already_added_error(bad_request_err, username_tried_adding, 
 
 
 def _error_is_user_already_added(bad_request_error_text):
-    return u"User already on list" in bad_request_error_text
+    return "User already on list" in bad_request_error_text
 
 
 def handle_list_args(list_arg):

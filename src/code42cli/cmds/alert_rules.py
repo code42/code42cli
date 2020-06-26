@@ -18,18 +18,18 @@ from code42cli.bulk import generate_template_cmd_factory
 
 
 class AlertRuleTypes(object):
-    EXFILTRATION = u"FED_ENDPOINT_EXFILTRATION"
-    CLOUD_SHARE = u"FED_CLOUD_SHARE_PERMISSIONS"
-    FILE_TYPE_MISMATCH = u"FED_FILE_TYPE_MISMATCH"
+    EXFILTRATION = "FED_ENDPOINT_EXFILTRATION"
+    CLOUD_SHARE = "FED_CLOUD_SHARE_PERMISSIONS"
+    FILE_TYPE_MISMATCH = "FED_FILE_TYPE_MISMATCH"
 
 
 _HEADER_KEYS_MAP = OrderedDict()
-_HEADER_KEYS_MAP[u"observerRuleId"] = u"RuleId"
-_HEADER_KEYS_MAP[u"name"] = u"Name"
-_HEADER_KEYS_MAP[u"severity"] = u"Severity"
-_HEADER_KEYS_MAP[u"type"] = u"Type"
-_HEADER_KEYS_MAP[u"ruleSource"] = u"Source"
-_HEADER_KEYS_MAP[u"isEnabled"] = u"Enabled"
+_HEADER_KEYS_MAP["observerRuleId"] = "RuleId"
+_HEADER_KEYS_MAP["name"] = "Name"
+_HEADER_KEYS_MAP["severity"] = "Severity"
+_HEADER_KEYS_MAP["type"] = "Type"
+_HEADER_KEYS_MAP["ruleSource"] = "Source"
+_HEADER_KEYS_MAP["isEnabled"] = "Enabled"
 
 
 @click.group(cls=OrderedGroup)

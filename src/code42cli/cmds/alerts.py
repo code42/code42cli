@@ -157,11 +157,15 @@ def alert_options(f):
     return f
 
 
+def _get_alert_cursor_store(profile_name):
+    return AlertCursorStore(profile_name)
+
+
 @click.group(cls=OrderedGroup)
 @global_options
 def alerts(state):
     """Tools for getting alert data."""
-    state.cursor = AlertCursorStore(state.profile.name)
+    state.cursor = _get_alert_cursor_store(state.profile.name)
 
 
 @alerts.command()
@@ -177,10 +181,17 @@ def clear_checkpoint(state):
 @global_options
 def _print(cli_state, format, begin, end, advanced_query, incremental, **kwargs):
     """Print alerts to stdout."""
+    print(begin)
     output_logger = logger_factory.get_logger_for_stdout(format)
     cursor = cli_state.cursor if incremental else None
     _extract(
-        cli_state.sdk, cursor, cli_state.search_filters, begin, end, advanced_query, output_logger,
+        sdk=cli_state.sdk,
+        cursor=cursor,
+        filter_list=cli_state.search_filters,
+        begin=begin,
+        end=end,
+        advanced_query=advanced_query,
+        output_logger=output_logger,
     )
 
 
@@ -194,7 +205,13 @@ def write_to(cli_state, format, output_file, begin, end, advanced_query, increme
     output_logger = logger_factory.get_logger_for_file(output_file, format)
     cursor = cli_state.cursor if incremental else None
     _extract(
-        cli_state.sdk, cursor, cli_state.search_filters, begin, end, advanced_query, output_logger,
+        sdk=cli_state.sdk,
+        cursor=cursor,
+        filter_list=cli_state.search_filters,
+        begin=begin,
+        end=end,
+        advanced_query=advanced_query,
+        output_logger=output_logger,
     )
 
 
@@ -210,13 +227,19 @@ def send_to(
     output_logger = logger_factory.get_logger_for_server(hostname, protocol, format)
     cursor = cli_state.cursor if incremental else None
     _extract(
-        cli_state.sdk, cursor, cli_state.search_filters, begin, end, advanced_query, output_logger,
+        sdk=cli_state.sdk,
+        cursor=cursor,
+        filter_list=cli_state.search_filters,
+        begin=begin,
+        end=end,
+        advanced_query=advanced_query,
+        output_logger=output_logger,
     )
 
 
 def _extract(sdk, cursor, filter_list, begin, end, advanced_query, output_logger):
     handlers = create_handlers(sdk, AlertExtractor, output_logger, cursor)
-    extractor = AlertExtractor(sdk, handlers)
+    extractor = _get_alert_extractor(sdk, handlers)
     if advanced_query:
         extractor.extract_advanced(advanced_query)
     else:
@@ -225,3 +248,7 @@ def _extract(sdk, cursor, filter_list, begin, end, advanced_query, output_logger
         extractor.extract(*filter_list)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         echo("No results found.")
+
+
+def _get_alert_extractor(sdk, handlers):
+    return AlertExtractor(sdk, handlers)

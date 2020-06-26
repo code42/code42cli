@@ -5,13 +5,13 @@ import click
 from c42eventextractor.common import convert_datetime_to_timestamp
 
 
-TIMESTAMP_REGEX = re.compile(u"(\d{4}-\d{2}-\d{2})\s*(.*)?")
-MAGIC_TIME_REGEX = re.compile(u"(\d+)([dhm])$")
+TIMESTAMP_REGEX = re.compile("(\d{4}-\d{2}-\d{2})\s*(.*)?")
+MAGIC_TIME_REGEX = re.compile("(\d+)([dhm])$")
 
 _FORMAT_VALUE_ERROR_MESSAGE = (
-    u"input must be a date/time string (e.g. 'yyyy-MM-dd', "
-    u"'yy-MM-dd HH:MM', 'yy-MM-dd HH:MM:SS'), or a short value in days, "
-    u"hours, or minutes (e.g. 30d, 24h, 15m)"
+    "input must be a date/time string (e.g. 'yyyy-MM-dd', "
+    "'yy-MM-dd HH:MM', 'yy-MM-dd HH:MM:SS'), or a short value in days, "
+    "hours, or minutes (e.g. 30d, 24h, 15m)"
 )
 
 
@@ -65,7 +65,7 @@ def _parse_timestamp(date_str, rounding_func):
 def _get_dt_from_date_time_pair(date, time):
     date_format = "%Y-%m-%d %H:%M:%S"
     if time:
-        time = "{}:{}:{}".format(*time.split(":") + ["00", u"00"])
+        time = "{}:{}:{}".format(*time.split(":") + ["00", "00"])
     else:
         time = "00:00:00"
     date_string = "{} {}".format(date, time)

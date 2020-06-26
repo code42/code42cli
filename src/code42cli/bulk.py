@@ -78,13 +78,16 @@ class BulkProcessor(object):
         reader (CSVReader or FlatFileReader): A generator that reads rows and yields data into `row_handler`.
     """
 
-    def __init__(self, row_handler, rows, worker=None, progress_bar=None):
+    def __init__(self, row_handler, rows, worker=None):
         total = len(rows)
         self._rows = rows
         self._row_handler = row_handler
-        self.__worker = worker or Worker(5, total)
+        self._progress_bar = click.progressbar(
+            length=len(self._rows), item_show_func=self._show_stats
+        )
+        self.__worker = worker or Worker(5, total, bar=self._progress_bar)
         self._stats = self.__worker.stats
-        self._progress_bar = progress_bar or ProgressBar(total)
+        self._current_row = ""
 
     def run(self):
         """Processes the csv rows specified in the ctor, calling `self.row_handler` on each row."""
@@ -114,11 +117,12 @@ class BulkProcessor(object):
             self.__worker.do_async(lambda *args, **kwargs: self._handle_row(*args, **kwargs), row)
 
     def _handle_row(self, *args, **kwargs):
-        message = str(self._stats)
-        self._progress_bar.update(self._stats.total_processed, message)
         self._row_handler(*args, **kwargs)
 
+    def _show_stats(self, _):
+        return str(self._stats)
+
     def _print_results(self):
-        self._progress_bar.clear_bar_and_print_final(str(self._stats))
+        click.echo("")
         if self._stats.total_errors:
             raise LoggedCLIError("Some problems occurred during bulk processing.")

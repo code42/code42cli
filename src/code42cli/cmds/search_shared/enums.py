@@ -1,27 +1,27 @@
-IS_INCREMENTAL_KEY = u"incremental"
+IS_INCREMENTAL_KEY = "incremental"
 
 
 class OutputFormat(object):
-    CEF = u"CEF"
-    JSON = u"JSON"
-    RAW = u"RAW-JSON"
+    CEF = "CEF"
+    JSON = "JSON"
+    RAW = "RAW-JSON"
 
     def __iter__(self):
         return iter([self.CEF, self.JSON, self.RAW])
 
 
 class AlertOutputFormat(object):
-    JSON = u"JSON"
-    RAW = u"RAW-JSON"
+    JSON = "JSON"
+    RAW = "RAW-JSON"
 
     def __iter__(self):
         return iter([self.JSON, self.RAW])
 
 
 class AlertSeverity(object):
-    HIGH = u"HIGH"
-    MEDIUM = u"MEDIUM"
-    LOW = u"LOW"
+    HIGH = "HIGH"
+    MEDIUM = "MEDIUM"
+    LOW = "LOW"
 
     def __iter__(self):
         return iter(self._as_list())
@@ -34,8 +34,8 @@ class AlertSeverity(object):
 
 
 class AlertState(object):
-    OPEN = u"OPEN"
-    DISMISSED = u"RESOLVED"
+    OPEN = "OPEN"
+    DISMISSED = "RESOLVED"
 
     def __iter__(self):
         return iter(self._as_list())
@@ -48,12 +48,12 @@ class AlertState(object):
 
 
 class ExposureType(object):
-    SHARED_VIA_LINK = u"SharedViaLink"
-    SHARED_TO_DOMAIN = u"SharedToDomain"
-    APPLICATION_READ = u"ApplicationRead"
-    CLOUD_STORAGE = u"CloudStorage"
-    REMOVABLE_MEDIA = u"RemovableMedia"
-    IS_PUBLIC = u"IsPublic"
+    SHARED_VIA_LINK = "SharedViaLink"
+    SHARED_TO_DOMAIN = "SharedToDomain"
+    APPLICATION_READ = "ApplicationRead"
+    CLOUD_STORAGE = "CloudStorage"
+    REMOVABLE_MEDIA = "RemovableMedia"
+    IS_PUBLIC = "IsPublic"
 
     def __iter__(self):
         return iter(self._as_list())
@@ -73,9 +73,9 @@ class ExposureType(object):
 
 
 class RuleType(object):
-    ENDPOINT_EXFILTRATION = u"FedEndpointExfiltration"
-    CLOUD_SHARE_PERMISSIONS = u"FedCloudSharePermissions"
-    FILE_TYPE_MISMATCH = u"FedFileTypeMismatch"
+    ENDPOINT_EXFILTRATION = "FedEndpointExfiltration"
+    CLOUD_SHARE_PERMISSIONS = "FedCloudSharePermissions"
+    FILE_TYPE_MISMATCH = "FedFileTypeMismatch"
 
     def __iter__(self):
         return iter(self._as_list())
@@ -88,8 +88,8 @@ class RuleType(object):
 
 
 class ServerProtocol(object):
-    TCP = u"TCP"
-    UDP = u"UDP"
+    TCP = "TCP"
+    UDP = "UDP"
 
     def __iter__(self):
         return iter([self.TCP, self.UDP])
@@ -99,26 +99,26 @@ class SearchArguments(object):
     """These string values should match `argparse` stored parameter names. For example, for the 
     CLI argument `--c42-username`, the string should be `c42_username`."""
 
-    ADVANCED_QUERY = u"advanced_query"
-    BEGIN_DATE = u"begin"
-    END_DATE = u"end"
+    ADVANCED_QUERY = "advanced_query"
+    BEGIN_DATE = "begin"
+    END_DATE = "end"
 
     def __iter__(self):
         return iter([self.ADVANCED_QUERY, self.BEGIN_DATE, self.END_DATE])
 
 
 class FileEventFilterArguments(SearchArguments):
-    EXPOSURE_TYPES = u"type"
-    C42_USERNAME = u"c42_username"
-    ACTOR = u"actor"
-    MD5 = u"md5"
-    SHA256 = u"sha256"
-    SOURCE = u"source"
-    FILE_NAME = u"file_name"
-    FILE_PATH = u"file_path"
-    PROCESS_OWNER = u"process_owner"
-    TAB_URL = u"tab_url"
-    INCLUDE_NON_EXPOSURE_EVENTS = u"include_non_exposure"
+    EXPOSURE_TYPES = "type"
+    C42_USERNAME = "c42_username"
+    ACTOR = "actor"
+    MD5 = "md5"
+    SHA256 = "sha256"
+    SOURCE = "source"
+    FILE_NAME = "file_name"
+    FILE_PATH = "file_path"
+    PROCESS_OWNER = "process_owner"
+    TAB_URL = "tab_url"
+    INCLUDE_NON_EXPOSURE_EVENTS = "include_non_exposure"
 
     def __iter__(self):
         return iter(
@@ -139,19 +139,19 @@ class FileEventFilterArguments(SearchArguments):
 
 
 class AlertFilterArguments(object):
-    STATE = u"state"
-    SEVERITY = u"severity"
-    ACTOR = u"actor"
-    ACTOR_CONTAINS = u"actor_contains"
-    EXCLUDE_ACTOR = u"exclude_actor"
-    EXCLUDE_ACTOR_CONTAINS = u"exclude_actor_contains"
-    RULE_NAME = u"rule_name"
-    EXCLUDE_RULE_NAME = u"exclude_rule_name"
-    RULE_ID = u"rule_id"
-    EXCLUDE_RULE_ID = u"exclude_rule_id"
-    RULE_TYPE = u"rule_type"
-    EXCLUDE_RULE_TYPE = u"exclude_rule_type"
-    DESCRIPTION = u"description"
+    STATE = "state"
+    SEVERITY = "severity"
+    ACTOR = "actor"
+    ACTOR_CONTAINS = "actor_contains"
+    EXCLUDE_ACTOR = "exclude_actor"
+    EXCLUDE_ACTOR_CONTAINS = "exclude_actor_contains"
+    RULE_NAME = "rule_name"
+    EXCLUDE_RULE_NAME = "exclude_rule_name"
+    RULE_ID = "rule_id"
+    EXCLUDE_RULE_ID = "exclude_rule_id"
+    RULE_TYPE = "rule_type"
+    EXCLUDE_RULE_TYPE = "exclude_rule_type"
+    DESCRIPTION = "description"
 
     def __iter__(self):
         return iter(

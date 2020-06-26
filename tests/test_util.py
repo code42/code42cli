@@ -2,9 +2,6 @@ import pytest
 
 from code42cli import PRODUCT_NAME
 from code42cli.util import does_user_agree, get_url_parts, find_format_width
-from code42cli.cmds.shared import get_user_id
-from code42cli.errors import UserDoesNotExistError
-
 
 TEST_HEADER = {u"key1": u"Column 1", u"key2": u"Column 10", u"key3": u"Column 100"}
 
@@ -71,8 +68,3 @@ def test_find_format_width_filters_keys_not_present_in_header():
     result, _ = find_format_width(report, header_with_subset_keys)
     for item in result:
         assert u"key2" not in item.keys()
-
-
-def test_get_user_id_when_user_does_not_raise_error(sdk_without_user):
-    with pytest.raises(UserDoesNotExistError):
-        get_user_id(sdk_without_user, "risky employee")

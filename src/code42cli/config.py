@@ -9,24 +9,24 @@ import code42cli.util as util
 class NoConfigProfileError(Exception):
     def __init__(self, profile_arg_name=None):
         message = (
-            u"Profile '{}' does not exist.".format(profile_arg_name)
+            "Profile '{}' does not exist.".format(profile_arg_name)
             if profile_arg_name
-            else u"Profile does not exist."
+            else "Profile does not exist."
         )
         super(NoConfigProfileError, self).__init__(message)
 
 
 class ConfigAccessor(object):
-    DEFAULT_VALUE = u"__DEFAULT__"
-    AUTHORITY_KEY = u"c42_authority_url"
-    USERNAME_KEY = u"c42_username"
-    IGNORE_SSL_ERRORS_KEY = u"ignore-ssl-errors"
-    DEFAULT_PROFILE = u"default_profile"
-    _INTERNAL_SECTION = u"Internal"
+    DEFAULT_VALUE = "__DEFAULT__"
+    AUTHORITY_KEY = "c42_authority_url"
+    USERNAME_KEY = "c42_username"
+    IGNORE_SSL_ERRORS_KEY = "ignore-ssl-errors"
+    DEFAULT_PROFILE = "default_profile"
+    _INTERNAL_SECTION = "Internal"
 
     def __init__(self, parser):
         self.parser = parser
-        file_name = u"config.cfg"
+        file_name = "config.cfg"
         self.path = os.path.join(util.get_user_project_path(), file_name)
         if not os.path.exists(self.path):
             self._create_internal_section()
@@ -135,7 +135,7 @@ class ConfigAccessor(object):
         self.parser[name][self.IGNORE_SSL_ERRORS_KEY] = str(False)
 
     def _save(self):
-        util.open_file(self.path, u"w+", lambda file: self.parser.write(file))
+        util.open_file(self.path, "w+", lambda file: self.parser.write(file))
 
     def _try_complete_setup(self, profile):
         authority = profile.get(self.AUTHORITY_KEY)
