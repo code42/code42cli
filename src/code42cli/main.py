@@ -1,4 +1,3 @@
-import platform
 import signal
 import sys
 
@@ -44,19 +43,6 @@ def exit_on_interrupt(signal, frame):
 
 signal.signal(signal.SIGINT, exit_on_interrupt)
 
-
-# If on Windows, configure console session to handle ANSI escape sequences correctly
-# source: https://bugs.python.org/issue29059
-if platform.system().lower() == "windows":
-    from ctypes import windll, c_int, byref
-
-    stdout_handle = windll.kernel32.GetStdHandle(c_int(-11))
-    mode = c_int(0)
-    windll.kernel32.GetConsoleMode(c_int(stdout_handle), byref(mode))
-    mode = c_int(mode.value | 4)
-    windll.kernel32.SetConsoleMode(c_int(stdout_handle), mode)
-
-
 # Sets part of the user agent string that py42 attaches to requests for the purposes of
 # identifying CLI users.
 set_user_agent_suffix(PRODUCT_NAME)
@@ -66,8 +52,8 @@ CONTEXT_SETTINGS = {
     "max_content_width": 200,
 }
 
-# cls=ExceptionHandlingGroup,
-@click.group(context_settings=CONTEXT_SETTINGS, help=BANNER)
+
+@click.group(cls=ExceptionHandlingGroup, context_settings=CONTEXT_SETTINGS, help=BANNER)
 @global_options
 def cli(state):
     pass
@@ -80,14 +66,3 @@ cli.add_command(departing_employee)
 cli.add_command(high_risk_employee)
 cli.add_command(legal_hold)
 cli.add_command(profile)
-
-
-def main():
-    try:
-        cli()
-    finally:
-        flush_stds_out_err_without_printing_error()
-
-
-if __name__ == "__main__":
-    main()
