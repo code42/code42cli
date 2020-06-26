@@ -5,10 +5,21 @@ from threading import Lock
 from code42cli.util import get_user_project_path
 
 # prevent loggers from printing stacks to stderr if a pipe is broken
-logging.raiseExceptions = False
+logging.raiseExceptions = True
 
 logger_deps_lock = Lock()
 ERROR_LOG_FILE_NAME = "code42_errors.log"
+
+
+def handleError(record):
+    """Override logger's `handleError` method to exit if an exception is raised while trying to 
+    log, and replace stdout with devnull because if we're here it's usually because stdout has 
+    been closed on us.
+    """
+    t, v, tb = sys.exc_info()
+    if t == BrokenPipeError:
+        sys.stdout = open(os.devnull)
+    sys.exit()
 
 
 def get_logger_for_stdout(name_suffix="main", formatter=None):
@@ -19,6 +30,7 @@ def get_logger_for_stdout(name_suffix="main", formatter=None):
     with logger_deps_lock:
         if not logger_has_handlers(logger):
             handler = logging.StreamHandler(sys.stdout)
+            handler.handleError = handleError
             formatter = formatter or _get_standard_formatter()
             logger.setLevel(logging.INFO)
             return add_handler_to_logger(logger, handler, formatter)

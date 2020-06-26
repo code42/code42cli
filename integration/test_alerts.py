@@ -4,7 +4,7 @@ import json
 from integration import run_command
 from integration.util import cleanup_after_validation
 
-ALERT_COMMAND = "code42 alerts_orig print -b 2020-05-18 -e 2020-05-20"
+ALERT_COMMAND = "code42 alerts print -b 2020-05-18 -e 2020-05-20"
 
 
 def _parse_response(response):
@@ -67,10 +67,10 @@ def _validate_severity(response):
     assert record["severity"] == "MEDIUM"
 
 
-@cleanup_after_validation("./integration/alerts_orig")
+@cleanup_after_validation("./integration/alerts")
 def test_alert_writes_to_file_and_filters_result_by_severity():
     command = (
-        "code42 alerts_orig write-to ./integration/alerts_orig -b 2020-05-18 -e 2020-05-20 "
+        "code42 alerts write-to ./integration/alerts -b 2020-05-18 -e 2020-05-20 "
         "--severity MEDIUM"
     )
     return_code, response = run_command(command)

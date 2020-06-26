@@ -4,7 +4,7 @@ import sys
 
 import click
 
-from code42cli.options import global_options, OrderedGroup
+from code42cli.options import global_options
 from code42cli.cmds.alerts import alerts
 from code42cli.cmds.alert_rules import alert_rules
 from code42cli.cmds.securitydata import security_data
@@ -18,7 +18,6 @@ from code42cli.cmds.profile import profile
 from py42.settings import set_user_agent_suffix
 
 from code42cli import PRODUCT_NAME
-from code42cli.util import flush_stds_out_err_without_printing_error
 from py42.__version__ import __version__ as py42version
 
 from code42cli.__version__ import __version__ as cliversion
@@ -67,8 +66,8 @@ CONTEXT_SETTINGS = {
     "max_content_width": 200,
 }
 
-
-@click.group(cls=ExceptionHandlingGroup, context_settings=CONTEXT_SETTINGS, help=BANNER)
+# cls=ExceptionHandlingGroup,
+@click.group(context_settings=CONTEXT_SETTINGS, help=BANNER)
 @global_options
 def cli(state):
     pass

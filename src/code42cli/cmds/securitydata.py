@@ -202,3 +202,9 @@ def _extract(sdk, cursor, filter_list, begin, end, advanced_query, output_logger
         extractor.extract(*filter_list)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         echo("No results found.")
+
+
+@security_data.command()
+def test():
+    for line in range(100):
+        echo(line)

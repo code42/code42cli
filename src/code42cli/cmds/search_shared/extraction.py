@@ -1,6 +1,6 @@
 import json
 
-from click import secho
+from click import secho, echo, Abort
 
 from c42eventextractor import ExtractionHandlers
 from py42.sdk.queries.query_filter import QueryFilterTimestampField
@@ -24,7 +24,7 @@ def _get_alert_details(sdk, alert_summary_list):
     results = []
     for batch in batches:
         r = sdk.alerts.get_details(batch)
-        results.extend(r["alerts_orig"])
+        results.extend(r["alerts"])
     results = sorted(results, key=lambda x: x["createdAt"], reverse=True)
     return results
 
@@ -41,7 +41,7 @@ def create_handlers(sdk, extractor_class, output_logger, cursor_store):
         else:
             message = exception
         logger.log_error(message)
-        secho(message, err=True, fg="red")
+        secho(str(message), err=True, fg="red")
 
     handlers.handle_error = handle_error
 
@@ -55,7 +55,7 @@ def create_handlers(sdk, extractor_class, output_logger, cursor_store):
     def handle_response(response):
         response_dict = json.loads(response.text)
         events = response_dict.get(extractor._key)
-        if extractor._key == "alerts_orig":
+        if extractor._key == "alerts":
             try:
                 events = _get_alert_details(sdk, events)
             except Exception as ex:

@@ -39,22 +39,6 @@ def is_interactive():
     return sys.stdin.isatty()
 
 
-def flush_stds_out_err_without_printing_error():
-    """Workaround for bug in python3 that causes exception to be printed on broken pipe: 
-    https://bugs.python.org/issue11380
-    """
-    try:
-        sys.stdout.flush()
-    except BrokenPipeError:
-        try:
-            sys.stdout.close()
-        except BrokenPipeError:
-            try:
-                sys.stderr.flush()
-            except BrokenPipeError:
-                sys.stderr.close()
-
-
 def get_url_parts(url_str):
     parts = url_str.split(":")
     port = None

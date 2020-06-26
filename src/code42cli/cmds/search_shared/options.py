@@ -28,7 +28,7 @@ def not_in_filter(filter_cls):
 
 def exists_filter(filter_cls):
     def callback(ctx, arg):
-        if arg:
+        if not arg:
             ctx.obj.search_filters.append(filter_cls.exists())
             return arg
 
@@ -65,7 +65,7 @@ class BeginOption(AdvancedQueryIncompatible):
         super().__init__(*args, **kwargs)
 
     def handle_parse_result(self, ctx, opts, args):
-        # if None it means we're in autocomplete mode and don't want to validate
+        # if ctx.obj is None it means we're in autocomplete mode and don't want to validate
         if ctx.obj is not None:
             incremental_present = "incremental" in opts
             begin_present = "begin" in opts
