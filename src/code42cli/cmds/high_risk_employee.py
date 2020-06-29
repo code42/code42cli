@@ -77,7 +77,7 @@ def remove_risk_tags(state, username, risk_tag):
 @high_risk_employee.group(cls=OrderedGroup)
 @global_options
 def bulk(state):
-    """Tools for executing bulk high-risk-employee commands."""
+    """Tools for executing bulk high risk employee actions."""
     pass
 
 

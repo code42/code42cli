@@ -100,7 +100,7 @@ def show(state, rule_id):
 @alert_rules.group(cls=OrderedGroup)
 @global_options
 def bulk(state):
-    """Tools for executing bulk alert-rules commands."""
+    """Tools for executing bulk alert rule actions."""
     pass
 
 

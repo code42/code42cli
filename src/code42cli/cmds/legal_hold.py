@@ -125,7 +125,7 @@ def show(state, matter_id, include_inactive=False, include_policy=False):
 @legal_hold.group(cls=OrderedGroup)
 @global_options
 def bulk(state):
-    """Tools for executing bulk legal-hold commands."""
+    """Tools for executing bulk legal hold actions."""
     pass
 
 
