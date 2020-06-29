@@ -50,6 +50,7 @@ def show(profile_name):
     if cliprofile.get_stored_password(c42profile.name) is not None:
         echo("\t* A password is set.")
     echo("")
+    echo("")
 
 
 @profile.command()

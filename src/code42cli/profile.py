@@ -135,7 +135,10 @@ def set_password(new_password, profile_name=None):
 
 
 CREATE_PROFILE_HELP = "\nTo add a profile, use:\n{}".format(
-    style("\tcode42 profile create <profile-name> <authority-URL> <username>\n", bold=True)
+    style(
+        "\tcode42 profile create --name <profile-name> --server <authority-URL> --username <username>\n",
+        bold=True,
+    )
 )
 
 
