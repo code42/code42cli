@@ -29,12 +29,6 @@ def get_user_project_path(subdir=""):
     return user_project_path
 
 
-def open_file(file_path, mode, action):
-    """Wrapper for opening files, useful for testing purposes."""
-    with open(file_path, mode, encoding="utf-8") as f:
-        return action(f)
-
-
 def is_interactive():
     return sys.stdin.isatty()
 

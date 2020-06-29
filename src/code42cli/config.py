@@ -135,7 +135,8 @@ class ConfigAccessor(object):
         self.parser[name][self.IGNORE_SSL_ERRORS_KEY] = str(False)
 
     def _save(self):
-        util.open_file(self.path, "w+", lambda file: self.parser.write(file))
+        with open(self.path, "w+") as file:
+            self.parser.write(file)
 
     def _try_complete_setup(self, profile):
         authority = profile.get(self.AUTHORITY_KEY)
