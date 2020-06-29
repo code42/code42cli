@@ -32,9 +32,7 @@ def file_event_namespace_with_begin(file_event_namespace):
 @pytest.fixture
 def file_event_checkpoint(mocker):
     return mocker.patch(
-        "{}.cmds.search_shared.cursor_store.FileEventCursorStore.get_stored_cursor_timestamp".format(
-            PRODUCT_NAME
-        )
+        "{}.cmds.search_shared.cursor_store.FileEventCursorStore.get".format(PRODUCT_NAME)
     )
 
 
@@ -63,11 +61,11 @@ def test_extract_when_is_advanced_query_and_include_non_exposure_is_false_does_n
     extraction_module.extract(sdk, profile, logger, file_event_namespace)
 
 
-def test_extract_when_is_advanced_query_and_has_incremental_mode_set_to_false_does_not_exit(
+def test_extract_when_is_advanced_query_and_has_does_not_use_checkpoint_does_not_exit(
     sdk, profile, logger, file_event_namespace
 ):
     file_event_namespace.advanced_query = "some complex json"
-    file_event_namespace.is_incremental = False
+    file_event_namespace.use_checkpoint = None
     extraction_module.extract(sdk, profile, logger, file_event_namespace)
 
 
@@ -179,7 +177,7 @@ def test_extract_when_using_both_min_and_max_dates_uses_expected_timestamps(
 def test_extract_when_given_min_timestamp_more_than_ninety_days_back_in_ad_hoc_mode_causes_exit(
     sdk, profile, logger, file_event_namespace
 ):
-    file_event_namespace.incremental = False
+    file_event_namespace.use_checkpoint = None
     date = get_test_date_str(days_ago=91) + " 12:51:00"
     file_event_namespace.begin = date
     with pytest.raises(DateArgumentError):
@@ -195,11 +193,11 @@ def test_extract_when_end_date_is_before_begin_date_causes_exit(
         extraction_module.extract(sdk, profile, logger, file_event_namespace)
 
 
-def test_when_given_begin_date_past_90_days_and_is_incremental_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
+def test_when_given_begin_date_past_90_days_and_uses_checkpoint_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
     sdk, profile, logger, file_event_namespace, file_event_extractor, file_event_checkpoint
 ):
     file_event_namespace.begin = "2019-01-01"
-    file_event_namespace.incremental = True
+    file_event_namespace.use_checkpoint = "foo"
     file_event_checkpoint.return_value = 22624624
     extraction_module.extract(sdk, profile, logger, file_event_namespace)
     assert not filter_term_is_in_call_args(file_event_extractor, EventTimestamp._term)
@@ -209,7 +207,7 @@ def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_b
     sdk, profile, logger, file_event_namespace, file_event_extractor, file_event_checkpoint
 ):
     file_event_namespace.begin = get_test_date_str(days_ago=1)
-    file_event_namespace.incremental = False
+    file_event_namespace.use_checkpoint = None
     file_event_checkpoint.return_value = 22624624
     extraction_module.extract(sdk, profile, logger, file_event_namespace)
 
@@ -221,11 +219,11 @@ def test_when_given_begin_date_and_not_interactive_mode_and_cursor_exists_uses_b
     assert filter_term_is_in_call_args(file_event_extractor, EventTimestamp._term)
 
 
-def test_when_not_given_begin_date_and_is_incremental_but_no_stored_checkpoint_exists_causes_exit(
+def test_when_not_given_begin_date_and_uses_checkpoint_but_no_stored_checkpoint_exists_causes_exit(
     sdk, profile, logger, file_event_namespace, file_event_checkpoint
 ):
     file_event_namespace.begin = None
-    file_event_namespace.is_incremental = True
+    file_event_namespace.use_checkpoint = "foo"
     file_event_checkpoint.return_value = None
     with pytest.raises(SystemExit):
         extraction_module.extract(sdk, profile, logger, file_event_namespace)
@@ -440,18 +438,34 @@ def test_when_sdk_raises_exception_global_variable_gets_set(
 def test_extract_saved_search_calls_extractor_extract_and_saved_search_execute(
     sdk_with_user, profile, logger, file_event_extractor, file_event_namespace_with_begin
 ):
-    search_query = {"groupClause": "AND",
-             "groups": [{"filterClause": "AND",
-                        "filters": [{"operator": "ON_OR_AFTER", "term": "eventTimestamp",
-                                     "value": "2020-05-01T00:00:00.000Z"}]},
-                        {"filterClause": "OR",
-                         "filters": [{"operator": "IS", "term": "eventType", "value": "DELETED"},
-                                     {"operator": "IS", "term": "eventType", "value": "EMAILED"},
-                                     {"operator": "IS", "term": "eventType", "value": "MODIFIED"},
-                                     {"operator": "IS", "term": "eventType", "value": "READ_BY_AP"},
-                                     {"operator": "IS", "term": "eventType", "value": "CREATED"}]
-                         }],
-             "pgNum": 1, "pgSize": 10000, "srtDir": "asc", "srtKey": "eventId"
+    search_query = {
+        "groupClause": "AND",
+        "groups": [
+            {
+                "filterClause": "AND",
+                "filters": [
+                    {
+                        "operator": "ON_OR_AFTER",
+                        "term": "eventTimestamp",
+                        "value": "2020-05-01T00:00:00.000Z",
+                    }
+                ],
+            },
+            {
+                "filterClause": "OR",
+                "filters": [
+                    {"operator": "IS", "term": "eventType", "value": "DELETED"},
+                    {"operator": "IS", "term": "eventType", "value": "EMAILED"},
+                    {"operator": "IS", "term": "eventType", "value": "MODIFIED"},
+                    {"operator": "IS", "term": "eventType", "value": "READ_BY_AP"},
+                    {"operator": "IS", "term": "eventType", "value": "CREATED"},
+                ],
+            },
+        ],
+        "pgNum": 1,
+        "pgSize": 10000,
+        "srtDir": "asc",
+        "srtKey": "eventId",
     }
     query = FileEventQuery.from_dict(search_query)
     extraction_module.extract(

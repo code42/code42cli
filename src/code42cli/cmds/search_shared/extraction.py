@@ -13,14 +13,14 @@ logger = get_main_cli_logger()
 
 
 def begin_date_is_required(args, cursor_store):
-    if not args.incremental:
+    if not args.use_checkpoint:
         return True
-    is_required = cursor_store and cursor_store.get_stored_cursor_timestamp() is None
+    is_required = cursor_store and cursor_store.get(args.use_checkpoint) is None
 
-    # Ignore begin date when in incremental mode, it is not required, and it was passed an argument.
+    # Ignore begin date when in use-checkpoint mode, it is not required, and it was passed an argument.
     if not is_required and args.begin:
         logger.print_and_log_info(
-            u"Ignoring --begin value as --incremental was passed and cursor checkpoint exists.\n"
+            u"Ignoring --begin value as --use-checkpoint was passed and cursor checkpoint exists.\n"
         )
         args.begin = None
     return is_required
@@ -33,7 +33,7 @@ def verify_begin_date_requirements(args, cursor_store):
         exit(1)
 
 
-def create_handlers(sdk, extractor_class, output_logger, cursor_store):
+def create_handlers(sdk, extractor_class, output_logger, cursor_store, checkpoint_name):
     extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = ExtractionHandlers()
     handlers.TOTAL_EVENTS = 0
@@ -49,8 +49,8 @@ def create_handlers(sdk, extractor_class, output_logger, cursor_store):
     handlers.handle_error = handle_error
 
     if cursor_store:
-        handlers.record_cursor_position = cursor_store.replace_stored_cursor_timestamp
-        handlers.get_cursor_position = cursor_store.get_stored_cursor_timestamp
+        handlers.record_cursor_position = lambda value: cursor_store.replace(checkpoint_name, value)
+        handlers.get_cursor_position = lambda: cursor_store.get(checkpoint_name)
 
     @warn_interrupt(
         warning=u"Attempting to cancel cleanly to keep checkpoint data accurate. One moment..."

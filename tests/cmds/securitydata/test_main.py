@@ -86,11 +86,11 @@ def test_validation_when_is_advanced_query_and_other_incompatible_multi_narg_arg
         main.print_out(sdk, profile, file_event_namespace)
 
 
-def test_validation_when_is_advanced_query_and_has_incremental_mode_exits(
+def test_validation_when_is_advanced_query_and_uses_checkpoint_exits(
     sdk, profile, file_event_namespace
 ):
     file_event_namespace.advanced_query = "some complex json"
-    file_event_namespace.incremental = True
+    file_event_namespace.use_checkpoint = "foo"
     with pytest.raises(SystemExit):
         main.print_out(sdk, profile, file_event_namespace)
 
@@ -122,9 +122,7 @@ def test_validation_when_is_saved_search_and_has_begin_date_exits(
         main.print_out(sdk, profile, file_event_namespace)
 
 
-def test_validation_when_is_saved_search_and_has_end_date_exits(
-    sdk, profile, file_event_namespace
-):
+def test_validation_when_is_saved_search_and_has_end_date_exits(sdk, profile, file_event_namespace):
     file_event_namespace.saved_search = "abc"
     file_event_namespace.end = "end date"
     with pytest.raises(SystemExit):
@@ -140,11 +138,11 @@ def test_validation_when_is_saved_search_and_has_exposure_types_exits(
         main.send_to(sdk, profile, file_event_namespace)
 
 
-def test_validation_when_is_saved_search_and_has_incremental_mode_exits(
+def test_validation_when_is_saved_search_and_uses_checkpoint_mode_exits(
     sdk, profile, file_event_namespace
 ):
     file_event_namespace.saved_search = "abc"
-    file_event_namespace.incremental = True
+    file_event_namespace.use_checkpoint = "foo"
     with pytest.raises(SystemExit):
         main.print_out(sdk, profile, file_event_namespace)
 
@@ -156,6 +154,7 @@ def test_validation_when_is_saved_search_and_has_include_non_exposure_exits(
     file_event_namespace.include_non_exposure = True
     with pytest.raises(SystemExit):
         main.print_out(sdk, profile, file_event_namespace)
+
 
 @pytest.mark.parametrize(
     "arg",

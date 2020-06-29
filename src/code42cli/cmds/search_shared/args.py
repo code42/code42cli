@@ -39,8 +39,9 @@ def _saved_search_args():
     saved_search = ArgConfig(
         u"--saved-search",
         help=u"Limits events to those discoverable with the saved search "
-             u"filters for the saved search with the given ID.\n"
-             u"WARNING: Using saved search is incompatible with other query-building args.")
+        u"filters for the saved search with the given ID.\n"
+        u"WARNING: Using saved search is incompatible with other query-building args.",
+    )
     return {u"saved_search": saved_search}
 
 
@@ -65,10 +66,9 @@ def create_incompatible_search_args(search_for=None):
             help=u"The end of the date range in which to look for {0}, "
             u"argument format options are the same as --begin.".format(search_for),
         ),
-        u"incremental": ArgConfig(
-            u"-i",
-            u"--incremental",
-            action=u"store_true",
+        u"use_checkpoint": ArgConfig(
+            u"-c",
+            u"--use-checkpoint",
             help=u"Only get {0} that were not previously retrieved.".format(search_for),
         ),
     }

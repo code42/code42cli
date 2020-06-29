@@ -1,9 +1,7 @@
 from c42eventextractor.extractors import FileEventExtractor
 from py42.sdk.queries.fileevents.filters import *
 
-from code42cli.cmds.search_shared.enums import (
-    ExposureType as ExposureTypeOptions,
-)
+from code42cli.cmds.search_shared.enums import ExposureType as ExposureTypeOptions
 from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore
 from code42cli.cmds.search_shared.extraction import (
     verify_begin_date_requirements,
@@ -29,8 +27,8 @@ def extract(sdk, profile, output_logger, args, query=None):
             args: Command line args used to build up file event query filters.
             query: FileEventQuery instance created from search-id of saved search.
     """
-    store = FileEventCursorStore(profile.name) if args.incremental else None
-    handlers = create_handlers(sdk, FileEventExtractor, output_logger, store)
+    store = FileEventCursorStore(profile.name) if args.use_checkpoint else None
+    handlers = create_handlers(sdk, FileEventExtractor, output_logger, store, args.use_checkpoint)
     extractor = FileEventExtractor(sdk, handlers)
     if not args.advanced_query and not args.saved_search:
         verify_begin_date_requirements(args, store)

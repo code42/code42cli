@@ -61,10 +61,6 @@ To see all your profiles, do:
 code42 profile list
 ```
 
-A separate profile would be needed in order to keep the incremental checkpoints separate for different queries.
-i.e User needs to maintain separate profiles for file event queries and saved search queries as only one checkpoint
-is supported per profile.
-
 ## Security Data and Alerts
 
 Using the CLI, you can query for security events and alerts and send them to three possible destination types:

@@ -104,8 +104,8 @@ class TestCompleter(object):
         assert not actual
 
     def test_complete_when_completing_arg_works(self):
-        actual = self._completer.complete("code42 security-data print --incre")
-        assert "--incremental" in actual
+        actual = self._completer.complete("code42 security-data print --use-c")
+        assert "--use-checkpoint" in actual
 
     def test_complete_does_not_complete_positional_args(self):
         actual = self._completer.complete("code42 profile use nam")
@@ -169,4 +169,4 @@ class TestCompleter(object):
     def test_completer_ignore_shorthand_flagged_args(self):
         actual = self._completer.complete("code42 alerts write-to -")
         assert "-i" not in actual
-        assert "--incremental" in actual
+        assert "--use-checkpoint" in actual

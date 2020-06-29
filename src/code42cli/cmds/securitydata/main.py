@@ -57,27 +57,26 @@ class SecurityDataSubcommandLoader(SubcommandLoader):
 
         clear = Command(
             self.CLEAR_CHECKPOINT,
-            u"Remove the saved file event checkpoint from 'incremental' (-i) mode.",
-            u"{} {}".format(usage_prefix, u"clear-checkpoint <optional-args>"),
+            u"Remove the saved file event checkpoint from 'use-checkpoint' (-c) mode.",
+            u"{} {}".format(usage_prefix, u"clear-checkpoint <name>"),
             handler=clear_checkpoint,
         )
 
         saved_search = Command(
             self.SAVED_SEARCH,
             u"Manage saved searches.",
-            subcommand_loader=SavedSearchSubCommandLoader(self.SAVED_SEARCH)
-
+            subcommand_loader=SavedSearchSubCommandLoader(self.SAVED_SEARCH),
         )
 
         return [print_func, write, send, clear, saved_search]
 
 
-def clear_checkpoint(sdk, profile):
+def clear_checkpoint(sdk, profile, cursor_name):
     """Removes the stored checkpoint that keeps track of the last file event retrieved for the given profile.
         To use, run `code42 security-data clear-checkpoint`.
-        This affects `incremental` mode by causing it to behave like it has never been run before.
+        This affects `use-checkpoint` mode by resetting the checkpoint, causing it to behave like it has never been run before.
     """
-    FileEventCursorStore(profile.name).replace_stored_cursor_timestamp(None)
+    FileEventCursorStore(profile.name).delete(cursor_name)
 
 
 def _get_incompatible_search_args(incompatible_search_args_dict):
@@ -88,18 +87,25 @@ def _get_incompatible_search_args(incompatible_search_args_dict):
 def _validate_args(args):
 
     if args.advanced_query:
-        incompatible_search_args_dict = get_advanced_query_incompatible_search_args(SEARCH_FOR_FILE_EVENTS)
+        incompatible_search_args_dict = get_advanced_query_incompatible_search_args(
+            SEARCH_FOR_FILE_EVENTS
+        )
         incompatible_search_args = _get_incompatible_search_args(incompatible_search_args_dict)
         exit_if_mutually_exclusive_args_used_together(args, incompatible_search_args)
     if args.saved_search:
-        incompatible_search_args_dict = get_saved_search_incompatible_search_args(SEARCH_FOR_FILE_EVENTS)
+        incompatible_search_args_dict = get_saved_search_incompatible_search_args(
+            SEARCH_FOR_FILE_EVENTS
+        )
         incompatible_search_args = _get_incompatible_search_args(incompatible_search_args_dict)
-        exit_if_mutually_exclusive_args_used_together(args, incompatible_search_args, u"--saved-search")
+        exit_if_mutually_exclusive_args_used_together(
+            args, incompatible_search_args, u"--saved-search"
+        )
 
 
 def _extract(sdk, profile, logger, args):
-    query = sdk.securitydata.savedsearches.get_query(args.saved_search) \
-        if args.saved_search else None
+    query = (
+        sdk.securitydata.savedsearches.get_query(args.saved_search) if args.saved_search else None
+    )
     extract(sdk, profile, logger, args, query)
 
 
@@ -207,5 +213,7 @@ def _load_search_args(arg_collection):
             help=u"Get all events including non-exposure events.",
         ),
     }
-    search_args = args.create_search_args(search_for=SEARCH_FOR_FILE_EVENTS, filter_args=filter_args)
+    search_args = args.create_search_args(
+        search_for=SEARCH_FOR_FILE_EVENTS, filter_args=filter_args
+    )
     arg_collection.extend(search_args)

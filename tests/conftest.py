@@ -23,7 +23,7 @@ def file_event_namespace():
         dict(
             sdk=mock_42,
             profile=create_mock_profile(),
-            incremental=None,
+            use_checkpoint=None,
             advanced_query=None,
             begin=None,
             end=None,
@@ -54,7 +54,7 @@ def alert_namespace():
         dict(
             sdk=mock_42,
             profile=create_mock_profile(),
-            incremental=None,
+            use_checkpoint=None,
             advanced_query=None,
             begin=None,
             end=None,
@@ -142,7 +142,24 @@ def setup_mock_accessor(mock_accessor, name=None, values_dict=None):
 
 @pytest.fixture
 def profile(mocker):
-    return mocker.MagicMock(spec=Code42Profile)
+    mock = mocker.MagicMock(spec=Code42Profile)
+    mock.name = "testcliprofile"
+    return mock
+
+
+@pytest.fixture(autouse=True)
+def mock_makedirs(mocker):
+    return mocker.patch("os.makedirs")
+
+
+@pytest.fixture(autouse=True)
+def mock_remove(mocker):
+    return mocker.patch("os.remove")
+
+
+@pytest.fixture(autouse=True)
+def mock_listdir(mocker):
+    return mocker.patch("os.listdir")
 
 
 def func_keyword_args(one=None, two=None, three=None, default="testdefault", nargstest=[]):

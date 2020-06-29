@@ -40,11 +40,6 @@ def parse_date_from_filter_value(json, filter_index):
     return convert_str_to_date(date_str)
 
 
-@pytest.fixture(autouse=True)
-def sqlite_connection(mocker):
-    return mocker.patch("sqlite3.connect")
-
-
 ACCEPTABLE_ARGS = [
     "-t",
     "SharedToDomain",
