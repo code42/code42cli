@@ -18,7 +18,7 @@ class Cursor(object):
 
     @property
     def value(self):
-        with (open(self._location)) as checkpoint:
+        with open(self._location) as checkpoint:
             return checkpoint.read()
 
 
@@ -30,7 +30,7 @@ class BaseCursorStore(object):
         """Gets the last stored date observed timestamp."""
         try:
             location = path.join(self._dir_path, cursor_name)
-            with (open(location)) as checkpoint:
+            with open(location) as checkpoint:
                 return float(checkpoint.read())
         except FileNotFoundError:
             return None
@@ -38,7 +38,7 @@ class BaseCursorStore(object):
     def replace(self, cursor_name, new_timestamp):
         """Replaces the last stored date observed timestamp with the given one."""
         location = path.join(self._dir_path, cursor_name)
-        with (open(location, "w")) as checkpoint:
+        with open(location, "w") as checkpoint:
             return checkpoint.write(str(new_timestamp))
 
     def delete(self, cursor_name):
