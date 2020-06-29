@@ -90,10 +90,9 @@ class CliLogger(object):
         self._logger = _get_error_file_logger()
 
     def log_error(self, err):
-        if err:
-            message = str(err)  # Filter out empty string logs.
-            if message:
-                self._logger.error(message)
+        message = str(err) if err else None
+        if message:
+            self._logger.error(message)
 
     def log_verbose_error(self, invocation_str=None, http_request=None):
         """For logging traces, invocation strs, and request parameters during exceptions to the 
