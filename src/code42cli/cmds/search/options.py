@@ -80,7 +80,8 @@ class BeginOption(AdvancedQueryIncompatible):
                 )
             if incremental_present and not checkpoint_exists and not begin_present:
                 raise click.UsageError(
-                    message="--begin date is required for --incremental when no checkpoint exists yet.",
+                    message="--begin date is required for --incremental when no checkpoint exists "
+                    "yet.",
                 )
             if not incremental_present and not begin_present:
                 raise click.UsageError(message="--begin date is required.")
