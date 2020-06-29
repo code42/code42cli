@@ -9,7 +9,7 @@ from c42eventextractor.extractors import FileEventExtractor
 
 from code42cli.cmds.search.options import (
     create_search_options,
-    AdvancedQueryIncompatible,
+    AdvancedQueryAndSavedSearchIncompatible,
     is_in_filter,
     exists_filter,
     output_file_arg,
@@ -44,7 +44,7 @@ exposure_type_option = click.option(
     "--type",
     multiple=True,
     type=click.Choice(list(ExposureTypeOptions())),
-    cls=AdvancedQueryIncompatible,
+    cls=AdvancedQueryAndSavedSearchIncompatible,
     callback=is_in_filter(ExposureType),
     help="Limits events to those with given exposure types.",
 )
@@ -52,14 +52,14 @@ username_option = click.option(
     "--c42-username",
     multiple=True,
     callback=is_in_filter(DeviceUsername),
-    cls=AdvancedQueryIncompatible,
+    cls=AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to endpoint events for these users.",
 )
 actor_option = click.option(
     "--actor",
     multiple=True,
     callback=is_in_filter(Actor),
-    cls=AdvancedQueryIncompatible,
+    cls=AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to only those enacted by the cloud service user "
     "of the person who caused the event.",
 )
@@ -67,42 +67,42 @@ md5_option = click.option(
     "--md5",
     multiple=True,
     callback=is_in_filter(MD5),
-    cls=AdvancedQueryIncompatible,
+    cls=AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to file events where the file has one of these MD5 hashes.",
 )
 sha256_option = click.option(
     "--sha256",
     multiple=True,
     callback=is_in_filter(SHA256),
-    cls=AdvancedQueryIncompatible,
+    cls=AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to file events where the file has one of these SHA256 hashes.",
 )
 source_option = click.option(
     "--source",
     multiple=True,
     callback=is_in_filter(Source),
-    cls=AdvancedQueryIncompatible,
+    cls=AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to only those from one of these sources. Example=Gmail.",
 )
 file_name_option = click.option(
     "--file-name",
     multiple=True,
     callback=is_in_filter(FileName),
-    cls=AdvancedQueryIncompatible,
+    cls=AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to file events where the file has one of these names.",
 )
 file_path_option = click.option(
     "--file-path",
     multiple=True,
     callback=is_in_filter(FilePath),
-    cls=AdvancedQueryIncompatible,
+    cls=AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to file events where the file is located at one of these paths.",
 )
 process_owner_option = click.option(
     "--process-owner",
     multiple=True,
     callback=is_in_filter(ProcessOwner),
-    cls=AdvancedQueryIncompatible,
+    cls=AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to exposure events where one of these users owns "
     "the process behind the exposure.",
 )
@@ -110,7 +110,7 @@ tab_url_option = click.option(
     "--tab-url",
     multiple=True,
     callback=is_in_filter(TabURL),
-    cls=AdvancedQueryIncompatible,
+    cls=AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to be exposure events with one of these destination tab URLs.",
 )
 include_non_exposure_option = click.option(
@@ -123,6 +123,8 @@ include_non_exposure_option = click.option(
 
 
 def _get_saved_search_query(ctx, arg):
+    if arg is None:
+        return
     query = ctx.obj.sdk.securitydata.savedsearches.get_query(arg)
     return query
 
@@ -155,26 +157,35 @@ def file_event_options(f):
 @global_options
 def security_data(state):
     """Tools for getting security related data, such as file events."""
-    state.cursor = FileEventCursorStore(state.profile.name)
+    # store cursor class on the group state so shared --begin option can use it in validation
+    state.cursor_class = FileEventCursorStore
 
 
 @security_data.command()
+@click.argument("checkpoint-name")
 @global_options
-def clear_checkpoint(state):
-    """Remove the saved file event checkpoint from 'incremental' (-i) mode."""
-    state.cursor.replace_stored_cursor_timestamp(None)
+def clear_checkpoint(state, checkpoint_name):
+    """Remove the saved file event checkpoint from '--use-checkpoint/-c' mode."""
+    FileEventCursorStore(state.profile.name).delete(checkpoint_name)
 
 
 @security_data.command("print")
 @file_event_options
 @search_options
 @global_options
-def _print(state, format, begin, end, advanced_query, incremental, **kwargs):
+def _print(state, format, begin, end, advanced_query, use_checkpoint, **kwargs):
     """Print file events to stdout."""
     output_logger = logger_factory.get_logger_for_stdout(format)
-    cursor = state.cursor if incremental else None
+    cursor = FileEventCursorStore(state.profile.name) if use_checkpoint else None
     _extract(
-        state.sdk, cursor, state.search_filters, begin, end, advanced_query, output_logger,
+        sdk=state.sdk,
+        cursor=cursor,
+        checkpoint_name=use_checkpoint,
+        filter_list=state.search_filters,
+        begin=begin,
+        end=end,
+        advanced_query=advanced_query,
+        output_logger=output_logger,
     )
 
 
@@ -183,12 +194,19 @@ def _print(state, format, begin, end, advanced_query, incremental, **kwargs):
 @file_event_options
 @search_options
 @global_options
-def write_to(state, format, output_file, begin, end, advanced_query, incremental, **kwargs):
+def write_to(state, format, output_file, begin, end, advanced_query, use_checkpoint, **kwargs):
     """Write file events to the file with the given name."""
     output_logger = logger_factory.get_logger_for_file(output_file, format)
-    cursor = state.cursor if incremental else None
+    cursor = FileEventCursorStore(state.profile.name) if use_checkpoint else None
     _extract(
-        state.sdk, cursor, state.search_filters, begin, end, advanced_query, output_logger,
+        sdk=state.sdk,
+        cursor=cursor,
+        checkpoint_name=use_checkpoint,
+        filter_list=state.search_filters,
+        begin=begin,
+        end=end,
+        advanced_query=advanced_query,
+        output_logger=output_logger,
     )
 
 
@@ -197,12 +215,21 @@ def write_to(state, format, output_file, begin, end, advanced_query, incremental
 @file_event_options
 @search_options
 @global_options
-def send_to(state, format, hostname, protocol, begin, end, advanced_query, incremental, **kwargs):
+def send_to(
+    state, format, hostname, protocol, begin, end, advanced_query, use_checkpoint, **kwargs
+):
     """Send file events to the given server address."""
     output_logger = logger_factory.get_logger_for_server(hostname, protocol, format)
-    cursor = state.cursor if incremental else None
+    cursor = FileEventCursorStore(state.profile.name) if use_checkpoint else None
     _extract(
-        state.sdk, cursor, state.search_filters, begin, end, advanced_query, output_logger,
+        sdk=state.sdk,
+        cursor=cursor,
+        checkpoint_name=use_checkpoint,
+        filter_list=state.search_filters,
+        begin=begin,
+        end=end,
+        advanced_query=advanced_query,
+        output_logger=output_logger,
     )
 
 
@@ -230,8 +257,8 @@ def show(state, search_id):
     echo(pformat(response["searches"]))
 
 
-def _extract(sdk, cursor, filter_list, begin, end, advanced_query, output_logger):
-    handlers = create_handlers(sdk, FileEventExtractor, output_logger, cursor)
+def _extract(sdk, cursor, checkpoint_name, filter_list, begin, end, advanced_query, output_logger):
+    handlers = create_handlers(sdk, FileEventExtractor, output_logger, cursor, checkpoint_name)
     extractor = FileEventExtractor(sdk, handlers)
     if advanced_query:
         extractor.extract_advanced(advanced_query)
@@ -241,9 +268,3 @@ def _extract(sdk, cursor, filter_list, begin, end, advanced_query, output_logger
         extractor.extract(*filter_list)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         echo("No results found.")
-
-
-@security_data.command()
-def test():
-    for line in range(100):
-        echo(line)

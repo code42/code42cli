@@ -11,7 +11,7 @@ class CLIState(object):
         self.debug = False
         self._sdk = None
         self.search_filters = []
-        self.cursor = None
+        self.cursor_class = None
 
     @property
     def sdk(self):

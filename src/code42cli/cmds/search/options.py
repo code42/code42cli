@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 import click
 
 from code42cli.options import incompatible_with
@@ -55,10 +57,10 @@ def not_contains_filter(filter_cls):
     return callback
 
 
-AdvancedQueryIncompatible = incompatible_with(["advanced_query", "saved_search"])
+AdvancedQueryAndSavedSearchIncompatible = incompatible_with(["advanced_query", "saved_search"])
 
 
-class BeginOption(AdvancedQueryIncompatible):
+class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
     """click.Option subclass that enforces correct --begin option usage."""
 
     def __init__(self, *args, **kwargs):
@@ -67,23 +69,24 @@ class BeginOption(AdvancedQueryIncompatible):
     def handle_parse_result(self, ctx, opts, args):
         # if ctx.obj is None it means we're in autocomplete mode and don't want to validate
         if ctx.obj is not None and "saved_search" not in opts:
-            incremental_present = "incremental" in opts
+            profile = opts.get("profile") or ctx.obj.profile.name
+            cursor = ctx.obj.cursor_class(profile)
+            checkpoint_arg_present = "use_checkpoint" in opts
+            checkpoint_value = cursor.get(opts.get("use_checkpoint", ""))
             begin_present = "begin" in opts
-            checkpoint_exists = (
-                ctx.obj.cursor and ctx.obj.cursor.get_stored_cursor_timestamp() is not None
-            )
-            if incremental_present and checkpoint_exists and begin_present:
+            if checkpoint_arg_present and checkpoint_value is not None and begin_present:
                 opts.pop("begin")
+                checkpoint_value_str = datetime.fromtimestamp(checkpoint_value).astimezone(timezone.utc).isoformat()
                 click.echo(
-                    "Ignoring --begin value as --incremental was passed and checkpoint exists.\n",
+                    "Ignoring --begin value as --use-checkpoint was passed and checkpoint of {} exists.\n".format(checkpoint_value_str),
                     err=True,
                 )
-            if incremental_present and not checkpoint_exists and not begin_present:
+            if checkpoint_arg_present and not checkpoint_value is not None and not begin_present:
                 raise click.UsageError(
-                    message="--begin date is required for --incremental when no checkpoint exists "
-                    "yet.",
+                    message="--begin date is required for --use-checkpoint when no checkpoint "
+                            "exists yet.",
                 )
-            if not incremental_present and not begin_present:
+            if not checkpoint_arg_present and not begin_present:
                 raise click.UsageError(message="--begin date is required.")
         return super().handle_parse_result(ctx, opts, args)
 
@@ -104,7 +107,7 @@ def create_search_options(search_term):
         "-e",
         "--end",
         callback=lambda ctx, arg: parse_max_timestamp(arg),
-        cls=AdvancedQueryIncompatible,
+        cls=AdvancedQueryAndSavedSearchIncompatible,
         help="The end of the date range in which to look for {}, argument format options are "
         "the same as --begin.".format(search_term),
     )
@@ -115,19 +118,18 @@ def create_search_options(search_term):
         "\nWARNING: Using advanced queries is incompatible with other query-building args.".format(
             search_term
         ),
-    )
-    incremental_option = click.option(
-        "-i",
-        "--incremental",
-        is_flag=True,
-        cls=AdvancedQueryIncompatible,
+    )   
+    checkpoint_option = click.option(
+        "-c",
+        "--use-checkpoint",
+        cls=AdvancedQueryAndSavedSearchIncompatible,
         help="Only get {0} that were not previously retrieved.".format(search_term),
     )
 
     def search_options(f):
         f = begin_option(f)
         f = end_option(f)
-        f = incremental_option(f)
+        f = checkpoint_option(f)
         f = advanced_query_option(f)
         return f
 
