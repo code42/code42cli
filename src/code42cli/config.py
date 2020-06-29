@@ -135,7 +135,7 @@ class ConfigAccessor(object):
         self.parser[name][self.IGNORE_SSL_ERRORS_KEY] = str(False)
 
     def _save(self):
-        with open(self.path, "w+") as file:
+        with open(self.path, "w+", encoding="utf-8") as file:
             self.parser.write(file)
 
     def _try_complete_setup(self, profile):
