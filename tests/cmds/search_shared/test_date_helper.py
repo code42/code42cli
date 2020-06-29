@@ -1,7 +1,7 @@
 import pytest
 
 from code42cli.errors import DateArgumentError
-from code42cli.cmds.search_shared.extraction import create_time_range_filter
+from code42cli.cmds.search.extraction import create_time_range_filter
 from py42.sdk.queries.fileevents.filters import InsertionTimestamp, EventTimestamp
 from py42.sdk.queries.alerts.filters import DateObserved
 from tests.cmds.conftest import get_filter_value_from_json

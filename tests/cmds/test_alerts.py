@@ -4,7 +4,7 @@ from click.testing import CliRunner
 
 from code42cli import PRODUCT_NAME
 from code42cli.main import cli
-from code42cli.cmds.search_shared.cursor_store import AlertCursorStore
+from code42cli.cmds.search.cursor_store import AlertCursorStore
 
 BEGIN_TIMESTAMP = "1000"
 END_TIMESTAMP = "2000"
@@ -13,27 +13,21 @@ CURSOR_TIMESTAMP = "1500"
 
 @pytest.fixture
 def stdout_logger(mocker):
-    mock = mocker.patch(
-        "{}.cmds.search_shared.logger_factory.get_logger_for_stdout".format(PRODUCT_NAME)
-    )
+    mock = mocker.patch("{}.cmds.search.logger_factory.get_logger_for_stdout".format(PRODUCT_NAME))
     mock.return_value = mocker.MagicMock()
     return mock
 
 
 @pytest.fixture
 def server_logger(mocker):
-    mock = mocker.patch(
-        "{}.cmds.search_shared.logger_factory.get_logger_for_server".format(PRODUCT_NAME)
-    )
+    mock = mocker.patch("{}.cmds.search.logger_factory.get_logger_for_server".format(PRODUCT_NAME))
     mock.return_value = mocker.MagicMock()
     return mock
 
 
 @pytest.fixture
 def file_logger(mocker):
-    mock = mocker.patch(
-        "{}.cmds.search_shared.logger_factory.get_logger_for_file".format(PRODUCT_NAME)
-    )
+    mock = mocker.patch("{}.cmds.search.logger_factory.get_logger_for_file".format(PRODUCT_NAME))
     mock.return_value = mocker.MagicMock()
     return mock
 
@@ -58,7 +52,7 @@ def alert_cursor_without_checkpoint(mocker):
 
 @pytest.fixture
 def begin_option(mocker):
-    mock = mocker.patch("code42cli.cmds.search_shared.options.parse_min_timestamp")
+    mock = mocker.patch("code42cli.cmds.search.options.parse_min_timestamp")
     mock.return_value = BEGIN_TIMESTAMP
     return mock
 

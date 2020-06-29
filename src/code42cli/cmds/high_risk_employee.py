@@ -2,21 +2,21 @@ import click
 
 from py42.exceptions import Py42BadRequestError
 
-from code42cli.cmds.detectionlists_shared import (
+from code42cli.cmds.detectionlists import (
     update_user,
     add_risk_tags as _add_risk_tags,
     remove_risk_tags as _remove_risk_tags,
     try_handle_user_already_added_error,
     handle_list_args,
 )
-from code42cli.cmds.detectionlists_shared.options import (
+from code42cli.cmds.detectionlists.options import (
     cloud_alias_option,
     notes_option,
     username_arg,
 )
 from code42cli.options import global_options, OrderedGroup
 from code42cli.cmds.shared import get_user_id
-from code42cli.cmds.detectionlists_shared.enums import RiskTags
+from code42cli.cmds.detectionlists.enums import RiskTags
 from code42cli.bulk import run_bulk_process, generate_template_cmd_factory
 from code42cli.file_readers import read_csv_arg, read_flat_file_arg
 

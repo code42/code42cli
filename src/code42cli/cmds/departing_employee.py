@@ -1,7 +1,7 @@
 import click
 
-from code42cli.cmds.detectionlists_shared import update_user, try_handle_user_already_added_error
-from code42cli.cmds.detectionlists_shared.options import (
+from code42cli.cmds.detectionlists import update_user, try_handle_user_already_added_error
+from code42cli.cmds.detectionlists.options import (
     username_arg,
     cloud_alias_option,
     notes_option,

@@ -7,7 +7,7 @@ from c42eventextractor.logging.formatters import (
     FileEventDictToRawJSONFormatter,
 )
 
-import code42cli.cmds.search_shared.logger_factory as factory
+import code42cli.cmds.search.logger_factory as factory
 
 
 @pytest.fixture

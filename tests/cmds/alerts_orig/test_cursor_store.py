@@ -1,7 +1,7 @@
 from os import path
 
 from code42cli import PRODUCT_NAME
-from code42cli.cmds.search_shared.cursor_store import BaseCursorStore, AlertCursorStore
+from code42cli.cmds.search.cursor_store import BaseCursorStore, AlertCursorStore
 
 
 class TestBaseCursorStore(object):
@@ -28,7 +28,7 @@ class TestAlertCursorStore(object):
         self, mocker, sqlite_connection
     ):
         mock = mocker.patch(
-            "{}.cmds.search_shared.cursor_store.AlertCursorStore._row_exists".format(PRODUCT_NAME)
+            "{}.cmds.search.cursor_store.AlertCursorStore._row_exists".format(PRODUCT_NAME)
         )
         mock.return_value = False
         spy = mocker.spy(AlertCursorStore, "_insert_new_row")

@@ -2,7 +2,7 @@ import click
 
 from code42cli.options import incompatible_with
 from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp
-from code42cli.cmds.search_shared.enums import ServerProtocol
+from code42cli.cmds.search.enums import ServerProtocol
 from code42cli.logger import get_main_cli_logger
 
 logger = get_main_cli_logger()

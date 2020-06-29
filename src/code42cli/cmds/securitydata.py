@@ -2,11 +2,11 @@ import click
 from click import echo
 
 from code42cli.options import global_options, incompatible_with
-from code42cli.cmds.search_shared import logger_factory
+from code42cli.cmds.search import logger_factory
 from py42.sdk.queries.fileevents.filters import *
 from c42eventextractor.extractors import FileEventExtractor
 
-from code42cli.cmds.search_shared.options import (
+from code42cli.cmds.search.options import (
     create_search_options,
     AdvancedQueryIncompatible,
     is_in_filter,
@@ -14,12 +14,12 @@ from code42cli.cmds.search_shared.options import (
     output_file_arg,
     server_options,
 )
-from code42cli.cmds.search_shared.enums import (
+from code42cli.cmds.search.enums import (
     OutputFormat,
     ExposureType as ExposureTypeOptions,
 )
-from code42cli.cmds.search_shared.cursor_store import FileEventCursorStore
-from code42cli.cmds.search_shared.extraction import (
+from code42cli.cmds.search.cursor_store import FileEventCursorStore
+from code42cli.cmds.search.extraction import (
     create_handlers,
     create_time_range_filter,
 )

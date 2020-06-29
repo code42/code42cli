@@ -5,7 +5,7 @@ from code42cli.cmds.detectionlists import (
     DetectionList,
     DetectionListHandlers,
 )
-from code42cli.cmds.detectionlists_shared import (
+from code42cli.cmds.detectionlists import (
     update_user,
     try_add_risk_tags,
     try_remove_risk_tags,
@@ -15,7 +15,7 @@ from code42cli.cmds.detectionlists_shared import (
 )
 from code42cli.errors import UserAlreadyAddedError, UnknownRiskTagError, UserDoesNotExistError
 from code42cli.bulk import BulkCommandType
-from code42cli.cmds.detectionlists_shared.enums import RiskTags
+from code42cli.cmds.detectionlists.enums import RiskTags
 from code42cli.cmds.detectionlists.bulk import HighRiskBulkCommandType
 from ...conftest import create_mock_reader, TEST_ID
 
