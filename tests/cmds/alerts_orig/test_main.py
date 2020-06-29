@@ -1,17 +1,17 @@
 import pytest
 
-import code42cli.cmds.alerts_mod.main as main
+import code42cli.cmds.alerts.main as main
 from code42cli import PRODUCT_NAME
 
 
 @pytest.fixture
 def mock_logger_factory(mocker):
-    return mocker.patch("{}.cmds.alerts_mod.main.logger_factory".format(PRODUCT_NAME))
+    return mocker.patch("{}.cmds.alerts.main.logger_factory".format(PRODUCT_NAME))
 
 
 @pytest.fixture
 def mock_extract(mocker):
-    return mocker.patch("{}.cmds.alerts_mod.main.extract".format(PRODUCT_NAME))
+    return mocker.patch("{}.cmds.alerts.main.extract".format(PRODUCT_NAME))
 
 
 def test_print_out(sdk, profile, alert_namespace, mocker, mock_logger_factory, mock_extract):
@@ -84,20 +84,20 @@ def test_extract_when_is_advanced_query_and_other_incompatible_single_arg_argume
         main.print_out(sdk, profile, alert_namespace)
 
 
-def test_extract_when_is_advanced_query_and_has_incremental_mode_exits(
+def test_extract_when_is_advanced_query_and_use_checkpoint_mode_exits(
     sdk, profile, alert_namespace
 ):
     alert_namespace.advanced_query = "some complex json"
-    alert_namespace.incremental = True
+    alert_namespace.use_checkpoint = "foo"
     with pytest.raises(SystemExit):
         main.print_out(sdk, profile, alert_namespace)
 
 
-def test_extract_when_is_advanced_query_and_has_incremental_mode_set_to_false_does_not_exit(
+def test_extract_when_is_advanced_query_and_does_not_use_checkpoint_does_not_exit(
     sdk, profile, alert_namespace, mock_extract, mocker, mock_logger_factory
 ):
     logger = mocker.MagicMock()
     mock_logger_factory.get_logger_for_server.return_value = logger
     alert_namespace.advanced_query = "some complex json"
-    alert_namespace.is_incremental = False
+    alert_namespace.use_checkpoint = None
     main.print_out(sdk, profile, alert_namespace)

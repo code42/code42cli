@@ -18,15 +18,16 @@ def does_user_agree(prompt):
     return ans == "y"
 
 
-def get_user_project_path(subdir=""):
+def get_user_project_path(*subdirs):
     """The path on your user dir to /.code42cli/[subdir]."""
-    package_name = __name__.split(".")[0]
-    home = path.expanduser("~")
-    hidden_package_name = ".{0}".format(package_name)
-    user_project_path = path.join(home, hidden_package_name, subdir)
-    if not path.exists(user_project_path):
-        os.makedirs(user_project_path)
-    return user_project_path
+    package_name = __name__.split(u".")[0]
+    home = path.expanduser(u"~")
+    hidden_package_name = u".{0}".format(package_name)
+    user_project_path = path.join(home, hidden_package_name)
+    result_path = path.join(user_project_path, *subdirs)
+    if not path.exists(result_path):
+        os.makedirs(result_path)
+    return result_path
 
 
 def is_interactive():

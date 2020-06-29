@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## Unreleased
+
+### Changed
+
+- `-i` (`--incremental`) has been removed, use `-c` (`--use-checkpoint`) with a string name for the checkpoint instead.
+
+### Added
+
+- Profile can now save multiple alert and file event checkpoints. The name of the checkpoint to be used for a given query should be passed to `-c` (`--use-checkpoint`).
+
 ## 0.7.3 - 2020-06-23
 
 ### Fixed

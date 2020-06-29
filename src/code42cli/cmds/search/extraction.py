@@ -1,6 +1,6 @@
 import json
 
-from click import secho, echo, Abort
+from click import secho, echo
 
 from c42eventextractor import ExtractionHandlers
 from py42.sdk.queries.query_filter import QueryFilterTimestampField
@@ -29,7 +29,7 @@ def _get_alert_details(sdk, alert_summary_list):
     return results
 
 
-def create_handlers(sdk, extractor_class, output_logger, cursor_store):
+def create_handlers(sdk, extractor_class, output_logger, cursor_store, checkpoint_name):
     extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = ExtractionHandlers()
     handlers.TOTAL_EVENTS = 0
@@ -46,8 +46,8 @@ def create_handlers(sdk, extractor_class, output_logger, cursor_store):
     handlers.handle_error = handle_error
 
     if cursor_store:
-        handlers.record_cursor_position = cursor_store.replace_stored_cursor_timestamp
-        handlers.get_cursor_position = cursor_store.get_stored_cursor_timestamp
+        handlers.record_cursor_position = lambda value: cursor_store.replace(checkpoint_name, value)
+        handlers.get_cursor_position = lambda: cursor_store.get(checkpoint_name)
 
     @warn_interrupt(
         warning="Attempting to cancel cleanly to keep checkpoint data accurate. One moment..."

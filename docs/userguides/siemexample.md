@@ -32,7 +32,7 @@ code42 security-data send-to "https://syslog.example.com:514" -p TCP --profile p
 ```
 
 Note that it is best practice to use a separate profile when executing a scheduled task. This way, it is harder to 
-accidentally mess up your stored checkpoints by running `--incremental` adhoc queries.
+accidentally mess up your stored checkpoints by running `--use-checkpoint` adhoc queries.
 
 This query will send to the syslog server only the new security event data since the previous request.
 

@@ -30,7 +30,7 @@ Search args are shared between `print`, `write-to`, and `send-to` commands.
     Available choices=['FedEndpointExfiltration', 'FedCloudSharePermissions', 'FedFileTypeMismatch'].
 * `--description`: Filter alerts by description. Does fuzzy search by default.
 * `-f`, `--format` (optional): The format used for outputting file events. Available choices= [CEF,JSON,RAW-JSON]. 
-* `-i`, `--incremental` (optional): Only get file events that were not previously retrieved.
+* `-c`, `--use-checkpoint` (optional): Get only file events that were not previously retrieved by writing the timestamp of the last event retrieved to a named checkpoint.
 
 ## print
 
@@ -73,9 +73,12 @@ code42 alerts send-to <server> <optional-args> <args>
 
 ## clear-checkpoint
 
-Remove the saved file event checkpoint from 'incremental' (-i) mode.
+Arguments:
+* `name`: The name to save this checkpoint as for later reuse.
+
+Remove the saved file event checkpoint from 'use-checkpoint' (-c) mode.
 
 Usage:
 ```bash
-code42 alerts clear-checkpoint
+code42 alerts clear-checkpoint <name>
 ```

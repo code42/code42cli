@@ -1,4 +1,4 @@
-IS_INCREMENTAL_KEY = "incremental"
+IS_CHECKPOINT_KEY = "use_checkpoint"
 
 
 class OutputFormat(object):
