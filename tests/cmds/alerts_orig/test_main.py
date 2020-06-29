@@ -85,7 +85,8 @@ def test_extract_when_is_advanced_query_and_other_incompatible_single_arg_argume
 
 
 def test_extract_when_is_advanced_query_and_has_incremental_mode_exits(
-    sdk, profile, alert_namespace):
+    sdk, profile, alert_namespace
+):
     alert_namespace.advanced_query = "some complex json"
     alert_namespace.incremental = True
     with pytest.raises(SystemExit):

@@ -55,7 +55,7 @@ def not_contains_filter(filter_cls):
     return callback
 
 
-AdvancedQueryIncompatible = incompatible_with("advanced_query")
+AdvancedQueryIncompatible = incompatible_with(["advanced_query", "saved_search"])
 
 
 class BeginOption(AdvancedQueryIncompatible):
@@ -66,7 +66,7 @@ class BeginOption(AdvancedQueryIncompatible):
 
     def handle_parse_result(self, ctx, opts, args):
         # if ctx.obj is None it means we're in autocomplete mode and don't want to validate
-        if ctx.obj is not None:
+        if ctx.obj is not None and "saved_search" not in opts:
             incremental_present = "incremental" in opts
             begin_present = "begin" in opts
             checkpoint_exists = (

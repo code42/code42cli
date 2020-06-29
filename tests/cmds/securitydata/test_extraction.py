@@ -440,18 +440,34 @@ def test_when_sdk_raises_exception_global_variable_gets_set(
 def test_extract_saved_search_calls_extractor_extract_and_saved_search_execute(
     sdk_with_user, profile, logger, file_event_extractor, file_event_namespace_with_begin
 ):
-    search_query = {"groupClause": "AND",
-             "groups": [{"filterClause": "AND",
-                        "filters": [{"operator": "ON_OR_AFTER", "term": "eventTimestamp",
-                                     "value": "2020-05-01T00:00:00.000Z"}]},
-                        {"filterClause": "OR",
-                         "filters": [{"operator": "IS", "term": "eventType", "value": "DELETED"},
-                                     {"operator": "IS", "term": "eventType", "value": "EMAILED"},
-                                     {"operator": "IS", "term": "eventType", "value": "MODIFIED"},
-                                     {"operator": "IS", "term": "eventType", "value": "READ_BY_AP"},
-                                     {"operator": "IS", "term": "eventType", "value": "CREATED"}]
-                         }],
-             "pgNum": 1, "pgSize": 10000, "srtDir": "asc", "srtKey": "eventId"
+    search_query = {
+        "groupClause": "AND",
+        "groups": [
+            {
+                "filterClause": "AND",
+                "filters": [
+                    {
+                        "operator": "ON_OR_AFTER",
+                        "term": "eventTimestamp",
+                        "value": "2020-05-01T00:00:00.000Z",
+                    }
+                ],
+            },
+            {
+                "filterClause": "OR",
+                "filters": [
+                    {"operator": "IS", "term": "eventType", "value": "DELETED"},
+                    {"operator": "IS", "term": "eventType", "value": "EMAILED"},
+                    {"operator": "IS", "term": "eventType", "value": "MODIFIED"},
+                    {"operator": "IS", "term": "eventType", "value": "READ_BY_AP"},
+                    {"operator": "IS", "term": "eventType", "value": "CREATED"},
+                ],
+            },
+        ],
+        "pgNum": 1,
+        "pgSize": 10000,
+        "srtDir": "asc",
+        "srtKey": "eventId",
     }
     query = FileEventQuery.from_dict(search_query)
     extraction_module.extract(

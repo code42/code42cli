@@ -122,9 +122,7 @@ def test_validation_when_is_saved_search_and_has_begin_date_exits(
         main.print_out(sdk, profile, file_event_namespace)
 
 
-def test_validation_when_is_saved_search_and_has_end_date_exits(
-    sdk, profile, file_event_namespace
-):
+def test_validation_when_is_saved_search_and_has_end_date_exits(sdk, profile, file_event_namespace):
     file_event_namespace.saved_search = "abc"
     file_event_namespace.end = "end date"
     with pytest.raises(SystemExit):
@@ -156,6 +154,7 @@ def test_validation_when_is_saved_search_and_has_include_non_exposure_exits(
     file_event_namespace.include_non_exposure = True
     with pytest.raises(SystemExit):
         main.print_out(sdk, profile, file_event_namespace)
+
 
 @pytest.mark.parametrize(
     "arg",

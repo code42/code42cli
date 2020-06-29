@@ -1,8 +1,5 @@
 import pytest
-from code42cli.cmds.securitydata.savedsearch.savedsearch import (
-    show,
-    show_detail
-)
+from code42cli.cmds.securitydata.savedsearch.savedsearch import show, show_detail
 
 
 def test_show_calls_get_method(sdk_with_user, profile):

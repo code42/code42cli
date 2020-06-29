@@ -1,7 +1,8 @@
+from pprint import pformat
 import click
 from click import echo
 
-from code42cli.options import global_options, incompatible_with
+from code42cli.options import global_options, incompatible_with, OrderedGroup
 from code42cli.cmds.search import logger_factory
 from py42.sdk.queries.fileevents.filters import *
 from c42eventextractor.extractors import FileEventExtractor
@@ -25,6 +26,7 @@ from code42cli.cmds.search.extraction import (
 )
 import code42cli.errors as errors
 from code42cli.logger import get_main_cli_logger
+from code42cli.util import format_to_table, find_format_width
 
 logger = get_main_cli_logger()
 
@@ -120,6 +122,18 @@ include_non_exposure_option = click.option(
 )
 
 
+def _get_saved_search_query(ctx, arg):
+    query = ctx.obj.sdk.securitydata.savedsearches.get_query(arg)
+    return query
+
+
+saved_search_option = click.option(
+    "--saved-search",
+    help="Get events from a saved search filter with the given ID",
+    callback=_get_saved_search_query,
+)
+
+
 def file_event_options(f):
     f = exposure_type_option(f)
     f = username_option(f)
@@ -133,10 +147,11 @@ def file_event_options(f):
     f = tab_url_option(f)
     f = include_non_exposure_option(f)
     f = format_option(f)
+    f = saved_search_option(f)
     return f
 
 
-@click.group()
+@click.group(cls=OrderedGroup)
 @global_options
 def security_data(state):
     """Tools for getting security related data, such as file events."""
@@ -189,6 +204,30 @@ def send_to(state, format, hostname, protocol, begin, end, advanced_query, incre
     _extract(
         state.sdk, cursor, state.search_filters, begin, end, advanced_query, output_logger,
     )
+
+
+@security_data.group(cls=OrderedGroup)
+@global_options
+def saved_search(state):
+    pass
+
+
+@saved_search.command("list")
+@global_options
+def _list(state):
+    """List available saved searches."""
+    response = state.sdk.securitydata.savedsearches.get()
+    header = {"name": "Name", "id": "Id"}
+    format_to_table(*find_format_width(response["searches"], header))
+
+
+@saved_search.command()
+@click.argument("search-id")
+@global_options
+def show(state, search_id):
+    """Get the details of a saved search."""
+    response = state.sdk.securitydata.savedsearches.get_by_id(search_id)
+    echo(pformat(response["searches"]))
 
 
 def _extract(sdk, cursor, filter_list, begin, end, advanced_query, output_logger):

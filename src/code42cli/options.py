@@ -72,7 +72,11 @@ def incompatible_with(incompatible_opts):
             # if None it means we're in autocomplete mode and don't want to validate
             if ctx.obj is not None:
                 found_incompatible = ", ".join(
-                    ["--{}".format(opt) for opt in opts if opt in incompatible_opts]
+                    [
+                        "--{}".format(opt.replace("_", "-"))
+                        for opt in opts
+                        if opt in incompatible_opts
+                    ]
                 )
                 if self.name in opts and found_incompatible:
                     raise click.BadOptionUsage(
