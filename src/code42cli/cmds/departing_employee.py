@@ -43,7 +43,7 @@ def remove(state, username):
 @departing_employee.group(cls=OrderedGroup)
 @global_options
 def bulk(state):
-    """Tools for executing bulk commands."""
+    """Tools for executing bulk departing-employee commands."""
     pass
 
 
