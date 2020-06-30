@@ -33,7 +33,13 @@ def read_csv(file, headers=None):
 
 
 def read_flat_file(file):
-    return [row.strip() for row in file]
+    """Helper to read rows of a flat file, automatically removing header comment row if 
+    it exists, and strips whitespace from each row automatically."""
+    first_row = next(file)
+    if first_row.startswith("#"):
+        return [row.strip() for row in file]
+    else:
+        return [first_row.strip(), *[row.strip() for row in file]]
 
 
 read_flat_file_arg = click.argument(
