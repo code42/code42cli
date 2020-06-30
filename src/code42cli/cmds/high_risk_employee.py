@@ -84,7 +84,7 @@ def bulk(state):
 HIGH_RISK_EMPLOYEE_CSV_HEADERS = ["username", "cloud_alias", "risk_tag", "notes"]
 
 high_risk_employee_generate_template = generate_template_cmd_factory(
-    csv_columns=HIGH_RISK_EMPLOYEE_CSV_HEADERS, cmd_name="high_risk_employee"
+    csv_columns=HIGH_RISK_EMPLOYEE_CSV_HEADERS, cmd_name="high_risk_employee", flat=["remove"]
 )
 bulk.add_command(high_risk_employee_generate_template)
 
