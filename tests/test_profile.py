@@ -1,11 +1,15 @@
 import pytest
 import logging
 
+from click.testing import CliRunner
+from code42cli.main import cli
+
 import code42cli.profile as cliprofile
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.search.cursor_store import FileEventCursorStore, AlertCursorStore
 from code42cli.config import ConfigAccessor, NoConfigProfileError
 from .conftest import MockSection, create_mock_profile
+from code42cli.errors import Code42CLIError
 
 
 @pytest.fixture
@@ -67,9 +71,9 @@ def test_get_profile_returns_expected_profile(config_accessor):
     assert profile.name == "testprofilename"
 
 
-def test_get_profile_when_config_accessor_throws_exits(config_accessor):
+def test_get_profile_when_config_accessor_raises_cli_error(config_accessor):
     config_accessor.get_profile.side_effect = NoConfigProfileError()
-    with pytest.raises(SystemExit):
+    with pytest.raises(Code42CLIError):
         cliprofile.get_profile("testprofilename")
 
 
@@ -90,7 +94,7 @@ def test_validate_default_profile_prints_set_default_help_when_no_valid_default_
 ):
     config_accessor.get_profile.side_effect = NoConfigProfileError()
     config_accessor.get_all_profiles.return_value = [MockSection("thisprofilexists")]
-    with pytest.raises(SystemExit):
+    with pytest.raises(Code42CLIError):
         cliprofile.validate_default_profile()
         capture = capsys.readouterr()
         assert "No default profile set." in capture.out
@@ -101,7 +105,7 @@ def test_validate_default_profile_prints_create_profile_help_when_no_valid_defau
 ):
     config_accessor.get_profile.side_effect = NoConfigProfileError()
     config_accessor.get_all_profiles.return_value = []
-    with pytest.raises(SystemExit):
+    with pytest.raises(Code42CLIError):
         cliprofile.validate_default_profile()
         capture = capsys.readouterr()
         assert "No existing profile." in capture.out
@@ -137,16 +141,10 @@ def test_create_profile_uses_expected_profile_values(config_accessor):
     )
 
 
-def test_create_profile_if_profile_exists_exits(mocker, caplog, config_accessor):
+def test_create_profile_if_profile_exists_exits(mocker, cli_state, caplog, config_accessor):
     config_accessor.get_profile.return_value = mocker.MagicMock()
-    success = True
-    with caplog.at_level(logging.ERROR):
-        try:
-            cliprofile.create_profile("foo", "bar", "baz", True)
-        except SystemExit:
-            success = True
-            assert "already exists" in caplog.text
-        assert success
+    with pytest.raises(Code42CLIError):
+        cliprofile.create_profile("foo", "bar", "baz", True)
 
 
 def test_get_all_profiles_returns_expected_profile_list(config_accessor):

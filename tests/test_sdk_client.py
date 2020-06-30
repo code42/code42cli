@@ -1,9 +1,18 @@
 import py42.sdk
 import py42.settings.debug as debug
+from py42.exceptions import Py42UnauthorizedError
+from requests.exceptions import ConnectionError, RequestException
+from requests import Response
 import pytest
 
 from code42cli.sdk_client import create_sdk, validate_connection
+from code42cli.errors import Code42CLIError, LoggedCLIError
 from .conftest import create_mock_profile
+
+
+@pytest.fixture
+def sdk_logger(mocker):
+    return mocker.patch("code42cli.sdk_client.logger")
 
 
 @pytest.fixture
@@ -12,23 +21,79 @@ def mock_sdk_factory(mocker):
 
 
 @pytest.fixture
-def error_sdk_factory(mock_sdk_factory):
-    def side_effect():
-        raise Exception()
+def requests_exception(mocker):
+    mock_response = mocker.MagicMock(spec=Response)
+    mock_exception = mocker.MagicMock(spec=RequestException)
+    mock_exception.response = mock_response
+    return mock_exception
 
-    mock_sdk_factory.side_effect = side_effect
-    return mock_sdk_factory
+
+# @pytest.fixture
+# def error_sdk_factory(mocker, mock_sdk_factory):
+#     def side_effect(*args):
+#         mock_response = mocker.MagicMock(spec=Response)
+#         mock_request_ex = mocker.MagicMock(spec=RequestException)
+#         mock_request_ex.response = mock_response
+#         ex = Py42UnauthorizedError(mock_request_ex)
+#         raise ex
+#
+#     mock_sdk_factory.side_effect = side_effect
+#     return mock_sdk_factory
 
 
-def test_create_sdk_when_py42_exception_occurs_causes_exit(error_sdk_factory):
+def test_create_sdk_when_py42_exception_occurs_raises_and_logs_cli_error(
+    sdk_logger, mock_sdk_factory, requests_exception
+):
+
+    mock_sdk_factory.side_effect = Py42UnauthorizedError(requests_exception)
     profile = create_mock_profile()
 
     def mock_get_password():
         return "Test Password"
 
     profile.get_password = mock_get_password
-    with pytest.raises(SystemExit):
+    with pytest.raises(Code42CLIError) as err:
         create_sdk(profile, False)
+
+    assert "Invalid credentials for user" in err.value.message
+    assert sdk_logger.log_error.call_count == 1
+    assert "Failure in HTTP call" in sdk_logger.log_error.call_args.args[0]
+
+
+def test_create_sdk_when_connection_exception_occurs_raises_and_logs_cli_error(
+    sdk_logger, mock_sdk_factory
+):
+    mock_sdk_factory.side_effect = ConnectionError("connection message")
+    profile = create_mock_profile()
+
+    def mock_get_password():
+        return "Test Password"
+
+    profile.get_password = mock_get_password
+    with pytest.raises(LoggedCLIError) as err:
+        create_sdk(profile, False)
+
+    assert "Problem connecting to" in err.value.message
+    assert sdk_logger.log_error.call_count == 1
+    assert "connection message" in sdk_logger.log_error.call_args.args[0]
+
+
+def test_create_sdk_when_unknown_exception_occurs_raises_and_logs_cli_error(
+    sdk_logger, mock_sdk_factory
+):
+    mock_sdk_factory.side_effect = Exception("test message")
+    profile = create_mock_profile()
+
+    def mock_get_password():
+        return "Test Password"
+
+    profile.get_password = mock_get_password
+    with pytest.raises(LoggedCLIError) as err:
+        create_sdk(profile, False)
+
+    assert "Unknown problem validating" in err.value.message
+    assert sdk_logger.log_error.call_count == 1
+    assert "test message" in sdk_logger.log_error.call_args.args[0]
 
 
 def test_create_sdk_when_told_to_debug_turns_on_debug(mock_sdk_factory):
@@ -40,14 +105,6 @@ def test_create_sdk_when_told_to_debug_turns_on_debug(mock_sdk_factory):
     profile.get_password = mock_get_password
     create_sdk(profile, True)
     assert py42.settings.debug.level == debug.DEBUG
-
-
-def test_validate_connection_when_creating_sdk_raises_returns_false(error_sdk_factory):
-    assert not validate_connection("Test", "Password", "Authority")
-
-
-def test_validate_connection_when_sdk_does_not_raise_returns_true(mock_sdk_factory):
-    assert validate_connection("Test", "Password", "Authority")
 
 
 def test_validate_connection_uses_given_credentials(mock_sdk_factory):
