@@ -3,11 +3,16 @@ import click
 
 from code42cli.profile import get_profile
 from code42cli.sdk_client import create_sdk
+from code42cli.errors import Code42CLIError
 
 
 class CLIState(object):
     def __init__(self):
-        self.profile = get_profile()
+        try:
+            profile = get_profile()
+        except Code42CLIError:
+            profile = None
+        self.profile = profile
         self.debug = False
         self._sdk = None
         self.search_filters = []
