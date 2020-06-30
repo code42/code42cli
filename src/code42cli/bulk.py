@@ -22,11 +22,14 @@ def write_template_file(path, columns=None):
     with open(path, "w", encoding="utf8") as new_file:
         if columns:
             new_file.write(",".join(columns))
+        else:
+            new_file.write("# This template takes a single item to be processed for each row.")
 
 
-def generate_template_cmd_factory(csv_columns, cmd_name):
+def generate_template_cmd_factory(csv_columns, cmd_name, flat=None):
     """Helper function that creates a `generate-template` click command that can be added to `bulk`
-    sub-command groups.
+    sub-command groups. If any bulk commands take a flat file instead of a csv, pass those command 
+    names (.e.g "add"/"remove") as a list to the `flat` param.
     """
 
     @click.command()
@@ -43,7 +46,10 @@ def generate_template_cmd_factory(csv_columns, cmd_name):
         if not path:
             filename = "{}_bulk_{}.csv".format(cmd_name, cmd)
             path = os.path.join(os.getcwd(), filename)
-        write_template_file(path, columns=csv_columns)
+        if cmd in flat:
+            write_template_file(path, columns=None)
+        else:
+            write_template_file(path, columns=csv_columns)
 
     return generate_template
 
