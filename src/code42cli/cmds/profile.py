@@ -128,6 +128,7 @@ def delete_all():
         if does_user_agree("\nThis will also delete any stored passwords and checkpoints. (y/n): "):
             for profile in existing_profiles:
                 cliprofile.delete_profile(profile.name)
+                echo("Profile '{}' has been deleted.".format(profile.name))
     else:
         echo("\nNo profiles exist. Nothing to delete.")
 
