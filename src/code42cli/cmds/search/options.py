@@ -11,7 +11,7 @@ logger = get_main_cli_logger()
 
 
 def is_in_filter(filter_cls):
-    def callback(ctx, arg):
+    def callback(ctx, param, arg):
         if arg:
             ctx.obj.search_filters.append(filter_cls.is_in(arg))
         return arg
@@ -20,7 +20,7 @@ def is_in_filter(filter_cls):
 
 
 def not_in_filter(filter_cls):
-    def callback(ctx, arg):
+    def callback(ctx, param, arg):
         if arg:
             ctx.obj.search_filters.append(filter_cls.not_in(arg))
         return arg
@@ -29,7 +29,7 @@ def not_in_filter(filter_cls):
 
 
 def exists_filter(filter_cls):
-    def callback(ctx, arg):
+    def callback(ctx, param, arg):
         if not arg:
             ctx.obj.search_filters.append(filter_cls.exists())
             return arg
@@ -38,7 +38,7 @@ def exists_filter(filter_cls):
 
 
 def contains_filter(filter_cls):
-    def callback(ctx, arg):
+    def callback(ctx, param, arg):
         if arg:
             for item in arg:
                 ctx.obj.search_filters.append(filter_cls.contains(item))
@@ -48,7 +48,7 @@ def contains_filter(filter_cls):
 
 
 def not_contains_filter(filter_cls):
-    def callback(ctx, arg):
+    def callback(ctx, param, arg):
         if arg:
             for item in arg:
                 ctx.obj.search_filters.append(filter_cls.not_contains(item))
@@ -99,7 +99,7 @@ def create_search_options(search_term):
     begin_option = click.option(
         "-b",
         "--begin",
-        callback=lambda ctx, arg: parse_min_timestamp(arg),
+        callback=lambda ctx, param, arg: parse_min_timestamp(arg),
         cls=BeginOption,
         help="The beginning of the date range in which to look for {}, can be a date/time in "
         "yyyy-MM-dd (UTC) or yyyy-MM-dd HH:MM:SS (UTC+24-hr time) format where the 'time' "
@@ -110,7 +110,7 @@ def create_search_options(search_term):
     end_option = click.option(
         "-e",
         "--end",
-        callback=lambda ctx, arg: parse_max_timestamp(arg),
+        callback=lambda ctx, param, arg: parse_max_timestamp(arg),
         cls=AdvancedQueryAndSavedSearchIncompatible,
         help="The end of the date range in which to look for {}, argument format options are "
         "the same as --begin.".format(search_term),

@@ -26,14 +26,14 @@ class CLIState(object):
         return self._sdk
 
 
-def set_profile(ctx, value):
+def set_profile(ctx, param, value):
     """Sets the profile on the global state object when --profile <name> is passed to commands 
     decorated with @global_options."""
     if value:
         ctx.ensure_object(CLIState).profile = get_profile(value)
 
 
-def set_debug(ctx, value):
+def set_debug(ctx, param, value):
     """Sets debug to True on global state object when --debug/-d is passed to commands decorated 
     with @global_options.
     """

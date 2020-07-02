@@ -122,7 +122,7 @@ include_non_exposure_option = click.option(
 )
 
 
-def _get_saved_search_query(ctx, arg):
+def _get_saved_search_query(ctx, param, arg):
     if arg is None:
         return
     query = ctx.obj.sdk.securitydata.savedsearches.get_query(arg)
