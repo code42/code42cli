@@ -111,7 +111,6 @@ def delete_profile(profile_name):
     for store in cursor_stores:
         store.clean()
     config_accessor.delete_profile(profile_name)
-    echo("Profile '{}' has been deleted.".format(profile_name))
 
 
 def update_profile(name, server, username, ignore_ssl_errors):

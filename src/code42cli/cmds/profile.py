@@ -114,6 +114,7 @@ def delete(profile_name):
     ):
         return
     cliprofile.delete_profile(profile_name)
+    echo("Profile '{}' has been deleted.".format(profile_name))
 
 
 @profile.command()
