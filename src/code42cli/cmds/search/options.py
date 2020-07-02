@@ -2,10 +2,10 @@ from datetime import datetime, timezone
 
 import click
 
-from code42cli.options import incompatible_with
-from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp
 from code42cli.cmds.search.enums import ServerProtocol
+from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp
 from code42cli.logger import get_main_cli_logger
+from code42cli.options import incompatible_with
 
 logger = get_main_cli_logger()
 
@@ -76,15 +76,19 @@ class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
             begin_present = "begin" in opts
             if checkpoint_arg_present and checkpoint_value is not None and begin_present:
                 opts.pop("begin")
-                checkpoint_value_str = datetime.fromtimestamp(checkpoint_value).astimezone(timezone.utc).isoformat()
+                checkpoint_value_str = (
+                    datetime.fromtimestamp(checkpoint_value).astimezone(timezone.utc).isoformat()
+                )
                 click.echo(
-                    "Ignoring --begin value as --use-checkpoint was passed and checkpoint of {} exists.\n".format(checkpoint_value_str),
+                    "Ignoring --begin value as --use-checkpoint was passed and checkpoint of {} exists.\n".format(
+                        checkpoint_value_str
+                    ),
                     err=True,
                 )
             if checkpoint_arg_present and not checkpoint_value is not None and not begin_present:
                 raise click.UsageError(
                     message="--begin date is required for --use-checkpoint when no checkpoint "
-                            "exists yet.",
+                    "exists yet.",
                 )
             if not checkpoint_arg_present and not begin_present:
                 raise click.UsageError(message="--begin date is required.")
@@ -118,7 +122,7 @@ def create_search_options(search_term):
         "\nWARNING: Using advanced queries is incompatible with other query-building args.".format(
             search_term
         ),
-    )   
+    )
     checkpoint_option = click.option(
         "-c",
         "--use-checkpoint",

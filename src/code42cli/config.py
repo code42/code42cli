@@ -1,7 +1,7 @@
 import os
+from configparser import ConfigParser
 
 from click import echo
-from configparser import ConfigParser
 
 import code42cli.util as util
 

@@ -2,10 +2,9 @@ import os
 
 import click
 
-from code42cli.worker import Worker
-from code42cli.logger import get_main_cli_logger
 from code42cli.errors import LoggedCLIError
-
+from code42cli.logger import get_main_cli_logger
+from code42cli.worker import Worker
 
 _logger = get_main_cli_logger()
 

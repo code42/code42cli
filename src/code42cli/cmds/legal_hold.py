@@ -4,23 +4,22 @@ from pprint import pformat
 
 import click
 from click import echo
-
 from py42.exceptions import Py42ForbiddenError, Py42BadRequestError
 
+from code42cli.bulk import run_bulk_process, generate_template_cmd_factory
+from code42cli.cmds.shared import get_user_id
 from code42cli.errors import (
     UserAlreadyAddedError,
     UserNotInLegalHoldError,
     LegalHoldNotFoundOrPermissionDeniedError,
 )
+from code42cli.file_readers import read_csv_arg
+from code42cli.options import global_options, OrderedGroup
 from code42cli.util import (
     format_to_table,
     find_format_width,
     format_string_list_to_columns,
 )
-from code42cli.cmds.shared import get_user_id
-from code42cli.file_readers import read_csv_arg
-from code42cli.options import global_options, OrderedGroup
-from code42cli.bulk import run_bulk_process, generate_template_cmd_factory
 
 _MATTER_KEYS_MAP = OrderedDict()
 _MATTER_KEYS_MAP["legalHoldUid"] = "Matter ID"

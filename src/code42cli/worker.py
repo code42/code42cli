@@ -1,11 +1,11 @@
+import queue
 from threading import Thread, Lock
 from time import sleep
-import queue
 
 from py42.exceptions import Py42HTTPError, Py42ForbiddenError
 
-from code42cli.logger import get_main_cli_logger
 from code42cli.errors import Code42CLIError
+from code42cli.logger import get_main_cli_logger
 
 
 class WorkerStats(object):

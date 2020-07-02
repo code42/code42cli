@@ -2,26 +2,20 @@ import signal
 import sys
 
 import click
+from py42.__version__ import __version__ as py42version
+from py42.settings import set_user_agent_suffix
 
-from code42cli.options import global_options
-from code42cli.cmds.alerts import alerts
+from code42cli import PRODUCT_NAME
+from code42cli.__version__ import __version__ as cliversion
 from code42cli.cmds.alert_rules import alert_rules
-from code42cli.cmds.securitydata import security_data
-
+from code42cli.cmds.alerts import alerts
 from code42cli.cmds.departing_employee import departing_employee
 from code42cli.cmds.high_risk_employee import high_risk_employee
 from code42cli.cmds.legal_hold import legal_hold
 from code42cli.cmds.profile import profile
-
-
-from py42.settings import set_user_agent_suffix
-
-from code42cli import PRODUCT_NAME
-from py42.__version__ import __version__ as py42version
-
-from code42cli.__version__ import __version__ as cliversion
-
+from code42cli.cmds.securitydata import security_data
 from code42cli.errors import ExceptionHandlingGroup
+from code42cli.options import global_options
 
 BANNER = """\b
  dP""b8  dP"Yb  8888b. 888888  dP88  oP"Yb. 

@@ -1,8 +1,7 @@
 import json
 
-from click import secho, echo
-
 from c42eventextractor import ExtractionHandlers
+from click import secho
 from py42.sdk.queries.query_filter import QueryFilterTimestampField
 
 import code42cli.errors as errors

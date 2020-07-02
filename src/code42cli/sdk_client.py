@@ -1,9 +1,8 @@
-from requests.exceptions import ConnectionError
-
 import py42.sdk
-import py42.settings.debug as debug
 import py42.settings
+import py42.settings.debug as debug
 from py42.exceptions import Py42UnauthorizedError
+from requests.exceptions import ConnectionError
 
 from code42cli.errors import Code42CLIError, LoggedCLIError
 from code42cli.logger import get_main_cli_logger

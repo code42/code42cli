@@ -1,5 +1,5 @@
-from code42cli.errors import UserAlreadyAddedError
 from code42cli.cmds.shared import get_user_id
+from code42cli.errors import UserAlreadyAddedError
 
 
 def update_user(sdk, user_id, cloud_alias=None, risk_tag=None, notes=None):

@@ -1,9 +1,9 @@
-import sys
-import shutil
 import os
-from os import path
+import shutil
+import sys
 from collections import OrderedDict
 from functools import wraps
+from os import path
 from signal import signal, getsignal, SIGINT
 
 from click import echo, style

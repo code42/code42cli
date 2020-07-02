@@ -4,10 +4,10 @@ import click
 from click import echo, secho
 
 import code42cli.profile as cliprofile
+from code42cli.errors import Code42CLIError
 from code42cli.profile import CREATE_PROFILE_HELP
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree
-from code42cli.errors import Code42CLIError
 
 
 @click.group()

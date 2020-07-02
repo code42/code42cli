@@ -8,14 +8,14 @@ from c42eventextractor.logging.formatters import (
 from c42eventextractor.logging.handlers import NoPrioritySysLogHandlerWrapper
 
 from code42cli.cmds.search.enums import OutputFormat
-from code42cli.util import get_url_parts
+from code42cli.errors import Code42CLIError
 from code42cli.logger import (
     logger_has_handlers,
     logger_deps_lock,
     add_handler_to_logger,
     get_logger_for_stdout as get_stdout_logger,
 )
-from code42cli.errors import Code42CLIError
+from code42cli.util import get_url_parts
 
 
 def get_logger_for_stdout(output_format):

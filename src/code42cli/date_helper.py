@@ -1,9 +1,8 @@
-from datetime import datetime, timedelta
 import re
+from datetime import datetime, timedelta
 
 import click
 from c42eventextractor.common import convert_datetime_to_timestamp
-
 
 TIMESTAMP_REGEX = re.compile("(\d{4}-\d{2}-\d{2})\s*(.*)?")
 MAGIC_TIME_REGEX = re.compile("(\d+)([dhm])$")

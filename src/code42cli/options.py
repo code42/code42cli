@@ -1,9 +1,10 @@
 from collections import OrderedDict
+
 import click
 
+from code42cli.errors import Code42CLIError
 from code42cli.profile import get_profile
 from code42cli.sdk_client import create_sdk
-from code42cli.errors import Code42CLIError
 
 
 class CLIState(object):

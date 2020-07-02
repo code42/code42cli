@@ -1,12 +1,21 @@
 from pprint import pformat
+
 import click
-from click import echo
-
-from code42cli.options import global_options, incompatible_with, OrderedGroup
-from code42cli.cmds.search import logger_factory
-from py42.sdk.queries.fileevents.filters import *
 from c42eventextractor.extractors import FileEventExtractor
+from click import echo
+from py42.sdk.queries.fileevents.filters import *
 
+import code42cli.errors as errors
+from code42cli.cmds.search import logger_factory
+from code42cli.cmds.search.cursor_store import FileEventCursorStore
+from code42cli.cmds.search.enums import (
+    OutputFormat,
+    ExposureType as ExposureTypeOptions,
+)
+from code42cli.cmds.search.extraction import (
+    create_handlers,
+    create_time_range_filter,
+)
 from code42cli.cmds.search.options import (
     create_search_options,
     AdvancedQueryAndSavedSearchIncompatible,
@@ -15,17 +24,8 @@ from code42cli.cmds.search.options import (
     output_file_arg,
     server_options,
 )
-from code42cli.cmds.search.enums import (
-    OutputFormat,
-    ExposureType as ExposureTypeOptions,
-)
-from code42cli.cmds.search.cursor_store import FileEventCursorStore
-from code42cli.cmds.search.extraction import (
-    create_handlers,
-    create_time_range_filter,
-)
-import code42cli.errors as errors
 from code42cli.logger import get_main_cli_logger
+from code42cli.options import global_options, incompatible_with, OrderedGroup
 from code42cli.util import format_to_table, find_format_width
 
 logger = get_main_cli_logger()

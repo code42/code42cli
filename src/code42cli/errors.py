@@ -1,7 +1,7 @@
+import difflib
 import re
 
 import click
-import difflib
 from click._compat import get_text_stderr
 from py42.exceptions import Py42ForbiddenError, Py42HTTPError
 

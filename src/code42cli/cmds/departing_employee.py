@@ -1,17 +1,16 @@
 import click
+from py42.exceptions import Py42BadRequestError
 
+from code42cli.bulk import generate_template_cmd_factory, run_bulk_process
 from code42cli.cmds.detectionlists import update_user, try_handle_user_already_added_error
 from code42cli.cmds.detectionlists.options import (
     username_arg,
     cloud_alias_option,
     notes_option,
 )
-from code42cli.bulk import generate_template_cmd_factory, run_bulk_process
-from code42cli.file_readers import read_csv_arg, read_flat_file_arg
 from code42cli.cmds.shared import get_user_id
+from code42cli.file_readers import read_csv_arg, read_flat_file_arg
 from code42cli.options import global_options, OrderedGroup
-
-from py42.exceptions import Py42BadRequestError
 
 
 @click.group(cls=OrderedGroup)
