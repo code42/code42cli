@@ -64,6 +64,7 @@ def validate_advanced_query_is_json(ctx, param, arg):
         return
     try:
         json.loads(arg)
+        return arg
     except json.JSONDecodeError:
         raise Code42CLIError("Failed to parse advanced query, must be a valid json string.")
 
