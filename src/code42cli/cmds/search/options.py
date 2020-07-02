@@ -60,6 +60,8 @@ def not_contains_filter(filter_cls):
 
 
 def validate_advanced_query_is_json(ctx, param, arg):
+    if arg is None:
+        return
     try:
         json.loads(arg)
     except:
