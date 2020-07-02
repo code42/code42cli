@@ -85,9 +85,10 @@ def incompatible_with(incompatible_opts):
                     ]
                 )
                 if self.name in opts and found_incompatible:
+                    name = self.name.replace("_", "-")
                     raise click.BadOptionUsage(
                         option_name=self.name,
-                        message="--{} can't be used with: {}".format(self.name, found_incompatible),
+                        message="--{} can't be used with: {}".format(name, found_incompatible),
                     )
             return super().handle_parse_result(ctx, opts, args)
 
