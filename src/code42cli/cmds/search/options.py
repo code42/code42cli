@@ -1,9 +1,11 @@
 from datetime import datetime, timezone
+import json
 
 import click
 
 from code42cli.cmds.search.enums import ServerProtocol
 from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp
+from code42cli.errors import Code42CLIError
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with
 
@@ -57,6 +59,13 @@ def not_contains_filter(filter_cls):
     return callback
 
 
+def validate_advanced_query_is_json(ctx, param, arg):
+    try:
+        json.loads(arg)
+    except:
+        raise Code42CLIError("Failed to parse advanced query, must be a valid json string.")
+
+
 AdvancedQueryAndSavedSearchIncompatible = incompatible_with(["advanced_query", "saved_search"])
 
 
@@ -68,7 +77,7 @@ class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
 
     def handle_parse_result(self, ctx, opts, args):
         # if ctx.obj is None it means we're in autocomplete mode and don't want to validate
-        if ctx.obj is not None and "saved_search" not in opts:
+        if ctx.obj is not None and "saved_search" not in opts and "advanced_query" not in opts:
             profile = opts.get("profile") or ctx.obj.profile.name
             cursor = ctx.obj.cursor_getter(profile)
             checkpoint_arg_present = "use_checkpoint" in opts
@@ -122,6 +131,7 @@ def create_search_options(search_term):
         "\nWARNING: Using advanced queries is incompatible with other query-building args.".format(
             search_term
         ),
+        callback=validate_advanced_query_is_json,
     )
     checkpoint_option = click.option(
         "-c",
