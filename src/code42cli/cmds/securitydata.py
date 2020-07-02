@@ -157,8 +157,8 @@ def file_event_options(f):
 @global_options
 def security_data(state):
     """Tools for getting security related data, such as file events."""
-    # store cursor class on the group state so shared --begin option can use it in validation
-    state.cursor_class = FileEventCursorStore
+    # store cursor getter on the group state so shared --begin option can use it in validation
+    state.cursor_getter = _get_file_event_cursor_store
 
 
 @security_data.command()
@@ -166,7 +166,7 @@ def security_data(state):
 @global_options
 def clear_checkpoint(state, checkpoint_name):
     """Remove the saved file event checkpoint from '--use-checkpoint/-c' mode."""
-    FileEventCursorStore(state.profile.name).delete(checkpoint_name)
+    _get_file_event_cursor_store(state.profile.name).delete(checkpoint_name)
 
 
 @security_data.command("print")
@@ -176,7 +176,7 @@ def clear_checkpoint(state, checkpoint_name):
 def _print(state, format, begin, end, advanced_query, use_checkpoint, **kwargs):
     """Print file events to stdout."""
     output_logger = logger_factory.get_logger_for_stdout(format)
-    cursor = FileEventCursorStore(state.profile.name) if use_checkpoint else None
+    cursor = _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
     _extract(
         sdk=state.sdk,
         cursor=cursor,
@@ -197,7 +197,7 @@ def _print(state, format, begin, end, advanced_query, use_checkpoint, **kwargs):
 def write_to(state, format, output_file, begin, end, advanced_query, use_checkpoint, **kwargs):
     """Write file events to the file with the given name."""
     output_logger = logger_factory.get_logger_for_file(output_file, format)
-    cursor = FileEventCursorStore(state.profile.name) if use_checkpoint else None
+    cursor = _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
     _extract(
         sdk=state.sdk,
         cursor=cursor,
@@ -220,7 +220,7 @@ def send_to(
 ):
     """Send file events to the given server address."""
     output_logger = logger_factory.get_logger_for_server(hostname, protocol, format)
-    cursor = FileEventCursorStore(state.profile.name) if use_checkpoint else None
+    cursor = _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
     _extract(
         sdk=state.sdk,
         cursor=cursor,
@@ -268,3 +268,7 @@ def _extract(sdk, cursor, checkpoint_name, filter_list, begin, end, advanced_que
         extractor.extract(*filter_list)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         echo("No results found.")
+
+
+def _get_file_event_cursor_store(profile_name):
+    return FileEventCursorStore(profile_name)

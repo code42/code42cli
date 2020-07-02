@@ -6,9 +6,9 @@ from code42cli import PRODUCT_NAME
 from code42cli.main import cli
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 
-BEGIN_TIMESTAMP = "1000"
-END_TIMESTAMP = "2000"
-CURSOR_TIMESTAMP = "1500"
+BEGIN_TIMESTAMP = 1577858400.0
+END_TIMESTAMP = 1580450400.0
+CURSOR_TIMESTAMP = 1579500000.0
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ def file_logger(mocker):
 def alert_cursor_with_checkpoint(mocker):
     mock = mocker.patch("code42cli.cmds.alerts._get_alert_cursor_store")
     mock_cursor = mocker.MagicMock(spec=AlertCursorStore)
-    mock_cursor.get_stored_cursor_timestamp.return_value = CURSOR_TIMESTAMP
+    mock_cursor.get.return_value = CURSOR_TIMESTAMP
     mock.return_value = mock_cursor
     return mock
 
@@ -45,7 +45,7 @@ def alert_cursor_with_checkpoint(mocker):
 def alert_cursor_without_checkpoint(mocker):
     mock = mocker.patch("code42cli.cmds.alerts._get_alert_cursor_store")
     mock_cursor = mocker.MagicMock(spec=AlertCursorStore)
-    mock_cursor.get_stored_cursor_timestamp.return_value = None
+    mock_cursor.get.return_value = None
     mock.return_value = mock_cursor
     return mock
 
@@ -70,6 +70,7 @@ def test_print_with_only_begin_calls_extract_with_expected_args(
     alert_extractor.assert_called_with(
         sdk=cli_state.sdk,
         cursor=None,
+        checkpoint_name=None,
         filter_list=cli_state.search_filters,
         begin=BEGIN_TIMESTAMP,
         end=None,
@@ -79,50 +80,58 @@ def test_print_with_only_begin_calls_extract_with_expected_args(
     assert result.exit_code == 0
 
 
-def test_print_with_incremental_and_without_begin_and_without_checkpoint_causes_expected_error(
+def test_print_with_use_checkpoint_and_without_begin_and_without_checkpoint_causes_expected_error(
     cli_state, alert_cursor_without_checkpoint
 ):
     runner = CliRunner()
-    result = runner.invoke(cli, ["alerts", "print", "--incremental"], obj=cli_state)
+    result = runner.invoke(cli, ["alerts", "print", "--use-checkpoint", "test"], obj=cli_state)
     assert result.exit_code == 2
     assert (
-        "--begin date is required for --incremental when no checkpoint exists yet." in result.output
+        "--begin date is required for --use-checkpoint when no checkpoint exists yet."
+        in result.output
     )
 
 
-def test_send_to_with_incremental_and_without_begin_and_without_checkpoint_causes_expected_error(
+def test_send_to_with_use_checkpoint_and_without_begin_and_without_checkpoint_causes_expected_error(
     cli_state, alert_cursor_without_checkpoint, server_logger
 ):
     runner = CliRunner()
-    result = runner.invoke(cli, ["alerts", "send-to", "localhost", "--incremental"], obj=cli_state)
+    result = runner.invoke(
+        cli, ["alerts", "send-to", "localhost", "--use-checkpoint", "test"], obj=cli_state
+    )
     assert result.exit_code == 2
     assert (
-        "--begin date is required for --incremental when no checkpoint exists yet." in result.output
+        "--begin date is required for --use-checkpoint when no checkpoint exists yet."
+        in result.output
     )
 
 
-def test_write_to_with_incremental_and_without_begin_and_without_checkpoint_causes_expected_error(
+def test_write_to_with_use_checkpoint_and_without_begin_and_without_checkpoint_causes_expected_error(
     cli_state, alert_cursor_without_checkpoint
 ):
     runner = CliRunner()
-    result = runner.invoke(cli, ["alerts", "write-to", "test_file", "--incremental"], obj=cli_state)
+    result = runner.invoke(
+        cli, ["alerts", "write-to", "test_file", "--use-checkpoint", "test"], obj=cli_state
+    )
     assert result.exit_code == 2
     assert (
-        "--begin date is required for --incremental when no checkpoint exists yet." in result.output
+        "--begin date is required for --use-checkpoint when no checkpoint exists yet."
+        in result.output
     )
 
 
-def test_print_with_incremental_and_with_begin_and_without_checkpoint_calls_extract_with_begin_date(
+def test_print_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_extract_with_begin_date(
     cli_state, alert_extractor, begin_option, alert_cursor_without_checkpoint, stdout_logger,
 ):
     runner = CliRunner()
     result = runner.invoke(
-        cli, ["alerts", "print", "--incremental", "--begin", "1h"], obj=cli_state
+        cli, ["alerts", "print", "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state
     )
     assert result.exit_code == 0
     alert_extractor.assert_called_with(
         sdk=cli_state.sdk,
         cursor=alert_cursor_without_checkpoint.return_value,
+        checkpoint_name="test",
         filter_list=cli_state.search_filters,
         begin=BEGIN_TIMESTAMP,
         end=None,
@@ -131,17 +140,20 @@ def test_print_with_incremental_and_with_begin_and_without_checkpoint_calls_extr
     )
 
 
-def test_send_to_with_incremental_and_with_begin_and_without_checkpoint_calls_extract_with_begin_date(
+def test_send_to_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_extract_with_begin_date(
     cli_state, alert_extractor, begin_option, alert_cursor_without_checkpoint, server_logger,
 ):
     runner = CliRunner()
     result = runner.invoke(
-        cli, ["alerts", "send-to", "localhost", "--incremental", "--begin", "1h"], obj=cli_state
+        cli,
+        ["alerts", "send-to", "localhost", "--use-checkpoint", "test", "--begin", "1h"],
+        obj=cli_state,
     )
     assert result.exit_code == 0
     alert_extractor.assert_called_with(
         sdk=cli_state.sdk,
         cursor=alert_cursor_without_checkpoint.return_value,
+        checkpoint_name="test",
         filter_list=cli_state.search_filters,
         begin=BEGIN_TIMESTAMP,
         end=None,
@@ -150,17 +162,20 @@ def test_send_to_with_incremental_and_with_begin_and_without_checkpoint_calls_ex
     )
 
 
-def test_write_to_with_incremental_and_with_begin_and_without_checkpoint_calls_extract_with_begin_date(
+def test_write_to_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_extract_with_begin_date(
     cli_state, alert_extractor, begin_option, alert_cursor_without_checkpoint, file_logger,
 ):
     runner = CliRunner()
     result = runner.invoke(
-        cli, ["alerts", "write-to", "test_file", "--incremental", "--begin", "1h"], obj=cli_state
+        cli,
+        ["alerts", "write-to", "test_file", "--use-checkpoint", "test", "--begin", "1h"],
+        obj=cli_state,
     )
     assert result.exit_code == 0
     alert_extractor.assert_called_with(
         sdk=cli_state.sdk,
         cursor=alert_cursor_without_checkpoint.return_value,
+        checkpoint_name="test",
         filter_list=cli_state.search_filters,
         begin=BEGIN_TIMESTAMP,
         end=None,
@@ -169,20 +184,22 @@ def test_write_to_with_incremental_and_with_begin_and_without_checkpoint_calls_e
     )
 
 
-def test_print_with_incremental_and_with_begin_and_with_checkpoint_calls_extract_with_begin_date_none(
+def test_print_with_use_checkpoint_and_with_begin_and_with_checkpoint_calls_extract_with_begin_date_none(
     cli_state, alert_extractor, alert_cursor_with_checkpoint, stdout_logger,
 ):
     runner = CliRunner()
     result = runner.invoke(
-        cli, ["alerts", "print", "--incremental", "--begin", "1h"], obj=cli_state
+        cli, ["alerts", "print", "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state
     )
     assert result.exit_code == 0
     alert_extractor.assert_called_with(
         sdk=cli_state.sdk,
         cursor=alert_cursor_with_checkpoint.return_value,
+        checkpoint_name="test",
         filter_list=cli_state.search_filters,
         begin=None,
         end=None,
         advanced_query=None,
         output_logger=stdout_logger.return_value,
     )
+    assert "checkpoint of 2020-01-20T06:00:00+00:00 exists" in result.output

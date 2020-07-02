@@ -70,7 +70,7 @@ class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
         # if ctx.obj is None it means we're in autocomplete mode and don't want to validate
         if ctx.obj is not None and "saved_search" not in opts:
             profile = opts.get("profile") or ctx.obj.profile.name
-            cursor = ctx.obj.cursor_class(profile)
+            cursor = ctx.obj.cursor_getter(profile)
             checkpoint_arg_present = "use_checkpoint" in opts
             checkpoint_value = cursor.get(opts.get("use_checkpoint", ""))
             begin_present = "begin" in opts

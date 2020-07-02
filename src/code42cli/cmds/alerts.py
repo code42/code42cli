@@ -157,8 +157,8 @@ def alert_options(f):
 @global_options
 def alerts(state):
     """Tools for getting alert data."""
-    # store cursor class on the group state so shared --begin option can use it in validation
-    state.cursor_class = AlertCursorStore
+    # store cursor getter on the group state so shared --begin option can use it in validation
+    state.cursor_getter = _get_alert_cursor_store
 
 
 @alerts.command()
@@ -166,7 +166,7 @@ def alerts(state):
 @global_options
 def clear_checkpoint(state, checkpoint_name):
     """Remove the saved alert checkpoint from '--use-checkpoint/-c' mode."""
-    AlertCursorStore(state.profile.name).delete(checkpoint_name)
+    _get_alert_cursor_store(state.profile.name).delete(checkpoint_name)
 
 
 @alerts.command("print")
@@ -176,7 +176,7 @@ def clear_checkpoint(state, checkpoint_name):
 def _print(cli_state, format, begin, end, advanced_query, use_checkpoint, **kwargs):
     """Print alerts to stdout."""
     output_logger = logger_factory.get_logger_for_stdout(format)
-    cursor = AlertCursorStore(cli_state.profile.name) if use_checkpoint else None
+    cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
     _extract(
         sdk=cli_state.sdk,
         cursor=cursor,
@@ -197,7 +197,7 @@ def _print(cli_state, format, begin, end, advanced_query, use_checkpoint, **kwar
 def write_to(cli_state, format, output_file, begin, end, advanced_query, use_checkpoint, **kwargs):
     """Write alerts to the file with the given name."""
     output_logger = logger_factory.get_logger_for_file(output_file, format)
-    cursor = AlertCursorStore(cli_state.profile.name) if use_checkpoint else None
+    cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
     _extract(
         sdk=cli_state.sdk,
         cursor=cursor,
@@ -220,7 +220,7 @@ def send_to(
 ):
     """Send alerts to the given server address."""
     output_logger = logger_factory.get_logger_for_server(hostname, protocol, format)
-    cursor = AlertCursorStore(cli_state.profile.name) if use_checkpoint else None
+    cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
     _extract(
         sdk=cli_state.sdk,
         cursor=cursor,
@@ -248,3 +248,7 @@ def _extract(sdk, cursor, checkpoint_name, filter_list, begin, end, advanced_que
 
 def _get_alert_extractor(sdk, handlers):
     return AlertExtractor(sdk, handlers)
+
+
+def _get_alert_cursor_store(profile_name):
+    return AlertCursorStore(profile_name)
