@@ -8,6 +8,10 @@ from code42cli.main import cli
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.cmds.search import extraction
 
+from tests.cmds.conftest import get_filter_value_from_json
+from ..conftest import get_test_date_str
+
+
 BEGIN_TIMESTAMP = 1577858400.0
 END_TIMESTAMP = 1580450400.0
 CURSOR_TIMESTAMP = 1579500000.0
@@ -118,16 +122,213 @@ def filter_term_is_in_call_args(extractor, term):
     return False
 
 
+ADVANCED_QUERY_JSON = '{"some": "complex json"}'
+
+
 @pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_alerts_when_is_advanced_query_uses_only_the_extract_advanced(
+def test_alerts_when_is_advanced_query_uses_only_the_extract_advanced_method(
     cmd, cli_state, alert_extractor
 ):
     runner = CliRunner()
     result = runner.invoke(
-        cli, ["alerts", *cmd, "--advanced-query", '{"some": "complex json"}'], obj=cli_state
+        cli, ["alerts", *cmd, "--advanced-query", ADVANCED_QUERY_JSON], obj=cli_state
     )
-    alert_extractor.extract_advanced.assert_called_once_with('{"some": "complex json"}')
+    alert_extractor.return_value.extract_advanced.assert_called_once_with(
+        '{"some": "complex json"}'
+    )
     assert alert_extractor.extract.call_count == 0
+
+
+@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
+def test_alerts_when_is_advanced_query_and_has_begin_date_exits(cmd, cli_state):
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["alerts", *cmd, "--advanced-query", ADVANCED_QUERY_JSON, "--begin", "1d"],
+        obj=cli_state,
+    )
+    assert result.exit_code == 2
+    assert "--begin can't be used with: --advanced-query" in result.output
+
+
+@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
+def test_alerts_when_advanced_query_and_has_begin_date_exits(cmd, cli_state):
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["alerts", *cmd, "--advanced-query", ADVANCED_QUERY_JSON, "--end", "1d"],
+        obj=cli_state,
+    )
+    assert result.exit_code == 2
+    assert "--end can't be used with: --advanced-query" in result.output
+
+
+@pytest.mark.parametrize(
+    "arg",
+    [
+        ("--severity", "HIGH"),
+        ("--actor", "test"),
+        ("--actor-contains", "test"),
+        ("--exclude-actor", "test"),
+        ("--exclude-actor-contains", "test"),
+        ("--rule-name", "test"),
+        ("--exclude-rule-name", "test"),
+        ("--rule-id", "test"),
+        ("--exclude-rule-id", "test"),
+        ("--rule-type", "FedEndpointExfiltration"),
+        ("--exclude-rule-type", "FedEndpointExfiltration"),
+        ("--description", "test"),
+        ("--state", "OPEN"),
+        ("--use-checkpoint", "test"),
+    ],
+)
+def test_print_when_advanced_query_and_other_incompatible_multi_narg_argument_passed(
+    arg, cli_state
+):
+    runner = CliRunner()
+    result = runner.invoke(
+        cli, ["alerts", "print", "--advanced-query", ADVANCED_QUERY_JSON, *arg], obj=cli_state,
+    )
+    assert result.exit_code == 2
+    assert "{} can't be used with: --advanced-query".format(arg[0]) in result.output
+
+
+@pytest.mark.parametrize(
+    "arg",
+    [
+        ("--severity", "HIGH"),
+        ("--actor", "test"),
+        ("--actor-contains", "test"),
+        ("--exclude-actor", "test"),
+        ("--exclude-actor-contains", "test"),
+        ("--rule-name", "test"),
+        ("--exclude-rule-name", "test"),
+        ("--rule-id", "test"),
+        ("--exclude-rule-id", "test"),
+        ("--rule-type", "FedEndpointExfiltration"),
+        ("--exclude-rule-type", "FedEndpointExfiltration"),
+        ("--description", "test"),
+        ("--state", "OPEN"),
+        ("--use-checkpoint", "test"),
+    ],
+)
+def test_write_to_when_advanced_query_and_other_incompatible_multi_narg_argument_passed(
+    arg, cli_state
+):
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["alerts", "write-to", "test_file", "--advanced-query", ADVANCED_QUERY_JSON, *arg],
+        obj=cli_state,
+    )
+    assert result.exit_code == 2
+    assert "{} can't be used with: --advanced-query".format(arg[0]) in result.output
+
+
+@pytest.mark.parametrize(
+    "arg",
+    [
+        ("--severity", "HIGH"),
+        ("--actor", "test"),
+        ("--actor-contains", "test"),
+        ("--exclude-actor", "test"),
+        ("--exclude-actor-contains", "test"),
+        ("--rule-name", "test"),
+        ("--exclude-rule-name", "test"),
+        ("--rule-id", "test"),
+        ("--exclude-rule-id", "test"),
+        ("--rule-type", "FedEndpointExfiltration"),
+        ("--exclude-rule-type", "FedEndpointExfiltration"),
+        ("--description", "test"),
+        ("--state", "OPEN"),
+        ("--use-checkpoint", "test"),
+    ],
+)
+def test_send_to_when_advanced_query_and_other_incompatible_multi_narg_argument_passed(
+    arg, cli_state
+):
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["alerts", "send-to", "localhost", "--advanced-query", ADVANCED_QUERY_JSON, *arg],
+        obj=cli_state,
+    )
+    assert result.exit_code == 2
+    assert "{} can't be used with: --advanced-query".format(arg[0]) in result.output
+
+
+@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
+def test_alerts_when_given_begin_and_end_dates_uses_expected_query(cmd, cli_state, alert_extractor):
+    begin_date = get_test_date_str(days_ago=89)
+    end_date = get_test_date_str(days_ago=1)
+    runner = CliRunner()
+    result = runner.invoke(cli, ["alerts", "print", "--begin", begin_date, "--end", end_date])
+    filters = alert_extractor.return_value.extract.call_args[0][0]
+    actual_begin = get_filter_value_from_json(filters, filter_index=0)
+    expected_begin = "{0}T00:00:00.000Z".format(begin_date)
+    actual_end = get_filter_value_from_json(filters, filter_index=1)
+    expected_end = "{0}T23:59:59.999Z".format(end_date)
+    assert actual_begin == expected_begin
+    assert actual_end == expected_end
+
+
+@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
+def test_alerts_when_given_begin_and_end_date_and_time_uses_expected_query(
+    cmd, cli_state, alert_extractor
+):
+    begin_date = get_test_date_str(days_ago=89)
+    end_date = get_test_date_str(days_ago=1)
+    time = "15:33:02"
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "alerts",
+            "print",
+            "--begin",
+            "{} {}".format(begin_date, time),
+            "--end",
+            "{} {}".format(end_date, time),
+        ],
+    )
+    filters = alert_extractor.return_value.extract.call_args[0][0]
+    actual_begin = get_filter_value_from_json(filters, filter_index=0)
+    expected_begin = "{0}T{1}.000Z".format(begin_date, time)
+    actual_end = get_filter_value_from_json(filters, filter_index=1)
+    expected_end = "{0}T{1}.000Z".format(end_date, time)
+    assert actual_begin == expected_begin
+    assert actual_end == expected_end
+
+
+@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
+def test_alerts_when_given_begin_date_and_time_without_seconds_uses_expected_query(
+    cmd, cli_state, alert_extractor
+):
+    date = get_test_date_str(days_ago=89)
+    time = "15:33"
+    runner = CliRunner()
+    result = runner.invoke(cli, ["alerts", "print", "--begin", "{} {}".format(date, time)])
+    actual = get_filter_value_from_json(
+        alert_extractor.return_value.extract.call_args[0][0], filter_index=0
+    )
+    expected = "{0}T{1}:00.000Z".format(date, time)
+    assert actual == expected
+
+
+@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
+def test_alerts_when_given_end_date_and_time_uses_expected_query(cmd, cli_state, alert_extractor):
+    begin_date = get_test_date_str(days_ago=10)
+    end_date = get_test_date_str(days_ago=1)
+    time = "15:33"
+    runner = CliRunner()
+    result = runner.invoke(
+        cli, ["alerts", "print", "--begin", begin_date, "--end", "{} {}".format(end_date, time)]
+    )
+    actual = get_filter_value_from_json(
+        alert_extractor.return_value.extract.call_args[0][0], filter_index=1
+    )
+    expected = "{0}T{1}:00.000Z".format(end_date, time)
+    assert actual == expected
 
 
 def test_get_alert_details_batches_results_according_to_batch_size(sdk):
