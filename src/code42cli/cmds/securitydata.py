@@ -117,7 +117,7 @@ include_non_exposure_option = click.option(
     "--include-non-exposure",
     is_flag=True,
     callback=exists_filter(ExposureType),
-    cls=incompatible_with(["advanced_query", "type"]),
+    cls=incompatible_with(["advanced_query", "type", "saved_search"]),
     help="Get all events including non-exposure events.",
 )
 
@@ -174,7 +174,7 @@ def clear_checkpoint(state, checkpoint_name):
 @file_event_options
 @search_options
 @global_options
-def _print(state, format, begin, end, advanced_query, use_checkpoint, **kwargs):
+def _print(state, format, begin, end, advanced_query, use_checkpoint, saved_search, **kwargs):
     """Print file events to stdout."""
     output_logger = logger_factory.get_logger_for_stdout(format)
     cursor = _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
@@ -186,6 +186,7 @@ def _print(state, format, begin, end, advanced_query, use_checkpoint, **kwargs):
         begin=begin,
         end=end,
         advanced_query=advanced_query,
+        saved_search=saved_search,
         output_logger=output_logger,
     )
 
@@ -195,7 +196,9 @@ def _print(state, format, begin, end, advanced_query, use_checkpoint, **kwargs):
 @file_event_options
 @search_options
 @global_options
-def write_to(state, format, output_file, begin, end, advanced_query, use_checkpoint, **kwargs):
+def write_to(
+    state, format, output_file, begin, end, advanced_query, use_checkpoint, saved_search, **kwargs
+):
     """Write file events to the file with the given name."""
     output_logger = logger_factory.get_logger_for_file(output_file, format)
     cursor = _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
@@ -207,6 +210,7 @@ def write_to(state, format, output_file, begin, end, advanced_query, use_checkpo
         begin=begin,
         end=end,
         advanced_query=advanced_query,
+        saved_search=saved_search,
         output_logger=output_logger,
     )
 
@@ -217,7 +221,16 @@ def write_to(state, format, output_file, begin, end, advanced_query, use_checkpo
 @search_options
 @global_options
 def send_to(
-    state, format, hostname, protocol, begin, end, advanced_query, use_checkpoint, **kwargs
+    state,
+    format,
+    hostname,
+    protocol,
+    begin,
+    end,
+    advanced_query,
+    use_checkpoint,
+    saved_search,
+    **kwargs
 ):
     """Send file events to the given server address."""
     output_logger = logger_factory.get_logger_for_server(hostname, protocol, format)
@@ -230,6 +243,7 @@ def send_to(
         begin=begin,
         end=end,
         advanced_query=advanced_query,
+        saved_search=saved_search,
         output_logger=output_logger,
     )
 
@@ -258,11 +272,23 @@ def show(state, search_id):
     echo(pformat(response["searches"]))
 
 
-def _extract(sdk, cursor, checkpoint_name, filter_list, begin, end, advanced_query, output_logger):
+def _extract(
+    sdk,
+    cursor,
+    checkpoint_name,
+    filter_list,
+    begin,
+    end,
+    advanced_query,
+    saved_search,
+    output_logger,
+):
     handlers = create_handlers(sdk, FileEventExtractor, output_logger, cursor, checkpoint_name)
     extractor = _get_file_event_extractor(sdk, handlers)
     if advanced_query:
         extractor.extract_advanced(advanced_query)
+    elif saved_search:
+        extractor.extract(*saved_search._filter_group_list)
     else:
         if begin or end:
             filter_list.append(create_time_range_filter(EventTimestamp, begin, end))
