@@ -5,12 +5,12 @@ import pytest
 
 from code42cli import PRODUCT_NAME
 from code42cli.errors import Code42CLIError
-from code42cli.cmds.search_shared.cursor_store import Cursor, AlertCursorStore, FileEventCursorStore
+from code42cli.cmds.search.cursor_store import Cursor, AlertCursorStore, FileEventCursorStore
 
 PROFILE_NAME = "testprofile"
 CURSOR_NAME = "testcursor"
 
-_NAMESPACE = "{}.cmds.search_shared.cursor_store".format(PRODUCT_NAME)
+_NAMESPACE = "{}.cmds.search.cursor_store".format(PRODUCT_NAME)
 
 
 @pytest.fixture
@@ -57,28 +57,28 @@ class TestAlertCursorStore(object):
     def test_get_reads_expected_file(self, mock_open):
         store = AlertCursorStore(PROFILE_NAME)
         store.get(CURSOR_NAME)
-        user_path = path.expanduser("~/.code42cli")
+        user_path = path.join(path.expanduser("~"), ".code42cli")
         expected_path = path.join(user_path, "alert_checkpoints", PROFILE_NAME, CURSOR_NAME)
         mock_open.assert_called_once_with(expected_path)
 
     def test_replace_writes_to_expected_file(self, mock_open):
         store = AlertCursorStore(PROFILE_NAME)
         store.replace("checkpointname", 123)
-        user_path = path.expanduser("~/.code42cli")
+        user_path = path.join(path.expanduser("~"), ".code42cli")
         expected_path = path.join(user_path, "alert_checkpoints", PROFILE_NAME, "checkpointname")
         mock_open.assert_called_once_with(expected_path, "w")
 
     def test_replace_writes_expected_content(self, mock_open):
         store = AlertCursorStore(PROFILE_NAME)
         store.replace("checkpointname", 123)
-        user_path = path.expanduser("~/.code42cli")
+        user_path = path.join(path.expanduser("~"), ".code42cli")
         expected_path = path.join(user_path, "alert_checkpoints", PROFILE_NAME, "checkpointname")
         mock_open.return_value.write.assert_called_once_with("123")
 
     def test_delete_calls_remove_on_expected_file(self, mock_open, mock_remove):
         store = AlertCursorStore(PROFILE_NAME)
         store.delete("deleteme")
-        user_path = path.expanduser("~/.code42cli")
+        user_path = path.join(path.expanduser("~"), ".code42cli")
         expected_path = path.join(user_path, "alert_checkpoints", PROFILE_NAME, "deleteme")
         mock_remove.assert_called_once_with(expected_path)
 
@@ -115,7 +115,7 @@ class TestFileEventCursorStore(object):
     def test_get_reads_expected_file(self, mock_open):
         store = FileEventCursorStore(PROFILE_NAME)
         store.get(CURSOR_NAME)
-        user_path = path.expanduser("~/.code42cli")
+        user_path = path.join(path.expanduser("~"), ".code42cli")
         expected_path = path.join(user_path, "file_event_checkpoints", PROFILE_NAME, CURSOR_NAME)
         mock_open.assert_called_once_with(expected_path)
 
@@ -129,7 +129,7 @@ class TestFileEventCursorStore(object):
     def test_replace_writes_to_expected_file(self, mock_open):
         store = FileEventCursorStore(PROFILE_NAME)
         store.replace("checkpointname", 123)
-        user_path = path.expanduser("~/.code42cli")
+        user_path = path.join(path.expanduser("~"), ".code42cli")
         expected_path = path.join(
             user_path, "file_event_checkpoints", PROFILE_NAME, "checkpointname"
         )
@@ -138,7 +138,7 @@ class TestFileEventCursorStore(object):
     def test_replace_writes_expected_content(self, mock_open):
         store = FileEventCursorStore(PROFILE_NAME)
         store.replace("checkpointname", 123)
-        user_path = path.expanduser("~/.code42cli")
+        user_path = path.join(path.expanduser("~"), ".code42cli")
         expected_path = path.join(
             user_path, "file_event_checkpoints", PROFILE_NAME, "checkpointname"
         )
@@ -147,7 +147,7 @@ class TestFileEventCursorStore(object):
     def test_delete_calls_remove_on_expected_file(self, mock_open, mock_remove):
         store = FileEventCursorStore(PROFILE_NAME)
         store.delete("deleteme")
-        user_path = path.expanduser("~/.code42cli")
+        user_path = path.join(path.expanduser("~"), ".code42cli")
         expected_path = path.join(user_path, "file_event_checkpoints", PROFILE_NAME, "deleteme")
         mock_remove.assert_called_once_with(expected_path)
 
