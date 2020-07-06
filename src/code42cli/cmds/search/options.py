@@ -5,7 +5,6 @@ import click
 
 from code42cli.cmds.search.enums import ServerProtocol
 from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp
-from code42cli.errors import Code42CLIError
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with
 
@@ -66,7 +65,7 @@ def validate_advanced_query_is_json(ctx, param, arg):
         json.loads(arg)
         return arg
     except json.JSONDecodeError:
-        raise Code42CLIError("Failed to parse advanced query, must be a valid json string.")
+        raise click.ClickException("Failed to parse advanced query, must be a valid json string.")
 
 
 AdvancedQueryAndSavedSearchIncompatible = incompatible_with(["advanced_query", "saved_search"])
