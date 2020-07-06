@@ -133,6 +133,7 @@ saved_search_option = click.option(
     "--saved-search",
     help="Get events from a saved search filter with the given ID",
     callback=_get_saved_search_query,
+    cls=incompatible_with("advanced_query"),
 )
 
 
@@ -259,7 +260,7 @@ def show(state, search_id):
 
 def _extract(sdk, cursor, checkpoint_name, filter_list, begin, end, advanced_query, output_logger):
     handlers = create_handlers(sdk, FileEventExtractor, output_logger, cursor, checkpoint_name)
-    extractor = FileEventExtractor(sdk, handlers)
+    extractor = _get_file_event_extractor(sdk, handlers)
     if advanced_query:
         extractor.extract_advanced(advanced_query)
     else:
@@ -268,6 +269,10 @@ def _extract(sdk, cursor, checkpoint_name, filter_list, begin, end, advanced_que
         extractor.extract(*filter_list)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         echo("No results found.")
+
+
+def _get_file_event_extractor(sdk, handlers):
+    return FileEventExtractor(sdk, handlers)
 
 
 def _get_file_event_cursor_store(profile_name):
