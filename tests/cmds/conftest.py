@@ -30,8 +30,37 @@ def cli_logger(mocker):
     return mock
 
 
+@pytest.fixture
+def stdout_logger(mocker):
+    mock = mocker.patch("{}.cmds.search.logger_factory.get_logger_for_stdout".format(PRODUCT_NAME))
+    mock.return_value = mocker.MagicMock()
+    return mock
+
+
+@pytest.fixture
+def server_logger(mocker):
+    mock = mocker.patch("{}.cmds.search.logger_factory.get_logger_for_server".format(PRODUCT_NAME))
+    mock.return_value = mocker.MagicMock()
+    return mock
+
+
+@pytest.fixture
+def file_logger(mocker):
+    mock = mocker.patch("{}.cmds.search.logger_factory.get_logger_for_file".format(PRODUCT_NAME))
+    mock.return_value = mocker.MagicMock()
+    return mock
+
+
 def get_filter_value_from_json(json, filter_index):
     return json_module.loads(str(json))["filters"][filter_index]["value"]
+
+
+def filter_term_is_in_call_args(extractor, term):
+    arg_filters = extractor.extract.call_args[0]
+    for f in arg_filters:
+        if term in str(f):
+            return True
+    return False
 
 
 def parse_date_from_filter_value(json, filter_index):
