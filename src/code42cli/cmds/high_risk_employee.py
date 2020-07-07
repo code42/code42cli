@@ -123,7 +123,7 @@ def _add_high_risk_employee(sdk, username, cloud_alias, risk_tag, notes):
 
     try:
         sdk.detectionlists.high_risk_employee.add(user_id)
-        update_user(sdk, user_id, cloud_alias=cloud_alias, risk_tag=risk_tag, notes=notes)
+        update_user(sdk, username, cloud_alias=cloud_alias, risk_tag=risk_tag, notes=notes)
     except Py42BadRequestError as err:
         try_handle_user_already_added_error(err, username, "high-risk-employee list")
         raise
