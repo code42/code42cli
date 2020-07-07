@@ -2,7 +2,7 @@ from code42cli.cmds.shared import get_user_id
 from code42cli.errors import UserAlreadyAddedError
 
 
-def update_user(sdk, user_id, cloud_alias=None, risk_tag=None, notes=None):
+def update_user(sdk, username, cloud_alias=None, risk_tag=None, notes=None):
     """Updates a detection list user.
 
     Args:
@@ -13,10 +13,11 @@ def update_user(sdk, user_id, cloud_alias=None, risk_tag=None, notes=None):
         risk_tag (iter[str or unicode]): A list of risk tags associated with user.
         notes (str or unicode): Notes about the user.
     """
+    user_id = get_user_id(sdk, username)
     if cloud_alias:
         sdk.detectionlists.add_user_cloud_alias(user_id, cloud_alias)
     if risk_tag:
-        add_risk_tags(sdk, user_id, risk_tag)
+        add_risk_tags(sdk, username, risk_tag)
     if notes:
         sdk.detectionlists.update_user_notes(user_id, notes)
 
