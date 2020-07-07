@@ -102,12 +102,12 @@ def sdk_without_user(sdk):
     return sdk
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_42(mocker):
     return mocker.patch("py42.sdk.from_local_account")
 
 
-@pytest.fixture()
+@pytest.fixture
 def cli_state(mocker, sdk, profile):
     mock_state = mocker.MagicMock(spec=CLIState)
     mock_state._sdk = sdk
@@ -237,14 +237,3 @@ class ErrorTrackerTestHelper:
 
 
 TEST_FILE_PATH = "some/path"
-
-
-def create_mock_reader(rows):
-    class MockDictReader(CliFileReader):
-        def __call__(self, *args, **kwargs):
-            return rows
-
-        def get_rows_count(self):
-            return len(rows)
-
-    return MockDictReader(TEST_FILE_PATH)

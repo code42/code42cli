@@ -28,19 +28,6 @@ def requests_exception(mocker):
     return mock_exception
 
 
-# @pytest.fixture
-# def error_sdk_factory(mocker, mock_sdk_factory):
-#     def side_effect(*args):
-#         mock_response = mocker.MagicMock(spec=Response)
-#         mock_request_ex = mocker.MagicMock(spec=RequestException)
-#         mock_request_ex.response = mock_response
-#         ex = Py42UnauthorizedError(mock_request_ex)
-#         raise ex
-#
-#     mock_sdk_factory.side_effect = side_effect
-#     return mock_sdk_factory
-
-
 def test_create_sdk_when_py42_exception_occurs_raises_and_logs_cli_error(
     sdk_logger, mock_sdk_factory, requests_exception
 ):
