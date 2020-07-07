@@ -116,10 +116,6 @@ def test_generate_template_file_when_given_remove_generates_template_from_handle
 
 
 def test_bulk_add_employees_uses_expected_arguments(runner, cli_state, mocker):
-    cli_state.sdk.detectionlists.add_user_cloud_alias.side_effect = sleep(0.5)
-    cli_state.sdk.detectionlists.add_user_risk_tags.side_effect = sleep(0.5)
-    cli_state.sdk.detectionlists.update_user_notes.side_effect = sleep(0.5)
-    cli_state.sdk.detectionlists.high_risk_employee.add.side_effect = sleep(0.5)
     with runner.isolated_filesystem():
         with open("test_add.csv", "w") as csv:
             csv.writelines(
@@ -137,25 +133,28 @@ def test_bulk_add_employees_uses_expected_arguments(runner, cli_state, mocker):
     cloud_alias_call_args = [
         call[0][1] for call in cli_state.sdk.detectionlists.add_user_cloud_alias.call_args_list
     ]
-    assert cli_state.sdk.detectionlists.add_user_cloud_alias.call_count == 2
+    assert len(cloud_alias_call_args) == 2
     assert "test_alias" in cloud_alias_call_args
     assert "test_alias_2" in cloud_alias_call_args
 
     add_risk_tags_call_args = [
         call[0][1] for call in cli_state.sdk.detectionlists.add_user_risk_tags.call_args_list
     ]
-    assert cli_state.sdk.detectionlists.add_user_risk_tags.call_count == 2
+    assert len(add_risk_tags_call_args) == 2
     assert ["test_tag_1", "test_tag_2"] in add_risk_tags_call_args
     assert ["test_tag_3"] in add_risk_tags_call_args
 
     add_notes_call_args = [
         call[0][1] for call in cli_state.sdk.detectionlists.update_user_notes.call_args_list
     ]
-    assert cli_state.sdk.detectionlists.update_user_notes.call_count == 2
+    assert len(add_notes_call_args) == 2
     assert "test_note" in add_notes_call_args
     assert "test_note_2" in add_notes_call_args
 
-    assert cli_state.sdk.detectionlists.high_risk_employee.add.call_count == 3
+    add_hre_user_call_args = [
+        call[0][0] for call in cli_state.sdk.detectionlists.high_risk_employee.add.call_args_list
+    ]
+    assert len(add_hre_user_call_args) == 3
 
 
 def test_bulk_remove_employees_uses_expected_arguments(runner, cli_state, mocker):
