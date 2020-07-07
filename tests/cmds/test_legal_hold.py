@@ -1,23 +1,14 @@
 import pytest
-
-from click.testing import CliRunner
 from requests import Response, HTTPError
 
 from code42cli import PRODUCT_NAME
-from code42cli.main import cli
 from code42cli.cmds.legal_hold import _check_matter_is_accessible
-from code42cli.errors import (
-    UserAlreadyAddedError,
-    UserNotInLegalHoldError,
-    LegalHoldNotFoundOrPermissionDeniedError,
-    UserDoesNotExistError,
-)
+from code42cli.main import cli
 
 _NAMESPACE = "{}.cmds.legal_hold".format(PRODUCT_NAME)
 
 from py42.exceptions import Py42BadRequestError
 from py42.response import Py42Response
-from requests import Response
 
 
 TEST_MATTER_ID = "99999"
@@ -104,11 +95,10 @@ def user_already_added_response(mocker):
 
 
 def test_add_user_raises_user_already_added_error_when_user_already_on_hold(
-    cli_state, user_already_added_response
+    runner, cli_state, user_already_added_response
 ):
 
     cli_state.sdk.legalhold.add_to_matter.side_effect = user_already_added_response
-    runner = CliRunner()
     result = runner.invoke(
         cli,
         [
@@ -128,9 +118,8 @@ def test_add_user_raises_user_already_added_error_when_user_already_on_hold(
 
 
 def test_add_user_raises_legalhold_not_found_error_if_matter_inaccessible(
-    cli_state, check_matter_accessible_failure, get_user_id_success
+    runner, cli_state, check_matter_accessible_failure, get_user_id_success
 ):
-    runner = CliRunner()
     result = runner.invoke(
         cli,
         [
@@ -150,9 +139,8 @@ def test_add_user_raises_legalhold_not_found_error_if_matter_inaccessible(
 
 
 def test_add_user_adds_user_to_hold_if_user_and_matter_exist(
-    cli_state, check_matter_accessible_success, get_user_id_success
+    runner, cli_state, check_matter_accessible_success, get_user_id_success
 ):
-    runner = CliRunner()
     result = runner.invoke(
         cli,
         [
@@ -171,9 +159,8 @@ def test_add_user_adds_user_to_hold_if_user_and_matter_exist(
 
 
 def test_remove_user_raises_legalhold_not_found_error_if_matter_inaccessible(
-    cli_state, check_matter_accessible_failure, get_user_id_success
+    runner, cli_state, check_matter_accessible_failure, get_user_id_success
 ):
-    runner = CliRunner()
     result = runner.invoke(
         cli,
         [
@@ -192,12 +179,11 @@ def test_remove_user_raises_legalhold_not_found_error_if_matter_inaccessible(
 
 
 def test_remove_user_raises_user_not_in_matter_error_if_user_not_active_in_matter(
-    cli_state, check_matter_accessible_success, get_user_id_success
+    runner, cli_state, check_matter_accessible_success, get_user_id_success
 ):
     cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
         EMPTY_LEGAL_HOLD_MEMBERSHIPS_RESULT
     )
-    runner = CliRunner()
     result = runner.invoke(
         cli,
         [
@@ -217,7 +203,7 @@ def test_remove_user_raises_user_not_in_matter_error_if_user_not_active_in_matte
 
 
 def test_remove_user_removes_user_if_user_in_matter(
-    cli_state, check_matter_accessible_success, get_user_id_success
+    runner, cli_state, check_matter_accessible_success, get_user_id_success
 ):
     cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
         ACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT
@@ -226,7 +212,6 @@ def test_remove_user_removes_user_if_user_in_matter(
     membership_uid = ACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT[0]["legalHoldMemberships"][0][
         "legalHoldMembershipUid"
     ]
-    runner = CliRunner()
     result = runner.invoke(
         cli,
         [
@@ -253,12 +238,11 @@ def test_matter_accessible_check_only_makes_one_http_call_when_called_multiple_t
 
 
 def test_show_matter_prints_active_and_inactive_results_when_include_inactive_flag_set(
-    cli_state, check_matter_accessible_success
+    runner, cli_state, check_matter_accessible_success
 ):
     cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
         ACTIVE_AND_INACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT
     )
-    runner = CliRunner()
     result = runner.invoke(
         cli, ["legal-hold", "show", TEST_MATTER_ID, "--include-inactive"], obj=cli_state
     )
@@ -266,23 +250,21 @@ def test_show_matter_prints_active_and_inactive_results_when_include_inactive_fl
     assert INACTIVE_TEST_USERNAME in result.output
 
 
-def test_show_matter_prints_active_results_only(cli_state, check_matter_accessible_success):
+def test_show_matter_prints_active_results_only(runner, cli_state, check_matter_accessible_success):
     cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
         ACTIVE_AND_INACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT
     )
-    runner = CliRunner()
     result = runner.invoke(cli, ["legal-hold", "show", TEST_MATTER_ID], obj=cli_state)
     assert ACTIVE_TEST_USERNAME in result.output
     assert INACTIVE_TEST_USERNAME not in result.output
 
 
 def test_show_matter_prints_no_active_members_when_no_membership(
-    cli_state, check_matter_accessible_success
+    runner, cli_state, check_matter_accessible_success
 ):
     cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
         EMPTY_LEGAL_HOLD_MEMBERSHIPS_RESULT
     )
-    runner = CliRunner()
     result = runner.invoke(cli, ["legal-hold", "show", TEST_MATTER_ID], obj=cli_state)
     assert ACTIVE_TEST_USERNAME not in result.output
     assert INACTIVE_TEST_USERNAME not in result.output
@@ -290,12 +272,11 @@ def test_show_matter_prints_no_active_members_when_no_membership(
 
 
 def test_show_matter_prints_no_inactive_members_when_no_inactive_membership(
-    cli_state, check_matter_accessible_success
+    runner, cli_state, check_matter_accessible_success
 ):
     cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
         ACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT
     )
-    runner = CliRunner()
     result = runner.invoke(
         cli, ["legal-hold", "show", TEST_MATTER_ID, "--include-inactive"], obj=cli_state
     )
@@ -305,12 +286,11 @@ def test_show_matter_prints_no_inactive_members_when_no_inactive_membership(
 
 
 def test_show_matter_prints_no_active_members_when_no_active_membership(
-    cli_state, check_matter_accessible_success
+    runner, cli_state, check_matter_accessible_success
 ):
     cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
         INACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT
     )
-    runner = CliRunner()
     result = runner.invoke(
         cli, ["legal-hold", "show", TEST_MATTER_ID, "--include-inactive"], obj=cli_state
     )
@@ -320,12 +300,11 @@ def test_show_matter_prints_no_active_members_when_no_active_membership(
 
 
 def test_show_matter_prints_no_active_members_when_no_active_membership_and_inactive_membership_included(
-    cli_state, check_matter_accessible_success
+    runner, cli_state, check_matter_accessible_success
 ):
     cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
         INACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT
     )
-    runner = CliRunner()
     result = runner.invoke(
         cli, ["legal-hold", "show", TEST_MATTER_ID, "--include-inactive"], obj=cli_state
     )
@@ -335,10 +314,9 @@ def test_show_matter_prints_no_active_members_when_no_active_membership_and_inac
 
 
 def test_show_matter_prints_preservation_policy_when_include_policy_flag_set(
-    cli_state, check_matter_accessible_success, preservation_policy_response
+    runner, cli_state, check_matter_accessible_success, preservation_policy_response
 ):
     cli_state.sdk.legalhold.get_policy_by_uid.return_value = preservation_policy_response
-    runner = CliRunner()
     result = runner.invoke(
         cli, ["legal-hold", "show", TEST_MATTER_ID, "--include-policy"], obj=cli_state
     )
@@ -346,17 +324,15 @@ def test_show_matter_prints_preservation_policy_when_include_policy_flag_set(
 
 
 def test_show_matter_does_not_print_preservation_policy(
-    cli_state, check_matter_accessible_success, preservation_policy_response
+    runner, cli_state, check_matter_accessible_success, preservation_policy_response
 ):
     cli_state.sdk.legalhold.get_policy_by_uid.return_value = preservation_policy_response
-    runner = CliRunner()
     result = runner.invoke(cli, ["legal-hold", "show", TEST_MATTER_ID], obj=cli_state)
     assert TEST_PRESERVATION_POLICY_UID not in result.output
 
 
-def test_add_bulk_users_uses_expected_arguments(mocker, cli_state):
+def test_add_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
     bulk_processor = mocker.patch("{}.run_bulk_process".format(_NAMESPACE))
-    runner = CliRunner()
     with runner.isolated_filesystem():
         with open("test_add.csv", "w") as csv:
             csv.writelines(["matter_id,username\n", "test,value\n"])
@@ -364,9 +340,8 @@ def test_add_bulk_users_uses_expected_arguments(mocker, cli_state):
     assert bulk_processor.call_args[0][1] == [{"matter_id": "test", "username": "value"}]
 
 
-def test_remove_bulk_users_uses_expected_arguments(mocker, cli_state):
+def test_remove_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
     bulk_processor = mocker.patch("{}.run_bulk_process".format(_NAMESPACE))
-    runner = CliRunner()
     with runner.isolated_filesystem():
         with open("test_remove.csv", "w") as csv:
             csv.writelines(["matter_id,username\n", "test,value\n"])

@@ -1,13 +1,18 @@
 from datetime import datetime, timedelta
 
 import pytest
+from click.testing import CliRunner
 from py42.sdk import SDKClient
 
-from code42cli.bulk import BulkProcessor
-from code42cli.config import ConfigAccessor
-from code42cli.profile import Code42Profile
-from code42cli.options import CLIState
 import code42cli.errors as error_tracker
+from code42cli.config import ConfigAccessor
+from code42cli.options import CLIState
+from code42cli.profile import Code42Profile
+
+
+@pytest.fixture
+def runner():
+    return CliRunner()
 
 
 @pytest.fixture(autouse=True)
