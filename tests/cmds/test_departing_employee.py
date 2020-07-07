@@ -111,7 +111,7 @@ def test_add_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
     departing_employee_add_call_args = [
         call[0][1] for call in cli_state.sdk.detectionlists.departing_employee.add.call_args_list
     ]
-    assert cli_state.sdk.detectionlists.departing_employee.add.call_count == 3
+    assert len(departing_employee_add_call_args) == 3
     assert "2020-01-01" in departing_employee_add_call_args
     assert "2020-02-01" in departing_employee_add_call_args
     assert None in departing_employee_add_call_args
@@ -119,14 +119,14 @@ def test_add_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
     cloud_alias_call_args = [
         call[0][1] for call in cli_state.sdk.detectionlists.add_user_cloud_alias.call_args_list
     ]
-    assert cli_state.sdk.detectionlists.add_user_cloud_alias.call_count == 2
+    assert len(cloud_alias_call_args) == 2
     assert "test_alias" in cloud_alias_call_args
     assert "test_alias_2" in cloud_alias_call_args
 
     add_notes_call_args = [
         call[0][1] for call in cli_state.sdk.detectionlists.update_user_notes.call_args_list
     ]
-    assert cli_state.sdk.detectionlists.update_user_notes.call_count == 2
+    assert len(add_notes_call_args) == 2
     assert "test_note" in add_notes_call_args
     assert "test_note_2" in add_notes_call_args
 
