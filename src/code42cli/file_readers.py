@@ -12,7 +12,7 @@ def read_csv_arg(headers):
         "csv_rows",
         metavar="CSV_FILE",
         type=click.File("r"),
-        callback=lambda ctx, arg: read_csv(arg, headers=headers),
+        callback=lambda ctx, param, arg: read_csv(arg, headers=headers),
     )
 
 
@@ -44,5 +44,8 @@ def read_flat_file(file):
 
 
 read_flat_file_arg = click.argument(
-    "file_rows", metavar="FILE", type=click.File("r"), callback=read_flat_file
+    "file_rows",
+    type=click.File("r"),
+    metavar="FILE",
+    callback=lambda ctx, param, arg: read_flat_file(arg),
 )
