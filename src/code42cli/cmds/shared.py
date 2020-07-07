@@ -12,7 +12,7 @@ def get_user_id(sdk, username):
     Returns:
          str: The user ID for the user with the given username.
     """
-    users = sdk.users.get_by_username(username)[u"users"]
+    users = sdk.users.get_by_username(username)["users"]
     if not users:
         raise UserDoesNotExistError(username)
-    return users[0][u"userUid"]
+    return users[0]["userUid"]
