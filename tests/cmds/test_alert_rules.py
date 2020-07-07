@@ -227,9 +227,31 @@ def test_show_rule_calls_correct_rule_property_file_type_mismatch(cli_state):
     cli_state.sdk.alerts.rules.filetypemismatch.get.assert_called_once_with(TEST_RULE_ID)
 
 
-def test_show_rule_when_no_matching_rule_prints_no_rule_message(cli_state, caplog):
+def test_show_rule_when_no_matching_rule_prints_no_rule_message(cli_state):
     cli_state.sdk.alerts.rules.get_by_observer_id.return_value = TEST_EMPTY_RULE_RESPONSE
     runner = CliRunner()
     result = runner.invoke(cli, ["alert-rules", "show", TEST_RULE_ID], obj=cli_state)
     msg = "No alert rules with RuleId {} found".format(TEST_RULE_ID)
     assert msg in result.output
+
+
+def test_add_bulk_users_uses_expected_arguments(mocker, cli_state):
+    bulk_processor = mocker.patch("code42cli.cmds.alert_rules.run_bulk_process")
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        with open("test_add.csv", "w") as csv:
+            csv.writelines(["rule_id,username\n", "test,value\n"])
+        result = runner.invoke(cli, ["alert-rules", "bulk", "add", "test_add.csv"], obj=cli_state)
+    assert bulk_processor.call_args[0][1] == [{"rule_id": "test", "username": "value"}]
+
+
+def test_remove_bulk_users_uses_expected_arguments(mocker, cli_state):
+    bulk_processor = mocker.patch("code42cli.cmds.alert_rules.run_bulk_process")
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        with open("test_remove.csv", "w") as csv:
+            csv.writelines(["rule_id,username\n", "test,value\n"])
+        result = runner.invoke(
+            cli, ["alert-rules", "bulk", "add", "test_remove.csv"], obj=cli_state
+        )
+    assert bulk_processor.call_args[0][1] == [{"rule_id": "test", "username": "value"}]
