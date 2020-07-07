@@ -128,20 +128,26 @@ def test_bulk_add_employees_uses_expected_arguments(runner, cli_state):
         result = runner.invoke(
             cli, ["high-risk-employee", "bulk", "add", "test_add.csv"], obj=cli_state
         )
-    cloud_alias_call_args = cli_state.sdk.detectionlists.add_user_cloud_alias.call_args_list
+    cloud_alias_call_args = [
+        call[0][1] for call in cli_state.sdk.detectionlists.add_user_cloud_alias.call_args_list
+    ]
     assert cli_state.sdk.detectionlists.add_user_risk_tags.call_count == 2
-    assert cloud_alias_call_args[0][0][1] == "test_alias"
-    assert cloud_alias_call_args[1][0][1] == "test_alias_2"
+    assert "test_alias" in cloud_alias_call_args
+    assert "test_alias_2" in cloud_alias_call_args
 
-    add_risk_tags_call_args = cli_state.sdk.detectionlists.add_user_risk_tags.call_args_list
+    add_risk_tags_call_args = [
+        call[0][1] for call in cli_state.sdk.detectionlists.add_user_risk_tags.call_args_list
+    ]
     assert cli_state.sdk.detectionlists.add_user_risk_tags.call_count == 2
-    assert add_risk_tags_call_args[0][0][1] == ["test_tag_1", "test_tag_2"]
-    assert add_risk_tags_call_args[1][0][1] == ["test_tag_3"]
+    assert ["test_tag_1", "test_tag_2"] in add_risk_tags_call_args
+    assert ["test_tag_3"] in add_risk_tags_call_args
 
-    add_notes_call_args = cli_state.sdk.detectionlists.update_user_notes.call_args_list
+    add_notes_call_args = [
+        call[0][1] for call in cli_state.sdk.detectionlists.update_user_notes.call_args_list
+    ]
     assert cli_state.sdk.detectionlists.update_user_notes.call_count == 2
-    assert add_notes_call_args[0][0][1] == "test_note"
-    assert add_notes_call_args[1][0][1] == "test_note_2"
+    assert "test_note" in add_notes_call_args
+    assert "test_note_2" in add_notes_call_args
 
     assert cli_state.sdk.detectionlists.high_risk_employee.add.call_count == 3
 

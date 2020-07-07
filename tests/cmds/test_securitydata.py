@@ -430,7 +430,9 @@ def test_with_use_checkpoint_and_with_begin_and_with_checkpoint_calls_extract_wi
 
 @parametrize_search_output_cmds
 def test_extract_when_given_invalid_exposure_type_causes_exit(runner, cmd, cli_state):
-    result = runner.invoke(cli, ["security-data", *cmd, "--begin", "1d", "-t", "NotValid"])
+    result = runner.invoke(
+        cli, ["security-data", *cmd, "--begin", "1d", "-t", "NotValid"], obj=cli_state
+    )
     assert result.exit_code == 2
     assert "invalid choice: NotValid" in result.output
 

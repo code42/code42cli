@@ -108,23 +108,27 @@ def test_add_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
         result = runner.invoke(
             cli, ["departing-employee", "bulk", "add", "test_add.csv"], obj=cli_state
         )
-    departing_employee_add_call_args = (
-        cli_state.sdk.detectionlists.departing_employee.add.call_args_list
-    )
+    departing_employee_add_call_args = [
+        call[0][1] for call in cli_state.sdk.detectionlists.departing_employee.add.call_args_list
+    ]
     assert cli_state.sdk.detectionlists.departing_employee.add.call_count == 3
-    assert departing_employee_add_call_args[0][0][1] == "2020-01-01"
-    assert departing_employee_add_call_args[1][0][1] == "2020-02-01"
-    assert departing_employee_add_call_args[2][0][1] is None
+    assert "2020-01-01" in departing_employee_add_call_args
+    assert "2020-02-01" in departing_employee_add_call_args
+    assert None in departing_employee_add_call_args
 
-    cloud_alias_call_args = cli_state.sdk.detectionlists.add_user_cloud_alias.call_args_list
+    cloud_alias_call_args = [
+        call[0][1] for call in cli_state.sdk.detectionlists.add_user_cloud_alias.call_args_list
+    ]
     assert cli_state.sdk.detectionlists.add_user_cloud_alias.call_count == 2
-    assert cloud_alias_call_args[0][0][1] == "test_alias"
-    assert cloud_alias_call_args[1][0][1] == "test_alias_2"
+    assert "test_alias" in cloud_alias_call_args
+    assert "test_alias_2" in cloud_alias_call_args
 
-    add_notes_call_args = cli_state.sdk.detectionlists.update_user_notes.call_args_list
+    add_notes_call_args = [
+        call[0][1] for call in cli_state.sdk.detectionlists.update_user_notes.call_args_list
+    ]
     assert cli_state.sdk.detectionlists.update_user_notes.call_count == 2
-    assert add_notes_call_args[0][0][1] == "test_note"
-    assert add_notes_call_args[1][0][1] == "test_note_2"
+    assert "test_note" in add_notes_call_args
+    assert "test_note_2" in add_notes_call_args
 
 
 def test_remove_bulk_users_uses_expected_arguments(runner, mocker, cli_state_with_user):
