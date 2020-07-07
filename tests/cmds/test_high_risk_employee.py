@@ -1,4 +1,3 @@
-from time import sleep
 import pytest
 
 from code42cli.main import cli
@@ -129,11 +128,11 @@ def test_bulk_add_employees_uses_expected_arguments(runner, cli_state):
         result = runner.invoke(
             cli, ["high-risk-employee", "bulk", "add", "test_add.csv"], obj=cli_state
         )
-        sleep(1)
 
     cloud_alias_call_args = [
         call[0][1] for call in cli_state.sdk.detectionlists.add_user_cloud_alias.call_args_list
     ]
+    assert len(cloud_alias_call_args) == 2
     assert cli_state.sdk.detectionlists.add_user_cloud_alias.call_count == 2
     assert "test_alias" in cloud_alias_call_args
     assert "test_alias_2" in cloud_alias_call_args
