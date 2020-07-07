@@ -1,3 +1,4 @@
+from time import sleep
 import pytest
 
 from code42cli.main import cli
@@ -128,6 +129,8 @@ def test_bulk_add_employees_uses_expected_arguments(runner, cli_state):
         result = runner.invoke(
             cli, ["high-risk-employee", "bulk", "add", "test_add.csv"], obj=cli_state
         )
+        sleep(1)
+
     cloud_alias_call_args = [
         call[0][1] for call in cli_state.sdk.detectionlists.add_user_cloud_alias.call_args_list
     ]
