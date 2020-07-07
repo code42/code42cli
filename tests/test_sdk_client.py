@@ -1,12 +1,12 @@
 import py42.sdk
 import py42.settings.debug as debug
-from py42.exceptions import Py42UnauthorizedError
-from requests.exceptions import ConnectionError, RequestException
-from requests import Response
 import pytest
+from py42.exceptions import Py42UnauthorizedError
+from requests import Response
+from requests.exceptions import ConnectionError, RequestException
 
-from code42cli.sdk_client import create_sdk, validate_connection
 from code42cli.errors import Code42CLIError, LoggedCLIError
+from code42cli.sdk_client import create_sdk, validate_connection
 from .conftest import create_mock_profile
 
 
@@ -44,7 +44,7 @@ def test_create_sdk_when_py42_exception_occurs_raises_and_logs_cli_error(
 
     assert "Invalid credentials for user" in err.value.message
     assert sdk_logger.log_error.call_count == 1
-    assert "Failure in HTTP call" in sdk_logger.log_error.call_args.args[0]
+    assert "Failure in HTTP call" in sdk_logger.log_error.call_args[0][0]
 
 
 def test_create_sdk_when_connection_exception_occurs_raises_and_logs_cli_error(
@@ -62,7 +62,7 @@ def test_create_sdk_when_connection_exception_occurs_raises_and_logs_cli_error(
 
     assert "Problem connecting to" in err.value.message
     assert sdk_logger.log_error.call_count == 1
-    assert "connection message" in sdk_logger.log_error.call_args.args[0]
+    assert "connection message" in sdk_logger.log_error.call_args[0][0]
 
 
 def test_create_sdk_when_unknown_exception_occurs_raises_and_logs_cli_error(
@@ -80,7 +80,7 @@ def test_create_sdk_when_unknown_exception_occurs_raises_and_logs_cli_error(
 
     assert "Unknown problem validating" in err.value.message
     assert sdk_logger.log_error.call_count == 1
-    assert "test message" in sdk_logger.log_error.call_args.args[0]
+    assert "test message" in sdk_logger.log_error.call_args[0][0]
 
 
 def test_create_sdk_when_told_to_debug_turns_on_debug(mock_sdk_factory):
