@@ -94,27 +94,37 @@ def test_remove_departing_employee_when_user_does_not_exist_exits(runner, cli_st
     assert "User '{}' does not exist.".format(_EMPLOYEE) in result.output
 
 
-def test_add_bulk_users_uses_expected_arguments(runner, mocker, cli_state_with_user):
-    bulk_processor = mocker.patch("code42cli.cmds.departing_employee.run_bulk_process")
+def test_add_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
     with runner.isolated_filesystem():
         with open("test_add.csv", "w") as csv:
             csv.writelines(
                 [
                     "username,cloud_alias,departure_date,notes\n",
-                    "test_user,test_alias,test_date,test_notes\n",
+                    "test_user,test_alias,2020-01-01,test_note\n",
+                    "test_user_2,test_alias_2,2020-02-01,test_note_2\n",
+                    "test_user_3,,,\n",
                 ]
             )
         result = runner.invoke(
-            cli, ["departing-employee", "bulk", "add", "test_add.csv"], obj=cli_state_with_user
+            cli, ["departing-employee", "bulk", "add", "test_add.csv"], obj=cli_state
         )
-    assert bulk_processor.call_args[0][1] == [
-        {
-            "username": "test_user",
-            "cloud_alias": "test_alias",
-            "departure_date": "test_date",
-            "notes": "test_notes",
-        }
-    ]
+    departing_employee_add_call_args = (
+        cli_state.sdk.detectionlists.departing_employee.add.call_args_list
+    )
+    assert cli_state.sdk.detectionlists.departing_employee.add.call_count == 3
+    assert departing_employee_add_call_args[0][0][1] == "2020-01-01"
+    assert departing_employee_add_call_args[1][0][1] == "2020-02-01"
+    assert departing_employee_add_call_args[2][0][1] is None
+
+    cloud_alias_call_args = cli_state.sdk.detectionlists.add_user_cloud_alias.call_args_list
+    assert cli_state.sdk.detectionlists.add_user_cloud_alias.call_count == 2
+    assert cloud_alias_call_args[0][0][1] == "test_alias"
+    assert cloud_alias_call_args[1][0][1] == "test_alias_2"
+
+    add_notes_call_args = cli_state.sdk.detectionlists.update_user_notes.call_args_list
+    assert cli_state.sdk.detectionlists.update_user_notes.call_count == 2
+    assert add_notes_call_args[0][0][1] == "test_note"
+    assert add_notes_call_args[1][0][1] == "test_note_2"
 
 
 def test_remove_bulk_users_uses_expected_arguments(runner, mocker, cli_state_with_user):
