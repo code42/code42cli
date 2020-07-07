@@ -9,8 +9,8 @@ from code42cli.main import cli
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.cmds.search import extraction
 
-from tests.cmds.conftest import get_filter_value_from_json
-from ..conftest import get_test_date_str
+from tests.cmds.conftest import get_filter_value_from_json, filter_term_is_in_call_args
+from tests.conftest import get_test_date_str
 
 
 BEGIN_TIMESTAMP = 1577858400.0
@@ -58,36 +58,15 @@ SORTED_ALERT_DETAILS = [
 
 
 @pytest.fixture
-def stdout_logger(mocker):
-    mock = mocker.patch("{}.cmds.search.logger_factory.get_logger_for_stdout".format(PRODUCT_NAME))
-    mock.return_value = mocker.MagicMock()
-    return mock
-
-
-@pytest.fixture
-def server_logger(mocker):
-    mock = mocker.patch("{}.cmds.search.logger_factory.get_logger_for_server".format(PRODUCT_NAME))
-    mock.return_value = mocker.MagicMock()
-    return mock
-
-
-@pytest.fixture
-def file_logger(mocker):
-    mock = mocker.patch("{}.cmds.search.logger_factory.get_logger_for_file".format(PRODUCT_NAME))
-    mock.return_value = mocker.MagicMock()
-    return mock
-
-
-@pytest.fixture
 def alert_extractor(mocker):
-    mock = mocker.patch("code42cli.cmds.alerts._get_alert_extractor")
+    mock = mocker.patch("{}.cmds.alerts._get_alert_extractor".format(PRODUCT_NAME))
     mock.return_value = mocker.MagicMock(spec=AlertExtractor)
-    return mock
+    return mock.return_value
 
 
 @pytest.fixture
 def alert_cursor_with_checkpoint(mocker):
-    mock = mocker.patch("code42cli.cmds.alerts._get_alert_cursor_store")
+    mock = mocker.patch("{}.cmds.alerts._get_alert_cursor_store".format(PRODUCT_NAME))
     mock_cursor = mocker.MagicMock(spec=AlertCursorStore)
     mock_cursor.get.return_value = CURSOR_TIMESTAMP
     mock.return_value = mock_cursor
@@ -96,7 +75,7 @@ def alert_cursor_with_checkpoint(mocker):
 
 @pytest.fixture
 def alert_cursor_without_checkpoint(mocker):
-    mock = mocker.patch("code42cli.cmds.alerts._get_alert_cursor_store")
+    mock = mocker.patch("{}.cmds.alerts._get_alert_cursor_store".format(PRODUCT_NAME))
     mock_cursor = mocker.MagicMock(spec=AlertCursorStore)
     mock_cursor.get.return_value = None
     mock.return_value = mock_cursor
@@ -105,37 +84,14 @@ def alert_cursor_without_checkpoint(mocker):
 
 @pytest.fixture
 def begin_option(mocker):
-    mock = mocker.patch("code42cli.cmds.search.options.parse_min_timestamp")
+    mock = mocker.patch("{}.cmds.search.options.parse_min_timestamp".format(PRODUCT_NAME))
     mock.return_value = BEGIN_TIMESTAMP
     return mock
 
 
 @pytest.fixture
 def alert_extract_func(mocker):
-    return mocker.patch("code42cli.cmds.alerts._extract")
-
-
-@pytest.fixture
-def alert_extractor(mocker):
-    mock = mocker.patch("code42cli.cmds.alerts._get_alert_extractor")
-    mock.return_value = mocker.MagicMock(spec=AlertExtractor)
-    return mock.return_value
-
-
-def filter_term_is_in_call_args(extractor, term):
-    arg_filters = extractor.extract.call_args[0]
-    for f in arg_filters:
-        if term in str(f):
-            return True
-    return False
-
-
-def filter_term_is_in_call_args(extractor, term):
-    arg_filters = extractor.extract.call_args[0]
-    for f in arg_filters:
-        if term in str(f):
-            return True
-    return False
+    return mocker.patch("{}.cmds.alerts._extract".format(PRODUCT_NAME))
 
 
 ADVANCED_QUERY_JSON = '{"some": "complex json"}'
@@ -151,6 +107,14 @@ def test_when_is_advanced_query_uses_only_the_extract_advanced_method(
     )
     alert_extractor.extract_advanced.assert_called_once_with('{"some": "complex json"}')
     assert alert_extractor.extract.call_count == 0
+
+
+@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
+def test_when_not_advanced_query_uses_only_the_extract_method(cmd, cli_state, alert_extractor):
+    runner = CliRunner()
+    result = runner.invoke(cli, ["alerts", *cmd, "--begin", "1d"], obj=cli_state)
+    assert alert_extractor.extract.call_count == 1
+    assert alert_extractor.extract_advanced.call_count == 0
 
 
 @pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
@@ -270,7 +234,9 @@ def test_when_given_begin_and_end_dates_uses_expected_query(cmd, cli_state, aler
     begin_date = get_test_date_str(days_ago=89)
     end_date = get_test_date_str(days_ago=1)
     runner = CliRunner()
-    result = runner.invoke(cli, ["alerts", "print", "--begin", begin_date, "--end", end_date])
+    result = runner.invoke(
+        cli, ["alerts", "print", "--begin", begin_date, "--end", end_date], obj=cli_state
+    )
     filters = alert_extractor.extract.call_args[0][0]
     actual_begin = get_filter_value_from_json(filters, filter_index=0)
     expected_begin = "{0}T00:00:00.000Z".format(begin_date)
@@ -298,6 +264,7 @@ def test_when_given_begin_and_end_date_and_time_uses_expected_query(
             "--end",
             "{} {}".format(end_date, time),
         ],
+        obj=cli_state,
     )
     filters = alert_extractor.extract.call_args[0][0]
     actual_begin = get_filter_value_from_json(filters, filter_index=0)
@@ -315,7 +282,9 @@ def test_when_given_begin_date_and_time_without_seconds_uses_expected_query(
     date = get_test_date_str(days_ago=89)
     time = "15:33"
     runner = CliRunner()
-    result = runner.invoke(cli, ["alerts", "print", "--begin", "{} {}".format(date, time)])
+    result = runner.invoke(
+        cli, ["alerts", "print", "--begin", "{} {}".format(date, time)], obj=cli_state
+    )
     actual = get_filter_value_from_json(alert_extractor.extract.call_args[0][0], filter_index=0)
     expected = "{0}T{1}:00.000Z".format(date, time)
     assert actual == expected
@@ -328,7 +297,9 @@ def test_when_given_end_date_and_time_uses_expected_query(cmd, cli_state, alert_
     time = "15:33"
     runner = CliRunner()
     result = runner.invoke(
-        cli, ["alerts", "print", "--begin", begin_date, "--end", "{} {}".format(end_date, time)]
+        cli,
+        ["alerts", "print", "--begin", begin_date, "--end", "{} {}".format(end_date, time)],
+        obj=cli_state,
     )
     actual = get_filter_value_from_json(alert_extractor.extract.call_args[0][0], filter_index=1)
     expected = "{0}T{1}:00.000Z".format(end_date, time)
@@ -341,7 +312,7 @@ def test_when_given_begin_date_more_than_ninety_days_back_in_ad_hoc_mode_causes_
 ):
     begin_date = get_test_date_str(days_ago=91) + " 12:51:00"
     runner = CliRunner()
-    result = runner.invoke(cli, ["alerts", *cmd, "--begin", begin_date])
+    result = runner.invoke(cli, ["alerts", *cmd, "--begin", begin_date], obj=cli_state)
     assert result.exit_code == 2
     assert "must be within 90 days" in result.output
 
@@ -352,7 +323,9 @@ def test_when_given_begin_date_past_90_days_and_use_checkpoint_and_a_stored_curs
 ):
     begin_date = get_test_date_str(days_ago=91) + " 12:51:00"
     runner = CliRunner()
-    result = runner.invoke(cli, ["alerts", *cmd, "--begin", begin_date, "--use-checkpoint", "test"])
+    result = runner.invoke(
+        cli, ["alerts", *cmd, "--begin", begin_date, "--use-checkpoint", "test"], obj=cli_state
+    )
     assert not filter_term_is_in_call_args(alert_extractor, DateObserved._term)
 
 
@@ -362,7 +335,7 @@ def test_when_given_begin_date_and_not_use_checkpoint_and_cursor_exists_uses_beg
 ):
     begin_date = get_test_date_str(days_ago=1)
     runner = CliRunner()
-    result = runner.invoke(cli, ["alerts", *cmd, "--begin", begin_date])
+    result = runner.invoke(cli, ["alerts", *cmd, "--begin", begin_date], obj=cli_state)
 
     actual_ts = get_filter_value_from_json(alert_extractor.extract.call_args[0][0], filter_index=0)
     expected_ts = "{0}T00:00:00.000Z".format(begin_date)
@@ -375,7 +348,9 @@ def test_when_end_date_is_before_begin_date_causes_exit(cmd, cli_state):
     begin_date = get_test_date_str(days_ago=1)
     end_date = get_test_date_str(days_ago=3)
     runner = CliRunner()
-    result = runner.invoke(cli, ["alerts", *cmd, "--begin", begin_date, "--end", end_date])
+    result = runner.invoke(
+        cli, ["alerts", *cmd, "--begin", begin_date, "--end", end_date], obj=cli_state
+    )
     assert result.exit_code == 2
     assert "'--begin': cannot be after --end date" in result.output
 
