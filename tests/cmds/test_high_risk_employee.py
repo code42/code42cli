@@ -1,3 +1,4 @@
+from time import sleep
 import pytest
 
 from code42cli.main import cli
@@ -114,7 +115,11 @@ def test_generate_template_file_when_given_remove_generates_template_from_handle
     pass
 
 
-def test_bulk_add_employees_uses_expected_arguments(runner, cli_state):
+def test_bulk_add_employees_uses_expected_arguments(runner, cli_state, mocker):
+    cli_state.sdk.detectionlists.add_user_cloud_alias.side_effect = sleep(0.5)
+    cli_state.sdk.detectionlists.add_user_risk_tags.side_effect = sleep(0.5)
+    cli_state.sdk.detectionlists.update_user_notes.side_effect = sleep(0.5)
+    cli_state.sdk.detectionlists.high_risk_employee.add.side_effect = sleep(0.5)
     with runner.isolated_filesystem():
         with open("test_add.csv", "w") as csv:
             csv.writelines(
@@ -132,7 +137,6 @@ def test_bulk_add_employees_uses_expected_arguments(runner, cli_state):
     cloud_alias_call_args = [
         call[0][1] for call in cli_state.sdk.detectionlists.add_user_cloud_alias.call_args_list
     ]
-    assert len(cloud_alias_call_args) == 2
     assert cli_state.sdk.detectionlists.add_user_cloud_alias.call_count == 2
     assert "test_alias" in cloud_alias_call_args
     assert "test_alias_2" in cloud_alias_call_args
