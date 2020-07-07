@@ -130,6 +130,7 @@ def remove(state, file_rows):
     )
 )
 @read_csv_arg(headers=RISK_TAG_CSV_HEADERS)
+@global_options
 def add_risk_tags(state, csv_rows):
     row_handler = lambda username, tag: _add_risk_tags(state.sdk, username, tag)
     run_bulk_process(
@@ -143,6 +144,7 @@ def add_risk_tags(state, csv_rows):
     )
 )
 @read_csv_arg(headers=RISK_TAG_CSV_HEADERS)
+@global_options
 def remove_risk_tags(state, csv_rows):
     row_handler = lambda username, tag: _remove_risk_tags(state.sdk, username, tag)
     run_bulk_process(

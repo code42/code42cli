@@ -54,12 +54,6 @@ class UserAlreadyAddedError(Code42CLIError):
         super().__init__(msg)
 
 
-class UnknownRiskTagError(Code42CLIError):
-    def __init__(self, bad_tags):
-        tags = ", ".join(bad_tags)
-        super().__init__("The following risk tags are unknown: '{}'.".format(tags))
-
-
 class InvalidRuleTypeError(Code42CLIError):
     def __init__(self, rule_id, source):
         msg = "Only alert rules with a source of 'Alerting' can be targeted by this command. "

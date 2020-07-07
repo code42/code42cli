@@ -149,7 +149,7 @@ def add(state, csv_rows):
     row_handler = lambda matter_id, username: _add_user_to_legal_hold(
         state.sdk, matter_id, username
     )
-    run_bulk_process(row_handler, csv_rows, progress_label="Adding users to legal hold: ")
+    run_bulk_process(row_handler, csv_rows, progress_label="Adding users to legal hold:")
 
 
 @bulk.command(
