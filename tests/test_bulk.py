@@ -1,25 +1,13 @@
 from collections import OrderedDict
-from io import IOBase
-import pytest
-import logging
 
-from click.testing import CliRunner
+import pytest
+
 from code42cli import PRODUCT_NAME
 from code42cli import errors
-from code42cli.bulk import generate_template_cmd_factory, BulkProcessor, run_bulk_process
+from code42cli.bulk import BulkProcessor, run_bulk_process
 from code42cli.logger import get_view_error_details_message
 
-from .conftest import ErrorTrackerTestHelper, create_mock_reader
-
-
 _NAMESPACE = "{}.bulk".format(PRODUCT_NAME)
-
-
-@pytest.fixture
-def mock_open(mocker):
-    mock = mocker.patch("{}.open".format(_NAMESPACE))
-    mock.return_value = mocker.MagicMock(spec=IOBase)
-    return mock
 
 
 @pytest.fixture
@@ -56,7 +44,7 @@ def test_run_bulk_process_creates_processor(bulk_processor_factory):
 
 
 class TestBulkProcessor(object):
-    def test_run_when_reader_returns_ordered_dict_process_kwargs(self, mock_open):
+    def test_run_when_reader_returns_ordered_dict_process_kwargs(self):
         processed_rows = []
 
         def func_for_bulk(test1, test2):
@@ -73,7 +61,7 @@ class TestBulkProcessor(object):
         assert (3, 4) in processed_rows
         assert (5, 6) in processed_rows
 
-    def test_run_when_reader_returns_dict_process_kwargs(self, mock_open):
+    def test_run_when_reader_returns_dict_process_kwargs(self):
         processed_rows = []
 
         def func_for_bulk(test1, test2):
@@ -86,7 +74,7 @@ class TestBulkProcessor(object):
         assert (3, 4) in processed_rows
         assert (5, 6) in processed_rows
 
-    def test_run_when_dict_reader_has_none_for_key_ignores_key(self, mock_open):
+    def test_run_when_dict_reader_has_none_for_key_ignores_key(self):
         processed_rows = []
 
         def func_for_bulk(test1):
@@ -97,7 +85,7 @@ class TestBulkProcessor(object):
         processor.run()
         assert processed_rows == [1]
 
-    def test_run_when_reader_returns_strs_processes_strs(self, mock_open):
+    def test_run_when_reader_returns_strs_processes_strs(self):
         processed_rows = []
 
         def func_for_bulk(test):
@@ -110,7 +98,7 @@ class TestBulkProcessor(object):
         assert "row2" in processed_rows
         assert "row3" in processed_rows
 
-    def test_run_when_error_occurs_raises_expected_logged_cli_error(self, mock_open):
+    def test_run_when_error_occurs_raises_expected_logged_cli_error(self):
         def func_for_bulk(test):
             if test == "row2":
                 raise Exception()
@@ -122,7 +110,7 @@ class TestBulkProcessor(object):
 
         assert err.value.message == "Some problems occurred during bulk processing."
 
-    def test_run_when_no_errors_occur_does_not_print_error_message(self, mock_open, capsys):
+    def test_run_when_no_errors_occur_does_not_print_error_message(self, capsys):
         def func_for_bulk(test):
             pass
 
@@ -133,7 +121,7 @@ class TestBulkProcessor(object):
         output = capsys.readouterr()
         assert get_view_error_details_message() not in output.out
 
-    def test_run_when_row_is_endline_does_not_process_row(self, mock_open):
+    def test_run_when_row_is_endline_does_not_process_row(self):
         processed_rows = []
 
         def func_for_bulk(test):
@@ -147,9 +135,7 @@ class TestBulkProcessor(object):
         assert "row2" in processed_rows
         assert "row3" not in processed_rows
 
-    def test_run_when_reader_returns_dict_rows_containing_empty_strs_converts_them_to_none(
-        self, mock_open
-    ):
+    def test_run_when_reader_returns_dict_rows_containing_empty_strs_converts_them_to_none(self):
         processed_rows = []
 
         def func_for_bulk(test1, test2):
