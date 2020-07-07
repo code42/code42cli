@@ -17,22 +17,34 @@ class BulkCommandType(object):
         return iter([self.ADD, self.REMOVE])
 
 
-def write_template_file(path, columns=None):
+def write_template_file(path, columns=None, flat_item=None):
     with open(path, "w", encoding="utf8") as new_file:
         if columns:
             new_file.write(",".join(columns))
         else:
-            new_file.write("# This template takes a single item to be processed for each row.")
+            new_file.write(
+                "# This template takes a single {} to be processed on each row.".format(
+                    flat_item or "item"
+                )
+            )
 
 
-def generate_template_cmd_factory(csv_columns, cmd_name, flat=None):
+def generate_template_cmd_factory(group_name, commands_dict):
     """Helper function that creates a `generate-template` click command that can be added to `bulk`
-    sub-command groups. If any bulk commands take a flat file instead of a csv, pass those command 
-    names (.e.g "add"/"remove") as a list to the `flat` param.
+    sub-command groups. 
+     
+    Args: 
+        `group_name`: a str representing the parent command group this is generating templates for.
+        `commands_dict`: a dict of the commands with their column names. Keys are the cmd 
+            names that will become the `cmd` argument, and values are the list of column names for 
+            the csv.
+            
+            If a cmd takes a flat file, value should be a string indicating what item the flat file
+            rows should contain.
     """
 
     @click.command()
-    @click.argument("cmd", type=click.Choice(BulkCommandType()))
+    @click.argument("cmd", type=click.Choice(list(commands_dict)))
     @click.argument(
         "path", required=False, type=click.Path(dir_okay=False, resolve_path=True, writable=True)
     )
@@ -42,13 +54,14 @@ def generate_template_cmd_factory(csv_columns, cmd_name, flat=None):
         
         Optional PATH argument can be provided to write to a specific file path/name.
         """
+        columns = commands_dict[cmd]
         if not path:
-            filename = "{}_bulk_{}.csv".format(cmd_name, cmd)
+            filename = "{}_bulk_{}.csv".format(group_name, cmd.replace("-", "_"))
             path = os.path.join(os.getcwd(), filename)
-        if cmd in flat:
-            write_template_file(path, columns=None)
+        if isinstance(columns, str):
+            write_template_file(path, columns=None, flat_item=columns)
         else:
-            write_template_file(path, columns=csv_columns)
+            write_template_file(path, columns=columns)
 
     return generate_template
 

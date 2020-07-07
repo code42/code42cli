@@ -80,9 +80,16 @@ def bulk(state):
 
 
 HIGH_RISK_EMPLOYEE_CSV_HEADERS = ["username", "cloud_alias", "risk_tag", "notes"]
+RISK_TAG_CSV_HEADERS = ["username", "tag"]
 
 high_risk_employee_generate_template = generate_template_cmd_factory(
-    csv_columns=HIGH_RISK_EMPLOYEE_CSV_HEADERS, cmd_name="high_risk_employee", flat=["remove"]
+    group_name="high_risk_employee",
+    commands_dict={
+        "add": HIGH_RISK_EMPLOYEE_CSV_HEADERS,
+        "remove": "username",
+        "add-risk-tags": RISK_TAG_CSV_HEADERS,
+        "remove-risk-tags": RISK_TAG_CSV_HEADERS,
+    },
 )
 bulk.add_command(high_risk_employee_generate_template)
 
@@ -114,6 +121,32 @@ def remove(state, file_rows):
         row_handler,
         file_rows,
         progress_label="Removing users from high risk employee detection list:",
+    )
+
+
+@bulk.command(
+    help="Adds risk tags to users in bulk using a csv file with format: {}".format(
+        ",".join(RISK_TAG_CSV_HEADERS)
+    )
+)
+@read_csv_arg(headers=RISK_TAG_CSV_HEADERS)
+def add_risk_tags(state, csv_rows):
+    row_handler = lambda username, tag: _add_risk_tags(state.sdk, username, tag)
+    run_bulk_process(
+        row_handler, csv_rows, progress_label="Adding risk tags to users:",
+    )
+
+
+@bulk.command(
+    help="Removes risk tags from users in bulk using a csv file with format: {}".format(
+        ",".join(RISK_TAG_CSV_HEADERS)
+    )
+)
+@read_csv_arg(headers=RISK_TAG_CSV_HEADERS)
+def remove_risk_tags(state, csv_rows):
+    row_handler = lambda username, tag: _remove_risk_tags(state.sdk, username, tag)
+    run_bulk_process(
+        row_handler, csv_rows, progress_label="Removing risk tags from users:",
     )
 
 

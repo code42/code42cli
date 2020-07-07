@@ -104,7 +104,8 @@ def bulk(state):
 ALERT_RULES_CSV_HEADERS = ["rule_id", "username"]
 
 alert_rules_generate_template = generate_template_cmd_factory(
-    csv_columns=ALERT_RULES_CSV_HEADERS, cmd_name="alert_rules"
+    group_name="alert_rules",
+    commands_dict={"add": ALERT_RULES_CSV_HEADERS, "remove": ALERT_RULES_CSV_HEADERS},
 )
 bulk.add_command(alert_rules_generate_template)
 

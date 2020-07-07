@@ -49,7 +49,8 @@ def bulk(state):
 DEPARTING_EMPLOYEE_CSV_HEADERS = ["username", "cloud_alias", "departure_date", "notes"]
 
 departing_employee_generate_template = generate_template_cmd_factory(
-    csv_columns=DEPARTING_EMPLOYEE_CSV_HEADERS, cmd_name="departing_employee", flat=["remove"]
+    group_name="departing_employee",
+    commands_dict={"add": DEPARTING_EMPLOYEE_CSV_HEADERS, "remove": "username"},
 )
 bulk.add_command(departing_employee_generate_template)
 

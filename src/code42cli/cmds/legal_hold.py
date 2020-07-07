@@ -132,7 +132,8 @@ LEGAL_HOLD_CSV_HEADERS = ["matter_id", "username"]
 
 
 legal_hold_generate_template = generate_template_cmd_factory(
-    csv_columns=LEGAL_HOLD_CSV_HEADERS, cmd_name="legal_hold"
+    group_name="legal_hold",
+    commands_dict={"add": LEGAL_HOLD_CSV_HEADERS, "remove": LEGAL_HOLD_CSV_HEADERS},
 )
 bulk.add_command(legal_hold_generate_template)
 
