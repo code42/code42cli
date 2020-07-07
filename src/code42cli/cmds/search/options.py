@@ -83,7 +83,9 @@ class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
             profile = opts.get("profile") or ctx.obj.profile.name
             cursor = ctx.obj.cursor_getter(profile)
             checkpoint_arg_present = "use_checkpoint" in opts
-            checkpoint_value = cursor.get(opts.get("use_checkpoint", ""))
+            checkpoint_value = (
+                cursor.get(opts.get("use_checkpoint", "")) if checkpoint_arg_present else None
+            )
             begin_present = "begin" in opts
             if checkpoint_arg_present and checkpoint_value is not None and begin_present:
                 opts.pop("begin")
@@ -96,7 +98,7 @@ class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
                     ),
                     err=True,
                 )
-            if checkpoint_arg_present and not checkpoint_value is not None and not begin_present:
+            if checkpoint_arg_present and checkpoint_value is None and not begin_present:
                 raise click.UsageError(
                     message="--begin date is required for --use-checkpoint when no checkpoint "
                     "exists yet.",
