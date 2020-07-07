@@ -23,11 +23,13 @@ def update_user(sdk, username, cloud_alias=None, risk_tag=None, notes=None):
 
 
 def add_risk_tags(sdk, username, risk_tag):
+    risk_tag = handle_list_args(risk_tag)
     user_id = get_user_id(sdk, username)
     sdk.detectionlists.add_user_risk_tags(user_id, risk_tag)
 
 
 def remove_risk_tags(sdk, username, risk_tag):
+    risk_tag = handle_list_args(risk_tag)
     user_id = get_user_id(sdk, username)
     sdk.detectionlists.remove_user_risk_tags(user_id, risk_tag)
 
@@ -43,8 +45,8 @@ def _error_is_user_already_added(bad_request_error_text):
 
 
 def handle_list_args(list_arg):
-    """Converts str args to a list. Useful for `bulk` commands which don't use `argparse` but
-    instead pass in values from files, such as in the form "item1 item2"."""
+    """Converts str args to a list. Useful for `bulk` commands which don't use click's argument 
+    parsing but instead pass in values from files, such as in the form "item1 item2"."""
     if isinstance(list_arg, str):
         return list_arg.split()
     return list_arg
