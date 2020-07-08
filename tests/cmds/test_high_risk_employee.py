@@ -1,22 +1,10 @@
-import threading
-
 from code42cli.main import cli
 
 from tests.conftest import TEST_ID
+from tests.cmds.conftest import thread_safe_side_effect
 
 _NAMESPACE = "code42cli.cmds.high_risk_employee"
 _EMPLOYEE = "risky employee"
-
-
-def thread_safe_side_effect():
-    def f(*args):
-        with threading.Lock():
-            f.call_count += 1
-            f.call_args_list.append(args)
-
-    f.call_count = 0
-    f.call_args_list = []
-    return f
 
 
 def test_add_high_risk_employee_adds(runner, cli_state_with_user):
@@ -125,7 +113,7 @@ def test_generate_template_file_when_given_remove_generates_template_from_handle
     pass
 
 
-def test_bulk_add_employees_uses_expected_arguments(runner, cli_state, mocker):
+def test_bulk_add_employees_calls_expected_py42_methods(runner, cli_state, mocker):
     add_user_cloud_alias = thread_safe_side_effect()
     add_user_risk_tags = thread_safe_side_effect()
     update_user_notes = thread_safe_side_effect()

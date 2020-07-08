@@ -1,4 +1,5 @@
 import json as json_module
+import threading
 
 import pytest
 from requests import Request, Response, HTTPError
@@ -103,3 +104,14 @@ def filter_term_is_in_call_args(extractor, term):
 def parse_date_from_filter_value(json, filter_index):
     date_str = get_filter_value_from_json(json, filter_index)
     return convert_str_to_date(date_str)
+
+
+def thread_safe_side_effect():
+    def f(*args):
+        with threading.Lock():
+            f.call_count += 1
+            f.call_args_list.append(args)
+
+    f.call_count = 0
+    f.call_args_list = []
+    return f

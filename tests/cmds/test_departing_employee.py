@@ -1,12 +1,7 @@
-import pytest
-
 from code42cli.main import cli
-from code42cli.errors import UserAlreadyAddedError, UserDoesNotExistError
-
 
 from tests.conftest import TEST_ID
-
-from py42.exceptions import Py42BadRequestError
+from tests.cmds.conftest import thread_safe_side_effect
 
 
 _EMPLOYEE = "departing employee"
@@ -94,7 +89,15 @@ def test_remove_departing_employee_when_user_does_not_exist_exits(runner, cli_st
     assert "User '{}' does not exist.".format(_EMPLOYEE) in result.output
 
 
-def test_add_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
+def test_add_bulk_users_calls_expected_py42_methods(runner, mocker, cli_state):
+    de_add_user = thread_safe_side_effect()
+    add_user_cloud_alias = thread_safe_side_effect()
+    update_user_notes = thread_safe_side_effect()
+
+    cli_state.sdk.detectionlists.departing_employee.add.side_effect = de_add_user
+    cli_state.sdk.detectionlists.add_user_cloud_alias.side_effect = add_user_cloud_alias
+    cli_state.sdk.detectionlists.update_user_notes.side_effect = update_user_notes
+
     with runner.isolated_filesystem():
         with open("test_add.csv", "w") as csv:
             csv.writelines(
@@ -108,27 +111,21 @@ def test_add_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
         result = runner.invoke(
             cli, ["departing-employee", "bulk", "add", "test_add.csv"], obj=cli_state
         )
-    departing_employee_add_call_args = [
-        call[0][1] for call in cli_state.sdk.detectionlists.departing_employee.add.call_args_list
-    ]
-    assert len(departing_employee_add_call_args) == 3
-    assert "2020-01-01" in departing_employee_add_call_args
-    assert "2020-02-01" in departing_employee_add_call_args
-    assert None in departing_employee_add_call_args
+    de_add_user_call_args = [call[1] for call in de_add_user.call_args_list]
+    assert de_add_user.call_count == 3
+    assert "2020-01-01" in de_add_user_call_args
+    assert "2020-02-01" in de_add_user_call_args
+    assert None in de_add_user_call_args
 
-    cloud_alias_call_args = [
-        call[0][1] for call in cli_state.sdk.detectionlists.add_user_cloud_alias.call_args_list
-    ]
-    assert len(cloud_alias_call_args) == 2
-    assert "test_alias" in cloud_alias_call_args
-    assert "test_alias_2" in cloud_alias_call_args
+    add_user_cloud_alias_call_args = [call[1] for call in add_user_cloud_alias.call_args_list]
+    assert add_user_cloud_alias.call_count == 2
+    assert "test_alias" in add_user_cloud_alias_call_args
+    assert "test_alias_2" in add_user_cloud_alias_call_args
 
-    add_notes_call_args = [
-        call[0][1] for call in cli_state.sdk.detectionlists.update_user_notes.call_args_list
-    ]
-    assert len(add_notes_call_args) == 2
-    assert "test_note" in add_notes_call_args
-    assert "test_note_2" in add_notes_call_args
+    update_user_notes_call_args = [call[1] for call in update_user_notes.call_args_list]
+    assert update_user_notes.call_count == 2
+    assert "test_note" in update_user_notes_call_args
+    assert "test_note_2" in update_user_notes_call_args
 
 
 def test_remove_bulk_users_uses_expected_arguments(runner, mocker, cli_state_with_user):
