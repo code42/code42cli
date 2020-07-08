@@ -1,4 +1,5 @@
 from functools import lru_cache
+
 from code42cli.errors import UserDoesNotExistError
 
 

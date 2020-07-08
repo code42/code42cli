@@ -1,4 +1,4 @@
-from click import echo, style
+from click import style
 
 import code42cli.password as password
 from code42cli.cmds.search.cursor_store import get_all_cursor_stores_for_profile
