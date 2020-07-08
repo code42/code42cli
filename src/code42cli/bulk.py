@@ -104,7 +104,6 @@ class BulkProcessor(object):
         )
         self.__worker = worker or Worker(5, total, bar=self._progress_bar)
         self._stats = self.__worker.stats
-        self._current_row = ""
 
     def run(self):
         """Processes the csv rows specified in the ctor, calling `self.row_handler` on each row."""
