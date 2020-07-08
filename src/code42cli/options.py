@@ -10,14 +10,23 @@ from code42cli.sdk_client import create_sdk
 class CLIState(object):
     def __init__(self):
         try:
-            profile = get_profile()
+            self._profile = get_profile()
         except Code42CLIError:
-            profile = None
-        self.profile = profile
+            self._profile = None
         self.debug = False
         self._sdk = None
         self.search_filters = []
         self.cursor_class = None
+
+    @property
+    def profile(self):
+        if self._profile is None:
+            self._profile = get_profile()
+        return self._profile
+
+    @profile.setter
+    def profile(self, value):
+        self._profile = value
 
     @property
     def sdk(self):
