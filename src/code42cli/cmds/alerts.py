@@ -173,7 +173,7 @@ def clear_checkpoint(state, checkpoint_name):
 @alert_options
 @search_options
 @sdk_options
-def _print(cli_state, format, begin, end, advanced_query, use_checkpoint, **kwargs):
+def print_alerts(cli_state, format, begin, end, advanced_query, use_checkpoint, **kwargs):
     """Print alerts to stdout."""
     output_logger = logger_factory.get_logger_for_stdout(format)
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None

@@ -5,10 +5,11 @@ from click import echo
 from py42.exceptions import Py42InternalServerError
 from py42.util import format_json
 
+from code42cli import PRODUCT_NAME
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
 from code42cli.cmds.shared import get_user_id
-from code42cli.errors import InvalidRuleTypeError
+from code42cli.errors import Code42CLIError, InvalidRuleTypeError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import sdk_options, OrderedGroup
 from code42cli.util import format_to_table, find_format_width
@@ -67,7 +68,7 @@ def remove_user(state, rule_id, username):
 
 @alert_rules.command("list")
 @sdk_options
-def _list(state):
+def list_alert_rules(state):
     """Fetch existing alert rules."""
     selected_rules = _get_all_rules_metadata(state.sdk)
     if selected_rules:
@@ -81,16 +82,9 @@ def _list(state):
 def show(state, rule_id):
     """Print out detailed alert rule criteria."""
     selected_rule = _get_rule_metadata(state.sdk, rule_id)
-    rule_detail = None
     if selected_rule:
-        rule_type = selected_rule[0][u"type"]
-        if rule_type == AlertRuleTypes.EXFILTRATION:
-            rule_detail = state.sdk.alerts.rules.exfiltration.get(rule_id)
-        elif rule_type == AlertRuleTypes.CLOUD_SHARE:
-            rule_detail = state.sdk.alerts.rules.cloudshare.get(rule_id)
-        elif rule_type == AlertRuleTypes.FILE_TYPE_MISMATCH:
-            rule_detail = state.sdk.alerts.rules.filetypemismatch.get(rule_id)
-    if rule_detail:
+        get = _get_rule_type_func(state.sdk, selected_rule[0]["type"])
+        rule_detail = get(rule_id)
         echo(format_json(rule_detail.text))
 
 
@@ -178,3 +172,17 @@ def _handle_rules_results(rules, rule_id=None):
 def _check_if_system_rule(rules):
     if rules and rules[0]["isSystem"]:
         raise InvalidRuleTypeError(rules[0]["observerRuleId"], rules[0]["ruleSource"])
+
+
+def _get_rule_type_func(sdk, rule_type):
+    if rule_type == AlertRuleTypes.EXFILTRATION:
+        return sdk.alerts.rules.exfiltration.get
+    elif rule_type == AlertRuleTypes.CLOUD_SHARE:
+        return sdk.alerts.rules.cloudshare.get
+    elif rule_type == AlertRuleTypes.FILE_TYPE_MISMATCH:
+        return sdk.alerts.rules.filetypemismatch.get
+    else:
+        raise Code42CLIError(
+            "Received an unknown rule type from server. You might need to update "
+            "to a newer version of {}".format(PRODUCT_NAME)
+        )
