@@ -103,18 +103,8 @@ def show(state, matter_id, include_inactive=False, include_policy=False):
 
     echo("")
     format_to_table(rows, column_size)
-    if active_usernames:
-        echo("\nActive matter members:\n")
-        format_string_list_to_columns(active_usernames)
-    else:
-        echo("\nNo active matter members.\n")
-
-    if include_inactive:
-        if inactive_usernames:
-            echo("\nInactive matter members:\n")
-            format_string_list_to_columns(inactive_usernames)
-        else:
-            echo("No inactive matter members.\n")
+    _print_matter_members(active_usernames, member_type="active")
+    _print_matter_members(inactive_usernames, member_type="inactive")
 
     if include_policy:
         _get_and_print_preservation_policy(state.sdk, matter["holdPolicyUid"])
@@ -219,6 +209,14 @@ def _get_all_active_matters(sdk):
     for matter in matters:
         matter["creator_username"] = matter["creator"]["username"]
     return matters
+
+
+def _print_matter_members(username_list, member_type="active"):
+    if username_list:
+        echo("\n{} matter members:\n".format(member_type.capitalize()))
+        format_string_list_to_columns(username_list)
+    else:
+        echo("No {} matter members.\n".format(member_type))
 
 
 @lru_cache(maxsize=None)
