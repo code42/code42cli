@@ -25,7 +25,7 @@ from code42cli.cmds.search.options import (
     server_options,
 )
 from code42cli.logger import get_main_cli_logger
-from code42cli.options import global_options, incompatible_with, OrderedGroup
+from code42cli.options import sdk_options, incompatible_with, OrderedGroup
 from code42cli.util import format_to_table, find_format_width
 
 logger = get_main_cli_logger()
@@ -155,7 +155,7 @@ def file_event_options(f):
 
 
 @click.group(cls=OrderedGroup)
-@global_options
+@sdk_options
 def security_data(state):
     """Tools for getting security related data, such as file events."""
     # store cursor getter on the group state so shared --begin option can use it in validation
@@ -164,7 +164,7 @@ def security_data(state):
 
 @security_data.command()
 @click.argument("checkpoint-name")
-@global_options
+@sdk_options
 def clear_checkpoint(state, checkpoint_name):
     """Remove the saved file event checkpoint from '--use-checkpoint/-c' mode."""
     _get_file_event_cursor_store(state.profile.name).delete(checkpoint_name)
@@ -173,7 +173,7 @@ def clear_checkpoint(state, checkpoint_name):
 @security_data.command("print")
 @file_event_options
 @search_options
-@global_options
+@sdk_options
 def _print(state, format, begin, end, advanced_query, use_checkpoint, saved_search, **kwargs):
     """Print file events to stdout."""
     output_logger = logger_factory.get_logger_for_stdout(format)
@@ -195,7 +195,7 @@ def _print(state, format, begin, end, advanced_query, use_checkpoint, saved_sear
 @output_file_arg
 @file_event_options
 @search_options
-@global_options
+@sdk_options
 def write_to(
     state, format, output_file, begin, end, advanced_query, use_checkpoint, saved_search, **kwargs
 ):
@@ -219,7 +219,7 @@ def write_to(
 @server_options
 @file_event_options
 @search_options
-@global_options
+@sdk_options
 def send_to(
     state,
     format,
@@ -249,13 +249,13 @@ def send_to(
 
 
 @security_data.group(cls=OrderedGroup)
-@global_options
+@sdk_options
 def saved_search(state):
     pass
 
 
 @saved_search.command("list")
-@global_options
+@sdk_options
 def _list(state):
     """List available saved searches."""
     response = state.sdk.securitydata.savedsearches.get()
@@ -265,7 +265,7 @@ def _list(state):
 
 @saved_search.command()
 @click.argument("search-id")
-@global_options
+@sdk_options
 def show(state, search_id):
     """Get the details of a saved search."""
     response = state.sdk.securitydata.savedsearches.get_by_id(search_id)

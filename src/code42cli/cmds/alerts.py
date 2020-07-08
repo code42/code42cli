@@ -26,7 +26,7 @@ from code42cli.cmds.search.options import (
     output_file_arg,
     server_options,
 )
-from code42cli.options import global_options, OrderedGroup
+from code42cli.options import sdk_options, OrderedGroup
 
 search_options = create_search_options("alerts")
 
@@ -154,7 +154,7 @@ def alert_options(f):
 
 
 @click.group(cls=OrderedGroup)
-@global_options
+@sdk_options
 def alerts(state):
     """Tools for getting alert data."""
     # store cursor getter on the group state so shared --begin option can use it in validation
@@ -163,7 +163,7 @@ def alerts(state):
 
 @alerts.command()
 @click.argument("checkpoint-name")
-@global_options
+@sdk_options
 def clear_checkpoint(state, checkpoint_name):
     """Remove the saved alert checkpoint from '--use-checkpoint/-c' mode."""
     _get_alert_cursor_store(state.profile.name).delete(checkpoint_name)
@@ -172,7 +172,7 @@ def clear_checkpoint(state, checkpoint_name):
 @alerts.command("print")
 @alert_options
 @search_options
-@global_options
+@sdk_options
 def _print(cli_state, format, begin, end, advanced_query, use_checkpoint, **kwargs):
     """Print alerts to stdout."""
     output_logger = logger_factory.get_logger_for_stdout(format)
@@ -193,7 +193,7 @@ def _print(cli_state, format, begin, end, advanced_query, use_checkpoint, **kwar
 @output_file_arg
 @alert_options
 @search_options
-@global_options
+@sdk_options
 def write_to(cli_state, format, output_file, begin, end, advanced_query, use_checkpoint, **kwargs):
     """Write alerts to the file with the given name."""
     output_logger = logger_factory.get_logger_for_file(output_file, format)
@@ -214,7 +214,7 @@ def write_to(cli_state, format, output_file, begin, end, advanced_query, use_che
 @server_options
 @alert_options
 @search_options
-@global_options
+@sdk_options
 def send_to(
     cli_state, format, hostname, protocol, begin, end, advanced_query, use_checkpoint, **kwargs
 ):

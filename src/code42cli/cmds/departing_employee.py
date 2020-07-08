@@ -10,11 +10,11 @@ from code42cli.cmds.detectionlists.options import (
 )
 from code42cli.cmds.shared import get_user_id
 from code42cli.file_readers import read_csv_arg, read_flat_file_arg
-from code42cli.options import global_options, OrderedGroup
+from code42cli.options import sdk_options, OrderedGroup
 
 
 @click.group(cls=OrderedGroup)
-@global_options
+@sdk_options
 def departing_employee(state):
     """For adding and removing employees from the departing employee detection list."""
     pass
@@ -25,7 +25,7 @@ def departing_employee(state):
 @click.option("--departure-date", help="The date the employee is departing. Format: yyyy-MM-dd.")
 @cloud_alias_option
 @notes_option
-@global_options
+@sdk_options
 def add(state, username, cloud_alias, departure_date, notes):
     """Add a user to the departing-employee detection list."""
     _add_departing_employee(state.sdk, username, cloud_alias, departure_date, notes)
@@ -33,14 +33,14 @@ def add(state, username, cloud_alias, departure_date, notes):
 
 @departing_employee.command()
 @username_arg
-@global_options
+@sdk_options
 def remove(state, username):
     """Remove a user from the departing-employee detection list."""
     _remove_departing_employee(state.sdk, username)
 
 
 @departing_employee.group(cls=OrderedGroup)
-@global_options
+@sdk_options
 def bulk(state):
     """Tools for executing bulk departing employee actions."""
     pass
@@ -60,7 +60,7 @@ bulk.add_command(departing_employee_generate_template)
     "format: {}".format(",".join(DEPARTING_EMPLOYEE_CSV_HEADERS))
 )
 @read_csv_arg(headers=DEPARTING_EMPLOYEE_CSV_HEADERS)
-@global_options
+@sdk_options
 def add(state, csv_rows):
     row_handler = lambda username, cloud_alias, departure_date, notes: _add_departing_employee(
         state.sdk, username, cloud_alias, departure_date, notes
@@ -75,7 +75,7 @@ def add(state, csv_rows):
     "file of usernames."
 )
 @read_flat_file_arg
-@global_options
+@sdk_options
 def remove(state, file_rows):
     row_handler = lambda username: _remove_departing_employee(state.sdk, username)
     run_bulk_process(

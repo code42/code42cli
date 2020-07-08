@@ -10,7 +10,7 @@ from code42cli.bulk import run_bulk_process
 from code42cli.cmds.shared import get_user_id
 from code42cli.errors import InvalidRuleTypeError
 from code42cli.file_readers import read_csv_arg
-from code42cli.options import global_options, OrderedGroup
+from code42cli.options import sdk_options, OrderedGroup
 from code42cli.util import format_to_table, find_format_width
 
 
@@ -30,7 +30,7 @@ _HEADER_KEYS_MAP["isEnabled"] = "Enabled"
 
 
 @click.group(cls=OrderedGroup)
-@global_options
+@sdk_options
 def alert_rules(state):
     """Manage alert rules."""
     pass
@@ -45,7 +45,7 @@ username_option = click.option("-u", "--username", required=True)
 @click.option(
     "-u", "--username", required=True, help="The username of the user to add to the alert rule.",
 )
-@global_options
+@sdk_options
 def add_user(state, rule_id, username):
     """Add a user to an alert rule."""
     _add_user(state.sdk, rule_id, username)
@@ -59,14 +59,14 @@ def add_user(state, rule_id, username):
     required=True,
     help="The username of the user to remove from the alert rule.",
 )
-@global_options
+@sdk_options
 def remove_user(state, rule_id, username):
     """Remove a user from an alert rule."""
     _remove_user(state.sdk, rule_id, username)
 
 
 @alert_rules.command("list")
-@global_options
+@sdk_options
 def _list(state):
     """Fetch existing alert rules."""
     selected_rules = _get_all_rules_metadata(state.sdk)
@@ -77,7 +77,7 @@ def _list(state):
 
 @alert_rules.command()
 @click.argument("rule_id")
-@global_options
+@sdk_options
 def show(state, rule_id):
     """Print out detailed alert rule criteria."""
     selected_rule = _get_rule_metadata(state.sdk, rule_id)
@@ -95,7 +95,7 @@ def show(state, rule_id):
 
 
 @alert_rules.group(cls=OrderedGroup)
-@global_options
+@sdk_options
 def bulk(state):
     """Tools for executing bulk alert rule actions."""
     pass
@@ -116,7 +116,7 @@ bulk.add_command(alert_rules_generate_template)
     )
 )
 @read_csv_arg(headers=ALERT_RULES_CSV_HEADERS)
-@global_options
+@sdk_options
 def add(state, csv_rows):
     row_handler = lambda rule_id, username: _add_user(state.sdk, rule_id, username)
     run_bulk_process(row_handler, csv_rows, progress_label="Adding users to alert-rules:")
@@ -128,7 +128,7 @@ def add(state, csv_rows):
     )
 )
 @read_csv_arg(headers=ALERT_RULES_CSV_HEADERS)
-@global_options
+@sdk_options
 def remove(state, csv_rows):
     row_handler = lambda rule_id, username: _remove_user(state.sdk, rule_id, username)
     run_bulk_process(row_handler, csv_rows, progress_label="Removing users from alert-rules:")

@@ -17,7 +17,7 @@ from code42cli.cmds.detectionlists.options import (
 )
 from code42cli.cmds.shared import get_user_id
 from code42cli.file_readers import read_csv_arg, read_flat_file_arg
-from code42cli.options import global_options, OrderedGroup
+from code42cli.options import sdk_options, OrderedGroup
 
 risk_tag_option = click.option(
     "-t",
@@ -29,7 +29,7 @@ risk_tag_option = click.option(
 
 
 @click.group(cls=OrderedGroup)
-@global_options
+@sdk_options
 def high_risk_employee(state):
     """For adding and removing employees from the high risk employee detection list."""
     pass
@@ -40,7 +40,7 @@ def high_risk_employee(state):
 @notes_option
 @risk_tag_option
 @username_arg
-@global_options
+@sdk_options
 def add(state, username, cloud_alias, risk_tag, notes):
     """Add a user to the high-risk-employee detection list."""
     _add_high_risk_employee(state.sdk, username, cloud_alias, risk_tag, notes)
@@ -48,7 +48,7 @@ def add(state, username, cloud_alias, risk_tag, notes):
 
 @high_risk_employee.command()
 @username_arg
-@global_options
+@sdk_options
 def remove(state, username):
     """Remove a user from the high-risk-employee detection list."""
     _remove_high_risk_employee(state.sdk, username)
@@ -57,7 +57,7 @@ def remove(state, username):
 @high_risk_employee.command()
 @username_arg
 @risk_tag_option
-@global_options
+@sdk_options
 def add_risk_tags(state, username, risk_tag):
     """Associates risk tags with a user."""
     _add_risk_tags(state.sdk, username, risk_tag)
@@ -66,14 +66,14 @@ def add_risk_tags(state, username, risk_tag):
 @high_risk_employee.command()
 @username_arg
 @risk_tag_option
-@global_options
+@sdk_options
 def remove_risk_tags(state, username, risk_tag):
     """Disassociates risk tags from a user."""
     _remove_risk_tags(state.sdk, username, risk_tag)
 
 
 @high_risk_employee.group(cls=OrderedGroup)
-@global_options
+@sdk_options
 def bulk(state):
     """Tools for executing bulk high risk employee actions."""
     pass
@@ -99,7 +99,7 @@ bulk.add_command(high_risk_employee_generate_template)
     "format: {}".format(",".join(HIGH_RISK_EMPLOYEE_CSV_HEADERS))
 )
 @read_csv_arg(headers=HIGH_RISK_EMPLOYEE_CSV_HEADERS)
-@global_options
+@sdk_options
 def add(state, csv_rows):
     row_handler = lambda username, cloud_alias, risk_tag, notes: _add_high_risk_employee(
         state.sdk, username, cloud_alias, risk_tag, notes
@@ -114,7 +114,7 @@ def add(state, csv_rows):
     "file of usernames."
 )
 @read_flat_file_arg
-@global_options
+@sdk_options
 def remove(state, file_rows):
     row_handler = lambda username: _remove_high_risk_employee(state.sdk, username)
     run_bulk_process(
@@ -130,7 +130,7 @@ def remove(state, file_rows):
     )
 )
 @read_csv_arg(headers=RISK_TAG_CSV_HEADERS)
-@global_options
+@sdk_options
 def add_risk_tags(state, csv_rows):
     row_handler = lambda username, tag: _add_risk_tags(state.sdk, username, tag)
     run_bulk_process(
@@ -144,7 +144,7 @@ def add_risk_tags(state, csv_rows):
     )
 )
 @read_csv_arg(headers=RISK_TAG_CSV_HEADERS)
-@global_options
+@sdk_options
 def remove_risk_tags(state, csv_rows):
     row_handler = lambda username, tag: _remove_risk_tags(state.sdk, username, tag)
     run_bulk_process(

@@ -67,7 +67,7 @@ debug_option = click.option(
 pass_state = click.make_pass_decorator(CLIState, ensure=True)
 
 
-def global_options(f):
+def sdk_options(f):
     f = profile_option(f)
     f = debug_option(f)
     f = pass_state(f)
