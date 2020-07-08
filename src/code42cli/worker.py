@@ -86,7 +86,7 @@ class Worker(object):
     def wait(self):
         """Wait for the tasks in the queue to complete. This should usually be called before 
         program termination."""
-        while not self._stats.total_processed >= self._tasks:
+        while self._stats.total_processed < self._tasks:
             sleep(0.5)
 
     def _process_queue(self):

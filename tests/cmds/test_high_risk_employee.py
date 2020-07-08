@@ -1,5 +1,4 @@
-from time import sleep
-import pytest
+import threading
 
 from code42cli.main import cli
 
@@ -7,6 +6,17 @@ from tests.conftest import TEST_ID
 
 _NAMESPACE = "code42cli.cmds.high_risk_employee"
 _EMPLOYEE = "risky employee"
+
+
+def thread_safe_side_effect():
+    def f(*args):
+        with threading.Lock():
+            f.call_count += 1
+            f.call_args_list.append(args)
+
+    f.call_count = 0
+    f.call_args_list = []
+    return f
 
 
 def test_add_high_risk_employee_adds(runner, cli_state_with_user):
@@ -116,6 +126,16 @@ def test_generate_template_file_when_given_remove_generates_template_from_handle
 
 
 def test_bulk_add_employees_uses_expected_arguments(runner, cli_state, mocker):
+    add_user_cloud_alias = thread_safe_side_effect()
+    add_user_risk_tags = thread_safe_side_effect()
+    update_user_notes = thread_safe_side_effect()
+    hre_add_user = thread_safe_side_effect()
+
+    cli_state.sdk.detectionlists.add_user_cloud_alias.side_effect = add_user_cloud_alias
+    cli_state.sdk.detectionlists.add_user_risk_tags.side_effect = add_user_risk_tags
+    cli_state.sdk.detectionlists.update_user_notes.side_effect = update_user_notes
+    cli_state.sdk.detectionlists.high_risk_employee.add.side_effect = hre_add_user
+
     with runner.isolated_filesystem():
         with open("test_add.csv", "w") as csv:
             csv.writelines(
@@ -129,32 +149,22 @@ def test_bulk_add_employees_uses_expected_arguments(runner, cli_state, mocker):
         result = runner.invoke(
             cli, ["high-risk-employee", "bulk", "add", "test_add.csv"], obj=cli_state
         )
+    alias_args = [call[1] for call in add_user_cloud_alias.call_args_list]
+    assert add_user_cloud_alias.call_count == 2
+    assert "test_alias" in alias_args
+    assert "test_alias_2" in alias_args
 
-    cloud_alias_call_args = [
-        call[0][1] for call in cli_state.sdk.detectionlists.add_user_cloud_alias.call_args_list
-    ]
-    assert len(cloud_alias_call_args) == 2
-    assert "test_alias" in cloud_alias_call_args
-    assert "test_alias_2" in cloud_alias_call_args
-
-    add_risk_tags_call_args = [
-        call[0][1] for call in cli_state.sdk.detectionlists.add_user_risk_tags.call_args_list
-    ]
-    assert len(add_risk_tags_call_args) == 2
+    add_risk_tags_call_args = [call[1] for call in add_user_risk_tags.call_args_list]
+    assert add_user_risk_tags.call_count == 2
     assert ["test_tag_1", "test_tag_2"] in add_risk_tags_call_args
     assert ["test_tag_3"] in add_risk_tags_call_args
 
-    add_notes_call_args = [
-        call[0][1] for call in cli_state.sdk.detectionlists.update_user_notes.call_args_list
-    ]
-    assert len(add_notes_call_args) == 2
+    add_notes_call_args = [call[1] for call in update_user_notes.call_args_list]
+    assert update_user_notes.call_count == 2
     assert "test_note" in add_notes_call_args
     assert "test_note_2" in add_notes_call_args
 
-    add_hre_user_call_args = [
-        call[0][0] for call in cli_state.sdk.detectionlists.high_risk_employee.add.call_args_list
-    ]
-    assert len(add_hre_user_call_args) == 3
+    assert hre_add_user.call_count == 3
 
 
 def test_bulk_remove_employees_uses_expected_arguments(runner, cli_state, mocker):
