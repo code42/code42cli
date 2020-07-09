@@ -104,7 +104,9 @@ def show(state, matter_id, include_inactive=False, include_policy=False):
     echo("")
     format_to_table(rows, column_size)
     _print_matter_members(active_usernames, member_type="active")
-    _print_matter_members(inactive_usernames, member_type="inactive")
+
+    if include_inactive:
+        _print_matter_members(inactive_usernames, member_type="inactive")
 
     if include_policy:
         _get_and_print_preservation_policy(state.sdk, matter["holdPolicyUid"])
