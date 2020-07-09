@@ -31,7 +31,7 @@ powered by py42 version {}.""".format(
 
 # Handle KeyboardInterrupts by just exiting instead of printing out a stack
 def exit_on_interrupt(signal, frame):
-    click.echo()
+    click.echo(err=True)
     sys.exit(1)
 
 
