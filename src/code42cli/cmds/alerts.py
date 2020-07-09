@@ -23,8 +23,6 @@ from code42cli.cmds.search.options import (
     contains_filter,
     not_contains_filter,
     not_in_filter,
-    output_file_arg,
-    server_options,
 )
 from code42cli.options import sdk_options, OrderedGroup
 
@@ -169,79 +167,22 @@ def clear_checkpoint(state, checkpoint_name):
     _get_alert_cursor_store(state.profile.name).delete(checkpoint_name)
 
 
-@alerts.command("print")
+@alerts.command()
 @alert_options
 @search_options
 @sdk_options
-def print_alerts(cli_state, format, begin, end, advanced_query, use_checkpoint, **kwargs):
-    """Print alerts to stdout."""
+def search(cli_state, format, begin, end, advanced_query, use_checkpoint, **kwargs):
+    """Search for alerts."""
     output_logger = logger_factory.get_logger_for_stdout(format)
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
-    _extract(
-        sdk=cli_state.sdk,
-        cursor=cursor,
-        checkpoint_name=use_checkpoint,
-        filter_list=cli_state.search_filters,
-        begin=begin,
-        end=end,
-        advanced_query=advanced_query,
-        output_logger=output_logger,
-    )
-
-
-@alerts.command()
-@output_file_arg
-@alert_options
-@search_options
-@sdk_options
-def write_to(cli_state, format, output_file, begin, end, advanced_query, use_checkpoint, **kwargs):
-    """Write alerts to the file with the given name."""
-    output_logger = logger_factory.get_logger_for_file(output_file, format)
-    cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
-    _extract(
-        sdk=cli_state.sdk,
-        cursor=cursor,
-        checkpoint_name=use_checkpoint,
-        filter_list=cli_state.search_filters,
-        begin=begin,
-        end=end,
-        advanced_query=advanced_query,
-        output_logger=output_logger,
-    )
-
-
-@alerts.command()
-@server_options
-@alert_options
-@search_options
-@sdk_options
-def send_to(
-    cli_state, format, hostname, protocol, begin, end, advanced_query, use_checkpoint, **kwargs
-):
-    """Send alerts to the given server address."""
-    output_logger = logger_factory.get_logger_for_server(hostname, protocol, format)
-    cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
-    _extract(
-        sdk=cli_state.sdk,
-        cursor=cursor,
-        checkpoint_name=use_checkpoint,
-        filter_list=cli_state.search_filters,
-        begin=begin,
-        end=end,
-        advanced_query=advanced_query,
-        output_logger=output_logger,
-    )
-
-
-def _extract(sdk, cursor, checkpoint_name, filter_list, begin, end, advanced_query, output_logger):
-    handlers = create_handlers(sdk, AlertExtractor, output_logger, cursor, checkpoint_name)
-    extractor = _get_alert_extractor(sdk, handlers)
+    handlers = create_handlers(cli_state.sdk, AlertExtractor, output_logger, cursor, use_checkpoint)
+    extractor = _get_alert_extractor(cli_state.sdk, handlers)
     if advanced_query:
         extractor.extract_advanced(advanced_query)
     else:
         if begin or end:
-            filter_list.append(create_time_range_filter(DateObserved, begin, end))
-        extractor.extract(*filter_list)
+            cli_state.search_filters.append(create_time_range_filter(DateObserved, begin, end))
+        extractor.extract(*cli_state.search_filters)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         echo("No results found.")
 
