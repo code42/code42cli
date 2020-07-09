@@ -1,2 +1,2 @@
-PRODUCT_NAME = u"code42cli"
-MAIN_COMMAND = u"code42"
+PRODUCT_NAME = "code42cli"
+MAIN_COMMAND = "code42"

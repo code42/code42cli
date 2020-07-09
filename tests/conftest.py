@@ -1,15 +1,18 @@
 from datetime import datetime, timedelta
 
 import pytest
+from click.testing import CliRunner
 from py42.sdk import SDKClient
 
-from code42cli.bulk import BulkProcessor
-from code42cli.file_readers import CliFileReader
-from code42cli.config import ConfigAccessor
-from code42cli.profile import Code42Profile
-from code42cli.commands import DictObject, Command, SubcommandLoader
-
 import code42cli.errors as error_tracker
+from code42cli.config import ConfigAccessor
+from code42cli.options import CLIState
+from code42cli.profile import Code42Profile
+
+
+@pytest.fixture
+def runner():
+    return CliRunner()
 
 
 @pytest.fixture(autouse=True)
@@ -19,63 +22,59 @@ def io_prevention(monkeypatch):
 
 @pytest.fixture
 def file_event_namespace():
-    args = DictObject(
-        dict(
-            sdk=mock_42,
-            profile=create_mock_profile(),
-            use_checkpoint=None,
-            advanced_query=None,
-            begin=None,
-            end=None,
-            type=None,
-            c42_username=None,
-            actor=None,
-            md5=None,
-            sha256=None,
-            source=None,
-            file_name=None,
-            file_path=None,
-            process_owner=None,
-            tab_url=None,
-            include_non_exposure=None,
-            format=None,
-            output_file=None,
-            server=None,
-            protocol=None,
-            saved_search=None,
-        )
+    args = dict(
+        sdk=mock_42,
+        profile=create_mock_profile(),
+        incremental=None,
+        advanced_query=None,
+        begin=None,
+        end=None,
+        type=None,
+        c42_username=None,
+        actor=None,
+        md5=None,
+        sha256=None,
+        source=None,
+        file_name=None,
+        file_path=None,
+        process_owner=None,
+        tab_url=None,
+        include_non_exposure=None,
+        format=None,
+        output_file=None,
+        server=None,
+        protocol=None,
+        saved_search=None,
     )
     return args
 
 
 @pytest.fixture
 def alert_namespace():
-    args = DictObject(
-        dict(
-            sdk=mock_42,
-            profile=create_mock_profile(),
-            use_checkpoint=None,
-            advanced_query=None,
-            begin=None,
-            end=None,
-            severity=None,
-            state=None,
-            actor=None,
-            actor_contains=None,
-            exclude_actor=None,
-            exclude_actor_contains=None,
-            rule_name=None,
-            exclude_rule_name=None,
-            rule_id=None,
-            exclude_rule_id=None,
-            rule_type=None,
-            exclude_rule_type=None,
-            description=None,
-            format=None,
-            output_file=None,
-            server=None,
-            protocol=None,
-        )
+    args = dict(
+        sdk=mock_42,
+        profile=create_mock_profile(),
+        incremental=None,
+        advanced_query=None,
+        begin=None,
+        end=None,
+        severity=None,
+        state=None,
+        actor=None,
+        actor_contains=None,
+        exclude_actor=None,
+        exclude_actor_contains=None,
+        rule_name=None,
+        exclude_rule_name=None,
+        rule_id=None,
+        exclude_rule_id=None,
+        rule_type=None,
+        exclude_rule_type=None,
+        description=None,
+        format=None,
+        output_file=None,
+        server=None,
+        protocol=None,
     )
     return args
 
@@ -108,9 +107,18 @@ def sdk_without_user(sdk):
     return sdk
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_42(mocker):
     return mocker.patch("py42.sdk.from_local_account")
+
+
+@pytest.fixture
+def cli_state(mocker, sdk, profile):
+    mock_state = mocker.MagicMock(spec=CLIState)
+    mock_state._sdk = sdk
+    mock_state.profile = profile
+    mock_state.search_filters = []
+    return mock_state
 
 
 class MockSection(object):
@@ -234,24 +242,3 @@ class ErrorTrackerTestHelper:
 
 
 TEST_FILE_PATH = "some/path"
-
-
-def create_mock_reader(rows):
-    class MockDictReader(CliFileReader):
-        def __call__(self, *args, **kwargs):
-            return rows
-
-        def get_rows_count(self):
-            return len(rows)
-
-    return MockDictReader(TEST_FILE_PATH)
-
-
-subcommand1 = Command("sub1", "sub1 desc", "sub1 usage")
-subcommand2 = Command("sub2", "sub2 desc", "sub2 usage")
-subcommand3 = Command("sub3", "sub3 desc", "sub3 usage")
-
-
-class DummySubcommandLoader(SubcommandLoader):
-    def load_commands(self):
-        return [subcommand1, subcommand2, subcommand3]

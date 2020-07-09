@@ -1,68 +1,86 @@
-import os, inspect
+import os
 
-from code42cli.compat import open, str
-from code42cli.worker import Worker
+import click
+
+from code42cli.errors import LoggedCLIError
 from code42cli.logger import get_main_cli_logger
-from code42cli.args import SDK_ARG_NAME, PROFILE_ARG_NAME
-from code42cli.progress_bar import ProgressBar
-
+from code42cli.worker import Worker
 
 _logger = get_main_cli_logger()
 
 
 class BulkCommandType(object):
-    ADD = u"add"
-    REMOVE = u"remove"
+    ADD = "add"
+    REMOVE = "remove"
 
     def __iter__(self):
         return iter([self.ADD, self.REMOVE])
 
 
-def generate_template(handler, path=None):
-    """Looks at the parameter names of `handler` and creates a file with the same column names. If 
-    `handler` only has one parameter that is not `sdk` or `profile`, it will create a blank file. 
-    This is useful for commands such as `remove` which only require a list of users.
-    """
-    path = path or os.path.join(os.getcwd(), u"{}.csv".format(str(handler.__name__)))
-    args = [
-        arg
-        for arg in inspect.getargspec(handler).args
-        if arg != SDK_ARG_NAME and arg != PROFILE_ARG_NAME
-    ]
-
-    if len(args) <= 1:
-        _logger.print_info(
-            u"A blank file was generated because there are no csv headers needed for this command. "
-            u"Simply enter one {} per line.".format(args[0])
-        )
-        # Set args to None so that we don't make a header out of the single arg.
-        args = None
-
-    _write_template_file(path, args)
-
-
-def _write_template_file(path, columns=None):
-    with open(path, u"w", encoding=u"utf8") as new_file:
+def write_template_file(path, columns=None, flat_item=None):
+    with open(path, "w", encoding="utf8") as new_file:
         if columns:
-            new_file.write(u",".join(columns))
+            new_file.write(",".join(columns))
+        else:
+            new_file.write(
+                "# This template takes a single {} to be processed on each row.".format(
+                    flat_item or "item"
+                )
+            )
 
 
-def run_bulk_process(row_handler, reader):
+def generate_template_cmd_factory(group_name, commands_dict):
+    """Helper function that creates a `generate-template` click command that can be added to `bulk`
+    sub-command groups. 
+     
+    Args: 
+        `group_name`: a str representing the parent command group this is generating templates for.
+        `commands_dict`: a dict of the commands with their column names. Keys are the cmd 
+            names that will become the `cmd` argument, and values are the list of column names for 
+            the csv.
+            
+            If a cmd takes a flat file, value should be a string indicating what item the flat file
+            rows should contain.
+    """
+
+    @click.command()
+    @click.argument("cmd", type=click.Choice(list(commands_dict)))
+    @click.argument(
+        "path", required=False, type=click.Path(dir_okay=False, resolve_path=True, writable=True)
+    )
+    def generate_template(cmd, path):
+        """\b
+        Generate the csv template needed for bulk adding/removing users.
+        
+        Optional PATH argument can be provided to write to a specific file path/name.
+        """
+        columns = commands_dict[cmd]
+        if not path:
+            filename = "{}_bulk_{}.csv".format(group_name, cmd.replace("-", "_"))
+            path = os.path.join(os.getcwd(), filename)
+        if isinstance(columns, str):
+            write_template_file(path, columns=None, flat_item=columns)
+        else:
+            write_template_file(path, columns=columns)
+
+    return generate_template
+
+
+def run_bulk_process(row_handler, rows, progress_label=None):
     """Runs a bulk process.
     
     Args: 
         row_handler (callable): A callable that you define to process values from the row as 
             either *args or **kwargs.
-        reader: (CSVReader or FlatFileReader, optional): A generator that reads rows and yields data into 
-            `row_handler`. If None, it will use a CSVReader. Defaults to None.
+        rows (iterable): the rows to process.
     """
-    processor = _create_bulk_processor(row_handler, reader)
+    processor = _create_bulk_processor(row_handler, rows, progress_label)
     processor.run()
 
 
-def _create_bulk_processor(row_handler, reader):
+def _create_bulk_processor(row_handler, rows, progress_label):
     """A factory method to create the bulk processor, useful for testing purposes."""
-    return BulkProcessor(row_handler, reader)
+    return BulkProcessor(row_handler, rows, progress_label=progress_label)
 
 
 class BulkProcessor(object):
@@ -77,21 +95,21 @@ class BulkProcessor(object):
         reader (CSVReader or FlatFileReader): A generator that reads rows and yields data into `row_handler`.
     """
 
-    def __init__(self, row_handler, reader, worker=None, progress_bar=None):
-        total = reader.get_rows_count()
-        self.file_path = reader.file_path
+    def __init__(self, row_handler, rows, worker=None, progress_label=None):
+        total = len(rows)
+        self._rows = rows
         self._row_handler = row_handler
-        self._reader = reader
-        self.__worker = worker or Worker(5, total)
+        self._progress_bar = click.progressbar(
+            length=len(self._rows), item_show_func=self._show_stats, label=progress_label
+        )
+        self.__worker = worker or Worker(5, total, bar=self._progress_bar)
         self._stats = self.__worker.stats
-        self._progress_bar = progress_bar or ProgressBar(total)
 
     def run(self):
-        """Processes the csv file specified in the ctor, calling `self.row_handler` on each row."""
-        with open(self.file_path, newline=u"", encoding=u"utf8") as bulk_file:
-            for row in self._reader(bulk_file=bulk_file):
-                self._process_row(row)
-            self.__worker.wait()
+        """Processes the csv rows specified in the ctor, calling `self.row_handler` on each row."""
+        for row in self._rows:
+            self._process_row(row)
+        self.__worker.wait()
         self._print_results()
 
     def _process_row(self, row):
@@ -101,10 +119,11 @@ class BulkProcessor(object):
             self._process_flat_file_row(row.strip())
 
     def _process_csv_row(self, row):
-        # Removes problems from including extra comments. Error messages from out of order args
+        # Removes problems from including extra columns. Error messages from out of order args
         # are more indicative this way too.
         row.pop(None, None)
-        row_values = {key: val if val != u"" else None for key, val in row.items()}
+
+        row_values = {key: val if val != "" else None for key, val in row.items()}
         self.__worker.do_async(
             lambda *args, **kwargs: self._handle_row(*args, **kwargs), **row_values
         )
@@ -114,12 +133,12 @@ class BulkProcessor(object):
             self.__worker.do_async(lambda *args, **kwargs: self._handle_row(*args, **kwargs), row)
 
     def _handle_row(self, *args, **kwargs):
-        message = str(self._stats)
-        self._progress_bar.update(self._stats.total_processed, message)
         self._row_handler(*args, **kwargs)
 
+    def _show_stats(self, _):
+        return str(self._stats)
+
     def _print_results(self):
-        self._progress_bar.clear_bar_and_print_final(str(self._stats))
+        click.echo("")
         if self._stats.total_errors:
-            logger = get_main_cli_logger()
-            logger.print_errors_occurred_message()
+            raise LoggedCLIError("Some problems occurred during bulk processing.")

@@ -7,10 +7,7 @@ from requests import Request
 from code42cli.logger import (
     add_handler_to_logger,
     logger_has_handlers,
-    get_view_exceptions_location_message,
-    RedStderrHandler,
-    InPlaceStreamHandler,
-    get_progress_logger,
+    get_view_error_details_message,
     CliLogger,
 )
 from code42cli.util import get_user_project_path
@@ -39,65 +36,10 @@ def test_logger_has_handlers_when_logger_does_not_have_handlers_returns_false():
 
 
 def test_get_view_exceptions_location_message_returns_expected_message():
-    actual = get_view_exceptions_location_message()
+    actual = get_view_error_details_message()
     path = os.path.join(get_user_project_path("log"), "code42_errors.log")
-    expected = u"View exceptions that occurred at {}.".format(path)
+    expected = u"View details in {}".format(path)
     assert actual == expected
-
-
-class TestRedStderrHandler(object):
-    def test_emit_when_error_adds_red_text(self, mocker, caplog):
-        handler = RedStderrHandler()
-        record = mocker.MagicMock(spec=logging.LogRecord)
-        record.msg = "TEST"
-        record.levelno = logging.ERROR
-
-        logger = mocker.patch("logging.StreamHandler.emit")
-        handler.emit(record)
-        actual = logger.call_args[0][0].msg
-        assert actual == "\x1b[91mERROR: TEST\x1b[0m"
-
-    def test_emit_when_info_does_not_alter(self, mocker, caplog):
-        handler = RedStderrHandler()
-        record = mocker.MagicMock(spec=logging.LogRecord)
-        record.msg = "TEST"
-        record.levelno = logging.INFO
-
-        logger = mocker.patch("logging.StreamHandler.emit")
-        handler.emit(record)
-        actual = logger.call_args[0][0].msg
-        assert actual == "TEST"
-
-
-class TestInPlaceStreamHandler(object):
-    def test_emit_when_runtime_recursion_error_occurs_raises_error(self, mocker):
-        handler = InPlaceStreamHandler()
-        record = mocker.MagicMock(spec=logging.LogRecord)
-
-        def side_effect(*args, **kwargs):
-            raise RuntimeError(
-                "maximum recursion depth exceeded while getting the str of an object"
-            )
-
-        handler.format = mocker.MagicMock()
-        handler.format = side_effect
-        with pytest.raises(RuntimeError):
-            handler.emit(record)
-
-    def test_emit_when_non_recursion_error_occurs_calls_handle_error(self, mocker):
-        handler = InPlaceStreamHandler()
-        record = mocker.MagicMock(spec=logging.LogRecord)
-        spy = mocker.spy(handler, "handleError")
-
-        def side_effect(*args, **kwargs):
-            raise Exception("Bad thing happened")
-
-        handler.format = mocker.MagicMock()
-        handler.format = side_effect
-        try:
-            handler.emit(record)
-        except Exception:
-            spy.assert_called_once_with(record)
 
 
 class TestCliLogger(object):
@@ -105,43 +47,15 @@ class TestCliLogger(object):
     _logger = CliLogger()
 
     def test_init_creates_user_error_logger_with_expected_handlers(self, mocker):
-        is_interactive = mocker.patch("code42cli.logger.is_interactive")
-        is_interactive.return_value = True
         logger = CliLogger()
-        handler_types = [type(h) for h in logger._user_error_logger.handlers]
-        assert RedStderrHandler in handler_types
+        handler_types = [type(h) for h in logger._logger.handlers]
         assert RotatingFileHandler in handler_types
-
-    def test_print_info_logs_expected_text_at_expected_level(self, caplog):
-        with caplog.at_level(logging.INFO):
-            self._logger.print_info("TEST")
-            assert "TEST" in caplog.text
-
-    def test_print_bold_logs_expected_text_at_expected_level(self, caplog):
-        with caplog.at_level(logging.INFO):
-            self._logger.print_bold("TEST")
-            assert "TEST" in caplog.text
-
-    def test_print_and_log_error_logs_expected_text_at_expected_level(self, caplog):
-        with caplog.at_level(logging.ERROR):
-            self._logger.print_and_log_error("TEST")
-            assert "TEST" in caplog.text
-
-    def test_print_and_log_info_logs_expected_text_at_expected_level(self, caplog):
-        with caplog.at_level(logging.INFO):
-            self._logger.print_and_log_info("TEST")
-            assert "TEST" in caplog.text
 
     def test_log_error_logs_expected_text_at_expected_level(self, caplog):
         with caplog.at_level(logging.ERROR):
             ex = Exception("TEST")
             self._logger.log_error(ex)
             assert str(ex) in caplog.text
-
-    def test_print_errors_occurred_message_logs_expected_text_at_expected_level(self, caplog):
-        with caplog.at_level(logging.ERROR):
-            self._logger.print_errors_occurred_message()
-            assert "View exceptions that occurred at" in caplog.text
 
     def test_log_verbose_error_logs_expected_text_at_expected_level(self, mocker, caplog):
         with caplog.at_level(logging.ERROR):

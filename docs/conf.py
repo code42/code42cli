@@ -21,9 +21,9 @@ import code42cli.__version__ as meta
 
 # -- Project information -----------------------------------------------------
 
-project = u"code42cli"
-copyright = u"2020, Code42 Software"
-author = u"Code42 Software"
+project = "code42cli"
+copyright = "2020, Code42 Software"
+author = "Code42 Software"
 
 # The short X.Y version
 version = "code42cli v{}".format(meta.__version__)
@@ -63,7 +63,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = [u"_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None

@@ -1,10 +1,10 @@
+import queue
 from threading import Thread, Lock
 from time import sleep
 
 from py42.exceptions import Py42HTTPError, Py42ForbiddenError
 
 from code42cli.errors import Code42CLIError
-from code42cli.compat import queue
 from code42cli.logger import get_main_cli_logger
 
 
@@ -35,7 +35,7 @@ class WorkerStats(object):
         return val if val >= 0 else 0
 
     def __str__(self):
-        return u"{0} succeeded, {1} failed out of {2}".format(
+        return "{0} succeeded, {1} failed out of {2}".format(
             self.total_successes, self._total_errors, self.total
         )
 
@@ -51,13 +51,15 @@ class WorkerStats(object):
 
 
 class Worker(object):
-    def __init__(self, thread_count, expected_total):
+    def __init__(self, thread_count, expected_total, bar=None):
         self._queue = queue.Queue()
         self._thread_count = thread_count
         self._stats = WorkerStats(expected_total)
         self._tasks = 0
         self.__started = False
         self.__start_lock = Lock()
+        self._logger = get_main_cli_logger()
+        self._bar = bar
 
     def do_async(self, func, *args, **kwargs):
         """Execute the given func asynchronously given *args and **kwargs.
@@ -72,7 +74,7 @@ class Worker(object):
                 if not self.__started:
                     self.__start()
                     self.__started = True
-        self._queue.put({u"func": func, u"args": args, u"kwargs": kwargs})
+        self._queue.put({"func": func, "args": args, "kwargs": kwargs})
         self._tasks += 1
 
     @property
@@ -84,36 +86,37 @@ class Worker(object):
     def wait(self):
         """Wait for the tasks in the queue to complete. This should usually be called before 
         program termination."""
-        while not self._stats.total_processed >= self._tasks:
+        while self._stats.total_processed < self._tasks:
             sleep(0.5)
 
     def _process_queue(self):
         while True:
             try:
                 task = self._queue.get()
-                func = task[u"func"]
-                args = task[u"args"]
-                kwargs = task[u"kwargs"]
+                func = task["func"]
+                args = task["args"]
+                kwargs = task["kwargs"]
                 func(*args, **kwargs)
             except Code42CLIError as err:
                 self._increment_total_errors()
-                logger = get_main_cli_logger()
-                logger.log_error(err)
+                self._logger.log_error(err)
             except Py42ForbiddenError as err:
                 self._increment_total_errors()
-                logger = get_main_cli_logger()
-                logger.log_verbose_error(http_request=err.response.request)
-                logger.log_permissions_error()
+                self._logger.log_verbose_error(http_request=err.response.request)
+                self._logger.log_error(
+                    "You do not have the necessary permissions to perform this task. "
+                    "Try using or creating a different profile."
+                )
             except Py42HTTPError as err:
                 self._increment_total_errors()
-                logger = get_main_cli_logger()
-                logger.log_verbose_error(http_request=err.response.request)
+                self._logger.log_verbose_error(http_request=err.response.request)
             except Exception:
                 self._increment_total_errors()
-                logger = get_main_cli_logger()
-                logger.log_verbose_error()
+                self._logger.log_verbose_error()
             finally:
                 self._stats.increment_total_processed()
+                if self._bar:
+                    self._bar.update(1)
                 self._queue.task_done()
 
     def __start(self):

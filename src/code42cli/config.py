@@ -1,33 +1,32 @@
 import os
-
 from configparser import ConfigParser
 
+from click import echo
+
 import code42cli.util as util
-from code42cli.compat import str
-from code42cli.logger import get_main_cli_logger
 
 
 class NoConfigProfileError(Exception):
     def __init__(self, profile_arg_name=None):
         message = (
-            u"Profile '{}' does not exist.".format(profile_arg_name)
+            "Profile '{}' does not exist.".format(profile_arg_name)
             if profile_arg_name
-            else u"Profile does not exist."
+            else "Profile does not exist."
         )
         super(NoConfigProfileError, self).__init__(message)
 
 
 class ConfigAccessor(object):
-    DEFAULT_VALUE = u"__DEFAULT__"
-    AUTHORITY_KEY = u"c42_authority_url"
-    USERNAME_KEY = u"c42_username"
-    IGNORE_SSL_ERRORS_KEY = u"ignore-ssl-errors"
-    DEFAULT_PROFILE = u"default_profile"
-    _INTERNAL_SECTION = u"Internal"
+    DEFAULT_VALUE = "__DEFAULT__"
+    AUTHORITY_KEY = "c42_authority_url"
+    USERNAME_KEY = "c42_username"
+    IGNORE_SSL_ERRORS_KEY = "ignore-ssl-errors"
+    DEFAULT_PROFILE = "default_profile"
+    _INTERNAL_SECTION = "Internal"
 
     def __init__(self, parser):
         self.parser = parser
-        file_name = u"config.cfg"
+        file_name = "config.cfg"
         self.path = os.path.join(util.get_user_project_path(), file_name)
         if not os.path.exists(self.path):
             self._create_internal_section()
@@ -84,9 +83,7 @@ class ConfigAccessor(object):
             raise NoConfigProfileError(new_default_name)
         self._internal[self.DEFAULT_PROFILE] = new_default_name
         self._save()
-        get_main_cli_logger().print_info(
-            u"{} has been set as the default profile.".format(new_default_name)
-        )
+        echo("{} has been set as the default profile.".format(new_default_name))
 
     def delete_profile(self, name):
         """Deletes a profile."""
@@ -138,7 +135,8 @@ class ConfigAccessor(object):
         self.parser[name][self.IGNORE_SSL_ERRORS_KEY] = str(False)
 
     def _save(self):
-        util.open_file(self.path, u"w+", lambda file: self.parser.write(file))
+        with open(self.path, "w+", encoding="utf-8") as file:
+            self.parser.write(file)
 
     def _try_complete_setup(self, profile):
         authority = profile.get(self.AUTHORITY_KEY)
@@ -151,7 +149,7 @@ class ConfigAccessor(object):
             return
 
         self._save()
-        get_main_cli_logger().print_info(u"Successfully saved profile '{}'.".format(profile.name))
+        echo("Successfully saved profile '{}'.".format(profile.name))
 
         default_profile = self._internal.get(self.DEFAULT_PROFILE)
         if default_profile is None or default_profile == self.DEFAULT_VALUE:

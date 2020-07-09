@@ -1,28 +1,21 @@
-from __future__ import print_function
-import sys
-import shutil
 import os
-import glob
-from os import path
+import shutil
+import sys
 from collections import OrderedDict
 from functools import wraps
+from os import path
 from signal import signal, getsignal, SIGINT
 
-from code42cli.compat import open, str
-from code42cli.errors import UserDoesNotExistError
+from click import echo, style
 
 _PADDING_SIZE = 3
 
 
-def get_input(prompt):
-    return input(prompt)
-
-
 def does_user_agree(prompt):
     """Prompts the user and checks if they said yes."""
-    ans = get_input(prompt)
+    ans = input(prompt)
     ans = ans.strip().lower()
-    return ans == u"y"
+    return ans == "y"
 
 
 def get_user_project_path(*subdirs):
@@ -37,36 +30,14 @@ def get_user_project_path(*subdirs):
     return result_path
 
 
-def open_file(file_path, mode, action):
-    """Wrapper for opening files, useful for testing purposes."""
-    with open(file_path, mode, encoding=u"utf-8") as f:
-        return action(f)
-
-
 def is_interactive():
     return sys.stdin.isatty()
 
 
-def flush_stds_out_err_without_printing_error():
-    """Workaround for bug in python3 that causes exception to be printed on broken pipe: 
-    https://bugs.python.org/issue11380
-    """
-    try:
-        sys.stdout.flush()
-    except BrokenPipeError:
-        try:
-            sys.stdout.close()
-        except BrokenPipeError:
-            try:
-                sys.stderr.flush()
-            except BrokenPipeError:
-                sys.stderr.close()
-
-
 def get_url_parts(url_str):
-    parts = url_str.split(u":")
+    parts = url_str.split(":")
     port = None
-    if len(parts) > 1 and parts[1] != u"":
+    if len(parts) > 1 and parts[1] != "":
         port = int(parts[1])
     return parts[0], port
 
@@ -104,8 +75,8 @@ def format_to_table(rows, column_size):
     """Prints result in left justified format in a tabular form."""
     for row in rows:
         for key in row.keys():
-            print(str(row[key]).ljust(column_size[key] + _PADDING_SIZE), end=u" ")
-        print(u"")
+            echo(str(row[key]).ljust(column_size[key] + _PADDING_SIZE), nl=False)
+        echo("")
 
 
 def format_string_list_to_columns(string_list, max_width=None):
@@ -116,16 +87,12 @@ def format_string_list_to_columns(string_list, max_width=None):
         max_width, _ = shutil.get_terminal_size()
     column_width = len(max(string_list, key=len)) + _PADDING_SIZE
     num_columns = int(max_width / column_width)
-    format_string = u"{{:<{0}}}".format(column_width) * num_columns
+    format_string = "{{:<{0}}}".format(column_width) * num_columns
     batches = [string_list[i : i + num_columns] for i in range(0, len(string_list), num_columns)]
-    padding = [u"" for _ in range(num_columns)]
+    padding = ["" for _ in range(num_columns)]
     for batch in batches:
-        print(format_string.format(*batch + padding))
-    print()
-
-
-def color_text_red(text):
-    return u"\033[91m{}\033[0m".format(text)
+        echo(format_string.format(*batch + padding))
+    echo()
 
 
 class warn_interrupt(object):
@@ -144,7 +111,7 @@ class warn_interrupt(object):
         self.warning = warning
         self.old_int_handler = None
         self.interrupted = False
-        self.exit_instructions = "Hit CTRL-C again to force quit."
+        self.exit_instructions = style("Hit CTRL-C again to force quit.", fg="red")
 
     def __enter__(self):
         self.old_int_handler = getsignal(SIGINT)
@@ -161,7 +128,7 @@ class warn_interrupt(object):
     def _handle_interrupts(self, sig, frame):
         if not self.interrupted:
             self.interrupted = True
-            print("\n{}\n{}".format(self.warning, self.exit_instructions), file=sys.stderr)
+            echo("\n{}\n{}".format(self.warning, self.exit_instructions), err=True)
         else:
             exit()
 
@@ -172,38 +139,3 @@ class warn_interrupt(object):
                 return func(*args, **kwargs)
 
         return inner
-
-
-def get_files_in_path(input_path):
-    try:
-        if not input_path:
-            return os.listdir(os.getcwd())
-
-        if "~" in input_path:
-            replace = os.path.expanduser("~")
-            input_path = input_path.replace("~", replace)
-
-        if os.path.isdir(input_path) and input_path[-1] != os.sep:
-            input_path += os.sep
-
-        files = glob.glob(input_path + "*")
-        return files
-    except Exception:
-        return []
-
-
-def get_user_id(sdk, username):
-    """Returns the user's UID (referred to by `user_id` in detection lists). Raises 
-    `UserDoesNotExistError` if the user doesn't exist in the Code42 server.
-    
-    Args:
-        sdk (py42.sdk.SDKClient): The py42 sdk.
-        username (str or unicode): The username of the user to get an ID for.
-    
-    Returns:
-         str: The user ID for the user with the given username.
-    """
-    users = sdk.users.get_by_username(username)[u"users"]
-    if not users:
-        raise UserDoesNotExistError(username)
-    return users[0][u"userUid"]

@@ -1,19 +1,12 @@
 import pytest
 
 from code42cli import PRODUCT_NAME
-from code42cli.util import does_user_agree, get_url_parts, find_format_width, get_user_id
-from code42cli.errors import UserDoesNotExistError
-
+from code42cli.util import does_user_agree, get_url_parts, find_format_width
 
 TEST_HEADER = {u"key1": u"Column 1", u"key2": u"Column 10", u"key3": u"Column 100"}
 
 
 _NAMESPACE = "{}.util".format(PRODUCT_NAME)
-
-
-@pytest.fixture
-def mock_input(mocker):
-    return mocker.patch("{}.get_input".format(_NAMESPACE))
 
 
 def test_get_url_parts_when_given_host_and_port_returns_expected_parts():
@@ -28,18 +21,18 @@ def test_get_url_parts_when_given_host_without_port_returns_expected_parts():
     assert parts == ("www.example.com", None)
 
 
-def test_does_user_agree_when_user_says_y_returns_true(mock_input):
-    mock_input.return_value = "y"
+def test_does_user_agree_when_user_says_y_returns_true(mocker):
+    mocker.patch("builtins.input", return_value="y")
     assert does_user_agree("Test Prompt")
 
 
-def test_does_user_agree_when_user_says_capital_y_returns_true(mock_input):
-    mock_input.return_value = "Y"
+def test_does_user_agree_when_user_says_capital_y_returns_true(mocker):
+    mocker.patch("builtins.input", return_value="Y")
     assert does_user_agree("Test Prompt")
 
 
-def test_does_user_agree_when_user_says_n_returns_false(mock_input):
-    mock_input.return_value = "n"
+def test_does_user_agree_when_user_says_n_returns_false(mocker):
+    mocker.patch("builtins.input", return_value="n")
     assert not does_user_agree("Test Prompt")
 
 
@@ -70,8 +63,3 @@ def test_find_format_width_filters_keys_not_present_in_header():
     result, _ = find_format_width(report, header_with_subset_keys)
     for item in result:
         assert u"key2" not in item.keys()
-
-
-def test_get_user_id_when_user_does_not_raise_error(sdk_without_user):
-    with pytest.raises(UserDoesNotExistError):
-        get_user_id(sdk_without_user, "risky employee")

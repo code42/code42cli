@@ -1,32 +1,41 @@
-from datetime import datetime, timedelta
 import re
+from datetime import datetime, timedelta
 
+import click
 from c42eventextractor.common import convert_datetime_to_timestamp
 
-from code42cli.errors import DateArgumentError
+TIMESTAMP_REGEX = re.compile(r"(\d{4}-\d{2}-\d{2})\s*(.*)?")
+MAGIC_TIME_REGEX = re.compile(r"(\d+)([dhm])$")
 
-TIMESTAMP_REGEX = re.compile(u"(\d{4}-\d{2}-\d{2})\s*(.*)?")
-MAGIC_TIME_REGEX = re.compile(u"(\d+)([dhm])$")
+_FORMAT_VALUE_ERROR_MESSAGE = (
+    "input must be a date/time string (e.g. 'yyyy-MM-dd', "
+    "'yy-MM-dd HH:MM', 'yy-MM-dd HH:MM:SS'), or a short value in days, "
+    "hours, or minutes (e.g. 30d, 24h, 15m)"
+)
 
 
 def verify_timestamp_order(min_timestamp, max_timestamp):
     if min_timestamp is None or max_timestamp is None:
         return
     if min_timestamp >= max_timestamp:
-        raise DateArgumentError(u"Begin date cannot be after end date")
+        raise click.BadParameter(
+            param_hint=["-b", "--begin"], message="cannot be after --end date."
+        )
 
 
 def parse_min_timestamp(begin_date_str, max_days_back=90):
+    if begin_date_str is None:
+        return
     dt = _parse_timestamp(begin_date_str, _round_datetime_to_day_start)
-
     boundary_date = _round_datetime_to_day_start(datetime.utcnow() - timedelta(days=max_days_back))
     if dt < boundary_date:
-        raise DateArgumentError(u"'Begin date' must be within {0} days.".format(max_days_back))
-
+        raise click.BadParameter(message="must be within {0} days.".format(max_days_back))
     return convert_datetime_to_timestamp(dt)
 
 
 def parse_max_timestamp(end_date_str):
+    if end_date_str is None:
+        return
     dt = _parse_timestamp(end_date_str, _round_datetime_to_day_end)
     return convert_datetime_to_timestamp(dt)
 
@@ -44,39 +53,39 @@ def _parse_timestamp(date_str, rounding_func):
     elif magic_match:
         num, period = magic_match.groups()
         dt = _get_dt_from_magic_time_pair(num, period)
-        if period == u"d":
+        if period == "d":
             dt = rounding_func(dt)
 
     else:
-        raise DateArgumentError()
+        raise click.BadParameter(message=_FORMAT_VALUE_ERROR_MESSAGE)
     return dt
 
 
 def _get_dt_from_date_time_pair(date, time):
-    date_format = u"%Y-%m-%d %H:%M:%S"
+    date_format = "%Y-%m-%d %H:%M:%S"
     if time:
-        time = u"{}:{}:{}".format(*time.split(":") + [u"00", u"00"])
+        time = "{}:{}:{}".format(*time.split(":") + ["00", "00"])
     else:
-        time = u"00:00:00"
-    date_string = u"{} {}".format(date, time)
+        time = "00:00:00"
+    date_string = "{} {}".format(date, time)
     try:
         dt = datetime.strptime(date_string, date_format)
     except ValueError:
-        raise DateArgumentError()
+        raise click.ClickException("Unable to parse date string.")
     else:
         return dt
 
 
 def _get_dt_from_magic_time_pair(num, period):
     num = int(num)
-    if period == u"d":
+    if period == "d":
         dt = datetime.utcnow() - timedelta(days=num)
-    elif period == u"h":
+    elif period == "h":
         dt = datetime.utcnow() - timedelta(hours=num)
-    elif period == u"m":
+    elif period == "m":
         dt = datetime.utcnow() - timedelta(minutes=num)
     else:
-        raise DateArgumentError(u"Couldn't parse magic time string: {}{}".format(num, period))
+        raise click.ClickException("Couldn't parse magic time string: {}{}".format(num, period))
     return dt
 
 

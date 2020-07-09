@@ -10,7 +10,7 @@ Use the `code42` command to interact with your Code42 environment.
 
 ## Requirements
 
-- Python 2.7.x or 3.5.0+
+- Python 3.5.0+
 - Code42 Server 6.8.x+
 
 ## Installation
@@ -18,7 +18,7 @@ Use the `code42` command to interact with your Code42 environment.
 Install the `code42` CLI using:
 
 ```bash
-$ python setup.py install
+$ python3 -m pip install code42cli
 ```
 
 ## Usage
@@ -144,7 +144,7 @@ This is only guaranteed if you did not change your query.
 To send events to a server using a specific profile, do:
 
 ```bash
-code42 security-data send-to --profile PROFILE_FOR_RECURRING_JOB syslog.company.com -b 2020-02-02 -f CEF -i
+code42 security-data --profile PROFILE_FOR_RECURRING_JOB send-to syslog.company.com -b 2020-02-02 -f CEF -i
 ```
 
 You can also use wildcard for queries, but note, if they are not in quotes, you may get unexpected behavior.
@@ -172,6 +172,8 @@ Each destination-type subcommand shares query parameters
 
 You cannot use other query parameters if you use `--advanced-query`.
 To learn more about acceptable arguments, add the `-h` flag to `code42` or any of the destination-type subcommands.
+
+
 
 ## Detection Lists
 
@@ -212,16 +214,22 @@ If that doesn't work, delete your credentials file located at ~/.code42cli or th
 
 ## Tab completion
 
-For `zsh`, add these commands to your `.zshrc` file:
+For Bash, add this to ~/.bashrc:
 
-```bash
-C42_COMPLETER=$(which code42cli_completer)
-autoload bashcompinit && bashcompinit
-complete -C '$C42_COMPLETER' code42
+```
+eval "$(_CODE42_COMPLETE=source_bash code42)"
 ```
 
-For bash, add just the first and last commands to your `.bash_profile`:
-```bash
-C42_COMPLETER=$(which code42cli_completer)
-complete -C '$C42_COMPLETER' code42
+For Zsh, add this to ~/.zshrc:
+
 ```
+eval "$(_CODE42_COMPLETE=source_zsh code42)"
+```
+
+For Fish, add this to ~/.config/fish/completions/code42.fish:
+
+```
+eval (env _CODE42_COMPLETE=source_fish code42)
+```
+
+Open a new shell to enable completion. Or run the eval command directly in your current shell to enable it temporarily.

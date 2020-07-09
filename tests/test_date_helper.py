@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import click
+
 from c42eventextractor.common import convert_datetime_to_timestamp
 
 from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp

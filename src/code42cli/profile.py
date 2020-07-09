@@ -1,8 +1,9 @@
-from code42cli.compat import str
+from click import style
+
 import code42cli.password as password
-from code42cli.cmds.search_shared.cursor_store import get_all_cursor_stores_for_profile
+from code42cli.cmds.search.cursor_store import get_all_cursor_stores_for_profile
 from code42cli.config import ConfigAccessor, config_accessor, NoConfigProfileError
-from code42cli.logger import get_main_cli_logger
+from code42cli.errors import Code42CLIError
 
 
 class Code42Profile(object):
@@ -28,7 +29,7 @@ class Code42Profile(object):
     @property
     def has_stored_password(self):
         stored_password = password.get_stored_password(self)
-        return stored_password is not None and stored_password != u""
+        return stored_password is not None and stored_password != ""
 
     def get_password(self):
         pwd = password.get_stored_password(self)
@@ -37,7 +38,7 @@ class Code42Profile(object):
         return pwd
 
     def __str__(self):
-        return u"{0}: Username={1}, Authority URL={2}".format(
+        return "{0}: Username={1}, Authority URL={2}".format(
             self.name, self.username, self.authority_url
         )
 
@@ -54,10 +55,7 @@ def get_profile(profile_name=None):
     try:
         return _get_profile(profile_name)
     except NoConfigProfileError as ex:
-        logger = get_main_cli_logger()
-        logger.print_and_log_error(str(ex))
-        _print_create_profile_help()
-        exit(1)
+        raise Code42CLIError(str(ex), help=CREATE_PROFILE_HELP)
 
 
 def default_profile_exists():
@@ -78,10 +76,11 @@ def validate_default_profile():
     if not default_profile_exists():
         existing_profiles = get_all_profiles()
         if not existing_profiles:
-            print_and_log_no_existing_profile()
+            raise Code42CLIError("No existing profile.", help=CREATE_PROFILE_HELP)
         else:
-            _print_set_default_profile_help(existing_profiles)
-        exit(1)
+            raise Code42CLIError(
+                "No default profile set.", help=_get_set_default_profile_help(existing_profiles)
+            )
 
 
 def profile_exists(profile_name=None):
@@ -99,9 +98,7 @@ def switch_default_profile(profile_name):
 
 def create_profile(name, server, username, ignore_ssl_errors):
     if profile_exists(name):
-        logger = get_main_cli_logger()
-        logger.print_and_log_error(u"A profile named '{}' already exists.".format(name))
-        exit(1)
+        raise Code42CLIError("A profile named '{}' already exists.".format(name))
 
     config_accessor.create_profile(name, server, username, ignore_ssl_errors)
 
@@ -114,7 +111,6 @@ def delete_profile(profile_name):
     for store in cursor_stores:
         store.clean()
     config_accessor.delete_profile(profile_name)
-    get_main_cli_logger().print_info(u"Profile '{}' has been deleted.".format(profile_name))
 
 
 def update_profile(name, server, username, ignore_ssl_errors):
@@ -136,27 +132,24 @@ def set_password(new_password, profile_name=None):
     password.set_password(profile, new_password)
 
 
-def print_and_log_no_existing_profile():
-    logger = get_main_cli_logger()
-    logger.print_and_log_error(u"No existing profile.")
-    _print_create_profile_help()
-
-
-def _print_create_profile_help():
-    logger = get_main_cli_logger()
-    logger.print_info(u"\nTo add a profile, use: ")
-    logger.print_bold(u"\tcode42 profile create <profile-name> <authority-URL> <username>\n")
-
-
-def _print_set_default_profile_help(existing_profiles):
-    logger = get_main_cli_logger()
-    logger.print_info(
-        u"\nNo default profile set.\n"
-        u"\nUse the --profile flag to specify which profile to use.\n"
-        u"\nTo set the default profile (used whenever --profile argument is not provided), use:"
+CREATE_PROFILE_HELP = "\nTo add a profile, use:\n{}".format(
+    style(
+        "\tcode42 profile create --name <profile-name> --server <authority-URL> --username <username>\n",
+        bold=True,
     )
-    logger.print_bold(u"\tcode42 profile use <profile-name>")
-    logger.print_info(u"\nExisting profiles:")
-    for profile in existing_profiles:
-        logger.print_info("\t{}".format(profile))
-    logger.print_info(u"")
+)
+
+
+def _get_set_default_profile_help(existing_profiles):
+    existing_profiles = [str(profile) for profile in existing_profiles]
+    help_msg = """
+Use the --profile flag to specify which profile to use.
+
+To set the default profile (used whenever --profile argument is not provided), use:
+    {}
+    
+Existing profiles:
+\t{}""".format(
+        style("code42 profile use <profile-name>", bold=True), "\n\t".join(existing_profiles)
+    )
+    return help_msg

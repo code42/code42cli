@@ -1,7 +1,10 @@
 import json as json_module
+import threading
 
 import pytest
+from requests import Request, Response, HTTPError
 
+from py42.exceptions import Py42BadRequestError
 from py42.sdk import SDKClient
 from code42cli import PRODUCT_NAME
 from code42cli.logger import CliLogger
@@ -21,7 +24,6 @@ def mock_42(mocker):
 @pytest.fixture
 def logger(mocker):
     mock = mocker.MagicMock()
-    mock.print_info = mocker.MagicMock()
     return mock
 
 
@@ -31,8 +33,72 @@ def cli_logger(mocker):
     return mock
 
 
+@pytest.fixture
+def stdout_logger(mocker):
+    mock = mocker.patch("{}.cmds.search.logger_factory.get_logger_for_stdout".format(PRODUCT_NAME))
+    mock.return_value = mocker.MagicMock()
+    return mock
+
+
+@pytest.fixture
+def server_logger(mocker):
+    mock = mocker.patch("{}.cmds.search.logger_factory.get_logger_for_server".format(PRODUCT_NAME))
+    mock.return_value = mocker.MagicMock()
+    return mock
+
+
+@pytest.fixture
+def file_logger(mocker):
+    mock = mocker.patch("{}.cmds.search.logger_factory.get_logger_for_file".format(PRODUCT_NAME))
+    mock.return_value = mocker.MagicMock()
+    return mock
+
+
+@pytest.fixture
+def cli_state_with_user(sdk_with_user, cli_state):
+    cli_state.sdk = sdk_with_user
+    return cli_state
+
+
+@pytest.fixture
+def cli_state_without_user(sdk_without_user, cli_state):
+    cli_state.sdk = sdk_without_user
+    return cli_state
+
+
+@pytest.fixture
+def bad_request_for_user_already_added(mocker):
+    resp = mocker.MagicMock(spec=Response)
+    resp.text = "User already on list"
+    return _create_bad_request_mock(resp)
+
+
+@pytest.fixture
+def generic_bad_request(mocker):
+    resp = mocker.MagicMock(spec=Response)
+    req = mocker.MagicMock(spec=Request)
+    req.body = '{"test":"body"}'
+    resp.request = req
+    resp.text = "TEST"
+    return _create_bad_request_mock(resp)
+
+
+def _create_bad_request_mock(resp):
+    base_err = HTTPError()
+    base_err.response = resp
+    return Py42BadRequestError(base_err)
+
+
 def get_filter_value_from_json(json, filter_index):
     return json_module.loads(str(json))["filters"][filter_index]["value"]
+
+
+def filter_term_is_in_call_args(extractor, term):
+    arg_filters = extractor.extract.call_args[0]
+    for f in arg_filters:
+        if term in str(f):
+            return True
+    return False
 
 
 def parse_date_from_filter_value(json, filter_index):
@@ -40,37 +106,12 @@ def parse_date_from_filter_value(json, filter_index):
     return convert_str_to_date(date_str)
 
 
-ACCEPTABLE_ARGS = [
-    "-t",
-    "SharedToDomain",
-    "ApplicationRead",
-    "CloudStorage",
-    "RemovableMedia",
-    "IsPublic",
-    "-f",
-    "JSON",
-    "-d",
-    "-b",
-    "600",
-    "-e",
-    "2020-02-02",
-    "--c42-username",
-    "test.testerson",
-    "--actor",
-    "test.testerson",
-    "--md5",
-    "098f6bcd4621d373cade4e832627b4f6",
-    "--sha256",
-    "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-    "--source",
-    "Gmail",
-    "--file-name",
-    "file.txt",
-    "--file-path",
-    "/path/to/file.txt",
-    "--process-owner",
-    "test.testerson",
-    "--tab-url",
-    "https://example.com",
-    "--include-non-exposure",
-]
+def thread_safe_side_effect():
+    def f(*args):
+        with threading.Lock():
+            f.call_count += 1
+            f.call_args_list.append(args)
+
+    f.call_count = 0
+    f.call_args_list = []
+    return f
