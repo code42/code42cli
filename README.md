@@ -159,6 +159,9 @@ $Writer = New-Object System.IO.StreamWriter($Connection.GetStream())
 code42 security-data search -b 10d | foreach { $Writer.WriteLine($_); $Writer.Flush() }
 ```
 
+Note: For more complex requirements when sending to an external server (SSL, special formatting, etc.), use a dedicated
+syslog forwarding tool like `rsyslog` or connection tunneling tool like `stunnel`.
+
 If you want to periodically run the same query, but only retrieve the new events each time, use the 
 `-c/--use-checkpoint` option with a name for your checkpoint. This stores the timestamp of the query's last event to a 
 file on disk and uses that as the "begin date" timestamp filter on the next query that uses the same checkpoint name. 
