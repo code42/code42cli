@@ -25,14 +25,14 @@ scheduled job or run ad-hoc queries. Learn more about [searching](../commands/se
 ## Run a query as a scheduled job
 
 Use your favorite scheduling tool, such as cron or Windows Task Scheduler, to run a query on a regular basis. Specify 
-the profile to use by including `--profile`. For example:  
+the profile to use by including `--profile`. An example using `netcat` to forward results to an external syslog server:  
 
 ```bash
-code42 security-data send-to "https://syslog.example.com:514" -p TCP --profile profile1 -i
+code42 security-data search --profile profile1 -c syslog_sender | nc syslog.example.com 514 
 ```
 
 Note that it is best practice to use a separate profile when executing a scheduled task. This way, it is harder to 
-accidentally mess up your stored checkpoints by running `--use-checkpoint` adhoc queries.
+accidentally mess up your stored checkpoints by running `--use-checkpoint` in adhoc queries.
 
 This query will send to the syslog server only the new security event data since the previous request.
 
@@ -43,18 +43,18 @@ Examples of ad-hoc queries you can run are as follows.
 Print security data since March 5 for a user in raw JSON format:
 
 ```bash
-code42 security-data print -f RAW-JSON -b 2020-03-05 --c42-username 'sean.cassidy@example.com'
+code42 security-data search -f RAW-JSON -b 2020-03-05 --c42-username 'sean.cassidy@example.com'
 ```
 
 Print security events since March 5 where a file was synced to a cloud service: 
 ```bash
-code42 security-data print -t  CloudStorage -b 2020-03-05 
+code42 security-data search -t  CloudStorage -b 2020-03-05 
 ```
 
 Write to a text file security events in raw JSON format where a file was read by browser or other app for a user since 
 March 5: 
 ```bash
-code42 security-data write-to /Users/sangita.maskey/Downloads/c42cli_output.txt -f RAW-JSON -b 2020-03-05 -t ApplicationRead --c42-username 'sean.cassidy@example.com'
+code42 security-data search -f RAW-JSON -b 2020-03-05 -t ApplicationRead --c42-username 'sean.cassidy@example.com' > /Users/sangita.maskey/Downloads/c42cli_output.txt
 ```
 
 Example output for a single exposure event (in default JSON format): 
