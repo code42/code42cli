@@ -21,6 +21,9 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - The `print` command on the `security-data` and `alerts` command groups has been replaced with the `search` command. 
     This was a name change only, all other functionality remains the same.
+   
+- A profile created with the `--disable-ssl-errors` flag will now correctly not verify SSL certs when making requests. A warning message is printed 
+    each time the CLI is run with a profile configured this way, as it is not recommended.
 
 ### Added
 
