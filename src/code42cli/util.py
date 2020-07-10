@@ -1,6 +1,5 @@
 import os
 import shutil
-import sys
 from collections import OrderedDict
 from functools import wraps
 from os import path
@@ -28,18 +27,6 @@ def get_user_project_path(*subdirs):
     if not path.exists(result_path):
         os.makedirs(result_path)
     return result_path
-
-
-def is_interactive():
-    return sys.stdin.isatty()
-
-
-def get_url_parts(url_str):
-    parts = url_str.split(":")
-    port = None
-    if len(parts) > 1 and parts[1] != "":
-        port = int(parts[1])
-    return parts[0], port
 
 
 def find_format_width(record, header):

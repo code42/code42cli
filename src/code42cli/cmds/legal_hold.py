@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from functools import lru_cache
+import json
 from pprint import pformat
 
 import click
@@ -181,7 +182,7 @@ def _remove_user_from_legal_hold(sdk, matter_id, username):
 def _get_and_print_preservation_policy(sdk, policy_uid):
     preservation_policy = sdk.legalhold.get_policy_by_uid(policy_uid)
     echo("\nPreservation Policy:\n")
-    echo(pformat(preservation_policy._data_root))
+    echo(pformat(json.loads(preservation_policy.text)))
 
 
 def _get_legal_hold_membership_id_for_user_and_matter(sdk, username, matter_id):

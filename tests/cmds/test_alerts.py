@@ -70,6 +70,7 @@ def alert_cursor_with_checkpoint(mocker):
     mock_cursor = mocker.MagicMock(spec=AlertCursorStore)
     mock_cursor.get.return_value = CURSOR_TIMESTAMP
     mock.return_value = mock_cursor
+    mock.expected_timestamp = "2020-01-20T06:00:00+00:00"
     return mock
 
 
@@ -86,6 +87,7 @@ def alert_cursor_without_checkpoint(mocker):
 def begin_option(mocker):
     mock = mocker.patch("{}.cmds.search.options.parse_min_timestamp".format(PRODUCT_NAME))
     mock.return_value = BEGIN_TIMESTAMP
+    mock.expected_timestamp = "2020-01-01T06:00:00.000Z"
     return mock
 
 
@@ -97,53 +99,31 @@ def alert_extract_func(mocker):
 ADVANCED_QUERY_JSON = '{"some": "complex json"}'
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_is_advanced_query_uses_only_the_extract_advanced_method(
-    cmd, cli_state, alert_extractor
+def test_search_with_advanced_query_uses_only_the_extract_advanced_method(
+    cli_state, alert_extractor, runner
 ):
-    runner = CliRunner()
+
     result = runner.invoke(
-        cli, ["alerts", *cmd, "--advanced-query", ADVANCED_QUERY_JSON], obj=cli_state
+        cli, ["alerts", "search", "--advanced-query", ADVANCED_QUERY_JSON], obj=cli_state
     )
     alert_extractor.extract_advanced.assert_called_once_with('{"some": "complex json"}')
     assert alert_extractor.extract.call_count == 0
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_not_advanced_query_uses_only_the_extract_method(cmd, cli_state, alert_extractor):
-    runner = CliRunner()
-    result = runner.invoke(cli, ["alerts", *cmd, "--begin", "1d"], obj=cli_state)
+def test_search_without_advanced_query_uses_only_the_extract_method(
+    cli_state, alert_extractor, runner
+):
+
+    result = runner.invoke(cli, ["alerts", "search", "--begin", "1d"], obj=cli_state)
     assert alert_extractor.extract.call_count == 1
     assert alert_extractor.extract_advanced.call_count == 0
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_is_advanced_query_and_has_begin_date_exits(cmd, cli_state):
-    runner = CliRunner()
-    result = runner.invoke(
-        cli,
-        ["alerts", *cmd, "--advanced-query", ADVANCED_QUERY_JSON, "--begin", "1d"],
-        obj=cli_state,
-    )
-    assert result.exit_code == 2
-    assert "--begin can't be used with: --advanced-query" in result.output
-
-
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_advanced_query_and_has_begin_date_exits(cmd, cli_state):
-    runner = CliRunner()
-    result = runner.invoke(
-        cli,
-        ["alerts", *cmd, "--advanced-query", ADVANCED_QUERY_JSON, "--end", "1d"],
-        obj=cli_state,
-    )
-    assert result.exit_code == 2
-    assert "--end can't be used with: --advanced-query" in result.output
-
-
 @pytest.mark.parametrize(
     "arg",
     [
+        ("--begin", "1d"),
+        ("--end", "1d"),
         ("--severity", "HIGH"),
         ("--actor", "test"),
         ("--actor-contains", "test"),
@@ -160,82 +140,23 @@ def test_when_advanced_query_and_has_begin_date_exits(cmd, cli_state):
         ("--use-checkpoint", "test"),
     ],
 )
-def test_print_when_advanced_query_and_other_incompatible_argument_passed(arg, cli_state):
-    runner = CliRunner()
+def test_search_with_advanced_query_and_incompatible_argument_errors(arg, cli_state, runner):
+
     result = runner.invoke(
-        cli, ["alerts", "print", "--advanced-query", ADVANCED_QUERY_JSON, *arg], obj=cli_state,
+        cli, ["alerts", "search", "--advanced-query", ADVANCED_QUERY_JSON, *arg], obj=cli_state,
     )
     assert result.exit_code == 2
     assert "{} can't be used with: --advanced-query".format(arg[0]) in result.output
 
 
-@pytest.mark.parametrize(
-    "arg",
-    [
-        ("--severity", "HIGH"),
-        ("--actor", "test"),
-        ("--actor-contains", "test"),
-        ("--exclude-actor", "test"),
-        ("--exclude-actor-contains", "test"),
-        ("--rule-name", "test"),
-        ("--exclude-rule-name", "test"),
-        ("--rule-id", "test"),
-        ("--exclude-rule-id", "test"),
-        ("--rule-type", "FedEndpointExfiltration"),
-        ("--exclude-rule-type", "FedEndpointExfiltration"),
-        ("--description", "test"),
-        ("--state", "OPEN"),
-        ("--use-checkpoint", "test"),
-    ],
-)
-def test_write_to_when_advanced_query_and_other_incompatible_argument_passed(arg, cli_state):
-    runner = CliRunner()
-    result = runner.invoke(
-        cli,
-        ["alerts", "write-to", "test_file", "--advanced-query", ADVANCED_QUERY_JSON, *arg],
-        obj=cli_state,
-    )
-    assert result.exit_code == 2
-    assert "{} can't be used with: --advanced-query".format(arg[0]) in result.output
-
-
-@pytest.mark.parametrize(
-    "arg",
-    [
-        ("--severity", "HIGH"),
-        ("--actor", "test"),
-        ("--actor-contains", "test"),
-        ("--exclude-actor", "test"),
-        ("--exclude-actor-contains", "test"),
-        ("--rule-name", "test"),
-        ("--exclude-rule-name", "test"),
-        ("--rule-id", "test"),
-        ("--exclude-rule-id", "test"),
-        ("--rule-type", "FedEndpointExfiltration"),
-        ("--exclude-rule-type", "FedEndpointExfiltration"),
-        ("--description", "test"),
-        ("--state", "OPEN"),
-        ("--use-checkpoint", "test"),
-    ],
-)
-def test_send_to_when_advanced_query_and_other_incompatible_argument_passed(arg, cli_state):
-    runner = CliRunner()
-    result = runner.invoke(
-        cli,
-        ["alerts", "send-to", "localhost", "--advanced-query", ADVANCED_QUERY_JSON, *arg],
-        obj=cli_state,
-    )
-    assert result.exit_code == 2
-    assert "{} can't be used with: --advanced-query".format(arg[0]) in result.output
-
-
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_given_begin_and_end_dates_uses_expected_query(cmd, cli_state, alert_extractor):
+def test_search_when_given_begin_and_end_dates_uses_expected_query(
+    cli_state, alert_extractor, runner
+):
     begin_date = get_test_date_str(days_ago=89)
     end_date = get_test_date_str(days_ago=1)
-    runner = CliRunner()
+
     result = runner.invoke(
-        cli, ["alerts", "print", "--begin", begin_date, "--end", end_date], obj=cli_state
+        cli, ["alerts", "search", "--begin", begin_date, "--end", end_date], obj=cli_state
     )
     filters = alert_extractor.extract.call_args[0][0]
     actual_begin = get_filter_value_from_json(filters, filter_index=0)
@@ -246,19 +167,17 @@ def test_when_given_begin_and_end_dates_uses_expected_query(cmd, cli_state, aler
     assert actual_end == expected_end
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_given_begin_and_end_date_and_time_uses_expected_query(
-    cmd, cli_state, alert_extractor
+def test_search_when_given_begin_and_end_date_and_times_uses_expected_query(
+    cli_state, alert_extractor, runner
 ):
     begin_date = get_test_date_str(days_ago=89)
     end_date = get_test_date_str(days_ago=1)
     time = "15:33:02"
-    runner = CliRunner()
     result = runner.invoke(
         cli,
         [
             "alerts",
-            "print",
+            "search",
             "--begin",
             "{} {}".format(begin_date, time),
             "--end",
@@ -275,30 +194,28 @@ def test_when_given_begin_and_end_date_and_time_uses_expected_query(
     assert actual_end == expected_end
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_given_begin_date_and_time_without_seconds_uses_expected_query(
-    cmd, cli_state, alert_extractor
+def test_search_when_given_begin_date_and_time_without_seconds_uses_expected_query(
+    cli_state, alert_extractor, runner
 ):
     date = get_test_date_str(days_ago=89)
     time = "15:33"
-    runner = CliRunner()
     result = runner.invoke(
-        cli, ["alerts", "print", "--begin", "{} {}".format(date, time)], obj=cli_state
+        cli, ["alerts", "search", "--begin", "{} {}".format(date, time)], obj=cli_state
     )
     actual = get_filter_value_from_json(alert_extractor.extract.call_args[0][0], filter_index=0)
     expected = "{0}T{1}:00.000Z".format(date, time)
     assert actual == expected
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_given_end_date_and_time_uses_expected_query(cmd, cli_state, alert_extractor):
+def test_search_when_given_end_date_and_time_uses_expected_query(
+    cli_state, alert_extractor, runner
+):
     begin_date = get_test_date_str(days_ago=10)
     end_date = get_test_date_str(days_ago=1)
     time = "15:33"
-    runner = CliRunner()
     result = runner.invoke(
         cli,
-        ["alerts", "print", "--begin", begin_date, "--end", "{} {}".format(end_date, time)],
+        ["alerts", "search", "--begin", begin_date, "--end", "{} {}".format(end_date, time)],
         obj=cli_state,
     )
     actual = get_filter_value_from_json(alert_extractor.extract.call_args[0][0], filter_index=1)
@@ -306,50 +223,39 @@ def test_when_given_end_date_and_time_uses_expected_query(cmd, cli_state, alert_
     assert actual == expected
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_given_begin_date_more_than_ninety_days_back_in_ad_hoc_mode_causes_exit(
-    cmd, cli_state,
-):
+def test_search_when_given_begin_date_more_than_ninety_days_back_errors(cli_state, runner):
     begin_date = get_test_date_str(days_ago=91) + " 12:51:00"
-    runner = CliRunner()
-    result = runner.invoke(cli, ["alerts", *cmd, "--begin", begin_date], obj=cli_state)
+    result = runner.invoke(cli, ["alerts", "search", "--begin", begin_date], obj=cli_state)
     assert result.exit_code == 2
     assert "must be within 90 days" in result.output
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_given_begin_date_past_90_days_and_use_checkpoint_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
-    cmd, cli_state, alert_cursor_with_checkpoint, mocker, alert_extractor
+def test_search_when_given_begin_date_past_90_days_and_use_checkpoint_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
+    cli_state, alert_cursor_with_checkpoint, mocker, alert_extractor, runner
 ):
     begin_date = get_test_date_str(days_ago=91) + " 12:51:00"
-    runner = CliRunner()
     result = runner.invoke(
-        cli, ["alerts", *cmd, "--begin", begin_date, "--use-checkpoint", "test"], obj=cli_state
+        cli, ["alerts", "search", "--begin", begin_date, "--use-checkpoint", "test"], obj=cli_state
     )
     assert not filter_term_is_in_call_args(alert_extractor, DateObserved._term)
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_given_begin_date_and_not_use_checkpoint_and_cursor_exists_uses_begin_date(
-    cmd, cli_state, alert_extractor
+def test_search_when_given_begin_date_and_not_use_checkpoint_and_cursor_exists_uses_begin_date(
+    cli_state, alert_extractor, runner
 ):
     begin_date = get_test_date_str(days_ago=1)
-    runner = CliRunner()
-    result = runner.invoke(cli, ["alerts", *cmd, "--begin", begin_date], obj=cli_state)
-
+    result = runner.invoke(cli, ["alerts", "search", "--begin", begin_date], obj=cli_state)
     actual_ts = get_filter_value_from_json(alert_extractor.extract.call_args[0][0], filter_index=0)
     expected_ts = "{0}T00:00:00.000Z".format(begin_date)
     assert actual_ts == expected_ts
     assert filter_term_is_in_call_args(alert_extractor, DateObserved._term)
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_end_date_is_before_begin_date_causes_exit(cmd, cli_state):
+def test_search_when_end_date_is_before_begin_date_causes_exit(cli_state, runner):
     begin_date = get_test_date_str(days_ago=1)
     end_date = get_test_date_str(days_ago=3)
-    runner = CliRunner()
     result = runner.invoke(
-        cli, ["alerts", *cmd, "--begin", begin_date, "--end", end_date], obj=cli_state
+        cli, ["alerts", "search", "--begin", begin_date, "--end", end_date], obj=cli_state
     )
     assert result.exit_code == 2
     assert "'--begin': cannot be after --end date" in result.output
@@ -369,66 +275,26 @@ def test_get_alert_details_sorts_results_by_date(sdk):
     assert results == SORTED_ALERT_DETAILS
 
 
-def test_print_with_only_begin_calls_extract_with_expected_args(
-    mocker, cli_state, alert_extract_func, stdout_logger, begin_option
+def test_search_with_only_begin_calls_extract_with_expected_filters(
+    mocker, cli_state, alert_extractor, stdout_logger, begin_option, runner
 ):
-    runner = CliRunner()
-    result = runner.invoke(cli, ["alerts", "print", "--begin", "1h"], obj=cli_state)
-    alert_extract_func.assert_called_with(
-        sdk=cli_state.sdk,
-        cursor=None,
-        checkpoint_name=None,
-        filter_list=cli_state.search_filters,
-        begin=BEGIN_TIMESTAMP,
-        end=None,
-        advanced_query=None,
-        output_logger=stdout_logger.return_value,
+
+    result = runner.invoke(
+        cli, ["alerts", "search", "--begin", "<overridden by fixture>"], obj=cli_state
     )
     assert result.exit_code == 0
-
-
-def test_send_to_with_only_begin_calls_extract_with_expected_args(
-    mocker, cli_state, alert_extract_func, server_logger, begin_option
-):
-    runner = CliRunner()
-    result = runner.invoke(cli, ["alerts", "send-to", "localhost", "--begin", "1h"], obj=cli_state)
-    alert_extract_func.assert_called_with(
-        sdk=cli_state.sdk,
-        cursor=None,
-        checkpoint_name=None,
-        filter_list=cli_state.search_filters,
-        begin=BEGIN_TIMESTAMP,
-        end=None,
-        advanced_query=None,
-        output_logger=server_logger.return_value,
+    assert str(
+        alert_extractor.extract.call_args[0][0]
+    ) == '{{"filterClause":"AND", "filters":[{{"operator":"ON_OR_AFTER", "term":"createdAt", ' '"value":"{}"}}]}}'.format(
+        begin_option.expected_timestamp
     )
-    assert result.exit_code == 0
 
 
-def test_write_to_with_only_begin_calls_extract_with_expected_args(
-    mocker, cli_state, alert_extract_func, file_logger, begin_option
+def test_search_with_use_checkpoint_and_without_begin_and_without_stored_checkpoint_causes_expected_error(
+    cli_state, alert_cursor_without_checkpoint, runner
 ):
-    runner = CliRunner()
-    result = runner.invoke(cli, ["alerts", "write-to", "test_file", "--begin", "1h"], obj=cli_state)
-    alert_extract_func.assert_called_with(
-        sdk=cli_state.sdk,
-        cursor=None,
-        checkpoint_name=None,
-        filter_list=cli_state.search_filters,
-        begin=BEGIN_TIMESTAMP,
-        end=None,
-        advanced_query=None,
-        output_logger=file_logger.return_value,
-    )
-    assert result.exit_code == 0
 
-
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_with_use_checkpoint_and_without_begin_and_without_checkpoint_causes_expected_error(
-    cmd, cli_state, alert_cursor_without_checkpoint
-):
-    runner = CliRunner()
-    result = runner.invoke(cli, ["alerts", *cmd, "--use-checkpoint", "test"], obj=cli_state)
+    result = runner.invoke(cli, ["alerts", "search", "--use-checkpoint", "test"], obj=cli_state)
     assert result.exit_code == 2
     assert (
         "--begin date is required for --use-checkpoint when no checkpoint exists yet."
@@ -436,174 +302,149 @@ def test_with_use_checkpoint_and_without_begin_and_without_checkpoint_causes_exp
     )
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
 def test_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_extract_with_begin_date(
-    cmd,
     cli_state,
-    alert_extract_func,
+    alert_extractor,
     begin_option,
     alert_cursor_without_checkpoint,
     stdout_logger,
-    server_logger,
-    file_logger,
     mocker,
+    runner,
 ):
-    runner = CliRunner()
+
     result = runner.invoke(
-        cli, ["alerts", *cmd, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state
+        cli,
+        ["alerts", "search", "--use-checkpoint", "test", "--begin", "<overridden by fixture>"],
+        obj=cli_state,
     )
     assert result.exit_code == 0
-    alert_extract_func.assert_called_with(
-        sdk=cli_state.sdk,
-        cursor=alert_cursor_without_checkpoint.return_value,
-        checkpoint_name="test",
-        filter_list=cli_state.search_filters,
-        begin=BEGIN_TIMESTAMP,
-        end=None,
-        advanced_query=None,
-        output_logger=mocker.ANY,
-    )
+    assert len(alert_extractor.extract.call_args[0]) == 1
+    assert begin_option.expected_timestamp in str(alert_extractor.extract.call_args[0][0])
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_with_use_checkpoint_and_with_begin_and_with_checkpoint_calls_extract_with_begin_date_none(
-    cmd,
-    cli_state,
-    alert_extract_func,
-    alert_cursor_with_checkpoint,
-    stdout_logger,
-    server_logger,
-    file_logger,
-    mocker,
+def test_search_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_calls_extract_with_checkpoint_and_ignores_begin_arg(
+    cli_state, alert_extractor, alert_cursor_with_checkpoint, runner
 ):
-    runner = CliRunner()
+
     result = runner.invoke(
-        cli, ["alerts", *cmd, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state
+        cli, ["alerts", "search", "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state
     )
     assert result.exit_code == 0
-    alert_extract_func.assert_called_with(
-        sdk=cli_state.sdk,
-        cursor=alert_cursor_with_checkpoint.return_value,
-        checkpoint_name="test",
-        filter_list=cli_state.search_filters,
-        begin=None,
-        end=None,
-        advanced_query=None,
-        output_logger=mocker.ANY,
+    alert_extractor.extract.assert_called_with()
+    assert (
+        "checkpoint of {} exists".format(alert_cursor_with_checkpoint.expected_timestamp)
+        in result.output
     )
-    assert "checkpoint of 2020-01-20T06:00:00+00:00 exists" in result.output
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_given_actor_is_uses_username_filter(cmd, cli_state, alert_extractor):
+def test_search_when_given_actor_is_uses_username_filter(cli_state, alert_extractor, runner):
     actor_name = "test.testerson"
-    runner = CliRunner()
+
     result = runner.invoke(
-        cli, ["alerts", *cmd, "--begin", "1h", "--actor", actor_name], obj=cli_state
+        cli, ["alerts", "search", "--begin", "1h", "--actor", actor_name], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(Actor.is_in([actor_name])) in filter_strings
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_given_exclude_actor_uses_actor_filter(cmd, cli_state, alert_extractor):
+def test_search_when_given_exclude_actor_uses_actor_filter(cli_state, alert_extractor, runner):
     actor_name = "test.testerson"
-    runner = CliRunner()
+
     result = runner.invoke(
-        cli, ["alerts", *cmd, "--begin", "1h", "--exclude-actor", actor_name], obj=cli_state
+        cli, ["alerts", "search", "--begin", "1h", "--exclude-actor", actor_name], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(Actor.not_in([actor_name])) in filter_strings
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_given_rule_name_uses_rule_name_filter(cmd, cli_state, alert_extractor):
+def test_search_when_given_rule_name_uses_rule_name_filter(cli_state, alert_extractor, runner):
     rule_name = "departing employee"
-    runner = CliRunner()
+
     result = runner.invoke(
-        cli, ["alerts", *cmd, "--begin", "1h", "--rule-name", rule_name], obj=cli_state
+        cli, ["alerts", "search", "--begin", "1h", "--rule-name", rule_name], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(RuleName.is_in([rule_name])) in filter_strings
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_given_exclude_rule_name_uses_rule_name_not_filter(cmd, cli_state, alert_extractor):
+def test_search_when_given_exclude_rule_name_uses_rule_name_not_filter(
+    cli_state, alert_extractor, runner
+):
     rule_name = "departing employee"
-    runner = CliRunner()
+
     result = runner.invoke(
-        cli, ["alerts", *cmd, "--begin", "1h", "--exclude-rule-name", rule_name], obj=cli_state
+        cli, ["alerts", "search", "--begin", "1h", "--exclude-rule-name", rule_name], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(RuleName.not_in([rule_name])) in filter_strings
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_given_rule_type_uses_rule_name_filter(cmd, cli_state, alert_extractor):
+def test_search_when_given_rule_type_uses_rule_name_filter(cli_state, alert_extractor, runner):
     rule_type = "FedEndpointExfiltration"
-    runner = CliRunner()
+
     result = runner.invoke(
-        cli, ["alerts", *cmd, "--begin", "1h", "--rule-type", rule_type], obj=cli_state
+        cli, ["alerts", "search", "--begin", "1h", "--rule-type", rule_type], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(RuleType.is_in([rule_type])) in filter_strings
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_given_exclude_rule_type_uses_rule_name_not_filter(cmd, cli_state, alert_extractor):
+def test_search_when_given_exclude_rule_type_uses_rule_name_not_filter(
+    cli_state, alert_extractor, runner
+):
     rule_type = "FedEndpointExfiltration"
-    runner = CliRunner()
+
     result = runner.invoke(
-        cli, ["alerts", *cmd, "--begin", "1h", "--exclude-rule-type", rule_type], obj=cli_state
+        cli, ["alerts", "search", "--begin", "1h", "--exclude-rule-type", rule_type], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(RuleType.not_in([rule_type])) in filter_strings
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_given_rule_id_uses_rule_name_filter(cmd, cli_state, alert_extractor):
+def test_search_when_given_rule_id_uses_rule_name_filter(cli_state, alert_extractor, runner):
     rule_id = "departing employee"
-    runner = CliRunner()
+
     result = runner.invoke(
-        cli, ["alerts", *cmd, "--begin", "1h", "--rule-id", rule_id], obj=cli_state
+        cli, ["alerts", "search", "--begin", "1h", "--rule-id", rule_id], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(RuleId.is_in([rule_id])) in filter_strings
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_given_exclude_rule_id_uses_rule_name_not_filter(cmd, cli_state, alert_extractor):
+def test_search_when_given_exclude_rule_id_uses_rule_name_not_filter(
+    cli_state, alert_extractor, runner
+):
     rule_id = "departing employee"
-    runner = CliRunner()
+
     result = runner.invoke(
-        cli, ["alerts", *cmd, "--begin", "1h", "--exclude-rule-id", rule_id], obj=cli_state
+        cli, ["alerts", "search", "--begin", "1h", "--exclude-rule-id", rule_id], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(RuleId.not_in([rule_id])) in filter_strings
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_given_description_uses_description_filter(cmd, cli_state, alert_extractor):
+def test_search_when_given_description_uses_description_filter(cli_state, alert_extractor, runner):
     description = "test description"
-    runner = CliRunner()
+
     result = runner.invoke(
-        cli, ["alerts", *cmd, "--begin", "1h", "--description", description], obj=cli_state
+        cli, ["alerts", "search", "--begin", "1h", "--description", description], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(Description.contains(description)) in filter_strings
 
 
-@pytest.mark.parametrize("cmd", [["print"], ["send-to", "localhost"], ["write-to", "test_file"]])
-def test_when_given_multiple_search_args_uses_expected_filters(cmd, cli_state, alert_extractor):
+def test_search_when_given_multiple_search_args_uses_expected_filters(
+    cli_state, alert_extractor, runner
+):
     actor = "test.testerson@example.com"
     exclude_actor = "flag.flagerson@code42.com"
     rule_name = "departing employee"
-    runner = CliRunner()
+
     result = runner.invoke(
         cli,
         [
             "alerts",
-            *cmd,
+            "search",
             "--begin",
             "1h",
             "--actor",

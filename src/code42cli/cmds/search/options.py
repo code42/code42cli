@@ -152,22 +152,3 @@ def create_search_options(search_term):
         return f
 
     return search_options
-
-
-output_file_arg = click.argument(
-    "output_file", type=click.Path(dir_okay=False, resolve_path=True, writable=True)
-)
-
-
-def server_options(f):
-    hostname_arg = click.argument("hostname")
-    protocol_option = click.option(
-        "-p",
-        "--protocol",
-        type=click.Choice(ServerProtocol()),
-        default=ServerProtocol.UDP,
-        help="Protocol used to send logs to server.",
-    )
-    f = hostname_arg(f)
-    f = protocol_option(f)
-    return f

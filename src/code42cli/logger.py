@@ -8,7 +8,7 @@ from threading import Lock
 from code42cli.util import get_user_project_path
 
 # prevent loggers from printing stacks to stderr if a pipe is broken
-logging.raiseExceptions = True
+logging.raiseExceptions = False
 
 logger_deps_lock = Lock()
 ERROR_LOG_FILE_NAME = "code42_errors.log"

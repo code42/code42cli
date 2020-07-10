@@ -21,8 +21,6 @@ from code42cli.cmds.search.options import (
     AdvancedQueryAndSavedSearchIncompatible,
     is_in_filter,
     exists_filter,
-    output_file_arg,
-    server_options,
 )
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import sdk_options, incompatible_with, OrderedGroup
@@ -170,82 +168,26 @@ def clear_checkpoint(state, checkpoint_name):
     _get_file_event_cursor_store(state.profile.name).delete(checkpoint_name)
 
 
-@security_data.command("print")
+@security_data.command()
 @file_event_options
 @search_options
 @sdk_options
-def _print(state, format, begin, end, advanced_query, use_checkpoint, saved_search, **kwargs):
-    """Print file events to stdout."""
+def search(state, format, begin, end, advanced_query, use_checkpoint, saved_search, **kwargs):
+    """Search for file events."""
     output_logger = logger_factory.get_logger_for_stdout(format)
     cursor = _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
-    _extract(
-        sdk=state.sdk,
-        cursor=cursor,
-        checkpoint_name=use_checkpoint,
-        filter_list=state.search_filters,
-        begin=begin,
-        end=end,
-        advanced_query=advanced_query,
-        saved_search=saved_search,
-        output_logger=output_logger,
-    )
-
-
-@security_data.command()
-@output_file_arg
-@file_event_options
-@search_options
-@sdk_options
-def write_to(
-    state, format, output_file, begin, end, advanced_query, use_checkpoint, saved_search, **kwargs
-):
-    """Write file events to the file with the given name."""
-    output_logger = logger_factory.get_logger_for_file(output_file, format)
-    cursor = _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
-    _extract(
-        sdk=state.sdk,
-        cursor=cursor,
-        checkpoint_name=use_checkpoint,
-        filter_list=state.search_filters,
-        begin=begin,
-        end=end,
-        advanced_query=advanced_query,
-        saved_search=saved_search,
-        output_logger=output_logger,
-    )
-
-
-@security_data.command()
-@server_options
-@file_event_options
-@search_options
-@sdk_options
-def send_to(
-    state,
-    format,
-    hostname,
-    protocol,
-    begin,
-    end,
-    advanced_query,
-    use_checkpoint,
-    saved_search,
-    **kwargs
-):
-    """Send file events to the given server address."""
-    output_logger = logger_factory.get_logger_for_server(hostname, protocol, format)
-    cursor = _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
-    _extract(
-        sdk=state.sdk,
-        cursor=cursor,
-        checkpoint_name=use_checkpoint,
-        filter_list=state.search_filters,
-        begin=begin,
-        end=end,
-        advanced_query=advanced_query,
-        saved_search=saved_search,
-        output_logger=output_logger,
-    )
+    handlers = create_handlers(state.sdk, FileEventExtractor, output_logger, cursor, use_checkpoint)
+    extractor = _get_file_event_extractor(state.sdk, handlers)
+    if advanced_query:
+        extractor.extract_advanced(advanced_query)
+    elif saved_search:
+        extractor.extract(*saved_search._filter_group_list)
+    else:
+        if begin or end:
+            state.search_filters.append(create_time_range_filter(EventTimestamp, begin, end))
+        extractor.extract(*state.search_filters)
+    if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
+        echo("No results found.")
 
 
 @security_data.group(cls=OrderedGroup)
@@ -270,31 +212,6 @@ def show(state, search_id):
     """Get the details of a saved search."""
     response = state.sdk.securitydata.savedsearches.get_by_id(search_id)
     echo(pformat(response["searches"]))
-
-
-def _extract(
-    sdk,
-    cursor,
-    checkpoint_name,
-    filter_list,
-    begin,
-    end,
-    advanced_query,
-    saved_search,
-    output_logger,
-):
-    handlers = create_handlers(sdk, FileEventExtractor, output_logger, cursor, checkpoint_name)
-    extractor = _get_file_event_extractor(sdk, handlers)
-    if advanced_query:
-        extractor.extract_advanced(advanced_query)
-    elif saved_search:
-        extractor.extract(*saved_search._filter_group_list)
-    else:
-        if begin or end:
-            filter_list.append(create_time_range_filter(EventTimestamp, begin, end))
-        extractor.extract(*filter_list)
-    if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
-        echo("No results found.")
 
 
 def _get_file_event_extractor(sdk, handlers):
