@@ -126,20 +126,37 @@ To write events to a file, just redirect your output:
 code42 security-data search -b 2020-02-02 > filename.txt
 ```
 
-To send events over UDP to a syslog server using `netcat` on Linux/Mac:
+To send events to an external server using `netcat` on Linux/Mac:
 
+UDP:
 ```bash
-code42 security-data search -b 2020-02-02 | nc -u syslog.company.com 514 
+code42 security-data search -b 10d | nc -u syslog.company.com 514 
+```
+
+TCP:
+```bash
+code42 security-data search -b 10d | nc server.company.com 8080
 ```
 
 Using `powershell` on Windows:
 
+UDP:
 ```powershell
 # set up connection
 $Connection = New-Object System.Net.Sockets.UDPClient("syslog.company.com",514)
 
 # pipe code42 output through connection
 code42 security-data search -b 10d | foreach {$Message = [Text.Encoding]::UTF8.GetBytes($_); $Connection.Send($Message, $Message.Length)}
+```
+
+TCP:
+```powershell
+# set up connection
+$Connection = New-Object System.Net.Sockets.TcpClient("127.0.0.1","65432")
+$Writer = New-Object System.IO.StreamWriter($Connection.GetStream())
+
+# pipe code42 output through connection
+code42 security-data search -b 10d | foreach { $Writer.WriteLine($_); $Writer.Flush() }
 ```
 
 If you want to periodically run the same query, but only retrieve the new events each time, use the 
