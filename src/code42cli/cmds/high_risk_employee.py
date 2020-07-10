@@ -101,8 +101,9 @@ bulk.add_command(high_risk_employee_generate_template)
 @read_csv_arg(headers=HIGH_RISK_EMPLOYEE_CSV_HEADERS)
 @sdk_options
 def add(state, csv_rows):
+    sdk = state.sdk
     row_handler = lambda username, cloud_alias, risk_tag, notes: _add_high_risk_employee(
-        state.sdk, username, cloud_alias, risk_tag, notes
+        sdk, username, cloud_alias, risk_tag, notes
     )
     run_bulk_process(
         row_handler, csv_rows, progress_label="Adding users to high risk employee detection list:"
@@ -116,7 +117,8 @@ def add(state, csv_rows):
 @read_flat_file_arg
 @sdk_options
 def remove(state, file_rows):
-    row_handler = lambda username: _remove_high_risk_employee(state.sdk, username)
+    sdk = state.sdk
+    row_handler = lambda username: _remove_high_risk_employee(sdk, username)
     run_bulk_process(
         row_handler,
         file_rows,
@@ -132,7 +134,8 @@ def remove(state, file_rows):
 @read_csv_arg(headers=RISK_TAG_CSV_HEADERS)
 @sdk_options
 def add_risk_tags(state, csv_rows):
-    row_handler = lambda username, tag: _add_risk_tags(state.sdk, username, tag)
+    sdk = state.sdk
+    row_handler = lambda username, tag: _add_risk_tags(sdk, username, tag)
     run_bulk_process(
         row_handler, csv_rows, progress_label="Adding risk tags to users:",
     )
@@ -146,7 +149,8 @@ def add_risk_tags(state, csv_rows):
 @read_csv_arg(headers=RISK_TAG_CSV_HEADERS)
 @sdk_options
 def remove_risk_tags(state, csv_rows):
-    row_handler = lambda username, tag: _remove_risk_tags(state.sdk, username, tag)
+    sdk = state.sdk
+    row_handler = lambda username, tag: _remove_risk_tags(sdk, username, tag)
     run_bulk_process(
         row_handler, csv_rows, progress_label="Removing risk tags from users:",
     )

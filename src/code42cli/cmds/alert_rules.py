@@ -112,7 +112,8 @@ bulk.add_command(alert_rules_generate_template)
 @read_csv_arg(headers=ALERT_RULES_CSV_HEADERS)
 @sdk_options
 def add(state, csv_rows):
-    row_handler = lambda rule_id, username: _add_user(state.sdk, rule_id, username)
+    sdk = state.sdk
+    row_handler = lambda rule_id, username: _add_user(sdk, rule_id, username)
     run_bulk_process(row_handler, csv_rows, progress_label="Adding users to alert-rules:")
 
 
@@ -124,7 +125,8 @@ def add(state, csv_rows):
 @read_csv_arg(headers=ALERT_RULES_CSV_HEADERS)
 @sdk_options
 def remove(state, csv_rows):
-    row_handler = lambda rule_id, username: _remove_user(state.sdk, rule_id, username)
+    sdk = state.sdk
+    row_handler = lambda rule_id, username: _remove_user(sdk, rule_id, username)
     run_bulk_process(row_handler, csv_rows, progress_label="Removing users from alert-rules:")
 
 
