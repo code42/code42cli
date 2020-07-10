@@ -28,6 +28,22 @@ def requests_exception(mocker):
     return mock_exception
 
 
+def test_create_sdk_when_profile_has_ssl_errors_disabled_sets_py42_setting_and_prints_warning(
+    profile, mocker, capsys
+):
+    mock_py42 = mocker.patch("code42cli.sdk_client.py42")
+    profile.ignore_ssl_errors = "True"
+    sdk = create_sdk(profile, False)
+    output = capsys.readouterr()
+    assert mock_py42.settings.verify_ssl_certs == False
+    assert (
+        "Warning: Profile '{0}' has SSL verification disabled. Adding certificate verification is strongly advised.".format(
+            profile.name
+        )
+        in output.err
+    )
+
+
 def test_create_sdk_when_py42_exception_occurs_raises_and_logs_cli_error(
     sdk_logger, mock_sdk_factory, requests_exception
 ):
