@@ -13,15 +13,22 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Changed
 
 - `-i` (`--incremental`) has been removed, use `-c` (`--use-checkpoint`) with a string name for the checkpoint instead.
+
 - The code42cli has been migrated to the [click](https://click.palletsprojects.com) framework. This brings:
-    - BREAKING CHANGE: Commands that accept multiple values for the same option now must have the option flag provided 
-        before each value: 
-            `--option value1 --option value2` instead of `--option value1 value2` (which was previously possible).
+    - BREAKING CHANGE: Commands that accept multiple values for the same option now must have the option flag provided before each value: 
+        use `--option value1 --option value2` instead of `--option value1 value2` (which was previously possible).
     - Cosmetic changes to error messages, progress bars, and help message formatting.
+
+- The `print` command on the `security-data` and `alerts` command groups has been replaced with the `search` command. 
+    This was a name change only, all other functionality remains the same.
 
 ### Added
 
 - Profile can now save multiple alert and file event checkpoints. The name of the checkpoint to be used for a given query should be passed to `-c` (`--use-checkpoint`).
+
+### Removed
+
+- The `write-to` and `send-to` commands on `security-data` and `alerts` command groups. 
 
 ## 0.7.3 - 2020-06-23
 

@@ -52,7 +52,7 @@ When the `--profile` flag is available on other commands, such as those in `secu
 instead of the default one. For example,
 
 ```bash
-code42 security-data print -b 2020-02-02 --profile MY_SECOND_PROFILE
+code42 security-data search -b 2020-02-02 --profile MY_SECOND_PROFILE
 ```
 
 To see all your profiles, do:
@@ -63,11 +63,10 @@ code42 profile list
 
 ## Security Data and Alerts
 
-Using the CLI, you can query for security events and alerts and send them to three possible destination types:
+Using the CLI, you can query for security events and alerts just like in the admin console, but the results are output
+to stdout so they can be written to a file or piped out to another process (for sending to an external syslog server, for 
+example). 
 
-* stdout
-* A file
-* A server, such as SysLog
 
 The following examples pertain to security events, but can also be used for alerts by replacing `security-data` with 
 `alerts`:
@@ -75,7 +74,7 @@ The following examples pertain to security events, but can also be used for aler
 To print events to stdout, do:
 
 ```bash
-code42 security-data print -b <begin_date>
+code42 security-data search -b <begin_date>
 ```
 
 Note that `-b` or `--begin` is usually required.
@@ -85,79 +84,90 @@ And end date can also be given with `-e` or `--end` to query for a specific date
 To specify a begin/end time, you can pass a date or a date w/ time as a string:
 
 ```bash
-code42 security-data print -b '2020-02-02 12:51:00'
+code42 security-data search -b '2020-02-02 12:51:00'
 ```
 
 ```bash
-code42 security-data print -b '2020-02-02 12:30'
+code42 security-data search -b '2020-02-02 12:30'
 ```
 
 ```bash
-code42 security-data print -b '2020-02-02 12'
+code42 security-data search -b '2020-02-02 12'
 ```
 
 ```bash
-code42 security-data print -b 2020-02-02
+code42 security-data search -b 2020-02-02
 ```
 
 or a shorthand string specifying either days, hours, or minutes back from the current time:
 
 ```bash
-code42 security-data print -b 30d
+code42 security-data search -b 30d
 ```
 
 ```bash
-code42 security-data print -b 10d -e 12h
+code42 security-data search -b 10d -e 12h
 ```
 
-Begin date will be ignored if provided on subsequent queries using `-i`.
+Begin date will be ignored if provided on subsequent queries using `-c/--use-checkpoint`.
 
 Use different format with `-f`:
 
 ```bash
-code42 security-data print -b 2020-02-02 -f CEF
+code42 security-data search -b 2020-02-02 -f CEF
 ```
 
 The available formats are CEF, JSON, and RAW-JSON.
 Currently, CEF format is only supported for security events.
 
-To write events to a file, do:
+To write events to a file, just redirect your output:
 
 ```bash
-code42 security-data write-to filename.txt -b 2020-02-02
+code42 security-data search -b 2020-02-02 > filename.txt
 ```
 
-To send events to a server, do:
+To send events over UDP to a syslog server using `netcat` on Linux/Mac:
 
 ```bash
-code42 security-data send-to syslog.company.com -p TCP -b 2020-02-02
+code42 security-data search -b 2020-02-02 | nc -u syslog.company.com 514 
 ```
 
-To only get events that Code42 previously did not observe since you last recorded a checkpoint, use the `-i` flag.
+Using `powershell` on Windows:
 
-```bash
-code42 security-data send-to syslog.company.com -i
+```powershell
+# set up connection
+$Connection = New-Object System.Net.Sockets.UDPClient("syslog.company.com",514)
+
+# pipe code42 output through connection
+code42 security-data search -b 10d | foreach {$Message = [Text.Encoding]::UTF8.GetBytes($_); $Connection.Send($Message, $Message.Length)}
 ```
 
-This is only guaranteed if you did not change your query.
+If you want to periodically run the same query, but only retrieve the new events each time, use the 
+`-c/--use-checkpoint` option with a name for your checkpoint. This stores the timestamp of the query's last event to a 
+file on disk and uses that as the "begin date" timestamp filter on the next query that uses the same checkpoint name. 
+Checkpoints are stored per profile. 
 
-To send events to a server using a specific profile, do:
-
+Initial run requires a begin date:
 ```bash
-code42 security-data --profile PROFILE_FOR_RECURRING_JOB send-to syslog.company.com -b 2020-02-02 -f CEF -i
+code42 security-data search -b 30d --use-checkpoint my_checkpoint
+```
+
+Subsequent runs do not:
+```bash
+code42 security-data search --use-checkpoint my_checkpoint
 ```
 
 You can also use wildcard for queries, but note, if they are not in quotes, you may get unexpected behavior.
 
 ```bash
-code42 security-data print --actor "*"
+code42 security-data search --actor "*"
 ```
 
-Each destination-type subcommand shares query parameters
+The search query parameters are as follows:
 
-- `-t` (exposure types)
-- `-b` (begin date)
-- `-e` (end date)
+- `-t/--type` (exposure types)
+- `-b/--begin` (begin date)
+- `-e/--end` (end date)
 - `--c42-username`
 - `--actor`
 - `--md5`
@@ -171,9 +181,29 @@ Each destination-type subcommand shares query parameters
 - `--advanced-query` (raw JSON query)
 
 You cannot use other query parameters if you use `--advanced-query`.
-To learn more about acceptable arguments, add the `-h` flag to `code42` or any of the destination-type subcommands.
+To learn more about acceptable arguments, add the `-h` flag to `code42 security-data` 
 
+Saved Searches:
 
+The CLI can also access "saved searches" that are stored in the admin console, and run them via their saved search ID.
+
+Use the `saved-search list` subcommand to list existing searches with their IDs:
+
+```bash
+code42 security-data saved-search list
+```
+
+The `show` subcommand will give details about the search with the provided ID:
+
+```bash
+code42 security-data saved-search show <ID>
+```
+
+To get the results of a saved search, use the `--saved-search` option with your search ID on the `search` subcommand:
+
+```bash
+code42 security-data search --saved-search <ID>
+```
 
 ## Detection Lists
 
@@ -212,7 +242,9 @@ reported.
 If you keep getting prompted for your password, try resetting with `code42 profile reset-pw`.
 If that doesn't work, delete your credentials file located at ~/.code42cli or the entry in keychain.
 
-## Tab completion
+## Shell tab completion
+
+To enable shell autocomplete when you hit `tab` after the first few characters of a command name, do the following:
 
 For Bash, add this to ~/.bashrc:
 
