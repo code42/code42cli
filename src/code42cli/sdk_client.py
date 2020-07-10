@@ -1,6 +1,8 @@
 import py42.sdk
 import py42.settings
 import py42.settings.debug as debug
+import requests
+from click import secho
 from py42.exceptions import Py42UnauthorizedError
 from requests.exceptions import ConnectionError
 
@@ -15,6 +17,17 @@ logger = get_main_cli_logger()
 def create_sdk(profile, is_debug_mode):
     if is_debug_mode:
         py42.settings.debug.level = debug.DEBUG
+    if profile.ignore_ssl_errors == "True":
+        secho(
+            "Warning: Profile '{0}' has SSL verification disabled. Adding certificate verification "
+            "is strongly advised.".format(profile.name),
+            fg="red",
+            err=True,
+        )
+        requests.packages.urllib3.disable_warnings(
+            requests.packages.urllib3.exceptions.InsecureRequestWarning
+        )
+        py42.settings.verify_ssl_certs = False
     password = profile.get_password()
     return validate_connection(profile.authority_url, profile.username, password)
 
