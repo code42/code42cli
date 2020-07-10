@@ -1,24 +1,12 @@
 import pytest
 
 from code42cli import PRODUCT_NAME
-from code42cli.util import does_user_agree, get_url_parts, find_format_width
+from code42cli.util import does_user_agree, find_format_width
 
 TEST_HEADER = {u"key1": u"Column 1", u"key2": u"Column 10", u"key3": u"Column 100"}
 
 
 _NAMESPACE = "{}.util".format(PRODUCT_NAME)
-
-
-def test_get_url_parts_when_given_host_and_port_returns_expected_parts():
-    url_str = "www.example.com:123"
-    parts = get_url_parts(url_str)
-    assert parts == ("www.example.com", 123)
-
-
-def test_get_url_parts_when_given_host_without_port_returns_expected_parts():
-    url_str = "www.example.com"
-    parts = get_url_parts(url_str)
-    assert parts == ("www.example.com", None)
 
 
 def test_does_user_agree_when_user_says_y_returns_true(mocker):
