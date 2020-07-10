@@ -1,11 +1,14 @@
 # Security Data
 
-## Shared arguments
 
-Search args are shared between `print`, `write-to`, and `send-to` commands.
+## search
 
-* `--advanced-query` (optional): A raw JSON file events query. Useful for when the provided query parameters do not 
+Search for file events and print them to stdout.
+
+Arguments:
+* `--advanced-query` (optional | cannot be used with other query options): A raw JSON file events query. Useful for when the provided query parameters do not 
     satisfy your requirements. WARNING: Using advanced queries is incompatible with other query-building args.
+* `--saved-search` (optional | cannot be used with other query options): Get events from a saved search filter (created in the Code42 admin console) with the given ID.
 * `-b`, `--begin` (required except for non-first runs in checkpoint mode): The beginning of the date range in which to 
     look for file events, can be a date/time in yyyy-MM-dd (UTC) or yyyy-MM-dd HH:MM:SS (UTC+24-hr time) format where 
     the 'time' portion of the string can be partial (e.g. '2020-01-01 12' or '2020-01-01 01:15') or a short value 
@@ -28,45 +31,11 @@ Search args are shared between `print`, `write-to`, and `send-to` commands.
 * `-f`, `--format` (optional): The format used for outputting file events. Available choices= [CEF,JSON,RAW-JSON]. 
 * `-c`, `--use-checkpoint` (optional): Get only file events that were not previously retrieved by writing the timestamp of the last event retrieved to a named checkpoint.
 
-
-## print
-
-Print file events to stdout.
-
-Arguments:
-* search args (note that begin date is often required).
-
 Usage:
 ```bash
-code42 security-data print -b <begin-date> <args>
+code42 security-data search -b <begin-date> <options>
 ```
 
-## write-to
-
-Write file events to the file with the given name. 
-
-Arguments:
-* `output_file`: The name of the local file to send output to.
-* search args (note that begin date is often required).
-
-Usage:
-```bash
-code42 security-data write-to -b 2020-03-01 <args>
-```
-
-## send-to
-
-Send file events to the given server address. 
-
-Arguments:
-* `server`: The server address to send output to.
-* `protocol` (optional): Protocol used to send logs to server. Available choices= [TCP, UDP].
-* search args (note that begin date is often required).
-
-Usage:
-```bash
-code42 security-data send-to <server> <optional-server-args> <args>
-```
 
 ## clear-checkpoint
 

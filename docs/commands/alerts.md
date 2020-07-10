@@ -1,9 +1,10 @@
 # Alerts
 
-## Shared arguments
+## search
 
-Search args are shared between `print`, `write-to`, and `send-to` commands.
+Search for alerts and print them to stdout.
 
+Arguments:
 * `advanced-query`: A raw JSON alerts query. Useful for when the provided query parameters do not satisfy your 
     requirements. WARNING: Using advanced queries is incompatible with other query-building args.
 * `-b`, `--begin`: The beginning of the date range in which to look for alerts, can be a date/time in yyyy-MM-dd (UTC) 
@@ -32,43 +33,9 @@ Search args are shared between `print`, `write-to`, and `send-to` commands.
 * `-f`, `--format` (optional): The format used for outputting file events. Available choices= [CEF,JSON,RAW-JSON]. 
 * `-c`, `--use-checkpoint` (optional): Get only file events that were not previously retrieved by writing the timestamp of the last event retrieved to a named checkpoint.
 
-## print
-
-Print file events to stdout.
-
-Arguments:
-* search args (note that begin date is often required).
-
 Usage:
 ```bash
-code42 alerts print -b <begin-date> <args>
-```
-
-## write-to
-
-Write file events to the file with the given name.
-
-Arguments:
-* `output_file`: The name of the local file to send output to.
-* search args (note that begin date is often required).
-
-Usage:
-```bash
-code42 alerts write-to -b 2020-03-01 <rgs>
-```
-
-## send-to
-
-Send file events to the given server address.
-
-Arguments:
-* `server`: The server address to send output to.
-* `protocol` (optional): Protocol used to send logs to server. Available choices= [TCP, UDP].
-* search args (note that begin date is often required).
-
-Usage:
-```bash
-code42 alerts send-to <server> <optional-args> <args>
+code42 alerts search -b <begin-date> <options>
 ```
 
 ## clear-checkpoint

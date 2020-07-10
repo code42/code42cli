@@ -13,7 +13,7 @@ To use the Code42 CLI, you must have:
 
 A Code42 Diamond or Platinum product plan 
 Endpoint monitoring enabled in the Code42 console 
-Python version 2.7.x, or 3.5 and later installed
+Python version 3.5 and later installed
 
 ## Content
 
