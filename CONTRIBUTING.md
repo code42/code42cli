@@ -35,7 +35,7 @@ Document all notable consumer-affecting changes in CHANGELOG.md per principles a
 ## Tests
 
 We use [tox](https://tox.readthedocs.io/en/latest/#) to run the
-[pytest](https://docs.pytest.org/) test framework on Python 2.7, 3.5, 3.6, and 3.7.
+[pytest](https://docs.pytest.org/) test framework on Python 3.5, 3.6, and 3.7.
 
 To run all tests, run this at the root of the repo:
 
@@ -49,11 +49,10 @@ To run the tests on all supported versions of Python in a local dev environment,
 
 ```bash
 $ pip install tox
-$ pyenv install 2.7.16
 $ pyenv install 3.5.7
 $ pyenv install 3.6.9
 $ pyenv install 3.7.4
-$ pyenv local 2.7.16 3.5.7 3.6.9 3.7.4
+$ pyenv local 3.5.7 3.6.9 3.7.4
 $ tox
 ```
 
