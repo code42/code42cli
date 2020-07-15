@@ -125,10 +125,11 @@ def delete_all():
     """Deletes all profiles and saved passwords (if any)."""
     existing_profiles = cliprofile.get_all_profiles()
     if existing_profiles:
-        echo("\nAre you sure you want to delete the following profiles?")
-        for profile in existing_profiles:
-            echo("\t{}".format(profile.name))
-        if does_user_agree("\nThis will also delete any stored passwords and checkpoints. (y/n): "):
+        message = (
+            "\nAre you sure you want to delete the following profiles?\n\t{}"
+            "\n\nThis will also delete any stored passwords and checkpoints. (y/n): "
+        ).format("\n\t".join([profile.name for profile in existing_profiles]))
+        if does_user_agree(message):
             for profile in existing_profiles:
                 cliprofile.delete_profile(profile.name)
                 echo("Profile '{}' has been deleted.".format(profile.name))

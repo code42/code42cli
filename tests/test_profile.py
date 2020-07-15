@@ -1,8 +1,4 @@
 import pytest
-import logging
-
-from click.testing import CliRunner
-from code42cli.main import cli
 
 import code42cli.profile as cliprofile
 from code42cli import PRODUCT_NAME

@@ -5,8 +5,7 @@ from functools import wraps
 from os import path
 from signal import signal, getsignal, SIGINT
 
-import click
-from click import echo, style
+from click import echo, style, get_current_context
 
 _PADDING_SIZE = 3
 
@@ -15,7 +14,7 @@ def does_user_agree(prompt):
     """Prompts the user and checks if they said yes. If command has the `yes_option` flag, and 
     `-y/--yes` is passed, this will always return `True`.
     """
-    ctx = click.get_current_context()
+    ctx = get_current_context()
     if ctx.obj.assume_yes:
         return True
     ans = input(prompt)
