@@ -5,6 +5,7 @@ from click import echo, secho
 
 import code42cli.profile as cliprofile
 from code42cli.errors import Code42CLIError
+from code42cli.options import yes_option
 from code42cli.profile import CREATE_PROFILE_HELP
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree
@@ -103,6 +104,7 @@ def use(profile_name):
 
 
 @profile.command()
+@yes_option
 @profile_name_arg
 def delete(profile_name):
     """Deletes a profile and its stored password (if any)."""
@@ -118,6 +120,7 @@ def delete(profile_name):
 
 
 @profile.command()
+@yes_option
 def delete_all():
     """Deletes all profiles and saved passwords (if any)."""
     existing_profiles = cliprofile.get_all_profiles()

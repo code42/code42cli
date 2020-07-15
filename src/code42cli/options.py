@@ -6,6 +6,15 @@ from code42cli.errors import Code42CLIError
 from code42cli.profile import get_profile
 from code42cli.sdk_client import create_sdk
 
+yes_option = click.option(
+    "-y",
+    "--assume-yes",
+    is_flag=True,
+    expose_value=False,
+    callback=lambda ctx, param, value: ctx.obj.set_assume_yes(value),
+    help='Assume "yes" as answer to all prompts and run non-interactively.',
+)
+
 
 class CLIState(object):
     def __init__(self):
@@ -16,7 +25,7 @@ class CLIState(object):
         self.debug = False
         self._sdk = None
         self.search_filters = []
-        self.cursor_class = None
+        self.assume_yes = False
 
     @property
     def profile(self):
@@ -33,6 +42,9 @@ class CLIState(object):
         if self._sdk is None:
             self._sdk = create_sdk(self.profile, self.debug)
         return self._sdk
+
+    def set_assume_yes(self, param):
+        self.assume_yes = param
 
 
 def set_profile(ctx, param, value):
