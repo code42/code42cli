@@ -108,15 +108,12 @@ def use(profile_name):
 @profile_name_arg
 def delete(profile_name):
     """Deletes a profile and its stored password (if any)."""
+    message = "\nDeleting this profile will also delete any stored passwords and checkpoints. Are you sure? (y/n): "
     if cliprofile.is_default_profile(profile_name):
-        echo("\n{} is currently the default profile!".format(profile_name))
-    if not does_user_agree(
-        "\nDeleting this profile will also delete any stored passwords and checkpoints. "
-        "Are you sure? (y/n): "
-    ):
-        return
-    cliprofile.delete_profile(profile_name)
-    echo("Profile '{}' has been deleted.".format(profile_name))
+        message = "\n'{0}' is currently the default profile!\n{1}".format(profile_name, message)
+    if does_user_agree(message):
+        cliprofile.delete_profile(profile_name)
+        echo("Profile '{}' has been deleted.".format(profile_name))
 
 
 @profile.command()
