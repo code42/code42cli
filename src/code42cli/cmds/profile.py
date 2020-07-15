@@ -21,14 +21,18 @@ name_option = click.option(
     "-n",
     "--name",
     required=True,
-    type=str,
     help="The name of the Code42 CLI profile to use when executing this command.",
 )
 server_option = click.option(
-    "-s", "--server", required=True, type=str, help="The url and port of the Code42 server."
+    "-s", "--server", required=True, help="The url and port of the Code42 server."
 )
 username_option = click.option(
-    "-u", "--username", required=True, type=str, help="The username of the Code42 API user."
+    "-u", "--username", required=True, help="The username of the Code42 API user."
+)
+password_option = click.option(
+    "--password",
+    help="The password for the Code42 API user. Only recommended if command needs to be run without "
+    "prompt interactions.",
 )
 disable_ssl_option = click.option(
     "--disable-ssl-errors",
@@ -57,11 +61,15 @@ def show(profile_name):
 @name_option
 @server_option
 @username_option
+@password_option
 @disable_ssl_option
-def create(name, server, username, disable_ssl_errors=False):
+def create(name, server, username, password, disable_ssl_errors):
     """Create profile settings. The first profile created will be the default."""
     cliprofile.create_profile(name, server, username, disable_ssl_errors)
-    _prompt_for_allow_password_set(name)
+    if password:
+        _set_pw(name, password)
+    else:
+        _prompt_for_allow_password_set(name)
     echo("Successfully created profile '{}'.".format(name))
 
 
@@ -69,20 +77,26 @@ def create(name, server, username, disable_ssl_errors=False):
 @name_option
 @server_option
 @username_option
+@password_option
 @disable_ssl_option
-def update(name=None, server=None, username=None, disable_ssl_errors=None):
+def update(name, server, username, password, disable_ssl_errors):
     """Update an existing profile."""
     profile = cliprofile.get_profile(name)
     cliprofile.update_profile(profile.name, server, username, disable_ssl_errors)
-    _prompt_for_allow_password_set(profile.name)
+    if password:
+        _set_pw(name, password)
+    else:
+        _prompt_for_allow_password_set(profile.name)
     echo("Profile '{}' has been updated.".format(profile.name))
 
 
 @profile.command()
 @profile_name_arg
-def reset_pw(profile_name=None):
+def reset_pw(profile_name):
     """Change the stored password for a profile."""
-    _reset_pw(profile_name)
+    password = getpass()
+    _set_pw(profile_name, password)
+    echo("Password updated for profile '{}'".format(profile_name))
 
 
 @profile.command("list")
@@ -100,6 +114,7 @@ def _list():
 def use(profile_name):
     """Set a profile as the default."""
     cliprofile.switch_default_profile(profile_name)
+    echo("{} has been set as the default profile.".format(profile_name))
 
 
 @profile.command()
@@ -135,7 +150,8 @@ def delete_all():
 
 def _prompt_for_allow_password_set(profile_name):
     if does_user_agree("Would you like to set a password? (y/n): "):
-        _reset_pw(profile_name)
+        password = getpass()
+        _set_pw(profile_name, password)
 
 
 def _reset_pw(profile_name):
@@ -147,3 +163,13 @@ def _reset_pw(profile_name):
         secho("Password not stored!", bold=True)
         raise
     cliprofile.set_password(new_password, c42profile.name)
+
+
+def _set_pw(profile_name, password):
+    c42profile = cliprofile.get_profile(profile_name)
+    try:
+        validate_connection(c42profile.authority_url, c42profile.username, password)
+    except Exception:
+        secho("Password not stored!", bold=True)
+        raise
+    cliprofile.set_password(password, c42profile.name)
