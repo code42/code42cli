@@ -73,10 +73,10 @@ def create(name, server, username, disable_ssl_errors=False):
 @disable_ssl_option
 def update(name=None, server=None, username=None, disable_ssl_errors=None):
     """Update an existing profile."""
-    profile = cliprofile.get_profile(name)
-    cliprofile.update_profile(profile.name, server, username, disable_ssl_errors)
-    _prompt_for_allow_password_set(profile.name)
-    echo("Profile '{}' has been updated.".format(profile.name))
+    profile_obj = cliprofile.get_profile(name)
+    cliprofile.update_profile(profile_obj.name, server, username, disable_ssl_errors)
+    _prompt_for_allow_password_set(profile_obj.name)
+    echo("Profile '{}' has been updated.".format(profile_obj.name))
 
 
 @profile.command()
