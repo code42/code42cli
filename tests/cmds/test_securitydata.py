@@ -67,7 +67,7 @@ def test_search_when_is_advanced_query_uses_only_the_extract_advanced_method(
 def test_search_when_is_not_advanced_query_uses_only_the_extract_advanced_method(
     runner, cli_state, file_event_extractor
 ):
-    result = runner.invoke(cli, ["security-data", "search", "--begin", "1d"], obj=cli_state)
+    runner.invoke(cli, ["security-data", "search", "--begin", "1d"], obj=cli_state)
     assert file_event_extractor.extract_advanced.call_count == 0
     assert file_event_extractor.extract.call_count == 1
 
