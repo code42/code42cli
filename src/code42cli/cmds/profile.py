@@ -94,7 +94,9 @@ def update(name, server, username, password, disable_ssl_errors):
 @profile.command()
 @profile_name_arg
 def reset_pw(profile_name):
-    """Change the stored password for a profile."""
+    """\b
+    Change the stored password for a profile. Only affects what's stored in the local profile, 
+    does not make any changes to the Code42 user account."""
     password = getpass()
     _set_pw(profile_name, password)
     echo("Password updated for profile '{}'".format(profile_name))
