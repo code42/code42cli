@@ -155,17 +155,6 @@ def _prompt_for_allow_password_set(profile_name):
         _set_pw(profile_name, password)
 
 
-def _reset_pw(profile_name):
-    c42profile = cliprofile.get_profile(profile_name)
-    new_password = getpass()
-    try:
-        validate_connection(c42profile.authority_url, c42profile.username, new_password)
-    except Exception:
-        secho("Password not stored!", bold=True)
-        raise
-    cliprofile.set_password(new_password, c42profile.name)
-
-
 def _set_pw(profile_name, password):
     c42profile = cliprofile.get_profile(profile_name)
     try:
