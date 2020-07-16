@@ -140,8 +140,9 @@ bulk.add_command(legal_hold_generate_template)
 @sdk_options
 def add(state, csv_rows):
     sdk = state.sdk
-    row_handler = lambda matter_id, username: _add_user_to_legal_hold(sdk, matter_id, username)
-    run_bulk_process(row_handler, csv_rows, progress_label="Adding users to legal hold:")
+    def handle_row(matter_id, username):
+        _add_user_to_legal_hold(sdk, matter_id, username)
+    run_bulk_process(handle_row, csv_rows, progress_label="Adding users to legal hold:")
 
 
 @bulk.command(
@@ -153,8 +154,9 @@ def add(state, csv_rows):
 @sdk_options
 def remove(state, csv_rows):
     sdk = state.sdk
-    row_handler = lambda matter_id, username: _remove_user_from_legal_hold(sdk, matter_id, username)
-    run_bulk_process(row_handler, csv_rows, progress_label="Removing users from legal hold:")
+    def handle_row(matter_id, username):
+        _remove_user_from_legal_hold(sdk, matter_id, username)
+    run_bulk_process(handle_row, csv_rows, progress_label="Removing users from legal hold:")
 
 
 def _add_user_to_legal_hold(sdk, matter_id, username):
