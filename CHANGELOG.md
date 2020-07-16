@@ -28,6 +28,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Added
 
 - Profile can now save multiple alert and file event checkpoints. The name of the checkpoint to be used for a given query should be passed to `-c` (`--use-checkpoint`).
+- `-y/--assume-yes` option added to `profile delete` and `profile delete-all` commands to not require interactive prompt.
 
 ### Removed
 

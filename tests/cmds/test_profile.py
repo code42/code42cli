@@ -182,12 +182,10 @@ def test_update_profile_if_user_agrees_and_valid_connection_sets_password(
     mock_cliprofile_namespace.set_password.assert_called_once_with("newpassword", mocker.ANY)
 
 
-def test_delete_profile_warns_if_deleting_default(
-    runner, user_agreement, mock_cliprofile_namespace
-):
+def test_delete_profile_warns_if_deleting_default(runner, mock_cliprofile_namespace):
     mock_cliprofile_namespace.is_default_profile.return_value = True
     result = runner.invoke(cli, ["profile", "delete", "mockdefault"])
-    assert "mockdefault is currently the default profile!" in result.output
+    assert "'mockdefault' is currently the default profile!" in result.output
 
 
 def test_delete_profile_does_nothing_if_user_doesnt_agree(
@@ -202,7 +200,7 @@ def test_delete_profile_outputs_success(runner, mock_cliprofile_namespace, user_
     assert "Profile 'mockdefault' has been deleted." in result.output
 
 
-def test_delete_all_warns_if_profiles_exist(runner, user_agreement, mock_cliprofile_namespace):
+def test_delete_all_warns_if_profiles_exist(runner, mock_cliprofile_namespace):
     mock_cliprofile_namespace.get_all_profiles.return_value = [
         create_mock_profile("test1"),
         create_mock_profile("test2"),
@@ -211,6 +209,17 @@ def test_delete_all_warns_if_profiles_exist(runner, user_agreement, mock_cliprof
     assert "Are you sure you want to delete the following profiles?" in result.output
     assert "test1" in result.output
     assert "test2" in result.output
+
+
+def test_delete_all_does_not_warn_if_assume_yes_flag(runner, mock_cliprofile_namespace):
+    mock_cliprofile_namespace.get_all_profiles.return_value = [
+        create_mock_profile("test1"),
+        create_mock_profile("test2"),
+    ]
+    result = runner.invoke(cli, ["profile", "delete-all", "-y"])
+    assert "Are you sure you want to delete the following profiles?" not in result.output
+    assert "Profile '{}' has been deleted.".format("test1") in result.output
+    assert "Profile '{}' has been deleted.".format("test2") in result.output
 
 
 def test_delete_all_profiles_does_nothing_if_user_doesnt_agree(
