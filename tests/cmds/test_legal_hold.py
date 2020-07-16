@@ -141,7 +141,7 @@ def test_add_user_raises_legalhold_not_found_error_if_matter_inaccessible(
 def test_add_user_adds_user_to_hold_if_user_and_matter_exist(
     runner, cli_state, check_matter_accessible_success, get_user_id_success
 ):
-    result = runner.invoke(
+    runner.invoke(
         cli,
         [
             "legal-hold",
@@ -212,7 +212,7 @@ def test_remove_user_removes_user_if_user_in_matter(
     membership_uid = ACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT[0]["legalHoldMemberships"][0][
         "legalHoldMembershipUid"
     ]
-    result = runner.invoke(
+    runner.invoke(
         cli,
         [
             "legal-hold",
@@ -336,7 +336,7 @@ def test_add_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
     with runner.isolated_filesystem():
         with open("test_add.csv", "w") as csv:
             csv.writelines(["matter_id,username\n", "test,value\n"])
-        result = runner.invoke(cli, ["legal-hold", "bulk", "add", "test_add.csv"], obj=cli_state)
+        runner.invoke(cli, ["legal-hold", "bulk", "add", "test_add.csv"], obj=cli_state)
     assert bulk_processor.call_args[0][1] == [{"matter_id": "test", "username": "value"}]
 
 
@@ -345,7 +345,7 @@ def test_remove_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
     with runner.isolated_filesystem():
         with open("test_remove.csv", "w") as csv:
             csv.writelines(["matter_id,username\n", "test,value\n"])
-        result = runner.invoke(
+        runner.invoke(
             cli, ["legal-hold", "bulk", "remove", "test_remove.csv"], obj=cli_state
         )
         assert bulk_processor.call_args[0][1] == [{"matter_id": "test", "username": "value"}]

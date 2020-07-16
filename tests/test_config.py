@@ -159,7 +159,7 @@ class TestConfigAccessor(object):
     def test_create_profile_when_no_default_profile_sets_default(
         self, mocker, config_parser_for_create, mock_saver
     ):
-        mock_profile = create_mock_profile_object(_TEST_PROFILE_NAME, None, None)
+        create_mock_profile_object(_TEST_PROFILE_NAME, None, None)
         mock_internal = create_internal_object(False)
         setup_parser_one_profile(mock_internal, mock_internal, config_parser_for_create)
         accessor = ConfigAccessor(config_parser_for_create)
@@ -171,7 +171,7 @@ class TestConfigAccessor(object):
     def test_create_profile_when_has_default_profile_does_not_set_default(
         self, mocker, config_parser_for_create, mock_saver
     ):
-        mock_profile = create_mock_profile_object(_TEST_PROFILE_NAME, None, None)
+        create_mock_profile_object(_TEST_PROFILE_NAME, None, None)
         mock_internal = create_internal_object(True, _TEST_PROFILE_NAME)
         setup_parser_one_profile(mock_internal, mock_internal, config_parser_for_create)
         accessor = ConfigAccessor(config_parser_for_create)

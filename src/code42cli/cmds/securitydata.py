@@ -129,7 +129,7 @@ def _get_saved_search_query(ctx, param, arg):
 
 saved_search_option = click.option(
     "--saved-search",
-    help="Get events from a saved search filter with the given ID",
+    help="Get events from a saved search filter with the given ID.",
     callback=_get_saved_search_query,
     cls=incompatible_with("advanced_query"),
 )

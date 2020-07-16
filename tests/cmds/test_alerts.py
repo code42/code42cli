@@ -103,7 +103,7 @@ def test_search_with_advanced_query_uses_only_the_extract_advanced_method(
     cli_state, alert_extractor, runner
 ):
 
-    result = runner.invoke(
+    runner.invoke(
         cli, ["alerts", "search", "--advanced-query", ADVANCED_QUERY_JSON], obj=cli_state
     )
     alert_extractor.extract_advanced.assert_called_once_with('{"some": "complex json"}')
@@ -114,7 +114,7 @@ def test_search_without_advanced_query_uses_only_the_extract_method(
     cli_state, alert_extractor, runner
 ):
 
-    result = runner.invoke(cli, ["alerts", "search", "--begin", "1d"], obj=cli_state)
+    runner.invoke(cli, ["alerts", "search", "--begin", "1d"], obj=cli_state)
     assert alert_extractor.extract.call_count == 1
     assert alert_extractor.extract_advanced.call_count == 0
 
@@ -155,7 +155,7 @@ def test_search_when_given_begin_and_end_dates_uses_expected_query(
     begin_date = get_test_date_str(days_ago=89)
     end_date = get_test_date_str(days_ago=1)
 
-    result = runner.invoke(
+    runner.invoke(
         cli, ["alerts", "search", "--begin", begin_date, "--end", end_date], obj=cli_state
     )
     filters = alert_extractor.extract.call_args[0][0]
@@ -173,7 +173,7 @@ def test_search_when_given_begin_and_end_date_and_times_uses_expected_query(
     begin_date = get_test_date_str(days_ago=89)
     end_date = get_test_date_str(days_ago=1)
     time = "15:33:02"
-    result = runner.invoke(
+    runner.invoke(
         cli,
         [
             "alerts",
@@ -213,7 +213,7 @@ def test_search_when_given_end_date_and_time_uses_expected_query(
     begin_date = get_test_date_str(days_ago=10)
     end_date = get_test_date_str(days_ago=1)
     time = "15:33"
-    result = runner.invoke(
+    runner.invoke(
         cli,
         ["alerts", "search", "--begin", begin_date, "--end", "{} {}".format(end_date, time)],
         obj=cli_state,
@@ -231,10 +231,10 @@ def test_search_when_given_begin_date_more_than_ninety_days_back_errors(cli_stat
 
 
 def test_search_when_given_begin_date_past_90_days_and_use_checkpoint_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
-    cli_state, alert_cursor_with_checkpoint, mocker, alert_extractor, runner
+    cli_state, alert_cursor_with_checkpoint, alert_extractor, runner
 ):
     begin_date = get_test_date_str(days_ago=91) + " 12:51:00"
-    result = runner.invoke(
+    runner.invoke(
         cli, ["alerts", "search", "--begin", begin_date, "--use-checkpoint", "test"], obj=cli_state
     )
     assert not filter_term_is_in_call_args(alert_extractor, DateObserved._term)
@@ -244,7 +244,7 @@ def test_search_when_given_begin_date_and_not_use_checkpoint_and_cursor_exists_u
     cli_state, alert_extractor, runner
 ):
     begin_date = get_test_date_str(days_ago=1)
-    result = runner.invoke(cli, ["alerts", "search", "--begin", begin_date], obj=cli_state)
+    runner.invoke(cli, ["alerts", "search", "--begin", begin_date], obj=cli_state)
     actual_ts = get_filter_value_from_json(alert_extractor.extract.call_args[0][0], filter_index=0)
     expected_ts = "{0}T00:00:00.000Z".format(begin_date)
     assert actual_ts == expected_ts
@@ -264,7 +264,7 @@ def test_search_when_end_date_is_before_begin_date_causes_exit(cli_state, runner
 def test_get_alert_details_batches_results_according_to_batch_size(sdk):
     extraction._ALERT_DETAIL_BATCH_SIZE = 2
     sdk.alerts.get_details.side_effect = ALERT_DETAIL_RESULT
-    results = extraction._get_alert_details(sdk, ALERT_SUMMARY_LIST)
+    extraction._get_alert_details(sdk, ALERT_SUMMARY_LIST)
     assert sdk.alerts.get_details.call_count == 10
 
 
@@ -276,9 +276,8 @@ def test_get_alert_details_sorts_results_by_date(sdk):
 
 
 def test_search_with_only_begin_calls_extract_with_expected_filters(
-    mocker, cli_state, alert_extractor, stdout_logger, begin_option, runner
+    cli_state, alert_extractor, stdout_logger, begin_option, runner
 ):
-
     result = runner.invoke(
         cli, ["alerts", "search", "--begin", "<overridden by fixture>"], obj=cli_state
     )
@@ -293,7 +292,6 @@ def test_search_with_only_begin_calls_extract_with_expected_filters(
 def test_search_with_use_checkpoint_and_without_begin_and_without_stored_checkpoint_causes_expected_error(
     cli_state, alert_cursor_without_checkpoint, runner
 ):
-
     result = runner.invoke(cli, ["alerts", "search", "--use-checkpoint", "test"], obj=cli_state)
     assert result.exit_code == 2
     assert (
@@ -308,10 +306,8 @@ def test_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_extract
     begin_option,
     alert_cursor_without_checkpoint,
     stdout_logger,
-    mocker,
     runner,
 ):
-
     result = runner.invoke(
         cli,
         ["alerts", "search", "--use-checkpoint", "test", "--begin", "<overridden by fixture>"],
@@ -340,7 +336,7 @@ def test_search_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_ca
 def test_search_when_given_actor_is_uses_username_filter(cli_state, alert_extractor, runner):
     actor_name = "test.testerson"
 
-    result = runner.invoke(
+    runner.invoke(
         cli, ["alerts", "search", "--begin", "1h", "--actor", actor_name], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
@@ -350,7 +346,7 @@ def test_search_when_given_actor_is_uses_username_filter(cli_state, alert_extrac
 def test_search_when_given_exclude_actor_uses_actor_filter(cli_state, alert_extractor, runner):
     actor_name = "test.testerson"
 
-    result = runner.invoke(
+    runner.invoke(
         cli, ["alerts", "search", "--begin", "1h", "--exclude-actor", actor_name], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
@@ -360,7 +356,7 @@ def test_search_when_given_exclude_actor_uses_actor_filter(cli_state, alert_extr
 def test_search_when_given_rule_name_uses_rule_name_filter(cli_state, alert_extractor, runner):
     rule_name = "departing employee"
 
-    result = runner.invoke(
+    runner.invoke(
         cli, ["alerts", "search", "--begin", "1h", "--rule-name", rule_name], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
@@ -372,7 +368,7 @@ def test_search_when_given_exclude_rule_name_uses_rule_name_not_filter(
 ):
     rule_name = "departing employee"
 
-    result = runner.invoke(
+    runner.invoke(
         cli, ["alerts", "search", "--begin", "1h", "--exclude-rule-name", rule_name], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
@@ -382,7 +378,7 @@ def test_search_when_given_exclude_rule_name_uses_rule_name_not_filter(
 def test_search_when_given_rule_type_uses_rule_name_filter(cli_state, alert_extractor, runner):
     rule_type = "FedEndpointExfiltration"
 
-    result = runner.invoke(
+    runner.invoke(
         cli, ["alerts", "search", "--begin", "1h", "--rule-type", rule_type], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
@@ -394,7 +390,7 @@ def test_search_when_given_exclude_rule_type_uses_rule_name_not_filter(
 ):
     rule_type = "FedEndpointExfiltration"
 
-    result = runner.invoke(
+    runner.invoke(
         cli, ["alerts", "search", "--begin", "1h", "--exclude-rule-type", rule_type], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
@@ -404,7 +400,7 @@ def test_search_when_given_exclude_rule_type_uses_rule_name_not_filter(
 def test_search_when_given_rule_id_uses_rule_name_filter(cli_state, alert_extractor, runner):
     rule_id = "departing employee"
 
-    result = runner.invoke(
+    runner.invoke(
         cli, ["alerts", "search", "--begin", "1h", "--rule-id", rule_id], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
@@ -416,7 +412,7 @@ def test_search_when_given_exclude_rule_id_uses_rule_name_not_filter(
 ):
     rule_id = "departing employee"
 
-    result = runner.invoke(
+    runner.invoke(
         cli, ["alerts", "search", "--begin", "1h", "--exclude-rule-id", rule_id], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
@@ -426,7 +422,7 @@ def test_search_when_given_exclude_rule_id_uses_rule_name_not_filter(
 def test_search_when_given_description_uses_description_filter(cli_state, alert_extractor, runner):
     description = "test description"
 
-    result = runner.invoke(
+    runner.invoke(
         cli, ["alerts", "search", "--begin", "1h", "--description", description], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
@@ -440,7 +436,7 @@ def test_search_when_given_multiple_search_args_uses_expected_filters(
     exclude_actor = "flag.flagerson@code42.com"
     rule_name = "departing employee"
 
-    result = runner.invoke(
+    runner.invoke(
         cli,
         [
             "alerts",

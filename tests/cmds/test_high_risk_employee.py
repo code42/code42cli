@@ -8,7 +8,7 @@ _EMPLOYEE = "risky employee"
 
 
 def test_add_high_risk_employee_adds(runner, cli_state_with_user):
-    result = runner.invoke(cli, ["high-risk-employee", "add", _EMPLOYEE], obj=cli_state_with_user)
+    runner.invoke(cli, ["high-risk-employee", "add", _EMPLOYEE], obj=cli_state_with_user)
     cli_state_with_user.sdk.detectionlists.high_risk_employee.add.assert_called_once_with(TEST_ID)
 
 
@@ -25,7 +25,7 @@ def test_add_high_risk_employee_when_given_cloud_alias_adds_alias(runner, cli_st
 
 
 def test_add_high_risk_employee_when_given_risk_tags_adds_tags(runner, cli_state_with_user):
-    result = runner.invoke(
+    runner.invoke(
         cli,
         [
             "high-risk-employee",
@@ -47,7 +47,7 @@ def test_add_high_risk_employee_when_given_risk_tags_adds_tags(runner, cli_state
 
 def test_add_high_risk_employee_when_given_notes_updates_notes(runner, cli_state_with_user):
     notes = "being risky"
-    result = runner.invoke(
+    runner.invoke(
         cli, ["high-risk-employee", "add", _EMPLOYEE, "--notes", notes], obj=cli_state_with_user,
     )
     cli_state_with_user.sdk.detectionlists.update_user_notes.assert_called_once_with(TEST_ID, notes)
@@ -85,7 +85,7 @@ def test_add_high_risk_employee_when_bad_request_but_not_user_already_added_exit
 
 
 def test_remove_high_risk_employee_calls_remove(runner, cli_state_with_user):
-    result = runner.invoke(
+    runner.invoke(
         cli, ["high-risk-employee", "remove", _EMPLOYEE], obj=cli_state_with_user
     )
     cli_state_with_user.sdk.detectionlists.high_risk_employee.remove.assert_called_once_with(
@@ -104,7 +104,7 @@ def test_remove_high_risk_employee_when_user_does_not_exist_exits_with_correct_m
 
 
 def test_generate_template_file_when_given_add_generates_template_from_handler(
-    runner, mocker, cli_state
+    runner, cli_state
 ):
     pass
 
@@ -113,7 +113,7 @@ def test_generate_template_file_when_given_remove_generates_template_from_handle
     pass
 
 
-def test_bulk_add_employees_calls_expected_py42_methods(runner, cli_state, mocker):
+def test_bulk_add_employees_calls_expected_py42_methods(runner, cli_state):
     add_user_cloud_alias = thread_safe_side_effect()
     add_user_risk_tags = thread_safe_side_effect()
     update_user_notes = thread_safe_side_effect()
@@ -134,7 +134,7 @@ def test_bulk_add_employees_calls_expected_py42_methods(runner, cli_state, mocke
                     "test_user_3,,,\n",
                 ]
             )
-        result = runner.invoke(
+        runner.invoke(
             cli, ["high-risk-employee", "bulk", "add", "test_add.csv"], obj=cli_state
         )
     alias_args = [call[1] for call in add_user_cloud_alias.call_args_list]
@@ -171,7 +171,7 @@ def test_bulk_add_risk_tags_uses_expected_arguments(runner, cli_state, mocker):
     with runner.isolated_filesystem():
         with open("test_add_risk_tags.csv", "w") as csv:
             csv.writelines(["username,tag\n", "test@example.com,tag1\n", "test2@example.com,tag2"])
-        result = runner.invoke(
+        runner.invoke(
             cli,
             ["high-risk-employee", "bulk", "add-risk-tags", "test_add_risk_tags.csv"],
             obj=cli_state,
@@ -187,7 +187,7 @@ def test_bulk_remove_risk_tags_uses_expected_arguments(runner, cli_state, mocker
     with runner.isolated_filesystem():
         with open("test_remove_risk_tags.csv", "w") as csv:
             csv.writelines(["username,tag\n", "test@example.com,tag1\n", "test2@example.com,tag2"])
-        result = runner.invoke(
+        runner.invoke(
             cli,
             ["high-risk-employee", "bulk", "remove-risk-tags", "test_remove_risk_tags.csv"],
             obj=cli_state,
