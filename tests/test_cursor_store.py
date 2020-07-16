@@ -52,7 +52,7 @@ class TestAlertCursorStore(object):
         checkpoint = store.get(CURSOR_NAME)
         mock_open = mocker.patch("{}.open".format(_NAMESPACE))
         mock_open.side_effect = FileNotFoundError
-        assert checkpoint == None
+        assert checkpoint is None
 
     def test_get_reads_expected_file(self, mock_open):
         store = AlertCursorStore(PROFILE_NAME)
@@ -72,7 +72,7 @@ class TestAlertCursorStore(object):
         store = AlertCursorStore(PROFILE_NAME)
         store.replace("checkpointname", 123)
         user_path = path.join(path.expanduser("~"), ".code42cli")
-        expected_path = path.join(user_path, "alert_checkpoints", PROFILE_NAME, "checkpointname")
+        path.join(user_path, "alert_checkpoints", PROFILE_NAME, "checkpointname")
         mock_open.return_value.write.assert_called_once_with("123")
 
     def test_delete_calls_remove_on_expected_file(self, mock_open, mock_remove):
@@ -139,7 +139,7 @@ class TestFileEventCursorStore(object):
         store = FileEventCursorStore(PROFILE_NAME)
         store.replace("checkpointname", 123)
         user_path = path.join(path.expanduser("~"), ".code42cli")
-        expected_path = path.join(
+        path.join(
             user_path, "file_event_checkpoints", PROFILE_NAME, "checkpointname"
         )
         mock_open.return_value.write.assert_called_once_with("123")

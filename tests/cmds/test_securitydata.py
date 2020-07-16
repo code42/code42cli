@@ -215,7 +215,7 @@ def test_search_when_given_begin_date_more_than_ninety_days_back_errors(
 
 
 def test_search_when_given_begin_date_past_90_days_and_use_checkpoint_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
-    runner, cli_state, file_event_cursor_with_checkpoint, mocker, file_event_extractor
+    runner, cli_state, file_event_cursor_with_checkpoint, file_event_extractor
 ):
     begin_date = get_test_date_str(days_ago=91) + " 12:51:00"
     runner.invoke(

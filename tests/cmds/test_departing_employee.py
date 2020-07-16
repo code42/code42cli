@@ -9,7 +9,7 @@ _EMPLOYEE = "departing employee"
 
 def test_add_departing_employee_when_given_cloud_alias_adds_alias(runner, cli_state_with_user):
     alias = "departing employee alias"
-    result = runner.invoke(
+    runner.invoke(
         cli,
         ["departing-employee", "add", _EMPLOYEE, "--cloud-alias", alias],
         obj=cli_state_with_user,
@@ -23,7 +23,7 @@ def test_add_departing_employee_when_given_notes_updates_notes(
     runner, cli_state_with_user, profile
 ):
     notes = "is leaving"
-    result = runner.invoke(
+    runner.invoke(
         cli, ["departing-employee", "add", _EMPLOYEE, "--notes", notes], obj=cli_state_with_user,
     )
     cli_state_with_user.sdk.detectionlists.update_user_notes.assert_called_once_with(TEST_ID, notes)
@@ -33,7 +33,7 @@ def test_add_departing_employee_adds(
     runner, cli_state_with_user,
 ):
     departure_date = "2020-02-02"
-    result = runner.invoke(
+    runner.invoke(
         cli,
         ["departing-employee", "add", _EMPLOYEE, "--departure-date", departure_date],
         obj=cli_state_with_user,
@@ -73,7 +73,7 @@ def test_add_departing_employee_when_bad_request_but_not_user_already_added_rais
 
 
 def test_remove_departing_employee_calls_remove(runner, cli_state_with_user):
-    result = runner.invoke(
+    runner.invoke(
         cli, ["departing-employee", "remove", _EMPLOYEE], obj=cli_state_with_user
     )
     cli_state_with_user.sdk.detectionlists.departing_employee.remove.assert_called_once_with(
@@ -108,7 +108,7 @@ def test_add_bulk_users_calls_expected_py42_methods(runner, mocker, cli_state):
                     "test_user_3,,,\n",
                 ]
             )
-        result = runner.invoke(
+        runner.invoke(
             cli, ["departing-employee", "bulk", "add", "test_add.csv"], obj=cli_state
         )
     de_add_user_call_args = [call[1] for call in de_add_user.call_args_list]
@@ -133,7 +133,7 @@ def test_remove_bulk_users_uses_expected_arguments(runner, mocker, cli_state_wit
     with runner.isolated_filesystem():
         with open("test_remove.csv", "w") as csv:
             csv.writelines(["# username\n", "test_user1\n", "test_user2\n"])
-        result = runner.invoke(
+        runner.invoke(
             cli,
             ["departing-employee", "bulk", "remove", "test_remove.csv"],
             obj=cli_state_with_user,
