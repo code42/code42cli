@@ -55,7 +55,7 @@ class BaseCursorStore(object):
             self.delete(cursor.name)
 
     def get_all_cursors(self):
-        """Returns a list of all cursors stored in this directory (which istypically scoped to a profile)."""
+        """Returns a list of all cursors stored in this directory (which is typically scoped to a profile)."""
         dir_contents = os.listdir(self._dir_path)
         return [Cursor(f) for f in dir_contents if self._is_file(f)]
 
