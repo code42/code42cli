@@ -113,8 +113,9 @@ bulk.add_command(alert_rules_generate_template)
 @sdk_options
 def add(state, csv_rows):
     sdk = state.sdk
-    row_handler = lambda rule_id, username: _add_user(sdk, rule_id, username)
-    run_bulk_process(row_handler, csv_rows, progress_label="Adding users to alert-rules:")
+    def handle_row(rule_id, username):
+        _add_user(sdk, rule_id, username)
+    run_bulk_process(handle_row, csv_rows, progress_label="Adding users to alert-rules:")
 
 
 @bulk.command(
@@ -126,8 +127,9 @@ def add(state, csv_rows):
 @sdk_options
 def remove(state, csv_rows):
     sdk = state.sdk
-    row_handler = lambda rule_id, username: _remove_user(sdk, rule_id, username)
-    run_bulk_process(row_handler, csv_rows, progress_label="Removing users from alert-rules:")
+    def handle_row(rule_id, username):
+        _remove_user(sdk, rule_id, username)
+    run_bulk_process(handle_row, csv_rows, progress_label="Removing users from alert-rules:")
 
 
 def _add_user(sdk, rule_id, username):
@@ -136,7 +138,7 @@ def _add_user(sdk, rule_id, username):
     try:
         if rules:
             sdk.alerts.rules.add_user(rule_id, user_id)
-    except Py42InternalServerError as e:
+    except Py42InternalServerError:
         _check_if_system_rule(rules)
         raise
 
@@ -147,7 +149,7 @@ def _remove_user(sdk, rule_id, username):
     try:
         if rules:
             sdk.alerts.rules.remove_user(rule_id, user_id)
-    except Py42InternalServerError as e:
+    except Py42InternalServerError:
         _check_if_system_rule(rules)
         raise
 

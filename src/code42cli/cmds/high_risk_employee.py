@@ -102,11 +102,12 @@ bulk.add_command(high_risk_employee_generate_template)
 @sdk_options
 def add(state, csv_rows):
     sdk = state.sdk
-    row_handler = lambda username, cloud_alias, risk_tag, notes: _add_high_risk_employee(
-        sdk, username, cloud_alias, risk_tag, notes
-    )
+    def handle_row(username, cloud_alias, risk_tag, notes):
+        _add_high_risk_employee(
+            sdk, username, cloud_alias, risk_tag, notes
+        )
     run_bulk_process(
-        row_handler, csv_rows, progress_label="Adding users to high risk employee detection list:"
+        handle_row, csv_rows, progress_label="Adding users to high risk employee detection list:"
     )
 
 
@@ -118,9 +119,10 @@ def add(state, csv_rows):
 @sdk_options
 def remove(state, file_rows):
     sdk = state.sdk
-    row_handler = lambda username: _remove_high_risk_employee(sdk, username)
+    def handle_row(username):
+        _remove_high_risk_employee(sdk, username)
     run_bulk_process(
-        row_handler,
+        handle_row,
         file_rows,
         progress_label="Removing users from high risk employee detection list:",
     )
@@ -135,9 +137,10 @@ def remove(state, file_rows):
 @sdk_options
 def add_risk_tags(state, csv_rows):
     sdk = state.sdk
-    row_handler = lambda username, tag: _add_risk_tags(sdk, username, tag)
+    def handle_row(username, tag):
+        _add_risk_tags(sdk, username, tag)
     run_bulk_process(
-        row_handler, csv_rows, progress_label="Adding risk tags to users:",
+        handle_row, csv_rows, progress_label="Adding risk tags to users:",
     )
 
 
@@ -150,9 +153,10 @@ def add_risk_tags(state, csv_rows):
 @sdk_options
 def remove_risk_tags(state, csv_rows):
     sdk = state.sdk
-    row_handler = lambda username, tag: _remove_risk_tags(sdk, username, tag)
+    def handle_row(username, tag):
+        _remove_risk_tags(sdk, username, tag)
     run_bulk_process(
-        row_handler, csv_rows, progress_label="Removing risk tags from users:",
+        handle_row, csv_rows, progress_label="Removing risk tags from users:",
     )
 
 
@@ -169,12 +173,5 @@ def _add_high_risk_employee(sdk, username, cloud_alias, risk_tag, notes):
 
 
 def _remove_high_risk_employee(sdk, username):
-    """Removes an employee from the high risk employee detection list.
-
-    Args:
-        sdk (py42.sdk.SDKClient): py42.
-        profile (C42Profile): Your code42 profile.
-        username (str): The username of the employee to remove.
-    """
     user_id = get_user_id(sdk, username)
     sdk.detectionlists.high_risk_employee.remove(user_id)

@@ -76,7 +76,7 @@ def mock_server_error(mocker):
 
 def test_add_user_adds_user_list_to_alert_rules(runner, cli_state):
     cli_state.sdk.users.get_by_username.return_value = {"users": [{"userUid": TEST_USER_ID}]}
-    result = runner.invoke(
+    runner.invoke(
         cli,
         ["alert-rules", "add-user", "--rule-id", TEST_RULE_ID, "-u", TEST_USERNAME],
         obj=cli_state,
@@ -129,7 +129,7 @@ def test_add_user_when_returns_500_and_not_system_rule_raises_Py42InternalServer
 
 def test_remove_user_removes_user_list_from_alert_rules(runner, cli_state):
     cli_state.sdk.users.get_by_username.return_value = {"users": [{"userUid": TEST_USER_ID}]}
-    result = runner.invoke(
+    runner.invoke(
         cli,
         ["alert-rules", "remove-user", "--rule-id", TEST_RULE_ID, "-u", TEST_USERNAME],
         obj=cli_state,
@@ -181,7 +181,7 @@ def test_remove_user_when_returns_500_and_not_system_rule_raises_Py42InternalSer
 
 
 def test_list_gets_alert_rules(runner, cli_state):
-    result = runner.invoke(cli, ["alert-rules", "list"], obj=cli_state)
+    runner.invoke(cli, ["alert-rules", "list"], obj=cli_state)
     assert cli_state.sdk.alerts.rules.get_all.call_count == 1
 
 
@@ -193,13 +193,13 @@ def test_list_when_no_rules_prints_no_rules_message(runner, cli_state):
 
 def test_show_rule_calls_correct_rule_property(runner, cli_state):
     cli_state.sdk.alerts.rules.get_by_observer_id.return_value = TEST_GET_ALL_RESPONSE_EXFILTRATION
-    result = runner.invoke(cli, ["alert-rules", "show", TEST_RULE_ID], obj=cli_state)
+    runner.invoke(cli, ["alert-rules", "show", TEST_RULE_ID], obj=cli_state)
     cli_state.sdk.alerts.rules.exfiltration.get.assert_called_once_with(TEST_RULE_ID)
 
 
 def test_show_rule_calls_correct_rule_property_cloud_share(runner, cli_state):
     cli_state.sdk.alerts.rules.get_by_observer_id.return_value = TEST_GET_ALL_RESPONSE_CLOUD_SHARE
-    result = runner.invoke(cli, ["alert-rules", "show", TEST_RULE_ID], obj=cli_state)
+    runner.invoke(cli, ["alert-rules", "show", TEST_RULE_ID], obj=cli_state)
     cli_state.sdk.alerts.rules.cloudshare.get.assert_called_once_with(TEST_RULE_ID)
 
 
@@ -207,7 +207,7 @@ def test_show_rule_calls_correct_rule_property_file_type_mismatch(runner, cli_st
     cli_state.sdk.alerts.rules.get_by_observer_id.return_value = (
         TEST_GET_ALL_RESPONSE_FILE_TYPE_MISMATCH
     )
-    result = runner.invoke(cli, ["alert-rules", "show", TEST_RULE_ID], obj=cli_state)
+    runner.invoke(cli, ["alert-rules", "show", TEST_RULE_ID], obj=cli_state)
     cli_state.sdk.alerts.rules.filetypemismatch.get.assert_called_once_with(TEST_RULE_ID)
 
 
@@ -223,7 +223,7 @@ def test_add_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
     with runner.isolated_filesystem():
         with open("test_add.csv", "w") as csv:
             csv.writelines(["rule_id,username\n", "test,value\n"])
-        result = runner.invoke(cli, ["alert-rules", "bulk", "add", "test_add.csv"], obj=cli_state)
+        runner.invoke(cli, ["alert-rules", "bulk", "add", "test_add.csv"], obj=cli_state)
     assert bulk_processor.call_args[0][1] == [{"rule_id": "test", "username": "value"}]
 
 
@@ -232,7 +232,7 @@ def test_remove_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
     with runner.isolated_filesystem():
         with open("test_remove.csv", "w") as csv:
             csv.writelines(["rule_id,username\n", "test,value\n"])
-        result = runner.invoke(
+        runner.invoke(
             cli, ["alert-rules", "bulk", "add", "test_remove.csv"], obj=cli_state
         )
     assert bulk_processor.call_args[0][1] == [{"rule_id": "test", "username": "value"}]

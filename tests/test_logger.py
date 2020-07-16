@@ -1,4 +1,3 @@
-import pytest
 import logging
 import os
 from logging.handlers import RotatingFileHandler
@@ -46,7 +45,7 @@ class TestCliLogger(object):
 
     _logger = CliLogger()
 
-    def test_init_creates_user_error_logger_with_expected_handlers(self, mocker):
+    def test_init_creates_user_error_logger_with_expected_handlers(self):
         logger = CliLogger()
         handler_types = [type(h) for h in logger._logger.handlers]
         assert RotatingFileHandler in handler_types

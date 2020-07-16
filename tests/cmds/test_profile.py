@@ -211,7 +211,7 @@ def test_delete_profile_warns_if_deleting_default(runner, mock_cliprofile_namesp
 def test_delete_profile_does_nothing_if_user_doesnt_agree(
     runner, user_disagreement, mock_cliprofile_namespace
 ):
-    result = runner.invoke(cli, ["profile", "delete", "mockdefault"])
+    runner.invoke(cli, ["profile", "delete", "mockdefault"])
     assert mock_cliprofile_namespace.delete_profile.call_count == 0
 
 
@@ -245,7 +245,7 @@ def test_delete_all_does_not_warn_if_assume_yes_flag(runner, mock_cliprofile_nam
 def test_delete_all_profiles_does_nothing_if_user_doesnt_agree(
     runner, user_disagreement, mock_cliprofile_namespace
 ):
-    result = runner.invoke(cli, ["profile", "delete-all"])
+    runner.invoke(cli, ["profile", "delete-all"])
     assert mock_cliprofile_namespace.delete_profile.call_count == 0
 
 
@@ -256,7 +256,7 @@ def test_delete_all_deletes_all_existing_profiles(
         create_mock_profile("test1"),
         create_mock_profile("test2"),
     ]
-    result = runner.invoke(cli, ["profile", "delete-all"])
+    runner.invoke(cli, ["profile", "delete-all"])
     mock_cliprofile_namespace.delete_profile.assert_any_call("test1")
     mock_cliprofile_namespace.delete_profile.assert_any_call("test2")
 
@@ -266,7 +266,7 @@ def test_prompt_for_password_reset_if_credentials_valid_password_saved(
 ):
     mock_verify.return_value = True
     mock_cliprofile_namespace.profile_exists.return_value = False
-    result = runner.invoke(cli, ["profile", "reset-pw"])
+    runner.invoke(cli, ["profile", "reset-pw"])
     mock_cliprofile_namespace.set_password.assert_called_once_with("newpassword", mocker.ANY)
 
 
@@ -275,7 +275,7 @@ def test_prompt_for_password_reset_if_credentials_invalid_password_not_saved(
 ):
     mock_verify.side_effect = Code42CLIError("Invalid credentials for user")
     mock_cliprofile_namespace.profile_exists.return_value = False
-    result = runner.invoke(cli, ["profile", "reset-pw"])
+    runner.invoke(cli, ["profile", "reset-pw"])
     assert not mock_cliprofile_namespace.set_password.call_count
 
 
@@ -301,6 +301,6 @@ def test_list_profiles_when_no_profiles_outputs_no_profiles_message(
 
 
 def test_use_profile(runner, mock_cliprofile_namespace, profile):
-    result = runner.invoke(cli, ["profile", "use", profile.name])
+    runner.invoke(cli, ["profile", "use", profile.name])
     mock_cliprofile_namespace.switch_default_profile.assert_called_once_with(profile.name)
     assert "{} has been set as the default profile.".format(profile.name) in result.output

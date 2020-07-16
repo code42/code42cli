@@ -55,7 +55,7 @@ class BaseCursorStore(object):
             self.delete(cursor.name)
 
     def get_all_cursors(self):
-        """Returns a list of all cursors stored in this directory (which istypically scoped to a profile)."""
+        """Returns a list of all cursors stored in this directory (which is typically scoped to a profile)."""
         dir_contents = os.listdir(self._dir_path)
         return [Cursor(f) for f in dir_contents if self._is_file(f)]
 
@@ -65,13 +65,13 @@ class BaseCursorStore(object):
 
 class FileEventCursorStore(BaseCursorStore):
     def __init__(self, profile_name):
-        dir_path = get_user_project_path(u"file_event_checkpoints", profile_name)
+        dir_path = get_user_project_path("file_event_checkpoints", profile_name)
         super(FileEventCursorStore, self).__init__(dir_path)
 
 
 class AlertCursorStore(BaseCursorStore):
     def __init__(self, profile_name):
-        dir_path = get_user_project_path(u"alert_checkpoints", profile_name)
+        dir_path = get_user_project_path("alert_checkpoints", profile_name)
         super(AlertCursorStore, self).__init__(dir_path)
 
 

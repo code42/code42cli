@@ -82,13 +82,13 @@ def create(name, server, username, password, disable_ssl_errors):
 @disable_ssl_option
 def update(name, server, username, password, disable_ssl_errors):
     """Update an existing profile."""
-    profile = cliprofile.get_profile(name)
+    c42profile = cliprofile.get_profile(name)
     cliprofile.update_profile(profile.name, server, username, disable_ssl_errors)
     if password:
         _set_pw(name, password)
     else:
-        _prompt_for_allow_password_set(profile.name)
-    echo("Profile '{}' has been updated.".format(profile.name))
+        _prompt_for_allow_password_set(c42profile.name)
+    echo("Profile '{}' has been updated.".format(c42profile.name))
 
 
 @profile.command()
@@ -108,8 +108,8 @@ def _list():
     profiles = cliprofile.get_all_profiles()
     if not profiles:
         raise Code42CLIError("No existing profile.", help=CREATE_PROFILE_HELP)
-    for profile in profiles:
-        echo(str(profile))
+    for c42profile in profiles:
+        echo(str(c42profile))
 
 
 @profile.command()
@@ -142,11 +142,11 @@ def delete_all():
         message = (
             "\nAre you sure you want to delete the following profiles?\n\t{}"
             "\n\nThis will also delete any stored passwords and checkpoints. (y/n): "
-        ).format("\n\t".join([profile.name for profile in existing_profiles]))
+        ).format("\n\t".join([c42profile.name for c42profile in existing_profiles]))
         if does_user_agree(message):
-            for profile in existing_profiles:
-                cliprofile.delete_profile(profile.name)
-                echo("Profile '{}' has been deleted.".format(profile.name))
+            for profile_obj in existing_profiles:
+                cliprofile.delete_profile(profile_obj.name)
+                echo("Profile '{}' has been deleted.".format(profile_obj.name))
     else:
         echo("\nNo profiles exist. Nothing to delete.")
 

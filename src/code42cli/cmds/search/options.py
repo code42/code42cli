@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 
 import click
 
-from code42cli.cmds.search.enums import ServerProtocol
 from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with

@@ -33,7 +33,7 @@ def test_create_sdk_when_profile_has_ssl_errors_disabled_sets_py42_setting_and_p
 ):
     mock_py42 = mocker.patch("code42cli.sdk_client.py42")
     profile.ignore_ssl_errors = "True"
-    sdk = create_sdk(profile, False)
+    create_sdk(profile, False)
     output = capsys.readouterr()
     assert mock_py42.settings.verify_ssl_certs == False
     assert (
