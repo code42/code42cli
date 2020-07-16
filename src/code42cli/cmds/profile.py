@@ -32,8 +32,8 @@ username_option = click.option(
 )
 password_option = click.option(
     "--password",
-    help="The password for the Code42 API user. Only recommended if command needs to be run without "
-    "prompt interactions.",
+    help="The password for the Code42 API user. If this option is omitted, interactive prompts "
+    "will be used to obtain the password.",
 )
 disable_ssl_option = click.option(
     "--disable-ssl-errors",
