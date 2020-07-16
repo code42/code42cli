@@ -301,6 +301,6 @@ def test_list_profiles_when_no_profiles_outputs_no_profiles_message(
 
 
 def test_use_profile(runner, mock_cliprofile_namespace, profile):
-    runner.invoke(cli, ["profile", "use", profile.name])
+    result = runner.invoke(cli, ["profile", "use", profile.name])
     mock_cliprofile_namespace.switch_default_profile.assert_called_once_with(profile.name)
     assert "{} has been set as the default profile.".format(profile.name) in result.output

@@ -83,7 +83,7 @@ def create(name, server, username, password, disable_ssl_errors):
 def update(name, server, username, password, disable_ssl_errors):
     """Update an existing profile."""
     c42profile = cliprofile.get_profile(name)
-    cliprofile.update_profile(profile.name, server, username, disable_ssl_errors)
+    cliprofile.update_profile(c42profile.name, server, username, disable_ssl_errors)
     if password:
         _set_pw(name, password)
     else:
