@@ -5,6 +5,7 @@ from click import echo, secho
 
 import code42cli.profile as cliprofile
 from code42cli.errors import Code42CLIError
+from code42cli.options import yes_option
 from code42cli.profile import CREATE_PROFILE_HELP
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree
@@ -118,29 +119,29 @@ def use(profile_name):
 
 
 @profile.command()
+@yes_option
 @profile_name_arg
 def delete(profile_name):
     """Deletes a profile and its stored password (if any)."""
+    message = "\nDeleting this profile will also delete any stored passwords and checkpoints. Are you sure? (y/n): "
     if cliprofile.is_default_profile(profile_name):
-        echo("\n{} is currently the default profile!".format(profile_name))
-    if not does_user_agree(
-        "\nDeleting this profile will also delete any stored passwords and checkpoints. "
-        "Are you sure? (y/n): "
-    ):
-        return
-    cliprofile.delete_profile(profile_name)
-    echo("Profile '{}' has been deleted.".format(profile_name))
+        message = "\n'{0}' is currently the default profile!\n{1}".format(profile_name, message)
+    if does_user_agree(message):
+        cliprofile.delete_profile(profile_name)
+        echo("Profile '{}' has been deleted.".format(profile_name))
 
 
 @profile.command()
+@yes_option
 def delete_all():
     """Deletes all profiles and saved passwords (if any)."""
     existing_profiles = cliprofile.get_all_profiles()
     if existing_profiles:
-        echo("\nAre you sure you want to delete the following profiles?")
-        for profile in existing_profiles:
-            echo("\t{}".format(profile.name))
-        if does_user_agree("\nThis will also delete any stored passwords and checkpoints. (y/n): "):
+        message = (
+            "\nAre you sure you want to delete the following profiles?\n\t{}"
+            "\n\nThis will also delete any stored passwords and checkpoints. (y/n): "
+        ).format("\n\t".join([profile.name for profile in existing_profiles]))
+        if does_user_agree(message):
             for profile in existing_profiles:
                 cliprofile.delete_profile(profile.name)
                 echo("Profile '{}' has been deleted.".format(profile.name))
