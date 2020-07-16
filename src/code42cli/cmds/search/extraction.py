@@ -60,10 +60,12 @@ def create_handlers(sdk, extractor_class, output_logger, cursor_store, checkpoin
             except Exception as ex:
                 handlers.handle_error(ex)
         handlers.TOTAL_EVENTS += len(events)
+        event = None
         for event in events:
             output_logger.info(event)
-        last_event_timestamp = extractor._get_timestamp_from_item(event)
-        handlers.record_cursor_position(last_event_timestamp)
+        if event:
+            last_event_timestamp = extractor._get_timestamp_from_item(event)
+            handlers.record_cursor_position(last_event_timestamp)
 
     handlers.handle_response = handle_response
     return handlers
