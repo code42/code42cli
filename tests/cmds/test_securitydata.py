@@ -120,7 +120,7 @@ def test_search_with_advanced_query_and_incompatible_argument_errors(runner, arg
         ("--use-checkpoint", "test"),
     ],
 )
-def test_serach_with_saved_search_and_incompatible_argument_errors(runner, arg, cli_state):
+def test_search_with_saved_search_and_incompatible_argument_errors(runner, arg, cli_state):
     result = runner.invoke(
         cli, ["security-data", "search", "--saved-search", "test_id", *arg], obj=cli_state,
     )
