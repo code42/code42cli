@@ -65,13 +65,13 @@ class BaseCursorStore(object):
 
 class FileEventCursorStore(BaseCursorStore):
     def __init__(self, profile_name):
-        dir_path = get_user_project_path(u"file_event_checkpoints", profile_name)
+        dir_path = get_user_project_path("file_event_checkpoints", profile_name)
         super(FileEventCursorStore, self).__init__(dir_path)
 
 
 class AlertCursorStore(BaseCursorStore):
     def __init__(self, profile_name):
-        dir_path = get_user_project_path(u"alert_checkpoints", profile_name)
+        dir_path = get_user_project_path("alert_checkpoints", profile_name)
         super(AlertCursorStore, self).__init__(dir_path)
 
 
