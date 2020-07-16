@@ -125,7 +125,7 @@ def delete_all():
         message = (
             "\nAre you sure you want to delete the following profiles?\n\t{}"
             "\n\nThis will also delete any stored passwords and checkpoints. (y/n): "
-        ).format("\n\t".join([profile.name for profile in existing_profiles]))
+        ).format("\n\t".join([c42profile.name for c42profile in existing_profiles]))
         if does_user_agree(message):
             for profile_obj in existing_profiles:
                 cliprofile.delete_profile(profile_obj.name)

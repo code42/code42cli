@@ -63,11 +63,12 @@ bulk.add_command(departing_employee_generate_template)
 @sdk_options
 def add(state, csv_rows):
     sdk = state.sdk
-    row_handler = lambda username, cloud_alias, departure_date, notes: _add_departing_employee(
-        sdk, username, cloud_alias, departure_date, notes
-    )
+    def handle_row(username, cloud_alias, departure_date, notes):
+        _add_departing_employee(
+            sdk, username, cloud_alias, departure_date, notes
+        )
     run_bulk_process(
-        row_handler, csv_rows, progress_label="Adding users to departing employee detection list:"
+        handle_row, csv_rows, progress_label="Adding users to departing employee detection list:"
     )
 
 
@@ -79,9 +80,10 @@ def add(state, csv_rows):
 @sdk_options
 def remove(state, file_rows):
     sdk = state.sdk
-    row_handler = lambda username: _remove_departing_employee(sdk, username)
+    def handle_row(username):
+        _remove_departing_employee(sdk, username)
     run_bulk_process(
-        row_handler,
+        handle_row,
         file_rows,
         progress_label="Removing users from departing employee detection list:",
     )

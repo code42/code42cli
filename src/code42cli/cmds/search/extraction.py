@@ -77,6 +77,8 @@ def create_time_range_filter(filter_cls, begin_date=None, end_date=None):
         `None` if both begin_date and end_date args are `None`.
         
         Args:
+            filter_cls: The class of filter to create. (must be a subclass of 
+              :class:`py42.sdk.queries.query_filter.QueryFilterTimestampField`)
             begin_date: The begin date for the range.
             end_date: The end date for the range.
     """
