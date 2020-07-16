@@ -136,7 +136,7 @@ def _add_user(sdk, rule_id, username):
     try:
         if rules:
             sdk.alerts.rules.add_user(rule_id, user_id)
-    except Py42InternalServerError as e:
+    except Py42InternalServerError:
         _check_if_system_rule(rules)
         raise
 
@@ -147,7 +147,7 @@ def _remove_user(sdk, rule_id, username):
     try:
         if rules:
             sdk.alerts.rules.remove_user(rule_id, user_id)
-    except Py42InternalServerError as e:
+    except Py42InternalServerError:
         _check_if_system_rule(rules)
         raise
 
