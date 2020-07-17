@@ -1,16 +1,15 @@
 import pytest
-from click.testing import CliRunner
-
 from c42eventextractor.extractors import AlertExtractor
+from click.testing import CliRunner
 from py42.sdk.queries.alerts.filters import *
+from tests.cmds.conftest import filter_term_is_in_call_args
+from tests.cmds.conftest import get_filter_value_from_json
+from tests.conftest import get_test_date_str
 
 from code42cli import PRODUCT_NAME
-from code42cli.main import cli
-from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.cmds.search import extraction
-
-from tests.cmds.conftest import get_filter_value_from_json, filter_term_is_in_call_args
-from tests.conftest import get_test_date_str
+from code42cli.cmds.search.cursor_store import AlertCursorStore
+from code42cli.main import cli
 
 
 BEGIN_TIMESTAMP = 1577858400.0
@@ -21,16 +20,66 @@ CURSOR_TIMESTAMP = 1579500000.0
 ALERT_SUMMARY_LIST = [{"id": i} for i in range(20)]
 
 ALERT_DETAIL_RESULT = [
-    {"alerts": [{"id": 1, "createdAt": "2020-01-17"}, {"id": 11, "createdAt": "2020-01-18"}]},
-    {"alerts": [{"id": 2, "createdAt": "2020-01-19"}, {"id": 12, "createdAt": "2020-01-20"}]},
-    {"alerts": [{"id": 3, "createdAt": "2020-01-01"}, {"id": 13, "createdAt": "2020-01-02"}]},
-    {"alerts": [{"id": 4, "createdAt": "2020-01-03"}, {"id": 14, "createdAt": "2020-01-04"}]},
-    {"alerts": [{"id": 5, "createdAt": "2020-01-05"}, {"id": 15, "createdAt": "2020-01-06"}]},
-    {"alerts": [{"id": 6, "createdAt": "2020-01-07"}, {"id": 16, "createdAt": "2020-01-08"}]},
-    {"alerts": [{"id": 7, "createdAt": "2020-01-09"}, {"id": 17, "createdAt": "2020-01-10"}]},
-    {"alerts": [{"id": 8, "createdAt": "2020-01-11"}, {"id": 18, "createdAt": "2020-01-12"}]},
-    {"alerts": [{"id": 9, "createdAt": "2020-01-13"}, {"id": 19, "createdAt": "2020-01-14"}]},
-    {"alerts": [{"id": 10, "createdAt": "2020-01-15"}, {"id": 20, "createdAt": "2020-01-16"}]},
+    {
+        "alerts": [
+            {"id": 1, "createdAt": "2020-01-17"},
+            {"id": 11, "createdAt": "2020-01-18"},
+        ]
+    },
+    {
+        "alerts": [
+            {"id": 2, "createdAt": "2020-01-19"},
+            {"id": 12, "createdAt": "2020-01-20"},
+        ]
+    },
+    {
+        "alerts": [
+            {"id": 3, "createdAt": "2020-01-01"},
+            {"id": 13, "createdAt": "2020-01-02"},
+        ]
+    },
+    {
+        "alerts": [
+            {"id": 4, "createdAt": "2020-01-03"},
+            {"id": 14, "createdAt": "2020-01-04"},
+        ]
+    },
+    {
+        "alerts": [
+            {"id": 5, "createdAt": "2020-01-05"},
+            {"id": 15, "createdAt": "2020-01-06"},
+        ]
+    },
+    {
+        "alerts": [
+            {"id": 6, "createdAt": "2020-01-07"},
+            {"id": 16, "createdAt": "2020-01-08"},
+        ]
+    },
+    {
+        "alerts": [
+            {"id": 7, "createdAt": "2020-01-09"},
+            {"id": 17, "createdAt": "2020-01-10"},
+        ]
+    },
+    {
+        "alerts": [
+            {"id": 8, "createdAt": "2020-01-11"},
+            {"id": 18, "createdAt": "2020-01-12"},
+        ]
+    },
+    {
+        "alerts": [
+            {"id": 9, "createdAt": "2020-01-13"},
+            {"id": 19, "createdAt": "2020-01-14"},
+        ]
+    },
+    {
+        "alerts": [
+            {"id": 10, "createdAt": "2020-01-15"},
+            {"id": 20, "createdAt": "2020-01-16"},
+        ]
+    },
 ]
 
 SORTED_ALERT_DETAILS = [
@@ -85,7 +134,9 @@ def alert_cursor_without_checkpoint(mocker):
 
 @pytest.fixture
 def begin_option(mocker):
-    mock = mocker.patch("{}.cmds.search.options.parse_min_timestamp".format(PRODUCT_NAME))
+    mock = mocker.patch(
+        "{}.cmds.search.options.parse_min_timestamp".format(PRODUCT_NAME)
+    )
     mock.return_value = BEGIN_TIMESTAMP
     mock.expected_timestamp = "2020-01-01T06:00:00.000Z"
     return mock
@@ -104,7 +155,9 @@ def test_search_with_advanced_query_uses_only_the_extract_advanced_method(
 ):
 
     runner.invoke(
-        cli, ["alerts", "search", "--advanced-query", ADVANCED_QUERY_JSON], obj=cli_state
+        cli,
+        ["alerts", "search", "--advanced-query", ADVANCED_QUERY_JSON],
+        obj=cli_state,
     )
     alert_extractor.extract_advanced.assert_called_once_with('{"some": "complex json"}')
     assert alert_extractor.extract.call_count == 0
@@ -140,10 +193,14 @@ def test_search_without_advanced_query_uses_only_the_extract_method(
         ("--use-checkpoint", "test"),
     ],
 )
-def test_search_with_advanced_query_and_incompatible_argument_errors(arg, cli_state, runner):
+def test_search_with_advanced_query_and_incompatible_argument_errors(
+    arg, cli_state, runner
+):
 
     result = runner.invoke(
-        cli, ["alerts", "search", "--advanced-query", ADVANCED_QUERY_JSON, *arg], obj=cli_state,
+        cli,
+        ["alerts", "search", "--advanced-query", ADVANCED_QUERY_JSON, *arg],
+        obj=cli_state,
     )
     assert result.exit_code == 2
     assert "{} can't be used with: --advanced-query".format(arg[0]) in result.output
@@ -156,13 +213,15 @@ def test_search_when_given_begin_and_end_dates_uses_expected_query(
     end_date = get_test_date_str(days_ago=1)
 
     runner.invoke(
-        cli, ["alerts", "search", "--begin", begin_date, "--end", end_date], obj=cli_state
+        cli,
+        ["alerts", "search", "--begin", begin_date, "--end", end_date],
+        obj=cli_state,
     )
     filters = alert_extractor.extract.call_args[0][0]
     actual_begin = get_filter_value_from_json(filters, filter_index=0)
-    expected_begin = "{0}T00:00:00.000Z".format(begin_date)
+    expected_begin = "{}T00:00:00.000Z".format(begin_date)
     actual_end = get_filter_value_from_json(filters, filter_index=1)
-    expected_end = "{0}T23:59:59.999Z".format(end_date)
+    expected_end = "{}T23:59:59.999Z".format(end_date)
     assert actual_begin == expected_begin
     assert actual_end == expected_end
 
@@ -187,9 +246,9 @@ def test_search_when_given_begin_and_end_date_and_times_uses_expected_query(
     )
     filters = alert_extractor.extract.call_args[0][0]
     actual_begin = get_filter_value_from_json(filters, filter_index=0)
-    expected_begin = "{0}T{1}.000Z".format(begin_date, time)
+    expected_begin = "{}T{}.000Z".format(begin_date, time)
     actual_end = get_filter_value_from_json(filters, filter_index=1)
-    expected_end = "{0}T{1}.000Z".format(end_date, time)
+    expected_end = "{}T{}.000Z".format(end_date, time)
     assert actual_begin == expected_begin
     assert actual_end == expected_end
 
@@ -202,8 +261,10 @@ def test_search_when_given_begin_date_and_time_without_seconds_uses_expected_que
     result = runner.invoke(
         cli, ["alerts", "search", "--begin", "{} {}".format(date, time)], obj=cli_state
     )
-    actual = get_filter_value_from_json(alert_extractor.extract.call_args[0][0], filter_index=0)
-    expected = "{0}T{1}:00.000Z".format(date, time)
+    actual = get_filter_value_from_json(
+        alert_extractor.extract.call_args[0][0], filter_index=0
+    )
+    expected = "{}T{}:00.000Z".format(date, time)
     assert actual == expected
 
 
@@ -215,17 +276,30 @@ def test_search_when_given_end_date_and_time_uses_expected_query(
     time = "15:33"
     runner.invoke(
         cli,
-        ["alerts", "search", "--begin", begin_date, "--end", "{} {}".format(end_date, time)],
+        [
+            "alerts",
+            "search",
+            "--begin",
+            begin_date,
+            "--end",
+            "{} {}".format(end_date, time),
+        ],
         obj=cli_state,
     )
-    actual = get_filter_value_from_json(alert_extractor.extract.call_args[0][0], filter_index=1)
-    expected = "{0}T{1}:00.000Z".format(end_date, time)
+    actual = get_filter_value_from_json(
+        alert_extractor.extract.call_args[0][0], filter_index=1
+    )
+    expected = "{}T{}:00.000Z".format(end_date, time)
     assert actual == expected
 
 
-def test_search_when_given_begin_date_more_than_ninety_days_back_errors(cli_state, runner):
+def test_search_when_given_begin_date_more_than_ninety_days_back_errors(
+    cli_state, runner
+):
     begin_date = get_test_date_str(days_ago=91) + " 12:51:00"
-    result = runner.invoke(cli, ["alerts", "search", "--begin", begin_date], obj=cli_state)
+    result = runner.invoke(
+        cli, ["alerts", "search", "--begin", begin_date], obj=cli_state
+    )
     assert result.exit_code == 2
     assert "must be within 90 days" in result.output
 
@@ -235,7 +309,9 @@ def test_search_when_given_begin_date_past_90_days_and_use_checkpoint_and_a_stor
 ):
     begin_date = get_test_date_str(days_ago=91) + " 12:51:00"
     runner.invoke(
-        cli, ["alerts", "search", "--begin", begin_date, "--use-checkpoint", "test"], obj=cli_state
+        cli,
+        ["alerts", "search", "--begin", begin_date, "--use-checkpoint", "test"],
+        obj=cli_state,
     )
     assert not filter_term_is_in_call_args(alert_extractor, DateObserved._term)
 
@@ -245,8 +321,10 @@ def test_search_when_given_begin_date_and_not_use_checkpoint_and_cursor_exists_u
 ):
     begin_date = get_test_date_str(days_ago=1)
     runner.invoke(cli, ["alerts", "search", "--begin", begin_date], obj=cli_state)
-    actual_ts = get_filter_value_from_json(alert_extractor.extract.call_args[0][0], filter_index=0)
-    expected_ts = "{0}T00:00:00.000Z".format(begin_date)
+    actual_ts = get_filter_value_from_json(
+        alert_extractor.extract.call_args[0][0], filter_index=0
+    )
+    expected_ts = "{}T00:00:00.000Z".format(begin_date)
     assert actual_ts == expected_ts
     assert filter_term_is_in_call_args(alert_extractor, DateObserved._term)
 
@@ -255,7 +333,9 @@ def test_search_when_end_date_is_before_begin_date_causes_exit(cli_state, runner
     begin_date = get_test_date_str(days_ago=1)
     end_date = get_test_date_str(days_ago=3)
     result = runner.invoke(
-        cli, ["alerts", "search", "--begin", begin_date, "--end", end_date], obj=cli_state
+        cli,
+        ["alerts", "search", "--begin", begin_date, "--end", end_date],
+        obj=cli_state,
     )
     assert result.exit_code == 2
     assert "'--begin': cannot be after --end date" in result.output
@@ -292,7 +372,9 @@ def test_search_with_only_begin_calls_extract_with_expected_filters(
 def test_search_with_use_checkpoint_and_without_begin_and_without_stored_checkpoint_causes_expected_error(
     cli_state, alert_cursor_without_checkpoint, runner
 ):
-    result = runner.invoke(cli, ["alerts", "search", "--use-checkpoint", "test"], obj=cli_state)
+    result = runner.invoke(
+        cli, ["alerts", "search", "--use-checkpoint", "test"], obj=cli_state
+    )
     assert result.exit_code == 2
     assert (
         "--begin date is required for --use-checkpoint when no checkpoint exists yet."
@@ -310,12 +392,21 @@ def test_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_extract
 ):
     result = runner.invoke(
         cli,
-        ["alerts", "search", "--use-checkpoint", "test", "--begin", "<overridden by fixture>"],
+        [
+            "alerts",
+            "search",
+            "--use-checkpoint",
+            "test",
+            "--begin",
+            "<overridden by fixture>",
+        ],
         obj=cli_state,
     )
     assert result.exit_code == 0
     assert len(alert_extractor.extract.call_args[0]) == 1
-    assert begin_option.expected_timestamp in str(alert_extractor.extract.call_args[0][0])
+    assert begin_option.expected_timestamp in str(
+        alert_extractor.extract.call_args[0][0]
+    )
 
 
 def test_search_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_calls_extract_with_checkpoint_and_ignores_begin_arg(
@@ -323,17 +414,23 @@ def test_search_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_ca
 ):
 
     result = runner.invoke(
-        cli, ["alerts", "search", "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state
+        cli,
+        ["alerts", "search", "--use-checkpoint", "test", "--begin", "1h"],
+        obj=cli_state,
     )
     assert result.exit_code == 0
     alert_extractor.extract.assert_called_with()
     assert (
-        "checkpoint of {} exists".format(alert_cursor_with_checkpoint.expected_timestamp)
+        "checkpoint of {} exists".format(
+            alert_cursor_with_checkpoint.expected_timestamp
+        )
         in result.output
     )
 
 
-def test_search_when_given_actor_is_uses_username_filter(cli_state, alert_extractor, runner):
+def test_search_when_given_actor_is_uses_username_filter(
+    cli_state, alert_extractor, runner
+):
     actor_name = "test.testerson"
 
     runner.invoke(
@@ -343,21 +440,29 @@ def test_search_when_given_actor_is_uses_username_filter(cli_state, alert_extrac
     assert str(Actor.is_in([actor_name])) in filter_strings
 
 
-def test_search_when_given_exclude_actor_uses_actor_filter(cli_state, alert_extractor, runner):
+def test_search_when_given_exclude_actor_uses_actor_filter(
+    cli_state, alert_extractor, runner
+):
     actor_name = "test.testerson"
 
     runner.invoke(
-        cli, ["alerts", "search", "--begin", "1h", "--exclude-actor", actor_name], obj=cli_state
+        cli,
+        ["alerts", "search", "--begin", "1h", "--exclude-actor", actor_name],
+        obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(Actor.not_in([actor_name])) in filter_strings
 
 
-def test_search_when_given_rule_name_uses_rule_name_filter(cli_state, alert_extractor, runner):
+def test_search_when_given_rule_name_uses_rule_name_filter(
+    cli_state, alert_extractor, runner
+):
     rule_name = "departing employee"
 
     runner.invoke(
-        cli, ["alerts", "search", "--begin", "1h", "--rule-name", rule_name], obj=cli_state
+        cli,
+        ["alerts", "search", "--begin", "1h", "--rule-name", rule_name],
+        obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(RuleName.is_in([rule_name])) in filter_strings
@@ -369,17 +474,23 @@ def test_search_when_given_exclude_rule_name_uses_rule_name_not_filter(
     rule_name = "departing employee"
 
     runner.invoke(
-        cli, ["alerts", "search", "--begin", "1h", "--exclude-rule-name", rule_name], obj=cli_state
+        cli,
+        ["alerts", "search", "--begin", "1h", "--exclude-rule-name", rule_name],
+        obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(RuleName.not_in([rule_name])) in filter_strings
 
 
-def test_search_when_given_rule_type_uses_rule_name_filter(cli_state, alert_extractor, runner):
+def test_search_when_given_rule_type_uses_rule_name_filter(
+    cli_state, alert_extractor, runner
+):
     rule_type = "FedEndpointExfiltration"
 
     runner.invoke(
-        cli, ["alerts", "search", "--begin", "1h", "--rule-type", rule_type], obj=cli_state
+        cli,
+        ["alerts", "search", "--begin", "1h", "--rule-type", rule_type],
+        obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(RuleType.is_in([rule_type])) in filter_strings
@@ -391,13 +502,17 @@ def test_search_when_given_exclude_rule_type_uses_rule_name_not_filter(
     rule_type = "FedEndpointExfiltration"
 
     runner.invoke(
-        cli, ["alerts", "search", "--begin", "1h", "--exclude-rule-type", rule_type], obj=cli_state
+        cli,
+        ["alerts", "search", "--begin", "1h", "--exclude-rule-type", rule_type],
+        obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(RuleType.not_in([rule_type])) in filter_strings
 
 
-def test_search_when_given_rule_id_uses_rule_name_filter(cli_state, alert_extractor, runner):
+def test_search_when_given_rule_id_uses_rule_name_filter(
+    cli_state, alert_extractor, runner
+):
     rule_id = "departing employee"
 
     runner.invoke(
@@ -413,17 +528,23 @@ def test_search_when_given_exclude_rule_id_uses_rule_name_not_filter(
     rule_id = "departing employee"
 
     runner.invoke(
-        cli, ["alerts", "search", "--begin", "1h", "--exclude-rule-id", rule_id], obj=cli_state
+        cli,
+        ["alerts", "search", "--begin", "1h", "--exclude-rule-id", rule_id],
+        obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(RuleId.not_in([rule_id])) in filter_strings
 
 
-def test_search_when_given_description_uses_description_filter(cli_state, alert_extractor, runner):
+def test_search_when_given_description_uses_description_filter(
+    cli_state, alert_extractor, runner
+):
     description = "test description"
 
     runner.invoke(
-        cli, ["alerts", "search", "--begin", "1h", "--description", description], obj=cli_state
+        cli,
+        ["alerts", "search", "--begin", "1h", "--description", description],
+        obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(Description.contains(description)) in filter_strings

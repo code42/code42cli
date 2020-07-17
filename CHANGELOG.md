@@ -15,14 +15,14 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - `-i` (`--incremental`) has been removed, use `-c` (`--use-checkpoint`) with a string name for the checkpoint instead.
 
 - The code42cli has been migrated to the [click](https://click.palletsprojects.com) framework. This brings:
-    - BREAKING CHANGE: Commands that accept multiple values for the same option now must have the option flag provided before each value: 
+    - BREAKING CHANGE: Commands that accept multiple values for the same option now must have the option flag provided before each value:
         use `--option value1 --option value2` instead of `--option value1 value2` (which was previously possible).
     - Cosmetic changes to error messages, progress bars, and help message formatting.
 
-- The `print` command on the `security-data` and `alerts` command groups has been replaced with the `search` command. 
+- The `print` command on the `security-data` and `alerts` command groups has been replaced with the `search` command.
     This was a name change only, all other functionality remains the same.
-   
-- A profile created with the `--disable-ssl-errors` flag will now correctly not verify SSL certs when making requests. A warning message is printed 
+
+- A profile created with the `--disable-ssl-errors` flag will now correctly not verify SSL certs when making requests. A warning message is printed
     each time the CLI is run with a profile configured this way, as it is not recommended.
 
 ### Added
@@ -32,7 +32,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Removed
 
-- The `write-to` and `send-to` commands on `security-data` and `alerts` command groups. 
+- The `write-to` and `send-to` commands on `security-data` and `alerts` command groups.
 
 ## 0.7.3 - 2020-06-23
 
@@ -106,12 +106,12 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
         - optional argument `--include-inactive` additionally prints matter memberships that are no longer active.
         - optional argument `--include-policy` additionally prints out the matter's backup preservation policy in json form.
     - `bulk` with subcommands:
-        - `add-user`: that takes a csv file with matter IDs and usernames. 
+        - `add-user`: that takes a csv file with matter IDs and usernames.
         - `remove-user`: that takes a csv file with matter IDs and usernames.
-        - `generate-template`: that creates the file templates. 
+        - `generate-template`: that creates the file templates.
             - `cmd`: with options `add` and `remove`.
             - `path`
-            
+
 - Success messages for `profile delete` and `profile update`.
 
 - Additional information in the error log file:
@@ -123,7 +123,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - A custom error in the error log when you try adding a user to a detection list who is already added.
 - Graceful handling of keyboard interrupts (ctrl-c) so stack traces aren't printed to console.
 - Warning message printed when ctrl-c is encountered in the middle of an operation that could cause incorrect checkpoint
-    state, a second ctrl-c is required to quit while that operation is ongoing. 
+    state, a second ctrl-c is required to quit while that operation is ongoing.
 
 - A progress bar that displays during bulk commands.
 

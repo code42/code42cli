@@ -84,7 +84,11 @@ class RuleType(object):
         return len(self._as_list())
 
     def _as_list(self):
-        return [self.ENDPOINT_EXFILTRATION, self.CLOUD_SHARE_PERMISSIONS, self.FILE_TYPE_MISMATCH]
+        return [
+            self.ENDPOINT_EXFILTRATION,
+            self.CLOUD_SHARE_PERMISSIONS,
+            self.FILE_TYPE_MISMATCH,
+        ]
 
 
 class ServerProtocol(object):

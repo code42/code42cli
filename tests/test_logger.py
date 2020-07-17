@@ -3,12 +3,11 @@ import os
 from logging.handlers import RotatingFileHandler
 
 from requests import Request
-from code42cli.logger import (
-    add_handler_to_logger,
-    logger_has_handlers,
-    get_view_error_details_message,
-    CliLogger,
-)
+
+from code42cli.logger import add_handler_to_logger
+from code42cli.logger import CliLogger
+from code42cli.logger import get_view_error_details_message
+from code42cli.logger import logger_has_handlers
 from code42cli.util import get_user_project_path
 
 
@@ -56,7 +55,9 @@ class TestCliLogger(object):
             self._logger.log_error(ex)
             assert str(ex) in caplog.text
 
-    def test_log_verbose_error_logs_expected_text_at_expected_level(self, mocker, caplog):
+    def test_log_verbose_error_logs_expected_text_at_expected_level(
+        self, mocker, caplog
+    ):
         with caplog.at_level(logging.ERROR):
             request = mocker.MagicMock(sepc=Request)
             request.body = {"foo": "bar"}

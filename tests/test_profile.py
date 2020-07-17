@@ -1,10 +1,13 @@
 import pytest
 
 import code42cli.profile as cliprofile
+from .conftest import create_mock_profile
+from .conftest import MockSection
 from code42cli import PRODUCT_NAME
-from code42cli.cmds.search.cursor_store import FileEventCursorStore, AlertCursorStore
-from code42cli.config import ConfigAccessor, NoConfigProfileError
-from .conftest import MockSection, create_mock_profile
+from code42cli.cmds.search.cursor_store import AlertCursorStore
+from code42cli.cmds.search.cursor_store import FileEventCursorStore
+from code42cli.config import ConfigAccessor
+from code42cli.config import NoConfigProfileError
 from code42cli.errors import Code42CLIError
 
 
@@ -31,14 +34,20 @@ def password_deleter(mocker):
 
 
 class TestCode42Profile(object):
-    def test_get_password_when_is_none_returns_password_from_getpass(self, mocker, password_getter):
+    def test_get_password_when_is_none_returns_password_from_getpass(
+        self, mocker, password_getter
+    ):
         password_getter.return_value = None
-        mock_getpass = mocker.patch("{}.password.get_password_from_prompt".format(PRODUCT_NAME))
+        mock_getpass = mocker.patch(
+            "{}.password.get_password_from_prompt".format(PRODUCT_NAME)
+        )
         mock_getpass.return_value = "Test Password"
         actual = create_mock_profile().get_password()
         assert actual == "Test Password"
 
-    def test_get_password_return_password_from_password_get_password(self, password_getter):
+    def test_get_password_return_password_from_password_get_password(
+        self, password_getter
+    ):
         password_getter.return_value = "Test Password"
         actual = create_mock_profile().get_password()
         assert actual == "Test Password"
@@ -137,7 +146,9 @@ def test_create_profile_uses_expected_profile_values(config_accessor):
     )
 
 
-def test_create_profile_if_profile_exists_exits(mocker, cli_state, caplog, config_accessor):
+def test_create_profile_if_profile_exists_exits(
+    mocker, cli_state, caplog, config_accessor
+):
     config_accessor.get_profile.return_value = mocker.MagicMock()
     with pytest.raises(Code42CLIError):
         cliprofile.create_profile("foo", "bar", "baz", True)
@@ -154,7 +165,9 @@ def test_get_all_profiles_returns_expected_profile_list(config_accessor):
     assert profiles[1].name == "two"
 
 
-def test_get_stored_password_returns_expected_password(config_accessor, password_getter):
+def test_get_stored_password_returns_expected_password(
+    config_accessor, password_getter
+):
     mock_section = MockSection("testprofilename")
     config_accessor.get_profile.return_value = mock_section
     test_profile = "testprofilename"
@@ -162,7 +175,9 @@ def test_get_stored_password_returns_expected_password(config_accessor, password
     assert cliprofile.get_stored_password("testprofilename") == "testpassword"
 
 
-def test_get_stored_password_uses_expected_profile_name(config_accessor, password_getter):
+def test_get_stored_password_uses_expected_profile_name(
+    config_accessor, password_getter
+):
     mock_section = MockSection("testprofilename")
     config_accessor.get_profile.return_value = mock_section
     test_profile = "testprofilename"
@@ -204,7 +219,9 @@ def test_delete_profile_clears_checkpoints(config_accessor, mocker):
     mock_get_profile.return_value = profile
     event_store = mocker.MagicMock(spec=FileEventCursorStore)
     alert_store = mocker.MagicMock(spec=AlertCursorStore)
-    mock_get_cursor_store = mocker.patch("code42cli.profile.get_all_cursor_stores_for_profile")
+    mock_get_cursor_store = mocker.patch(
+        "code42cli.profile.get_all_cursor_stores_for_profile"
+    )
     mock_get_cursor_store.return_value = [event_store, alert_store]
     cliprofile.delete_profile("deleteme")
     assert event_store.clean.call_count == 1

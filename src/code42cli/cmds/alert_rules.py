@@ -9,10 +9,13 @@ from code42cli import PRODUCT_NAME
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
 from code42cli.cmds.shared import get_user_id
-from code42cli.errors import Code42CLIError, InvalidRuleTypeError
+from code42cli.errors import Code42CLIError
+from code42cli.errors import InvalidRuleTypeError
 from code42cli.file_readers import read_csv_arg
-from code42cli.options import sdk_options, OrderedGroup
-from code42cli.util import format_to_table, find_format_width
+from code42cli.options import OrderedGroup
+from code42cli.options import sdk_options
+from code42cli.util import find_format_width
+from code42cli.util import format_to_table
 
 
 class AlertRuleTypes(object):
@@ -37,14 +40,19 @@ def alert_rules(state):
     pass
 
 
-rule_id_option = click.option("--rule-id", required=True, help="Observer ID of the rule.")
+rule_id_option = click.option(
+    "--rule-id", required=True, help="Observer ID of the rule."
+)
 username_option = click.option("-u", "--username", required=True)
 
 
 @alert_rules.command()
 @rule_id_option
 @click.option(
-    "-u", "--username", required=True, help="The username of the user to add to the alert rule.",
+    "-u",
+    "--username",
+    required=True,
+    help="The username of the user to add to the alert rule.",
 )
 @sdk_options
 def add_user(state, rule_id, username):
@@ -113,9 +121,13 @@ bulk.add_command(alert_rules_generate_template)
 @sdk_options
 def add(state, csv_rows):
     sdk = state.sdk
+
     def handle_row(rule_id, username):
         _add_user(sdk, rule_id, username)
-    run_bulk_process(handle_row, csv_rows, progress_label="Adding users to alert-rules:")
+
+    run_bulk_process(
+        handle_row, csv_rows, progress_label="Adding users to alert-rules:"
+    )
 
 
 @bulk.command(
@@ -127,9 +139,13 @@ def add(state, csv_rows):
 @sdk_options
 def remove(state, csv_rows):
     sdk = state.sdk
+
     def handle_row(rule_id, username):
         _remove_user(sdk, rule_id, username)
-    run_bulk_process(handle_row, csv_rows, progress_label="Removing users from alert-rules:")
+
+    run_bulk_process(
+        handle_row, csv_rows, progress_label="Removing users from alert-rules:"
+    )
 
 
 def _add_user(sdk, rule_id, username):
@@ -156,7 +172,9 @@ def _remove_user(sdk, rule_id, username):
 
 def _get_all_rules_metadata(sdk):
     rules_generator = sdk.alerts.rules.get_all()
-    selected_rules = [rule for rules in rules_generator for rule in rules["ruleMetadata"]]
+    selected_rules = [
+        rule for rules in rules_generator for rule in rules["ruleMetadata"]
+    ]
     return _handle_rules_results(selected_rules)
 
 
@@ -167,7 +185,7 @@ def _get_rule_metadata(sdk, rule_id):
 
 def _handle_rules_results(rules, rule_id=None):
     id_msg = "with RuleId {} ".format(rule_id) if rule_id else ""
-    msg = "No alert rules {0}found.".format(id_msg)
+    msg = "No alert rules {}found.".format(id_msg)
     if not rules:
         echo(msg)
     return rules

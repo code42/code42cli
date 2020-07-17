@@ -4,8 +4,8 @@ import click
 
 
 def read_csv_arg(headers):
-    """Helper for defining arguments that read from a csv file. Automatically converts 
-    the file name provided on command line to a list of csv rows (passed to command 
+    """Helper for defining arguments that read from a csv file. Automatically converts
+    the file name provided on command line to a list of csv rows (passed to command
     function as `csv_rows` param).
     """
     return click.argument(
@@ -24,7 +24,9 @@ def read_csv(file, headers=None):
     first_row = next(reader)
     if None in first_row or None in first_row.values():
         raise click.BadParameter(
-            "Column count in {} doesn't match expected headers: {}".format(file.name, headers)
+            "Column count in {} doesn't match expected headers: {}".format(
+                file.name, headers
+            )
         )
     # skip first row if it's the header values
     if tuple(first_row.keys()) == tuple(first_row.values()):
@@ -34,7 +36,7 @@ def read_csv(file, headers=None):
 
 
 def read_flat_file(file):
-    """Helper to read rows of a flat file, automatically removing header comment row if 
+    """Helper to read rows of a flat file, automatically removing header comment row if
     it exists, and strips whitespace from each row automatically."""
     first_row = next(file)
     if first_row.startswith("#"):

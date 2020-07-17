@@ -45,7 +45,7 @@ class BaseCursorStore(object):
             location = path.join(self._dir_path, cursor_name)
             os.remove(location)
         except FileNotFoundError:
-            msg = "No checkpoint named {0} exists for this profile.".format(cursor_name)
+            msg = "No checkpoint named {} exists for this profile.".format(cursor_name)
             raise Code42CLIError(msg)
 
     def clean(self):

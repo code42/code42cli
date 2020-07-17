@@ -1,5 +1,6 @@
 import pytest
-from requests import Response, HTTPError
+from requests import HTTPError
+from requests import Response
 
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.legal_hold import _check_matter_is_accessible
@@ -44,9 +45,16 @@ INACTIVE_LEGAL_HOLD_MEMBERSHIP = {
 
 
 EMPTY_LEGAL_HOLD_MEMBERSHIPS_RESULT = [{"legalHoldMemberships": []}]
-ACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT = [{"legalHoldMemberships": [ACTIVE_LEGAL_HOLD_MEMBERSHIP]}]
+ACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT = [
+    {"legalHoldMemberships": [ACTIVE_LEGAL_HOLD_MEMBERSHIP]}
+]
 ACTIVE_AND_INACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT = [
-    {"legalHoldMemberships": [ACTIVE_LEGAL_HOLD_MEMBERSHIP, INACTIVE_LEGAL_HOLD_MEMBERSHIP]}
+    {
+        "legalHoldMemberships": [
+            ACTIVE_LEGAL_HOLD_MEMBERSHIP,
+            INACTIVE_LEGAL_HOLD_MEMBERSHIP,
+        ]
+    }
 ]
 INACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT = [
     {"legalHoldMemberships": [INACTIVE_LEGAL_HOLD_MEMBERSHIP]}
@@ -67,7 +75,9 @@ def preservation_policy_response(mocker):
 
 @pytest.fixture
 def get_user_id_success(cli_state):
-    cli_state.sdk.users.get_by_username.return_value = {"users": [{"userUid": ACTIVE_TEST_USER_ID}]}
+    cli_state.sdk.users.get_by_username.return_value = {
+        "users": [{"userUid": ACTIVE_TEST_USER_ID}]
+    }
 
 
 @pytest.fixture
@@ -82,7 +92,9 @@ def check_matter_accessible_success(cli_state):
 
 @pytest.fixture
 def check_matter_accessible_failure(cli_state):
-    cli_state.sdk.legalhold.get_matter_by_uid.side_effect = Py42BadRequestError(HTTPError())
+    cli_state.sdk.legalhold.get_matter_by_uid.side_effect = Py42BadRequestError(
+        HTTPError()
+    )
 
 
 @pytest.fixture
@@ -112,7 +124,7 @@ def test_add_user_raises_user_already_added_error_when_user_already_on_hold(
         obj=cli_state,
     )
     assert result.exit_code == 1
-    assert "'{0}' is already on the legal hold matter id={1}".format(
+    assert "'{}' is already on the legal hold matter id={}".format(
         ACTIVE_TEST_USERNAME, TEST_MATTER_ID
     )
 
@@ -133,7 +145,7 @@ def test_add_user_raises_legalhold_not_found_error_if_matter_inaccessible(
         obj=cli_state,
     )
     assert result.exit_code == 1
-    assert "Matter with id={0} either does not exist or your profile does not have permission to view it.".format(
+    assert "Matter with id={} either does not exist or your profile does not have permission to view it.".format(
         TEST_MATTER_ID
     )
 
@@ -197,7 +209,7 @@ def test_remove_user_raises_user_not_in_matter_error_if_user_not_active_in_matte
         obj=cli_state,
     )
     assert result.exit_code == 1
-    assert "User '{0}' is not an active member of legal hold matter '{1}'".format(
+    assert "User '{}' is not an active member of legal hold matter '{}'".format(
         ACTIVE_TEST_USERNAME, TEST_MATTER_ID
     )
 
@@ -250,7 +262,9 @@ def test_show_matter_prints_active_and_inactive_results_when_include_inactive_fl
     assert INACTIVE_TEST_USERNAME in result.output
 
 
-def test_show_matter_prints_active_results_only(runner, cli_state, check_matter_accessible_success):
+def test_show_matter_prints_active_results_only(
+    runner, cli_state, check_matter_accessible_success
+):
     cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
         ACTIVE_AND_INACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT
     )
@@ -316,7 +330,9 @@ def test_show_matter_prints_no_active_members_when_no_active_membership_and_inac
 def test_show_matter_prints_preservation_policy_when_include_policy_flag_set(
     runner, cli_state, check_matter_accessible_success, preservation_policy_response
 ):
-    cli_state.sdk.legalhold.get_policy_by_uid.return_value = preservation_policy_response
+    cli_state.sdk.legalhold.get_policy_by_uid.return_value = (
+        preservation_policy_response
+    )
     result = runner.invoke(
         cli, ["legal-hold", "show", TEST_MATTER_ID, "--include-policy"], obj=cli_state
     )
@@ -326,7 +342,9 @@ def test_show_matter_prints_preservation_policy_when_include_policy_flag_set(
 def test_show_matter_does_not_print_preservation_policy(
     runner, cli_state, check_matter_accessible_success, preservation_policy_response
 ):
-    cli_state.sdk.legalhold.get_policy_by_uid.return_value = preservation_policy_response
+    cli_state.sdk.legalhold.get_policy_by_uid.return_value = (
+        preservation_policy_response
+    )
     result = runner.invoke(cli, ["legal-hold", "show", TEST_MATTER_ID], obj=cli_state)
     assert TEST_PRESERVATION_POLICY_UID not in result.output
 
@@ -337,7 +355,9 @@ def test_add_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
         with open("test_add.csv", "w") as csv:
             csv.writelines(["matter_id,username\n", "test,value\n"])
         runner.invoke(cli, ["legal-hold", "bulk", "add", "test_add.csv"], obj=cli_state)
-    assert bulk_processor.call_args[0][1] == [{"matter_id": "test", "username": "value"}]
+    assert bulk_processor.call_args[0][1] == [
+        {"matter_id": "test", "username": "value"}
+    ]
 
 
 def test_remove_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
@@ -348,4 +368,6 @@ def test_remove_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
         runner.invoke(
             cli, ["legal-hold", "bulk", "remove", "test_remove.csv"], obj=cli_state
         )
-        assert bulk_processor.call_args[0][1] == [{"matter_id": "test", "username": "value"}]
+        assert bulk_processor.call_args[0][1] == [
+            {"matter_id": "test", "username": "value"}
+        ]

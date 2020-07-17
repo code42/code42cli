@@ -1,11 +1,9 @@
 import logging
 
 import pytest
-from c42eventextractor.logging.formatters import (
-    FileEventDictToCEFFormatter,
-    FileEventDictToJSONFormatter,
-    FileEventDictToRawJSONFormatter,
-)
+from c42eventextractor.logging.formatters import FileEventDictToCEFFormatter
+from c42eventextractor.logging.formatters import FileEventDictToJSONFormatter
+from c42eventextractor.logging.formatters import FileEventDictToRawJSONFormatter
 
 import code42cli.cmds.search.logger_factory as factory
 

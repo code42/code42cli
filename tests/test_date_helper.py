@@ -2,19 +2,20 @@ from datetime import datetime
 
 from c42eventextractor.common import convert_datetime_to_timestamp
 
-from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp
-from .conftest import (
-    begin_date_str,
-    begin_date_str_with_time,
-    end_date_str,
-    end_date_str_with_time,
-    get_test_date,
-)
+from .conftest import begin_date_str
+from .conftest import begin_date_str_with_time
+from .conftest import end_date_str
+from .conftest import end_date_str_with_time
+from .conftest import get_test_date
+from code42cli.date_helper import parse_max_timestamp
+from code42cli.date_helper import parse_min_timestamp
 
 
 def test_parse_min_timestamp_when_given_date_str_parses_successfully():
     actual = parse_min_timestamp(begin_date_str)
-    expected = convert_datetime_to_timestamp(datetime.strptime(begin_date_str, "%Y-%m-%d"))
+    expected = convert_datetime_to_timestamp(
+        datetime.strptime(begin_date_str, "%Y-%m-%d")
+    )
     assert actual == expected
 
 
@@ -49,7 +50,9 @@ def test_parse_min_timestamp_when_given_magic_minutes_parses_successfully():
 
 def test_parse_max_timestamp_when_given_date_str_parses_successfully():
     actual = parse_min_timestamp(end_date_str)
-    expected = convert_datetime_to_timestamp(datetime.strptime(end_date_str, "%Y-%m-%d"))
+    expected = convert_datetime_to_timestamp(
+        datetime.strptime(end_date_str, "%Y-%m-%d")
+    )
     assert actual == expected
 
 
@@ -66,7 +69,9 @@ def test_parse_max_timestamp_when_given_magic_days_parses_successfully():
     expected_date = datetime.utcfromtimestamp(
         convert_datetime_to_timestamp(get_test_date(days_ago=20))
     )
-    expected_date = expected_date.replace(hour=23, minute=59, second=59, microsecond=999000)
+    expected_date = expected_date.replace(
+        hour=23, minute=59, second=59, microsecond=999000
+    )
     assert actual_date == expected_date
 
 

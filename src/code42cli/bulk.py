@@ -31,14 +31,14 @@ def write_template_file(path, columns=None, flat_item=None):
 
 def generate_template_cmd_factory(group_name, commands_dict):
     """Helper function that creates a `generate-template` click command that can be added to `bulk`
-    sub-command groups. 
-     
-    Args: 
+    sub-command groups.
+
+    Args:
         `group_name`: a str representing the parent command group this is generating templates for.
-        `commands_dict`: a dict of the commands with their column names. Keys are the cmd 
-            names that will become the `cmd` argument, and values are the list of column names for 
+        `commands_dict`: a dict of the commands with their column names. Keys are the cmd
+            names that will become the `cmd` argument, and values are the list of column names for
             the csv.
-            
+
             If a cmd takes a flat file, value should be a string indicating what item the flat file
             rows should contain.
     """
@@ -46,12 +46,14 @@ def generate_template_cmd_factory(group_name, commands_dict):
     @click.command()
     @click.argument("cmd", type=click.Choice(list(commands_dict)))
     @click.argument(
-        "path", required=False, type=click.Path(dir_okay=False, resolve_path=True, writable=True)
+        "path",
+        required=False,
+        type=click.Path(dir_okay=False, resolve_path=True, writable=True),
     )
     def generate_template(cmd, path):
         """\b
         Generate the csv template needed for bulk adding/removing users.
-        
+
         Optional PATH argument can be provided to write to a specific file path/name.
         """
         columns = commands_dict[cmd]
@@ -68,9 +70,9 @@ def generate_template_cmd_factory(group_name, commands_dict):
 
 def run_bulk_process(row_handler, rows, progress_label=None):
     """Runs a bulk process.
-    
-    Args: 
-        row_handler (callable): A callable that you define to process values from the row as 
+
+    Args:
+        row_handler (callable): A callable that you define to process values from the row as
             either *args or **kwargs.
         rows (iterable): the rows to process.
     """
@@ -84,13 +86,13 @@ def _create_bulk_processor(row_handler, rows, progress_label):
 
 
 class BulkProcessor(object):
-    """A class for bulk processing a file. 
-    
+    """A class for bulk processing a file.
+
     Args:
-        row_handler (callable): A callable that you define to process values from the row as 
-            either *args or **kwargs. For example, if it's a csv file with header `prop_a,prop_b` 
-            and first row `1,test`, then `row_handler` should receive kwargs 
-            `prop_a: '1', prop_b: 'test'` when processing the first row. If it's a flat file, then 
+        row_handler (callable): A callable that you define to process values from the row as
+            either *args or **kwargs. For example, if it's a csv file with header `prop_a,prop_b`
+            and first row `1,test`, then `row_handler` should receive kwargs
+            `prop_a: '1', prop_b: 'test'` when processing the first row. If it's a flat file, then
             `row_handler` only needs to take an extra arg.
         reader (CSVReader or FlatFileReader): A generator that reads rows and yields data into `row_handler`.
     """
@@ -100,7 +102,9 @@ class BulkProcessor(object):
         self._rows = rows
         self._row_handler = row_handler
         self._progress_bar = click.progressbar(
-            length=len(self._rows), item_show_func=self._show_stats, label=progress_label
+            length=len(self._rows),
+            item_show_func=self._show_stats,
+            label=progress_label,
         )
         self.__worker = worker or Worker(5, total, bar=self._progress_bar)
         self._stats = self.__worker.stats
@@ -130,7 +134,9 @@ class BulkProcessor(object):
 
     def _process_flat_file_row(self, row):
         if row:
-            self.__worker.do_async(lambda *args, **kwargs: self._handle_row(*args, **kwargs), row)
+            self.__worker.do_async(
+                lambda *args, **kwargs: self._handle_row(*args, **kwargs), row
+            )
 
     def _handle_row(self, *args, **kwargs):
         self._row_handler(*args, **kwargs)

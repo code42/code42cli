@@ -8,23 +8,20 @@ from py42.sdk.queries.fileevents.filters import *
 import code42cli.errors as errors
 from code42cli.cmds.search import logger_factory
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
-from code42cli.cmds.search.enums import (
-    OutputFormat,
-    ExposureType as ExposureTypeOptions,
-)
-from code42cli.cmds.search.extraction import (
-    create_handlers,
-    create_time_range_filter,
-)
-from code42cli.cmds.search.options import (
-    create_search_options,
-    AdvancedQueryAndSavedSearchIncompatible,
-    is_in_filter,
-    exists_filter,
-)
+from code42cli.cmds.search.enums import ExposureType as ExposureTypeOptions
+from code42cli.cmds.search.enums import OutputFormat
+from code42cli.cmds.search.extraction import create_handlers
+from code42cli.cmds.search.extraction import create_time_range_filter
+from code42cli.cmds.search.options import AdvancedQueryAndSavedSearchIncompatible
+from code42cli.cmds.search.options import create_search_options
+from code42cli.cmds.search.options import exists_filter
+from code42cli.cmds.search.options import is_in_filter
 from code42cli.logger import get_main_cli_logger
-from code42cli.options import sdk_options, incompatible_with, OrderedGroup
-from code42cli.util import format_to_table, find_format_width
+from code42cli.options import incompatible_with
+from code42cli.options import OrderedGroup
+from code42cli.options import sdk_options
+from code42cli.util import find_format_width
+from code42cli.util import format_to_table
 
 logger = get_main_cli_logger()
 
@@ -172,11 +169,17 @@ def clear_checkpoint(state, checkpoint_name):
 @file_event_options
 @search_options
 @sdk_options
-def search(state, format, begin, end, advanced_query, use_checkpoint, saved_search, **kwargs):
+def search(
+    state, format, begin, end, advanced_query, use_checkpoint, saved_search, **kwargs
+):
     """Search for file events."""
     output_logger = logger_factory.get_logger_for_stdout(format)
-    cursor = _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
-    handlers = create_handlers(state.sdk, FileEventExtractor, output_logger, cursor, use_checkpoint)
+    cursor = (
+        _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
+    )
+    handlers = create_handlers(
+        state.sdk, FileEventExtractor, output_logger, cursor, use_checkpoint
+    )
     extractor = _get_file_event_extractor(state.sdk, handlers)
     if advanced_query:
         extractor.extract_advanced(advanced_query)
@@ -184,7 +187,9 @@ def search(state, format, begin, end, advanced_query, use_checkpoint, saved_sear
         extractor.extract(*saved_search._filter_group_list)
     else:
         if begin or end:
-            state.search_filters.append(create_time_range_filter(EventTimestamp, begin, end))
+            state.search_filters.append(
+                create_time_range_filter(EventTimestamp, begin, end)
+            )
         extractor.extract(*state.search_filters)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         echo("No results found.")

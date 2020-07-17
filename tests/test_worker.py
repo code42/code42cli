@@ -1,6 +1,7 @@
 import time
 
-from code42cli.worker import Worker, WorkerStats
+from code42cli.worker import Worker
+from code42cli.worker import WorkerStats
 
 
 class TestWorkerStats(object):

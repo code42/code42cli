@@ -6,25 +6,20 @@ from py42.sdk.queries.alerts.filters import *
 import code42cli.errors as errors
 from code42cli.cmds.search import logger_factory
 from code42cli.cmds.search.cursor_store import AlertCursorStore
-from code42cli.cmds.search.enums import (
-    AlertOutputFormat,
-    AlertSeverity as AlertSeverityOptions,
-    AlertState as AlertStateOptions,
-    RuleType as RuleTypeOptions,
-)
-from code42cli.cmds.search.extraction import (
-    create_handlers,
-    create_time_range_filter,
-)
-from code42cli.cmds.search.options import (
-    create_search_options,
-    AdvancedQueryAndSavedSearchIncompatible,
-    is_in_filter,
-    contains_filter,
-    not_contains_filter,
-    not_in_filter,
-)
-from code42cli.options import sdk_options, OrderedGroup
+from code42cli.cmds.search.enums import AlertOutputFormat
+from code42cli.cmds.search.enums import AlertSeverity as AlertSeverityOptions
+from code42cli.cmds.search.enums import AlertState as AlertStateOptions
+from code42cli.cmds.search.enums import RuleType as RuleTypeOptions
+from code42cli.cmds.search.extraction import create_handlers
+from code42cli.cmds.search.extraction import create_time_range_filter
+from code42cli.cmds.search.options import AdvancedQueryAndSavedSearchIncompatible
+from code42cli.cmds.search.options import contains_filter
+from code42cli.cmds.search.options import create_search_options
+from code42cli.cmds.search.options import is_in_filter
+from code42cli.cmds.search.options import not_contains_filter
+from code42cli.cmds.search.options import not_in_filter
+from code42cli.options import OrderedGroup
+from code42cli.options import sdk_options
 
 search_options = create_search_options("alerts")
 
@@ -175,13 +170,17 @@ def search(cli_state, format, begin, end, advanced_query, use_checkpoint, **kwar
     """Search for alerts."""
     output_logger = logger_factory.get_logger_for_stdout(format)
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
-    handlers = create_handlers(cli_state.sdk, AlertExtractor, output_logger, cursor, use_checkpoint)
+    handlers = create_handlers(
+        cli_state.sdk, AlertExtractor, output_logger, cursor, use_checkpoint
+    )
     extractor = _get_alert_extractor(cli_state.sdk, handlers)
     if advanced_query:
         extractor.extract_advanced(advanced_query)
     else:
         if begin or end:
-            cli_state.search_filters.append(create_time_range_filter(DateObserved, begin, end))
+            cli_state.search_filters.append(
+                create_time_range_filter(DateObserved, begin, end)
+            )
         extractor.extract(*cli_state.search_filters)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         echo("No results found.")

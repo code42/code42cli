@@ -1,8 +1,10 @@
 import queue
-from threading import Thread, Lock
+from threading import Lock
+from threading import Thread
 from time import sleep
 
-from py42.exceptions import Py42HTTPError, Py42ForbiddenError
+from py42.exceptions import Py42ForbiddenError
+from py42.exceptions import Py42HTTPError
 
 from code42cli.errors import Code42CLIError
 from code42cli.logger import get_main_cli_logger
@@ -35,7 +37,7 @@ class WorkerStats(object):
         return val if val >= 0 else 0
 
     def __str__(self):
-        return "{0} succeeded, {1} failed out of {2}".format(
+        return "{} succeeded, {} failed out of {}".format(
             self.total_successes, self._total_errors, self.total
         )
 
@@ -63,7 +65,7 @@ class Worker(object):
 
     def do_async(self, func, *args, **kwargs):
         """Execute the given func asynchronously given *args and **kwargs.
-        
+
         Args:
             func (callable): The function to execute asynchronously.
             *args (iter): Positional args to pass to the function.
@@ -84,7 +86,7 @@ class Worker(object):
         return self._stats
 
     def wait(self):
-        """Wait for the tasks in the queue to complete. This should usually be called before 
+        """Wait for the tasks in the queue to complete. This should usually be called before
         program termination."""
         while self._stats.total_processed < self._tasks:
             sleep(0.5)

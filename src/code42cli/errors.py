@@ -3,9 +3,11 @@ import re
 
 import click
 from click._compat import get_text_stderr
-from py42.exceptions import Py42ForbiddenError, Py42HTTPError
+from py42.exceptions import Py42ForbiddenError
+from py42.exceptions import Py42HTTPError
 
-from code42cli.logger import get_view_error_details_message, get_main_cli_logger
+from code42cli.logger import get_main_cli_logger
+from code42cli.logger import get_view_error_details_message
 
 ERRORED = False
 _DIFFLIB_CUT_OFF = 0.6
@@ -14,7 +16,7 @@ _DIFFLIB_CUT_OFF = 0.6
 class Code42CLIError(click.ClickException):
     """Base CLI exception. The `message` param automatically gets logged to error file and printed
     to stderr in red text. If `help` param is provided, it will also be printed to stderr after the
-    message but not logged to file. 
+    message but not logged to file.
     """
 
     def __init__(self, message, help=None):
@@ -32,9 +34,9 @@ class Code42CLIError(click.ClickException):
 
 class LoggedCLIError(Code42CLIError):
     """Exception to be raised when wanting to point users to error logs for error details.
-    
-    If `message` param is provided it will be printed to screen along with message on where to 
-    find error details in the log. 
+
+    If `message` param is provided it will be printed to screen along with message on where to
+    find error details in the log.
     """
 
     def __init__(self, message=None):
@@ -44,7 +46,9 @@ class LoggedCLIError(Code42CLIError):
     def format_message(self):
         locations_message = get_view_error_details_message()
         return (
-            "{}\n{}".format(self.message, locations_message) if self.message else locations_message
+            "{}\n{}".format(self.message, locations_message)
+            if self.message
+            else locations_message
         )
 
 
@@ -62,8 +66,8 @@ class InvalidRuleTypeError(Code42CLIError):
 
 
 class UserDoesNotExistError(Code42CLIError):
-    """An error to represent a username that is not in our system. The CLI shows this error when 
-    the user tries to add or remove a user that does not exist. This error is not shown during 
+    """An error to represent a username that is not in our system. The CLI shows this error when
+    the user tries to add or remove a user that does not exist. This error is not shown during
     bulk add or remove."""
 
     def __init__(self, username):
