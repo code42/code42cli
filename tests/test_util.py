@@ -94,11 +94,10 @@ def test_find_format_width_filters_keys_not_present_in_header():
         assert u"key2" not in item.keys()
 
 
-def test_format_string_list_to_columns_when_given_no_string_list_does_not_echo(mocker):
-    echo = mocker.patch("code42cli.util.echo")
+def test_format_string_list_to_columns_when_given_no_string_list_does_not_echo(echo_output):
     format_string_list_to_columns([], None)
     format_string_list_to_columns(None, None)
-    assert not echo.call_count
+    assert not echo_output.call_count
 
 
 def test_format_string_list_to_columns_when_not_given_max_uses_shell_size(mocker, echo_output):
