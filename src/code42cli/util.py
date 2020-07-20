@@ -78,7 +78,7 @@ def format_string_list_to_columns(string_list, max_width=None):
     if not max_width:
         max_width, _ = shutil.get_terminal_size()
     column_width = len(max(string_list, key=len)) + _PADDING_SIZE
-    num_columns = int(max_width / column_width)
+    num_columns = int(max_width / column_width) or 1
     format_string = "{{:<{0}}}".format(column_width) * num_columns
     batches = [string_list[i : i + num_columns] for i in range(0, len(string_list), num_columns)]
     padding = ["" for _ in range(num_columns)]
