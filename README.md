@@ -1,11 +1,17 @@
 # The Code42 CLI
 
+![Build status](https://github.com/code42/code42cli/workflows/build/badge.svg)
+[![codecov.io](https://codecov.io/github/code42/code42cli/coverage.svg?branch=master)](https://codecov.io/github/code42/code42cli?branch=master)
+[![versions](https://img.shields.io/pypi/pyversions/code42cli.svg)](https://pypi.org/project/code42cli/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Documentation Status](https://readthedocs.org/projects/code42cli/badge/?version=latest)](https://clidocs.code42.com/en/latest/?badge=latest)
+
 Use the `code42` command to interact with your Code42 environment.
 
 * `code42 security-data` is a CLI tool for extracting AED events.
     Additionally, you can choose to only get events that Code42 previously did not observe since you last recorded a
     checkpoint (provided you do not change your query).
-* `code42 high-risk-employee` is a collection of tools for managing the high risk employee detection list. Similarly, 
+* `code42 high-risk-employee` is a collection of tools for managing the high risk employee detection list. Similarly,
     there is `code42 departing-employee`.
 
 ## Requirements
@@ -28,14 +34,14 @@ First, create your profile:
 code42 profile create --name MY_FIRST_PROFILE --server example.authority.com --username security.admin@example.com
 ```
 
-Your profile contains the necessary properties for logging into Code42 servers. After running `code42 profile create`, 
+Your profile contains the necessary properties for logging into Code42 servers. After running `code42 profile create`,
 the program prompts you about storing a password. If you agree, you are then prompted to input your password.
 
-Your password is not shown when you do `code42 profile show`. However, `code42 profile show` will confirm that a 
-password exists for your profile. If you do not set a password, you will be securely prompted to enter a password each 
+Your password is not shown when you do `code42 profile show`. However, `code42 profile show` will confirm that a
+password exists for your profile. If you do not set a password, you will be securely prompted to enter a password each
 time you run a command.
 
-For development purposes, you may need to ignore ssl errors. If you need to do this, use the `--disable-ssl-errors` 
+For development purposes, you may need to ignore ssl errors. If you need to do this, use the `--disable-ssl-errors`
 option when creating your profile:
 
 ```bash
@@ -48,7 +54,7 @@ You can add multiple profiles with different names and the change the default pr
 code42 profile use MY_SECOND_PROFILE
 ```
 
-When the `--profile` flag is available on other commands, such as those in `security-data`, it will use that profile 
+When the `--profile` flag is available on other commands, such as those in `security-data`, it will use that profile
 instead of the default one. For example,
 
 ```bash
@@ -64,11 +70,11 @@ code42 profile list
 ## Security Data and Alerts
 
 Using the CLI, you can query for security events and alerts just like in the admin console, but the results are output
-to stdout so they can be written to a file or piped out to another process (for sending to an external syslog server, for 
-example). 
+to stdout so they can be written to a file or piped out to another process (for sending to an external syslog server, for
+example).
 
 
-The following examples pertain to security events, but can also be used for alerts by replacing `security-data` with 
+The following examples pertain to security events, but can also be used for alerts by replacing `security-data` with
 `alerts`:
 
 To print events to stdout, do:
@@ -130,7 +136,7 @@ To send events to an external server using `netcat` on Linux/Mac:
 
 UDP:
 ```bash
-code42 security-data search -b 10d | nc -u syslog.company.com 514 
+code42 security-data search -b 10d | nc -u syslog.company.com 514
 ```
 
 TCP:
@@ -162,10 +168,10 @@ code42 security-data search -b 10d | foreach { $Writer.WriteLine($_); $Writer.Fl
 Note: For more complex requirements when sending to an external server (SSL, special formatting, etc.), use a dedicated
 syslog forwarding tool like `rsyslog` or connection tunneling tool like `stunnel`.
 
-If you want to periodically run the same query, but only retrieve the new events each time, use the 
-`-c/--use-checkpoint` option with a name for your checkpoint. This stores the timestamp of the query's last event to a 
-file on disk and uses that as the "begin date" timestamp filter on the next query that uses the same checkpoint name. 
-Checkpoints are stored per profile. 
+If you want to periodically run the same query, but only retrieve the new events each time, use the
+`-c/--use-checkpoint` option with a name for your checkpoint. This stores the timestamp of the query's last event to a
+file on disk and uses that as the "begin date" timestamp filter on the next query that uses the same checkpoint name.
+Checkpoints are stored per profile.
 
 Initial run requires a begin date:
 ```bash
@@ -201,7 +207,7 @@ The search query parameters are as follows:
 - `--advanced-query` (raw JSON query)
 
 You cannot use other query parameters if you use `--advanced-query`.
-To learn more about acceptable arguments, add the `-h` flag to `code42 security-data` 
+To learn more about acceptable arguments, add the `-h` flag to `code42 security-data`
 
 Saved Searches:
 
@@ -234,14 +240,14 @@ code42 high-risk-employee add user@example.com --notes "These are notes"
 code42 high-risk-employee remove user@example.com
 ```
 
-Detection lists include a `bulk` command. To add employees to a list, you can pass in a csv file. First, generate the 
+Detection lists include a `bulk` command. To add employees to a list, you can pass in a csv file. First, generate the
 csv file for the desired command by executing the `generate-template` command:
 
 ```bash
 code42 high-risk-employee bulk generate-template add
 ```
 
-Notice that `generate-template` takes a `cmd` parameter for determining what type of template to generate. In the 
+Notice that `generate-template` takes a `cmd` parameter for determining what type of template to generate. In the
 example above, we give it the value `add` to generate a file for bulk adding users to the high risk employee list.
 
 Next, fill out the csv file with all the users and then pass it in as a parameter to `bulk add`:
@@ -254,7 +260,7 @@ Note that for `bulk remove`, the file only has to be an end-line delimited list 
 
 ## Known Issues
 
-In `security-data`, only the first 10,000 of each set of events containing the exact same insertion timestamp is 
+In `security-data`, only the first 10,000 of each set of events containing the exact same insertion timestamp is
 reported.
 
 ## Troubleshooting

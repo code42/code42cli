@@ -1,59 +1,124 @@
-# Contributing to code42cli
+- [Set up your Development environment](#set-up-your-development-environment)
+  - [macOS](#macos)
+  - [Windows/Linux](#windowslinux)
+- [Run a full build](#run-a-full-build)
+- [Coding Style](#coding-style)
+  - [Style linter](#style-linter)
+- [Tests](#tests)
+  - [Writing tests](#writing-tests)
+- [Documentation](#documentation)
+  - [Generating documentation](#generating-documentation)
+    - [Performing a test build](#performing-a-test-build)
+    - [Running the docs locally](#running-the-docs-locally)
+- [Changes](#changes)
+- [Opening a PR](#opening-a-pr)
 
-## Development environment
+## Set up your Development environment
 
-Install code42cli and its development dependencies. The `-e` option installs py42 in 
-["editable mode"](https://pip.pypa.io/en/stable/reference/pip_install/#editable-installs). 
+The very first thing to do is to fork the code42cli repo, clone it, and make it your working directory!
 
 ```bash
-$ pip install -e .[dev]
+git clone https://github.com/myaccount/code42cli
+cd code42cli
 ```
 
-If you are using `zsh`, you may need to escape the brackets.
+To set up your development environment, create a python virtual environment and activate it. This keeps your dependencies sandboxed so that they are unaffected by (and do not affect) other python packages you may have installed.
 
-We use [black](https://black.readthedocs.io/en/stable/) to automatically format our code.
-After installing dependencies, be sure to run:
+### macOS
+
+There are many ways to do this (you can also use the method outlined for Windows/Linux below), but we recommend using [pyenv](https://github.com/pyenv/pyenv).
+
+Install `pyenv` and `pyenv-virtualenv` via [homebrew](https://brew.sh/):
 
 ```bash
-$ pre-commit install
+brew install pyenv pyenv-virtualenv
 ```
 
-This will set up a pre-commit hook that will automatically format your code to our desired styles whenever you commit.
-It requires python 3.6+ to run, so be sure to have a qualifying python executable in your PATH when you commit.
+After installing `pyenv` and `pyenv-virtualenv`, be sure to add the following entries to your `.zshrc` (or `.bashrc` if you are using bash) and restart your shell:
 
-## General
+```bash
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+```
 
-* Use positional argument specifiers in `str.format()`
-* Use syntax and built-in modules that are compatible with both Python 2 and 3.
-* Use the `code42cli._internal.compat` module to create abstractions around functionality that differs between 2 and 3.
+Then, create your virtual environment. While code42cli runs on python 3.5+, a 3.6+ version is required for development in order to run all of the unit tests and style checks.
 
-## Changes
+```bash
+pyenv install 3.6.10
+pyenv virtualenv 3.6.10 code42cli
+pyenv activate code42cli
+```
 
-Document all notable consumer-affecting changes in CHANGELOG.md per principles and guidelines at
-[Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+Use `source deactivate` to exit the virtual environment and `pyenv activate code42cli` to reactivate it.
+
+### Windows/Linux
+
+Install a version of python 3.6 or higher from [python.org](https://python.org).
+Next, in a directory somewhere outside the project, create and activate your virtual environment:
+
+```bash
+python -m venv code42cli
+# macOS/Linux
+source code42cli/bin/activate
+# Windows
+.\code42cli\Scripts\Activate
+```
+
+To leave the virtual environment, simply use:
+```bash
+deactivate
+```
+
+Next, with your virtual environment activated, install code42cli and its development dependencies. The `-e` option installs code42cli in
+["editable mode"](https://pip.pypa.io/en/stable/reference/pip_install/#editable-installs).
+
+```bash
+pip install -e .[dev]
+```
+
+Open the project in your IDE of choice and change the python environment to
+point to your virtual environment, and you should be ready to go!
+
+## Run a full build
+
+We use [tox](https://tox.readthedocs.io/en/latest/#) to run our build against Python 3.5, 3.6, 3.7, and 3.8. When run locally, `tox` will run only against the version of python that your virtual envrionment is running, but all versions will be validated against when you [open a PR](#opening-a-pr).
+
+To run all the unit tests, do a test build of the documentation, and check that the code meets all style requirements, simply run:
+
+```bash
+tox
+```
+If the full process runs without any errors, your environment is set up correctly! You can also use `tox` to run sub-parts of the build, as explained below.
+
+## Coding Style
+
+Use syntax and built-in modules that are compatible with Python 3.5+.
+
+### Style linter
+
+When you open a PR, after all of the unit tests successfully pass, a series
+of style checks will run. See the [pre-commit-config.yaml](.pre-commit-config.yaml) file to see a list of the projects involved in this automation. If your code does not pass the style checks, the PR will not be allowed to merge. Many of the style rules can be corrected automatically by running a simple command once you are satisfied with your change:
+
+```bash
+tox -e style
+```
+
+This will output a diff of the files that were changed as well a list of files / line numbers / error descriptions for any style problems that need to be corrected manually. Once these have been corrected and re-pushed, the PR checks should pass.
+
+You can optionally also choose to have these checks / automatic adjustments
+occur automatically on each git commit that you make (instead of only when running `tox`.) To do so, install `pre-commit` and install the pre-commit hooks:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
 
 ## Tests
 
-We use [tox](https://tox.readthedocs.io/en/latest/#) to run the
-[pytest](https://docs.pytest.org/) test framework on Python 3.5, 3.6, and 3.7.
-
-To run all tests, run this at the root of the repo:
+This will also test that the documentation build passes and run the style checks. If you want to _only_ run the unit tests, you can use:
 
 ```bash
-$ tox
-```
-
-If you're using a virtual environment, this will only run the tests within that environment/version of Python.
-To run the tests on all supported versions of Python in a local dev environment, we recommend using 
-[pyenv](https://github.com/pyenv/pyenv) and tox in your system (non-virtual) environment:
-
-```bash
-$ pip install tox
-$ pyenv install 3.5.7
-$ pyenv install 3.6.9
-$ pyenv install 3.7.4
-$ pyenv local 3.5.7 3.6.9 3.7.4
-$ tox
+$ tox -e py
 ```
 
 ### Writing tests
@@ -65,7 +130,7 @@ a = 4
 assert a % 2 == 0
 ```
 
-Use the following naming convention with test methods:  
+Use the following naming convention with test methods:
 
 test\_\[unit_under_test\]\_\[variables_for_the_test\]\_\[expected_state\]
 
@@ -75,61 +140,28 @@ Example:
 def test_add_one_and_one_equals_two():
 ```
 
-### Adding a new command
-
-See class documentation on the [Command](src/code42cli/commands.py) class for an explanation of its constructor parameters.
-
-1. If you are creating a new top-level command, create a new instance of `Command` and add it to the list returned
-    by `load_commands()` function in `code42cli.main.MainSubcommandLoader`.
-
-2. If you are creating a new subcommand, find the top-level command that this will be a subcommand of in
-    `load_commands()` in `code42cli.main.MainSubcommandLoader` and navigate to its subcommand loader's `load_commands()` 
-    Then, add a new instance of `Command` to the list returned.
-
-3. For commands that actually are executed (rather than just being groups), you will add a `handler` function as a constructor parameter.
-   This will be the function that you want to execute when your command is run.
-   * _Positional_ arguments of the handler will automatically become _required_ cli arguments.
-     * The order that the positional arguments should be entered in on the cli is the same as the order in which they appear in the handler.
-   * _Keyword_ arguments of the handler will automatically become _optional_ cli arguments
-   * the cli argument name will be the same as the handler param name except with `_` replaced with `-`, and prefixed with `--` if optional.
-
-    For example, consider the following python function:
-
-    ```python
-    def handler_example(one, two, three=None, four=None):
-        pass
-    ```
-
-    When the above function is supplied as a `Command`'s `handler` parameter, the result will be a command that can be executed as follows
-    (assuming `cmd` is the name given to the command):
-
-    ```bash
-    $ code42 cmd oneval twoval --three threeval --four fourval
-    ```
-
-4. To add descriptions to your cli arguments to appear in the help text, your command takes a function as the `arg_customizer` parameter.
-    The entire [`ArgConfigCollection`](src/code42cli/args.py) that was automatically created is supplied as the only argument to this function
-    and can be modified by it. See `code42cli.cmds.profile._load_profile_create_descriptions` for an example of this.
-
-5. If one of your handler's parameters is named `sdk`, you will automatically get a `--profile` argument available in the cli and the `sdk` parameter
-    will automatically contain an instance of `py42.sdk.SDKClient` that was created with the given (or default) profile.
-    - A cli parameter named `--sdk` will _not_ be added in this case.
-
-6. If you have an `sdk` parameter, a parameter named `profile` will automatically contain the info of the profile that was used to create the sdk.
-    - A parameter named `profile` behaves normally if you do not also have a parameter named `sdk`.
-
-7. Each command accepts a `use_single_arg_obj` bool in its constructor. If set to true, this will instead cause the handler to be called with a single object
-    containing all of the args as attributes, which will be passed to a variable named `args` in your handler. Since your handler will only contain the parameter `args`,
-    the names of your cli parameters need to built manually in your `arg_customizer` if you use this option. An example of this can be seen in `code42cli.cmds.securitydata.main`.
-
-
 ## Documentation
 
-`code42cli` uses [Sphinx](http://www.sphinx-doc.org/) to generate documentation.
+Command functions should have accompanying documentation. Documentation is written in markdown and managed in the `docs` folder of this repo.
 
-To build the documentation, run the following from the `docs` directory:
+### Generating documentation
+
+code42cli uses [Sphinx](http://www.sphinx-doc.org/) to generate documentation.
+
+#### Performing a test build
+
+To simply test that the documentation build without errors, you can run:
 
 ```bash
+tox -e docs
+```
+
+#### Running the docs locally
+
+To build and run the documentation locally, run the following from the `docs` directory:
+
+```bash
+pip install sphinx recommonmark sphinx_rtd_theme
 make html
 ```
 
@@ -143,3 +175,14 @@ python -m http.server --directory "_build/html" 1337
 ```
 
 and then pointing your browser to `localhost:1337`.
+
+## Changes
+
+Document all notable consumer-affecting changes in CHANGELOG.md per principles and guidelines at
+[Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## Opening a PR
+
+When you're satisified with your changes, open a PR and fill out the pull request template file. We recommend prefixing the name of your branch and/or PR title with `bugfix`, `chore`, or `feature` to help quickly categorize your change. Your unit tests and other checks will run against all supported python versions when you do this.
+
+A team member should get in contact with you shortly to help merge your PR to completion and get it ready for a release!

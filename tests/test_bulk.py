@@ -2,9 +2,10 @@ from collections import OrderedDict
 
 import pytest
 
-from code42cli import PRODUCT_NAME
 from code42cli import errors
-from code42cli.bulk import BulkProcessor, run_bulk_process
+from code42cli import PRODUCT_NAME
+from code42cli.bulk import BulkProcessor
+from code42cli.bulk import run_bulk_process
 from code42cli.logger import get_view_error_details_message
 
 _NAMESPACE = "{}.bulk".format(PRODUCT_NAME)
@@ -43,7 +44,7 @@ def test_run_bulk_process_creates_processor(bulk_processor_factory):
     bulk_processor_factory.assert_called_once_with(func_with_one_arg, rows, None)
 
 
-class TestBulkProcessor(object):
+class TestBulkProcessor:
     def test_run_when_reader_returns_ordered_dict_process_kwargs(self):
         processed_rows = []
 
@@ -67,7 +68,11 @@ class TestBulkProcessor(object):
         def func_for_bulk(test1, test2):
             processed_rows.append((test1, test2))
 
-        rows = [{"test1": 1, "test2": 2}, {"test1": 3, "test2": 4}, {"test1": 5, "test2": 6}]
+        rows = [
+            {"test1": 1, "test2": 2},
+            {"test1": 3, "test2": 4},
+            {"test1": 5, "test2": 6},
+        ]
         processor = BulkProcessor(func_for_bulk, rows)
         processor.run()
         assert (1, 2) in processed_rows
@@ -135,13 +140,15 @@ class TestBulkProcessor(object):
         assert "row2" in processed_rows
         assert "row3" not in processed_rows
 
-    def test_run_when_reader_returns_dict_rows_containing_empty_strs_converts_them_to_none(self):
+    def test_run_when_reader_returns_dict_rows_containing_empty_strs_converts_them_to_none(
+        self,
+    ):
         processed_rows = []
 
         def func_for_bulk(test1, test2):
             processed_rows.append((test1, test2))
 
-        rows = [{"test1": "", "test2": "foo"}, {"test1": "bar", "test2": u""}]
+        rows = [{"test1": "", "test2": "foo"}, {"test1": "bar", "test2": ""}]
         processor = BulkProcessor(func_for_bulk, rows)
         processor.run()
         assert (None, "foo") in processed_rows

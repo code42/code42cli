@@ -1,7 +1,7 @@
 IS_CHECKPOINT_KEY = "use_checkpoint"
 
 
-class OutputFormat(object):
+class OutputFormat:
     CEF = "CEF"
     JSON = "JSON"
     RAW = "RAW-JSON"
@@ -10,7 +10,7 @@ class OutputFormat(object):
         return iter([self.CEF, self.JSON, self.RAW])
 
 
-class AlertOutputFormat(object):
+class AlertOutputFormat:
     JSON = "JSON"
     RAW = "RAW-JSON"
 
@@ -18,7 +18,7 @@ class AlertOutputFormat(object):
         return iter([self.JSON, self.RAW])
 
 
-class AlertSeverity(object):
+class AlertSeverity:
     HIGH = "HIGH"
     MEDIUM = "MEDIUM"
     LOW = "LOW"
@@ -33,7 +33,7 @@ class AlertSeverity(object):
         return [self.HIGH, self.MEDIUM, self.LOW]
 
 
-class AlertState(object):
+class AlertState:
     OPEN = "OPEN"
     DISMISSED = "RESOLVED"
 
@@ -47,7 +47,7 @@ class AlertState(object):
         return [self.OPEN, self.DISMISSED]
 
 
-class ExposureType(object):
+class ExposureType:
     SHARED_VIA_LINK = "SharedViaLink"
     SHARED_TO_DOMAIN = "SharedToDomain"
     APPLICATION_READ = "ApplicationRead"
@@ -72,7 +72,7 @@ class ExposureType(object):
         ]
 
 
-class RuleType(object):
+class RuleType:
     ENDPOINT_EXFILTRATION = "FedEndpointExfiltration"
     CLOUD_SHARE_PERMISSIONS = "FedCloudSharePermissions"
     FILE_TYPE_MISMATCH = "FedFileTypeMismatch"
@@ -84,10 +84,14 @@ class RuleType(object):
         return len(self._as_list())
 
     def _as_list(self):
-        return [self.ENDPOINT_EXFILTRATION, self.CLOUD_SHARE_PERMISSIONS, self.FILE_TYPE_MISMATCH]
+        return [
+            self.ENDPOINT_EXFILTRATION,
+            self.CLOUD_SHARE_PERMISSIONS,
+            self.FILE_TYPE_MISMATCH,
+        ]
 
 
-class ServerProtocol(object):
+class ServerProtocol:
     TCP = "TCP"
     UDP = "UDP"
 

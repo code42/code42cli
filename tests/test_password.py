@@ -73,7 +73,11 @@ def test_set_password_uses_expected_service_name_username_and_password(
 
 
 def test_set_password_when_using_file_fallback_and_user_accepts_saves_password(
-    profile, keyring_password_setter, keyring_password_getter, get_keyring, user_agreement
+    profile,
+    keyring_password_setter,
+    keyring_password_getter,
+    get_keyring,
+    user_agreement,
 ):
     keyring_password_getter.return_value = "test_password"
     profile.name = "profile_name"

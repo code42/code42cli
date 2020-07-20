@@ -2,7 +2,9 @@ import logging
 
 import pytest
 from py42.exceptions import Py42InternalServerError
-from requests import Request, Response, HTTPError
+from requests import HTTPError
+from requests import Request
+from requests import Response
 
 from code42cli.main import cli
 
@@ -15,8 +17,8 @@ TEST_EMPTY_RULE_RESPONSE = {"ruleMetadata": []}
 TEST_SYSTEM_RULE_RESPONSE = {
     "ruleMetadata": [
         {
-            u"observerRuleId": TEST_RULE_ID,
-            "type": u"FED_FILE_TYPE_MISMATCH",
+            "observerRuleId": TEST_RULE_ID,
+            "type": "FED_FILE_TYPE_MISMATCH",
             "isSystem": True,
             "ruleSource": "NOTVALID",
         }
@@ -35,10 +37,14 @@ TEST_USER_RULE_RESPONSE = {
 }
 
 TEST_GET_ALL_RESPONSE_EXFILTRATION = {
-    "ruleMetadata": [{"observerRuleId": TEST_RULE_ID, "type": "FED_ENDPOINT_EXFILTRATION"}]
+    "ruleMetadata": [
+        {"observerRuleId": TEST_RULE_ID, "type": "FED_ENDPOINT_EXFILTRATION"}
+    ]
 }
 TEST_GET_ALL_RESPONSE_CLOUD_SHARE = {
-    "ruleMetadata": [{"observerRuleId": TEST_RULE_ID, "type": "FED_CLOUD_SHARE_PERMISSIONS"}]
+    "ruleMetadata": [
+        {"observerRuleId": TEST_RULE_ID, "type": "FED_CLOUD_SHARE_PERMISSIONS"}
+    ]
 }
 TEST_GET_ALL_RESPONSE_FILE_TYPE_MISMATCH = {
     "ruleMetadata": [{"observerRuleId": TEST_RULE_ID, "type": "FED_FILE_TYPE_MISMATCH"}]
@@ -75,17 +81,23 @@ def mock_server_error(mocker):
 
 
 def test_add_user_adds_user_list_to_alert_rules(runner, cli_state):
-    cli_state.sdk.users.get_by_username.return_value = {"users": [{"userUid": TEST_USER_ID}]}
+    cli_state.sdk.users.get_by_username.return_value = {
+        "users": [{"userUid": TEST_USER_ID}]
+    }
     runner.invoke(
         cli,
         ["alert-rules", "add-user", "--rule-id", TEST_RULE_ID, "-u", TEST_USERNAME],
         obj=cli_state,
     )
-    cli_state.sdk.alerts.rules.add_user.assert_called_once_with(TEST_RULE_ID, TEST_USER_ID)
+    cli_state.sdk.alerts.rules.add_user.assert_called_once_with(
+        TEST_RULE_ID, TEST_USER_ID
+    )
 
 
 def test_add_user_when_non_existent_alert_prints_no_rules_message(runner, cli_state):
-    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = TEST_EMPTY_RULE_RESPONSE
+    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = (
+        TEST_EMPTY_RULE_RESPONSE
+    )
     result = runner.invoke(
         cli,
         ["alert-rules", "add-user", "--rule-id", TEST_RULE_ID, "-u", TEST_USERNAME],
@@ -98,7 +110,9 @@ def test_add_user_when_non_existent_alert_prints_no_rules_message(runner, cli_st
 def test_add_user_when_returns_500_and_system_rule_exits_with_InvalidRuleTypeError(
     runner, cli_state, mock_server_error
 ):
-    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = TEST_SYSTEM_RULE_RESPONSE
+    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = (
+        TEST_SYSTEM_RULE_RESPONSE
+    )
     cli_state.sdk.alerts.rules.add_user.side_effect = mock_server_error
     result = runner.invoke(
         cli,
@@ -128,17 +142,23 @@ def test_add_user_when_returns_500_and_not_system_rule_raises_Py42InternalServer
 
 
 def test_remove_user_removes_user_list_from_alert_rules(runner, cli_state):
-    cli_state.sdk.users.get_by_username.return_value = {"users": [{"userUid": TEST_USER_ID}]}
+    cli_state.sdk.users.get_by_username.return_value = {
+        "users": [{"userUid": TEST_USER_ID}]
+    }
     runner.invoke(
         cli,
         ["alert-rules", "remove-user", "--rule-id", TEST_RULE_ID, "-u", TEST_USERNAME],
         obj=cli_state,
     )
-    cli_state.sdk.alerts.rules.remove_user.assert_called_once_with(TEST_RULE_ID, TEST_USER_ID)
+    cli_state.sdk.alerts.rules.remove_user.assert_called_once_with(
+        TEST_RULE_ID, TEST_USER_ID
+    )
 
 
 def test_remove_user_when_non_existent_alert_prints_no_rules_message(runner, cli_state):
-    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = TEST_EMPTY_RULE_RESPONSE
+    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = (
+        TEST_EMPTY_RULE_RESPONSE
+    )
     result = runner.invoke(
         cli,
         ["alert-rules", "remove-user", "--rule-id", TEST_RULE_ID, "-u", TEST_USERNAME],
@@ -151,7 +171,9 @@ def test_remove_user_when_non_existent_alert_prints_no_rules_message(runner, cli
 def test_remove_user_when_returns_500_and_system_rule_raises_InvalidRuleTypeError(
     runner, cli_state, mock_server_error
 ):
-    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = TEST_SYSTEM_RULE_RESPONSE
+    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = (
+        TEST_SYSTEM_RULE_RESPONSE
+    )
     cli_state.sdk.alerts.rules.remove_user.side_effect = mock_server_error
     result = runner.invoke(
         cli,
@@ -173,7 +195,14 @@ def test_remove_user_when_returns_500_and_not_system_rule_raises_Py42InternalSer
     with caplog.at_level(logging.ERROR):
         result = runner.invoke(
             cli,
-            ["alert-rules", "remove-user", "--rule-id", TEST_RULE_ID, "-u", TEST_USERNAME],
+            [
+                "alert-rules",
+                "remove-user",
+                "--rule-id",
+                TEST_RULE_ID,
+                "-u",
+                TEST_USERNAME,
+            ],
             obj=cli_state,
         )
         assert result.exit_code == 1
@@ -192,13 +221,17 @@ def test_list_when_no_rules_prints_no_rules_message(runner, cli_state):
 
 
 def test_show_rule_calls_correct_rule_property(runner, cli_state):
-    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = TEST_GET_ALL_RESPONSE_EXFILTRATION
+    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = (
+        TEST_GET_ALL_RESPONSE_EXFILTRATION
+    )
     runner.invoke(cli, ["alert-rules", "show", TEST_RULE_ID], obj=cli_state)
     cli_state.sdk.alerts.rules.exfiltration.get.assert_called_once_with(TEST_RULE_ID)
 
 
 def test_show_rule_calls_correct_rule_property_cloud_share(runner, cli_state):
-    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = TEST_GET_ALL_RESPONSE_CLOUD_SHARE
+    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = (
+        TEST_GET_ALL_RESPONSE_CLOUD_SHARE
+    )
     runner.invoke(cli, ["alert-rules", "show", TEST_RULE_ID], obj=cli_state)
     cli_state.sdk.alerts.rules.cloudshare.get.assert_called_once_with(TEST_RULE_ID)
 
@@ -208,11 +241,15 @@ def test_show_rule_calls_correct_rule_property_file_type_mismatch(runner, cli_st
         TEST_GET_ALL_RESPONSE_FILE_TYPE_MISMATCH
     )
     runner.invoke(cli, ["alert-rules", "show", TEST_RULE_ID], obj=cli_state)
-    cli_state.sdk.alerts.rules.filetypemismatch.get.assert_called_once_with(TEST_RULE_ID)
+    cli_state.sdk.alerts.rules.filetypemismatch.get.assert_called_once_with(
+        TEST_RULE_ID
+    )
 
 
 def test_show_rule_when_no_matching_rule_prints_no_rule_message(runner, cli_state):
-    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = TEST_EMPTY_RULE_RESPONSE
+    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = (
+        TEST_EMPTY_RULE_RESPONSE
+    )
     result = runner.invoke(cli, ["alert-rules", "show", TEST_RULE_ID], obj=cli_state)
     msg = "No alert rules with RuleId {} found".format(TEST_RULE_ID)
     assert msg in result.output
@@ -223,7 +260,9 @@ def test_add_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
     with runner.isolated_filesystem():
         with open("test_add.csv", "w") as csv:
             csv.writelines(["rule_id,username\n", "test,value\n"])
-        runner.invoke(cli, ["alert-rules", "bulk", "add", "test_add.csv"], obj=cli_state)
+        runner.invoke(
+            cli, ["alert-rules", "bulk", "add", "test_add.csv"], obj=cli_state
+        )
     assert bulk_processor.call_args[0][1] == [{"rule_id": "test", "username": "value"}]
 
 

@@ -1,12 +1,12 @@
 import os
 
 
-class cleanup(object):
+class cleanup:
     def __init__(self, filename):
         self.filename = filename
 
     def __enter__(self):
-        return open(self.filename, "r")
+        return open(self.filename)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         os.remove(self.filename)

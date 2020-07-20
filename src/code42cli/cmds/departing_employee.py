@@ -1,16 +1,18 @@
 import click
 from py42.exceptions import Py42BadRequestError
 
-from code42cli.bulk import generate_template_cmd_factory, run_bulk_process
-from code42cli.cmds.detectionlists import update_user, try_handle_user_already_added_error
-from code42cli.cmds.detectionlists.options import (
-    username_arg,
-    cloud_alias_option,
-    notes_option,
-)
+from code42cli.bulk import generate_template_cmd_factory
+from code42cli.bulk import run_bulk_process
+from code42cli.cmds.detectionlists import try_handle_user_already_added_error
+from code42cli.cmds.detectionlists import update_user
+from code42cli.cmds.detectionlists.options import cloud_alias_option
+from code42cli.cmds.detectionlists.options import notes_option
+from code42cli.cmds.detectionlists.options import username_arg
 from code42cli.cmds.shared import get_user_id
-from code42cli.file_readers import read_csv_arg, read_flat_file_arg
-from code42cli.options import sdk_options, OrderedGroup
+from code42cli.file_readers import read_csv_arg
+from code42cli.file_readers import read_flat_file_arg
+from code42cli.options import OrderedGroup
+from code42cli.options import sdk_options
 
 
 @click.group(cls=OrderedGroup)
@@ -22,7 +24,9 @@ def departing_employee(state):
 
 @departing_employee.command()
 @username_arg
-@click.option("--departure-date", help="The date the employee is departing. Format: yyyy-MM-dd.")
+@click.option(
+    "--departure-date", help="The date the employee is departing. Format: yyyy-MM-dd."
+)
 @cloud_alias_option
 @notes_option
 @sdk_options
@@ -56,32 +60,38 @@ bulk.add_command(departing_employee_generate_template)
 
 
 @bulk.command(
+    name="add",
     help="Bulk add users to the departing-employee detection list using a csv file with "
-    "format: {}".format(",".join(DEPARTING_EMPLOYEE_CSV_HEADERS))
+    "format: {}".format(",".join(DEPARTING_EMPLOYEE_CSV_HEADERS)),
 )
 @read_csv_arg(headers=DEPARTING_EMPLOYEE_CSV_HEADERS)
 @sdk_options
-def add(state, csv_rows):
+def bulk_add(state, csv_rows):
     sdk = state.sdk
+
     def handle_row(username, cloud_alias, departure_date, notes):
-        _add_departing_employee(
-            sdk, username, cloud_alias, departure_date, notes
-        )
+        _add_departing_employee(sdk, username, cloud_alias, departure_date, notes)
+
     run_bulk_process(
-        handle_row, csv_rows, progress_label="Adding users to departing employee detection list:"
+        handle_row,
+        csv_rows,
+        progress_label="Adding users to departing employee detection list:",
     )
 
 
 @bulk.command(
+    name="remove",
     help="Bulk remove users from the departing-employee detection list using a newline separated "
-    "file of usernames."
+    "file of usernames.",
 )
 @read_flat_file_arg
 @sdk_options
-def remove(state, file_rows):
+def bulk_remove(state, file_rows):
     sdk = state.sdk
+
     def handle_row(username):
         _remove_departing_employee(sdk, username)
+
     run_bulk_process(
         handle_row,
         file_rows,

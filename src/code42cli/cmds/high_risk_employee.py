@@ -1,23 +1,22 @@
 import click
 from py42.exceptions import Py42BadRequestError
 
-from code42cli.bulk import run_bulk_process, generate_template_cmd_factory
-from code42cli.cmds.detectionlists import (
-    update_user,
-    add_risk_tags as _add_risk_tags,
-    remove_risk_tags as _remove_risk_tags,
-    try_handle_user_already_added_error,
-    handle_list_args,
-)
+from code42cli.bulk import generate_template_cmd_factory
+from code42cli.bulk import run_bulk_process
+from code42cli.cmds.detectionlists import add_risk_tags as _add_risk_tags
+from code42cli.cmds.detectionlists import handle_list_args
+from code42cli.cmds.detectionlists import remove_risk_tags as _remove_risk_tags
+from code42cli.cmds.detectionlists import try_handle_user_already_added_error
+from code42cli.cmds.detectionlists import update_user
 from code42cli.cmds.detectionlists.enums import RiskTags
-from code42cli.cmds.detectionlists.options import (
-    cloud_alias_option,
-    notes_option,
-    username_arg,
-)
+from code42cli.cmds.detectionlists.options import cloud_alias_option
+from code42cli.cmds.detectionlists.options import notes_option
+from code42cli.cmds.detectionlists.options import username_arg
 from code42cli.cmds.shared import get_user_id
-from code42cli.file_readers import read_csv_arg, read_flat_file_arg
-from code42cli.options import sdk_options, OrderedGroup
+from code42cli.file_readers import read_csv_arg
+from code42cli.file_readers import read_flat_file_arg
+from code42cli.options import OrderedGroup
+from code42cli.options import sdk_options
 
 risk_tag_option = click.option(
     "-t",
@@ -95,32 +94,38 @@ bulk.add_command(high_risk_employee_generate_template)
 
 
 @bulk.command(
+    name="add",
     help="Bulk add users to the high-risk-employee detection list using a csv file with "
-    "format: {}".format(",".join(HIGH_RISK_EMPLOYEE_CSV_HEADERS))
+    "format: {}".format(",".join(HIGH_RISK_EMPLOYEE_CSV_HEADERS)),
 )
 @read_csv_arg(headers=HIGH_RISK_EMPLOYEE_CSV_HEADERS)
 @sdk_options
-def add(state, csv_rows):
+def bulk_add(state, csv_rows):
     sdk = state.sdk
+
     def handle_row(username, cloud_alias, risk_tag, notes):
-        _add_high_risk_employee(
-            sdk, username, cloud_alias, risk_tag, notes
-        )
+        _add_high_risk_employee(sdk, username, cloud_alias, risk_tag, notes)
+
     run_bulk_process(
-        handle_row, csv_rows, progress_label="Adding users to high risk employee detection list:"
+        handle_row,
+        csv_rows,
+        progress_label="Adding users to high risk employee detection list:",
     )
 
 
 @bulk.command(
+    name="remove",
     help="Bulk remove users from the high-risk-employee detection list using a newline separated "
-    "file of usernames."
+    "file of usernames.",
 )
 @read_flat_file_arg
 @sdk_options
-def remove(state, file_rows):
+def bulk_remove(state, file_rows):
     sdk = state.sdk
+
     def handle_row(username):
         _remove_high_risk_employee(sdk, username)
+
     run_bulk_process(
         handle_row,
         file_rows,
@@ -129,32 +134,38 @@ def remove(state, file_rows):
 
 
 @bulk.command(
+    name="add-risk-tags",
     help="Adds risk tags to users in bulk using a csv file with format: {}".format(
         ",".join(RISK_TAG_CSV_HEADERS)
-    )
+    ),
 )
 @read_csv_arg(headers=RISK_TAG_CSV_HEADERS)
 @sdk_options
-def add_risk_tags(state, csv_rows):
+def bulk_add_risk_tags(state, csv_rows):
     sdk = state.sdk
+
     def handle_row(username, tag):
         _add_risk_tags(sdk, username, tag)
+
     run_bulk_process(
         handle_row, csv_rows, progress_label="Adding risk tags to users:",
     )
 
 
 @bulk.command(
+    name="remove-risk-tags",
     help="Removes risk tags from users in bulk using a csv file with format: {}".format(
         ",".join(RISK_TAG_CSV_HEADERS)
-    )
+    ),
 )
 @read_csv_arg(headers=RISK_TAG_CSV_HEADERS)
 @sdk_options
-def remove_risk_tags(state, csv_rows):
+def bulk_remove_risk_tags(state, csv_rows):
     sdk = state.sdk
+
     def handle_row(username, tag):
         _remove_risk_tags(sdk, username, tag)
+
     run_bulk_process(
         handle_row, csv_rows, progress_label="Removing risk tags from users:",
     )
@@ -166,7 +177,9 @@ def _add_high_risk_employee(sdk, username, cloud_alias, risk_tag, notes):
 
     try:
         sdk.detectionlists.high_risk_employee.add(user_id)
-        update_user(sdk, username, cloud_alias=cloud_alias, risk_tag=risk_tag, notes=notes)
+        update_user(
+            sdk, username, cloud_alias=cloud_alias, risk_tag=risk_tag, notes=notes
+        )
     except Py42BadRequestError as err:
         try_handle_user_already_added_error(err, username, "high-risk-employee list")
         raise

@@ -1,16 +1,17 @@
 import time
 
-from code42cli.worker import Worker, WorkerStats
+from code42cli.worker import Worker
+from code42cli.worker import WorkerStats
 
 
-class TestWorkerStats(object):
+class TestWorkerStats:
     def test_successes_when_should_be_negative_returns_zero(self):
         stats = WorkerStats(100)
         stats._total_errors = 101
         assert not stats.total_successes
 
 
-class TestWorker(object):
+class TestWorker:
     def test_is_async(self):
         worker = Worker(5, 2)
         demo_ls = []

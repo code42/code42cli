@@ -1,26 +1,25 @@
+import json
 from collections import OrderedDict
 from functools import lru_cache
-import json
 from pprint import pformat
 
 import click
 from click import echo
-from py42.exceptions import Py42ForbiddenError, Py42BadRequestError
+from py42.exceptions import Py42BadRequestError
+from py42.exceptions import Py42ForbiddenError
 
-from code42cli.bulk import run_bulk_process, generate_template_cmd_factory
+from code42cli.bulk import generate_template_cmd_factory
+from code42cli.bulk import run_bulk_process
 from code42cli.cmds.shared import get_user_id
-from code42cli.errors import (
-    UserAlreadyAddedError,
-    UserNotInLegalHoldError,
-    LegalHoldNotFoundOrPermissionDeniedError,
-)
+from code42cli.errors import LegalHoldNotFoundOrPermissionDeniedError
+from code42cli.errors import UserAlreadyAddedError
+from code42cli.errors import UserNotInLegalHoldError
 from code42cli.file_readers import read_csv_arg
-from code42cli.options import sdk_options, OrderedGroup
-from code42cli.util import (
-    format_to_table,
-    find_format_width,
-    format_string_list_to_columns,
-)
+from code42cli.options import OrderedGroup
+from code42cli.options import sdk_options
+from code42cli.util import find_format_width
+from code42cli.util import format_string_list_to_columns
+from code42cli.util import format_to_table
 
 _MATTER_KEYS_MAP = OrderedDict()
 _MATTER_KEYS_MAP["legalHoldUid"] = "Matter ID"
@@ -94,8 +93,12 @@ def show(state, matter_id, include_inactive=False, include_policy=False):
     # if `active` is None then all matters (whether active or inactive) are returned. True returns
     # only those that are active.
     active = None if include_inactive else True
-    memberships = _get_legal_hold_memberships_for_matter(state.sdk, matter_id, active=active)
-    active_usernames = [member["user"]["username"] for member in memberships if member["active"]]
+    memberships = _get_legal_hold_memberships_for_matter(
+        state.sdk, matter_id, active=active
+    )
+    active_usernames = [
+        member["user"]["username"] for member in memberships if member["active"]
+    ]
     inactive_usernames = [
         member["user"]["username"] for member in memberships if not member["active"]
     ]
@@ -132,16 +135,19 @@ bulk.add_command(legal_hold_generate_template)
 
 
 @bulk.command(
+    name="add",
     help="Bulk add users to legal hold matters from a csv file. CSV file format: {}".format(
         ",".join(LEGAL_HOLD_CSV_HEADERS)
-    )
+    ),
 )
 @read_csv_arg(headers=LEGAL_HOLD_CSV_HEADERS)
 @sdk_options
-def add(state, csv_rows):
+def bulk_add(state, csv_rows):
     sdk = state.sdk
+
     def handle_row(matter_id, username):
         _add_user_to_legal_hold(sdk, matter_id, username)
+
     run_bulk_process(handle_row, csv_rows, progress_label="Adding users to legal hold:")
 
 
@@ -154,9 +160,13 @@ def add(state, csv_rows):
 @sdk_options
 def remove(state, csv_rows):
     sdk = state.sdk
+
     def handle_row(matter_id, username):
         _remove_user_from_legal_hold(sdk, matter_id, username)
-    run_bulk_process(handle_row, csv_rows, progress_label="Removing users from legal hold:")
+
+    run_bulk_process(
+        handle_row, csv_rows, progress_label="Removing users from legal hold:"
+    )
 
 
 def _add_user_to_legal_hold(sdk, matter_id, username):
@@ -175,7 +185,9 @@ def _add_user_to_legal_hold(sdk, matter_id, username):
 
 def _remove_user_from_legal_hold(sdk, matter_id, username):
     _check_matter_is_accessible(sdk, matter_id)
-    membership_id = _get_legal_hold_membership_id_for_user_and_matter(sdk, username, matter_id)
+    membership_id = _get_legal_hold_membership_id_for_user_and_matter(
+        sdk, username, matter_id
+    )
     sdk.legalhold.remove_from_matter(membership_id)
 
 
@@ -199,7 +211,9 @@ def _get_legal_hold_memberships_for_matter(sdk, matter_id, active=True):
         legal_hold_uid=matter_id, active=active
     )
     memberships = [
-        member for page in memberships_generator for member in page["legalHoldMemberships"]
+        member
+        for page in memberships_generator
+        for member in page["legalHoldMemberships"]
     ]
     return memberships
 
@@ -207,7 +221,10 @@ def _get_legal_hold_memberships_for_matter(sdk, matter_id, active=True):
 def _get_all_active_matters(sdk):
     matters_generator = sdk.legalhold.get_all_matters()
     matters = [
-        matter for page in matters_generator for matter in page["legalHolds"] if matter["active"]
+        matter
+        for page in matters_generator
+        for matter in page["legalHolds"]
+        if matter["active"]
     ]
     for matter in matters:
         matter["creator_username"] = matter["creator"]["username"]

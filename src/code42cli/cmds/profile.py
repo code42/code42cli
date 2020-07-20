@@ -1,7 +1,8 @@
 from getpass import getpass
 
 import click
-from click import echo, secho
+from click import echo
+from click import secho
 
 import code42cli.profile as cliprofile
 from code42cli.errors import Code42CLIError
@@ -25,16 +26,27 @@ name_option = click.option(
     help="The name of the Code42 CLI profile to use when executing this command.",
 )
 server_option = click.option(
-    "-s", "--server", required=True, help="The url and port of the Code42 server."
+    "-s",
+    "--server",
+    required=True,
+    type=str,
+    help="The url and port of the Code42 server.",
 )
+
 username_option = click.option(
-    "-u", "--username", required=True, help="The username of the Code42 API user."
+    "-u",
+    "--username",
+    required=True,
+    type=str,
+    help="The username of the Code42 API user.",
 )
+
 password_option = click.option(
     "--password",
     help="The password for the Code42 API user. If this option is omitted, interactive prompts "
     "will be used to obtain the password.",
 )
+
 disable_ssl_option = click.option(
     "--disable-ssl-errors",
     is_flag=True,
@@ -48,7 +60,7 @@ disable_ssl_option = click.option(
 def show(profile_name):
     """Print the details of a profile."""
     c42profile = cliprofile.get_profile(profile_name)
-    echo("\n{0}:".format(c42profile.name))
+    echo("\n{}:".format(c42profile.name))
     echo("\t* username = {}".format(c42profile.username))
     echo("\t* authority url = {}".format(c42profile.authority_url))
     echo("\t* ignore-ssl-errors = {}".format(c42profile.ignore_ssl_errors))
@@ -95,7 +107,7 @@ def update(name, server, username, password, disable_ssl_errors):
 @profile_name_arg
 def reset_pw(profile_name):
     """\b
-    Change the stored password for a profile. Only affects what's stored in the local profile, 
+    Change the stored password for a profile. Only affects what's stored in the local profile,
     does not make any changes to the Code42 user account."""
     password = getpass()
     _set_pw(profile_name, password)
@@ -127,7 +139,9 @@ def delete(profile_name):
     """Deletes a profile and its stored password (if any)."""
     message = "\nDeleting this profile will also delete any stored passwords and checkpoints. Are you sure? (y/n): "
     if cliprofile.is_default_profile(profile_name):
-        message = "\n'{0}' is currently the default profile!\n{1}".format(profile_name, message)
+        message = "\n'{}' is currently the default profile!\n{}".format(
+            profile_name, message
+        )
     if does_user_agree(message):
         cliprofile.delete_profile(profile_name)
         echo("Profile '{}' has been deleted.".format(profile_name))

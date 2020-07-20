@@ -72,10 +72,10 @@ python3 -m pip install code42cli --upgrade
 .. important:: the Code42 CLI currently only supports token-based authentication.
 ```
 
-To use the CLI, you must provide your credentials (basic authentication). The CLI uses keyring when storing passwords. 
+To use the CLI, you must provide your credentials (basic authentication). The CLI uses keyring when storing passwords.
 If you choose not to store your password in the CLI, you have to enter it for each command that requires a connection.
 
-The Code42 CLI currently does **not** support SSO login providers or any other identity providers such as Active 
+The Code42 CLI currently does **not** support SSO login providers or any other identity providers such as Active
 Directory or Okta.
 
 To learn more about authenticating in the CLI, follow the [profile guide](profile.md).
@@ -85,17 +85,17 @@ To learn more about authenticating in the CLI, follow the [profile guide](profil
 ### Debug mode
 
 Debug mode may be useful if you are trying to determine if you are experiencing permissions issues. When debug mode is
-on, the CLI logs HTTP request data to the console. Use the `-d` flag to enable debug mode for a particular command. 
+on, the CLI logs HTTP request data to the console. Use the `-d` flag to enable debug mode for a particular command.
 `-d` can appear anywhere in the command chain:
 
 ```bash
-code42 <command> <subcommand> <args> -d 
+code42 <command> <subcommand> <args> -d
 ```
 
 ### File an issue on GitHub
 
 If you are experiencing an issue with the Code42 CLI, you can create a *New issue* at the
-[project repository](https://github.com/code42/code42cli/issues). See the Github 
+[project repository](https://github.com/code42/code42cli/issues). See the Github
 [guide on creating an issue](https://help.github.com/en/github/managing-your-work-on-github/creating-an-issue) for more information.
 
 ### Contact Code42 Support
