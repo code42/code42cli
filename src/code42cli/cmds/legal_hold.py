@@ -135,13 +135,14 @@ bulk.add_command(legal_hold_generate_template)
 
 
 @bulk.command(
+    name="add",
     help="Bulk add users to legal hold matters from a csv file. CSV file format: {}".format(
         ",".join(LEGAL_HOLD_CSV_HEADERS)
     )
 )
 @read_csv_arg(headers=LEGAL_HOLD_CSV_HEADERS)
 @sdk_options
-def add(state, csv_rows):
+def bulk_add(state, csv_rows):
     sdk = state.sdk
 
     def handle_row(matter_id, username):
