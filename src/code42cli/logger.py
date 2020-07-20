@@ -90,7 +90,7 @@ def _create_formatter_for_error_file():
     return logging.Formatter("%(asctime)s %(message)s")
 
 
-class CliLogger(object):
+class CliLogger:
     def __init__(self):
         self._logger = _get_error_file_logger()
 

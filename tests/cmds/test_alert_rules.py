@@ -17,8 +17,8 @@ TEST_EMPTY_RULE_RESPONSE = {"ruleMetadata": []}
 TEST_SYSTEM_RULE_RESPONSE = {
     "ruleMetadata": [
         {
-            u"observerRuleId": TEST_RULE_ID,
-            "type": u"FED_FILE_TYPE_MISMATCH",
+            "observerRuleId": TEST_RULE_ID,
+            "type": "FED_FILE_TYPE_MISMATCH",
             "isSystem": True,
             "ruleSource": "NOTVALID",
         }

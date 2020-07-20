@@ -13,10 +13,10 @@ class NoConfigProfileError(Exception):
             if profile_arg_name
             else "Profile does not exist."
         )
-        super(NoConfigProfileError, self).__init__(message)
+        super().__init__(message)
 
 
-class ConfigAccessor(object):
+class ConfigAccessor:
     DEFAULT_VALUE = "__DEFAULT__"
     AUTHORITY_KEY = "c42_authority_url"
     USERNAME_KEY = "c42_username"

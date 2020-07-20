@@ -8,7 +8,7 @@ from code42cli.config import NoConfigProfileError
 from code42cli.errors import Code42CLIError
 
 
-class Code42Profile(object):
+class Code42Profile:
     def __init__(self, profile):
         self._profile = profile
 

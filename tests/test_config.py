@@ -89,7 +89,7 @@ def setup_parser_one_profile(profile, internal, parser):
     parser.__getitem__.side_effect = side_effect
 
 
-class TestConfigAccessor(object):
+class TestConfigAccessor:
     def test_get_profile_when_profile_does_not_exist_raises(self, mock_config_parser):
         mock_config_parser.sections.return_value = [_INTERNAL]
         accessor = ConfigAccessor(mock_config_parser)

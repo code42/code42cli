@@ -5,7 +5,7 @@ from code42cli.errors import Code42CLIError
 from code42cli.util import get_user_project_path
 
 
-class Cursor(object):
+class Cursor:
     def __init__(self, location):
         self._location = location
         self._name = path.basename(location)
@@ -20,7 +20,7 @@ class Cursor(object):
             return checkpoint.read()
 
 
-class BaseCursorStore(object):
+class BaseCursorStore:
     def __init__(self, dir_path):
         self._dir_path = dir_path
 
@@ -66,13 +66,13 @@ class BaseCursorStore(object):
 class FileEventCursorStore(BaseCursorStore):
     def __init__(self, profile_name):
         dir_path = get_user_project_path("file_event_checkpoints", profile_name)
-        super(FileEventCursorStore, self).__init__(dir_path)
+        super().__init__(dir_path)
 
 
 class AlertCursorStore(BaseCursorStore):
     def __init__(self, profile_name):
         dir_path = get_user_project_path("alert_checkpoints", profile_name)
-        super(AlertCursorStore, self).__init__(dir_path)
+        super().__init__(dir_path)
 
 
 def get_file_event_cursor_store(profile_name):

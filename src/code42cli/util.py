@@ -28,9 +28,9 @@ def does_user_agree(prompt):
 
 def get_user_project_path(*subdirs):
     """The path on your user dir to /.code42cli/[subdir]."""
-    package_name = __name__.split(u".")[0]
-    home = path.expanduser(u"~")
-    hidden_package_name = u".{}".format(package_name)
+    package_name = __name__.split(".")[0]
+    home = path.expanduser("~")
+    hidden_package_name = ".{}".format(package_name)
     user_project_path = path.join(home, hidden_package_name)
     result_path = path.join(user_project_path, *subdirs)
     if not path.exists(result_path):
@@ -94,7 +94,7 @@ def format_string_list_to_columns(string_list, max_width=None):
     echo()
 
 
-class warn_interrupt(object):
+class warn_interrupt:
     """A context decorator class used to wrap functions where a keyboard interrupt could potentially
     leave things in a bad state. Warns the user with provided message and exits when wrapped
     function is complete. Requires user to ctrl-c a second time to force exit.

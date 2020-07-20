@@ -123,7 +123,7 @@ def cli_state(mocker, sdk, profile):
     return mock_state
 
 
-class MockSection(object):
+class MockSection:
     def __init__(self, name=None, values_dict=None):
         self.name = name
         self.values_dict = values_dict or create_profile_values_dict()
@@ -209,7 +209,7 @@ def func_with_args(args):
 
 
 def convert_str_to_date(date_str):
-    return datetime.strptime(date_str, u"%Y-%m-%dT%H:%M:%S.%fZ")
+    return datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%fZ")
 
 
 def get_test_date(days_ago=None, hours_ago=None, minutes_ago=None):

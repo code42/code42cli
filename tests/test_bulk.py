@@ -44,7 +44,7 @@ def test_run_bulk_process_creates_processor(bulk_processor_factory):
     bulk_processor_factory.assert_called_once_with(func_with_one_arg, rows, None)
 
 
-class TestBulkProcessor(object):
+class TestBulkProcessor:
     def test_run_when_reader_returns_ordered_dict_process_kwargs(self):
         processed_rows = []
 
@@ -148,7 +148,7 @@ class TestBulkProcessor(object):
         def func_for_bulk(test1, test2):
             processed_rows.append((test1, test2))
 
-        rows = [{"test1": "", "test2": "foo"}, {"test1": "bar", "test2": u""}]
+        rows = [{"test1": "", "test2": "foo"}, {"test1": "bar", "test2": ""}]
         processor = BulkProcessor(func_for_bulk, rows)
         processor.run()
         assert (None, "foo") in processed_rows

@@ -16,7 +16,7 @@ yes_option = click.option(
 )
 
 
-class CLIState(object):
+class CLIState:
     def __init__(self):
         try:
             self._profile = get_profile()

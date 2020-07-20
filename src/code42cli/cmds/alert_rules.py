@@ -18,7 +18,7 @@ from code42cli.util import find_format_width
 from code42cli.util import format_to_table
 
 
-class AlertRuleTypes(object):
+class AlertRuleTypes:
     EXFILTRATION = "FED_ENDPOINT_EXFILTRATION"
     CLOUD_SHARE = "FED_CLOUD_SHARE_PERMISSIONS"
     FILE_TYPE_MISMATCH = "FED_FILE_TYPE_MISMATCH"

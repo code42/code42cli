@@ -10,7 +10,7 @@ from code42cli.errors import Code42CLIError
 from code42cli.logger import get_main_cli_logger
 
 
-class WorkerStats(object):
+class WorkerStats:
     """Stats about the tasks that have run."""
 
     def __init__(self, total):
@@ -52,7 +52,7 @@ class WorkerStats(object):
             self._total_errors += 1
 
 
-class Worker(object):
+class Worker:
     def __init__(self, thread_count, expected_total, bar=None):
         self._queue = queue.Queue()
         self._thread_count = thread_count

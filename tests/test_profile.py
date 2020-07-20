@@ -33,7 +33,7 @@ def password_deleter(mocker):
     return mocker.patch("code42cli.password.delete_password")
 
 
-class TestCode42Profile(object):
+class TestCode42Profile:
     def test_get_password_when_is_none_returns_password_from_getpass(
         self, mocker, password_getter
     ):

@@ -9,7 +9,7 @@ from code42cli.worker import Worker
 _logger = get_main_cli_logger()
 
 
-class BulkCommandType(object):
+class BulkCommandType:
     ADD = "add"
     REMOVE = "remove"
 
@@ -85,7 +85,7 @@ def _create_bulk_processor(row_handler, rows, progress_label):
     return BulkProcessor(row_handler, rows, progress_label=progress_label)
 
 
-class BulkProcessor(object):
+class BulkProcessor:
     """A class for bulk processing a file.
 
     Args:
