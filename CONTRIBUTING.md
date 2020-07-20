@@ -103,7 +103,7 @@ of style checks will run. See the [pre-commit-config.yaml](.pre-commit-config.ya
 tox -e style
 ```
 
-This will output a diff of the files that were changed as well a list of files / line numbers / error descriptions for any style problems that need to corrected manually. Once these have been corrected and re-pushed, the PR checks should pass.
+This will output a diff of the files that were changed as well a list of files / line numbers / error descriptions for any style problems that need to be corrected manually. Once these have been corrected and re-pushed, the PR checks should pass.
 
 You can optionally also choose to have these checks / automatic adjustments
 occur automatically on each git commit that you make (instead of only when running `tox`.) To do so, install `pre-commit` and install the pre-commit hooks:
@@ -142,8 +142,7 @@ def test_add_one_and_one_equals_two():
 
 ## Documentation
 
-Public functions, classes, and methods should have docstrings.
-Follow [Google's format](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings).
+Command functions should have accompanying documentation. Documentation is written in markdown and managed in the `docs` folder of this repo.
 
 ### Generating documentation
 
