@@ -10,6 +10,10 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
+### Fixed
+
+- Bug where `code42 legal-hold show` would error when terminal was too small.
+
 ### Changed
 
 - `-i` (`--incremental`) has been removed, use `-c` (`--use-checkpoint`) with a string name for the checkpoint instead.

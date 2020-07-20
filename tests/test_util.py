@@ -1,8 +1,10 @@
 import pytest
 
 from code42cli import PRODUCT_NAME
+from code42cli.util import _PADDING_SIZE
 from code42cli.util import does_user_agree
 from code42cli.util import find_format_width
+from code42cli.util import format_string_list_to_columns
 
 TEST_HEADER = {"key1": "Column 1", "key2": "Column 10", "key3": "Column 100"}
 
@@ -23,7 +25,18 @@ def context_without_assume_yes(mocker, cli_state):
     return mocker.patch("code42cli.util.get_current_context", return_value=ctx)
 
 
+@pytest.fixture
+def echo_output(mocker):
+    return mocker.patch("code42cli.util.echo")
+
+
 _NAMESPACE = "{}.util".format(PRODUCT_NAME)
+
+
+def get_expected_row_width(max_col_len, max_width):
+    col_size = max_col_len + _PADDING_SIZE
+    num_cols = int(max_width / col_size) or 1
+    return col_size * num_cols
 
 
 def test_does_user_agree_when_user_says_y_returns_true(
@@ -83,3 +96,62 @@ def test_find_format_width_filters_keys_not_present_in_header():
     result, _ = find_format_width(report, header_with_subset_keys)
     for item in result:
         assert "key2" not in item.keys()
+
+
+def test_format_string_list_to_columns_when_given_no_string_list_does_not_echo(
+    echo_output,
+):
+    format_string_list_to_columns([], None)
+    format_string_list_to_columns(None, None)
+    assert not echo_output.call_count
+
+
+def test_format_string_list_to_columns_when_not_given_max_uses_shell_size(
+    mocker, echo_output
+):
+    terminal_size = mocker.patch("code42cli.util.shutil.get_terminal_size")
+    max_width = 30
+    terminal_size.return_value = (max_width, None)  # Cols, Rows
+
+    columns = ["col1", "col2"]
+    format_string_list_to_columns(columns)
+
+    printed_row = echo_output.call_args_list[0][0][0]
+    assert len(printed_row) == get_expected_row_width(4, max_width)
+    assert printed_row == "col1   col2                 "
+
+
+def test_format_string_list_to_columns_when_given_small_max_width_prints_one_column_per_row(
+    echo_output,
+):
+    max_width = 5
+
+    columns = ["col1", "col2"]
+    format_string_list_to_columns(columns, max_width)
+
+    expected_row_width = get_expected_row_width(4, max_width)
+    printed_row = echo_output.call_args_list[0][0][0]
+    assert len(printed_row) == expected_row_width
+    assert printed_row == "col1   "
+
+    printed_row = echo_output.call_args_list[1][0][0]
+    assert len(printed_row) == expected_row_width
+    assert printed_row == "col2   "
+
+
+def test_format_string_list_to_columns_uses_width_of_longest_string(echo_output):
+    max_width = 5
+
+    columns = ["col1", "col2_that_is_really_long"]
+    format_string_list_to_columns(columns, max_width)
+
+    expected_row_width = get_expected_row_width(
+        len("col2_that_is_really_long"), max_width
+    )
+    printed_row = echo_output.call_args_list[0][0][0]
+    assert len(printed_row) == expected_row_width
+    assert printed_row == "col1                       "
+
+    printed_row = echo_output.call_args_list[1][0][0]
+    assert len(printed_row) == expected_row_width
+    assert printed_row == "col2_that_is_really_long   "
