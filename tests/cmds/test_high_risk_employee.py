@@ -20,7 +20,7 @@ def test_add_high_risk_employee_when_given_cloud_alias_adds_alias(
     runner, cli_state_with_user
 ):
     alias = "risk employee alias"
-    result = runner.invoke(
+    runner.invoke(
         cli,
         ["high-risk-employee", "add", _EMPLOYEE, "--cloud-alias", alias],
         obj=cli_state_with_user,
@@ -184,7 +184,7 @@ def test_bulk_remove_employees_uses_expected_arguments(runner, cli_state, mocker
     with runner.isolated_filesystem():
         with open("test_remove.csv", "w") as csv:
             csv.writelines(["# username\n", "test@example.com\n", "test2@example.com"])
-        result = runner.invoke(
+        runner.invoke(
             cli,
             ["high-risk-employee", "bulk", "remove", "test_remove.csv"],
             obj=cli_state,

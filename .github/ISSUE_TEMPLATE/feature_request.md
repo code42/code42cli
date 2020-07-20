@@ -12,7 +12,7 @@ assignees: ''
 
 ## Proposed API
 
-<!-- What should the function calls to accomplish your idea look like?
+<!-- What should the terminal commands to accomplish your idea look like?
 What parameters are required / optional? What are their names? -->
 
 ## Intended Use Case

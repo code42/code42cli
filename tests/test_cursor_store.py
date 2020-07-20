@@ -1,5 +1,3 @@
-from io import IOBase
-from io import StringIO
 from os import path
 
 import pytest
@@ -139,7 +137,7 @@ class TestFileEventCursorStore(object):
         checkpoint = store.get(CURSOR_NAME)
         mock_open = mocker.patch("{}.open".format(_NAMESPACE))
         mock_open.side_effect = FileNotFoundError
-        assert checkpoint == None
+        assert checkpoint is None
 
     def test_replace_writes_to_expected_file(self, mock_open):
         store = FileEventCursorStore(PROFILE_NAME)

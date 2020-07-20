@@ -60,12 +60,13 @@ bulk.add_command(departing_employee_generate_template)
 
 
 @bulk.command(
+    name="add",
     help="Bulk add users to the departing-employee detection list using a csv file with "
-    "format: {}".format(",".join(DEPARTING_EMPLOYEE_CSV_HEADERS))
+    "format: {}".format(",".join(DEPARTING_EMPLOYEE_CSV_HEADERS)),
 )
 @read_csv_arg(headers=DEPARTING_EMPLOYEE_CSV_HEADERS)
 @sdk_options
-def add(state, csv_rows):
+def bulk_add(state, csv_rows):
     sdk = state.sdk
 
     def handle_row(username, cloud_alias, departure_date, notes):
@@ -79,12 +80,13 @@ def add(state, csv_rows):
 
 
 @bulk.command(
+    name="remove",
     help="Bulk remove users from the departing-employee detection list using a newline separated "
-    "file of usernames."
+    "file of usernames.",
 )
 @read_flat_file_arg
 @sdk_options
-def remove(state, file_rows):
+def bulk_remove(state, file_rows):
     sdk = state.sdk
 
     def handle_row(username):

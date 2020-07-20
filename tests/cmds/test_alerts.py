@@ -1,6 +1,5 @@
 import pytest
 from c42eventextractor.extractors import AlertExtractor
-from click.testing import CliRunner
 from py42.sdk.queries.alerts.filters import *
 from tests.cmds.conftest import filter_term_is_in_call_args
 from tests.cmds.conftest import get_filter_value_from_json
@@ -258,7 +257,7 @@ def test_search_when_given_begin_date_and_time_without_seconds_uses_expected_que
 ):
     date = get_test_date_str(days_ago=89)
     time = "15:33"
-    result = runner.invoke(
+    runner.invoke(
         cli, ["alerts", "search", "--begin", "{} {}".format(date, time)], obj=cli_state
     )
     actual = get_filter_value_from_json(
@@ -364,7 +363,7 @@ def test_search_with_only_begin_calls_extract_with_expected_filters(
     assert result.exit_code == 0
     assert str(
         alert_extractor.extract.call_args[0][0]
-    ) == '{{"filterClause":"AND", "filters":[{{"operator":"ON_OR_AFTER", "term":"createdAt", ' '"value":"{}"}}]}}'.format(
+    ) == '{{"filterClause":"AND", "filters":[{{"operator":"ON_OR_AFTER", "term":"createdAt", "value":"{}"}}]}}'.format(
         begin_option.expected_timestamp
     )
 

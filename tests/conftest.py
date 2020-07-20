@@ -173,7 +173,7 @@ def mock_listdir(mocker):
 
 
 def func_keyword_args(
-    one=None, two=None, three=None, default="testdefault", nargstest=[]
+    one=None, two=None, three=None, default="testdefault", nargstest=None
 ):
     pass
 

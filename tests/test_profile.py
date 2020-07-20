@@ -66,7 +66,7 @@ class TestCode42Profile(object):
 
     def test_ignore_ssl_errors_returns_expected_value(self):
         mock_profile = create_mock_profile()
-        assert mock_profile.ignore_ssl_errors == True
+        assert mock_profile.ignore_ssl_errors
 
 
 def test_get_profile_returns_expected_profile(config_accessor):
@@ -170,7 +170,6 @@ def test_get_stored_password_returns_expected_password(
 ):
     mock_section = MockSection("testprofilename")
     config_accessor.get_profile.return_value = mock_section
-    test_profile = "testprofilename"
     password_getter.return_value = "testpassword"
     assert cliprofile.get_stored_password("testprofilename") == "testpassword"
 

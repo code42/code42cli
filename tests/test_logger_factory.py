@@ -1,6 +1,5 @@
 import logging
 
-import pytest
 from c42eventextractor.logging.formatters import FileEventDictToCEFFormatter
 from c42eventextractor.logging.formatters import FileEventDictToJSONFormatter
 from c42eventextractor.logging.formatters import FileEventDictToRawJSONFormatter

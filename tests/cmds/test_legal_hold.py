@@ -1,4 +1,6 @@
 import pytest
+from py42.exceptions import Py42BadRequestError
+from py42.response import Py42Response
 from requests import HTTPError
 from requests import Response
 
@@ -7,10 +9,6 @@ from code42cli.cmds.legal_hold import _check_matter_is_accessible
 from code42cli.main import cli
 
 _NAMESPACE = "{}.cmds.legal_hold".format(PRODUCT_NAME)
-
-from py42.exceptions import Py42BadRequestError
-from py42.response import Py42Response
-
 
 TEST_MATTER_ID = "99999"
 TEST_LEGAL_HOLD_MEMBERSHIP_UID = "88888"
@@ -186,8 +184,10 @@ def test_remove_user_raises_legalhold_not_found_error_if_matter_inaccessible(
         obj=cli_state,
     )
     assert result.exit_code == 1
-    assert "Matter with id={0} either does not exist or your profile does not have "
-    "permission to view it.".format(TEST_MATTER_ID)
+    assert (
+        "Matter with id={} either does not exist or your profile does not have "
+        "permission to view it.".format(TEST_MATTER_ID)
+    )
 
 
 def test_remove_user_raises_user_not_in_matter_error_if_user_not_active_in_matter(

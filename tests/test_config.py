@@ -1,10 +1,8 @@
-import logging
 from configparser import ConfigParser
 
 import pytest
 
 from .conftest import MockSection
-from code42cli import PRODUCT_NAME
 from code42cli.config import ConfigAccessor
 from code42cli.config import NoConfigProfileError
 
@@ -120,7 +118,7 @@ class TestConfigAccessor(object):
         profiles = accessor.get_all_profiles()
         for p in profiles:
             if p.name == _INTERNAL:
-                assert False
+                raise AssertionError()
 
     def test_get_all_profiles_returns_profiles_with_expected_values(
         self, config_parser_for_multiple_profiles

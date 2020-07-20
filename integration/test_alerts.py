@@ -65,7 +65,7 @@ def _validate_begin_date(response):
         assert record["createdAt"].startswith("2020-05-18")
 
 
-@pytest.mark.parametrize("command, validate", [(ALERT_COMMAND, _validate_begin_date),])
+@pytest.mark.parametrize("command, validate", [(ALERT_COMMAND, _validate_begin_date)])
 def test_alert_prints_to_stdout_and_filters_result_between_given_date(
     command, validate
 ):

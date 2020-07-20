@@ -38,7 +38,7 @@ def test_create_sdk_when_profile_has_ssl_errors_disabled_sets_py42_setting_and_p
     profile.ignore_ssl_errors = "True"
     create_sdk(profile, False)
     output = capsys.readouterr()
-    assert mock_py42.settings.verify_ssl_certs == False
+    assert not mock_py42.settings.verify_ssl_certs
     assert (
         "Warning: Profile '{}' has SSL verification disabled. Adding certificate verification is strongly advised.".format(
             profile.name

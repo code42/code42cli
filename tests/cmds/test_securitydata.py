@@ -1,9 +1,9 @@
 import logging
 
+import py42.sdk.queries.fileevents.filters as f
 import pytest
 from c42eventextractor.extractors import FileEventExtractor
 from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
-from py42.sdk.queries.fileevents.filters import *
 from tests.cmds.conftest import filter_term_is_in_call_args
 from tests.cmds.conftest import get_filter_value_from_json
 from tests.conftest import get_test_date_str
@@ -257,7 +257,7 @@ def test_search_when_given_begin_date_past_90_days_and_use_checkpoint_and_a_stor
         obj=cli_state,
     )
     assert not filter_term_is_in_call_args(
-        file_event_extractor, InsertionTimestamp._term
+        file_event_extractor, f.InsertionTimestamp._term
     )
 
 
@@ -273,7 +273,7 @@ def test_search_when_given_begin_date_and_not_use_checkpoint_and_cursor_exists_u
     )
     expected_ts = "{}T00:00:00.000Z".format(begin_date)
     assert actual_ts == expected_ts
-    assert filter_term_is_in_call_args(file_event_extractor, EventTimestamp._term)
+    assert filter_term_is_in_call_args(file_event_extractor, f.EventTimestamp._term)
 
 
 def test_search_when_end_date_is_before_begin_date_causes_exit(runner, cli_state):
@@ -297,7 +297,7 @@ def test_search_with_only_begin_calls_extract_with_expected_args(
     assert result.exit_code == 0
     assert str(
         file_event_extractor.extract.call_args[0][1]
-    ) == '{{"filterClause":"AND", "filters":[{{"operator":"ON_OR_AFTER", "term":"eventTimestamp", ' '"value":"{}"}}]}}'.format(
+    ) == '{{"filterClause":"AND", "filters":[{{"operator":"ON_OR_AFTER", "term":"eventTimestamp", "value":"{}"}}]}}'.format(
         begin_option.expected_timestamp
     )
 
@@ -377,7 +377,7 @@ def test_search_when_given_username_uses_username_filter(
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
-    assert str(DeviceUsername.is_in([c42_username])) in filter_strings
+    assert str(f.DeviceUsername.is_in([c42_username])) in filter_strings
 
 
 def test_search_when_given_actor_is_uses_username_filter(
@@ -390,7 +390,7 @@ def test_search_when_given_actor_is_uses_username_filter(
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
-    assert str(Actor.is_in([actor_name])) in filter_strings
+    assert str(f.Actor.is_in([actor_name])) in filter_strings
 
 
 def test_search_when_given_md5_uses_md5_filter(runner, cli_state, file_event_extractor):
@@ -399,7 +399,7 @@ def test_search_when_given_md5_uses_md5_filter(runner, cli_state, file_event_ext
         cli, ["security-data", "search", "--begin", "1h", "--md5", md5], obj=cli_state
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
-    assert str(MD5.is_in([md5])) in filter_strings
+    assert str(f.MD5.is_in([md5])) in filter_strings
 
 
 def test_search_when_given_sha256_uses_sha256_filter(
@@ -412,7 +412,7 @@ def test_search_when_given_sha256_uses_sha256_filter(
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
-    assert str(SHA256.is_in([sha_256])) in filter_strings
+    assert str(f.SHA256.is_in([sha_256])) in filter_strings
 
 
 def test_search_when_given_source_uses_source_filter(
@@ -425,7 +425,7 @@ def test_search_when_given_source_uses_source_filter(
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
-    assert str(Source.is_in([source])) in filter_strings
+    assert str(f.Source.is_in([source])) in filter_strings
 
 
 def test_search_when_given_file_name_uses_file_name_filter(
@@ -438,7 +438,7 @@ def test_search_when_given_file_name_uses_file_name_filter(
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
-    assert str(FileName.is_in([filename])) in filter_strings
+    assert str(f.FileName.is_in([filename])) in filter_strings
 
 
 def test_search_when_given_file_path_uses_file_path_filter(
@@ -451,7 +451,7 @@ def test_search_when_given_file_path_uses_file_path_filter(
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
-    assert str(FilePath.is_in([filepath])) in filter_strings
+    assert str(f.FilePath.is_in([filepath])) in filter_strings
 
 
 def test_when_given_process_owner_uses_process_owner_filter(
@@ -464,7 +464,7 @@ def test_when_given_process_owner_uses_process_owner_filter(
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
-    assert str(ProcessOwner.is_in([process_owner])) in filter_strings
+    assert str(f.ProcessOwner.is_in([process_owner])) in filter_strings
 
 
 def test_when_given_tab_url_uses_process_tab_url_filter(
@@ -477,7 +477,7 @@ def test_when_given_tab_url_uses_process_tab_url_filter(
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
-    assert str(TabURL.is_in([tab_url])) in filter_strings
+    assert str(f.TabURL.is_in([tab_url])) in filter_strings
 
 
 def test_when_given_exposure_types_uses_exposure_type_is_in_filter(
@@ -490,7 +490,7 @@ def test_when_given_exposure_types_uses_exposure_type_is_in_filter(
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
-    assert str(ExposureType.is_in([exposure_type])) in filter_strings
+    assert str(f.ExposureType.is_in([exposure_type])) in filter_strings
 
 
 def test_when_given_include_non_exposure_does_not_include_exposure_type_exists(
@@ -502,7 +502,7 @@ def test_when_given_include_non_exposure_does_not_include_exposure_type_exists(
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
-    assert str(ExposureType.exists()) not in filter_strings
+    assert str(f.ExposureType.exists()) not in filter_strings
 
 
 def test_when_not_given_include_non_exposure_includes_exposure_type_exists(
@@ -512,7 +512,7 @@ def test_when_not_given_include_non_exposure_includes_exposure_type_exists(
         cli, ["security-data", "search", "--begin", "1h"], obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
-    assert str(ExposureType.exists()) in filter_strings
+    assert str(f.ExposureType.exists()) in filter_strings
 
 
 def test_when_given_multiple_search_args_uses_expected_filters(
@@ -538,9 +538,9 @@ def test_when_given_multiple_search_args_uses_expected_filters(
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
-    assert str(ProcessOwner.is_in([process_owner])) in filter_strings
-    assert str(FileName.is_in([filename])) in filter_strings
-    assert str(DeviceUsername.is_in([c42_username])) in filter_strings
+    assert str(f.ProcessOwner.is_in([process_owner])) in filter_strings
+    assert str(f.FileName.is_in([filename])) in filter_strings
+    assert str(f.DeviceUsername.is_in([c42_username])) in filter_strings
 
 
 def test_when_given_include_non_exposure_and_exposure_types_causes_exit(

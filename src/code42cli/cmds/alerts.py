@@ -1,129 +1,119 @@
 import click
+import py42.sdk.queries.alerts.filters as f
 from c42eventextractor.extractors import AlertExtractor
 from click import echo
-from py42.sdk.queries.alerts.filters import *
 
+import code42cli.cmds.search.enums as enum
+import code42cli.cmds.search.extraction as ext
+import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
+import code42cli.options as opt
 from code42cli.cmds.search import logger_factory
 from code42cli.cmds.search.cursor_store import AlertCursorStore
-from code42cli.cmds.search.enums import AlertOutputFormat
-from code42cli.cmds.search.enums import AlertSeverity as AlertSeverityOptions
-from code42cli.cmds.search.enums import AlertState as AlertStateOptions
-from code42cli.cmds.search.enums import RuleType as RuleTypeOptions
-from code42cli.cmds.search.extraction import create_handlers
-from code42cli.cmds.search.extraction import create_time_range_filter
-from code42cli.cmds.search.options import AdvancedQueryAndSavedSearchIncompatible
-from code42cli.cmds.search.options import contains_filter
-from code42cli.cmds.search.options import create_search_options
-from code42cli.cmds.search.options import is_in_filter
-from code42cli.cmds.search.options import not_contains_filter
-from code42cli.cmds.search.options import not_in_filter
-from code42cli.options import OrderedGroup
-from code42cli.options import sdk_options
 
-search_options = create_search_options("alerts")
+search_options = searchopt.create_search_options("alerts")
 
 format_option = click.option(
     "-f",
     "--format",
-    type=click.Choice(AlertOutputFormat()),
-    default=AlertOutputFormat.JSON,
+    type=click.Choice(enum.AlertOutputFormat()),
+    default=enum.AlertOutputFormat.JSON,
     help="The format used for outputting alerts.",
 )
 severity_option = click.option(
     "--severity",
     multiple=True,
-    type=click.Choice(AlertSeverityOptions()),
-    cls=AdvancedQueryAndSavedSearchIncompatible,
-    callback=is_in_filter(Severity),
+    type=click.Choice(enum.AlertSeverity()),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.is_in_filter(f.Severity),
     help="Filter alerts by severity. Defaults to returning all severities.",
 )
 state_option = click.option(
     "--state",
     multiple=True,
-    type=click.Choice(AlertStateOptions()),
-    cls=AdvancedQueryAndSavedSearchIncompatible,
-    callback=is_in_filter(AlertState),
+    type=click.Choice(enum.AlertState()),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.is_in_filter(f.AlertState),
     help="Filter alerts by state. Defaults to returning all states.",
 )
 actor_option = click.option(
     "--actor",
     multiple=True,
-    cls=AdvancedQueryAndSavedSearchIncompatible,
-    callback=is_in_filter(Actor),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.is_in_filter(f.Actor),
     help="Filter alerts by including the given actor(s) who triggered the alert. "
     "Args must match actor username exactly.",
 )
 actor_contains_option = click.option(
     "--actor-contains",
     multiple=True,
-    cls=AdvancedQueryAndSavedSearchIncompatible,
-    callback=contains_filter(Actor),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.contains_filter(f.Actor),
     help="Filter alerts by including actor(s) whose username contains the given string.",
 )
 exclude_actor_option = click.option(
     "--exclude-actor",
     multiple=True,
-    cls=AdvancedQueryAndSavedSearchIncompatible,
-    callback=not_in_filter(Actor),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.not_in_filter(f.Actor),
     help="Filter alerts by excluding the given actor(s) who triggered the alert. "
     "Args must match actor username exactly.",
 )
 exclude_actor_contains_option = click.option(
     "--exclude-actor-contains",
     multiple=True,
-    cls=AdvancedQueryAndSavedSearchIncompatible,
-    callback=not_contains_filter(Actor),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.not_contains_filter(f.Actor),
     help="Filter alerts by excluding actor(s) whose username contains the given string.",
 )
 rule_name_option = click.option(
     "--rule-name",
     multiple=True,
-    cls=AdvancedQueryAndSavedSearchIncompatible,
-    callback=is_in_filter(RuleName),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.is_in_filter(f.RuleName),
     help="Filter alerts by including the given rule name(s).",
 )
 exclude_rule_name_option = click.option(
     "--exclude-rule-name",
     multiple=True,
-    cls=AdvancedQueryAndSavedSearchIncompatible,
-    callback=not_in_filter(RuleName),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.not_in_filter(f.RuleName),
     help="Filter alerts by excluding the given rule name(s).",
 )
 rule_id_option = click.option(
     "--rule-id",
     multiple=True,
-    cls=AdvancedQueryAndSavedSearchIncompatible,
-    callback=is_in_filter(RuleId),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.is_in_filter(f.RuleId),
     help="Filter alerts by including the given rule id(s).",
 )
 exclude_rule_id_option = click.option(
     "--exclude-rule-id",
     multiple=True,
-    cls=AdvancedQueryAndSavedSearchIncompatible,
-    callback=not_in_filter(RuleId),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.not_in_filter(f.RuleId),
     help="Filter alerts by excluding the given rule id(s).",
 )
 rule_type_option = click.option(
     "--rule-type",
     multiple=True,
-    type=click.Choice(RuleTypeOptions()),
-    cls=AdvancedQueryAndSavedSearchIncompatible,
-    callback=is_in_filter(RuleType),
+    type=click.Choice(enum.RuleType()),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.is_in_filter(f.RuleType),
     help="Filter alerts by including the given rule type(s).",
 )
 exclude_rule_type_option = click.option(
     "--exclude-rule-type",
     multiple=True,
-    cls=AdvancedQueryAndSavedSearchIncompatible,
-    callback=not_in_filter(RuleType),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.not_in_filter(f.RuleType),
     help="Filter alerts by excluding the given rule type(s).",
 )
 description_option = click.option(
     "--description",
     multiple=True,
-    cls=AdvancedQueryAndSavedSearchIncompatible,
-    callback=contains_filter(Description),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.contains_filter(f.Description),
     help="Filter alerts by description. Does fuzzy search by default.",
 )
 
@@ -146,8 +136,8 @@ def alert_options(f):
     return f
 
 
-@click.group(cls=OrderedGroup)
-@sdk_options
+@click.group(cls=opt.OrderedGroup)
+@opt.sdk_options
 def alerts(state):
     """Tools for getting alert data."""
     # store cursor getter on the group state so shared --begin option can use it in validation
@@ -156,7 +146,7 @@ def alerts(state):
 
 @alerts.command()
 @click.argument("checkpoint-name")
-@sdk_options
+@opt.sdk_options
 def clear_checkpoint(state, checkpoint_name):
     """Remove the saved alert checkpoint from '--use-checkpoint/-c' mode."""
     _get_alert_cursor_store(state.profile.name).delete(checkpoint_name)
@@ -165,12 +155,12 @@ def clear_checkpoint(state, checkpoint_name):
 @alerts.command()
 @alert_options
 @search_options
-@sdk_options
+@opt.sdk_options
 def search(cli_state, format, begin, end, advanced_query, use_checkpoint, **kwargs):
     """Search for alerts."""
     output_logger = logger_factory.get_logger_for_stdout(format)
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
-    handlers = create_handlers(
+    handlers = ext.create_handlers(
         cli_state.sdk, AlertExtractor, output_logger, cursor, use_checkpoint
     )
     extractor = _get_alert_extractor(cli_state.sdk, handlers)
@@ -179,7 +169,7 @@ def search(cli_state, format, begin, end, advanced_query, use_checkpoint, **kwar
     else:
         if begin or end:
             cli_state.search_filters.append(
-                create_time_range_filter(DateObserved, begin, end)
+                ext.create_time_range_filter(f.DateObserved, begin, end)
             )
         extractor.extract(*cli_state.search_filters)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
