@@ -1,6 +1,6 @@
+import py42.sdk.queries.alerts.filters as f
 import pytest
 from c42eventextractor.extractors import AlertExtractor
-from py42.sdk.queries.alerts.filters import *
 from tests.cmds.conftest import filter_term_is_in_call_args
 from tests.cmds.conftest import get_filter_value_from_json
 from tests.conftest import get_test_date_str
@@ -312,7 +312,7 @@ def test_search_when_given_begin_date_past_90_days_and_use_checkpoint_and_a_stor
         ["alerts", "search", "--begin", begin_date, "--use-checkpoint", "test"],
         obj=cli_state,
     )
-    assert not filter_term_is_in_call_args(alert_extractor, DateObserved._term)
+    assert not filter_term_is_in_call_args(alert_extractor, f.DateObserved._term)
 
 
 def test_search_when_given_begin_date_and_not_use_checkpoint_and_cursor_exists_uses_begin_date(
@@ -325,7 +325,7 @@ def test_search_when_given_begin_date_and_not_use_checkpoint_and_cursor_exists_u
     )
     expected_ts = "{}T00:00:00.000Z".format(begin_date)
     assert actual_ts == expected_ts
-    assert filter_term_is_in_call_args(alert_extractor, DateObserved._term)
+    assert filter_term_is_in_call_args(alert_extractor, f.DateObserved._term)
 
 
 def test_search_when_end_date_is_before_begin_date_causes_exit(cli_state, runner):
@@ -436,7 +436,7 @@ def test_search_when_given_actor_is_uses_username_filter(
         cli, ["alerts", "search", "--begin", "1h", "--actor", actor_name], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(Actor.is_in([actor_name])) in filter_strings
+    assert str(f.Actor.is_in([actor_name])) in filter_strings
 
 
 def test_search_when_given_exclude_actor_uses_actor_filter(
@@ -450,7 +450,7 @@ def test_search_when_given_exclude_actor_uses_actor_filter(
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(Actor.not_in([actor_name])) in filter_strings
+    assert str(f.Actor.not_in([actor_name])) in filter_strings
 
 
 def test_search_when_given_rule_name_uses_rule_name_filter(
@@ -464,7 +464,7 @@ def test_search_when_given_rule_name_uses_rule_name_filter(
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(RuleName.is_in([rule_name])) in filter_strings
+    assert str(f.RuleName.is_in([rule_name])) in filter_strings
 
 
 def test_search_when_given_exclude_rule_name_uses_rule_name_not_filter(
@@ -478,7 +478,7 @@ def test_search_when_given_exclude_rule_name_uses_rule_name_not_filter(
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(RuleName.not_in([rule_name])) in filter_strings
+    assert str(f.RuleName.not_in([rule_name])) in filter_strings
 
 
 def test_search_when_given_rule_type_uses_rule_name_filter(
@@ -492,7 +492,7 @@ def test_search_when_given_rule_type_uses_rule_name_filter(
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(RuleType.is_in([rule_type])) in filter_strings
+    assert str(f.RuleType.is_in([rule_type])) in filter_strings
 
 
 def test_search_when_given_exclude_rule_type_uses_rule_name_not_filter(
@@ -506,7 +506,7 @@ def test_search_when_given_exclude_rule_type_uses_rule_name_not_filter(
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(RuleType.not_in([rule_type])) in filter_strings
+    assert str(f.RuleType.not_in([rule_type])) in filter_strings
 
 
 def test_search_when_given_rule_id_uses_rule_name_filter(
@@ -518,7 +518,7 @@ def test_search_when_given_rule_id_uses_rule_name_filter(
         cli, ["alerts", "search", "--begin", "1h", "--rule-id", rule_id], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(RuleId.is_in([rule_id])) in filter_strings
+    assert str(f.RuleId.is_in([rule_id])) in filter_strings
 
 
 def test_search_when_given_exclude_rule_id_uses_rule_name_not_filter(
@@ -532,7 +532,7 @@ def test_search_when_given_exclude_rule_id_uses_rule_name_not_filter(
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(RuleId.not_in([rule_id])) in filter_strings
+    assert str(f.RuleId.not_in([rule_id])) in filter_strings
 
 
 def test_search_when_given_description_uses_description_filter(
@@ -546,7 +546,7 @@ def test_search_when_given_description_uses_description_filter(
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(Description.contains(description)) in filter_strings
+    assert str(f.Description.contains(description)) in filter_strings
 
 
 def test_search_when_given_multiple_search_args_uses_expected_filters(
@@ -573,6 +573,6 @@ def test_search_when_given_multiple_search_args_uses_expected_filters(
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(Actor.is_in([actor])) in filter_strings
-    assert str(Actor.not_in([exclude_actor])) in filter_strings
-    assert str(RuleName.is_in([rule_name])) in filter_strings
+    assert str(f.Actor.is_in([actor])) in filter_strings
+    assert str(f.Actor.not_in([exclude_actor])) in filter_strings
+    assert str(f.RuleName.is_in([rule_name])) in filter_strings
