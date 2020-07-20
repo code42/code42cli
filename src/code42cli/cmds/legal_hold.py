@@ -138,7 +138,7 @@ bulk.add_command(legal_hold_generate_template)
     name="add",
     help="Bulk add users to legal hold matters from a csv file. CSV file format: {}".format(
         ",".join(LEGAL_HOLD_CSV_HEADERS)
-    )
+    ),
 )
 @read_csv_arg(headers=LEGAL_HOLD_CSV_HEADERS)
 @sdk_options
