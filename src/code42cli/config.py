@@ -1,8 +1,6 @@
 import os
 from configparser import ConfigParser
 
-from click import echo
-
 import code42cli.util as util
 
 
@@ -83,7 +81,6 @@ class ConfigAccessor:
             raise NoConfigProfileError(new_default_name)
         self._internal[self.DEFAULT_PROFILE] = new_default_name
         self._save()
-        echo("{} has been set as the default profile.".format(new_default_name))
 
     def delete_profile(self, name):
         """Deletes a profile."""
@@ -149,7 +146,6 @@ class ConfigAccessor:
             return
 
         self._save()
-        echo("Successfully saved profile '{}'.".format(profile.name))
 
         default_profile = self._internal.get(self.DEFAULT_PROFILE)
         if default_profile is None or default_profile == self.DEFAULT_VALUE:

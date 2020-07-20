@@ -147,14 +147,6 @@ class TestConfigAccessor:
         accessor.switch_default_profile(_TEST_SECOND_PROFILE_NAME)
         assert mock_saver.call_count
 
-    def test_switch_default_profile_outputs_confirmation(
-        self, capsys, config_parser_for_multiple_profiles, mock_saver
-    ):
-        accessor = ConfigAccessor(config_parser_for_multiple_profiles)
-        accessor.switch_default_profile(_TEST_SECOND_PROFILE_NAME)
-        output = capsys.readouterr()
-        assert "set as the default profile" in output.out
-
     def test_create_profile_when_given_default_name_does_not_create(
         self, config_parser_for_create
     ):
@@ -196,16 +188,6 @@ class TestConfigAccessor:
 
         accessor.create_profile(_TEST_PROFILE_NAME, "example.com", "bar", False)
         assert mock_saver.call_count
-
-    def test_create_profile_when_not_existing_outputs_confirmation(
-        self, capsys, config_parser_for_create, mock_saver
-    ):
-        mock_internal = create_internal_object(False)
-        setup_parser_one_profile(mock_internal, mock_internal, config_parser_for_create)
-        accessor = ConfigAccessor(config_parser_for_create)
-        accessor.create_profile(_TEST_PROFILE_NAME, "example.com", "bar", False)
-        output = capsys.readouterr()
-        assert "Successfully saved" in output.out
 
     def test_update_profile_when_no_profile_exists_raises_exception(
         self, config_parser_for_multiple_profiles
