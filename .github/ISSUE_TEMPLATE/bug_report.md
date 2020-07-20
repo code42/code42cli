@@ -22,6 +22,6 @@ assignees: ''
 
 ### Basic Information
 
-- code42cli version: <!-- get the version using `pip show code42cli`-->
-- python version: <!-- get the version using `python --version`-->
+- code42cli version: <!-- get using `code42 -h`-->
+- python version: <!-- get using `code42 -h`-->
 - operating system:
