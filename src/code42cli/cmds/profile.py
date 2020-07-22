@@ -26,17 +26,11 @@ name_option = click.option(
     help="The name of the Code42 CLI profile to use when executing this command.",
 )
 server_option = click.option(
-    "-s",
-    "--server",
-    required=True,
-    help="The url and port of the Code42 server.",
+    "-s", "--server", required=True, help="The url and port of the Code42 server.",
 )
 
 username_option = click.option(
-    "-u",
-    "--username",
-    required=True,
-    help="The username of the Code42 API user.",
+    "-u", "--username", required=True, help="The username of the Code42 API user.",
 )
 
 password_option = click.option(
