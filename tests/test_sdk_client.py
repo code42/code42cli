@@ -3,11 +3,14 @@ import py42.settings.debug as debug
 import pytest
 from py42.exceptions import Py42UnauthorizedError
 from requests import Response
-from requests.exceptions import ConnectionError, RequestException
+from requests.exceptions import ConnectionError
+from requests.exceptions import RequestException
 
-from code42cli.errors import Code42CLIError, LoggedCLIError
-from code42cli.sdk_client import create_sdk, validate_connection
 from .conftest import create_mock_profile
+from code42cli.errors import Code42CLIError
+from code42cli.errors import LoggedCLIError
+from code42cli.sdk_client import create_sdk
+from code42cli.sdk_client import validate_connection
 
 
 @pytest.fixture
@@ -35,9 +38,9 @@ def test_create_sdk_when_profile_has_ssl_errors_disabled_sets_py42_setting_and_p
     profile.ignore_ssl_errors = "True"
     create_sdk(profile, False)
     output = capsys.readouterr()
-    assert mock_py42.settings.verify_ssl_certs == False
+    assert not mock_py42.settings.verify_ssl_certs
     assert (
-        "Warning: Profile '{0}' has SSL verification disabled. Adding certificate verification is strongly advised.".format(
+        "Warning: Profile '{}' has SSL verification disabled. Adding certificate verification is strongly advised.".format(
             profile.name
         )
         in output.err

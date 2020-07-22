@@ -1,9 +1,10 @@
 import pytest
 
-from code42cli import PRODUCT_NAME
-from code42cli.errors import Code42CLIError, LoggedCLIError
-from code42cli.main import cli
 from ..conftest import create_mock_profile
+from code42cli import PRODUCT_NAME
+from code42cli.errors import Code42CLIError
+from code42cli.errors import LoggedCLIError
+from code42cli.main import cli
 
 
 @pytest.fixture
@@ -75,9 +76,22 @@ def test_create_profile_if_user_sets_password_is_created(
 ):
     mock_cliprofile_namespace.profile_exists.return_value = False
     runner.invoke(
-        cli, ["profile", "create", "-n", "foo", "-s", "bar", "-u", "baz", "--disable-ssl-errors"]
+        cli,
+        [
+            "profile",
+            "create",
+            "-n",
+            "foo",
+            "-s",
+            "bar",
+            "-u",
+            "baz",
+            "--disable-ssl-errors",
+        ],
     )
-    mock_cliprofile_namespace.create_profile.assert_called_once_with("foo", "bar", "baz", True)
+    mock_cliprofile_namespace.create_profile.assert_called_once_with(
+        "foo", "bar", "baz", True
+    )
 
 
 def test_create_profile_if_user_does_not_set_password_is_created(
@@ -85,9 +99,22 @@ def test_create_profile_if_user_does_not_set_password_is_created(
 ):
     mock_cliprofile_namespace.profile_exists.return_value = False
     runner.invoke(
-        cli, ["profile", "create", "-n", "foo", "-s", "bar", "-u", "baz", "--disable-ssl-errors"]
+        cli,
+        [
+            "profile",
+            "create",
+            "-n",
+            "foo",
+            "-s",
+            "bar",
+            "-u",
+            "baz",
+            "--disable-ssl-errors",
+        ],
     )
-    mock_cliprofile_namespace.create_profile.assert_called_once_with("foo", "bar", "baz", True)
+    mock_cliprofile_namespace.create_profile.assert_called_once_with(
+        "foo", "bar", "baz", True
+    )
 
 
 def test_create_profile_if_user_does_not_agree_does_not_save_password(
@@ -95,7 +122,18 @@ def test_create_profile_if_user_does_not_agree_does_not_save_password(
 ):
     mock_cliprofile_namespace.profile_exists.return_value = False
     runner.invoke(
-        cli, ["profile", "create", "-n", "foo", "-s", "bar", "-u", "baz", "--disable-ssl-errors"]
+        cli,
+        [
+            "profile",
+            "create",
+            "-n",
+            "foo",
+            "-s",
+            "bar",
+            "-u",
+            "baz",
+            "--disable-ssl-errors",
+        ],
     )
     assert not mock_cliprofile_namespace.set_password.call_count
 
@@ -104,7 +142,9 @@ def test_create_profile_if_credentials_invalid_password_not_saved(
     runner, user_agreement, invalid_connection, mock_cliprofile_namespace
 ):
     mock_cliprofile_namespace.profile_exists.return_value = False
-    result = runner.invoke(cli, ["profile", "create", "-n", "foo", "-s", "bar", "-u", "baz"],)
+    result = runner.invoke(
+        cli, ["profile", "create", "-n", "foo", "-s", "bar", "-u", "baz"],
+    )
     assert "Password not stored!" in result.output
     assert not mock_cliprofile_namespace.set_password.call_count
 
@@ -115,7 +155,19 @@ def test_create_profile_with_password_option_if_credentials_invalid_password_not
     password = "test_pass"
     mock_cliprofile_namespace.profile_exists.return_value = False
     result = runner.invoke(
-        cli, ["profile", "create", "-n", "foo", "-s", "bar", "-u", "baz", "--password", password],
+        cli,
+        [
+            "profile",
+            "create",
+            "-n",
+            "foo",
+            "-s",
+            "bar",
+            "-u",
+            "baz",
+            "--password",
+            password,
+        ],
     )
     assert "Password not stored!" in result.output
     assert not mock_cliprofile_namespace.set_password.call_count
@@ -127,7 +179,9 @@ def test_create_profile_if_credentials_valid_password_saved(
 ):
     mock_cliprofile_namespace.profile_exists.return_value = False
     runner.invoke(cli, ["profile", "create", "-n", "foo", "-s", "bar", "-u", "baz"])
-    mock_cliprofile_namespace.set_password.assert_called_once_with("newpassword", mocker.ANY)
+    mock_cliprofile_namespace.set_password.assert_called_once_with(
+        "newpassword", mocker.ANY
+    )
 
 
 def test_create_profile_with_password_option_if_credentials_valid_password_saved(
@@ -136,7 +190,19 @@ def test_create_profile_with_password_option_if_credentials_valid_password_saved
     password = "test_pass"
     mock_cliprofile_namespace.profile_exists.return_value = False
     result = runner.invoke(
-        cli, ["profile", "create", "-n", "foo", "-s", "bar", "-u", "baz", "--password", password],
+        cli,
+        [
+            "profile",
+            "create",
+            "-n",
+            "foo",
+            "-s",
+            "bar",
+            "-u",
+            "baz",
+            "--password",
+            password,
+        ],
     )
     mock_cliprofile_namespace.set_password.assert_called_once_with(password, mocker.ANY)
     assert "Would you like to set a password?" not in result.output
@@ -147,7 +213,18 @@ def test_create_profile_outputs_confirmation(
 ):
     mock_cliprofile_namespace.profile_exists.return_value = False
     result = runner.invoke(
-        cli, ["profile", "create", "-n", "foo", "-s", "bar", "-u", "baz", "--disable-ssl-errors"]
+        cli,
+        [
+            "profile",
+            "create",
+            "-n",
+            "foo",
+            "-s",
+            "bar",
+            "-u",
+            "baz",
+            "--disable-ssl-errors",
+        ],
     )
     assert "Successfully created profile 'foo'." in result.output
 
@@ -159,9 +236,22 @@ def test_update_profile_updates_existing_profile(
     profile.name = name
     mock_cliprofile_namespace.get_profile.return_value = profile
     runner.invoke(
-        cli, ["profile", "update", "-n", name, "-s", "bar", "-u", "baz", "--disable-ssl-errors"]
+        cli,
+        [
+            "profile",
+            "update",
+            "-n",
+            name,
+            "-s",
+            "bar",
+            "-u",
+            "baz",
+            "--disable-ssl-errors",
+        ],
     )
-    mock_cliprofile_namespace.update_profile.assert_called_once_with(name, "bar", "baz", True)
+    mock_cliprofile_namespace.update_profile.assert_called_once_with(
+        name, "bar", "baz", True
+    )
 
 
 def test_update_profile_if_user_does_not_agree_does_not_save_password(
@@ -171,7 +261,18 @@ def test_update_profile_if_user_does_not_agree_does_not_save_password(
     profile.name = name
     mock_cliprofile_namespace.get_profile.return_value = profile
     runner.invoke(
-        cli, ["profile", "update", "-n", name, "-s", "bar", "-u", "baz", "--disable-ssl-errors"]
+        cli,
+        [
+            "profile",
+            "update",
+            "-n",
+            name,
+            "-s",
+            "bar",
+            "-u",
+            "baz",
+            "--disable-ssl-errors",
+        ],
     )
     assert not mock_cliprofile_namespace.set_password.call_count
 
@@ -184,7 +285,18 @@ def test_update_profile_if_credentials_invalid_password_not_saved(
     mock_cliprofile_namespace.get_profile.return_value = profile
 
     result = runner.invoke(
-        cli, ["profile", "update", "-n", "foo", "-s", "bar", "-u", "baz", "--disable-ssl-errors"]
+        cli,
+        [
+            "profile",
+            "update",
+            "-n",
+            "foo",
+            "-s",
+            "bar",
+            "-u",
+            "baz",
+            "--disable-ssl-errors",
+        ],
     )
     assert not mock_cliprofile_namespace.set_password.call_count
     assert "Password not stored!" in result.output
@@ -197,9 +309,22 @@ def test_update_profile_if_user_agrees_and_valid_connection_sets_password(
     profile.name = name
     mock_cliprofile_namespace.get_profile.return_value = profile
     runner.invoke(
-        cli, ["profile", "update", "-n", name, "-s", "bar", "-u", "baz", "--disable-ssl-errors"]
+        cli,
+        [
+            "profile",
+            "update",
+            "-n",
+            name,
+            "-s",
+            "bar",
+            "-u",
+            "baz",
+            "--disable-ssl-errors",
+        ],
     )
-    mock_cliprofile_namespace.set_password.assert_called_once_with("newpassword", mocker.ANY)
+    mock_cliprofile_namespace.set_password.assert_called_once_with(
+        "newpassword", mocker.ANY
+    )
 
 
 def test_delete_profile_warns_if_deleting_default(runner, mock_cliprofile_namespace):
@@ -215,7 +340,9 @@ def test_delete_profile_does_nothing_if_user_doesnt_agree(
     assert mock_cliprofile_namespace.delete_profile.call_count == 0
 
 
-def test_delete_profile_outputs_success(runner, mock_cliprofile_namespace, user_agreement):
+def test_delete_profile_outputs_success(
+    runner, mock_cliprofile_namespace, user_agreement
+):
     result = runner.invoke(cli, ["profile", "delete", "mockdefault"])
     assert "Profile 'mockdefault' has been deleted." in result.output
 
@@ -237,7 +364,9 @@ def test_delete_all_does_not_warn_if_assume_yes_flag(runner, mock_cliprofile_nam
         create_mock_profile("test2"),
     ]
     result = runner.invoke(cli, ["profile", "delete-all", "-y"])
-    assert "Are you sure you want to delete the following profiles?" not in result.output
+    assert (
+        "Are you sure you want to delete the following profiles?" not in result.output
+    )
     assert "Profile '{}' has been deleted.".format("test1") in result.output
     assert "Profile '{}' has been deleted.".format("test2") in result.output
 
@@ -267,7 +396,9 @@ def test_prompt_for_password_reset_if_credentials_valid_password_saved(
     mock_verify.return_value = True
     mock_cliprofile_namespace.profile_exists.return_value = False
     runner.invoke(cli, ["profile", "reset-pw"])
-    mock_cliprofile_namespace.set_password.assert_called_once_with("newpassword", mocker.ANY)
+    mock_cliprofile_namespace.set_password.assert_called_once_with(
+        "newpassword", mocker.ANY
+    )
 
 
 def test_prompt_for_password_reset_if_credentials_invalid_password_not_saved(
@@ -302,5 +433,9 @@ def test_list_profiles_when_no_profiles_outputs_no_profiles_message(
 
 def test_use_profile(runner, mock_cliprofile_namespace, profile):
     result = runner.invoke(cli, ["profile", "use", profile.name])
-    mock_cliprofile_namespace.switch_default_profile.assert_called_once_with(profile.name)
-    assert "{} has been set as the default profile.".format(profile.name) in result.output
+    mock_cliprofile_namespace.switch_default_profile.assert_called_once_with(
+        profile.name
+    )
+    assert (
+        "{} has been set as the default profile.".format(profile.name) in result.output
+    )

@@ -2,11 +2,13 @@ from click import style
 
 import code42cli.password as password
 from code42cli.cmds.search.cursor_store import get_all_cursor_stores_for_profile
-from code42cli.config import ConfigAccessor, config_accessor, NoConfigProfileError
+from code42cli.config import config_accessor
+from code42cli.config import ConfigAccessor
+from code42cli.config import NoConfigProfileError
 from code42cli.errors import Code42CLIError
 
 
-class Code42Profile(object):
+class Code42Profile:
     def __init__(self, profile):
         self._profile = profile
 
@@ -38,7 +40,7 @@ class Code42Profile(object):
         return pwd
 
     def __str__(self):
-        return "{0}: Username={1}, Authority URL={2}".format(
+        return "{}: Username={}, Authority URL={}".format(
             self.name, self.username, self.authority_url
         )
 
@@ -79,7 +81,8 @@ def validate_default_profile():
             raise Code42CLIError("No existing profile.", help=CREATE_PROFILE_HELP)
         else:
             raise Code42CLIError(
-                "No default profile set.", help=_get_set_default_profile_help(existing_profiles)
+                "No default profile set.",
+                help=_get_set_default_profile_help(existing_profiles),
             )
 
 
@@ -118,7 +121,9 @@ def update_profile(name, server, username, ignore_ssl_errors):
 
 
 def get_all_profiles():
-    profiles = [Code42Profile(profile) for profile in config_accessor.get_all_profiles()]
+    profiles = [
+        Code42Profile(profile) for profile in config_accessor.get_all_profiles()
+    ]
     return profiles
 
 
@@ -147,9 +152,10 @@ Use the --profile flag to specify which profile to use.
 
 To set the default profile (used whenever --profile argument is not provided), use:
     {}
-    
+
 Existing profiles:
 \t{}""".format(
-        style("code42 profile use <profile-name>", bold=True), "\n\t".join(existing_profiles)
+        style("code42 profile use <profile-name>", bold=True),
+        "\n\t".join(existing_profiles),
     )
     return help_msg

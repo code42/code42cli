@@ -1,7 +1,7 @@
 # Profile Commands
 
 ## show
-  
+
 Print the details of a profile.
 
 Arguments:
@@ -11,7 +11,7 @@ Usage:
 ```bash
 code42 profile show <optional-arguments>
 ```
-  
+
 ## list
 
 Show all existing stored profiles.
@@ -32,7 +32,7 @@ Usage:
 ```bash
 code42 profile use <profile-name>
 ```
-  
+
 ## reset-pw
 
 Change the stored password for a profile.
@@ -47,13 +47,13 @@ code42 profile reset-pw <optional-args>
 
 ## create
 
-Create profile settings. The first profile created will be the default. 
+Create profile settings. The first profile created will be the default.
 
 Arguments:
 * `--name`, `-n`: The name of the code42cli profile to use when executing this command.
 * `--server`, `-s`: The url and port of the Code42 server.
 * `--username`, `-u`: The username of the Code42 API user.
-* `--disable-ssl-errors` (optional): For development purposes, do not validate the SSL certificates of Code42 servers. 
+* `--disable-ssl-errors` (optional): For development purposes, do not validate the SSL certificates of Code42 servers.
     This is not recommended unless it is required.
 
 Usage:
@@ -63,13 +63,13 @@ code42 profile create --name <profile-name> --server <server> --username <userna
 
 ## update
 
-Update an existing profile. 
+Update an existing profile.
 
 Arguments:
 * `--name`, `-n`: The name of the code42cli profile to use when executing this command.
 * `--server`, `-s`: The url and port of the Code42 server.
 * `--username`, `-u`: The username of the Code42 API user.
-* `--disable-ssl-errors` (optional): For development purposes, do not validate the SSL certificates of Code42 servers. 
+* `--disable-ssl-errors` (optional): For development purposes, do not validate the SSL certificates of Code42 servers.
     This is not recommended unless it is required.
 
 Usage:

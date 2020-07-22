@@ -2,13 +2,13 @@
 
 ## add
 
-Add a user to the high-risk-employee detection list. 
+Add a user to the high-risk-employee detection list.
 
 Arguments:
 * `username`: A Code42 username for an employee.
 * `--cloud-alias` (optional): An alternative email address for another cloud service.
-* `-risk-tag` (optional): Risk tags associated with the user.  Options include: [FLIGHT_RISK, HIGH_IMPACT_EMPLOYEE, 
-    ELEVATED_ACCESS_PRIVILEGES, PERFORMANCE_CONCERNS, SUSPICIOUS_SYSTEM_ACTIVITY, POOR_SECURITY_PRACTICES, 
+* `-risk-tag` (optional): Risk tags associated with the user.  Options include: [FLIGHT_RISK, HIGH_IMPACT_EMPLOYEE,
+    ELEVATED_ACCESS_PRIVILEGES, PERFORMANCE_CONCERNS, SUSPICIOUS_SYSTEM_ACTIVITY, POOR_SECURITY_PRACTICES,
     CONTRACT_EMPLOYEE].
 * `--notes` (optional): Notes about the employee.
 
@@ -35,10 +35,10 @@ Associates risk tags with a user.
 
 Arguments:
 * `--username`, `-u`:  A Code42 username for an employee.
-* `--tag`:  Risk tags associated with the employee. 
-    Options include: [FLIGHT_RISK, HIGH_IMPACT_EMPLOYEE, ELEVATED_ACCESS_PRIVILEGES, PERFORMANCE_CONCERNS, 
+* `--tag`:  Risk tags associated with the employee.
+    Options include: [FLIGHT_RISK, HIGH_IMPACT_EMPLOYEE, ELEVATED_ACCESS_PRIVILEGES, PERFORMANCE_CONCERNS,
     SUSPICIOUS_SYSTEM_ACTIVITY, POOR_SECURITY_PRACTICES, CONTRACT_EMPLOYEE].
-    
+
 Usage:
 ```bash
 code42 high-risk-employee add-risk-tags --username <username> --tag <risk-tags>
@@ -50,10 +50,10 @@ Disassociates risk tags from a user.
 
 Arguments:
 * `--username`, `-u`:  A Code42 username for an employee.
-* `--tag`:  Risk tags associated with the employee. 
-    Options include: [FLIGHT_RISK, HIGH_IMPACT_EMPLOYEE, ELEVATED_ACCESS_PRIVILEGES, PERFORMANCE_CONCERNS, 
+* `--tag`:  Risk tags associated with the employee.
+    Options include: [FLIGHT_RISK, HIGH_IMPACT_EMPLOYEE, ELEVATED_ACCESS_PRIVILEGES, PERFORMANCE_CONCERNS,
     SUSPICIOUS_SYSTEM_ACTIVITY, POOR_SECURITY_PRACTICES, CONTRACT_EMPLOYEE].
-    
+
 Usage:
 ```bash
 code42 high-risk-employee remove-risk-tags --username <username> --tag <risk-tags>

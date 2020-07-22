@@ -1,44 +1,44 @@
 # Integrating with SIEM Tools
 
-The Code42 command-line interface (CLI) tool offers a way to interact with your Code42 environment without using the 
-Code42 console or making API calls directly. This article provides instructions on using the CLI to extract Code42 data 
-for use in a security information and event management (SIEM) tool like LogRhythm, Sumo Logic, or IBM QRadar. 
+The Code42 command-line interface (CLI) tool offers a way to interact with your Code42 environment without using the
+Code42 console or making API calls directly. This article provides instructions on using the CLI to extract Code42 data
+for use in a security information and event management (SIEM) tool like LogRhythm, Sumo Logic, or IBM QRadar.
 
-You can also use the Code42 CLI to bulk-add or remove users from the High Risk Employees list or Departing Employees 
-list. For more information, see Manage detection list users with the Code42 command-line interface. 
+You can also use the Code42 CLI to bulk-add or remove users from the High Risk Employees list or Departing Employees
+list. For more information, see Manage detection list users with the Code42 command-line interface.
 
 ## Considerations
 
-To integrate with a SIEM tool using the Code42 command-line interface, the Code42 user account running the integration 
-must be assigned roles that provide the necessary permissions. We recommend you assign the roles in our use case for 
+To integrate with a SIEM tool using the Code42 command-line interface, the Code42 user account running the integration
+must be assigned roles that provide the necessary permissions. We recommend you assign the roles in our use case for
 managing a security application integrated with Code42.
 
 ## Before you begin
 
-To integrate Code42 with a SIEM tool, you must first install and configure the Code42 CLI following the instructions in 
-[Getting Started](gettingstarted.md) the Code42 command-line interface. 
+To integrate Code42 with a SIEM tool, you must first install and configure the Code42 CLI following the instructions in
+[Getting Started](gettingstarted.md) the Code42 command-line interface.
 
-## Commands and query parameters 
-You can get security events in either a JSON or CEF format for use by your SIEM tool. You can query the data as a 
+## Commands and query parameters
+You can get security events in either a JSON or CEF format for use by your SIEM tool. You can query the data as a
 scheduled job or run ad-hoc queries. Learn more about [searching](../commands/securitydata.md) using the CLI.
 
 ## Run a query as a scheduled job
 
-Use your favorite scheduling tool, such as cron or Windows Task Scheduler, to run a query on a regular basis. Specify 
-the profile to use by including `--profile`. An example using `netcat` to forward results to an external syslog server:  
+Use your favorite scheduling tool, such as cron or Windows Task Scheduler, to run a query on a regular basis. Specify
+the profile to use by including `--profile`. An example using `netcat` to forward results to an external syslog server:
 
 ```bash
-code42 security-data search --profile profile1 -c syslog_sender | nc syslog.example.com 514 
+code42 security-data search --profile profile1 -c syslog_sender | nc syslog.example.com 514
 ```
 
-Note that it is best practice to use a separate profile when executing a scheduled task. This way, it is harder to 
+Note that it is best practice to use a separate profile when executing a scheduled task. This way, it is harder to
 accidentally mess up your stored checkpoints by running `--use-checkpoint` in adhoc queries.
 
 This query will send to the syslog server only the new security event data since the previous request.
 
 ## Run an ad-hoc query
 
-Examples of ad-hoc queries you can run are as follows. 
+Examples of ad-hoc queries you can run are as follows.
 
 Print security data since March 5 for a user in raw JSON format:
 
@@ -46,18 +46,18 @@ Print security data since March 5 for a user in raw JSON format:
 code42 security-data search -f RAW-JSON -b 2020-03-05 --c42-username 'sean.cassidy@example.com'
 ```
 
-Print security events since March 5 where a file was synced to a cloud service: 
+Print security events since March 5 where a file was synced to a cloud service:
 ```bash
-code42 security-data search -t  CloudStorage -b 2020-03-05 
+code42 security-data search -t  CloudStorage -b 2020-03-05
 ```
 
-Write to a text file security events in raw JSON format where a file was read by browser or other app for a user since 
-March 5: 
+Write to a text file security events in raw JSON format where a file was read by browser or other app for a user since
+March 5:
 ```bash
 code42 security-data search -f RAW-JSON -b 2020-03-05 -t ApplicationRead --c42-username 'sean.cassidy@example.com' > /Users/sangita.maskey/Downloads/c42cli_output.txt
 ```
 
-Example output for a single exposure event (in default JSON format): 
+Example output for a single exposure event (in default JSON format):
 
 ```json
 {
@@ -101,8 +101,8 @@ The following tables map the data from the Code42 CLI to common event format (CE
 
 ### Attribute mapping
 
-The table below maps JSON fields, CEF fields, and [Forensic Search fields](https://support.code42.com/Administrator/Cloud/Administration_console_reference/Forensic_Search_reference_guide) 
-to one another. 
+The table below maps JSON fields, CEF fields, and [Forensic Search fields](https://support.code42.com/Administrator/Cloud/Administration_console_reference/Forensic_Search_reference_guide)
+to one another.
 
 ```eval_rst
 
@@ -183,7 +183,7 @@ to one another.
 
 ### Event mapping
 
-See the table below to map exfiltration events to CEF signature IDs. 
+See the table below to map exfiltration events to CEF signature IDs.
 
 ```eval_rst
 
@@ -201,4 +201,3 @@ See the table below to map exfiltration events to CEF signature IDs.
 | EMAILED            | C42204    |
 +--------------------+-----------+
 ```
-

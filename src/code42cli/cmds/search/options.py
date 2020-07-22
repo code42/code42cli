@@ -1,9 +1,11 @@
 import json
-from datetime import datetime, timezone
+from datetime import datetime
+from datetime import timezone
 
 import click
 
-from code42cli.date_helper import parse_min_timestamp, parse_max_timestamp
+from code42cli.date_helper import parse_max_timestamp
+from code42cli.date_helper import parse_min_timestamp
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with
 
@@ -64,10 +66,14 @@ def validate_advanced_query_is_json(ctx, param, arg):
         json.loads(arg)
         return arg
     except json.JSONDecodeError:
-        raise click.ClickException("Failed to parse advanced query, must be a valid json string.")
+        raise click.ClickException(
+            "Failed to parse advanced query, must be a valid json string."
+        )
 
 
-AdvancedQueryAndSavedSearchIncompatible = incompatible_with(["advanced_query", "saved_search"])
+AdvancedQueryAndSavedSearchIncompatible = incompatible_with(
+    ["advanced_query", "saved_search"]
+)
 
 
 class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
@@ -78,15 +84,25 @@ class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
 
     def handle_parse_result(self, ctx, opts, args):
         # if ctx.obj is None it means we're in autocomplete mode and don't want to validate
-        if ctx.obj is not None and "saved_search" not in opts and "advanced_query" not in opts:
+        if (
+            ctx.obj is not None
+            and "saved_search" not in opts
+            and "advanced_query" not in opts
+        ):
             profile = opts.get("profile") or ctx.obj.profile.name
             cursor = ctx.obj.cursor_getter(profile)
             checkpoint_arg_present = "use_checkpoint" in opts
             checkpoint_value = (
-                cursor.get(opts.get("use_checkpoint", "")) if checkpoint_arg_present else None
+                cursor.get(opts.get("use_checkpoint", ""))
+                if checkpoint_arg_present
+                else None
             )
             begin_present = "begin" in opts
-            if checkpoint_arg_present and checkpoint_value is not None and begin_present:
+            if (
+                checkpoint_arg_present
+                and checkpoint_value is not None
+                and begin_present
+            ):
                 opts.pop("begin")
                 checkpoint_value_str = datetime.fromtimestamp(
                     checkpoint_value, timezone.utc
@@ -97,7 +113,11 @@ class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
                     ),
                     err=True,
                 )
-            if checkpoint_arg_present and checkpoint_value is None and not begin_present:
+            if (
+                checkpoint_arg_present
+                and checkpoint_value is None
+                and not begin_present
+            ):
                 raise click.UsageError(
                     message="--begin date is required for --use-checkpoint when no checkpoint "
                     "exists yet.",
@@ -140,7 +160,7 @@ def create_search_options(search_term):
         "-c",
         "--use-checkpoint",
         cls=AdvancedQueryAndSavedSearchIncompatible,
-        help="Only get {0} that were not previously retrieved.".format(search_term),
+        help="Only get {} that were not previously retrieved.".format(search_term),
     )
 
     def search_options(f):

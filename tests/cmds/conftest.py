@@ -2,13 +2,15 @@ import json as json_module
 import threading
 
 import pytest
-from requests import Request, Response, HTTPError
-
 from py42.exceptions import Py42BadRequestError
 from py42.sdk import SDKClient
+from requests import HTTPError
+from requests import Request
+from requests import Response
+from tests.conftest import convert_str_to_date
+
 from code42cli import PRODUCT_NAME
 from code42cli.logger import CliLogger
-from tests.conftest import convert_str_to_date
 
 
 @pytest.fixture
@@ -35,7 +37,9 @@ def cli_logger(mocker):
 
 @pytest.fixture
 def stdout_logger(mocker):
-    mock = mocker.patch("{}.cmds.search.logger_factory.get_logger_for_stdout".format(PRODUCT_NAME))
+    mock = mocker.patch(
+        "{}.cmds.search.logger_factory.get_logger_for_stdout".format(PRODUCT_NAME)
+    )
     mock.return_value = mocker.MagicMock()
     return mock
 

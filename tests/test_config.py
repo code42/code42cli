@@ -2,8 +2,9 @@ from configparser import ConfigParser
 
 import pytest
 
-from code42cli.config import ConfigAccessor, NoConfigProfileError
 from .conftest import MockSection
+from code42cli.config import ConfigAccessor
+from code42cli.config import NoConfigProfileError
 
 _TEST_PROFILE_NAME = "ProfileA"
 _TEST_SECOND_PROFILE_NAME = "ProfileB"
@@ -28,7 +29,9 @@ def config_parser_for_multiple_profiles(mock_config_parser):
         _TEST_SECOND_PROFILE_NAME,
     ]
     mock_profile_a = create_mock_profile_object(_TEST_PROFILE_NAME, "test", "test")
-    mock_profile_b = create_mock_profile_object(_TEST_SECOND_PROFILE_NAME, "test", "test")
+    mock_profile_b = create_mock_profile_object(
+        _TEST_SECOND_PROFILE_NAME, "test", "test"
+    )
 
     mock_internal = create_internal_object(True, _TEST_PROFILE_NAME)
 
@@ -86,7 +89,7 @@ def setup_parser_one_profile(profile, internal, parser):
     parser.__getitem__.side_effect = side_effect
 
 
-class TestConfigAccessor(object):
+class TestConfigAccessor:
     def test_get_profile_when_profile_does_not_exist_raises(self, mock_config_parser):
         mock_config_parser.sections.return_value = [_INTERNAL]
         accessor = ConfigAccessor(mock_config_parser)
@@ -115,7 +118,7 @@ class TestConfigAccessor(object):
         profiles = accessor.get_all_profiles()
         for p in profiles:
             if p.name == _INTERNAL:
-                assert False
+                raise AssertionError()
 
     def test_get_all_profiles_returns_profiles_with_expected_values(
         self, config_parser_for_multiple_profiles
@@ -131,16 +134,22 @@ class TestConfigAccessor(object):
         accessor = ConfigAccessor(config_parser_for_multiple_profiles)
         accessor.switch_default_profile(_TEST_SECOND_PROFILE_NAME)
         assert (
-            config_parser_for_multiple_profiles[_INTERNAL][ConfigAccessor.DEFAULT_PROFILE]
+            config_parser_for_multiple_profiles[_INTERNAL][
+                ConfigAccessor.DEFAULT_PROFILE
+            ]
             == _TEST_SECOND_PROFILE_NAME
         )
 
-    def test_switch_default_profile_saves(self, config_parser_for_multiple_profiles, mock_saver):
+    def test_switch_default_profile_saves(
+        self, config_parser_for_multiple_profiles, mock_saver
+    ):
         accessor = ConfigAccessor(config_parser_for_multiple_profiles)
         accessor.switch_default_profile(_TEST_SECOND_PROFILE_NAME)
         assert mock_saver.call_count
 
-    def test_create_profile_when_given_default_name_does_not_create(self, config_parser_for_create):
+    def test_create_profile_when_given_default_name_does_not_create(
+        self, config_parser_for_create
+    ):
         accessor = ConfigAccessor(config_parser_for_create)
         with pytest.raises(Exception):
             accessor.create_profile(ConfigAccessor.DEFAULT_VALUE, "foo", "bar", False)
@@ -169,7 +178,9 @@ class TestConfigAccessor(object):
         accessor.create_profile(_TEST_PROFILE_NAME, "example.com", "bar", False)
         assert not accessor.switch_default_profile.call_count
 
-    def test_create_profile_when_not_existing_saves(self, config_parser_for_create, mock_saver):
+    def test_create_profile_when_not_existing_saves(
+        self, config_parser_for_create, mock_saver
+    ):
         create_mock_profile_object(_TEST_PROFILE_NAME, None, None)
         mock_internal = create_internal_object(False)
         setup_parser_one_profile(mock_internal, mock_internal, config_parser_for_create)
@@ -191,9 +202,17 @@ class TestConfigAccessor(object):
         username = "NEW USERNAME"
 
         accessor.update_profile(_TEST_PROFILE_NAME, address, username, True)
-        assert accessor.get_profile(_TEST_PROFILE_NAME)[ConfigAccessor.AUTHORITY_KEY] == address
-        assert accessor.get_profile(_TEST_PROFILE_NAME)[ConfigAccessor.USERNAME_KEY] == username
-        assert accessor.get_profile(_TEST_PROFILE_NAME)[ConfigAccessor.IGNORE_SSL_ERRORS_KEY]
+        assert (
+            accessor.get_profile(_TEST_PROFILE_NAME)[ConfigAccessor.AUTHORITY_KEY]
+            == address
+        )
+        assert (
+            accessor.get_profile(_TEST_PROFILE_NAME)[ConfigAccessor.USERNAME_KEY]
+            == username
+        )
+        assert accessor.get_profile(_TEST_PROFILE_NAME)[
+            ConfigAccessor.IGNORE_SSL_ERRORS_KEY
+        ]
 
     def test_update_profile_does_not_update_when_given_none(
         self, config_parser_for_multiple_profiles
@@ -206,6 +225,14 @@ class TestConfigAccessor(object):
         accessor.update_profile(_TEST_PROFILE_NAME, address, username, True)
 
         accessor.update_profile(_TEST_PROFILE_NAME, None, None, None)
-        assert accessor.get_profile(_TEST_PROFILE_NAME)[ConfigAccessor.AUTHORITY_KEY] == address
-        assert accessor.get_profile(_TEST_PROFILE_NAME)[ConfigAccessor.USERNAME_KEY] == username
-        assert accessor.get_profile(_TEST_PROFILE_NAME)[ConfigAccessor.IGNORE_SSL_ERRORS_KEY]
+        assert (
+            accessor.get_profile(_TEST_PROFILE_NAME)[ConfigAccessor.AUTHORITY_KEY]
+            == address
+        )
+        assert (
+            accessor.get_profile(_TEST_PROFILE_NAME)[ConfigAccessor.USERNAME_KEY]
+            == username
+        )
+        assert accessor.get_profile(_TEST_PROFILE_NAME)[
+            ConfigAccessor.IGNORE_SSL_ERRORS_KEY
+        ]

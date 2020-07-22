@@ -33,7 +33,9 @@ def remove_risk_tags(sdk, username, risk_tag):
     sdk.detectionlists.remove_user_risk_tags(user_id, risk_tag)
 
 
-def try_handle_user_already_added_error(bad_request_err, username_tried_adding, list_name):
+def try_handle_user_already_added_error(
+    bad_request_err, username_tried_adding, list_name
+):
     if _error_is_user_already_added(bad_request_err.response.text):
         raise UserAlreadyAddedError(username_tried_adding, list_name)
     return False
@@ -44,7 +46,7 @@ def _error_is_user_already_added(bad_request_error_text):
 
 
 def handle_list_args(list_arg):
-    """Converts str args to a list. Useful for `bulk` commands which don't use click's argument 
+    """Converts str args to a list. Useful for `bulk` commands which don't use click's argument
     parsing but instead pass in values from files, such as in the form "item1 item2"."""
     if isinstance(list_arg, str):
         return list_arg.split()

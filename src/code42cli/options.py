@@ -16,7 +16,7 @@ yes_option = click.option(
 )
 
 
-class CLIState(object):
+class CLIState:
     def __init__(self):
         try:
             self._profile = get_profile()
@@ -48,14 +48,14 @@ class CLIState(object):
 
 
 def set_profile(ctx, param, value):
-    """Sets the profile on the global state object when --profile <name> is passed to commands 
+    """Sets the profile on the global state object when --profile <name> is passed to commands
     decorated with @global_options."""
     if value:
         ctx.ensure_object(CLIState).profile = get_profile(value)
 
 
 def set_debug(ctx, param, value):
-    """Sets debug to True on global state object when --debug/-d is passed to commands decorated 
+    """Sets debug to True on global state object when --debug/-d is passed to commands decorated
     with @global_options.
     """
     if value:
@@ -109,7 +109,9 @@ def incompatible_with(incompatible_opts):
                     name = self.name.replace("_", "-")
                     raise click.BadOptionUsage(
                         option_name=self.name,
-                        message="--{} can't be used with: {}".format(name, found_incompatible),
+                        message="--{} can't be used with: {}".format(
+                            name, found_incompatible
+                        ),
                     )
             return super().handle_parse_result(ctx, opts, args)
 
@@ -117,7 +119,7 @@ def incompatible_with(incompatible_opts):
 
 
 class OrderedGroup(click.Group):
-    """A click.Group subclass that uses OrderedDict to store commands so the help text lists them 
+    """A click.Group subclass that uses OrderedDict to store commands so the help text lists them
     in the order they were defined/added to the group.
     """
 

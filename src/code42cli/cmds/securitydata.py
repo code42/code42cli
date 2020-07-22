@@ -1,120 +1,112 @@
 from pprint import pformat
 
 import click
+import py42.sdk.queries.fileevents.filters as f
 from c42eventextractor.extractors import FileEventExtractor
 from click import echo
-from py42.sdk.queries.fileevents.filters import *
 
+import code42cli.cmds.search.enums as enum
+import code42cli.cmds.search.extraction as ext
+import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 from code42cli.cmds.search import logger_factory
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
-from code42cli.cmds.search.enums import (
-    OutputFormat,
-    ExposureType as ExposureTypeOptions,
-)
-from code42cli.cmds.search.extraction import (
-    create_handlers,
-    create_time_range_filter,
-)
-from code42cli.cmds.search.options import (
-    create_search_options,
-    AdvancedQueryAndSavedSearchIncompatible,
-    is_in_filter,
-    exists_filter,
-)
 from code42cli.logger import get_main_cli_logger
-from code42cli.options import sdk_options, incompatible_with, OrderedGroup
-from code42cli.util import format_to_table, find_format_width
+from code42cli.options import incompatible_with
+from code42cli.options import OrderedGroup
+from code42cli.options import sdk_options
+from code42cli.util import find_format_width
+from code42cli.util import format_to_table
 
 logger = get_main_cli_logger()
 
-search_options = create_search_options("file events")
+search_options = searchopt.create_search_options("file events")
 
 format_option = click.option(
     "-f",
     "--format",
-    type=click.Choice(OutputFormat()),
-    default=OutputFormat.JSON,
+    type=click.Choice(enum.OutputFormat()),
+    default=enum.OutputFormat.JSON,
     help="The format used for outputting file events.",
 )
 exposure_type_option = click.option(
     "-t",
     "--type",
     multiple=True,
-    type=click.Choice(list(ExposureTypeOptions())),
-    cls=AdvancedQueryAndSavedSearchIncompatible,
-    callback=is_in_filter(ExposureType),
+    type=click.Choice(list(enum.ExposureType())),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.is_in_filter(f.ExposureType),
     help="Limits events to those with given exposure types.",
 )
 username_option = click.option(
     "--c42-username",
     multiple=True,
-    callback=is_in_filter(DeviceUsername),
-    cls=AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.is_in_filter(f.DeviceUsername),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to endpoint events for these users.",
 )
 actor_option = click.option(
     "--actor",
     multiple=True,
-    callback=is_in_filter(Actor),
-    cls=AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.is_in_filter(f.Actor),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to only those enacted by the cloud service user "
     "of the person who caused the event.",
 )
 md5_option = click.option(
     "--md5",
     multiple=True,
-    callback=is_in_filter(MD5),
-    cls=AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.is_in_filter(f.MD5),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to file events where the file has one of these MD5 hashes.",
 )
 sha256_option = click.option(
     "--sha256",
     multiple=True,
-    callback=is_in_filter(SHA256),
-    cls=AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.is_in_filter(f.SHA256),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to file events where the file has one of these SHA256 hashes.",
 )
 source_option = click.option(
     "--source",
     multiple=True,
-    callback=is_in_filter(Source),
-    cls=AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.is_in_filter(f.Source),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to only those from one of these sources. Example=Gmail.",
 )
 file_name_option = click.option(
     "--file-name",
     multiple=True,
-    callback=is_in_filter(FileName),
-    cls=AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.is_in_filter(f.FileName),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to file events where the file has one of these names.",
 )
 file_path_option = click.option(
     "--file-path",
     multiple=True,
-    callback=is_in_filter(FilePath),
-    cls=AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.is_in_filter(f.FilePath),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to file events where the file is located at one of these paths.",
 )
 process_owner_option = click.option(
     "--process-owner",
     multiple=True,
-    callback=is_in_filter(ProcessOwner),
-    cls=AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.is_in_filter(f.ProcessOwner),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to exposure events where one of these users owns "
     "the process behind the exposure.",
 )
 tab_url_option = click.option(
     "--tab-url",
     multiple=True,
-    callback=is_in_filter(TabURL),
-    cls=AdvancedQueryAndSavedSearchIncompatible,
+    callback=searchopt.is_in_filter(f.TabURL),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to be exposure events with one of these destination tab URLs.",
 )
 include_non_exposure_option = click.option(
     "--include-non-exposure",
     is_flag=True,
-    callback=exists_filter(ExposureType),
+    callback=searchopt.exists_filter(f.ExposureType),
     cls=incompatible_with(["advanced_query", "type", "saved_search"]),
     help="Get all events including non-exposure events.",
 )
@@ -178,8 +170,12 @@ def search(
 ):
     """Search for file events."""
     output_logger = logger_factory.get_logger_for_stdout(format)
-    cursor = _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
-    handlers = create_handlers(state.sdk, FileEventExtractor, output_logger, cursor, use_checkpoint)
+    cursor = (
+        _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
+    )
+    handlers = ext.create_handlers(
+        state.sdk, FileEventExtractor, output_logger, cursor, use_checkpoint
+    )
     extractor = _get_file_event_extractor(state.sdk, handlers)
     if or_query:
         extractor.use_or_query = True
@@ -190,7 +186,9 @@ def search(
         extractor.extract(*saved_search._filter_group_list)
     else:
         if begin or end:
-            state.search_filters.append(create_time_range_filter(EventTimestamp, begin, end))
+            state.search_filters.append(
+                ext.create_time_range_filter(f.EventTimestamp, begin, end)
+            )
         extractor.extract(*state.search_filters)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         echo("No results found.")

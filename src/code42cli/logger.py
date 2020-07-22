@@ -15,8 +15,8 @@ ERROR_LOG_FILE_NAME = "code42_errors.log"
 
 
 def handleError(record):
-    """Override logger's `handleError` method to exit if an exception is raised while trying to 
-    log, and replace stdout with devnull because if we're here it's usually because stdout has 
+    """Override logger's `handleError` method to exit if an exception is raised while trying to
+    log, and replace stdout with devnull because if we're here it's usually because stdout has
     been closed on us.
     """
     t, v, tb = sys.exc_info()
@@ -51,7 +51,9 @@ def _get_error_log_path():
 
 def _create_error_file_handler():
     log_path = _get_error_log_path()
-    return RotatingFileHandler(log_path, maxBytes=250000000, encoding="utf-8", delay=True)
+    return RotatingFileHandler(
+        log_path, maxBytes=250000000, encoding="utf-8", delay=True
+    )
 
 
 def add_handler_to_logger(logger, handler, formatter):
@@ -88,7 +90,7 @@ def _create_formatter_for_error_file():
     return logging.Formatter("%(asctime)s %(message)s")
 
 
-class CliLogger(object):
+class CliLogger:
     def __init__(self):
         self._logger = _get_error_file_logger()
 
@@ -98,7 +100,7 @@ class CliLogger(object):
             self._logger.error(message)
 
     def log_verbose_error(self, invocation_str=None, http_request=None):
-        """For logging traces, invocation strs, and request parameters during exceptions to the 
+        """For logging traces, invocation strs, and request parameters during exceptions to the
         error log file."""
         prefix = (
             "Exception occurred."

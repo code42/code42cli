@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
 #
 # Configuration file for the Sphinx documentation builder.
 #
 # This file does only contain a selection of the most common options. For a
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
-
 # -- Path setup --------------------------------------------------------------
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -106,6 +103,8 @@ html_css_files = ["custom.css"]
 # html_sidebars = {}
 
 # At the bottom of conf.py
+
+
 def setup(app):
     app.add_config_value(
         "recommonmark_config",
