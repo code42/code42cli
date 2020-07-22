@@ -79,9 +79,40 @@ debug_option = click.option(
 pass_state = click.make_pass_decorator(CLIState, ensure=True)
 
 
+profile_option_quiet = click.option(
+    "--profile",
+    expose_value=False,
+    callback=set_profile,
+    hidden=True,
+    help="The name of the Code42 CLI profile to use when executing this command.",
+)
+debug_option_quiet = click.option(
+    "-d",
+    "--debug",
+    is_flag=True,
+    expose_value=False,
+    hidden=True,
+    callback=set_debug,
+    help="Turn on debug logging.",
+)
+
+
 def sdk_options(f):
+    """Decorate a command or group to automatically pass in the CLIState object and add --profile
+    and --debug options.
+    """
     f = profile_option(f)
     f = debug_option(f)
+    f = pass_state(f)
+    return f
+
+
+def quiet_sdk_options(f):
+    """Behaves exactly like @sdk_options but --profile and --debug do not show up in help/docs on 
+    decorated command/group.
+    """
+    f = profile_option_quiet(f)
+    f = debug_option_quiet(f)
     f = pass_state(f)
     return f
 

@@ -14,6 +14,7 @@ from code42cli.errors import InvalidRuleTypeError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
+from code42cli.options import quiet_sdk_options
 from code42cli.util import find_format_width
 from code42cli.util import format_to_table
 
@@ -34,7 +35,7 @@ _HEADER_KEYS_MAP["isEnabled"] = "Enabled"
 
 
 @click.group(cls=OrderedGroup)
-@sdk_options
+@quiet_sdk_options
 def alert_rules(state):
     """Manage alert rules."""
     pass
@@ -97,7 +98,7 @@ def show(state, rule_id):
 
 
 @alert_rules.group(cls=OrderedGroup)
-@sdk_options
+@quiet_sdk_options
 def bulk(state):
     """Tools for executing bulk alert rule actions."""
     pass

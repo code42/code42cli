@@ -137,7 +137,7 @@ def alert_options(f):
 
 
 @click.group(cls=opt.OrderedGroup)
-@opt.sdk_options
+@opt.quiet_sdk_options
 def alerts(state):
     """Tools for getting alert data."""
     # store cursor getter on the group state so shared --begin option can use it in validation

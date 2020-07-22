@@ -17,6 +17,7 @@ from code42cli.errors import UserNotInLegalHoldError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
+from code42cli.options import quiet_sdk_options
 from code42cli.util import find_format_width
 from code42cli.util import format_string_list_to_columns
 from code42cli.util import format_to_table
@@ -30,7 +31,7 @@ _MATTER_KEYS_MAP["creationDate"] = "Creation Date"
 
 
 @click.group(cls=OrderedGroup)
-@sdk_options
+@quiet_sdk_options
 def legal_hold(state):
     """For adding and removing employees to legal hold matters."""
     pass
@@ -118,7 +119,7 @@ def show(state, matter_id, include_inactive=False, include_policy=False):
 
 
 @legal_hold.group(cls=OrderedGroup)
-@sdk_options
+@quiet_sdk_options
 def bulk(state):
     """Tools for executing bulk legal hold actions."""
     pass

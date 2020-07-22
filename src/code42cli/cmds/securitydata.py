@@ -15,6 +15,7 @@ from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
+from code42cli.options import quiet_sdk_options
 from code42cli.util import find_format_width
 from code42cli.util import format_to_table
 
@@ -145,7 +146,7 @@ def file_event_options(f):
 
 
 @click.group(cls=OrderedGroup)
-@sdk_options
+@quiet_sdk_options
 def security_data(state):
     """Tools for getting security related data, such as file events."""
     # store cursor getter on the group state so shared --begin option can use it in validation

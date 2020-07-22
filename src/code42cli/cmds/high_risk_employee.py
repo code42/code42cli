@@ -17,6 +17,7 @@ from code42cli.file_readers import read_csv_arg
 from code42cli.file_readers import read_flat_file_arg
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
+from code42cli.options import quiet_sdk_options
 
 risk_tag_option = click.option(
     "-t",
@@ -28,7 +29,7 @@ risk_tag_option = click.option(
 
 
 @click.group(cls=OrderedGroup)
-@sdk_options
+@quiet_sdk_options
 def high_risk_employee(state):
     """For adding and removing employees from the high risk employee detection list."""
     pass
@@ -72,7 +73,7 @@ def remove_risk_tags(state, username, risk_tag):
 
 
 @high_risk_employee.group(cls=OrderedGroup)
-@sdk_options
+@quiet_sdk_options
 def bulk(state):
     """Tools for executing bulk high risk employee actions."""
     pass
