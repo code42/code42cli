@@ -163,10 +163,20 @@ def clear_checkpoint(state, checkpoint_name):
 @security_data.command()
 @file_event_options
 @search_options
-@click.option("--or-query", is_flag=True, cls=AdvancedQueryAndSavedSearchIncompatible)
+@click.option(
+    "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
+)
 @sdk_options
 def search(
-    state, format, begin, end, advanced_query, use_checkpoint, saved_search, or_query, **kwargs
+    state,
+    format,
+    begin,
+    end,
+    advanced_query,
+    use_checkpoint,
+    saved_search,
+    or_query,
+    **kwargs
 ):
     """Search for file events."""
     output_logger = logger_factory.get_logger_for_stdout(format)
@@ -179,7 +189,7 @@ def search(
     extractor = _get_file_event_extractor(state.sdk, handlers)
     if or_query:
         extractor.use_or_query = True
-        extractor.or_query_exempt_filters.append(ExposureType.exists())
+        extractor.or_query_exempt_filters.append(f.ExposureType.exists())
     if advanced_query:
         extractor.extract_advanced(advanced_query)
     elif saved_search:
