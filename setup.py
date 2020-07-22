@@ -23,7 +23,7 @@ setup(
     install_requires=[
         "click>=7.1.1",
         "colorama>=0.4.3",
-        "c42eventextractor==0.3.2",
+        "c42eventextractor==0.4.0",
         "keyring==18.0.1",
         "keyrings.alt==3.2.0",
         "py42>=1.7.0",
