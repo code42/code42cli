@@ -155,8 +155,13 @@ def clear_checkpoint(state, checkpoint_name):
 @alerts.command()
 @alert_options
 @search_options
+@click.option(
+    "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
+)
 @opt.sdk_options
-def search(cli_state, format, begin, end, advanced_query, use_checkpoint, **kwargs):
+def search(
+    cli_state, format, begin, end, advanced_query, use_checkpoint, or_query, **kwargs
+):
     """Search for alerts."""
     output_logger = logger_factory.get_logger_for_stdout(format)
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
@@ -164,6 +169,7 @@ def search(cli_state, format, begin, end, advanced_query, use_checkpoint, **kwar
         cli_state.sdk, AlertExtractor, output_logger, cursor, use_checkpoint
     )
     extractor = _get_alert_extractor(cli_state.sdk, handlers)
+    extractor.use_or_query = or_query
     if advanced_query:
         extractor.extract_advanced(advanced_query)
     else:
