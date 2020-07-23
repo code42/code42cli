@@ -108,7 +108,7 @@ def sdk_options(f):
 
 
 def quiet_sdk_options(f):
-    """Behaves exactly like @sdk_options but --profile and --debug do not show up in help/docs on 
+    """Behaves exactly like @sdk_options but --profile and --debug do not show up in help/docs on
     decorated command/group.
     """
     f = profile_option_quiet(f)

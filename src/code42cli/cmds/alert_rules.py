@@ -13,8 +13,8 @@ from code42cli.errors import Code42CLIError
 from code42cli.errors import InvalidRuleTypeError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import OrderedGroup
-from code42cli.options import sdk_options
 from code42cli.options import quiet_sdk_options
+from code42cli.options import sdk_options
 from code42cli.util import find_format_width
 from code42cli.util import format_to_table
 

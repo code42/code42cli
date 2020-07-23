@@ -16,8 +16,8 @@ from code42cli.errors import UserAlreadyAddedError
 from code42cli.errors import UserNotInLegalHoldError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import OrderedGroup
-from code42cli.options import sdk_options
 from code42cli.options import quiet_sdk_options
+from code42cli.options import sdk_options
 from code42cli.util import find_format_width
 from code42cli.util import format_string_list_to_columns
 from code42cli.util import format_to_table

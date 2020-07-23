@@ -14,8 +14,8 @@ from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
-from code42cli.options import sdk_options
 from code42cli.options import quiet_sdk_options
+from code42cli.options import sdk_options
 from code42cli.util import find_format_width
 from code42cli.util import format_to_table
 

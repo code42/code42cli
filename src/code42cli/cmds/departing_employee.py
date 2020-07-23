@@ -12,8 +12,8 @@ from code42cli.cmds.shared import get_user_id
 from code42cli.file_readers import read_csv_arg
 from code42cli.file_readers import read_flat_file_arg
 from code42cli.options import OrderedGroup
-from code42cli.options import sdk_options
 from code42cli.options import quiet_sdk_options
+from code42cli.options import sdk_options
 
 
 @click.group(cls=OrderedGroup)
