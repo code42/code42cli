@@ -72,29 +72,6 @@ def remove_risk_tags(state, username, risk_tag):
     _remove_risk_tags(state.sdk, username, risk_tag)
 
 
-@high_risk_employee.command()
-@click.option(
-    "--many-test-options",
-    type=click.Choice(
-        [
-            "Option1",
-            "Option2",
-            "Option3",
-            "Option4",
-            "Option5",
-            "Option6",
-            "Option7",
-            "Option8",
-            "Option9",
-            "Option10",
-            "OptionThatIsQuiteLong",
-        ]
-    ),
-)
-def many_options(many_test_options):
-    pass
-
-
 @high_risk_employee.group(cls=OrderedGroup)
 @quiet_sdk_options
 def bulk(state):
