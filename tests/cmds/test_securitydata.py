@@ -1,3 +1,4 @@
+import json
 import logging
 
 import py42.sdk.queries.fileevents.filters as f
@@ -634,3 +635,59 @@ def test_show_detail_calls_get_by_id_method(runner, cli_state):
         cli, ["security-data", "saved-search", "show", test_id], obj=cli_state
     )
     cli_state.sdk.securitydata.savedsearches.get_by_id.assert_called_once_with(test_id)
+
+
+def test_search_with_or_query_flag_produces_expected_query(runner, cli_state):
+    begin_date = get_test_date_str(days_ago=10)
+    test_username = "test@example.com"
+    test_filename = "test.txt"
+    result = runner.invoke(
+        cli,
+        [
+            "security-data",
+            "search",
+            "--or-query",
+            "--begin",
+            begin_date,
+            "--c42-username",
+            test_username,
+            "--file-name",
+            test_filename,
+        ],
+        obj=cli_state,
+    )
+    expected_query = {
+        "groupClause": "AND",
+        "groups": [
+            {
+                "filterClause": "AND",
+                "filters": [
+                    {"operator": "EXISTS", "term": "exposure", "value": None},
+                    {
+                        "operator": "ON_OR_AFTER",
+                        "term": "eventTimestamp",
+                        "value": "{}T00:00:00.000Z".format(begin_date),
+                    },
+                ],
+            },
+            {
+                "filterClause": "OR",
+                "filters": [
+                    {
+                        "operator": "IS",
+                        "term": "deviceUserName",
+                        "value": "test@example.com",
+                    },
+                    {"operator": "IS", "term": "fileName", "value": "test.txt"},
+                ],
+            },
+        ],
+        "pgNum": 1,
+        "pgSize": 10000,
+        "srtDir": "asc",
+        "srtKey": "insertionTimestamp",
+    }
+    actual_query = json.loads(
+        str(cli_state.sdk.securitydata.search_file_events.call_args[0][0])
+    )
+    assert actual_query == expected_query

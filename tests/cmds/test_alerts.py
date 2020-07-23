@@ -1,3 +1,4 @@
+import json
 import py42.sdk.queries.alerts.filters as f
 import pytest
 from c42eventextractor.extractors import AlertExtractor
@@ -576,3 +577,57 @@ def test_search_when_given_multiple_search_args_uses_expected_filters(
     assert str(f.Actor.is_in([actor])) in filter_strings
     assert str(f.Actor.not_in([exclude_actor])) in filter_strings
     assert str(f.RuleName.is_in([rule_name])) in filter_strings
+
+
+def test_search_with_or_query_flag_produces_expected_query(runner, cli_state):
+    begin_date = get_test_date_str(days_ago=10)
+    test_actor = "test@example.com"
+    test_rule_type = "FedEndpointExfiltration"
+    result = runner.invoke(
+        cli,
+        [
+            "alerts",
+            "search",
+            "--or-query",
+            "--begin",
+            begin_date,
+            "--actor",
+            test_actor,
+            "--rule-type",
+            test_rule_type,
+        ],
+        obj=cli_state,
+    )
+    expected_query = {
+        "tenantId": None,
+        "groupClause": "AND",
+        "groups": [
+            {
+                "filterClause": "AND",
+                "filters": [
+                    {
+                        "operator": "ON_OR_AFTER",
+                        "term": "createdAt",
+                        "value": "{}T00:00:00.000Z".format(begin_date),
+                    }
+                ],
+            },
+            {
+                "filterClause": "OR",
+                "filters": [
+                    {"operator": "IS", "term": "actor", "value": "test@example.com"},
+                    {
+                        "operator": "IS",
+                        "term": "type",
+                        "value": "FedEndpointExfiltration",
+                    },
+                ],
+            },
+        ],
+        "pgNum": 0,
+        "pgSize": 500,
+        "srtDirection": "asc",
+        "srtKey": "CreatedAt",
+    }
+    actual_query = json.loads(str(cli_state.sdk.alerts.search.call_args[0][0]))
+    assert actual_query == expected_query
