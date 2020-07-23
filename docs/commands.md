@@ -1,8 +1,8 @@
 # Commands
 
-* [Profile](commands/profile.md)
-* [Security Data](commands/securitydata.md)
-* [Alerts](commands/alerts.md)
-* [Alert Rules](commands/alertrules.md)
-* [Departing Employee](commands/departingemployee.md)
-* [High Risk Employee](commands/highriskemployee.md)
+* [Profile](commands/profile.rst)
+* [Security Data](commands/securitydata.rst)
+* [Alerts](commands/alerts.rst)
+* [Alert Rules](commands/alertrules.rst)
+* [Departing Employee](commands/departingemployee.rst)
+* [High Risk Employee](commands/highriskemployee.rst)

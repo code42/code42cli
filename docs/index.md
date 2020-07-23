@@ -1,4 +1,4 @@
-# Code42 console command-line interface reference
+# Code42 command-line interface reference
 
 [![license](https://img.shields.io/pypi/l/code42cli.svg)](https://pypi.org/project/code42cli/)
 [![versions](https://img.shields.io/pypi/pyversions/code42cli.svg)](https://pypi.org/project/code42cli/)
