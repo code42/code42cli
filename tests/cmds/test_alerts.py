@@ -1,4 +1,5 @@
 import json
+
 import py42.sdk.queries.alerts.filters as f
 import pytest
 from c42eventextractor.extractors import AlertExtractor
