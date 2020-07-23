@@ -169,8 +169,7 @@ def search(
         cli_state.sdk, AlertExtractor, output_logger, cursor, use_checkpoint
     )
     extractor = _get_alert_extractor(cli_state.sdk, handlers)
-    if or_query:
-        extractor.use_or_query = True
+    extractor.use_or_query = or_query
     if advanced_query:
         extractor.extract_advanced(advanced_query)
     else:
