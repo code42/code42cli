@@ -584,7 +584,7 @@ def test_search_with_or_query_flag_produces_expected_query(runner, cli_state):
     begin_date = get_test_date_str(days_ago=10)
     test_actor = "test@example.com"
     test_rule_type = "FedEndpointExfiltration"
-    result = runner.invoke(
+    runner.invoke(
         cli,
         [
             "alerts",
