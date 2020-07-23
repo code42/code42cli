@@ -187,9 +187,8 @@ def search(
         state.sdk, FileEventExtractor, output_logger, cursor, use_checkpoint
     )
     extractor = _get_file_event_extractor(state.sdk, handlers)
-    if or_query:
-        extractor.use_or_query = True
-        extractor.or_query_exempt_filters.append(f.ExposureType.exists())
+    extractor.use_or_query = or_query
+    extractor.or_query_exempt_filters.append(f.ExposureType.exists())
     if advanced_query:
         extractor.extract_advanced(advanced_query)
     elif saved_search:
