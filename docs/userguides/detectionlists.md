@@ -46,5 +46,5 @@ To remove multiple users at once:
 code42 high-risk-employee bulk remove /Users/matt.allen/remove_high_risk_employee.csv
 ```
 
-Learn more about the [Departing Employee](../commands/departingemployee.md) and 
+Learn more about the [Departing Employee](../commands/departingemployee.md) and
 [High Risk Employee](../commands/highriskemployee.md) commands.
