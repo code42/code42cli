@@ -1,4 +1,4 @@
-# Getting started with the code42cli
+# Get started with the Code42 command-line interface (CLI)
 
 * [Licensing](#licensing)
 * [Installation](#installation)
@@ -22,7 +22,7 @@ python3 -m pip install code42cli
 ```
 
 To install a previous version of the Code42 CLI via `pip`, add the version number. For example, to install version
-0.4.1, you would enter:
+0.4.1, enter:
 
 ```bash
 python3 -m pip install code42cli==0.5.3
@@ -46,7 +46,7 @@ python setup.py install
 
 ### From distribution
 
-If you want create a `.tar` ball for installing elsewhere, run this command from the project's root directory:
+If you want create a `.tar` ball for installing elsewhere, run the following command from the project's root directory:
 
 ```bash
 python setup.py sdist
@@ -60,7 +60,7 @@ python3 -m pip install code42cli-[VERSION].tar.gz
 
 ## Updates
 
-To update the CLI, use pip's `--upgrade` flag.
+To update the CLI, use the pip `--upgrade` flag.
 
 ```bash
 python3 -m pip install code42cli --upgrade
@@ -73,12 +73,12 @@ python3 -m pip install code42cli --upgrade
 ```
 
 To use the CLI, you must provide your credentials (basic authentication). The CLI uses keyring when storing passwords.
-If you choose not to store your password in the CLI, you have to enter it for each command that requires a connection.
+If you choose not to store your password in the CLI, you must enter it for each command that requires a connection.
 
 The Code42 CLI currently does **not** support SSO login providers or any other identity providers such as Active
 Directory or Okta.
 
-To learn more about authenticating in the CLI, follow the [profile guide](profile.md).
+To learn more about authenticating in the CLI, follow the [Configure profile guide](profile.md).
 
 ## Troubleshooting and support
 
@@ -94,8 +94,8 @@ code42 <command> <subcommand> <args> -d
 
 ### File an issue on GitHub
 
-If you are experiencing an issue with the Code42 CLI, you can create a *New issue* at the
-[project repository](https://github.com/code42/code42cli/issues). See the Github
+If you are experiencing an issue with the Code42 CLI, select *New issue* at the
+[project repository](https://github.com/code42/code42cli/issues) to create an issue. See the Github
 [guide on creating an issue](https://help.github.com/en/github/managing-your-work-on-github/creating-an-issue) for more information.
 
 ### Contact Code42 Support
