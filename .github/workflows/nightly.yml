@@ -3,6 +3,8 @@ name: nightly
 on:
   schedule:
     - cron: '0 5 * * *'
+    branches:
+      - master
 
 
 jobs:
