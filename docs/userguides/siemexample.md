@@ -6,7 +6,7 @@ into a security information and event management (SIEM) tool like LogRhythm, Sum
 ## Considerations
 
 To ingest file events into a SIEM tool using the Code42 command-line interface, the Code42 user account running the integration
-must be assigned roles that provide the necessary permissions. 
+must be assigned roles that provide the necessary permissions.
 
 ## Before you begin
 
