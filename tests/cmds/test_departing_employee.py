@@ -157,3 +157,33 @@ def test_remove_bulk_users_uses_expected_arguments(runner, mocker, cli_state_wit
             obj=cli_state_with_user,
         )
     assert bulk_processor.call_args[0][1] == ["test_user1", "test_user2"]
+
+
+def test_add_departing_employee_when_invalid_date_validation_raises_error(
+    runner, cli_state_with_user
+):
+    departure_date = "2020-02-30"
+    result = runner.invoke(
+        cli,
+        ["departing-employee", "add", _EMPLOYEE, "--departure-date", departure_date],
+        obj=cli_state_with_user,
+    )
+    assert result.exit_code == 2
+    assert (
+        "Invalid value for '--departure-date': invalid datetime format" in result.output
+    )
+
+
+def test_add_departing_employee_when_invalid_date_format_validation_raises_error(
+    runner, cli_state_with_user
+):
+    departure_date = "2020-30-01"
+    result = runner.invoke(
+        cli,
+        ["departing-employee", "add", _EMPLOYEE, "--departure-date", departure_date],
+        obj=cli_state_with_user,
+    )
+    assert result.exit_code == 2
+    assert (
+        "Invalid value for '--departure-date': invalid datetime format" in result.output
+    )
