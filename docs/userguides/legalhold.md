@@ -1,10 +1,10 @@
 # Manage legal hold custodians
 
-Once you [create a legal hold matter in the Code42 console](https://support.code42.com/Administrator/Cloud/Configuring/Create_a_legal_hold_matter#Step_1:_Create_a_matter), you can use the Code42 CLI to add or release custodians from the matter.  
+Once you [create a legal hold matter in the Code42 console](https://support.code42.com/Administrator/Cloud/Configuring/Create_a_legal_hold_matter#Step_1:_Create_a_matter), you can use the Code42 CLI to add or release custodians from the matter.
 
 Use the `legal-hold` commands to manage legal hold custodians.
- - To see a list of all the users currently in your organization, you can export a list from the Users action menu. 
- - To view a list of legal hold matters for your organization, including the matter ID, use the following command:  
+ - To see a list of all the users currently in your organization, you can export a list from the Users action menu.
+ - To view a list of legal hold matters for your organization, including the matter ID, use the following command:
    `code42 legal-hold list`
  - To see a list of all the custodians currently associated with a legal hold matter, enter `code42 legal-hold show <matterID>`.
 
@@ -13,25 +13,25 @@ Use the `legal-hold` commands to manage legal hold custodians.
 
 To add multiple custodians to a legal hold matter:
 
-1. Generate a CSV template. Below is an example command for generating a template to use to add custodians to legal hold matter. Once generated, the CSV file is saved to your current working directory.  
+1. Generate a CSV template. Below is an example command for generating a template to use to add custodians to legal hold matter. Once generated, the CSV file is saved to your current working directory.
     `code42 legal-hold bulk generate-template add`
 
-    To generate a template to use to remove custodians from a legal hold matter, for example: 
+    To generate a template to use to remove custodians from a legal hold matter, for example:
 
     `code42 legal-hold bulk generate-template remove`
 
-    The CSV templates for adding and removing are the same. 
+    The CSV templates for adding and removing are the same.
 
 2. Use the CSV template to enter the matter ID(s) and Code42 usernames for the custodians you want to add to the matters.
-To get the ID for a matter, enter `code42 legal-hold list`. 
-3. Save the CSV file. 
+To get the ID for a matter, enter `code42 legal-hold list`.
+3. Save the CSV file.
 
-## Add custodians to a legal hold matter  
+## Add custodians to a legal hold matter
 
 You can add one or more custodians to a legal hold matter using the Code42 CLI.
 
 ### Add multiple custodians
-Once you have entered the matter ID and user information in the CSV file, use the bulk add-user command with the CSV file path to add multiple custodians at once. For example: 
+Once you have entered the matter ID and user information in the CSV file, use the bulk add-user command with the CSV file path to add multiple custodians at once. For example:
 
 `code42 legal-hold bulk add-user /Users/astrid.ludwig/add_users_to_legal_hold.csv`
 
@@ -39,15 +39,15 @@ Once you have entered the matter ID and user information in the CSV file, use th
 
 To add a single custodian to a legal hold matter, use the following command as an example:
 
-`code42 legal-hold add-user --matter-id 123456789123456789 --username tanya.rowe@example.com`  
+`code42 legal-hold add-user --matter-id 123456789123456789 --username tanya.rowe@example.com`
 
 #### Options
 
- - `--matter-id` (required):   The identification number of the legal hold matter. To get the ID for a matter, run the command code42 legal-hold list. 
+ - `--matter-id` (required):   The identification number of the legal hold matter. To get the ID for a matter, run the command code42 legal-hold list.
  - `--username` (required):    The Code42 username of the custodian to add to the matter.
- - `--profile` (optional):     The profile to use to execute the command. If not specified, the default profile is used. 
+ - `--profile` (optional):     The profile to use to execute the command. If not specified, the default profile is used.
 
-## Release custodians 
+## Release custodians
 You can [release one or more custodians](https://support.code42.com/Administrator/Cloud/Configuring/Create_a_legal_hold_matter#Release_or_reactivate_custodians) from a legal hold matter using the Code42 CLI.
 
 ### Release multiple custodians
@@ -55,13 +55,13 @@ You can [release one or more custodians](https://support.code42.com/Administrato
 To release multiple custodians at once:
 
 1. Enter the matter ID(s) and Code42 usernames to the [CSV file template you generated](#get-csv-template).
-2. Save the file to your current working directory. 
-3. Use the `bulk remove-user` command with the file path of the CSV you created. For example:  
+2. Save the file to your current working directory.
+3. Use the `bulk remove-user` command with the file path of the CSV you created. For example:
     `code42 legal-hold bulk remove-user /Users/hope.rodriguez/remove_users_from_legal_hold.csv`
 
-### Release a single custodian 
+### Release a single custodian
 
-Use `remove-user` to remove a single custodian. For example: 
+Use `remove-user` to remove a single custodian. For example:
 
 `code42 legal-hold remove-user --matter-id  123456789123456789 --username mercedes.simmons@example.com`
 
@@ -69,11 +69,11 @@ Options are the same as `add-user` shown above.
 
 ## View matters and custodians
 
-You can use the Code42 CLI to get a list of all the [legal hold matters](https://support.code42.com/Administrator/Cloud/Code42_console_reference/Legal_Hold_reference#All_Matters) for your organization, or get full details for a matter. 
+You can use the Code42 CLI to get a list of all the [legal hold matters](https://support.code42.com/Administrator/Cloud/Code42_console_reference/Legal_Hold_reference#All_Matters) for your organization, or get full details for a matter.
 
 ### List legal hold matters
 
-To view a list of legal hold matters for your organization, use the following command:  
+To view a list of legal hold matters for your organization, use the following command:
 
 `code42 legal-hold list`
 
@@ -81,7 +81,7 @@ This command produces the matter ID, name, description, creator, and creation da
 
 ### View matter details
 
-To view active custodians for a legal hold matter, enter code42 legal-hold show with the matter ID, for example: 
+To view active custodians for a legal hold matter, enter code42 legal-hold show with the matter ID, for example:
 
 `code42 legal-hold show 123456789123456789`
 
