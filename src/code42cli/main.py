@@ -15,7 +15,7 @@ from code42cli.cmds.legal_hold import legal_hold
 from code42cli.cmds.profile import profile
 from code42cli.cmds.securitydata import security_data
 from code42cli.errors import ExceptionHandlingGroup
-from code42cli.options import quiet_sdk_options
+from code42cli.options import sdk_options
 
 BANNER = """\b
  dP""b8  dP"Yb  8888b. 888888  dP88  oP"Yb.
@@ -48,7 +48,7 @@ CONTEXT_SETTINGS = {
 
 
 @click.group(cls=ExceptionHandlingGroup, context_settings=CONTEXT_SETTINGS, help=BANNER)
-@quiet_sdk_options
+@sdk_options(hidden=True)
 def cli(state):
     pass
 

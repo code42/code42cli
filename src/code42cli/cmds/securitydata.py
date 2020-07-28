@@ -14,7 +14,6 @@ from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
-from code42cli.options import quiet_sdk_options
 from code42cli.options import sdk_options
 from code42cli.util import find_format_width
 from code42cli.util import format_to_table
@@ -146,7 +145,7 @@ def file_event_options(f):
 
 
 @click.group(cls=OrderedGroup)
-@quiet_sdk_options
+@sdk_options(hidden=True)
 def security_data(state):
     """Tools for getting security related data, such as file events."""
     # store cursor getter on the group state so shared --begin option can use it in validation
@@ -155,7 +154,7 @@ def security_data(state):
 
 @security_data.command()
 @click.argument("checkpoint-name")
-@sdk_options
+@sdk_options()
 def clear_checkpoint(state, checkpoint_name):
     """Remove the saved file event checkpoint from '--use-checkpoint/-c' mode."""
     _get_file_event_cursor_store(state.profile.name).delete(checkpoint_name)
@@ -167,7 +166,7 @@ def clear_checkpoint(state, checkpoint_name):
 @click.option(
     "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
 )
-@sdk_options
+@sdk_options()
 def search(
     state,
     format,
@@ -205,13 +204,13 @@ def search(
 
 
 @security_data.group(cls=OrderedGroup)
-@sdk_options
+@sdk_options()
 def saved_search(state):
     pass
 
 
 @saved_search.command("list")
-@sdk_options
+@sdk_options()
 def _list(state):
     """List available saved searches."""
     response = state.sdk.securitydata.savedsearches.get()
@@ -221,7 +220,7 @@ def _list(state):
 
 @saved_search.command()
 @click.argument("search-id")
-@sdk_options
+@sdk_options()
 def show(state, search_id):
     """Get the details of a saved search."""
     response = state.sdk.securitydata.savedsearches.get_by_id(search_id)
