@@ -3,7 +3,7 @@
 Once you [create a legal hold matter in the Code42 console](https://support.code42.com/Administrator/Cloud/Configuring/Create_a_legal_hold_matter#Step_1:_Create_a_matter), you can use the Code42 CLI to add or release custodians from the matter.
 
 Use the `legal-hold` commands to manage legal hold custodians.
- - To see a list of all the users currently in your organization, you can export a list from the Users action menu.
+ - To see a list of all the users currently in your organization, you can export a list from the [Users action menu](https://support.code42.com/Administrator/Cloud/Code42_console_reference/Users_reference#Action_menu).
  - To view a list of legal hold matters for your organization, including the matter ID, use the following command:
    `code42 legal-hold list`
  - To see a list of all the custodians currently associated with a legal hold matter, enter `code42 legal-hold show <matterID>`.
