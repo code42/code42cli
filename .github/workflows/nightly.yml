@@ -1,0 +1,35 @@
+name: nightly
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 5 * * *'
+
+jobs:
+  nightly:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: [3.5, 3.6, 3.7, 3.8]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Setup SSH Keys and known_hosts
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.C42_EVENT_EXTRACTOR_PRIVATE_DEPLOY_KEY }}"
+      - name: Install tox
+        run: pip install tox==3.17.1
+      - name: Run Unit tests
+        env:
+            SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: tox -e nightly  # Run tox using latest master branch from py42/c42eventextractor

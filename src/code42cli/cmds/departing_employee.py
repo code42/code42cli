@@ -26,13 +26,17 @@ def departing_employee(state):
 @departing_employee.command()
 @username_arg
 @click.option(
-    "--departure-date", help="The date the employee is departing. Format: yyyy-MM-dd."
+    "--departure-date",
+    help="The date the employee is departing. Format: yyyy-MM-dd.",
+    type=click.DateTime(formats=["%Y-%m-%d"]),
 )
 @cloud_alias_option
 @notes_option
 @sdk_options
 def add(state, username, cloud_alias, departure_date, notes):
     """Add a user to the departing-employee detection list."""
+    if departure_date:
+        departure_date = departure_date.strftime("%Y-%m-%d")
     _add_departing_employee(state.sdk, username, cloud_alias, departure_date, notes)
 
 

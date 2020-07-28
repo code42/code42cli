@@ -1,24 +1,19 @@
-# Integrating with SIEM Tools
+# Ingest file event data into a SIEM tool
 
-The Code42 command-line interface (CLI) tool offers a way to interact with your Code42 environment without using the
-Code42 console or making API calls directly. This article provides instructions on using the CLI to extract Code42 data
-for use in a security information and event management (SIEM) tool like LogRhythm, Sumo Logic, or IBM QRadar.
-
-You can also use the Code42 CLI to bulk-add or remove users from the High Risk Employees list or Departing Employees
-list. For more information, see Manage detection list users with the Code42 command-line interface.
+This guide provides instructions on using the CLI to ingest Code42 file event data
+into a security information and event management (SIEM) tool like LogRhythm, Sumo Logic, or IBM QRadar.
 
 ## Considerations
 
-To integrate with a SIEM tool using the Code42 command-line interface, the Code42 user account running the integration
-must be assigned roles that provide the necessary permissions. We recommend you assign the roles in our use case for
-managing a security application integrated with Code42.
+To ingest file events into a SIEM tool using the Code42 command-line interface, the Code42 user account running the integration
+must be assigned roles that provide the necessary permissions.
 
 ## Before you begin
 
-To integrate Code42 with a SIEM tool, you must first install and configure the Code42 CLI following the instructions in
-[Getting Started](gettingstarted.md) the Code42 command-line interface.
+First install and configure the Code42 CLI following the instructions in
+[Getting Started](gettingstarted.md).
 
-## Commands and query parameters
+## Run file event queries
 You can get security events in either a JSON or CEF format for use by your SIEM tool. You can query the data as a
 scheduled job or run ad-hoc queries. Learn more about [searching](../commands/securitydata.md) using the CLI.
 
@@ -31,8 +26,7 @@ the profile to use by including `--profile`. An example using `netcat` to forwar
 code42 security-data search --profile profile1 -c syslog_sender | nc syslog.example.com 514
 ```
 
-Note that it is best practice to use a separate profile when executing a scheduled task. This way, it is harder to
-accidentally mess up your stored checkpoints by running `--use-checkpoint` in adhoc queries.
+As a best practice, use a separate profile when executing a scheduled task. Using separate profiles can help prevent accidental updates to your stored checkpoints, for example, by adding `--use-checkpoint` to adhoc queries.
 
 This query will send to the syslog server only the new security event data since the previous request.
 
@@ -101,7 +95,7 @@ The following tables map the data from the Code42 CLI to common event format (CE
 
 ### Attribute mapping
 
-The table below maps JSON fields, CEF fields, and [Forensic Search fields](https://support.code42.com/Administrator/Cloud/Administration_console_reference/Forensic_Search_reference_guide)
+The table below maps JSON fields, CEF fields, and [Forensic Search fields](https://code42.com/r/support/forensic-search-fields)
 to one another.
 
 ```eval_rst
