@@ -62,28 +62,41 @@ def set_debug(ctx, param, value):
         ctx.ensure_object(CLIState).debug = value
 
 
-profile_option = click.option(
-    "--profile",
-    expose_value=False,
-    callback=set_profile,
-    help="The name of the Code42 CLI profile to use when executing this command.",
-)
-debug_option = click.option(
-    "-d",
-    "--debug",
-    is_flag=True,
-    expose_value=False,
-    callback=set_debug,
-    help="Turn on debug logging.",
-)
+def profile_option(hidden=False):
+    opt = click.option(
+        "--profile",
+        expose_value=False,
+        callback=set_profile,
+        hidden=hidden,
+        help="The name of the Code42 CLI profile to use when executing this command.",
+    )
+    return opt
+
+
+def debug_option(hidden=False):
+    opt = click.option(
+        "-d",
+        "--debug",
+        is_flag=True,
+        expose_value=False,
+        callback=set_debug,
+        hidden=hidden,
+        help="Turn on debug logging.",
+    )
+    return opt
+
+
 pass_state = click.make_pass_decorator(CLIState, ensure=True)
 
 
-def sdk_options(f):
-    f = profile_option(f)
-    f = debug_option(f)
-    f = pass_state(f)
-    return f
+def sdk_options(hidden=False):
+    def decorator(f):
+        f = profile_option(hidden)(f)
+        f = debug_option(hidden)(f)
+        f = pass_state(f)
+        return f
+
+    return decorator
 
 
 def incompatible_with(incompatible_opts):

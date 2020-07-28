@@ -30,7 +30,7 @@ _MATTER_KEYS_MAP["creationDate"] = "Creation Date"
 
 
 @click.group(cls=OrderedGroup)
-@sdk_options
+@sdk_options(hidden=True)
 def legal_hold(state):
     """For adding and removing employees to legal hold matters."""
     pass
@@ -55,7 +55,7 @@ user_id_option = click.option(
 @legal_hold.command()
 @matter_id_option
 @user_id_option
-@sdk_options
+@sdk_options()
 def add_user(state, matter_id, username):
     """Add a user to a legal hold matter."""
     _add_user_to_legal_hold(state.sdk, matter_id, username)
@@ -64,14 +64,14 @@ def add_user(state, matter_id, username):
 @legal_hold.command()
 @matter_id_option
 @user_id_option
-@sdk_options
+@sdk_options()
 def remove_user(state, matter_id, username):
     """Remove a user from a legal hold matter."""
     _remove_user_from_legal_hold(state.sdk, matter_id, username)
 
 
 @legal_hold.command("list")
-@sdk_options
+@sdk_options()
 def _list(state):
     """Fetch existing legal hold matters."""
     matters = _get_all_active_matters(state.sdk)
@@ -84,7 +84,7 @@ def _list(state):
 @click.argument("matter-id")
 @click.option("--include-inactive", is_flag=True)
 @click.option("--include-policy", is_flag=True)
-@sdk_options
+@sdk_options()
 def show(state, matter_id, include_inactive=False, include_policy=False):
     """Display details of a given legal hold matter."""
     matter = _check_matter_is_accessible(state.sdk, matter_id)
@@ -118,7 +118,7 @@ def show(state, matter_id, include_inactive=False, include_policy=False):
 
 
 @legal_hold.group(cls=OrderedGroup)
-@sdk_options
+@sdk_options(hidden=True)
 def bulk(state):
     """Tools for executing bulk legal hold actions."""
     pass
@@ -141,7 +141,7 @@ bulk.add_command(legal_hold_generate_template)
     ),
 )
 @read_csv_arg(headers=LEGAL_HOLD_CSV_HEADERS)
-@sdk_options
+@sdk_options()
 def bulk_add(state, csv_rows):
     sdk = state.sdk
 
@@ -157,7 +157,7 @@ def bulk_add(state, csv_rows):
     )
 )
 @read_csv_arg(headers=LEGAL_HOLD_CSV_HEADERS)
-@sdk_options
+@sdk_options()
 def remove(state, csv_rows):
     sdk = state.sdk
 

@@ -48,7 +48,7 @@ CONTEXT_SETTINGS = {
 
 
 @click.group(cls=ExceptionHandlingGroup, context_settings=CONTEXT_SETTINGS, help=BANNER)
-@sdk_options
+@sdk_options(hidden=True)
 def cli(state):
     pass
 

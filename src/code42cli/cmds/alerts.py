@@ -137,7 +137,7 @@ def alert_options(f):
 
 
 @click.group(cls=opt.OrderedGroup)
-@opt.sdk_options
+@opt.sdk_options(hidden=True)
 def alerts(state):
     """Tools for getting alert data."""
     # store cursor getter on the group state so shared --begin option can use it in validation
@@ -146,7 +146,7 @@ def alerts(state):
 
 @alerts.command()
 @click.argument("checkpoint-name")
-@opt.sdk_options
+@opt.sdk_options()
 def clear_checkpoint(state, checkpoint_name):
     """Remove the saved alert checkpoint from '--use-checkpoint/-c' mode."""
     _get_alert_cursor_store(state.profile.name).delete(checkpoint_name)
@@ -158,7 +158,7 @@ def clear_checkpoint(state, checkpoint_name):
 @click.option(
     "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
 )
-@opt.sdk_options
+@opt.sdk_options()
 def search(
     cli_state, format, begin, end, advanced_query, use_checkpoint, or_query, **kwargs
 ):

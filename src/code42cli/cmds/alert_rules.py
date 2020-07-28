@@ -34,7 +34,7 @@ _HEADER_KEYS_MAP["isEnabled"] = "Enabled"
 
 
 @click.group(cls=OrderedGroup)
-@sdk_options
+@sdk_options(hidden=True)
 def alert_rules(state):
     """Manage alert rules."""
     pass
@@ -54,7 +54,7 @@ username_option = click.option("-u", "--username", required=True)
     required=True,
     help="The username of the user to add to the alert rule.",
 )
-@sdk_options
+@sdk_options()
 def add_user(state, rule_id, username):
     """Add a user to an alert rule."""
     _add_user(state.sdk, rule_id, username)
@@ -68,14 +68,14 @@ def add_user(state, rule_id, username):
     required=True,
     help="The username of the user to remove from the alert rule.",
 )
-@sdk_options
+@sdk_options()
 def remove_user(state, rule_id, username):
     """Remove a user from an alert rule."""
     _remove_user(state.sdk, rule_id, username)
 
 
 @alert_rules.command("list")
-@sdk_options
+@sdk_options()
 def list_alert_rules(state):
     """Fetch existing alert rules."""
     selected_rules = _get_all_rules_metadata(state.sdk)
@@ -86,7 +86,7 @@ def list_alert_rules(state):
 
 @alert_rules.command()
 @click.argument("rule_id")
-@sdk_options
+@sdk_options()
 def show(state, rule_id):
     """Print out detailed alert rule criteria."""
     selected_rule = _get_rule_metadata(state.sdk, rule_id)
@@ -97,7 +97,7 @@ def show(state, rule_id):
 
 
 @alert_rules.group(cls=OrderedGroup)
-@sdk_options
+@sdk_options(hidden=True)
 def bulk(state):
     """Tools for executing bulk alert rule actions."""
     pass
@@ -118,7 +118,7 @@ bulk.add_command(alert_rules_generate_template)
     )
 )
 @read_csv_arg(headers=ALERT_RULES_CSV_HEADERS)
-@sdk_options
+@sdk_options()
 def add(state, csv_rows):
     sdk = state.sdk
 
@@ -136,7 +136,7 @@ def add(state, csv_rows):
     )
 )
 @read_csv_arg(headers=ALERT_RULES_CSV_HEADERS)
-@sdk_options
+@sdk_options()
 def remove(state, csv_rows):
     sdk = state.sdk
 
