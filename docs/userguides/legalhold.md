@@ -33,13 +33,13 @@ You can add one or more custodians to a legal hold matter using the Code42 CLI.
 ### Add multiple custodians
 Once you have entered the matter ID and user information in the CSV file, use the `bulk add-user` command with the CSV file path to add multiple custodians at once. For example:
 
-`code42 legal-hold bulk add-user /Users/astrid.ludwig/add_users_to_legal_hold.csv`
+`code42 legal-hold bulk add-user /Users/admin/add_users_to_legal_hold.csv`
 
 ### Add a single custodian
 
 To add a single custodian to a legal hold matter, use the following command as an example:
 
-`code42 legal-hold add-user --matter-id 123456789123456789 --username tanya.rowe@example.com`
+`code42 legal-hold add-user --matter-id 123456789123456789 --username user@example.com`
 
 #### Options
 
@@ -57,13 +57,13 @@ To release multiple custodians at once:
 1. Enter the matter ID(s) and Code42 usernames to the [CSV file template you generated](#get-csv-template).
 2. Save the file to your current working directory.
 3. Use the `bulk remove-user` command with the file path of the CSV you created. For example:
-    `code42 legal-hold bulk remove-user /Users/hope.rodriguez/remove_users_from_legal_hold.csv`
+    `code42 legal-hold bulk remove-user /Users/admin/remove_users_from_legal_hold.csv`
 
 ### Release a single custodian
 
 Use `remove-user` to remove a single custodian. For example:
 
-`code42 legal-hold remove-user --matter-id  123456789123456789 --username mercedes.simmons@example.com`
+`code42 legal-hold remove-user --matter-id  123456789123456789 --username user@example.com`
 
 Options are the same as `add-user` shown above.
 
