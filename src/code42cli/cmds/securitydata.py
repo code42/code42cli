@@ -2,6 +2,7 @@ from pprint import pformat
 
 import click
 import py42.sdk.queries.fileevents.filters as f
+from py42.sdk.queries.fileevents.filters.exposure_filter import ExposureType
 from c42eventextractor.extractors import FileEventExtractor
 from click import echo
 
@@ -29,11 +30,12 @@ format_option = click.option(
     default=enum.OutputFormat.JSON,
     help="The format used for outputting file events.",
 )
+
 exposure_type_option = click.option(
     "-t",
     "--type",
     multiple=True,
-    type=click.Choice(list(enum.ExposureType())),
+    type=click.Choice(list(ExposureType.choices())),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     callback=searchopt.is_in_filter(f.ExposureType),
     help="Limits events to those with given exposure types.",
@@ -93,7 +95,7 @@ file_category_option = click.option(
     multiple=True,
     callback=searchopt.is_in_filter(f.FileCategory),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
-    help="Limits events to file events where the file can be classified by one of these categories."
+    help="Limits events to file events where the file can be classified by one of these categories.",
 )
 process_owner_option = click.option(
     "--process-owner",
@@ -148,7 +150,7 @@ def file_event_options(f):
     f = tab_url_option(f)
     f = include_non_exposure_option(f)
     f = format_option(f)
-    f = saved_search_option(f)    
+    f = saved_search_option(f)
     return f
 
 

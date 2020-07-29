@@ -2,6 +2,9 @@ import click
 import py42.sdk.queries.alerts.filters as f
 from c42eventextractor.extractors import AlertExtractor
 from click import echo
+from py42.sdk.queries.alerts.filters import AlertState
+from py42.sdk.queries.alerts.filters import Severity
+from py42.sdk.queries.alerts.filters import RuleType
 
 import code42cli.cmds.search.enums as enum
 import code42cli.cmds.search.extraction as ext
@@ -23,7 +26,7 @@ format_option = click.option(
 severity_option = click.option(
     "--severity",
     multiple=True,
-    type=click.Choice(enum.AlertSeverity()),
+    type=click.Choice(Severity.choices()),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     callback=searchopt.is_in_filter(f.Severity),
     help="Filter alerts by severity. Defaults to returning all severities.",
@@ -31,7 +34,7 @@ severity_option = click.option(
 state_option = click.option(
     "--state",
     multiple=True,
-    type=click.Choice(enum.AlertState()),
+    type=click.Choice(AlertState.choices()),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     callback=searchopt.is_in_filter(f.AlertState),
     help="Filter alerts by state. Defaults to returning all states.",
@@ -97,7 +100,7 @@ exclude_rule_id_option = click.option(
 rule_type_option = click.option(
     "--rule-type",
     multiple=True,
-    type=click.Choice(enum.RuleType()),
+    type=click.Choice(RuleType.choices()),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     callback=searchopt.is_in_filter(f.RuleType),
     help="Filter alerts by including the given rule type(s).",
