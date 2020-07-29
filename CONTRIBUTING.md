@@ -183,6 +183,6 @@ Document all notable consumer-affecting changes in CHANGELOG.md per principles a
 
 ## Opening a PR
 
-When you're satisified with your changes, open a PR and fill out the pull request template file. We recommend prefixing the name of your branch and/or PR title with `bugfix`, `chore`, or `feature` to help quickly categorize your change. Your unit tests and other checks will run against all supported python versions when you do this.
+When you're satisfied with your changes, open a PR and fill out the pull request template file. We recommend prefixing the name of your branch and/or PR title with `bugfix`, `chore`, or `feature` to help quickly categorize your change. Your unit tests and other checks will run against all supported python versions when you do this.
 
 A team member should get in contact with you shortly to help merge your PR to completion and get it ready for a release!
