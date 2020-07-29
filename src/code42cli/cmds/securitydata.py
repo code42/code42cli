@@ -3,6 +3,7 @@ from pprint import pformat
 import click
 import py42.sdk.queries.fileevents.filters as f
 from py42.sdk.queries.fileevents.filters.exposure_filter import ExposureType
+from py42.sdk.queries.fileevents.filters.file_filter import FileCategory
 from c42eventextractor.extractors import FileEventExtractor
 from click import echo
 
@@ -30,7 +31,6 @@ format_option = click.option(
     default=enum.OutputFormat.JSON,
     help="The format used for outputting file events.",
 )
-
 exposure_type_option = click.option(
     "-t",
     "--type",
@@ -93,6 +93,7 @@ file_path_option = click.option(
 file_category_option = click.option(
     "--file-category",
     multiple=True,
+    type=click.Choice(list(FileCategory.choices())),
     callback=searchopt.is_in_filter(f.FileCategory),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to file events where the file can be classified by one of these categories.",
