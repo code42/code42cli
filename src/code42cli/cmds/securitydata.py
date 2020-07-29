@@ -88,6 +88,13 @@ file_path_option = click.option(
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to file events where the file is located at one of these paths.",
 )
+file_category_option = click.option(
+    "--file-category",
+    multiple=True,
+    callback=searchopt.is_in_filter(f.FileCategory),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
+    help="Limits events to file events where the file can be classified by one of these categories."
+)
 process_owner_option = click.option(
     "--process-owner",
     multiple=True,
@@ -136,11 +143,12 @@ def file_event_options(f):
     f = source_option(f)
     f = file_name_option(f)
     f = file_path_option(f)
+    f = file_category_option(f)
     f = process_owner_option(f)
     f = tab_url_option(f)
     f = include_non_exposure_option(f)
     f = format_option(f)
-    f = saved_search_option(f)
+    f = saved_search_option(f)    
     return f
 
 
