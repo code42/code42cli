@@ -16,7 +16,7 @@ To add multiple custodians to a legal hold matter:
 1. Generate a CSV template. Below is an example command that generates a template to use when bulk adding custodians to legal hold matter. Once generated, the CSV file is saved to your current working directory.
     `code42 legal-hold bulk generate-template add`
 
-    To generate a template to use when bulk removing custodians from a legal hold matter:
+    To generate a template to use when bulk releasing custodians from a legal hold matter:
 
     `code42 legal-hold bulk generate-template remove`
 
@@ -61,7 +61,7 @@ To release multiple custodians at once:
 
 ### Release a single custodian
 
-Use `remove-user` to remove a single custodian. For example:
+Use `remove-user` to release a single custodian. For example:
 
 `code42 legal-hold remove-user --matter-id  123456789123456789 --username user@example.com`
 
