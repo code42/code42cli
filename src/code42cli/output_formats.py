@@ -8,13 +8,13 @@ from code42cli.cmds.enums import OutputFormat
 
 def output_format(_, __, value):
     if value is not None:
-        if value is OutputFormat.CSV:
+        if value == OutputFormat.CSV:
             return to_csv
-        if value is OutputFormat.RAW:
+        if value == OutputFormat.RAW:
             return to_json
-        if value is OutputFormat.ASCII:
+        if value == OutputFormat.ASCII:
             return to_ascii_table
-        if value is OutputFormat.JSON:
+        if value == OutputFormat.JSON:
             return to_formatted_json
 
 
@@ -31,12 +31,12 @@ def to_csv(output, header):
     columns = ",".join(header.values())
 
     lines = []
+    lines.append(columns)
     for row in output:
         items = [str(row[key]) for key in header.keys()]
         line = ",".join(items)
         lines.append(line)
-    click.echo(columns)
-    click.echo("\n".join(lines))
+    return "\n".join(lines)
 
 
 def to_ascii_table(output, header):
@@ -52,14 +52,14 @@ def to_ascii_table(output, header):
     for row in output:
         rows.append([str(row[key]) for key in header.keys()])
     table.add_rows(rows)
-    click.echo(table.draw() + "\n")
+    return table.draw() + "\n"
 
 
 def to_json(output, header=None):
     # Todo Whether to filter results by header, and verify default output is json
-    click.echo(output)
+    return json.dumps(output)
 
 
 def to_formatted_json(output, header=None):
     # Todo Whether to filter results by header
-    click.echo(json.dumps(output, indent=4))
+    return json.dumps(output, indent=4)

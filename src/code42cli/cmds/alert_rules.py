@@ -83,7 +83,8 @@ def list_alert_rules(state, format=None):
     selected_rules = _get_all_rules_metadata(state.sdk)
     if selected_rules:
         if format:
-            format(selected_rules, _HEADER_KEYS_MAP)
+            formatted_output = format(selected_rules, _HEADER_KEYS_MAP)
+            echo(formatted_output)
         else:
             rows, column_size = find_format_width(selected_rules, _HEADER_KEYS_MAP)
             format_to_table(rows, column_size)
