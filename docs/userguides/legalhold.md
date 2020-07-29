@@ -13,14 +13,14 @@ Use the `legal-hold` commands to manage legal hold custodians.
 
 To add multiple custodians to a legal hold matter:
 
-1. Generate a CSV template. Below is an example command for generating a template to use to add custodians to legal hold matter. Once generated, the CSV file is saved to your current working directory.
+1. Generate a CSV template. Below is an example command that generates a template to use when bulk adding custodians to legal hold matter. Once generated, the CSV file is saved to your current working directory.
     `code42 legal-hold bulk generate-template add`
 
-    To generate a template to use to remove custodians from a legal hold matter, for example:
+    To generate a template to use when bulk removing custodians from a legal hold matter:
 
     `code42 legal-hold bulk generate-template remove`
 
-    The CSV templates for adding and removing are the same.
+    The CSV templates for `add` and `remove` have the same columns, but the commands generate different default filenames.
 
 2. Use the CSV template to enter the matter ID(s) and Code42 usernames for the custodians you want to add to the matters.
 To get the ID for a matter, enter `code42 legal-hold list`.
