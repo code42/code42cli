@@ -4,3 +4,4 @@
 * [Configuring a Profile](userguides/profile.md)
 * [Integerating with a SIEM](userguides/siemexample.md)
 * [Manage detection list users](userguides/detectionlists.md)
+* [Manage legal hold users](userguides/legalhold.md)
