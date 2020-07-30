@@ -62,6 +62,33 @@ TEST_DATA = [
     },
 ]
 
+FILTERED_OUTPUT = [
+    {
+        "RuleId": "d12d54f0-5160-47a8-a48f-7d5fa5b051c5",
+        "Name": "outside td",
+        "Severity": "HIGH",
+        "Type": "FED_CLOUD_SHARE_PERMISSIONS",
+        "Source": "Alerting",
+        "Enabled": True,
+    },
+    {
+        "RuleId": "8b393324-c34c-44ac-9f79-4313601dd859",
+        "Name": "Test different filters",
+        "Severity": "MEDIUM",
+        "Type": "FED_ENDPOINT_EXFILTRATION",
+        "Source": "Alerting",
+        "Enabled": True,
+    },
+    {
+        "RuleId": "5eabed1d-a406-4dfc-af81-f7485ee09b19",
+        "Name": "Test Alerts using CLI",
+        "Severity": "HIGH",
+        "Type": "FED_ENDPOINT_EXFILTRATION",
+        "Source": "Alerting",
+        "Enabled": True,
+    },
+]
+
 TEST_HEADER = OrderedDict()
 TEST_HEADER["observerRuleId"] = "RuleId"
 TEST_HEADER["name"] = "Name"
@@ -69,6 +96,7 @@ TEST_HEADER["severity"] = "Severity"
 TEST_HEADER["type"] = "Type"
 TEST_HEADER["ruleSource"] = "Source"
 TEST_HEADER["isEnabled"] = "Enabled"
+
 
 TABLE_OUTPUT = """RuleId                                 Name                     Severity   Type                          Source     Enabled   
 d12d54f0-5160-47a8-a48f-7d5fa5b051c5   outside td               HIGH       FED_CLOUD_SHARE_PERMISSIONS   Alerting   True      
@@ -93,13 +121,13 @@ def test_to_table_formats_data_to_table_format():
 
 
 def test_to_json():
-    formatted_output = to_json(TEST_DATA)
-    assert formatted_output == json.dumps(TEST_DATA)
+    formatted_output = to_json(TEST_DATA, TEST_HEADER)
+    assert formatted_output == json.dumps(FILTERED_OUTPUT)
 
 
 def test_to_formatted_json():
-    formatted_output = to_formatted_json(TEST_DATA)
-    assert formatted_output == json.dumps(TEST_DATA, indent=4)
+    formatted_output = to_formatted_json(TEST_DATA, TEST_HEADER)
+    assert formatted_output == json.dumps(FILTERED_OUTPUT, indent=4)
 
 
 def test_output_format_returns_to_formatted_json_function_when_json_format_option_is_passed():

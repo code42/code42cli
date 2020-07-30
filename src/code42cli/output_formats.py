@@ -47,11 +47,13 @@ def to_table(output, header):
     return format_to_table(rows, column_size)
 
 
+def _filter(output, header):
+    return [{header[key]: row[key] for key in header.keys()} for row in output]
+
+
 def to_json(output, header=None):
-    # Todo Whether to filter results by header, and verify default output is json
-    return json.dumps(output)
+    return json.dumps(_filter(output, header))
 
 
 def to_formatted_json(output, header=None):
-    # Todo Whether to filter results by header
-    return json.dumps(output, indent=4)
+    return json.dumps(_filter(output, header), indent=4)
