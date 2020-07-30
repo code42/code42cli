@@ -215,7 +215,9 @@ def _list(state):
     """List available saved searches."""
     response = state.sdk.securitydata.savedsearches.get()
     header = {"name": "Name", "id": "Id"}
-    format_to_table(*find_format_width(response["searches"], header))
+    output = format_to_table(*find_format_width(response["searches"], header))
+    echo(output, nl=False)
+    echo("")
 
 
 @saved_search.command()

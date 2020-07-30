@@ -37,7 +37,6 @@ setup(
         "keyring==18.0.1",
         "keyrings.alt==3.2.0",
         "py42>=1.7.0",
-        "texttable>=1.6.2",
     ],
     extras_require={
         "dev": [

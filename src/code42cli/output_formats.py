@@ -1,9 +1,10 @@
 import json
 
 import click
-from texttable import Texttable
 
 from code42cli.cmds.enums import OutputFormat
+from code42cli.util import find_format_width
+from code42cli.util import format_to_table
 
 
 def output_format(_, __, value):
@@ -12,10 +13,12 @@ def output_format(_, __, value):
             return to_csv
         if value == OutputFormat.RAW:
             return to_json
-        if value == OutputFormat.ASCII:
-            return to_ascii_table
+        if value == OutputFormat.TABLE:
+            return to_table
         if value == OutputFormat.JSON:
             return to_formatted_json
+    # default option
+    return to_table
 
 
 output_option = click.option(
@@ -39,20 +42,9 @@ def to_csv(output, header):
     return "\n".join(lines)
 
 
-def to_ascii_table(output, header):
-    table = Texttable()
-    table.set_cols_align(["c" for _ in header.keys()])
-    table.set_cols_valign(["m" for _ in header.keys()])
-    table.set_max_width(0)
-
-    rows = []
-    columns = header.values()
-    rows.append(columns)
-
-    for row in output:
-        rows.append([str(row[key]) for key in header.keys()])
-    table.add_rows(rows)
-    return table.draw() + "\n"
+def to_table(output, header):
+    rows, column_size = find_format_width(output, header)
+    return format_to_table(rows, column_size)
 
 
 def to_json(output, header=None):

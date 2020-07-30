@@ -2,10 +2,10 @@ import json
 from collections import OrderedDict
 
 from code42cli.output_formats import output_format
-from code42cli.output_formats import to_ascii_table
 from code42cli.output_formats import to_csv
 from code42cli.output_formats import to_formatted_json
 from code42cli.output_formats import to_json
+from code42cli.output_formats import to_table
 
 
 TEST_DATA = [
@@ -70,16 +70,10 @@ TEST_HEADER["type"] = "Type"
 TEST_HEADER["ruleSource"] = "Source"
 TEST_HEADER["isEnabled"] = "Enabled"
 
-ASCII_OUTPUT = """+--------------------------------------+------------------------+----------+-----------------------------+----------+---------+
-|                RuleId                |          Name          | Severity |            Type             |  Source  | Enabled |
-+======================================+========================+==========+=============================+==========+=========+
-| d12d54f0-5160-47a8-a48f-7d5fa5b051c5 |       outside td       |   HIGH   | FED_CLOUD_SHARE_PERMISSIONS | Alerting |  True   |
-+--------------------------------------+------------------------+----------+-----------------------------+----------+---------+
-| 8b393324-c34c-44ac-9f79-4313601dd859 | Test different filters |  MEDIUM  |  FED_ENDPOINT_EXFILTRATION  | Alerting |  True   |
-+--------------------------------------+------------------------+----------+-----------------------------+----------+---------+
-| 5eabed1d-a406-4dfc-af81-f7485ee09b19 | Test Alerts using CLI  |   HIGH   |  FED_ENDPOINT_EXFILTRATION  | Alerting |  True   |
-+--------------------------------------+------------------------+----------+-----------------------------+----------+---------+
-"""
+TABLE_OUTPUT = """RuleId                                 Name                     Severity   Type                          Source     Enabled   
+d12d54f0-5160-47a8-a48f-7d5fa5b051c5   outside td               HIGH       FED_CLOUD_SHARE_PERMISSIONS   Alerting   True      
+8b393324-c34c-44ac-9f79-4313601dd859   Test different filters   MEDIUM     FED_ENDPOINT_EXFILTRATION     Alerting   True      
+5eabed1d-a406-4dfc-af81-f7485ee09b19   Test Alerts using CLI    HIGH       FED_ENDPOINT_EXFILTRATION     Alerting   True      """
 
 CSV_OUTPUT = """RuleId,Name,Severity,Type,Source,Enabled
 d12d54f0-5160-47a8-a48f-7d5fa5b051c5,outside td,HIGH,FED_CLOUD_SHARE_PERMISSIONS,Alerting,True
@@ -92,9 +86,10 @@ def test_to_csv_formats_data_to_csv_format():
     assert formatted_output == CSV_OUTPUT
 
 
-def test_to_ascii_table_formats_data_to_ascii_table_format():
-    formatted_output = to_ascii_table(TEST_DATA, TEST_HEADER)
-    assert formatted_output == ASCII_OUTPUT
+def test_to_table_formats_data_to_table_format():
+    formatted_output = to_table(TEST_DATA, TEST_HEADER)
+    print(formatted_output)
+    assert formatted_output == TABLE_OUTPUT
 
 
 def test_to_json():
@@ -117,11 +112,16 @@ def test_output_format_returns_to_json_function_when_raw_json_format_option_is_p
     assert id(format_function) == id(to_json)
 
 
-def test_output_format_returns_to_ascii_table_function_when_ascii_table_format_option_is_passed():
-    format_function = output_format(None, None, "ASCII-TABLE")
-    assert id(format_function) == id(to_ascii_table)
+def test_output_format_returns_to_table_function_when_ascii_table_format_option_is_passed():
+    format_function = output_format(None, None, "TABLE")
+    assert id(format_function) == id(to_table)
 
 
 def test_output_format_returns_to_csv_function_when_csv_format_option_is_passed():
     format_function = output_format(None, None, "CSV")
     assert id(format_function) == id(to_csv)
+
+
+def test_output_format_returns_to_table_function_when_no_format_option_is_passed():
+    format_function = output_format(None, None, None)
+    assert id(format_function) == id(to_table)

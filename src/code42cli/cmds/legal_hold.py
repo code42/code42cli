@@ -77,7 +77,9 @@ def _list(state):
     matters = _get_all_active_matters(state.sdk)
     if matters:
         rows, column_size = find_format_width(matters, _MATTER_KEYS_MAP)
-        format_to_table(rows, column_size)
+        output = format_to_table(rows, column_size)
+        echo(output, nl=False)
+        echo("")
 
 
 @legal_hold.command()
