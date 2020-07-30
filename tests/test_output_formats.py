@@ -98,10 +98,14 @@ TEST_HEADER["ruleSource"] = "Source"
 TEST_HEADER["isEnabled"] = "Enabled"
 
 
-TABLE_OUTPUT = """RuleId                                 Name                     Severity   Type                          Source     Enabled   
-d12d54f0-5160-47a8-a48f-7d5fa5b051c5   outside td               HIGH       FED_CLOUD_SHARE_PERMISSIONS   Alerting   True      
-8b393324-c34c-44ac-9f79-4313601dd859   Test different filters   MEDIUM     FED_ENDPOINT_EXFILTRATION     Alerting   True      
-5eabed1d-a406-4dfc-af81-f7485ee09b19   Test Alerts using CLI    HIGH       FED_ENDPOINT_EXFILTRATION     Alerting   True      """
+TABLE_OUTPUT = "\n".join(
+    [
+        """RuleId                                 Name                     Severity   Type                          Source     Enabled   """,
+        """d12d54f0-5160-47a8-a48f-7d5fa5b051c5   outside td               HIGH       FED_CLOUD_SHARE_PERMISSIONS   Alerting   True      """,
+        """8b393324-c34c-44ac-9f79-4313601dd859   Test different filters   MEDIUM     FED_ENDPOINT_EXFILTRATION     Alerting   True      """,
+        """5eabed1d-a406-4dfc-af81-f7485ee09b19   Test Alerts using CLI    HIGH       FED_ENDPOINT_EXFILTRATION     Alerting   True      """,
+    ]
+)
 
 CSV_OUTPUT = """RuleId,Name,Severity,Type,Source,Enabled
 d12d54f0-5160-47a8-a48f-7d5fa5b051c5,outside td,HIGH,FED_CLOUD_SHARE_PERMISSIONS,Alerting,True

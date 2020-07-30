@@ -15,7 +15,7 @@ from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.output_formats import format_option
+from code42cli.output_formats import format_option as format_output
 
 
 logger = get_main_cli_logger()
@@ -210,7 +210,7 @@ def saved_search(state):
 
 
 @saved_search.command("list")
-@format_option
+@format_output
 @sdk_options()
 def _list(state, format=None):
     """List available saved searches."""
