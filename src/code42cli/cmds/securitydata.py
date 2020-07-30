@@ -216,8 +216,10 @@ def _list(state, format=None):
     """List available saved searches."""
     response = state.sdk.securitydata.savedsearches.get()
     header = {"name": "Name", "id": "Id"}
-    output = format(response["searches"], header)
-    echo(output)
+    result = response["searches"]
+    if result:
+        output = format(result, header)
+        echo(output)
 
 
 @saved_search.command()
