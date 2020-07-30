@@ -14,7 +14,7 @@ from code42cli.errors import InvalidRuleTypeError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.output_formats import output_option
+from code42cli.output_formats import format_option
 
 
 class AlertRuleTypes:
@@ -74,7 +74,7 @@ def remove_user(state, rule_id, username):
 
 
 @alert_rules.command("list")
-@output_option
+@format_option
 @sdk_options()
 def list_alert_rules(state, format=None):
     """Fetch existing alert rules."""

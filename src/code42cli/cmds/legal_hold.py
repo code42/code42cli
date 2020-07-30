@@ -17,7 +17,7 @@ from code42cli.errors import UserNotInLegalHoldError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.output_formats import output_option
+from code42cli.output_formats import format_option
 from code42cli.util import format_string_list_to_columns
 
 
@@ -71,7 +71,7 @@ def remove_user(state, matter_id, username):
 
 
 @legal_hold.command("list")
-@output_option
+@format_option
 @sdk_options()
 def _list(state, format=None):
     """Fetch existing legal hold matters."""
@@ -85,7 +85,7 @@ def _list(state, format=None):
 @click.argument("matter-id")
 @click.option("--include-inactive", is_flag=True)
 @click.option("--include-policy", is_flag=True)
-@output_option
+@format_option
 @sdk_options()
 def show(state, matter_id, include_inactive=False, include_policy=False, format=None):
     """Display details of a given legal hold matter."""

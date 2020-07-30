@@ -21,7 +21,7 @@ def output_format(_, __, value):
     return to_table
 
 
-output_option = click.option(
+format_option = click.option(
     "-f",
     "--format",
     type=click.Choice(OutputFormat(), case_sensitive=False),
