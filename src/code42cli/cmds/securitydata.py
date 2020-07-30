@@ -15,8 +15,8 @@ from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.util import find_format_width
-from code42cli.util import format_to_table
+from code42cli.output_formats import output_option
+
 
 logger = get_main_cli_logger()
 
@@ -210,12 +210,13 @@ def saved_search(state):
 
 
 @saved_search.command("list")
+@output_option
 @sdk_options()
-def _list(state):
+def _list(state, format=None):
     """List available saved searches."""
     response = state.sdk.securitydata.savedsearches.get()
     header = {"name": "Name", "id": "Id"}
-    output = format_to_table(*find_format_width(response["searches"], header))
+    output = format(response["searches"], header)
     echo(output, nl=False)
     echo("")
 
