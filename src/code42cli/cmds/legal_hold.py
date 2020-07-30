@@ -78,8 +78,7 @@ def _list(state, format=None):
     matters = _get_all_active_matters(state.sdk)
     if matters:
         output = format(matters, _MATTER_KEYS_MAP)
-        echo(output, nl=False)
-        echo("")
+        echo(output)
 
 
 @legal_hold.command()
@@ -107,8 +106,7 @@ def show(state, matter_id, include_inactive=False, include_policy=False, format=
     ]
 
     output = format([matter], _MATTER_KEYS_MAP)
-    echo(output, nl=False)
-    echo("")
+    echo(output)
 
     _print_matter_members(active_usernames, member_type="active")
 

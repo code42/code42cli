@@ -217,8 +217,7 @@ def _list(state, format=None):
     response = state.sdk.securitydata.savedsearches.get()
     header = {"name": "Name", "id": "Id"}
     output = format(response["searches"], header)
-    echo(output, nl=False)
-    echo("")
+    echo(output)
 
 
 @saved_search.command()

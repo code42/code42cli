@@ -81,8 +81,7 @@ def list_alert_rules(state, format=None):
     selected_rules = _get_all_rules_metadata(state.sdk)
     if selected_rules:
         formatted_output = format(selected_rules, _HEADER_KEYS_MAP)
-        echo(formatted_output, nl=False)
-        echo("")
+        echo(formatted_output)
 
 
 @alert_rules.command()
