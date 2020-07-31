@@ -3,6 +3,7 @@ from datetime import timedelta
 
 import pytest
 from click.testing import CliRunner
+from py42.exceptions import Py42UserDoesNotExistError
 from py42.sdk import SDKClient
 
 import code42cli.errors as error_tracker
@@ -104,7 +105,9 @@ def sdk_with_user(sdk):
 
 @pytest.fixture
 def sdk_without_user(sdk):
-    sdk.users.get_by_username.return_value = {"users": []}
+    def get_user(name):
+        raise Py42UserDoesNotExistError(name)
+    sdk.users.get_by_username.side_effect = get_user
     return sdk
 
 

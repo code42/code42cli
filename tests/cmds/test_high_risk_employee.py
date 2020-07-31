@@ -1,3 +1,5 @@
+from py42.exceptions import Py42UserAlreadyAddedError
+
 from tests.cmds.conftest import thread_safe_side_effect
 from tests.conftest import TEST_ID
 
@@ -79,17 +81,19 @@ def test_add_high_risk_employee_when_user_does_not_exist_exits_with_correct_mess
 
 
 def test_add_high_risk_employee_when_user_already_added_exits_with_correct_message(
-    runner, cli_state_with_user, bad_request_for_user_already_added
+    runner, cli_state_with_user
 ):
-    cli_state_with_user.sdk.detectionlists.high_risk_employee.add.side_effect = (
-        bad_request_for_user_already_added
-    )
+    def add_user(user):
+        raise Py42UserAlreadyAddedError(user, "high-risk-employee list")
+    
+    cli_state_with_user.sdk.detectionlists.high_risk_employee.add.side_effect = add_user
+    
     result = runner.invoke(
         cli, ["high-risk-employee", "add", _EMPLOYEE], obj=cli_state_with_user
     )
     assert result.exit_code == 1
     assert (
-        "'{}' is already on the high-risk-employee list.".format(_EMPLOYEE)
+        "TEST_ID is already on the high-risk-employee list.".format(_EMPLOYEE)
         in result.output
     )
 

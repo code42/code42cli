@@ -3,7 +3,6 @@ from py42.exceptions import Py42BadRequestError
 
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
-from code42cli.cmds.detectionlists import try_handle_user_already_added_error
 from code42cli.cmds.detectionlists import update_user
 from code42cli.cmds.detectionlists.options import cloud_alias_option
 from code42cli.cmds.detectionlists.options import notes_option
@@ -105,12 +104,8 @@ def bulk_remove(state, file_rows):
 
 def _add_departing_employee(sdk, username, cloud_alias, departure_date, notes):
     user_id = get_user_id(sdk, username)
-    try:
-        sdk.detectionlists.departing_employee.add(user_id, departure_date)
-        update_user(sdk, username, cloud_alias=cloud_alias, notes=notes)
-    except Py42BadRequestError as err:
-        try_handle_user_already_added_error(err, username, "departing-employee list")
-        raise
+    sdk.detectionlists.departing_employee.add(user_id, departure_date)
+    update_user(sdk, username, cloud_alias=cloud_alias, notes=notes)
 
 
 def _remove_departing_employee(sdk, username):
