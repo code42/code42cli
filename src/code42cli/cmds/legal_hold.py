@@ -17,9 +17,9 @@ from code42cli.errors import UserNotInLegalHoldError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.util import find_format_width
+from code42cli.output_formats import format_option
 from code42cli.util import format_string_list_to_columns
-from code42cli.util import format_to_table
+
 
 _MATTER_KEYS_MAP = OrderedDict()
 _MATTER_KEYS_MAP["legalHoldUid"] = "Matter ID"
@@ -71,21 +71,23 @@ def remove_user(state, matter_id, username):
 
 
 @legal_hold.command("list")
+@format_option
 @sdk_options()
-def _list(state):
+def _list(state, format=None):
     """Fetch existing legal hold matters."""
     matters = _get_all_active_matters(state.sdk)
     if matters:
-        rows, column_size = find_format_width(matters, _MATTER_KEYS_MAP)
-        format_to_table(rows, column_size)
+        output = format(matters, _MATTER_KEYS_MAP)
+        echo(output)
 
 
 @legal_hold.command()
 @click.argument("matter-id")
 @click.option("--include-inactive", is_flag=True)
 @click.option("--include-policy", is_flag=True)
+@format_option
 @sdk_options()
-def show(state, matter_id, include_inactive=False, include_policy=False):
+def show(state, matter_id, include_inactive=False, include_policy=False, format=None):
     """Display details of a given legal hold matter."""
     matter = _check_matter_is_accessible(state.sdk, matter_id)
     matter["creator_username"] = matter["creator"]["username"]
@@ -103,10 +105,9 @@ def show(state, matter_id, include_inactive=False, include_policy=False):
         member["user"]["username"] for member in memberships if not member["active"]
     ]
 
-    rows, column_size = find_format_width([matter], _MATTER_KEYS_MAP)
+    output = format([matter], _MATTER_KEYS_MAP)
+    echo(output)
 
-    echo("")
-    format_to_table(rows, column_size)
     _print_matter_members(active_usernames, member_type="active")
 
     if include_inactive:

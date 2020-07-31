@@ -68,11 +68,14 @@ def find_format_width(record, header):
 
 
 def format_to_table(rows, column_size):
-    """Prints result in left justified format in a tabular form."""
+    """Formats given rows into a string of left justified table."""
+    lines = []
     for row in rows:
+        line = ""
         for key in row.keys():
-            echo(str(row[key]).ljust(column_size[key] + _PADDING_SIZE), nl=False)
-        echo("")
+            line += str(row[key]).ljust(column_size[key] + _PADDING_SIZE)
+        lines.append(line)
+    return "\n".join(lines)
 
 
 def format_string_list_to_columns(string_list, max_width=None):
