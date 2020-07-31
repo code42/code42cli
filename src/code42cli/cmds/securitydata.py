@@ -1,3 +1,4 @@
+from _collections import OrderedDict
 from pprint import pformat
 
 import click
@@ -19,6 +20,10 @@ from code42cli.output_formats import format_option as format_output
 
 
 logger = get_main_cli_logger()
+
+_HEADER_KEYS_MAP = OrderedDict()
+_HEADER_KEYS_MAP["name"] = "Name"
+_HEADER_KEYS_MAP["id"] = "Id"
 
 search_options = searchopt.create_search_options("file events")
 
@@ -215,10 +220,9 @@ def saved_search(state):
 def _list(state, format=None):
     """List available saved searches."""
     response = state.sdk.securitydata.savedsearches.get()
-    header = {"name": "Name", "id": "Id"}
     result = response["searches"]
     if result:
-        output = format(result, header)
+        output = format(result, _HEADER_KEYS_MAP)
         echo(output)
 
 
