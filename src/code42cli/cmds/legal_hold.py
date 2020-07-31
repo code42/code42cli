@@ -5,7 +5,6 @@ from pprint import pformat
 
 import click
 from click import echo
-from py42.exceptions import Py42LegalHoldNotFoundOrPermissionDeniedError
 
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
