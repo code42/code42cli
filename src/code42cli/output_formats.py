@@ -25,7 +25,7 @@ format_option = click.option(
     "-f",
     "--format",
     type=click.Choice(OutputFormat(), case_sensitive=False),
-    help="The output format of the result.",
+    help="The output format of the result. Defaults to table format.",
     callback=output_format,
 )
 
