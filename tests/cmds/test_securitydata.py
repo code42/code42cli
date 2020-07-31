@@ -19,6 +19,19 @@ END_TIMESTAMP = 1580450400.0
 CURSOR_TIMESTAMP = 1579500000.0
 
 
+TEST_LIST_RESPONSE = {
+    "searches": [
+        {
+            "id": "a083f08d-8f33-4cbd-81c4-8d1820b61185",
+            "name": "test-events",
+            "notes": "py42 is here",
+        },
+    ]
+}
+
+TEST_EMPTY_LIST_RESPONSE = {"searches": []}
+
+
 @pytest.fixture
 def file_event_extractor(mocker):
     mock = mocker.patch(
@@ -691,3 +704,24 @@ def test_search_with_or_query_flag_produces_expected_query(runner, cli_state):
         str(cli_state.sdk.securitydata.search_file_events.call_args[0][0])
     )
     assert actual_query == expected_query
+
+
+def test_saved_search_list_with_format_option_returns_csv_formatted_response(
+    runner, cli_state
+):
+    cli_state.sdk.securitydata.savedsearches.get.return_value = TEST_LIST_RESPONSE
+    result = runner.invoke(
+        cli, ["security-data", "saved-search", "list", "-f", "csv"], obj=cli_state
+    )
+    assert "Name,Id" in result.output
+    assert "test-events,a083f08d-8f33-4cbd-81c4-8d1820b61185" in result.output
+
+
+def test_saved_search_list_with_format_option_does_not_return_when_response_is_empty(
+    runner, cli_state
+):
+    cli_state.sdk.securitydata.savedsearches.get.return_value = TEST_EMPTY_LIST_RESPONSE
+    result = runner.invoke(
+        cli, ["security-data", "saved-search", "list", "-f", "csv"], obj=cli_state
+    )
+    assert "Name,Id" not in result.output

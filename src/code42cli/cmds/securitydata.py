@@ -1,3 +1,4 @@
+from _collections import OrderedDict
 from pprint import pformat
 
 import click
@@ -15,10 +16,14 @@ from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.util import find_format_width
-from code42cli.util import format_to_table
+from code42cli.output_formats import format_option as format_output
+
 
 logger = get_main_cli_logger()
+
+_HEADER_KEYS_MAP = OrderedDict()
+_HEADER_KEYS_MAP["name"] = "Name"
+_HEADER_KEYS_MAP["id"] = "Id"
 
 search_options = searchopt.create_search_options("file events")
 
@@ -210,12 +215,15 @@ def saved_search(state):
 
 
 @saved_search.command("list")
+@format_output
 @sdk_options()
-def _list(state):
+def _list(state, format=None):
     """List available saved searches."""
     response = state.sdk.securitydata.savedsearches.get()
-    header = {"name": "Name", "id": "Id"}
-    format_to_table(*find_format_width(response["searches"], header))
+    result = response["searches"]
+    if result:
+        output = format(result, _HEADER_KEYS_MAP)
+        echo(output)
 
 
 @saved_search.command()

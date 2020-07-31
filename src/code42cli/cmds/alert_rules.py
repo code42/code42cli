@@ -12,8 +12,7 @@ from code42cli.errors import Code42CLIError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.util import find_format_width
-from code42cli.util import format_to_table
+from code42cli.output_formats import format_option
 
 
 class AlertRuleTypes:
@@ -73,13 +72,14 @@ def remove_user(state, rule_id, username):
 
 
 @alert_rules.command("list")
+@format_option
 @sdk_options()
-def list_alert_rules(state):
+def list_alert_rules(state, format=None):
     """Fetch existing alert rules."""
     selected_rules = _get_all_rules_metadata(state.sdk)
     if selected_rules:
-        rows, column_size = find_format_width(selected_rules, _HEADER_KEYS_MAP)
-        format_to_table(rows, column_size)
+        formatted_output = format(selected_rules, _HEADER_KEYS_MAP)
+        echo(formatted_output)
 
 
 @alert_rules.command()

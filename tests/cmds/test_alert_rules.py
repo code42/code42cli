@@ -12,6 +12,19 @@ TEST_SOURCE = "rule source"
 
 TEST_EMPTY_RULE_RESPONSE = {"ruleMetadata": []}
 
+TEST_RULE_RESPONSE = {
+    "ruleMetadata": [
+        {
+            "observerRuleId": TEST_RULE_ID,
+            "type": "FED_FILE_TYPE_MISMATCH",
+            "isEnabled": True,
+            "ruleSource": "NOTVALID",
+            "name": "Test",
+            "severity": "high",
+        }
+    ]
+}
+
 TEST_GET_ALL_RESPONSE_EXFILTRATION = {
     "ruleMetadata": [
         {"observerRuleId": TEST_RULE_ID, "type": "FED_ENDPOINT_EXFILTRATION"}
@@ -241,3 +254,19 @@ def test_remove_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
             cli, ["alert-rules", "bulk", "add", "test_remove.csv"], obj=cli_state
         )
     assert bulk_processor.call_args[0][1] == [{"rule_id": "test", "username": "value"}]
+
+
+def test_list_cmd_prints_no_rules_found_when_f_is_passed_and_response_is_empty(
+    runner, cli_state
+):
+    cli_state.sdk.alerts.rules.get_all.return_value = [TEST_EMPTY_RULE_RESPONSE]
+    result = runner.invoke(cli, ["alert-rules", "list", "-f", "csv"], obj=cli_state)
+    assert cli_state.sdk.alerts.rules.get_all.call_count == 1
+    assert "No alert rules found" in result.output
+
+
+def test_list_cmd_formats_to_csv_when_format_is_passed(runner, cli_state):
+    cli_state.sdk.alerts.rules.get_all.return_value = [TEST_RULE_RESPONSE]
+    result = runner.invoke(cli, ["alert-rules", "list", "-f", "csv"], obj=cli_state)
+    assert cli_state.sdk.alerts.rules.get_all.call_count == 1
+    assert "RuleId,Name,Severity,Type,Source,Enabled" in result.output
