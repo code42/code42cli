@@ -1,40 +1,16 @@
 import logging
 
 import pytest
-from py42.exceptions import Py42InternalServerError
-from requests import HTTPError
-from requests import Request
-from requests import Response
+from py42.exceptions import Py42InvalidRuleTypeError
 
 from code42cli.main import cli
 
 TEST_RULE_ID = "rule-id"
 TEST_USER_ID = "test-user-id"
 TEST_USERNAME = "test@code42.com"
+TEST_SOURCE = "rule source"
 
 TEST_EMPTY_RULE_RESPONSE = {"ruleMetadata": []}
-
-TEST_SYSTEM_RULE_RESPONSE = {
-    "ruleMetadata": [
-        {
-            "observerRuleId": TEST_RULE_ID,
-            "type": "FED_FILE_TYPE_MISMATCH",
-            "isSystem": True,
-            "ruleSource": "NOTVALID",
-        }
-    ]
-}
-
-TEST_USER_RULE_RESPONSE = {
-    "ruleMetadata": [
-        {
-            "observerRuleId": TEST_RULE_ID,
-            "type": "FED_FILE_TYPE_MISMATCH",
-            "isSystem": False,
-            "ruleSource": "Testing",
-        }
-    ]
-}
 
 TEST_GET_ALL_RESPONSE_EXFILTRATION = {
     "ruleMetadata": [
@@ -49,6 +25,10 @@ TEST_GET_ALL_RESPONSE_CLOUD_SHARE = {
 TEST_GET_ALL_RESPONSE_FILE_TYPE_MISMATCH = {
     "ruleMetadata": [{"observerRuleId": TEST_RULE_ID, "type": "FED_FILE_TYPE_MISMATCH"}]
 }
+
+
+def invalid_rule_type_side_effect(*args, **kwargs):
+    raise Py42InvalidRuleTypeError(TEST_RULE_ID, TEST_SOURCE)
 
 
 @pytest.fixture
@@ -66,18 +46,6 @@ def alert_rules_sdk(sdk):
     sdk.alerts.rules.cloudshare.get.return_value = {}
     sdk.alerts.rules.filetypemismatch.get.return_value = {}
     return sdk
-
-
-@pytest.fixture
-def mock_server_error(mocker):
-    base_err = HTTPError()
-    mock_response = mocker.MagicMock(spec=Response)
-    base_err.response = mock_response
-    request = mocker.MagicMock(spec=Request)
-    request.body = '{"test":"body"}'
-    base_err.response.request = request
-
-    return Py42InternalServerError(base_err)
 
 
 def test_add_user_adds_user_list_to_alert_rules(runner, cli_state):
@@ -107,13 +75,10 @@ def test_add_user_when_non_existent_alert_prints_no_rules_message(runner, cli_st
     assert msg in result.output
 
 
-def test_add_user_when_returns_500_and_system_rule_exits_with_InvalidRuleTypeError(
-    runner, cli_state, mock_server_error
+def test_add_user_when_returns_invalid_rule_type_error_and_system_rule_exits(
+    runner, cli_state
 ):
-    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = (
-        TEST_SYSTEM_RULE_RESPONSE
-    )
-    cli_state.sdk.alerts.rules.add_user.side_effect = mock_server_error
+    cli_state.sdk.alerts.rules.add_user.side_effect = invalid_rule_type_side_effect
     result = runner.invoke(
         cli,
         ["alert-rules", "add-user", "--rule-id", TEST_RULE_ID, "-u", TEST_USERNAME],
@@ -126,11 +91,10 @@ def test_add_user_when_returns_500_and_system_rule_exits_with_InvalidRuleTypeErr
     )
 
 
-def test_add_user_when_returns_500_and_not_system_rule_raises_Py42InternalServerError(
-    runner, cli_state, mock_server_error, caplog
+def test_add_user_when_raises_invalid_rules_type_error_shows_correct_message(
+    runner, cli_state, caplog
 ):
-    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = TEST_USER_RULE_RESPONSE
-    cli_state.sdk.alerts.rules.add_user.side_effect = mock_server_error
+    cli_state.sdk.alerts.rules.add_user.side_effect = invalid_rule_type_side_effect
     with caplog.at_level(logging.ERROR):
         result = runner.invoke(
             cli,
@@ -138,7 +102,10 @@ def test_add_user_when_returns_500_and_not_system_rule_raises_Py42InternalServer
             obj=cli_state,
         )
         assert result.exit_code == 1
-        assert "Py42InternalServerError" in caplog.text
+        assert (
+            "Only alert rules with a source of 'Alerting' can be targeted by this command. Rule rule-id has a source of 'rule source'"
+            in caplog.text
+        )
 
 
 def test_remove_user_removes_user_list_from_alert_rules(runner, cli_state):
@@ -168,13 +135,10 @@ def test_remove_user_when_non_existent_alert_prints_no_rules_message(runner, cli
     assert msg in result.output
 
 
-def test_remove_user_when_returns_500_and_system_rule_raises_InvalidRuleTypeError(
-    runner, cli_state, mock_server_error
+def test_remove_user_when_raise_invalid_rule_type_error_and_system_rule_raises_InvalidRuleTypeError(
+    runner, cli_state
 ):
-    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = (
-        TEST_SYSTEM_RULE_RESPONSE
-    )
-    cli_state.sdk.alerts.rules.remove_user.side_effect = mock_server_error
+    cli_state.sdk.alerts.rules.remove_user.side_effect = invalid_rule_type_side_effect
     result = runner.invoke(
         cli,
         ["alert-rules", "remove-user", "--rule-id", TEST_RULE_ID, "-u", TEST_USERNAME],
@@ -187,11 +151,10 @@ def test_remove_user_when_returns_500_and_system_rule_raises_InvalidRuleTypeErro
     )
 
 
-def test_remove_user_when_returns_500_and_not_system_rule_raises_Py42InternalServerError(
-    runner, cli_state, mock_server_error, caplog
+def test_remove_user_when_raises_invalid_rule_type_side_effect_and_not_system_rule_raises_Py42InternalServerError(
+    runner, cli_state, caplog
 ):
-    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = TEST_USER_RULE_RESPONSE
-    cli_state.sdk.alerts.rules.remove_user.side_effect = mock_server_error
+    cli_state.sdk.alerts.rules.remove_user.side_effect = invalid_rule_type_side_effect
     with caplog.at_level(logging.ERROR):
         result = runner.invoke(
             cli,
@@ -206,7 +169,10 @@ def test_remove_user_when_returns_500_and_not_system_rule_raises_Py42InternalSer
             obj=cli_state,
         )
         assert result.exit_code == 1
-        assert "Py42InternalServerError" in caplog.text
+        assert (
+            "Only alert rules with a source of 'Alerting' can be targeted by this command."
+            in caplog.text
+        )
 
 
 def test_list_gets_alert_rules(runner, cli_state):

@@ -107,6 +107,7 @@ def sdk_with_user(sdk):
 def sdk_without_user(sdk):
     def get_user(name):
         raise Py42UserDoesNotExistError(name)
+
     sdk.users.get_by_username.side_effect = get_user
     return sdk
 

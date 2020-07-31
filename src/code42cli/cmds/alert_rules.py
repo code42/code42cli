@@ -2,7 +2,6 @@ from collections import OrderedDict
 
 import click
 from click import echo
-from py42.exceptions import Py42InternalServerError
 from py42.util import format_json
 
 from code42cli import PRODUCT_NAME
@@ -10,7 +9,6 @@ from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
 from code42cli.cmds.shared import get_user_id
 from code42cli.errors import Code42CLIError
-from code42cli.errors import InvalidRuleTypeError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
@@ -150,24 +148,14 @@ def remove(state, csv_rows):
 
 def _add_user(sdk, rule_id, username):
     user_id = get_user_id(sdk, username)
-    rules = _get_rule_metadata(sdk, rule_id)
-    try:
-        if rules:
-            sdk.alerts.rules.add_user(rule_id, user_id)
-    except Py42InternalServerError:
-        _check_if_system_rule(rules)
-        raise
+    _get_rule_metadata(sdk, rule_id)  # Verifies rule exists
+    sdk.alerts.rules.add_user(rule_id, user_id)
 
 
 def _remove_user(sdk, rule_id, username):
     user_id = get_user_id(sdk, username)
-    rules = _get_rule_metadata(sdk, rule_id)
-    try:
-        if rules:
-            sdk.alerts.rules.remove_user(rule_id, user_id)
-    except Py42InternalServerError:
-        _check_if_system_rule(rules)
-        raise
+    _get_rule_metadata(sdk, rule_id)  # Verifies rule exists
+    sdk.alerts.rules.remove_user(rule_id, user_id)
 
 
 def _get_all_rules_metadata(sdk):
@@ -184,16 +172,11 @@ def _get_rule_metadata(sdk, rule_id):
 
 
 def _handle_rules_results(rules, rule_id=None):
-    id_msg = "with RuleId {} ".format(rule_id) if rule_id else ""
-    msg = "No alert rules {}found.".format(id_msg)
     if not rules:
+        id_msg = "with RuleId {} ".format(rule_id) if rule_id else ""
+        msg = "No alert rules {}found.".format(id_msg)
         echo(msg)
     return rules
-
-
-def _check_if_system_rule(rules):
-    if rules and rules[0]["isSystem"]:
-        raise InvalidRuleTypeError(rules[0]["observerRuleId"], rules[0]["ruleSource"])
 
 
 def _get_rule_type_func(sdk, rule_type):

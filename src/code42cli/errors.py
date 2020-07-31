@@ -3,8 +3,11 @@ import re
 
 import click
 from click._compat import get_text_stderr
-from py42.exceptions import Py42ForbiddenError, Py42UserDoesNotExistError, Py42UserAlreadyAddedError
+from py42.exceptions import Py42ForbiddenError
 from py42.exceptions import Py42HTTPError
+from py42.exceptions import Py42InvalidRuleTypeError
+from py42.exceptions import Py42UserAlreadyAddedError
+from py42.exceptions import Py42UserDoesNotExistError
 
 from code42cli.logger import get_main_cli_logger
 from code42cli.logger import get_view_error_details_message
@@ -52,13 +55,6 @@ class LoggedCLIError(Code42CLIError):
         )
 
 
-class InvalidRuleTypeError(Code42CLIError):
-    def __init__(self, rule_id, source):
-        msg = "Only alert rules with a source of 'Alerting' can be targeted by this command. "
-        msg += "Rule {0} has a source of '{1}'."
-        super().__init__(msg.format(rule_id, source))
-
-
 class UserNotInLegalHoldError(Code42CLIError):
     def __init__(self, username, matter_id):
         super().__init__(
@@ -100,12 +96,12 @@ class ExceptionHandlingGroup(click.Group):
 
         except click.exceptions.Exit:
             raise
-        
-        except Py42UserDoesNotExistError as err:
-            self.logger.log_error(err)
-            raise LoggedCLIError(str(err))
-        
-        except Py42UserAlreadyAddedError as err:
+
+        except (
+            Py42UserDoesNotExistError,
+            Py42UserAlreadyAddedError,
+            Py42InvalidRuleTypeError,
+        ) as err:
             self.logger.log_error(err)
             raise LoggedCLIError(str(err))
 
