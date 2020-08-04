@@ -10,13 +10,12 @@ import code42cli.cmds.search.enums as enum
 import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
-from code42cli.cmds.search import logger_factory
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.output_formats import format_option as format_output
+from code42cli.output_formats import format_option
 
 
 logger = get_main_cli_logger()
@@ -25,15 +24,14 @@ _HEADER_KEYS_MAP = OrderedDict()
 _HEADER_KEYS_MAP["name"] = "Name"
 _HEADER_KEYS_MAP["id"] = "Id"
 
+_SEARCH_RESPONSE_HEADER = OrderedDict()
+_SEARCH_RESPONSE_HEADER["eventId"] = "Event Id"
+_SEARCH_RESPONSE_HEADER["eventType"] = "Type"
+_SEARCH_RESPONSE_HEADER["eventTimestamp"] = "Observed Date"
+
 search_options = searchopt.create_search_options("file events")
 
-format_option = click.option(
-    "-f",
-    "--format",
-    type=click.Choice(enum.OutputFormat()),
-    default=enum.OutputFormat.JSON,
-    help="The format used for outputting file events.",
-)
+
 exposure_type_option = click.option(
     "-t",
     "--type",
@@ -183,12 +181,16 @@ def search(
     **kwargs
 ):
     """Search for file events."""
-    output_logger = logger_factory.get_logger_for_stdout(format)
     cursor = (
         _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
     )
     handlers = ext.create_handlers(
-        state.sdk, FileEventExtractor, output_logger, cursor, use_checkpoint
+        state.sdk,
+        FileEventExtractor,
+        format,
+        cursor,
+        use_checkpoint,
+        format_header=_SEARCH_RESPONSE_HEADER,
     )
     extractor = _get_file_event_extractor(state.sdk, handlers)
     extractor.use_or_query = or_query
@@ -214,7 +216,7 @@ def saved_search(state):
 
 
 @saved_search.command("list")
-@format_output
+@format_option
 @sdk_options()
 def _list(state, format=None):
     """List available saved searches."""

@@ -1,5 +1,6 @@
 import json
 
+import click
 from c42eventextractor import ExtractionHandlers
 from click import secho
 from py42.sdk.queries.query_filter import QueryFilterTimestampField
@@ -28,7 +29,9 @@ def _get_alert_details(sdk, alert_summary_list):
     return results
 
 
-def create_handlers(sdk, extractor_class, output_logger, cursor_store, checkpoint_name):
+def create_handlers(
+    sdk, extractor_class, output_format, cursor_store, checkpoint_name, format_header
+):
     extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = ExtractionHandlers()
     handlers.TOTAL_EVENTS = 0
@@ -63,8 +66,8 @@ def create_handlers(sdk, extractor_class, output_logger, cursor_store, checkpoin
                 handlers.handle_error(ex)
         handlers.TOTAL_EVENTS += len(events)
         event = None
-        for event in events:
-            output_logger.info(event)
+        output = output_format(events, format_header)
+        click.echo(output)
         if event:
             last_event_timestamp = extractor._get_timestamp_from_item(event)
             handlers.record_cursor_position(last_event_timestamp)

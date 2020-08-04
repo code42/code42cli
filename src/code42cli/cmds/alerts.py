@@ -1,3 +1,5 @@
+from _collections import OrderedDict
+
 import click
 import py42.sdk.queries.alerts.filters as f
 from c42eventextractor.extractors import AlertExtractor
@@ -8,18 +10,20 @@ import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 import code42cli.options as opt
-from code42cli.cmds.search import logger_factory
 from code42cli.cmds.search.cursor_store import AlertCursorStore
+from code42cli.output_formats import format_option
 
 search_options = searchopt.create_search_options("alerts")
 
-format_option = click.option(
-    "-f",
-    "--format",
-    type=click.Choice(enum.AlertOutputFormat()),
-    default=enum.AlertOutputFormat.JSON,
-    help="The format used for the alerts output.",
-)
+_HEADERS_KEY_MAP = OrderedDict()
+_HEADERS_KEY_MAP["name"] = "Rule Name"
+_HEADERS_KEY_MAP["actor"] = "Username"
+_HEADERS_KEY_MAP["createdAt"] = "Observed Date"
+_HEADERS_KEY_MAP["state"] = "Status"
+_HEADERS_KEY_MAP["severity"] = "Severity"
+_HEADERS_KEY_MAP["description"] = "Description"
+
+
 severity_option = click.option(
     "--severity",
     multiple=True,
@@ -163,10 +167,14 @@ def search(
     cli_state, format, begin, end, advanced_query, use_checkpoint, or_query, **kwargs
 ):
     """Search for alerts."""
-    output_logger = logger_factory.get_logger_for_stdout(format)
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
     handlers = ext.create_handlers(
-        cli_state.sdk, AlertExtractor, output_logger, cursor, use_checkpoint
+        cli_state.sdk,
+        AlertExtractor,
+        format,
+        cursor,
+        use_checkpoint,
+        format_header=_HEADERS_KEY_MAP,
     )
     extractor = _get_alert_extractor(cli_state.sdk, handlers)
     extractor.use_or_query = or_query
