@@ -30,7 +30,8 @@ def _get_alert_details(sdk, alert_summary_list):
 
 
 def create_handlers(
-    sdk, extractor_class, output_format, cursor_store, checkpoint_name, format_header
+    sdk, extractor_class, output_format, cursor_store, checkpoint_name, format_header,
+    optional_fields=None
 ):
     extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = ExtractionHandlers()
@@ -66,7 +67,12 @@ def create_handlers(
                 handlers.handle_error(ex)
         handlers.TOTAL_EVENTS += len(events)
         event = None
-        output = output_format(events, format_header)
+        transformed_events = []
+        for event in events:
+            for optional_field in optional_fields:
+                event = optional_field(event)
+            transformed_events.append(event)
+        output = output_format(transformed_events, format_header)
         click.echo(output)
         if event:
             last_event_timestamp = extractor._get_timestamp_from_item(event)
