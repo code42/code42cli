@@ -30,8 +30,13 @@ def _get_alert_details(sdk, alert_summary_list):
 
 
 def create_handlers(
-    sdk, extractor_class, output_format, cursor_store, checkpoint_name, format_header,
-    optional_fields=None
+    sdk,
+    extractor_class,
+    output_format,
+    cursor_store,
+    checkpoint_name,
+    format_header,
+    optional_fields=None,
 ):
     extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = ExtractionHandlers()
@@ -69,8 +74,9 @@ def create_handlers(
         event = None
         transformed_events = []
         for event in events:
-            for optional_field in optional_fields:
-                event = optional_field(event)
+            if optional_fields:
+                for optional_field in optional_fields:
+                    event = optional_field(event)
             transformed_events.append(event)
         output = output_format(transformed_events, format_header)
         click.echo(output)

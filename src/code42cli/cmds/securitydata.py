@@ -29,6 +29,37 @@ _SEARCH_RESPONSE_HEADER["eventId"] = "Event Id"
 _SEARCH_RESPONSE_HEADER["eventType"] = "Type"
 _SEARCH_RESPONSE_HEADER["eventTimestamp"] = "Observed Date"
 
+_OPTIONAL_FIELDS = [
+    "filePath",
+    "fileName",
+    "fileType",
+    "fileSize",
+    "fileOwner",
+    "md5Checksum",
+    "sha256Checksum",
+    "deviceUserName",
+    "osHostName",
+    "domainName",
+    "publicIpAddress",
+    "privateIpAddresses",
+    "deviceUid",
+    "userUid",
+    "source",
+    "exposure",
+    "processOwner",
+    "processName",
+    "tabUrl",
+    "remoteActivity",
+    "trusted",
+    "operatingSystemUser",
+    "outsideActiveHours",
+    "mimeTypeByBytes",
+    "mimeTypeByExtension",
+    "mimeTypeMismatch",
+    "windowTitle",
+]
+
+
 search_options = searchopt.create_search_options("file events")
 
 
@@ -169,6 +200,12 @@ def clear_checkpoint(state, checkpoint_name):
     "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
 )
 @sdk_options()
+@click.option(
+    "--display",
+    multiple=True,
+    default=_OPTIONAL_FIELDS,
+    type=click.Choice(_OPTIONAL_FIELDS),
+)
 def search(
     state,
     format,
@@ -178,6 +215,7 @@ def search(
     use_checkpoint,
     saved_search,
     or_query,
+    display,
     **kwargs
 ):
     """Search for file events."""
@@ -191,6 +229,7 @@ def search(
         cursor,
         use_checkpoint,
         format_header=_SEARCH_RESPONSE_HEADER,
+        optional_fields=_optionally_display(display),
     )
     extractor = _get_file_event_extractor(state.sdk, handlers)
     extractor.use_or_query = or_query
@@ -242,3 +281,18 @@ def _get_file_event_extractor(sdk, handlers):
 
 def _get_file_event_cursor_store(profile_name):
     return FileEventCursorStore(profile_name)
+
+
+def _display_optional_fields(field):
+    def process_event(event):
+        if type(event[field]) == list:
+            event[field] = "##".join(event[field])
+        return event
+
+    return process_event
+
+
+def _optionally_display(display_options):
+    for option in display_options:
+        _SEARCH_RESPONSE_HEADER[option] = option.capitalize()
+    # return [ _display_optional_fields(option) for option in display_options]

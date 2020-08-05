@@ -22,7 +22,14 @@ _HEADERS_KEY_MAP["createdAt"] = "Observed Date"
 _HEADERS_KEY_MAP["state"] = "Status"
 _HEADERS_KEY_MAP["severity"] = "Severity"
 # _HEADERS_KEY_MAP["description"] = "Description"
-
+_OPTIONAL_OPTIONS = [
+    "sources",
+    "exposure_types",
+    "file_count",
+    "file_detail",
+    "file_size",
+    "ip",
+]
 
 severity_option = click.option(
     "--severity",
@@ -166,13 +173,19 @@ def clear_checkpoint(state, checkpoint_name):
 @click.option(
     "--display",
     multiple=True,
-    default=["sources", "exposure_types", "file_count", "file_detail", "file_size", "ip"],
-    type=click.Choice(
-        ["sources", "exposure_types", "file_count", "file_detail", "file_size", "ip"]
-    ),
+    default=_OPTIONAL_OPTIONS,
+    type=click.Choice(_OPTIONAL_OPTIONS),
 )
 def search(
-    cli_state, format, begin, end, advanced_query, use_checkpoint, or_query, display, **kwargs
+    cli_state,
+    format,
+    begin,
+    end,
+    advanced_query,
+    use_checkpoint,
+    or_query,
+    display,
+    **kwargs
 ):
     """Search for alerts."""
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
@@ -183,7 +196,7 @@ def search(
         cursor,
         use_checkpoint,
         format_header=_HEADERS_KEY_MAP,
-        optional_fields = _optionally_display(display)
+        optional_fields=_optionally_display(display),
     )
     extractor = _get_alert_extractor(cli_state.sdk, handlers)
     extractor.use_or_query = or_query
@@ -240,10 +253,8 @@ def _display_file_detail(event):
     data = event["observations"][0]["data"]
     event["file_detail"] = ""
     for file_detail in data["files"]:
-        event["file_detail"] += "{0}##{1}##{2}".format(
-            file_detail["name"],
-            file_detail["path"],
-            file_detail["category"]
+        event["file_detail"] += "{}##{}##{}".format(
+            file_detail["name"], file_detail["path"], file_detail["category"]
         )
     return event
 
@@ -261,7 +272,7 @@ _OPTIONAL_DISPLAY_FUNCTIONS = {
     "file_categories": _display_file_categories,
     "file_detail": _display_file_detail,
     "file_size": _display_file_size,
-    "ip": _display_ip
+    "ip": _display_ip,
 }
 
 
