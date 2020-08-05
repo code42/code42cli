@@ -295,4 +295,4 @@ def _display_optional_fields(field):
 def _optionally_display(display_options):
     for option in display_options:
         _SEARCH_RESPONSE_HEADER[option] = option.capitalize()
-    # return [ _display_optional_fields(option) for option in display_options]
+    return [_display_optional_fields(option) for option in display_options]
