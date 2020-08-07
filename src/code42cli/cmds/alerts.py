@@ -1,5 +1,3 @@
-from _collections import OrderedDict
-
 import click
 import py42.sdk.queries.alerts.filters as f
 from c42eventextractor.extractors import AlertExtractor
@@ -15,21 +13,6 @@ from code42cli.output_formats import extraction_format_option as format_option
 
 search_options = searchopt.create_search_options("alerts")
 
-_HEADERS_KEY_MAP = OrderedDict()
-_HEADERS_KEY_MAP["name"] = "Rule Name"
-_HEADERS_KEY_MAP["actor"] = "Username"
-_HEADERS_KEY_MAP["createdAt"] = "Observed Date"
-_HEADERS_KEY_MAP["state"] = "Status"
-_HEADERS_KEY_MAP["severity"] = "Severity"
-# _HEADERS_KEY_MAP["description"] = "Description"
-_OPTIONAL_OPTIONS = [
-    "sources",
-    "exposure_types",
-    "file_count",
-    "file_detail",
-    "file_size",
-    "ip",
-]
 
 severity_option = click.option(
     "--severity",
@@ -212,65 +195,3 @@ def _get_alert_extractor(sdk, handlers):
 
 def _get_alert_cursor_store(profile_name):
     return AlertCursorStore(profile_name)
-
-
-def _display_sources(event):
-    # Assuming here and all other `_include` function that only 'observations' contain a
-    # single record.
-    sources = event["observations"][0]["data"]["sources"]
-    event["sources"] = "##".join(sources)
-    return event
-
-
-def _display_exposure_types(event):
-
-    exposure_types = event["observations"][0]["data"]["exposureTypes"]
-    event["exposure_types"] = "##".join(exposure_types)
-    return event
-
-
-def _display_file_count(event):
-    event["file_count"] = event["observations"][0]["data"]["fileCount"]
-    return event
-
-
-def _display_file_categories(event):
-    pass
-
-
-def _display_file_size(event):
-    event["file_size"] = event["observations"][0]["data"]["totalFileSize"]
-    return event
-
-
-def _display_file_detail(event):
-    data = event["observations"][0]["data"]
-    event["file_detail"] = ""
-    for file_detail in data["files"]:
-        event["file_detail"] += "{}##{}##{}".format(
-            file_detail["name"], file_detail["path"], file_detail["category"]
-        )
-    return event
-
-
-def _display_ip(event):
-    ips = event["observations"][0]["data"]["sendingIpAddresses"]
-    event["ip"] = "##".join(ips)
-    return event
-
-
-_OPTIONAL_DISPLAY_FUNCTIONS = {
-    "sources": _display_sources,
-    "exposure_types": _display_exposure_types,
-    "file_count": _display_file_count,
-    "file_categories": _display_file_categories,
-    "file_detail": _display_file_detail,
-    "file_size": _display_file_size,
-    "ip": _display_ip,
-}
-
-
-def _optionally_display(display_options):
-    for option in display_options:
-        _HEADERS_KEY_MAP[option] = option.capitalize()
-    return [_OPTIONAL_DISPLAY_FUNCTIONS[option] for option in display_options]
