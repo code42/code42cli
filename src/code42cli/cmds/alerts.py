@@ -168,12 +168,7 @@ def search(
     """Search for alerts."""
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
     handlers = ext.create_handlers(
-        cli_state.sdk,
-        AlertExtractor,
-        format,
-        cursor,
-        use_checkpoint,
-        display_all=include_all,
+        cli_state.sdk, AlertExtractor, cursor, use_checkpoint,
     )
     extractor = _get_alert_extractor(cli_state.sdk, handlers)
     extractor.use_or_query = or_query
@@ -187,6 +182,9 @@ def search(
         extractor.extract(*cli_state.search_filters)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         echo("No results found.")
+    else:
+        output = process_events(format, include_all, handlers.EVENTS)
+        click.echo_via_pager(output)
 
 
 def _get_alert_extractor(sdk, handlers):
@@ -195,3 +193,17 @@ def _get_alert_extractor(sdk, handlers):
 
 def _get_alert_cursor_store(profile_name):
     return AlertCursorStore(profile_name)
+
+
+def process_events(output_format, include_all, events):
+
+    format_header = (
+        {key: key.capitalize() for key in events[0].keys()}
+        if include_all
+        else {
+            key: key.capitalize()
+            for key in events[0].keys()
+            if type(events[0][key]) == str
+        }
+    )
+    return output_format(events, format_header)
