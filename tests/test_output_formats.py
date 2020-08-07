@@ -126,7 +126,7 @@ def test_to_table_formats_data_to_table_format():
 
 def test_to_json():
     formatted_output = to_json(TEST_DATA, TEST_HEADER)
-    assert formatted_output == json.dumps(FILTERED_OUTPUT)
+    assert formatted_output == json.dumps(TEST_DATA)
 
 
 def test_to_formatted_json():

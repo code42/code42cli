@@ -86,12 +86,8 @@ def _filter(output, header):
 
 
 def to_json(output, header=None):
-    # TODO To remove after approval
-    # return json.dumps(output)
-    return json.dumps(_filter(output, header))
+    return json.dumps(output)
 
 
 def to_formatted_json(output, header=None):
-    # TODO To remove after approval
-    # return json.dumps(output, indent=4)
     return json.dumps(_filter(output, header), indent=4)
