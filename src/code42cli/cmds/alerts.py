@@ -11,7 +11,7 @@ import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 import code42cli.options as opt
 from code42cli.cmds.search.cursor_store import AlertCursorStore
-from code42cli.output_formats import format_option
+from code42cli.output_formats import extraction_format_option as format_option
 
 search_options = searchopt.create_search_options("alerts")
 
@@ -170,12 +170,7 @@ def clear_checkpoint(state, checkpoint_name):
     "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
 )
 @opt.sdk_options()
-@click.option(
-    "--display",
-    multiple=True,
-    default=_OPTIONAL_OPTIONS,
-    type=click.Choice(_OPTIONAL_OPTIONS),
-)
+@click.option("--include-all", default=False, is_flag=True)
 def search(
     cli_state,
     format,
@@ -184,7 +179,7 @@ def search(
     advanced_query,
     use_checkpoint,
     or_query,
-    display,
+    include_all,
     **kwargs
 ):
     """Search for alerts."""
@@ -195,8 +190,7 @@ def search(
         format,
         cursor,
         use_checkpoint,
-        format_header=_HEADERS_KEY_MAP,
-        optional_fields=_optionally_display(display),
+        display_all=include_all,
     )
     extractor = _get_alert_extractor(cli_state.sdk, handlers)
     extractor.use_or_query = or_query

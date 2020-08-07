@@ -15,8 +15,8 @@ from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
+from code42cli.output_formats import extraction_format_option
 from code42cli.output_formats import format_option
-
 
 logger = get_main_cli_logger()
 
@@ -172,7 +172,7 @@ def file_event_options(f):
     f = process_owner_option(f)
     f = tab_url_option(f)
     f = include_non_exposure_option(f)
-    f = format_option(f)
+    f = extraction_format_option(f)
     f = saved_search_option(f)
     return f
 
@@ -200,12 +200,7 @@ def clear_checkpoint(state, checkpoint_name):
     "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
 )
 @sdk_options()
-@click.option(
-    "--display",
-    multiple=True,
-    default=_OPTIONAL_FIELDS,
-    type=click.Choice(_OPTIONAL_FIELDS),
-)
+@click.option("--include-all", default=False, is_flag=True)
 def search(
     state,
     format,
@@ -215,21 +210,21 @@ def search(
     use_checkpoint,
     saved_search,
     or_query,
-    display,
+    include_all,
     **kwargs
 ):
     """Search for file events."""
     cursor = (
         _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
     )
+
     handlers = ext.create_handlers(
         state.sdk,
         FileEventExtractor,
         format,
         cursor,
         use_checkpoint,
-        format_header=_SEARCH_RESPONSE_HEADER,
-        optional_fields=_optionally_display(display),
+        display_all=include_all,
     )
     extractor = _get_file_event_extractor(state.sdk, handlers)
     extractor.use_or_query = or_query

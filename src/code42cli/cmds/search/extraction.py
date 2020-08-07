@@ -35,8 +35,7 @@ def create_handlers(
     output_format,
     cursor_store,
     checkpoint_name,
-    format_header,
-    optional_fields=None,
+    display_all=False,
 ):
     extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = ExtractionHandlers()
@@ -70,18 +69,22 @@ def create_handlers(
                 events = _get_alert_details(sdk, events)
             except Exception as ex:
                 handlers.handle_error(ex)
+
         handlers.TOTAL_EVENTS += len(events)
-        event = None
-        transformed_events = []
-        for event in events:
-            if optional_fields:
-                for optional_field in optional_fields:
-                    event = optional_field(event)
-            transformed_events.append(event)
-        output = output_format(transformed_events, format_header)
-        click.echo(output)
-        if event:
-            last_event_timestamp = extractor._get_timestamp_from_item(event)
+        if len(events):
+            format_header = (
+                {key: key.capitalize() for key in events[0].keys()}
+                if display_all
+                else {
+                    key: key.capitalize()
+                    for key in events[0].keys()
+                    if type(events[0][key]) == str
+                }
+            )
+
+            click.echo(output_format(events, format_header))
+
+            last_event_timestamp = extractor._get_timestamp_from_item(events[-1])
             handlers.record_cursor_position(last_event_timestamp)
 
     handlers.handle_response = handle_response
