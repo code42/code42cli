@@ -24,41 +24,6 @@ _HEADER_KEYS_MAP = OrderedDict()
 _HEADER_KEYS_MAP["name"] = "Name"
 _HEADER_KEYS_MAP["id"] = "Id"
 
-_SEARCH_RESPONSE_HEADER = OrderedDict()
-_SEARCH_RESPONSE_HEADER["eventId"] = "Event Id"
-_SEARCH_RESPONSE_HEADER["eventType"] = "Type"
-_SEARCH_RESPONSE_HEADER["eventTimestamp"] = "Observed Date"
-
-_OPTIONAL_FIELDS = [
-    "filePath",
-    "fileName",
-    "fileType",
-    "fileSize",
-    "fileOwner",
-    "md5Checksum",
-    "sha256Checksum",
-    "deviceUserName",
-    "osHostName",
-    "domainName",
-    "publicIpAddress",
-    "privateIpAddresses",
-    "deviceUid",
-    "userUid",
-    "source",
-    "exposure",
-    "processOwner",
-    "processName",
-    "tabUrl",
-    "remoteActivity",
-    "trusted",
-    "operatingSystemUser",
-    "outsideActiveHours",
-    "mimeTypeByBytes",
-    "mimeTypeByExtension",
-    "mimeTypeMismatch",
-    "windowTitle",
-]
-
 
 search_options = searchopt.create_search_options("file events")
 
@@ -276,18 +241,3 @@ def _get_file_event_extractor(sdk, handlers):
 
 def _get_file_event_cursor_store(profile_name):
     return FileEventCursorStore(profile_name)
-
-
-def _display_optional_fields(field):
-    def process_event(event):
-        if type(event[field]) == list:
-            event[field] = "##".join(event[field])
-        return event
-
-    return process_event
-
-
-def _optionally_display(display_options):
-    for option in display_options:
-        _SEARCH_RESPONSE_HEADER[option] = option.capitalize()
-    return [_display_optional_fields(option) for option in display_options]
