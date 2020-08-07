@@ -82,7 +82,7 @@ def create_handlers(
                 }
             )
 
-            click.echo(output_format(events, format_header))
+            click.echo_via_pager(output_format(events, format_header))
 
             last_event_timestamp = extractor._get_timestamp_from_item(events[-1])
             handlers.record_cursor_position(last_event_timestamp)
