@@ -91,3 +91,15 @@ def to_json(output, header=None):
 
 def to_formatted_json(output, header=None):
     return json.dumps(_filter(output, header), indent=4)
+
+
+def get_format_header(include_all, header_items):
+    return (
+        {key: key.capitalize() for key in header_items.keys()}
+        if include_all
+        else {
+            key: key.capitalize()
+            for key in header_items.keys()
+            if type(header_items[key]) == str
+        }
+    )

@@ -17,6 +17,8 @@ from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
 from code42cli.output_formats import extraction_format_option
 from code42cli.output_formats import format_option
+from code42cli.output_formats import get_format_header
+
 
 logger = get_main_cli_logger()
 
@@ -202,7 +204,7 @@ def search(
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         echo("No results found.")
     else:
-        output = process_events(format, include_all, handlers.EVENTS)
+        output = _process_events(format, include_all, handlers.EVENTS)
         click.echo_via_pager(output)
 
 
@@ -241,14 +243,6 @@ def _get_file_event_cursor_store(profile_name):
     return FileEventCursorStore(profile_name)
 
 
-def process_events(output_format, include_all, events):
-    format_header = (
-        {key: key.capitalize() for key in events[0].keys()}
-        if include_all
-        else {
-            key: key.capitalize()
-            for key in events[0].keys()
-            if type(events[0][key]) == str
-        }
-    )
+def _process_events(output_format, include_all, events):
+    format_header = get_format_header(include_all, events[0])
     return output_format(events, format_header)

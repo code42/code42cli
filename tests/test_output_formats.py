@@ -1,8 +1,11 @@
 import json
 from collections import OrderedDict
 
+from code42cli.output_formats import extraction_output_format
+from code42cli.output_formats import get_format_header
 from code42cli.output_formats import output_format
 from code42cli.output_formats import to_csv
+from code42cli.output_formats import to_dynamic_csv
 from code42cli.output_formats import to_formatted_json
 from code42cli.output_formats import to_json
 from code42cli.output_formats import to_table
@@ -113,6 +116,21 @@ d12d54f0-5160-47a8-a48f-7d5fa5b051c5,outside td,HIGH,FED_CLOUD_SHARE_PERMISSIONS
 5eabed1d-a406-4dfc-af81-f7485ee09b19,Test Alerts using CLI,HIGH,FED_ENDPOINT_EXFILTRATION,Alerting,True"""
 
 
+TEST_NESTED_DATA = {
+    "test": "TEST",
+    "name": "outside td",
+    "description": "",
+    "severity": "HIGH",
+    "isSystem": False,
+    "isEnabled": True,
+    "ruleSource": ["Alerting"],
+    "tenantId": "1d71796f-af5b-4231-9d8e-df6434da4663",
+    "observerRuleId": {"test": ["d12d54f0-5160-47a8-a48f-7d5fa5b051c5"]},
+    "type": ["FED_CLOUD_SHARE_PERMISSIONS"],
+    "id": "5157f1df-cb3e-4755-92a2-0f42c7841020",
+}
+
+
 def test_to_csv_formats_data_to_csv_format():
     formatted_output = to_csv(TEST_DATA, TEST_HEADER)
     assert formatted_output == CSV_OUTPUT
@@ -157,3 +175,58 @@ def test_output_format_returns_to_csv_function_when_csv_format_option_is_passed(
 def test_output_format_returns_to_table_function_when_no_format_option_is_passed():
     format_function = output_format(None, None, None)
     assert id(format_function) == id(to_table)
+
+
+def test_output_format_returns_to_dynamic_csv_function_when_csv_option_is_passed():
+    extraction_output_format_function = extraction_output_format(None, None, "CSV")
+    assert id(extraction_output_format_function) == id(to_dynamic_csv)
+
+
+def test_extraction_output_format_returns_to_formatted_json_function_when_json__option_is_passed():
+    format_function = extraction_output_format(None, None, "JSON")
+    assert id(format_function) == id(to_formatted_json)
+
+
+def test_extraction_output_format_returns_to_json_function_when_raw_json_format_option_is_passed():
+    format_function = extraction_output_format(None, None, "RAW-JSON")
+    assert id(format_function) == id(to_json)
+
+
+def test_extraction_output_format_returns_to_table_function_when_table_format_option_is_passed():
+    format_function = extraction_output_format(None, None, "TABLE")
+    assert id(format_function) == id(to_table)
+
+
+def test_extraction_output_format_returns_to_table_function_when_no_format_option_is_passed():
+    format_function = extraction_output_format(None, None, None)
+    assert id(format_function) == id(to_table)
+
+
+def test_get_format_header_returns_all_keys_when_include_all_is_false():
+    header = get_format_header(False, TEST_NESTED_DATA)
+    assert header == {
+        "test": "Test",
+        "name": "Name",
+        "description": "Description",
+        "severity": "Severity",
+        "tenantId": "Tenantid",
+        "id": "Id",
+    }
+
+
+def test_get_format_header_returns_only_root_level_keys_when_include_all_is_true():
+    header = get_format_header(True, TEST_NESTED_DATA)
+    print(header)
+    assert header == {
+        "test": "Test",
+        "name": "Name",
+        "description": "Description",
+        "severity": "Severity",
+        "isSystem": "Issystem",
+        "isEnabled": "Isenabled",
+        "ruleSource": "Rulesource",
+        "tenantId": "Tenantid",
+        "observerRuleId": "Observerruleid",
+        "type": "Type",
+        "id": "Id",
+    }
