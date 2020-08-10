@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import click
 from py42.exceptions import Py42BadRequestError
 
@@ -15,6 +17,9 @@ from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
 
 
+DATE_FORMAT = "%Y-%m-%d"
+
+
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def departing_employee(state):
@@ -27,7 +32,7 @@ def departing_employee(state):
 @click.option(
     "--departure-date",
     help="The date the employee is departing. Format: yyyy-MM-dd.",
-    type=click.DateTime(formats=["%Y-%m-%d"]),
+    type=click.DateTime(formats=[DATE_FORMAT]),
 )
 @cloud_alias_option
 @notes_option
@@ -35,7 +40,7 @@ def departing_employee(state):
 def add(state, username, cloud_alias, departure_date, notes):
     """Add a user to the departing-employee detection list."""
     if departure_date:
-        departure_date = departure_date.strftime("%Y-%m-%d")
+        departure_date = departure_date.strftime(DATE_FORMAT)
     _add_departing_employee(state.sdk, username, cloud_alias, departure_date, notes)
 
 
@@ -70,11 +75,18 @@ bulk.add_command(departing_employee_generate_template)
 )
 @read_csv_arg(headers=DEPARTING_EMPLOYEE_CSV_HEADERS)
 @sdk_options()
-def bulk_add(state, csv_rows):
-    sdk = state.sdk
-
+@click.pass_context
+def bulk_add(ctx, state, csv_rows):
     def handle_row(username, cloud_alias, departure_date, notes):
-        _add_departing_employee(sdk, username, cloud_alias, departure_date, notes)
+        if departure_date:
+            departure_date = datetime.strptime(departure_date, DATE_FORMAT)
+        ctx.invoke(
+            add,
+            username=username,
+            cloud_alias=cloud_alias,
+            departure_date=departure_date,
+            notes=notes,
+        )
 
     run_bulk_process(
         handle_row,
