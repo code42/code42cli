@@ -167,7 +167,12 @@ def clear_checkpoint(state, checkpoint_name):
     "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
 )
 @sdk_options()
-@click.option("--include-all", default=False, is_flag=True)
+@click.option(
+    "--include-all",
+    default=False,
+    is_flag=True,
+    help="Display complete list of data items or only from top level of nested response.",
+)
 def search(
     state,
     format,
