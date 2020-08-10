@@ -31,6 +31,11 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     each time the CLI is run with a profile configured this way, as it is not recommended.
 
 - The `path` positional argument for bulk `generate-template` commands is now an option (`--p/-p`).
+- Below `search` subcommands accept argument `--format/-f` to display result in formats `csv`, `table`, `json`, `formatted-json`:
+    By default only root/top level items from the response will be displayed, to view all items, that contains nested data, pass `--include-all` option.
+    - `code42 alerts search`
+    - `code42 security-data search`
+    - `code42 security-data search --saved-search`
 
 ### Added
 
