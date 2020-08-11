@@ -122,6 +122,8 @@ def test_add_bulk_users_calls_expected_py42_methods(runner, mocker, cli_state):
                     "test_user,test_alias,2020-01-01,test_note\n",
                     "test_user_2,test_alias_2,2020-02-01,test_note_2\n",
                     "test_user_3,,,\n",
+                    "test_user_3,,2020-30-02,\n",
+                    "test_user_3,,20-02-2020,\n",
                 ]
             )
         runner.invoke(

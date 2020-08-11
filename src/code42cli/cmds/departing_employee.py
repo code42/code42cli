@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import click
 from py42.exceptions import Py42BadRequestError
 
@@ -11,6 +9,7 @@ from code42cli.cmds.detectionlists.options import cloud_alias_option
 from code42cli.cmds.detectionlists.options import notes_option
 from code42cli.cmds.detectionlists.options import username_arg
 from code42cli.cmds.shared import get_user_id
+from code42cli.errors import Code42CLIError
 from code42cli.file_readers import read_csv_arg
 from code42cli.file_readers import read_flat_file_arg
 from code42cli.options import OrderedGroup
@@ -79,7 +78,15 @@ bulk.add_command(departing_employee_generate_template)
 def bulk_add(ctx, state, csv_rows):
     def handle_row(username, cloud_alias, departure_date, notes):
         if departure_date:
-            departure_date = datetime.strptime(departure_date, DATE_FORMAT)
+            try:
+                departure_date = click.DateTime(formats=[DATE_FORMAT]).convert(
+                    departure_date, None, None
+                )
+            except click.exceptions.BadParameter:
+                message = "Invalid date {}, valid date format {}".format(
+                    departure_date, DATE_FORMAT
+                )
+                raise Code42CLIError(message)
         ctx.invoke(
             add,
             username=username,
