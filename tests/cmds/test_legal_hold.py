@@ -63,6 +63,30 @@ TEST_PRESERVATION_POLICY_JSON = '{{"creationDate": "2020-01-01","legalHoldPolicy
     TEST_PRESERVATION_POLICY_UID
 )
 
+TEST_LEGAL_HOLD_LIST = [
+    {
+        "legalHolds": [
+            {
+                "legalHoldUid": "932880202064992021",
+                "name": "test",
+                "description": "",
+                "active": True,
+                "creationDate": "2019-12-19T20:32:10.763Z",
+                "lastModified": "2019-12-19T20:32:10.781Z",
+                "creator": {
+                    "userUid": "921286907298179098",
+                    "username": "test@test.test",
+                    "email": "test@test.test",
+                },
+                "holdPolicyUid": "901109555892625150",
+                "creator_username": "test@test.test",
+            },
+        ],
+    }
+]
+
+TEST_LEGAL_HOLD_EMPTY_LIST = [{"legalHolds": []}]
+
 
 @pytest.fixture
 def preservation_policy_response(mocker):
@@ -371,3 +395,36 @@ def test_remove_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
         assert bulk_processor.call_args[0][1] == [
             {"matter_id": "test", "username": "value"}
         ]
+
+
+def test_list_with_format_option_returns_expected_format(runner, cli_state):
+    cli_state.sdk.legalhold.get_all_matters.return_value = TEST_LEGAL_HOLD_LIST
+
+    result = runner.invoke(cli, ["legal-hold", "list", "-f", "csv"], obj=cli_state)
+    assert "Matter ID,Name,Description,Creator,Creation Date" in result.output
+    assert "932880202064992021" in result.output
+
+
+def test_list_with_format_option_returns_no_response_when_response_is_empty(
+    runner, cli_state
+):
+    cli_state.sdk.legalhold.get_all_matters.return_value = TEST_LEGAL_HOLD_EMPTY_LIST
+    result = runner.invoke(cli, ["legal-hold", "list", "-f", "csv"], obj=cli_state)
+    assert "Matter ID,Name,Description,Creator,Creation Date" not in result.output
+
+
+def test_show_with_format_option_returns_expected_format(
+    runner, cli_state, check_matter_accessible_success, get_user_id_success
+):
+    cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
+        ACTIVE_AND_INACTIVE_LEGAL_HOLD_MEMBERSHIPS_RESULT
+    )
+    result = runner.invoke(
+        cli, ["legal-hold", "show", TEST_MATTER_ID, "-f", "csv"], obj=cli_state
+    )
+
+    assert "Matter ID,Name,Description,Creator,Creation Date" in result.output
+    assert (
+        "88888,Test_Matter,,legal_admin@example.com,2020-01-01T00:00:00.000-06:00"
+        in result.output
+    )

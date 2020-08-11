@@ -31,8 +31,15 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
-- Profile can now save multiple alert and file event checkpoints. The name of the checkpoint to be used for a given query should be passed to `-c` (`--use-checkpoint`).
+- `--or-query` option added to `security-data search` and `alerts search` commands which combines the provided filter arguments into an 'OR' query instead of the default 'AND' query.
+- `--password` option added to `profile create` and `profile update` commands, enabling creating profiles while bypassing the interactive password prompt.
+- Profiles can now save multiple alert and file event checkpoints. The name of the checkpoint to be used for a given query should be passed to `-c` (`--use-checkpoint`).
 - `-y/--assume-yes` option added to `profile delete` and `profile delete-all` commands to not require interactive prompt.
+- Below subcommands accept argument `--format/-f` to display result in formats `csv`, `table`, `json`, `formatted-json`:
+    - `code42 alert-rules list`
+    - `code42 legal-hold list`
+    - `code42 legal-hold show`
+    - `code42 security-data saved-search list`
 
 ### Removed
 
