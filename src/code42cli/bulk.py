@@ -45,16 +45,15 @@ def generate_template_cmd_factory(group_name, commands_dict):
 
     @click.command()
     @click.argument("cmd", type=click.Choice(list(commands_dict)))
-    @click.argument(
-        "path",
-        required=False,
+    @click.option(
+        "--path",
+        "-p",
         type=click.Path(dir_okay=False, resolve_path=True, writable=True),
+        help="Write template file to specific file path/name.",
     )
     def generate_template(cmd, path):
         """\b
         Generate the CSV template needed for bulk adding/removing users.
-
-        Add the optional PATH argument to write to a specific file path/name.
         """
         columns = commands_dict[cmd]
         if not path:
