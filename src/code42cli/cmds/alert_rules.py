@@ -35,14 +35,13 @@ _HEADER_KEYS_MAP["isEnabled"] = "Enabled"
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def alert_rules(state):
-    """Manage alert rules."""
+    """Manage users associated with alert rules."""
     pass
 
 
 rule_id_option = click.option(
-    "--rule-id", required=True, help="Observer ID of the rule."
+    "--rule-id", required=True, help="Identification number of the alert rule."
 )
-username_option = click.option("-u", "--username", required=True)
 
 
 @alert_rules.command()
@@ -131,7 +130,7 @@ def add(state, csv_rows):
 
 
 @bulk.command(
-    help="Bulk remove users from alert rules from a csv file. CSV file format: {}".format(
+    help="Bulk remove users from alert rules using a CSV file. CSV file format: {}".format(
         ",".join(ALERT_RULES_CSV_HEADERS)
     )
 )

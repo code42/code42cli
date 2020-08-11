@@ -18,7 +18,7 @@ format_option = click.option(
     "--format",
     type=click.Choice(enum.AlertOutputFormat()),
     default=enum.AlertOutputFormat.JSON,
-    help="The format used for outputting alerts.",
+    help="The format used for the alerts output.",
 )
 severity_option = click.option(
     "--severity",
@@ -34,7 +34,7 @@ state_option = click.option(
     type=click.Choice(enum.AlertState()),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     callback=searchopt.is_in_filter(f.AlertState),
-    help="Filter alerts by state. Defaults to returning all states.",
+    help="Filter alerts by status. Defaults to returning all statuses.",
 )
 actor_option = click.option(
     "--actor",
@@ -42,14 +42,14 @@ actor_option = click.option(
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     callback=searchopt.is_in_filter(f.Actor),
     help="Filter alerts by including the given actor(s) who triggered the alert. "
-    "Args must match actor username exactly.",
+    "Arguments must match the actor's cloud alias exactly.",
 )
 actor_contains_option = click.option(
     "--actor-contains",
     multiple=True,
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     callback=searchopt.contains_filter(f.Actor),
-    help="Filter alerts by including actor(s) whose username contains the given string.",
+    help="Filter alerts by including actor(s) whose cloud alias contains the given string.",
 )
 exclude_actor_option = click.option(
     "--exclude-actor",
@@ -57,14 +57,14 @@ exclude_actor_option = click.option(
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     callback=searchopt.not_in_filter(f.Actor),
     help="Filter alerts by excluding the given actor(s) who triggered the alert. "
-    "Args must match actor username exactly.",
+    "Arguments must match actor's cloud alias exactly.",
 )
 exclude_actor_contains_option = click.option(
     "--exclude-actor-contains",
     multiple=True,
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     callback=searchopt.not_contains_filter(f.Actor),
-    help="Filter alerts by excluding actor(s) whose username contains the given string.",
+    help="Filter alerts by excluding actor(s) whose cloud alias contains the given string.",
 )
 rule_name_option = click.option(
     "--rule-name",
@@ -148,7 +148,7 @@ def alerts(state):
 @click.argument("checkpoint-name")
 @opt.sdk_options()
 def clear_checkpoint(state, checkpoint_name):
-    """Remove the saved alert checkpoint from '--use-checkpoint/-c' mode."""
+    """Remove the saved alert checkpoint from `--use-checkpoint/-c` mode."""
     _get_alert_cursor_store(state.profile.name).delete(checkpoint_name)
 
 

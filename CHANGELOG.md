@@ -29,6 +29,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - A profile created with the `--disable-ssl-errors` flag will now correctly not verify SSL certs when making requests. A warning message is printed
     each time the CLI is run with a profile configured this way, as it is not recommended.
 
+- The `path` positional argument for bulk `generate-template` commands is now an option (`--p/-p`).
+
 ### Added
 
 - `--or-query` option added to `security-data search` and `alerts search` commands which combines the provided filter arguments into an 'OR' query instead of the default 'AND' query.

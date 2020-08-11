@@ -18,7 +18,7 @@ from code42cli.options import sdk_options
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def departing_employee(state):
-    """For adding and removing employees from the departing employee detection list."""
+    """For adding and removing employees from the departing employees detection list."""
     pass
 
 
@@ -33,7 +33,7 @@ def departing_employee(state):
 @notes_option
 @sdk_options()
 def add(state, username, cloud_alias, departure_date, notes):
-    """Add a user to the departing-employee detection list."""
+    """Add a user to the departing employees detection list."""
     if departure_date:
         departure_date = departure_date.strftime("%Y-%m-%d")
     _add_departing_employee(state.sdk, username, cloud_alias, departure_date, notes)
@@ -65,7 +65,7 @@ bulk.add_command(departing_employee_generate_template)
 
 @bulk.command(
     name="add",
-    help="Bulk add users to the departing-employee detection list using a csv file with "
+    help="Bulk add users to the departing employees detection list using a CSV file with "
     "format: {}".format(",".join(DEPARTING_EMPLOYEE_CSV_HEADERS)),
 )
 @read_csv_arg(headers=DEPARTING_EMPLOYEE_CSV_HEADERS)
@@ -85,7 +85,7 @@ def bulk_add(state, csv_rows):
 
 @bulk.command(
     name="remove",
-    help="Bulk remove users from the departing-employee detection list using a newline separated "
+    help="Bulk remove users from the departing employees detection list using a line-separated "
     "file of usernames.",
 )
 @read_flat_file_arg

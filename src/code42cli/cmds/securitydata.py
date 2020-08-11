@@ -48,7 +48,7 @@ username_option = click.option(
     multiple=True,
     callback=searchopt.is_in_filter(f.DeviceUsername),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
-    help="Limits events to endpoint events for these users.",
+    help="Limits events to endpoint events for these Code42 users.",
 )
 actor_option = click.option(
     "--actor",
@@ -77,7 +77,7 @@ source_option = click.option(
     multiple=True,
     callback=searchopt.is_in_filter(f.Source),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
-    help="Limits events to only those from one of these sources. Example=Gmail.",
+    help="Limits events to only those from one of these sources. For example, Gmail, Box, or Endpoint.",
 )
 file_name_option = click.option(
     "--file-name",
@@ -91,22 +91,21 @@ file_path_option = click.option(
     multiple=True,
     callback=searchopt.is_in_filter(f.FilePath),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
-    help="Limits events to file events where the file is located at one of these paths.",
+    help="Limits events to file events where the file is located at one of these paths. Applies to endpoint file events only.",
 )
 process_owner_option = click.option(
     "--process-owner",
     multiple=True,
     callback=searchopt.is_in_filter(f.ProcessOwner),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
-    help="Limits events to exposure events where one of these users owns "
-    "the process behind the exposure.",
+    help="Limits exposure events by process owner, as reported by the device’s operating system. Applies only to `Printed` and `Browser or app read` events",
 )
 tab_url_option = click.option(
     "--tab-url",
     multiple=True,
     callback=searchopt.is_in_filter(f.TabURL),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
-    help="Limits events to be exposure events with one of these destination tab URLs.",
+    help="Limits events to be exposure events with one of the specified destination tab URLs.",
 )
 include_non_exposure_option = click.option(
     "--include-non-exposure",
@@ -152,7 +151,7 @@ def file_event_options(f):
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def security_data(state):
-    """Tools for getting security related data, such as file events."""
+    """Tools for getting file event data."""
     # store cursor getter on the group state so shared --begin option can use it in validation
     state.cursor_getter = _get_file_event_cursor_store
 
@@ -161,7 +160,7 @@ def security_data(state):
 @click.argument("checkpoint-name")
 @sdk_options()
 def clear_checkpoint(state, checkpoint_name):
-    """Remove the saved file event checkpoint from '--use-checkpoint/-c' mode."""
+    """Remove the saved file event checkpoint from `--use-checkpoint/-c` mode."""
     _get_file_event_cursor_store(state.profile.name).delete(checkpoint_name)
 
 

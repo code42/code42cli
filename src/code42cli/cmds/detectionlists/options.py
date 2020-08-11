@@ -7,4 +7,4 @@ cloud_alias_option = click.option(
     "that they use for cloud services such as Google Drive, OneDrive, or Box, "
     "add and monitor the alias.",
 )
-notes_option = click.option("--notes", help="Notes about the employee.")
+notes_option = click.option("--notes", help="Optional notes about the employee.")

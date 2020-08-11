@@ -14,7 +14,7 @@ from code42cli.util import does_user_agree
 
 @click.group()
 def profile():
-    """For managing Code42 settings."""
+    """For managing Code42 connection settings."""
     pass
 
 
@@ -26,7 +26,7 @@ name_option = click.option(
     help="The name of the Code42 CLI profile to use when executing this command.",
 )
 server_option = click.option(
-    "-s", "--server", required=True, help="The url and port of the Code42 server.",
+    "-s", "--server", required=True, help="The URL you use to sign into Code42.",
 )
 
 username_option = click.option(
@@ -43,7 +43,7 @@ disable_ssl_option = click.option(
     "--disable-ssl-errors",
     is_flag=True,
     help="For development purposes, do not validate the SSL certificates of Code42 servers. "
-    "This is not recommended unless it is required.",
+    "This is not recommended, except for specific scenarios like testing.",
 )
 
 
