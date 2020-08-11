@@ -52,9 +52,9 @@ def generate_template_cmd_factory(group_name, commands_dict):
     )
     def generate_template(cmd, path):
         """\b
-        Generate the csv template needed for bulk adding/removing users.
+        Generate the CSV template needed for bulk adding/removing users.
 
-        Optional PATH argument can be provided to write to a specific file path/name.
+        Add the optional PATH argument to write to a specific file path/name.
         """
         columns = commands_dict[cmd]
         if not path:

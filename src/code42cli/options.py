@@ -12,7 +12,7 @@ yes_option = click.option(
     is_flag=True,
     expose_value=False,
     callback=lambda ctx, param, value: ctx.obj.set_assume_yes(value),
-    help='Assume "yes" as answer to all prompts and run non-interactively.',
+    help='Assume "yes" as the answer to all prompts and run non-interactively.',
 )
 
 
