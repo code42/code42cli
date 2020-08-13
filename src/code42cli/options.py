@@ -152,3 +152,17 @@ class OrderedGroup(click.Group):
 
     def list_commands(self, ctx):
         return self.commands
+
+
+def server_options(f):
+    hostname_arg = click.argument("hostname")
+    protocol_option = click.option(
+        "-p",
+        "--protocol",
+        type=click.Choice(ServerProtocol()),
+        default=ServerProtocol.UDP,
+        help="Protocol used to send logs to server.",
+    )
+    f = hostname_arg(f)
+    f = protocol_option(f)
+    return f

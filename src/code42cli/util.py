@@ -144,3 +144,11 @@ class warn_interrupt:
                 return func(*args, **kwargs)
 
         return inner
+
+
+def get_url_parts(url_str):
+    parts = url_str.split(":")
+    port = None
+    if len(parts) > 1 and parts[1] != "":
+        port = int(parts[1])
+    return parts[0], port

@@ -5,6 +5,7 @@ import py42.sdk.queries.alerts.filters as f
 from c42eventextractor.extractors import AlertExtractor
 from click import echo
 
+from code42cli.options import server_options
 import code42cli.cmds.search.enums as enum
 import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
@@ -185,15 +186,41 @@ def search(
     output_header = ext.try_get_default_header(
         include_all, SEARCH_DEFAULT_HEADER, format
     )
-    format_func = get_output_format_func(format)
+    #format_func = get_output_format_func(format)
+    _extract_events(cli_state, format, begin, end, advanced_query, use_checkpoint, or_query, **kwargs)
+
+
+@alerts.command()
+@server_options
+@alert_options
+@search_options
+@click.option(
+    "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
+)
+@opt.sdk_options
+def send_to(
+    cli_state, format, hostname, protocol, begin, end, advanced_query, use_checkpoint, or_query, **kwargs
+):
+    """Send alerts to the given server address."""
+    # output_logger = logger_factory.get_logger_for_server(hostname, protocol, format)
+    _extract_events(cli_state, format, begin, end, advanced_query, use_checkpoint, or_query, **kwargs)
+
+
+def _get_alert_extractor(sdk, handlers):
+    return AlertExtractor(sdk, handlers)
+
+
+def _get_alert_cursor_store(profile_name):
+    return AlertCursorStore(profile_name)
+
+
+def _extract_events(cli_state, begin, end, advanced_query, use_checkpoint, or_query, **kwargs ):
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
     handlers = ext.create_handlers(
         cli_state.sdk,
         AlertExtractor,
         cursor,
-        use_checkpoint,
-        format_func=format_func,
-        output_header=output_header,
+        use_checkpoint
     )
     extractor = _get_alert_extractor(cli_state.sdk, handlers)
     extractor.use_or_query = or_query
@@ -207,11 +234,3 @@ def search(
         extractor.extract(*cli_state.search_filters)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         echo("No results found.")
-
-
-def _get_alert_extractor(sdk, handlers):
-    return AlertExtractor(sdk, handlers)
-
-
-def _get_alert_cursor_store(profile_name):
-    return AlertCursorStore(profile_name)
