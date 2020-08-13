@@ -1,5 +1,6 @@
 import json
 
+import click
 from c42eventextractor import ExtractionHandlers
 from click import secho
 from py42.sdk.queries.query_filter import QueryFilterTimestampField
@@ -7,6 +8,7 @@ from py42.sdk.queries.query_filter import QueryFilterTimestampField
 import code42cli.errors as errors
 from code42cli.date_helper import verify_timestamp_order
 from code42cli.logger import get_main_cli_logger
+from code42cli.output_formats import get_format_header
 from code42cli.util import warn_interrupt
 
 logger = get_main_cli_logger()
@@ -29,7 +31,7 @@ def _get_alert_details(sdk, alert_summary_list):
 
 
 def create_handlers(
-    sdk, extractor_class, cursor_store, checkpoint_name,
+    sdk, extractor_class, cursor_store, checkpoint_name, include_all, output_format
 ):
     extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = ExtractionHandlers()
@@ -63,11 +65,15 @@ def create_handlers(
                 events = _get_alert_details(sdk, events)
             except Exception as ex:
                 handlers.handle_error(ex)
-        total_events = len(events)
-        handlers.TOTAL_EVENTS += total_events
-        handlers.EVENTS = events
-        if total_events:
-            last_event_timestamp = extractor._get_timestamp_from_item(events[-1])
+
+        handlers.TOTAL_EVENTS += len(events)
+        event = None
+        for event in events:
+            output = _process_events(output_format, include_all, event)
+            click.echo(output)
+
+        if event:
+            last_event_timestamp = extractor._get_timestamp_from_item(event)
             handlers.record_cursor_position(last_event_timestamp)
 
     handlers.handle_response = handle_response
@@ -97,3 +103,8 @@ def create_time_range_filter(filter_cls, begin_date=None, end_date=None):
 
     elif end_date and not begin_date:
         return filter_cls.on_or_before(end_date)
+
+
+def _process_events(output_format, include_all, event):
+    format_header = get_format_header(include_all, event)
+    return output_format([event], format_header)

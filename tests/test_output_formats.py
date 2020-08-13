@@ -6,6 +6,7 @@ from code42cli.output_formats import get_format_header
 from code42cli.output_formats import output_format
 from code42cli.output_formats import to_csv
 from code42cli.output_formats import to_dynamic_csv
+from code42cli.output_formats import to_event_table
 from code42cli.output_formats import to_formatted_json
 from code42cli.output_formats import to_json
 from code42cli.output_formats import to_table
@@ -194,12 +195,12 @@ def test_extraction_output_format_returns_to_json_function_when_raw_json_format_
 
 def test_extraction_output_format_returns_to_table_function_when_table_format_option_is_passed():
     format_function = extraction_output_format(None, None, "TABLE")
-    assert id(format_function) == id(to_table)
+    assert id(format_function) == id(to_event_table)
 
 
 def test_extraction_output_format_returns_to_table_function_when_no_format_option_is_passed():
     format_function = extraction_output_format(None, None, None)
-    assert id(format_function) == id(to_table)
+    assert id(format_function) == id(to_event_table)
 
 
 def test_get_format_header_returns_all_keys_when_include_all_is_false():

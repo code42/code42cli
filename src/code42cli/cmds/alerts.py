@@ -10,7 +10,7 @@ import code42cli.errors as errors
 import code42cli.options as opt
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.output_formats import extraction_format_option as format_option
-from code42cli.output_formats import get_format_header
+
 
 search_options = searchopt.create_search_options("alerts")
 
@@ -174,7 +174,12 @@ def search(
     """Search for alerts."""
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
     handlers = ext.create_handlers(
-        cli_state.sdk, AlertExtractor, cursor, use_checkpoint,
+        cli_state.sdk,
+        AlertExtractor,
+        cursor,
+        use_checkpoint,
+        include_all=include_all,
+        output_format=format,
     )
     extractor = _get_alert_extractor(cli_state.sdk, handlers)
     extractor.use_or_query = or_query
@@ -188,9 +193,6 @@ def search(
         extractor.extract(*cli_state.search_filters)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         echo("No results found.")
-    else:
-        output = _process_events(format, include_all, handlers.EVENTS)
-        click.echo_via_pager(output)
 
 
 def _get_alert_extractor(sdk, handlers):
@@ -199,8 +201,3 @@ def _get_alert_extractor(sdk, handlers):
 
 def _get_alert_cursor_store(profile_name):
     return AlertCursorStore(profile_name)
-
-
-def _process_events(output_format, include_all, events):
-    format_header = get_format_header(include_all, events[0])
-    return output_format(events, format_header)

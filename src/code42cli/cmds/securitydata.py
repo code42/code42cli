@@ -191,7 +191,12 @@ def search(
     )
 
     handlers = ext.create_handlers(
-        state.sdk, FileEventExtractor, cursor, use_checkpoint,
+        state.sdk,
+        FileEventExtractor,
+        cursor,
+        use_checkpoint,
+        include_all,
+        output_format=format,
     )
     extractor = _get_file_event_extractor(state.sdk, handlers)
     extractor.use_or_query = or_query
@@ -208,9 +213,6 @@ def search(
         extractor.extract(*state.search_filters)
     if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
         echo("No results found.")
-    else:
-        output = _process_events(format, include_all, handlers.EVENTS)
-        click.echo_via_pager(output)
 
 
 @security_data.group(cls=OrderedGroup)

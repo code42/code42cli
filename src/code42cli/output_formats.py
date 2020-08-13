@@ -30,11 +30,11 @@ def extraction_output_format(_, __, value):
         if value == OutputFormat.RAW:
             return to_json
         if value == OutputFormat.TABLE:
-            return to_table
+            return to_event_table
         if value == OutputFormat.JSON:
             return to_formatted_json
     # default option
-    return to_table
+    return to_event_table
 
 
 format_option = click.option(
@@ -59,7 +59,7 @@ def to_dynamic_csv(output, header):
     string_io = io.StringIO()
     writer = csv.DictWriter(string_io, fieldnames=header)
     filtered_output = [{key: row[key] for key in header} for row in output]
-    writer.writeheader()
+    # writer.writeheader()
     writer.writerows(filtered_output)
     return string_io.getvalue()
 
@@ -74,6 +74,11 @@ def to_csv(output, header):
         lines.append(line)
 
     return "\n".join(lines)
+
+
+def to_event_table(output, header):
+    rows, column_size = find_format_width(output, header, False)
+    return format_to_table(rows, column_size)
 
 
 def to_table(output, header):

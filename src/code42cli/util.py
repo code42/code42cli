@@ -38,7 +38,7 @@ def get_user_project_path(*subdirs):
     return result_path
 
 
-def find_format_width(record, header):
+def find_format_width(record, header, include_header=True):
     """Fetches needed keys/items to be displayed based on header keys.
 
     Finds the largest string against each column so as to decide the padding size for the column.
@@ -47,11 +47,14 @@ def find_format_width(record, header):
         record (list of dict), data to be formatted.
         header (dict), key-value where keys should map to keys of record dict and
           value is the corresponding column name to be displayed on the cli.
+        include_header (bool), include header in output, defaults to True.
 
     Returns:
         tuple (list of dict, dict), i.e Filtered records, padding size of columns.
     """
-    rows = [header]
+    rows = []
+    if include_header:
+        rows.append(header)
 
     # Set default max width items to column names
     max_width_item = dict(header.items())
