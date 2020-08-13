@@ -13,6 +13,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Fixed
 
 - Bug where `code42 legal-hold show` would error when terminal was too small.
+- Fixed bug in `departing_employee bulk add` command that allowed invalid dates to be passed without validation.
 
 ### Changed
 
