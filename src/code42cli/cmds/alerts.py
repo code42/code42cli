@@ -168,7 +168,7 @@ def clear_checkpoint(state, checkpoint_name):
     "--include-all",
     default=False,
     is_flag=True,
-    help="Display complete list of data items from the first level of the nested response.",
+    help="Display simple properties of the primary level of the nested response.",
 )
 def search(
     cli_state,
