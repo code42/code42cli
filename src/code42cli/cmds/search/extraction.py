@@ -14,6 +14,7 @@ from code42cli.util import warn_interrupt
 logger = get_main_cli_logger()
 
 _ALERT_DETAIL_BATCH_SIZE = 100
+_EVENT_COUNT_PER_PAGE = 10
 
 
 def _get_alert_details(sdk, alert_summary_list):
@@ -28,6 +29,13 @@ def _get_alert_details(sdk, alert_summary_list):
         results.extend(r["alerts"])
     results = sorted(results, key=lambda x: x["createdAt"], reverse=True)
     return results
+
+
+def _pager(events, page_size):
+    while len(events) > page_size:
+        yield events[:page_size]
+        del events[:page_size]
+    yield events[:]
 
 
 def create_handlers(
@@ -66,14 +74,15 @@ def create_handlers(
             except Exception as ex:
                 handlers.handle_error(ex)
 
-        handlers.TOTAL_EVENTS += len(events)
-        event = None
-        for event in events:
-            output = _process_events(output_format, include_all, event)
-            click.echo(output)
+        total_events = len(events)
+        handlers.TOTAL_EVENTS += total_events
 
-        if event:
-            last_event_timestamp = extractor._get_timestamp_from_item(event)
+        for events_per_page in _pager(events, _EVENT_COUNT_PER_PAGE):
+            output = _process_events(output_format, include_all, events_per_page)
+            click.echo_via_pager(output)
+
+        if total_events:
+            last_event_timestamp = extractor._get_timestamp_from_item(events[-1])
             handlers.record_cursor_position(last_event_timestamp)
 
     handlers.handle_response = handle_response
@@ -105,6 +114,6 @@ def create_time_range_filter(filter_cls, begin_date=None, end_date=None):
         return filter_cls.on_or_before(end_date)
 
 
-def _process_events(output_format, include_all, event):
-    format_header = get_format_header(include_all, event)
-    return output_format([event], format_header)
+def _process_events(output_format, include_all, events):
+    format_header = get_format_header(include_all, events[0])
+    return output_format(events, format_header)

@@ -32,7 +32,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - The `path` positional argument for bulk `generate-template` commands is now an option (`--p/-p`).
 - Below `search` subcommands accept argument `--format/-f` to display result in formats `csv`, `table`, `json`, `raw-json`:
-    - BREAKING CHANGE: Default output format is changed to `table` format from `raw-json` 
+    - BREAKING CHANGE: Default output format is changed to `table` format from `raw-json`, returns a paginated response
     By default only root/top level items from the response will be displayed, to view all items, that contains nested data, pass `--include-all` option.
     - `code42 alerts search`
     - `code42 security-data search`
