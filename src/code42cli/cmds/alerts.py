@@ -1,3 +1,5 @@
+from _collections import OrderedDict
+
 import click
 import py42.sdk.queries.alerts.filters as f
 from c42eventextractor.extractors import AlertExtractor
@@ -11,6 +13,14 @@ import code42cli.options as opt
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.output_formats import extraction_format_option as format_option
 
+
+SEARCH_DEFAULT_HEADER = OrderedDict()
+SEARCH_DEFAULT_HEADER["name"] = "RuleName"
+SEARCH_DEFAULT_HEADER["actor"] = "Username"
+SEARCH_DEFAULT_HEADER["createdAt"] = "ObservedDate"
+SEARCH_DEFAULT_HEADER["state"] = "Status"
+SEARCH_DEFAULT_HEADER["severity"] = "Severity"
+SEARCH_DEFAULT_HEADER["description"] = "Description"
 
 search_options = searchopt.create_search_options("alerts")
 
@@ -180,6 +190,7 @@ def search(
         use_checkpoint,
         include_all=include_all,
         output_format=format,
+        output_header=SEARCH_DEFAULT_HEADER,
     )
     extractor = _get_alert_extractor(cli_state.sdk, handlers)
     extractor.use_or_query = or_query

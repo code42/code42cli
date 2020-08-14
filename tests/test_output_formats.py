@@ -2,7 +2,7 @@ import json
 from collections import OrderedDict
 
 from code42cli.output_formats import extraction_output_format
-from code42cli.output_formats import get_format_header
+from code42cli.output_formats import get_dynamic_header
 from code42cli.output_formats import output_format
 from code42cli.output_formats import to_csv
 from code42cli.output_formats import to_dynamic_csv
@@ -193,7 +193,7 @@ def test_extraction_output_format_returns_to_json_function_when_raw_json_format_
 
 
 def test_get_format_header_returns_all_keys_when_include_all_is_false():
-    header = get_format_header(False, TEST_NESTED_DATA)
+    header = get_dynamic_header(TEST_NESTED_DATA)
     assert header == {
         "test": "Test",
         "name": "Name",
@@ -205,8 +205,7 @@ def test_get_format_header_returns_all_keys_when_include_all_is_false():
 
 
 def test_get_format_header_returns_only_root_level_keys_when_include_all_is_true():
-    header = get_format_header(True, TEST_NESTED_DATA)
-    print(header)
+    header = get_dynamic_header(TEST_NESTED_DATA)
     assert header == {
         "test": "Test",
         "name": "Name",

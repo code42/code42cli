@@ -8,7 +8,7 @@ from py42.sdk.queries.query_filter import QueryFilterTimestampField
 import code42cli.errors as errors
 from code42cli.date_helper import verify_timestamp_order
 from code42cli.logger import get_main_cli_logger
-from code42cli.output_formats import get_format_header
+from code42cli.output_formats import get_dynamic_header
 from code42cli.util import warn_interrupt
 
 logger = get_main_cli_logger()
@@ -39,7 +39,13 @@ def _pager(events, page_size):
 
 
 def create_handlers(
-    sdk, extractor_class, cursor_store, checkpoint_name, include_all, output_format
+    sdk,
+    extractor_class,
+    cursor_store,
+    checkpoint_name,
+    include_all,
+    output_format,
+    output_header,
 ):
     extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = ExtractionHandlers()
@@ -78,7 +84,9 @@ def create_handlers(
         handlers.TOTAL_EVENTS += total_events
 
         for events_per_page in _pager(events, _EVENT_COUNT_PER_PAGE):
-            output = _process_events(output_format, include_all, events_per_page)
+            output = _process_events(
+                output_format, include_all, events_per_page, output_header
+            )
             click.echo_via_pager(output)
 
         if total_events:
@@ -114,6 +122,7 @@ def create_time_range_filter(filter_cls, begin_date=None, end_date=None):
         return filter_cls.on_or_before(end_date)
 
 
-def _process_events(output_format, include_all, events):
-    format_header = get_format_header(include_all, events[0])
-    return output_format(events, format_header)
+def _process_events(output_format, include_all, events, output_header):
+    if include_all:
+        output_header = get_dynamic_header(events[0])
+    return output_format(events, output_header)

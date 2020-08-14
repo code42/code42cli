@@ -17,7 +17,7 @@ from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
 from code42cli.output_formats import extraction_format_option
 from code42cli.output_formats import format_option
-from code42cli.output_formats import get_format_header
+from code42cli.output_formats import get_dynamic_header
 
 
 logger = get_main_cli_logger()
@@ -26,6 +26,17 @@ _HEADER_KEYS_MAP = OrderedDict()
 _HEADER_KEYS_MAP["name"] = "Name"
 _HEADER_KEYS_MAP["id"] = "Id"
 
+SEARCH_DEFAULT_HEADER = OrderedDict()
+SEARCH_DEFAULT_HEADER["eventId"] = "EventId"
+SEARCH_DEFAULT_HEADER["eventType"] = "Type"
+SEARCH_DEFAULT_HEADER["eventTimestamp"] = "EventTimestamp"
+SEARCH_DEFAULT_HEADER["fileCategory"] = "FileCategory"
+SEARCH_DEFAULT_HEADER["fileSize"] = "FileSize"
+SEARCH_DEFAULT_HEADER["fileOwner"] = "FileOwner"
+SEARCH_DEFAULT_HEADER["md5Checksum"] = "MD5Checksum"
+SEARCH_DEFAULT_HEADER["sha256Checksum"] = "SHA256Checksum"
+SEARCH_DEFAULT_HEADER["filePath"] = "FilePath"
+SEARCH_DEFAULT_HEADER["fileName"] = "FileName"
 
 search_options = searchopt.create_search_options("file events")
 
@@ -197,6 +208,7 @@ def search(
         use_checkpoint,
         include_all,
         output_format=format,
+        output_header=SEARCH_DEFAULT_HEADER,
     )
     extractor = _get_file_event_extractor(state.sdk, handlers)
     extractor.use_or_query = or_query
@@ -251,5 +263,5 @@ def _get_file_event_cursor_store(profile_name):
 
 
 def _process_events(output_format, include_all, events):
-    format_header = get_format_header(include_all, events[0])
+    format_header = get_dynamic_header(include_all, events[0])
     return output_format(events, format_header)
