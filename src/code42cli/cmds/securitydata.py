@@ -27,7 +27,8 @@ _HEADER_KEYS_MAP["name"] = "Name"
 _HEADER_KEYS_MAP["id"] = "Id"
 
 SEARCH_DEFAULT_HEADER = OrderedDict()
-SEARCH_DEFAULT_HEADER["eventId"] = "EventId"
+SEARCH_DEFAULT_HEADER["filePath"] = "FilePath"
+SEARCH_DEFAULT_HEADER["fileName"] = "FileName"
 SEARCH_DEFAULT_HEADER["eventType"] = "Type"
 SEARCH_DEFAULT_HEADER["eventTimestamp"] = "EventTimestamp"
 SEARCH_DEFAULT_HEADER["fileCategory"] = "FileCategory"
@@ -35,8 +36,7 @@ SEARCH_DEFAULT_HEADER["fileSize"] = "FileSize"
 SEARCH_DEFAULT_HEADER["fileOwner"] = "FileOwner"
 SEARCH_DEFAULT_HEADER["md5Checksum"] = "MD5Checksum"
 SEARCH_DEFAULT_HEADER["sha256Checksum"] = "SHA256Checksum"
-SEARCH_DEFAULT_HEADER["filePath"] = "FilePath"
-SEARCH_DEFAULT_HEADER["fileName"] = "FileName"
+
 
 search_options = searchopt.create_search_options("file events")
 
