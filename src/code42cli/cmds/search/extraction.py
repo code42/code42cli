@@ -31,7 +31,7 @@ def _get_alert_details(sdk, alert_summary_list):
     return results
 
 
-def _pager(events, page_size):
+def _paginate(events, page_size):
     while len(events) > page_size:
         yield events[:page_size]
         del events[:page_size]
@@ -83,7 +83,7 @@ def create_handlers(
         total_events = len(events)
         handlers.TOTAL_EVENTS += total_events
 
-        for events_per_page in _pager(events, _EVENT_COUNT_PER_PAGE):
+        for events_per_page in _paginate(events, _EVENT_COUNT_PER_PAGE):
             output = _process_events(
                 output_format, include_all, events_per_page, output_header
             )

@@ -192,7 +192,7 @@ def test_extraction_output_format_returns_to_json_function_when_raw_json_format_
     assert id(format_function) == id(to_json)
 
 
-def test_get_format_header_returns_all_keys_when_include_all_is_false():
+def test_get_format_header_returns_all_keys_only_which_are_not_nested():
     header = get_dynamic_header(TEST_NESTED_DATA)
     assert header == {
         "test": "Test",
@@ -200,22 +200,5 @@ def test_get_format_header_returns_all_keys_when_include_all_is_false():
         "description": "Description",
         "severity": "Severity",
         "tenantId": "Tenantid",
-        "id": "Id",
-    }
-
-
-def test_get_format_header_returns_only_root_level_keys_when_include_all_is_true():
-    header = get_dynamic_header(TEST_NESTED_DATA)
-    assert header == {
-        "test": "Test",
-        "name": "Name",
-        "description": "Description",
-        "severity": "Severity",
-        "isSystem": "Issystem",
-        "isEnabled": "Isenabled",
-        "ruleSource": "Rulesource",
-        "tenantId": "Tenantid",
-        "observerRuleId": "Observerruleid",
-        "type": "Type",
         "id": "Id",
     }
