@@ -17,7 +17,6 @@ from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
 from code42cli.output_formats import extraction_format_option
 from code42cli.output_formats import format_option
-from code42cli.output_formats import get_dynamic_header
 
 
 logger = get_main_cli_logger()
@@ -260,4 +259,3 @@ def _get_file_event_extractor(sdk, handlers):
 
 def _get_file_event_cursor_store(profile_name):
     return FileEventCursorStore(profile_name)
-

@@ -14,7 +14,6 @@ from code42cli.util import warn_interrupt
 logger = get_main_cli_logger()
 
 _ALERT_DETAIL_BATCH_SIZE = 100
-_EVENT_COUNT_PER_PAGE = 100
 
 
 def _get_alert_details(sdk, alert_summary_list):
@@ -29,13 +28,6 @@ def _get_alert_details(sdk, alert_summary_list):
         results.extend(r["alerts"])
     results = sorted(results, key=lambda x: x["createdAt"], reverse=True)
     return results
-
-
-def _paginate(events, page_size):
-    while len(events) > page_size:
-        yield events[:page_size]
-        del events[:page_size]
-    yield events[:]
 
 
 def create_handlers(
@@ -83,11 +75,10 @@ def create_handlers(
         total_events = len(events)
         handlers.TOTAL_EVENTS += total_events
 
-        for events_per_page in _paginate(events, _EVENT_COUNT_PER_PAGE):
-            output = _process_events(
-                output_format, include_all, events_per_page, output_header
-            )
-            click.echo_via_pager(output)
+        def paginate():
+            yield _process_events(output_format, include_all, events, output_header)
+
+        click.echo_via_pager(paginate)
 
     handlers.handle_response = handle_response
     return handlers
