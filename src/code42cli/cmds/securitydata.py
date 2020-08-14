@@ -261,7 +261,3 @@ def _get_file_event_extractor(sdk, handlers):
 def _get_file_event_cursor_store(profile_name):
     return FileEventCursorStore(profile_name)
 
-
-def _process_events(output_format, include_all, events):
-    format_header = get_dynamic_header(include_all, events[0])
-    return output_format(events, format_header)
