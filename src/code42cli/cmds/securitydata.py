@@ -11,11 +11,11 @@ import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
+from code42cli.cmds.search.options import extraction_format_option
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.output_formats import extraction_format_option
 from code42cli.output_formats import format_option
 
 
@@ -149,6 +149,7 @@ def file_event_options(f):
     f = process_owner_option(f)
     f = tab_url_option(f)
     f = include_non_exposure_option(f)
+    f = format_option(f)
     f = extraction_format_option(f)
     f = saved_search_option(f)
     return f

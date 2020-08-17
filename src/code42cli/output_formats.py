@@ -4,9 +4,18 @@ import json
 
 import click
 
-from code42cli.cmds.enums import OutputFormat
 from code42cli.util import find_format_width
 from code42cli.util import format_to_table
+
+
+class OutputFormat:
+    TABLE = "TABLE"
+    CSV = "CSV"
+    JSON = "JSON"
+    RAW = "RAW-JSON"
+
+    def __iter__(self):
+        return iter([self.TABLE, self.CSV, self.JSON, self.RAW])
 
 
 def output_format(_, __, value):
@@ -23,35 +32,12 @@ def output_format(_, __, value):
     return to_table
 
 
-def extraction_output_format(_, __, value):
-    if value is not None:
-        if value == OutputFormat.CSV:
-            return to_dynamic_csv
-        if value == OutputFormat.RAW:
-            return to_json
-        if value == OutputFormat.TABLE:
-            return to_table
-        if value == OutputFormat.JSON:
-            return to_formatted_json
-    # default option
-    return to_table
-
-
 format_option = click.option(
     "-f",
     "--format",
     type=click.Choice(OutputFormat(), case_sensitive=False),
     help="The output format of the result. Defaults to table format.",
     callback=output_format,
-)
-
-
-extraction_format_option = click.option(
-    "-f",
-    "--format",
-    type=click.Choice(OutputFormat(), case_sensitive=False),
-    help="The output format of the result. Defaults to table format.",
-    callback=extraction_output_format,
 )
 
 
