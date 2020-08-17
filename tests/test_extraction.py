@@ -16,15 +16,14 @@ def search(*args, **kwargs):
     pass
 
 
-class TestExtractor(BaseExtractor):
-    def __init__(self, handlers, timestamp_filter):
-        timestamp_filter._term = "test_term"
-        super().__init__(key, search, handlers, timestamp_filter, TestQuery)
-
-
 def test_create_handlers_creates_handlers_that_pass_events_to_output_format(
     mocker, sdk
 ):
+    class TestExtractor(BaseExtractor):
+        def __init__(self, handlers, timestamp_filter):
+            timestamp_filter._term = "test_term"
+            super().__init__(key, search, handlers, timestamp_filter, TestQuery)
+
     output_format = mocker.MagicMock()
     cursor_store = mocker.MagicMock(sepc=BaseCursorStore)
     handlers = create_handlers(
@@ -32,7 +31,7 @@ def test_create_handlers_creates_handlers_that_pass_events_to_output_format(
     )
     http_response = mocker.MagicMock(spec=Response)
     events = [{"food": "bar"}]
-    http_response.text = '{{"{0}": "{1}"}}'.format(key, events)
+    http_response.text = '{{"{0}": [{{"food": "bar"}}]}}'.format(key, events)
     py42_response = Py42Response(http_response)
     handlers.handle_response(py42_response)
     output_format.assert_called_once_with(events, "header")
