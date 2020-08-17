@@ -5,15 +5,20 @@ import py42.sdk.queries.alerts.filters as f
 from c42eventextractor.extractors import AlertExtractor
 from click import echo
 
-from code42cli.options import server_options
 import code42cli.cmds.search.enums as enum
 import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 import code42cli.options as opt
 from code42cli.cmds.search.cursor_store import AlertCursorStore
+<<<<<<< HEAD
 from code42cli.options import format_option
 from code42cli.output_formats import get_output_format_func
+=======
+from code42cli.options import server_options
+from code42cli.output_formats import extraction_format_option as format_option
+
+>>>>>>> Added send-to commands
 
 SEARCH_DEFAULT_HEADER = OrderedDict()
 SEARCH_DEFAULT_HEADER["name"] = "RuleName"
@@ -22,6 +27,8 @@ SEARCH_DEFAULT_HEADER["createdAt"] = "ObservedDate"
 SEARCH_DEFAULT_HEADER["state"] = "Status"
 SEARCH_DEFAULT_HEADER["severity"] = "Severity"
 SEARCH_DEFAULT_HEADER["description"] = "Description"
+
+
 
 search_options = searchopt.create_search_options("alerts")
 
@@ -183,27 +190,59 @@ def search(
     **kwargs
 ):
     """Search for alerts."""
+<<<<<<< HEAD
     output_header = ext.try_get_default_header(
         include_all, SEARCH_DEFAULT_HEADER, format
     )
     #format_func = get_output_format_func(format)
     _extract_events(cli_state, format, begin, end, advanced_query, use_checkpoint, or_query, **kwargs)
 
+=======
+    _extract_events(
+        cli_state,
+        format,
+        begin,
+        end,
+        advanced_query,
+        use_checkpoint,
+        or_query,
+        include_all,
+        **kwargs
+    )
+>>>>>>> Added send-to commands
 
 @alerts.command()
-@server_options
 @alert_options
 @search_options
 @click.option(
     "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
 )
-@opt.sdk_options
+@opt.sdk_options()
+@server_options
 def send_to(
-    cli_state, format, hostname, protocol, begin, end, advanced_query, use_checkpoint, or_query, **kwargs
+    cli_state,
+    format,
+    hostname,
+    protocol,
+    begin,
+    end,
+    advanced_query,
+    use_checkpoint,
+    or_query,
+    **kwargs
 ):
     """Send alerts to the given server address."""
     # output_logger = logger_factory.get_logger_for_server(hostname, protocol, format)
-    _extract_events(cli_state, format, begin, end, advanced_query, use_checkpoint, or_query, **kwargs)
+    _extract_events(
+        cli_state,
+        format,
+        begin,
+        end,
+        advanced_query,
+        use_checkpoint,
+        or_query,
+        **kwargs
+    )
 
 
 def _get_alert_extractor(sdk, handlers):
@@ -214,7 +253,17 @@ def _get_alert_cursor_store(profile_name):
     return AlertCursorStore(profile_name)
 
 
-def _extract_events(cli_state, begin, end, advanced_query, use_checkpoint, or_query, **kwargs ):
+def _extract_events(
+    cli_state,
+    output_logger,
+    begin,
+    end,
+    advanced_query,
+    use_checkpoint,
+    or_query,
+    include_all,
+    **kwargs
+):
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
     handlers = ext.create_handlers(
         cli_state.sdk,

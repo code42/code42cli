@@ -19,7 +19,14 @@ from code42cli.options import format_option
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
+<<<<<<< HEAD
 from code42cli.output_formats import get_output_format_func
+=======
+from code42cli.output_formats import extraction_format_option
+from code42cli.output_formats import format_option
+from code42cli.options import server_options
+
+>>>>>>> Added send-to commands
 
 logger = get_main_cli_logger()
 
@@ -210,33 +217,19 @@ def search(
     output_header = ext.try_get_default_header(
         include_all, SEARCH_DEFAULT_HEADER, format
     )
-    format_func = get_file_events_output_format_func(format)
-    cursor = (
-        _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
-    )
-    handlers = ext.create_handlers(
-        state.sdk,
-        FileEventExtractor,
-        cursor,
+    # format_func = get_file_events_output_format_func(format)
+    _extract_events(
+        state,
+        format,
+        begin,
+        end,
+        advanced_query,
         use_checkpoint,
-        format_func=format_func,
-        output_header=output_header,
+        saved_search,
+        or_query,
+        include_all,
+        **kwargs,
     )
-    extractor = _get_file_event_extractor(state.sdk, handlers)
-    extractor.use_or_query = or_query
-    extractor.or_query_exempt_filters.append(f.ExposureType.exists())
-    if advanced_query:
-        extractor.extract_advanced(advanced_query)
-    elif saved_search:
-        extractor.extract(*saved_search._filter_group_list)
-    else:
-        if begin or end:
-            state.search_filters.append(
-                ext.create_time_range_filter(f.EventTimestamp, begin, end)
-            )
-        extractor.extract(*state.search_filters)
-    if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
-        echo("No results found.")
 
 
 @security_data.group(cls=OrderedGroup)
@@ -267,9 +260,78 @@ def show(state, search_id):
     echo(pformat(response["searches"]))
 
 
+@security_data.command()
+@file_event_options
+@search_options
+@click.option(
+    "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
+)
+@sdk_options()
+@server_options
+def send_to(
+    state,
+    format,
+    hostname,
+    protocol,
+    begin,
+    end,
+    advanced_query,
+    use_checkpoint,
+    saved_search,
+    or_query,
+    **kwargs
+):
+    """Send alerts to the given server address."""
+    _extract_events(
+        state,
+        format,
+        begin,
+        end,
+        advanced_query,
+        use_checkpoint,
+        saved_search,
+        or_query,
+        **kwargs,
+    )
+
+
 def _get_file_event_extractor(sdk, handlers):
     return FileEventExtractor(sdk, handlers)
 
 
 def _get_file_event_cursor_store(profile_name):
     return FileEventCursorStore(profile_name)
+
+
+def _extract_events(
+    state,
+    output_logger,
+    begin,
+    end,
+    advanced_query,
+    use_checkpoint,
+    saved_search,
+    or_query,
+    **kwargs
+):
+    cursor = (
+        _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
+    )
+    handlers = ext.create_handlers(
+        state.sdk, FileEventExtractor, output_logger, cursor, use_checkpoint
+    )
+    extractor = _get_file_event_extractor(state.sdk, handlers)
+    extractor.use_or_query = or_query
+    extractor.or_query_exempt_filters.append(f.ExposureType.exists())
+    if advanced_query:
+        extractor.extract_advanced(advanced_query)
+    elif saved_search:
+        extractor.extract(*saved_search._filter_group_list)
+    else:
+        if begin or end:
+            state.search_filters.append(
+                ext.create_time_range_filter(f.EventTimestamp, begin, end)
+            )
+        extractor.extract(*state.search_filters)
+    if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
+        echo("No results found.")
