@@ -51,15 +51,6 @@ def extraction_output_format(_, __, value):
     return to_table
 
 
-def to_dynamic_csv(output, header):
-    string_io = io.StringIO()
-    writer = csv.DictWriter(string_io, fieldnames=header)
-    filtered_output = [{key: row[key] for key in header} for row in output]
-    writer.writeheader()
-    writer.writerows(filtered_output)
-    return string_io.getvalue()
-
-
 format_option = click.option(
     "-f",
     "--format",
@@ -67,6 +58,15 @@ format_option = click.option(
     help="The output format of the result. Defaults to table format.",
     callback=output_format,
 )
+
+
+def to_dynamic_csv(output, header):
+    string_io = io.StringIO()
+    writer = csv.DictWriter(string_io, fieldnames=header)
+    filtered_output = [{key: row[key] for key in header} for row in output]
+    writer.writeheader()
+    writer.writerows(filtered_output)
+    return string_io.getvalue()
 
 
 def to_csv(output, header):
