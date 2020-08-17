@@ -24,9 +24,9 @@ from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
 from code42cli.output_formats import CEF_DEFAULT_PRODUCT_NAME
 from code42cli.output_formats import CEF_DEFAULT_SEVERITY_LEVEL
+from code42cli.output_formats import format_option
 from code42cli.output_formats import output_format
 from code42cli.output_formats import to_dynamic_csv
-from code42cli.output_formats import format_option
 
 
 logger = get_main_cli_logger()

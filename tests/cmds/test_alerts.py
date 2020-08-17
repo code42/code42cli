@@ -384,11 +384,7 @@ def test_search_with_use_checkpoint_and_without_begin_and_without_stored_checkpo
 
 
 def test_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_extract_with_begin_date(
-    cli_state,
-    alert_extractor,
-    begin_option,
-    alert_cursor_without_checkpoint,
-    runner,
+    cli_state, alert_extractor, begin_option, alert_cursor_without_checkpoint, runner,
 ):
     result = runner.invoke(
         cli,

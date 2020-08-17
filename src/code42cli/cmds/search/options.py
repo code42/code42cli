@@ -3,15 +3,11 @@ from datetime import datetime
 from datetime import timezone
 
 import click
-from c42eventextractor.logging.formatters import FileEventDictToCEFFormatter
-from c42eventextractor.maps import JSON_TO_CEF_MAP
 
-from code42cli.cmds.search.enums import SecurityDataOutputFormat
 from code42cli.date_helper import parse_max_timestamp
 from code42cli.date_helper import parse_min_timestamp
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with
-from code42cli.output_formats import output_format
 
 logger = get_main_cli_logger()
 

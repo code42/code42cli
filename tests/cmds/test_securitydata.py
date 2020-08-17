@@ -353,10 +353,7 @@ def test_search_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_
 
 
 def test_search_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_calls_extract_with_checkpoint_and_ignores_begin_arg(
-    runner,
-    cli_state,
-    file_event_extractor,
-    file_event_cursor_with_checkpoint,
+    runner, cli_state, file_event_extractor, file_event_cursor_with_checkpoint,
 ):
     result = runner.invoke(
         cli,

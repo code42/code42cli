@@ -9,7 +9,6 @@ from requests import Request
 from requests import Response
 from tests.conftest import convert_str_to_date
 
-from code42cli import PRODUCT_NAME
 from code42cli.logger import CliLogger
 
 
