@@ -8,8 +8,10 @@ from code42cli.cmds.search.extraction import create_handlers
 key = "events"
 header = {"property": "Property"}
 
+
 class TestQuery:
     """"""
+
     pass
 
 
@@ -18,7 +20,7 @@ def search(*args, **kwargs):
 
 
 def test_create_handlers_creates_handlers_that_pass_events_to_output_format(
-    mocker, sdk, 
+    mocker, sdk,
 ):
     class TestExtractor(BaseExtractor):
         def __init__(self, handlers, timestamp_filter):
@@ -31,8 +33,13 @@ def test_create_handlers_creates_handlers_that_pass_events_to_output_format(
     output_format = mocker.MagicMock()
     cursor_store = mocker.MagicMock(sepc=BaseCursorStore)
     handlers = create_handlers(
-        sdk, TestExtractor, cursor_store, "chk-name", False, output_format, 
-        output_header=header
+        sdk,
+        TestExtractor,
+        cursor_store,
+        "chk-name",
+        False,
+        output_format,
+        output_header=header,
     )
     http_response = mocker.MagicMock(spec=Response)
     events = [{"property": "bar"}]
@@ -56,8 +63,13 @@ def test_include_all_creates_dynamic_header_from_events_to_output_format(
     output_format = mocker.MagicMock()
     cursor_store = mocker.MagicMock(sepc=BaseCursorStore)
     handlers = create_handlers(
-        sdk, TestExtractor, cursor_store, "chk-name", True, output_format,
-        output_header=header
+        sdk,
+        TestExtractor,
+        cursor_store,
+        "chk-name",
+        True,
+        output_format,
+        output_header=header,
     )
     http_response = mocker.MagicMock(spec=Response)
     events = [{"food": "bar"}]
