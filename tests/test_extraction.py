@@ -1,7 +1,6 @@
-from requests import Response
-
 from c42eventextractor.extractors import BaseExtractor
 from py42.response import Py42Response
+from requests import Response
 
 from code42cli.cmds.search.cursor_store import BaseCursorStore
 from code42cli.cmds.search.extraction import create_handlers
@@ -9,7 +8,7 @@ from code42cli.cmds.search.extraction import create_handlers
 key = "events"
 
 
-class TestQuery(object):
+class TestQuery:
     """"""
 
 
@@ -23,7 +22,9 @@ class TestExtractor(BaseExtractor):
         super().__init__(key, search, handlers, timestamp_filter, TestQuery)
 
 
-def test_create_handlers_creates_handles_that_pass_events_to_output_format(mocker, sdk):
+def test_create_handlers_creates_handlers_that_pass_events_to_output_format(
+    mocker, sdk
+):
     output_format = mocker.MagicMock()
     cursor_store = mocker.MagicMock(sepc=BaseCursorStore)
     handlers = create_handlers(
