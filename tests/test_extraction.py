@@ -23,7 +23,7 @@ class TestExtractor(BaseExtractor):
         super().__init__(key, search, handlers, timestamp_filter, TestQuery)
 
 
-def test_create_handlers(mocker, sdk):
+def test_create_handlers_creates_handles_that_pass_events_to_output_format(mocker, sdk):
     output_format = mocker.MagicMock()
     cursor_store = mocker.MagicMock(sepc=BaseCursorStore)
     handlers = create_handlers(
