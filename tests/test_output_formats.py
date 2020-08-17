@@ -115,6 +115,16 @@ d12d54f0-5160-47a8-a48f-7d5fa5b051c5,outside td,HIGH,FED_CLOUD_SHARE_PERMISSIONS
 8b393324-c34c-44ac-9f79-4313601dd859,Test different filters,MEDIUM,FED_ENDPOINT_EXFILTRATION,Alerting,True
 5eabed1d-a406-4dfc-af81-f7485ee09b19,Test Alerts using CLI,HIGH,FED_ENDPOINT_EXFILTRATION,Alerting,True"""
 
+DYNAMIC_CSV_OUTPUT = "\r\n".join(
+    [
+        "observerRuleId,name,severity,type,ruleSource,isEnabled",
+        "d12d54f0-5160-47a8-a48f-7d5fa5b051c5,outside td,HIGH,FED_CLOUD_SHARE_PERMISSIONS,Alerting,True",
+        "8b393324-c34c-44ac-9f79-4313601dd859,Test different filters,MEDIUM,FED_ENDPOINT_EXFILTRATION,Alerting,True",
+        "5eabed1d-a406-4dfc-af81-f7485ee09b19,Test Alerts using CLI,HIGH,FED_ENDPOINT_EXFILTRATION,Alerting,True",
+        "",
+    ]
+)
+
 
 TEST_NESTED_DATA = {
     "test": "TEST",
@@ -182,6 +192,11 @@ def test_output_format_returns_to_dynamic_csv_function_when_csv_option_is_passed
     assert id(extraction_output_format_function) == id(to_dynamic_csv)
 
 
+def test_output_format_returns_to_table_function_when_table_option_is_passed():
+    extraction_output_format_function = extraction_output_format(None, None, "TABLE")
+    assert id(extraction_output_format_function) == id(to_table)
+
+
 def test_extraction_output_format_returns_to_formatted_json_function_when_json__option_is_passed():
     format_function = extraction_output_format(None, None, "JSON")
     assert id(format_function) == id(to_formatted_json)
@@ -202,3 +217,8 @@ def test_get_format_header_returns_all_keys_only_which_are_not_nested():
         "tenantId": "Tenantid",
         "id": "Id",
     }
+
+
+def test_to_dynamic_csv():
+    formatted_output = to_dynamic_csv(TEST_DATA, TEST_HEADER)
+    assert formatted_output == DYNAMIC_CSV_OUTPUT
