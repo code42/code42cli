@@ -26,8 +26,8 @@ _HEADER_KEYS_MAP["name"] = "Name"
 _HEADER_KEYS_MAP["id"] = "Id"
 
 SEARCH_DEFAULT_HEADER = OrderedDict()
-SEARCH_DEFAULT_HEADER["filePath"] = "FilePath"
 SEARCH_DEFAULT_HEADER["fileName"] = "FileName"
+SEARCH_DEFAULT_HEADER["filePath"] = "FilePath"
 SEARCH_DEFAULT_HEADER["eventType"] = "Type"
 SEARCH_DEFAULT_HEADER["eventTimestamp"] = "EventTimestamp"
 SEARCH_DEFAULT_HEADER["fileCategory"] = "FileCategory"

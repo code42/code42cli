@@ -80,6 +80,11 @@ def create_handlers(
 
         click.echo_via_pager(paginate)
 
+        # To make sure the extractor records correct timestamp event when `CTRL-C` is pressed.
+        if total_events:
+            last_event_timestamp = extractor._get_timestamp_from_item(events[-1])
+            handlers.record_cursor_position(last_event_timestamp)
+
     handlers.handle_response = handle_response
     return handlers
 
