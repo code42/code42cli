@@ -37,6 +37,7 @@ def output_format(_, __, value):
     return to_table
 
 
+
 def to_dynamic_csv(output, header):
     string_io = io.StringIO()
     writer = csv.DictWriter(string_io, fieldnames=header)
@@ -44,6 +45,29 @@ def to_dynamic_csv(output, header):
     writer.writeheader()
     writer.writerows(filtered_output)
     return string_io.getvalue()
+
+
+def extraction_output_format(_, __, value):
+    if value is not None:
+        if value == OutputFormat.CSV:
+            return to_dynamic_csv
+        if value == OutputFormat.RAW:
+            return to_json
+        if value == OutputFormat.TABLE:
+            return to_table
+        if value == OutputFormat.JSON:
+            return to_formatted_json
+    # default option
+    return to_table
+
+
+format_option = click.option(
+    "-f",
+    "--format",
+    type=click.Choice(OutputFormat(), case_sensitive=False),
+    help="The output format of the result. Defaults to table format.",
+    callback=output_format,
+)
 
 
 def to_csv(output, header):

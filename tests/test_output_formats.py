@@ -4,6 +4,7 @@ from collections import OrderedDict
 from code42cli.output_formats import get_dynamic_header
 from code42cli.output_formats import output_format
 from code42cli.output_formats import to_csv
+from code42cli.output_formats import to_dynamic_csv
 from code42cli.output_formats import to_formatted_json
 from code42cli.output_formats import to_json
 from code42cli.output_formats import to_table
@@ -113,6 +114,31 @@ d12d54f0-5160-47a8-a48f-7d5fa5b051c5,outside td,HIGH,FED_CLOUD_SHARE_PERMISSIONS
 8b393324-c34c-44ac-9f79-4313601dd859,Test different filters,MEDIUM,FED_ENDPOINT_EXFILTRATION,Alerting,True
 5eabed1d-a406-4dfc-af81-f7485ee09b19,Test Alerts using CLI,HIGH,FED_ENDPOINT_EXFILTRATION,Alerting,True"""
 
+DYNAMIC_CSV_OUTPUT = "\r\n".join(
+    [
+        "observerRuleId,name,severity,type,ruleSource,isEnabled",
+        "d12d54f0-5160-47a8-a48f-7d5fa5b051c5,outside td,HIGH,FED_CLOUD_SHARE_PERMISSIONS,Alerting,True",
+        "8b393324-c34c-44ac-9f79-4313601dd859,Test different filters,MEDIUM,FED_ENDPOINT_EXFILTRATION,Alerting,True",
+        "5eabed1d-a406-4dfc-af81-f7485ee09b19,Test Alerts using CLI,HIGH,FED_ENDPOINT_EXFILTRATION,Alerting,True",
+        "",
+    ]
+)
+
+
+TEST_NESTED_DATA = {
+    "test": "TEST",
+    "name": "outside td",
+    "description": "",
+    "severity": "HIGH",
+    "isSystem": False,
+    "isEnabled": True,
+    "ruleSource": ["Alerting"],
+    "tenantId": "1d71796f-af5b-4231-9d8e-df6434da4663",
+    "observerRuleId": {"test": ["d12d54f0-5160-47a8-a48f-7d5fa5b051c5"]},
+    "type": ["FED_CLOUD_SHARE_PERMISSIONS"],
+    "id": "5157f1df-cb3e-4755-92a2-0f42c7841020",
+}
+
 
 TEST_NESTED_DATA = {
     "test": "TEST",
@@ -185,3 +211,8 @@ def test_get_format_header_returns_all_keys_only_which_are_not_nested():
         "tenantId": "Tenantid",
         "id": "Id",
     }
+
+
+def test_to_dynamic_csv():
+    formatted_output = to_dynamic_csv(TEST_DATA, TEST_HEADER)
+    assert formatted_output == DYNAMIC_CSV_OUTPUT
