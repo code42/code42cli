@@ -31,7 +31,7 @@ def test_create_handlers_creates_handlers_that_pass_events_to_output_format(
     )
     http_response = mocker.MagicMock(spec=Response)
     events = [{"food": "bar"}]
-    http_response.text = '{{"{0}": [{{"food": "bar"}}]}}'.format(key, events)
+    http_response.text = '{{"{0}": [{{"food": "bar"}}]}}'.format(key)
     py42_response = Py42Response(http_response)
     handlers.handle_response(py42_response)
     output_format.assert_called_once_with(events, "header")
