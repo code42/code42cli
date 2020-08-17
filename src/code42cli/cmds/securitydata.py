@@ -10,13 +10,13 @@ import code42cli.cmds.search.enums as enum
 import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
-from code42cli.cmds.search import logger_factory
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.output_formats import format_option as format_output
+from code42cli.output_formats import extraction_format_option
+from code42cli.output_formats import format_option
 
 
 logger = get_main_cli_logger()
@@ -25,15 +25,21 @@ _HEADER_KEYS_MAP = OrderedDict()
 _HEADER_KEYS_MAP["name"] = "Name"
 _HEADER_KEYS_MAP["id"] = "Id"
 
+SEARCH_DEFAULT_HEADER = OrderedDict()
+SEARCH_DEFAULT_HEADER["fileName"] = "FileName"
+SEARCH_DEFAULT_HEADER["filePath"] = "FilePath"
+SEARCH_DEFAULT_HEADER["eventType"] = "Type"
+SEARCH_DEFAULT_HEADER["eventTimestamp"] = "EventTimestamp"
+SEARCH_DEFAULT_HEADER["fileCategory"] = "FileCategory"
+SEARCH_DEFAULT_HEADER["fileSize"] = "FileSize"
+SEARCH_DEFAULT_HEADER["fileOwner"] = "FileOwner"
+SEARCH_DEFAULT_HEADER["md5Checksum"] = "MD5Checksum"
+SEARCH_DEFAULT_HEADER["sha256Checksum"] = "SHA256Checksum"
+
+
 search_options = searchopt.create_search_options("file events")
 
-format_option = click.option(
-    "-f",
-    "--format",
-    type=click.Choice(enum.OutputFormat()),
-    default=enum.OutputFormat.JSON,
-    help="The format used for outputting file events.",
-)
+
 exposure_type_option = click.option(
     "-t",
     "--type",
@@ -143,7 +149,7 @@ def file_event_options(f):
     f = process_owner_option(f)
     f = tab_url_option(f)
     f = include_non_exposure_option(f)
-    f = format_option(f)
+    f = extraction_format_option(f)
     f = saved_search_option(f)
     return f
 
@@ -171,6 +177,12 @@ def clear_checkpoint(state, checkpoint_name):
     "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
 )
 @sdk_options()
+@click.option(
+    "--include-all",
+    default=False,
+    is_flag=True,
+    help="Display simple properties of the primary level of the nested response.",
+)
 def search(
     state,
     format,
@@ -180,15 +192,22 @@ def search(
     use_checkpoint,
     saved_search,
     or_query,
+    include_all,
     **kwargs
 ):
     """Search for file events."""
-    output_logger = logger_factory.get_logger_for_stdout(format)
     cursor = (
         _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
     )
+
     handlers = ext.create_handlers(
-        state.sdk, FileEventExtractor, output_logger, cursor, use_checkpoint
+        state.sdk,
+        FileEventExtractor,
+        cursor,
+        use_checkpoint,
+        include_all,
+        output_format=format,
+        output_header=SEARCH_DEFAULT_HEADER,
     )
     extractor = _get_file_event_extractor(state.sdk, handlers)
     extractor.use_or_query = or_query
@@ -214,7 +233,7 @@ def saved_search(state):
 
 
 @saved_search.command("list")
-@format_output
+@format_option
 @sdk_options()
 def _list(state, format=None):
     """List available saved searches."""

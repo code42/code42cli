@@ -1,3 +1,5 @@
+from _collections import OrderedDict
+
 import click
 import py42.sdk.queries.alerts.filters as f
 from c42eventextractor.extractors import AlertExtractor
@@ -8,18 +10,21 @@ import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 import code42cli.options as opt
-from code42cli.cmds.search import logger_factory
 from code42cli.cmds.search.cursor_store import AlertCursorStore
+from code42cli.output_formats import extraction_format_option as format_option
+
+
+SEARCH_DEFAULT_HEADER = OrderedDict()
+SEARCH_DEFAULT_HEADER["name"] = "RuleName"
+SEARCH_DEFAULT_HEADER["actor"] = "Username"
+SEARCH_DEFAULT_HEADER["createdAt"] = "ObservedDate"
+SEARCH_DEFAULT_HEADER["state"] = "Status"
+SEARCH_DEFAULT_HEADER["severity"] = "Severity"
+SEARCH_DEFAULT_HEADER["description"] = "Description"
 
 search_options = searchopt.create_search_options("alerts")
 
-format_option = click.option(
-    "-f",
-    "--format",
-    type=click.Choice(enum.AlertOutputFormat()),
-    default=enum.AlertOutputFormat.JSON,
-    help="The format used for the alerts output.",
-)
+
 severity_option = click.option(
     "--severity",
     multiple=True,
@@ -159,14 +164,33 @@ def clear_checkpoint(state, checkpoint_name):
     "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
 )
 @opt.sdk_options()
+@click.option(
+    "--include-all",
+    default=False,
+    is_flag=True,
+    help="Display simple properties of the primary level of the nested response.",
+)
 def search(
-    cli_state, format, begin, end, advanced_query, use_checkpoint, or_query, **kwargs
+    cli_state,
+    format,
+    begin,
+    end,
+    advanced_query,
+    use_checkpoint,
+    or_query,
+    include_all,
+    **kwargs
 ):
     """Search for alerts."""
-    output_logger = logger_factory.get_logger_for_stdout(format)
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
     handlers = ext.create_handlers(
-        cli_state.sdk, AlertExtractor, output_logger, cursor, use_checkpoint
+        cli_state.sdk,
+        AlertExtractor,
+        cursor,
+        use_checkpoint,
+        include_all=include_all,
+        output_format=format,
+        output_header=SEARCH_DEFAULT_HEADER,
     )
     extractor = _get_alert_extractor(cli_state.sdk, handlers)
     extractor.use_or_query = or_query

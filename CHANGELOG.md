@@ -31,6 +31,11 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     each time the CLI is run with a profile configured this way, as it is not recommended.
 
 - The `path` positional argument for bulk `generate-template` commands is now an option (`--p/-p`).
+- Below `search` subcommands accept argument `--format/-f` to display result in formats `csv`, `table`, `json`, `raw-json`:
+    - Default output format is changed to `table` format from `raw-json`, returns a paginated response.
+    A predefined properties would be displayed by default, pass `--include-all` to view all non-nested top-level properties.
+    - `code42 alerts search`
+    - `code42 security-data search`
 
 ### Added
 

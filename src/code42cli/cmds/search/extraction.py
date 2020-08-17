@@ -1,5 +1,6 @@
 import json
 
+import click
 from c42eventextractor import ExtractionHandlers
 from click import secho
 from py42.sdk.queries.query_filter import QueryFilterTimestampField
@@ -7,6 +8,7 @@ from py42.sdk.queries.query_filter import QueryFilterTimestampField
 import code42cli.errors as errors
 from code42cli.date_helper import verify_timestamp_order
 from code42cli.logger import get_main_cli_logger
+from code42cli.output_formats import get_dynamic_header
 from code42cli.util import warn_interrupt
 
 logger = get_main_cli_logger()
@@ -28,7 +30,15 @@ def _get_alert_details(sdk, alert_summary_list):
     return results
 
 
-def create_handlers(sdk, extractor_class, output_logger, cursor_store, checkpoint_name):
+def create_handlers(
+    sdk,
+    extractor_class,
+    cursor_store,
+    checkpoint_name,
+    include_all,
+    output_format,
+    output_header,
+):
     extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = ExtractionHandlers()
     handlers.TOTAL_EVENTS = 0
@@ -61,12 +71,22 @@ def create_handlers(sdk, extractor_class, output_logger, cursor_store, checkpoin
                 events = _get_alert_details(sdk, events)
             except Exception as ex:
                 handlers.handle_error(ex)
-        handlers.TOTAL_EVENTS += len(events)
-        event = None
-        for event in events:
-            output_logger.info(event)
-        if event:
-            last_event_timestamp = extractor._get_timestamp_from_item(event)
+
+        total_events = len(events)
+        handlers.TOTAL_EVENTS += total_events
+
+        def paginate():
+            yield _process_events(output_format, include_all, events, output_header)
+
+        if len(events) > 10:
+            click.echo_via_pager(paginate)
+        else:
+            for page in paginate():
+                click.echo(page)
+
+        # To make sure the extractor records correct timestamp event when `CTRL-C` is pressed.
+        if total_events:
+            last_event_timestamp = extractor._get_timestamp_from_item(events[-1])
             handlers.record_cursor_position(last_event_timestamp)
 
     handlers.handle_response = handle_response
@@ -96,3 +116,9 @@ def create_time_range_filter(filter_cls, begin_date=None, end_date=None):
 
     elif end_date and not begin_date:
         return filter_cls.on_or_before(end_date)
+
+
+def _process_events(output_format, include_all, events, output_header):
+    if include_all:
+        output_header = get_dynamic_header(events[0])
+    return output_format(events, output_header)
