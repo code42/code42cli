@@ -17,7 +17,6 @@ import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
-from code42cli.cmds.search.options import SecurityDataOutputFormat
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
@@ -48,9 +47,9 @@ SEARCH_DEFAULT_HEADER["sha256Checksum"] = "SHA256Checksum"
 
 
 def extraction_output_format(_, __, value):
-    if value == SecurityDataOutputFormat.CEF:
+    if value == enum.SecurityDataOutputFormat.CEF:
         return to_cef
-    if value == SecurityDataOutputFormat.CSV:
+    if value == enum.SecurityDataOutputFormat.CSV:
         return to_dynamic_csv
     return output_format(None, None, value)
 
