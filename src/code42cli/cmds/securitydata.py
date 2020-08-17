@@ -19,14 +19,8 @@ from code42cli.options import format_option
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-<<<<<<< HEAD
 from code42cli.output_formats import get_output_format_func
-=======
-from code42cli.output_formats import extraction_format_option
-from code42cli.output_formats import format_option
 from code42cli.options import server_options
-
->>>>>>> Added send-to commands
 
 logger = get_main_cli_logger()
 
@@ -282,6 +276,7 @@ def send_to(
     **kwargs
 ):
     """Send alerts to the given server address."""
+    #output_logger = logger_factory.get_server_logger(hostname, protocol, format)
     _extract_events(
         state,
         format,
@@ -305,20 +300,22 @@ def _get_file_event_cursor_store(profile_name):
 
 def _extract_events(
     state,
-    output_logger,
+    format,
     begin,
     end,
     advanced_query,
     use_checkpoint,
     saved_search,
     or_query,
+    include_all=False,
     **kwargs
 ):
     cursor = (
         _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
     )
     handlers = ext.create_handlers(
-        state.sdk, FileEventExtractor, output_logger, cursor, use_checkpoint
+        state.sdk, FileEventExtractor, cursor, use_checkpoint, output_format=format, include_all=include_all,
+        output_header=SEARCH_DEFAULT_HEADER
     )
     extractor = _get_file_event_extractor(state.sdk, handlers)
     extractor.use_or_query = or_query

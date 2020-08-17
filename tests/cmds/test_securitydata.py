@@ -726,3 +726,35 @@ def test_saved_search_list_with_format_option_does_not_return_when_response_is_e
         cli, ["security-data", "saved-search", "list", "-f", "csv"], obj=cli_state
     )
     assert "Name,Id" not in result.output
+
+
+def test_send_to_when_is_advanced_query_uses_only_the_extract_advanced_method(
+    runner, cli_state, file_event_extractor, server_logger
+):
+    runner.invoke(
+        cli,
+        [
+            "security-data",
+            "send-to",
+            "localhost",
+            "--advanced-query",
+            ADVANCED_QUERY_JSON,
+        ],
+        obj=cli_state,
+    )
+    file_event_extractor.extract_advanced.assert_called_once_with(
+        '{"some": "complex json"}'
+    )
+    assert file_event_extractor.extract.call_count == 0
+    assert file_event_extractor.extract_advanced.call_count == 1
+    assert server_logger.assert_called_once_with("localhost", "UDP", "JSON") is None
+
+
+def test_send_to_when_is_not_advanced_query_uses_only_the_extract_advanced_method(
+    runner, cli_state, file_event_extractor
+):
+    runner.invoke(
+        cli, ["security-data", "send-to", "localhost", "--begin", "1d"], obj=cli_state
+    )
+    assert file_event_extractor.extract_advanced.call_count == 0
+    assert file_event_extractor.extract.call_count == 1

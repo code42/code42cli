@@ -626,3 +626,28 @@ def test_search_with_or_query_flag_produces_expected_query(runner, cli_state):
     }
     actual_query = json.loads(str(cli_state.sdk.alerts.search.call_args[0][0]))
     assert actual_query == expected_query
+
+
+def test_send_to_makes_call_to_the_extract_method(
+    cli_state, alert_extractor, runner, server_logger
+):
+
+    runner.invoke(
+        cli, ["alerts", "send-to", "localhost", "--begin", "1d"], obj=cli_state
+    )
+    assert alert_extractor.extract.call_count == 1
+    assert alert_extractor.extract_advanced.call_count == 0
+    assert server_logger.assert_called_once_with("localhost", "UDP", "JSON") is None
+
+
+def test_send_to_makes_call_to_the_extract_advnced_method(
+    cli_state, alert_extractor, runner
+):
+
+    runner.invoke(
+        cli,
+        ["alerts", "send-to", "localhost", "--advanced-query", ADVANCED_QUERY_JSON],
+        obj=cli_state,
+    )
+    assert alert_extractor.extract.call_count == 0
+    alert_extractor.extract_advanced.assert_called_once_with('{"some": "complex json"}')

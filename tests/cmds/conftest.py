@@ -35,6 +35,33 @@ def cli_logger(mocker):
 
 
 @pytest.fixture
+def stdout_logger(mocker):
+    mock = mocker.patch(
+        "{}.cmds.search.logger_factory.get_logger_for_stdout".format(PRODUCT_NAME)
+    )
+    mock.return_value = mocker.MagicMock()
+    return mock
+
+
+@pytest.fixture
+def server_logger(mocker):
+    mock = mocker.patch(
+        "{}.cmds.search.logger_factory.get_server_logger".format(PRODUCT_NAME)
+    )
+    mock.return_value = mocker.MagicMock()
+    return mock
+
+
+@pytest.fixture
+def event_extractor_logger(mocker):
+    mock = mocker.patch(
+        "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper"
+    )
+    mock.return_value = mocker.MagicMock()
+    return mock
+
+
+@pytest.fixture
 def cli_state_with_user(sdk_with_user, cli_state):
     cli_state.sdk = sdk_with_user
     return cli_state
