@@ -66,8 +66,7 @@ def to_dynamic_csv(output, header):
 
 def to_csv(output, header):
     columns = ",".join(header.values())
-    lines = []
-    lines.append(columns)
+    lines = [columns]
     for row in output:
         items = [str(row[key]) for key in header.keys()]
         line = ",".join(items)
