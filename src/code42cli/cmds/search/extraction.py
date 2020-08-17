@@ -78,7 +78,11 @@ def create_handlers(
         def paginate():
             yield _process_events(output_format, include_all, events, output_header)
 
-        click.echo_via_pager(paginate)
+        if len(events) > 10:
+            click.echo_via_pager(paginate)
+        else:
+            for page in paginate():
+                click.echo(page)
 
         # To make sure the extractor records correct timestamp event when `CTRL-C` is pressed.
         if total_events:
