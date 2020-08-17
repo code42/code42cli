@@ -11,7 +11,7 @@ import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 import code42cli.options as opt
 from code42cli.cmds.search.cursor_store import AlertCursorStore
-from code42cli.cmds.search.options import extraction_format_option as format_option
+from code42cli.options import format_option
 
 
 SEARCH_DEFAULT_HEADER = OrderedDict()

@@ -8,6 +8,10 @@ from code42cli.util import find_format_width
 from code42cli.util import format_to_table
 
 
+CEF_DEFAULT_PRODUCT_NAME = "Advanced Exfiltration Detection"
+CEF_DEFAULT_SEVERITY_LEVEL = "5"
+
+
 class OutputFormat:
     TABLE = "TABLE"
     CSV = "CSV"
@@ -30,15 +34,6 @@ def output_format(_, __, value):
             return to_formatted_json
     # default option
     return to_table
-
-
-format_option = click.option(
-    "-f",
-    "--format",
-    type=click.Choice(OutputFormat(), case_sensitive=False),
-    help="The output format of the result. Defaults to table format.",
-    callback=output_format,
-)
 
 
 def to_dynamic_csv(output, header):

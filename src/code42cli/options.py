@@ -3,6 +3,8 @@ from collections import OrderedDict
 import click
 
 from code42cli.errors import Code42CLIError
+from code42cli.output_formats import output_format
+from code42cli.output_formats import OutputFormat
 from code42cli.profile import get_profile
 from code42cli.sdk_client import create_sdk
 
@@ -13,6 +15,14 @@ yes_option = click.option(
     expose_value=False,
     callback=lambda ctx, param, value: ctx.obj.set_assume_yes(value),
     help='Assume "yes" as the answer to all prompts and run non-interactively.',
+)
+
+format_option = click.option(
+    "-f",
+    "--format",
+    type=click.Choice(OutputFormat(), case_sensitive=False),
+    help="The output format of the result. Defaults to table format.",
+    callback=output_format,
 )
 
 

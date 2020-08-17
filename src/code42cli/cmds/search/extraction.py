@@ -6,6 +6,7 @@ from click import secho
 from py42.sdk.queries.query_filter import QueryFilterTimestampField
 
 import code42cli.errors as errors
+from code42cli.cmds.search.options import SecurityDataOutputFormat
 from code42cli.date_helper import verify_timestamp_order
 from code42cli.logger import get_main_cli_logger
 from code42cli.output_formats import get_dynamic_header

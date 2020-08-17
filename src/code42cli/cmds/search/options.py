@@ -3,6 +3,8 @@ from datetime import datetime
 from datetime import timezone
 
 import click
+from c42eventextractor.logging.formatters import FileEventDictToCEFFormatter
+from c42eventextractor.maps import JSON_TO_CEF_MAP
 
 from code42cli.cmds.search.enums import SecurityDataOutputFormat
 from code42cli.date_helper import parse_max_timestamp
@@ -12,25 +14,6 @@ from code42cli.options import incompatible_with
 from code42cli.output_formats import output_format
 
 logger = get_main_cli_logger()
-
-
-def extraction_output_format(_, __, value):
-    if value == SecurityDataOutputFormat.CEF:
-        return to_cef
-    return output_format(None, None, value)
-
-
-extraction_format_option = click.option(
-    "-f",
-    "--format",
-    type=click.Choice(SecurityDataOutputFormat(), case_sensitive=False),
-    help="The output format of the result. Defaults to table format.",
-    callback=extraction_output_format,
-)
-
-
-def to_cef():
-    """"""
 
 
 def is_in_filter(filter_cls):
