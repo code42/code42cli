@@ -357,7 +357,7 @@ def test_get_alert_details_sorts_results_by_date(sdk):
 
 
 def test_search_with_only_begin_calls_extract_with_expected_filters(
-    cli_state, alert_extractor, stdout_logger, begin_option, runner
+    cli_state, alert_extractor, begin_option, runner
 ):
     result = runner.invoke(
         cli, ["alerts", "search", "--begin", "<overridden by fixture>"], obj=cli_state
@@ -388,7 +388,6 @@ def test_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_extract
     alert_extractor,
     begin_option,
     alert_cursor_without_checkpoint,
-    stdout_logger,
     runner,
 ):
     result = runner.invoke(

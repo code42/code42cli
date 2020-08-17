@@ -24,6 +24,7 @@ class OutputFormat:
 
 def output_format(_, __, value):
     if value is not None:
+        value = value.upper()
         if value == OutputFormat.CSV:
             return to_csv
         if value == OutputFormat.RAW:

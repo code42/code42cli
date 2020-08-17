@@ -19,12 +19,14 @@ import code42cli.errors as errors
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.cmds.search.options import SecurityDataOutputFormat
 from code42cli.logger import get_main_cli_logger
-from code42cli.options import incompatible_with
+from code42cli.options import incompatible_with, format_option
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
 from code42cli.output_formats import CEF_DEFAULT_PRODUCT_NAME
 from code42cli.output_formats import CEF_DEFAULT_SEVERITY_LEVEL
 from code42cli.output_formats import output_format
+from code42cli.output_formats import to_csv
+from code42cli.output_formats import to_dynamic_csv
 
 logger = get_main_cli_logger()
 
@@ -47,6 +49,8 @@ SEARCH_DEFAULT_HEADER["sha256Checksum"] = "SHA256Checksum"
 def extraction_output_format(_, __, value):
     if value == SecurityDataOutputFormat.CEF:
         return to_cef
+    if value == SecurityDataOutputFormat.CSV:
+        return to_dynamic_csv
     return output_format(None, None, value)
 
 
@@ -336,7 +340,7 @@ def saved_search(state):
 
 
 @saved_search.command("list")
-@extraction_format_option
+@format_option
 @sdk_options()
 def _list(state, format=None):
     """List available saved searches."""

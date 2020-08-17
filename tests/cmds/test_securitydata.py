@@ -12,7 +12,11 @@ from tests.conftest import get_test_date_str
 from code42cli import errors
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
+from code42cli.cmds.securitydata import extraction_output_format
 from code42cli.main import cli
+from code42cli.output_formats import to_dynamic_csv
+from code42cli.output_formats import to_formatted_json
+from code42cli.output_formats import to_json
 
 BEGIN_TIMESTAMP = 1577858400.0
 END_TIMESTAMP = 1580450400.0
@@ -303,7 +307,7 @@ def test_search_when_end_date_is_before_begin_date_causes_exit(runner, cli_state
 
 
 def test_search_with_only_begin_calls_extract_with_expected_args(
-    runner, cli_state, file_event_extractor, stdout_logger, begin_option
+    runner, cli_state, file_event_extractor, begin_option
 ):
     result = runner.invoke(
         cli, ["security-data", "search", "--begin", "1h"], obj=cli_state
@@ -335,7 +339,6 @@ def test_search_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_
     file_event_extractor,
     begin_option,
     file_event_cursor_without_checkpoint,
-    stdout_logger,
 ):
     result = runner.invoke(
         cli,
@@ -354,7 +357,6 @@ def test_search_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_ca
     cli_state,
     file_event_extractor,
     file_event_cursor_with_checkpoint,
-    stdout_logger,
 ):
     result = runner.invoke(
         cli,
@@ -725,3 +727,18 @@ def test_saved_search_list_with_format_option_does_not_return_when_response_is_e
         cli, ["security-data", "saved-search", "list", "-f", "csv"], obj=cli_state
     )
     assert "Name,Id" not in result.output
+
+
+def test_extraction_output_format_returns_to_dynamic_csv_function_when_csv_option_is_passed():
+    extraction_output_format_function = extraction_output_format(None, None, "CSV")
+    assert id(extraction_output_format_function) == id(to_dynamic_csv)
+
+
+def test_extraction_output_format_returns_to_formatted_json_function_when_json__option_is_passed():
+    format_function = extraction_output_format(None, None, "JSON")
+    assert id(format_function) == id(to_formatted_json)
+
+
+def test_extraction_output_format_returns_to_json_function_when_raw_json_format_option_is_passed():
+    format_function = extraction_output_format(None, None, "RAW-JSON")
+    assert id(format_function) == id(to_json)
