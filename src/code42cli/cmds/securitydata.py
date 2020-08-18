@@ -21,6 +21,8 @@ from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
 from code42cli.output_formats import get_output_format_func
 from code42cli.options import server_options
+from code42cli.cmds.search.output_processor import send_events
+from code42cli.cmds.search.output_processor import print_events
 
 logger = get_main_cli_logger()
 
@@ -212,18 +214,21 @@ def search(
         include_all, SEARCH_DEFAULT_HEADER, format
     )
     # format_func = get_file_events_output_format_func(format)
-    _extract_events(
+    handlers = _extract_events(
         state,
-        format,
         begin,
         end,
         advanced_query,
         use_checkpoint,
         saved_search,
         or_query,
-        include_all,
         **kwargs,
     )
+    if not handlers.TOTAL_EVENTS and not errors.ERRORED:
+        echo("No results found.")
+    else:
+        output_func = handlers.output_func
+        output_func(format, include_all, SEARCH_DEFAULT_HEADER,)
 
 
 @security_data.group(cls=OrderedGroup)
@@ -275,19 +280,23 @@ def send_to(
     or_query,
     **kwargs
 ):
-    """Send alerts to the given server address."""
-    #output_logger = logger_factory.get_server_logger(hostname, protocol, format)
-    _extract_events(
+    """Send events to the given server address."""
+    handlers = _extract_events(
         state,
-        format,
         begin,
         end,
         advanced_query,
         use_checkpoint,
         saved_search,
         or_query,
+        output_function=send_events,
         **kwargs,
     )
+    if not handlers.TOTAL_EVENTS and not errors.ERRORED:
+        echo("No results found.")
+    else:
+        output_func = handlers.output_func
+        output_func(format, hostname, protocol, SEARCH_DEFAULT_HEADER)
 
 
 def _get_file_event_extractor(sdk, handlers):
@@ -300,22 +309,20 @@ def _get_file_event_cursor_store(profile_name):
 
 def _extract_events(
     state,
-    format,
     begin,
     end,
     advanced_query,
     use_checkpoint,
     saved_search,
     or_query,
-    include_all=False,
+    output_function=print_events,
     **kwargs
 ):
     cursor = (
         _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
     )
     handlers = ext.create_handlers(
-        state.sdk, FileEventExtractor, cursor, use_checkpoint, output_format=format, include_all=include_all,
-        output_header=SEARCH_DEFAULT_HEADER
+        state.sdk, FileEventExtractor, cursor, use_checkpoint, output_function=output_function
     )
     extractor = _get_file_event_extractor(state.sdk, handlers)
     extractor.use_or_query = or_query
@@ -330,5 +337,4 @@ def _extract_events(
                 ext.create_time_range_filter(f.EventTimestamp, begin, end)
             )
         extractor.extract(*state.search_filters)
-    if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
-        echo("No results found.")
+    return handlers

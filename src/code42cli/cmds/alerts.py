@@ -14,6 +14,8 @@ from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.options import format_option
 from code42cli.output_formats import get_output_format_func
 from code42cli.options import server_options
+from code42cli.cmds.search.output_processor import print_events
+from code42cli.cmds.search.output_processor import send_events
 
 
 SEARCH_DEFAULT_HEADER = OrderedDict()
@@ -23,7 +25,6 @@ SEARCH_DEFAULT_HEADER["createdAt"] = "ObservedDate"
 SEARCH_DEFAULT_HEADER["state"] = "Status"
 SEARCH_DEFAULT_HEADER["severity"] = "Severity"
 SEARCH_DEFAULT_HEADER["description"] = "Description"
-
 
 
 search_options = searchopt.create_search_options("alerts")
@@ -190,7 +191,12 @@ def search(
         include_all, SEARCH_DEFAULT_HEADER, format
     )
     #format_func = get_output_format_func(format)
-    _extract_events(cli_state, format, begin, end, advanced_query, use_checkpoint, or_query, **kwargs)
+    handlers = _extract_events(cli_state, begin, end, advanced_query, use_checkpoint, or_query, **kwargs)
+    if not handlers.TOTAL_EVENTS and not errors.ERRORED:
+        echo("No results found.")
+    else:
+        output_func = handlers.output_func
+        output_func(format, include_all, SEARCH_DEFAULT_HEADER,)
 
 
 @alerts.command()
@@ -214,17 +220,12 @@ def send_to(
     **kwargs
 ):
     """Send alerts to the given server address."""
-    #output_logger = logger_factory.get_server_logger(hostname, protocol, format)
-    _extract_events(
-        cli_state,
-        format,
-        begin,
-        end,
-        advanced_query,
-        use_checkpoint,
-        or_query,
-        **kwargs
-    )
+    handlers = _extract_events(cli_state, begin, end, advanced_query, use_checkpoint, or_query, output_function=send_events, **kwargs)
+    if not handlers.TOTAL_EVENTS and not errors.ERRORED:
+        echo("No results found.")
+    else:
+        output_func = handlers.output_func
+        output_func(format, hostname, protocol, SEARCH_DEFAULT_HEADER)
 
 
 def _get_alert_extractor(sdk, handlers):
@@ -237,13 +238,12 @@ def _get_alert_cursor_store(profile_name):
 
 def _extract_events(
     cli_state,
-    format,
     begin,
     end,
     advanced_query,
     use_checkpoint,
     or_query,
-    include_all=False,
+    output_function=print_events,
     **kwargs
 ):
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
@@ -251,7 +251,8 @@ def _extract_events(
         cli_state.sdk,
         AlertExtractor,
         cursor,
-        use_checkpoint
+        use_checkpoint,
+        output_function=output_function
     )
     extractor = _get_alert_extractor(cli_state.sdk, handlers)
     extractor.use_or_query = or_query
@@ -263,5 +264,5 @@ def _extract_events(
                 ext.create_time_range_filter(f.DateObserved, begin, end)
             )
         extractor.extract(*cli_state.search_filters)
-    if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
-        echo("No results found.")
+    
+    return handlers
