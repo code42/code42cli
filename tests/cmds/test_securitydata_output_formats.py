@@ -9,6 +9,7 @@ from code42cli.output_formats import to_dynamic_csv
 from code42cli.output_formats import to_formatted_json
 from code42cli.output_formats import to_json
 
+
 AED_CLOUD_ACTIVITY_EVENT_DICT = json.loads(
     """{
     "url": "https://www.example.com",
@@ -31,6 +32,7 @@ AED_REMOVABLE_MEDIA_EVENT_DICT = json.loads(
     "removableMediaBusType": "TEST_BUS_TYPE"
     }"""
 )
+
 
 AED_EMAIL_EVENT_DICT = json.loads(
     """{

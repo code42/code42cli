@@ -40,7 +40,7 @@ SEARCH_DEFAULT_HEADER["sha256Checksum"] = "SHA256Checksum"
 file_events_format_option = click.option(
     "-f",
     "--format",
-    type=click.Choice(enum.SecurityDataOutputFormat(), case_sensitive=False),
+    type=click.Choice(enum.FileEventsOutputFormat(), case_sensitive=False),
     help="The output format of the result. Defaults to table format.",
     callback=file_events_output_format,
 )

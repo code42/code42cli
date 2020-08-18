@@ -3,7 +3,7 @@ from code42cli.output_formats import OutputFormat
 IS_CHECKPOINT_KEY = "use_checkpoint"
 
 
-class SecurityDataOutputFormat(OutputFormat):
+class FileEventsOutputFormat(OutputFormat):
     CEF = "CEF"
 
     def __iter__(self):

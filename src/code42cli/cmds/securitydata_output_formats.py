@@ -13,7 +13,7 @@ from code42cli.output_formats import CEF_DEFAULT_SEVERITY_LEVEL
 
 
 def file_events_output_format(_, __, value):
-    if value == enum.SecurityDataOutputFormat.CEF:
+    if value == enum.FileEventsOutputFormat.CEF:
         return to_cef
     return extraction_output_format(None, None, value)
 
