@@ -17,6 +17,7 @@ import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
+from code42cli.cmds.search.output_formats import extraction_output_format
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
@@ -24,7 +25,6 @@ from code42cli.options import sdk_options
 from code42cli.output_formats import CEF_DEFAULT_PRODUCT_NAME
 from code42cli.output_formats import CEF_DEFAULT_SEVERITY_LEVEL
 from code42cli.output_formats import format_option
-from code42cli.cmds.search.output_formats import extraction_output_format
 
 
 logger = get_main_cli_logger()

@@ -1,8 +1,8 @@
 from code42cli.cmds.search.output_formats import extraction_output_format
+from code42cli.output_formats import to_dynamic_csv
 from code42cli.output_formats import to_formatted_json
 from code42cli.output_formats import to_json
 from code42cli.output_formats import to_table
-from code42cli.output_formats import to_dynamic_csv
 
 
 def test_extraction_output_format_returns_to_formatted_json_function_when_json_format_option_is_passed():
