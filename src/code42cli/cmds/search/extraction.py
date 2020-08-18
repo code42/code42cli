@@ -8,11 +8,22 @@ from py42.sdk.queries.query_filter import QueryFilterTimestampField
 import code42cli.errors as errors
 from code42cli.date_helper import verify_timestamp_order
 from code42cli.logger import get_main_cli_logger
+from code42cli.output_formats import to_table
 from code42cli.util import warn_interrupt
 
 logger = get_main_cli_logger()
 
 _ALERT_DETAIL_BATCH_SIZE = 100
+
+
+def handle_include_all(include_all, default_header):
+    output_header = None
+    if format.__name__ == to_table.__name__:
+        if not include_all:
+            output_header = default_header
+    elif include_all:
+        raise Exception("--include-all only allowed for non-Table output formats.")
+    return output_header
 
 
 def _get_alert_details(sdk, alert_summary_list):

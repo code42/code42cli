@@ -17,7 +17,6 @@ from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
 from code42cli.output_formats import format_option
-from code42cli.output_formats import to_table
 
 logger = get_main_cli_logger()
 
@@ -205,12 +204,7 @@ def search(
     **kwargs
 ):
     """Search for file events."""
-    output_header = None
-    if format.__name__ == to_table.__name__:
-        if not include_all:
-            output_header = SEARCH_DEFAULT_HEADER
-    elif include_all:
-        raise Exception("--include-all only allowed for non-Table output formats.")
+    output_header = ext.handle_include_all(include_all, SEARCH_DEFAULT_HEADER)
 
     cursor = (
         _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
