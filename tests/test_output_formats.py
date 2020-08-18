@@ -140,21 +140,6 @@ TEST_NESTED_DATA = {
 }
 
 
-TEST_NESTED_DATA = {
-    "test": "TEST",
-    "name": "outside td",
-    "description": "",
-    "severity": "HIGH",
-    "isSystem": False,
-    "isEnabled": True,
-    "ruleSource": ["Alerting"],
-    "tenantId": "1d71796f-af5b-4231-9d8e-df6434da4663",
-    "observerRuleId": {"test": ["d12d54f0-5160-47a8-a48f-7d5fa5b051c5"]},
-    "type": ["FED_CLOUD_SHARE_PERMISSIONS"],
-    "id": "5157f1df-cb3e-4755-92a2-0f42c7841020",
-}
-
-
 def test_to_csv_formats_data_to_csv_format():
     formatted_output = to_csv(TEST_DATA, TEST_HEADER)
     assert formatted_output == CSV_OUTPUT
