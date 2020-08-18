@@ -11,8 +11,7 @@ import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
-from code42cli.cmds.search.output_formats import extraction_output_format
-from code42cli.cmds.securitydata_output_formats import to_cef
+from code42cli.cmds.securitydata_output_formats import file_events_output_format
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
@@ -36,12 +35,6 @@ SEARCH_DEFAULT_HEADER["fileSize"] = "FileSize"
 SEARCH_DEFAULT_HEADER["fileOwner"] = "FileOwner"
 SEARCH_DEFAULT_HEADER["md5Checksum"] = "MD5Checksum"
 SEARCH_DEFAULT_HEADER["sha256Checksum"] = "SHA256Checksum"
-
-
-def file_events_output_format(_, __, value):
-    if value == enum.SecurityDataOutputFormat.CEF:
-        return to_cef
-    return extraction_output_format(None, None, value)
 
 
 file_events_format_option = click.option(

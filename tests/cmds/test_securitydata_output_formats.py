@@ -3,8 +3,11 @@ import json
 import pytest
 from c42eventextractor.maps import FILE_EVENT_TO_SIGNATURE_ID_MAP
 
+from code42cli.cmds.securitydata_output_formats import file_events_output_format
 from code42cli.cmds.securitydata_output_formats import to_cef
-
+from code42cli.output_formats import to_dynamic_csv
+from code42cli.output_formats import to_formatted_json
+from code42cli.output_formats import to_json
 
 AED_CLOUD_ACTIVITY_EVENT_DICT = json.loads(
     """{
@@ -115,6 +118,26 @@ def mock_file_event_email_event():
 @pytest.fixture
 def mock_file_event():
     return [AED_EVENT_DICT]
+
+
+def test_file_events_output_format_returns_to_dynamic_csv_function_when_csv_option_is_passed():
+    extraction_output_format_function = file_events_output_format(None, None, "CSV")
+    assert id(extraction_output_format_function) == id(to_dynamic_csv)
+
+
+def test_file_events_output_format_returns_to_formatted_json_function_when_json__option_is_passed():
+    format_function = file_events_output_format(None, None, "JSON")
+    assert id(format_function) == id(to_formatted_json)
+
+
+def test_file_events_output_format_returns_to_json_function_when_raw_json_format_option_is_passed():
+    format_function = file_events_output_format(None, None, "RAW-JSON")
+    assert id(format_function) == id(to_json)
+
+
+def test_file_events_output_format_returns_to_cef_function_when_cef_format_option_is_passed():
+    format_function = file_events_output_format(None, None, "CEF")
+    assert id(format_function) == id(to_cef)
 
 
 def test_to_cef_returns_cef_tagged_string(mock_file_event):
