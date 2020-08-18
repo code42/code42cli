@@ -24,8 +24,7 @@ from code42cli.options import sdk_options
 from code42cli.output_formats import CEF_DEFAULT_PRODUCT_NAME
 from code42cli.output_formats import CEF_DEFAULT_SEVERITY_LEVEL
 from code42cli.output_formats import format_option
-from code42cli.output_formats import output_format
-from code42cli.output_formats import to_dynamic_csv
+from code42cli.cmds.search.output_formats import extraction_output_format
 
 
 logger = get_main_cli_logger()
@@ -46,20 +45,18 @@ SEARCH_DEFAULT_HEADER["md5Checksum"] = "MD5Checksum"
 SEARCH_DEFAULT_HEADER["sha256Checksum"] = "SHA256Checksum"
 
 
-def extraction_output_format(_, __, value):
+def file_events_output_format(_, __, value):
     if value == enum.SecurityDataOutputFormat.CEF:
         return to_cef
-    if value == enum.SecurityDataOutputFormat.CSV:
-        return to_dynamic_csv
-    return output_format(None, None, value)
+    return extraction_output_format(None, None, value)
 
 
-extraction_format_option = click.option(
+file_events_format_option = click.option(
     "-f",
     "--format",
     type=click.Choice(enum.SecurityDataOutputFormat(), case_sensitive=False),
     help="The output format of the result. Defaults to table format.",
-    callback=extraction_output_format,
+    callback=file_events_output_format,
 )
 
 
@@ -257,7 +254,7 @@ def file_event_options(f):
     f = process_owner_option(f)
     f = tab_url_option(f)
     f = include_non_exposure_option(f)
-    f = extraction_format_option(f)
+    f = file_events_format_option(f)
     f = saved_search_option(f)
     return f
 
