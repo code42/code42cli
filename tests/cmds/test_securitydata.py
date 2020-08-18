@@ -707,10 +707,12 @@ def test_saved_search_list_with_format_option_returns_csv_formatted_response(
 ):
     cli_state.sdk.securitydata.savedsearches.get.return_value = TEST_LIST_RESPONSE
     result = runner.invoke(
-        cli, ["security-data", "saved-search", "list", "-f", "csv"], obj=cli_state
+        cli, ["security-data", "saved-search", "list", "-f", "CSV"], obj=cli_state
     )
-    assert "Name,Id" in result.output
-    assert "test-events,a083f08d-8f33-4cbd-81c4-8d1820b61185" in result.output
+    assert "id,name,notes" in result.output
+    assert (
+        "083f08d-8f33-4cbd-81c4-8d1820b61185,test-events,py42 is here" in result.output
+    )
 
 
 def test_saved_search_list_with_format_option_does_not_return_when_response_is_empty(

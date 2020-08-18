@@ -7,15 +7,15 @@ from c42eventextractor.maps import FILE_EVENT_TO_SIGNATURE_ID_MAP
 from c42eventextractor.maps import JSON_TO_CEF_MAP
 
 import code42cli.cmds.search.enums as enum
-from code42cli.cmds.search.output_formats import extraction_output_format
 from code42cli.output_formats import CEF_DEFAULT_PRODUCT_NAME
 from code42cli.output_formats import CEF_DEFAULT_SEVERITY_LEVEL
+from code42cli.output_formats import output_format
 
 
 def file_events_output_format(_, __, value):
     if value == enum.FileEventsOutputFormat.CEF:
         return to_cef
-    return extraction_output_format(None, None, value)
+    return output_format(None, None, value)
 
 
 def to_cef(output, header):

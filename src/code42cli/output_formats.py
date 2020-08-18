@@ -46,27 +46,20 @@ format_option = click.option(
 )
 
 
-def to_dynamic_csv(output, header):
+def to_csv(output, header):
+    if not output:
+        return
     string_io = io.StringIO()
-    writer = csv.DictWriter(string_io, fieldnames=header)
-    filtered_output = [{key: row[key] for key in header} for row in output]
+    writer = csv.DictWriter(string_io, fieldnames=output[0].keys())
     writer.writeheader()
-    writer.writerows(filtered_output)
+    writer.writerows(output)
     return string_io.getvalue()
 
 
-def to_csv(output, header):
-    columns = ",".join(header.values())
-    lines = [columns]
-    for row in output:
-        items = [str(row[key]) for key in header.keys()]
-        line = ",".join(items)
-        lines.append(line)
-
-    return "\n".join(lines)
-
-
 def to_table(output, header):
+    if not output:
+        return
+    header = header or get_dynamic_header(output[0])
     rows, column_size = find_format_width(output, header)
     return format_to_table(rows, column_size)
 
@@ -84,6 +77,7 @@ def to_formatted_json(output, header=None):
 
 
 def get_dynamic_header(header_items):
+    print(header_items)
     return {
         key: key.capitalize()
         for key in header_items.keys()

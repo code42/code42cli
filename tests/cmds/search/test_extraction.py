@@ -47,33 +47,3 @@ def test_create_handlers_creates_handlers_that_pass_events_to_output_format(
     py42_response = Py42Response(http_response)
     handlers.handle_response(py42_response)
     output_format.assert_called_once_with(events, header)
-
-
-def test_include_all_creates_dynamic_header_from_events_to_output_format(
-    mocker, sdk,
-):
-    class TestExtractor(BaseExtractor):
-        def __init__(self, handlers, timestamp_filter):
-            timestamp_filter._term = "test_term"
-            super().__init__(key, search, handlers, timestamp_filter, TestQuery)
-
-        def _get_timestamp_from_item(self, item):
-            pass
-
-    output_format = mocker.MagicMock()
-    cursor_store = mocker.MagicMock(sepc=BaseCursorStore)
-    handlers = create_handlers(
-        sdk,
-        TestExtractor,
-        cursor_store,
-        "chk-name",
-        True,
-        output_format,
-        output_header=header,
-    )
-    http_response = mocker.MagicMock(spec=Response)
-    events = [{"food": "bar"}]
-    http_response.text = '{{"{0}": [{{"food": "bar"}}]}}'.format(key)
-    py42_response = Py42Response(http_response)
-    handlers.handle_response(py42_response)
-    output_format.assert_called_once_with(events, {"food": "Food"})

@@ -5,7 +5,7 @@ from c42eventextractor.maps import FILE_EVENT_TO_SIGNATURE_ID_MAP
 
 from code42cli.cmds.securitydata_output_formats import file_events_output_format
 from code42cli.cmds.securitydata_output_formats import to_cef
-from code42cli.output_formats import to_dynamic_csv
+from code42cli.output_formats import to_csv
 from code42cli.output_formats import to_formatted_json
 from code42cli.output_formats import to_json
 
@@ -124,7 +124,7 @@ def mock_file_event():
 
 def test_file_events_output_format_returns_to_dynamic_csv_function_when_csv_option_is_passed():
     extraction_output_format_function = file_events_output_format(None, None, "CSV")
-    assert id(extraction_output_format_function) == id(to_dynamic_csv)
+    assert id(extraction_output_format_function) == id(to_csv)
 
 
 def test_file_events_output_format_returns_to_formatted_json_function_when_json__option_is_passed():
