@@ -712,7 +712,7 @@ def test_saved_search_list_with_format_option_returns_csv_formatted_response(
     assert "id" in result.output
     assert "name" in result.output
     assert "notes" in result.output
-    
+
     assert "083f08d-8f33-4cbd-81c4-8d1820b61185" in result.output
     assert "test-events" in result.output
     assert "py42 is here" in result.output

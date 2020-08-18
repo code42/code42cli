@@ -133,10 +133,10 @@ TEST_NESTED_DATA = {
 
 def assert_csv_texts_are_equal(actual, expected):
     """Have to be careful when testing ordering because of 3.5"""
-    actual = actual.replace('\r', ',')
-    actual = actual.replace('\n', ',')
-    expected = expected.replace('\r', ',')
-    expected = expected.replace('\n', ',')
+    actual = actual.replace("\r", ",")
+    actual = actual.replace("\n", ",")
+    expected = expected.replace("\r", ",")
+    expected = expected.replace("\n", ",")
     actual = set(actual.split(","))
     expected = set(expected.split(","))
     assert actual == expected
