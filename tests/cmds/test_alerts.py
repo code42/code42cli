@@ -629,7 +629,7 @@ def test_search_with_or_query_flag_produces_expected_query(runner, cli_state):
 
 
 def test_send_to_makes_call_to_the_extract_method(
-    cli_state, alert_extractor, runner, server_logger
+    cli_state, alert_extractor, runner, event_extractor_logger
 ):
 
     runner.invoke(
@@ -637,7 +637,6 @@ def test_send_to_makes_call_to_the_extract_method(
     )
     assert alert_extractor.extract.call_count == 1
     assert alert_extractor.extract_advanced.call_count == 0
-    assert server_logger.assert_called_once_with("localhost", "UDP", "JSON") is None
 
 
 def test_send_to_makes_call_to_the_extract_advnced_method(

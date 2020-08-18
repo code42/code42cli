@@ -1,7 +1,8 @@
 import click
+from c42eventextractor.logging.handlers import NoPrioritySysLogHandlerWrapper
+
 from code42cli.output_formats import get_dynamic_header
 from code42cli.util import get_url_parts
-from c42eventextractor.logging.handlers import NoPrioritySysLogHandlerWrapper
 
 
 def _process_events(output_format, events, output_header, include_all=False):
@@ -16,6 +17,7 @@ def _process_events(output_format, events, output_header, include_all=False):
 
 def print_events(events):
     """Prints events to stdout"""
+
     def decorator(output_format, include_all, output_header):
         paginate = _process_events(output_format, events, output_header, include_all)
         if len(events) > 10:
@@ -29,6 +31,7 @@ def print_events(events):
 
 def send_events(events):
     """Sends events to server/hostname"""
+
     def decorator(output_format, hostname, protocol, output_header):
         paginate = _process_events(output_format, events, output_header)
 

@@ -44,15 +44,6 @@ def stdout_logger(mocker):
 
 
 @pytest.fixture
-def server_logger(mocker):
-    mock = mocker.patch(
-        "{}.cmds.search.logger_factory.get_server_logger".format(PRODUCT_NAME)
-    )
-    mock.return_value = mocker.MagicMock()
-    return mock
-
-
-@pytest.fixture
 def event_extractor_logger(mocker):
     mock = mocker.patch(
         "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper"

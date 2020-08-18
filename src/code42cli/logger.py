@@ -5,9 +5,6 @@ import traceback
 from logging.handlers import RotatingFileHandler
 from threading import Lock
 
-from c42eventextractor.logging.handlers import NoPrioritySysLogHandlerWrapper
-
-from code42cli.util import get_url_parts
 from code42cli.util import get_user_project_path
 
 

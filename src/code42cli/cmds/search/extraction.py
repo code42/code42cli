@@ -44,11 +44,7 @@ def _get_alert_details(sdk, alert_summary_list):
 
 
 def create_handlers(
-    sdk,
-    extractor_class,
-    cursor_store,
-    checkpoint_name,
-    output_function
+    sdk, extractor_class, cursor_store, checkpoint_name, output_function
 ):
     extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = ExtractionHandlers()
@@ -90,7 +86,7 @@ def create_handlers(
         if total_events:
             last_event_timestamp = extractor._get_timestamp_from_item(events[-1])
             handlers.record_cursor_position(last_event_timestamp)
-    
+
     handlers.handle_response = handle_response
     return handlers
 

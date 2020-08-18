@@ -16,7 +16,8 @@ from code42cli.output_formats import get_output_format_func
 from code42cli.options import server_options
 from code42cli.cmds.search.output_processor import print_events
 from code42cli.cmds.search.output_processor import send_events
-
+from code42cli.options import server_options
+f
 
 SEARCH_DEFAULT_HEADER = OrderedDict()
 SEARCH_DEFAULT_HEADER["name"] = "RuleName"
@@ -191,12 +192,17 @@ def search(
         include_all, SEARCH_DEFAULT_HEADER, format
     )
     #format_func = get_output_format_func(format)
-    handlers = _extract_events(cli_state, begin, end, advanced_query, use_checkpoint, or_query, **kwargs)
+    
+    handlers = _extract_events(
+        cli_state, begin, end, advanced_query, use_checkpoint, or_query, **kwargs
+    )
     if not handlers.TOTAL_EVENTS and not errors.ERRORED:
         echo("No results found.")
     else:
         output_func = handlers.output_func
-        output_func(format, include_all, SEARCH_DEFAULT_HEADER,)
+        output_func(
+            format, include_all, SEARCH_DEFAULT_HEADER,
+        )
 
 
 @alerts.command()
@@ -220,7 +226,16 @@ def send_to(
     **kwargs
 ):
     """Send alerts to the given server address."""
-    handlers = _extract_events(cli_state, begin, end, advanced_query, use_checkpoint, or_query, output_function=send_events, **kwargs)
+    handlers = _extract_events(
+        cli_state,
+        begin,
+        end,
+        advanced_query,
+        use_checkpoint,
+        or_query,
+        output_function=send_events,
+        **kwargs
+    )
     if not handlers.TOTAL_EVENTS and not errors.ERRORED:
         echo("No results found.")
     else:
@@ -252,7 +267,7 @@ def _extract_events(
         AlertExtractor,
         cursor,
         use_checkpoint,
-        output_function=output_function
+        output_function=output_function,
     )
     extractor = _get_alert_extractor(cli_state.sdk, handlers)
     extractor.use_or_query = or_query
@@ -264,5 +279,5 @@ def _extract_events(
                 ext.create_time_range_filter(f.DateObserved, begin, end)
             )
         extractor.extract(*cli_state.search_filters)
-    
+
     return handlers

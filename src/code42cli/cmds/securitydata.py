@@ -14,15 +14,14 @@ from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.cmds.securitydata_output_formats import (
     get_file_events_output_format_func,
 )
+from code42cli.cmds.search.output_processor import print_events
+from code42cli.cmds.search.output_processor import send_events
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import format_option
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.output_formats import get_output_format_func
 from code42cli.options import server_options
-from code42cli.cmds.search.output_processor import send_events
-from code42cli.cmds.search.output_processor import print_events
 
 logger = get_main_cli_logger()
 
@@ -228,7 +227,9 @@ def search(
         echo("No results found.")
     else:
         output_func = handlers.output_func
-        output_func(format, include_all, SEARCH_DEFAULT_HEADER,)
+        output_func(
+            format, include_all, SEARCH_DEFAULT_HEADER,
+        )
 
 
 @security_data.group(cls=OrderedGroup)
@@ -322,7 +323,11 @@ def _extract_events(
         _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
     )
     handlers = ext.create_handlers(
-        state.sdk, FileEventExtractor, cursor, use_checkpoint, output_function=output_function
+        state.sdk,
+        FileEventExtractor,
+        cursor,
+        use_checkpoint,
+        output_function=output_function,
     )
     extractor = _get_file_event_extractor(state.sdk, handlers)
     extractor.use_or_query = or_query
