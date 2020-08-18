@@ -138,8 +138,13 @@ def test_to_csv_formats_data_to_csv_format():
 
 def test_to_table_formats_data_to_table_format():
     formatted_output = to_table(TEST_DATA, TEST_HEADER)
-    print(formatted_output)
     assert formatted_output == TABLE_OUTPUT
+
+
+def test_to_table_when_not_given_header_creates_header_dynamically():
+    formatted_output = to_table(TEST_DATA, None)
+    assert len(formatted_output) > len(TABLE_OUTPUT)
+    assert "test.user+partners@code42.com" in formatted_output
 
 
 def test_to_json():

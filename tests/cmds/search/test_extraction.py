@@ -1,9 +1,12 @@
+import pytest
 from c42eventextractor.extractors import BaseExtractor
 from py42.response import Py42Response
 from requests import Response
 
+from code42cli import errors
 from code42cli.cmds.search.cursor_store import BaseCursorStore
 from code42cli.cmds.search.extraction import create_handlers
+from code42cli.cmds.search.extraction import handle_include_all
 
 key = "events"
 header = {"property": "Property"}
@@ -17,6 +20,16 @@ class TestQuery:
 
 def search(*args, **kwargs):
     pass
+
+
+def test_handle_include_all_raises_cli_error_when_using_include_all_with_csv():
+    def _format():
+        pass
+
+    with pytest.raises(errors.Code42CLIError) as err:
+        handle_include_all(True, _format)
+
+    assert str(err.value) == "--include-all only allowed for non-Table output formats."
 
 
 def test_create_handlers_creates_handlers_that_pass_events_to_output_format(
