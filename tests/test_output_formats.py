@@ -131,9 +131,20 @@ TEST_NESTED_DATA = {
 }
 
 
+def assert_csv_texts_are_equal(actual, expected):
+    """Have to be careful when testing ordering because of 3.5"""
+    actual = actual.replace('\r', ',')
+    actual = actual.replace('\n', ',')
+    expected = expected.replace('\r', ',')
+    expected = expected.replace('\n', ',')
+    actual = set(actual.split(","))
+    expected = set(expected.split(","))
+    assert actual == expected
+
+
 def test_to_csv_formats_data_to_csv_format():
     formatted_output = to_csv(TEST_DATA, None)
-    assert formatted_output == CSV_OUTPUT
+    assert_csv_texts_are_equal(formatted_output, CSV_OUTPUT)
 
 
 def test_to_table_formats_data_to_table_format():
