@@ -45,13 +45,7 @@ def _get_alert_details(sdk, alert_summary_list):
 
 
 def create_handlers(
-    sdk,
-    extractor_class,
-    cursor_store,
-    checkpoint_name,
-    include_all,
-    format_func,
-    output_header,
+    sdk, extractor_class, cursor_store, checkpoint_name, format_func, output_header,
 ):
     extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = ExtractionHandlers()
