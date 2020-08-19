@@ -1,5 +1,5 @@
 import click
-from c42eventextractor.logging.handlers import NoPrioritySysLogHandlerWrapper
+from c42eventextractor.logging.handlers import NoPrioritySysLogHandler
 
 from code42cli.output_formats import get_dynamic_header
 from code42cli.util import get_url_parts
@@ -15,10 +15,10 @@ def _process_events(output_format, events, output_header, include_all=False):
     return paginate
 
 
-def print_events(events):
+def print_events(output_format, include_all, output_header):
     """Prints events to stdout"""
 
-    def decorator(output_format, include_all, output_header):
+    def decorator(events):
         paginate = _process_events(output_format, events, output_header, include_all)
         if len(events) > 10:
             click.echo_via_pager(paginate)
@@ -29,18 +29,18 @@ def print_events(events):
     return decorator
 
 
-def send_events(events):
+def send_events(output_format, hostname, protocol, output_header):
     """Sends events to server/hostname"""
 
-    def decorator(output_format, hostname, protocol, output_header):
+    def decorator(events):
         paginate = _process_events(output_format, events, output_header)
 
         url_parts = get_url_parts(hostname)
         port = url_parts[1] or 514
         try:
-            handler = NoPrioritySysLogHandlerWrapper(
+            handler = NoPrioritySysLogHandler(
                 url_parts[0], port=port, protocol=protocol
-            ).handler
+            )
         except Exception as e:
             raise Exception(
                 "Unable to connect to {}. Error: {}".format(hostname, str(e))

@@ -213,6 +213,8 @@ def search(
         include_all, SEARCH_DEFAULT_HEADER, format
     )
     # format_func = get_file_events_output_format_func(format)
+
+    print_events_decorator = print_events(format, include_all, SEARCH_DEFAULT_HEADER)
     handlers = _extract_events(
         state,
         begin,
@@ -221,15 +223,11 @@ def search(
         use_checkpoint,
         saved_search,
         or_query,
+        output_function=print_events_decorator,
         **kwargs,
     )
     if not handlers.TOTAL_EVENTS and not errors.ERRORED:
         echo("No results found.")
-    else:
-        output_func = handlers.output_func
-        output_func(
-            format, include_all, SEARCH_DEFAULT_HEADER,
-        )
 
 
 @security_data.group(cls=OrderedGroup)
@@ -282,6 +280,9 @@ def send_to(
     **kwargs
 ):
     """Send events to the given server address."""
+    send_events_decorator = send_events(
+        format, hostname, protocol, SEARCH_DEFAULT_HEADER
+    )
     handlers = _extract_events(
         state,
         begin,
@@ -290,14 +291,11 @@ def send_to(
         use_checkpoint,
         saved_search,
         or_query,
-        output_function=send_events,
+        output_function=send_events_decorator,
         **kwargs,
     )
     if not handlers.TOTAL_EVENTS and not errors.ERRORED:
         echo("No results found.")
-    else:
-        output_func = handlers.output_func
-        output_func(format, hostname, protocol, SEARCH_DEFAULT_HEADER)
 
 
 def _get_file_event_extractor(sdk, handlers):
@@ -316,7 +314,7 @@ def _extract_events(
     use_checkpoint,
     saved_search,
     or_query,
-    output_function=print_events,
+    output_function,
     **kwargs
 ):
     cursor = (

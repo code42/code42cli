@@ -13,11 +13,10 @@ import code42cli.options as opt
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.options import format_option
 from code42cli.output_formats import get_output_format_func
-from code42cli.options import server_options
 from code42cli.cmds.search.output_processor import print_events
 from code42cli.cmds.search.output_processor import send_events
 from code42cli.options import server_options
-f
+
 
 SEARCH_DEFAULT_HEADER = OrderedDict()
 SEARCH_DEFAULT_HEADER["name"] = "RuleName"
@@ -193,16 +192,19 @@ def search(
     )
     #format_func = get_output_format_func(format)
     
+    print_events_decorator = print_events(format, include_all, SEARCH_DEFAULT_HEADER)
     handlers = _extract_events(
-        cli_state, begin, end, advanced_query, use_checkpoint, or_query, **kwargs
+        cli_state,
+        begin,
+        end,
+        advanced_query,
+        use_checkpoint,
+        or_query,
+        output_function=print_events_decorator,
+        **kwargs
     )
     if not handlers.TOTAL_EVENTS and not errors.ERRORED:
         echo("No results found.")
-    else:
-        output_func = handlers.output_func
-        output_func(
-            format, include_all, SEARCH_DEFAULT_HEADER,
-        )
 
 
 @alerts.command()
@@ -226,6 +228,9 @@ def send_to(
     **kwargs
 ):
     """Send alerts to the given server address."""
+    send_events_decorator = send_events(
+        format, hostname, protocol, SEARCH_DEFAULT_HEADER
+    )
     handlers = _extract_events(
         cli_state,
         begin,
@@ -233,14 +238,11 @@ def send_to(
         advanced_query,
         use_checkpoint,
         or_query,
-        output_function=send_events,
+        output_function=send_events_decorator,
         **kwargs
     )
     if not handlers.TOTAL_EVENTS and not errors.ERRORED:
         echo("No results found.")
-    else:
-        output_func = handlers.output_func
-        output_func(format, hostname, protocol, SEARCH_DEFAULT_HEADER)
 
 
 def _get_alert_extractor(sdk, handlers):
@@ -258,7 +260,7 @@ def _extract_events(
     advanced_query,
     use_checkpoint,
     or_query,
-    output_function=print_events,
+    output_function,
     **kwargs
 ):
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None

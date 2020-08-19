@@ -81,7 +81,8 @@ def create_handlers(
 
         total_events = len(events)
         handlers.TOTAL_EVENTS += total_events
-        handlers.output_func = output_function(events)
+
+        output_function(events)
         # To make sure the extractor records correct timestamp event when `CTRL-C` is pressed.
         if total_events:
             last_event_timestamp = extractor._get_timestamp_from_item(events[-1])
