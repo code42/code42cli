@@ -154,7 +154,6 @@ ADVANCED_QUERY_JSON = '{"some": "complex json"}'
 def test_search_with_advanced_query_uses_only_the_extract_advanced_method(
     cli_state, alert_extractor, runner
 ):
-
     runner.invoke(
         cli,
         ["alerts", "search", "--advanced-query", ADVANCED_QUERY_JSON],

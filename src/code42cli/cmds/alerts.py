@@ -192,7 +192,6 @@ def search(
         AlertExtractor,
         cursor,
         use_checkpoint,
-        include_all=include_all,
         format_func=format_func,
         output_header=output_header,
     )

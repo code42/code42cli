@@ -60,7 +60,6 @@ def test_create_handlers_creates_handlers_that_pass_events_to_output_format(
         TestExtractor,
         cursor_store,
         "chk-name",
-        False,
         output_format,
         output_header=header,
     )

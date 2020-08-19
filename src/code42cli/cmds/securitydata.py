@@ -219,7 +219,6 @@ def search(
         FileEventExtractor,
         cursor,
         use_checkpoint,
-        include_all,
         format_func=format_func,
         output_header=output_header,
     )
