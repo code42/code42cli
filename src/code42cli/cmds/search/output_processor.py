@@ -42,7 +42,6 @@ def send_events(output_format, hostname, protocol, output_header):
                 url_parts[0], port=port, protocol=protocol
             )
             for page in paginate():
-                print("here", page)
                 handler.emit(page)
             handler.socket.close()
         except Exception as e:

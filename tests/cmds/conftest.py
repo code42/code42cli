@@ -48,7 +48,7 @@ def event_extractor_logger(mocker):
     mock = mocker.patch(
         "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper"
     )
-    mock.return_value = mocker.MagicMock()
+    mock.emit.return_value = mocker.MagicMock()
     return mock
 
 
