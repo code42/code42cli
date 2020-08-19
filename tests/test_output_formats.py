@@ -201,7 +201,7 @@ def test_output_format_returns_to_table_function_when_no_format_option_is_passed
     assert id(format_function) == id(to_table)
 
 
-def test_get_format_header_returns_all_keys_only_which_are_not_nested():
+def test_get_dynamic_header_returns_all_keys_only_which_are_not_nested():
     header = get_dynamic_header(TEST_NESTED_DATA)
     assert header == {
         "test": "Test",
