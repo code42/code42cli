@@ -3,7 +3,9 @@ import json
 import pytest
 from c42eventextractor.maps import FILE_EVENT_TO_SIGNATURE_ID_MAP
 
-from code42cli.cmds.securitydata_output_formats import get_file_events_output_format_func
+from code42cli.cmds.securitydata_output_formats import (
+    get_file_events_output_format_func,
+)
 from code42cli.cmds.securitydata_output_formats import to_cef
 from code42cli.output_formats import to_csv
 from code42cli.output_formats import to_formatted_json

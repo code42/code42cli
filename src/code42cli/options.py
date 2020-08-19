@@ -3,7 +3,6 @@ from collections import OrderedDict
 import click
 
 from code42cli.errors import Code42CLIError
-from code42cli.output_formats import get_output_format_func
 from code42cli.output_formats import OutputFormat
 from code42cli.profile import get_profile
 from code42cli.sdk_client import create_sdk

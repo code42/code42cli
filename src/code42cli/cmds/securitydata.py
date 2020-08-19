@@ -11,12 +11,15 @@ import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
-from code42cli.cmds.securitydata_output_formats import get_file_events_output_format_func
+from code42cli.cmds.securitydata_output_formats import (
+    get_file_events_output_format_func,
+)
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.output_formats import format_option, get_output_format_func
+from code42cli.output_formats import format_option
+from code42cli.output_formats import get_output_format_func
 
 logger = get_main_cli_logger()
 
