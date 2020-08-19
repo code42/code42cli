@@ -77,7 +77,7 @@ To use the CLI, you must provide your credentials (basic authentication). If you
 The Code42 CLI currently does **not** support SSO login providers or any other identity providers such as Active
 Directory or Okta.
 
-### Windows and Mac 
+### Windows and Mac
 
 For Windows and Mac systems, the CLI uses Keyring when storing passwords.
 
@@ -88,7 +88,7 @@ To use Keyring to store the credentials you enter in the Code42 CLI, enter the f
 yum -y install python-pip python3 dbus-python gnome-keyring libsecret dbus-x11
 pip3 install code42cli
 ```
-If the following directories do not already exist, create them: 
+If the following directories do not already exist, create them:
 ```bash
 mkdir -p ~/.cache
 mkdir -p ~/.local/share/keyring
@@ -99,7 +99,7 @@ eval "$(dbus-launch --sh-syntax)"
 eval "$(printf '\n' | gnome-keyring-daemon --unlock)"
 eval "$(printf '\n' | /usr/bin/gnome-keyring-daemon --start)"
 ```
-Close out your D-bus session and GNOME Keyring: 
+Close out your D-bus session and GNOME Keyring:
 ```bash
 pkill gnome
 pkill dbus
