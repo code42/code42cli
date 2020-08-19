@@ -128,9 +128,3 @@ def create_time_range_filter(filter_cls, begin_date=None, end_date=None):
 
     elif end_date and not begin_date:
         return filter_cls.on_or_before(end_date)
-
-
-# def _process_events(output_format, include_all, events, output_header):
-#     if include_all:
-#         output_header = get_dynamic_header(events[0])
-#     return output_format(events, output_header)
