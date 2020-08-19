@@ -17,10 +17,11 @@ _ALERT_DETAIL_BATCH_SIZE = 100
 
 
 def handle_include_all(include_all, default_header, output_format):
+    """Returns appropriate header based on include-all and output format. If returns None,
+    the CLI format option will figure out the header based on the data keys."""
     output_header = None
-    if output_format == OutputFormat.TABLE:
-        if not include_all:
-            output_header = default_header
+    if output_format == OutputFormat.TABLE and not include_all:
+        output_header = default_header
     elif include_all:
         err_text = "--include-all only allowed for non-Table output formats."
         logger.log_error(err_text)
