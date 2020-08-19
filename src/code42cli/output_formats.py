@@ -2,8 +2,6 @@ import csv
 import io
 import json
 
-import click
-
 from code42cli.util import find_format_width
 from code42cli.util import format_to_table
 
@@ -35,15 +33,6 @@ def get_output_format_func(value):
             return to_formatted_json
     # default option
     return to_table
-
-
-format_option = click.option(
-    "-f",
-    "--format",
-    type=click.Choice(OutputFormat(), case_sensitive=False),
-    help="The output format of the result. Defaults to table format.",
-    default=OutputFormat.TABLE,
-)
 
 
 def to_csv(output, header):
