@@ -147,9 +147,17 @@ def test_to_csv_formats_data_to_csv_format():
     assert_csv_texts_are_equal(formatted_output, CSV_OUTPUT)
 
 
+def test_to_csv_when_given_no_output_returns_none():
+    assert to_csv(None, None) is None
+
+
 def test_to_table_formats_data_to_table_format():
     formatted_output = to_table(TEST_DATA, TEST_HEADER)
     assert formatted_output == TABLE_OUTPUT
+
+
+def test_to_table_formats_when_given_no_output_returns_none():
+    assert to_table(None, None) is None
 
 
 def test_to_table_when_not_given_header_creates_header_dynamically():
