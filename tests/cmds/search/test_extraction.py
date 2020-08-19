@@ -27,7 +27,7 @@ def test_handle_include_all_raises_cli_error_when_using_include_all_with_csv():
         pass
 
     with pytest.raises(errors.Code42CLIError) as err:
-        handle_include_all(True, _format)
+        handle_include_all(True, {}, _format)
 
     assert str(err.value) == "--include-all only allowed for non-Table output formats."
 
