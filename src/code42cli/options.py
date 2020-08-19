@@ -3,7 +3,7 @@ from collections import OrderedDict
 import click
 
 from code42cli.errors import Code42CLIError
-from code42cli.output_formats import output_format
+from code42cli.output_formats import get_output_format_func
 from code42cli.output_formats import OutputFormat
 from code42cli.profile import get_profile
 from code42cli.sdk_client import create_sdk
@@ -22,7 +22,6 @@ format_option = click.option(
     "--format",
     type=click.Choice(OutputFormat(), case_sensitive=False),
     help="The output format of the result. Defaults to table format.",
-    callback=output_format,
 )
 
 

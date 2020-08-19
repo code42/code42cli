@@ -11,12 +11,12 @@ import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
-from code42cli.cmds.securitydata_output_formats import file_events_output_format
+from code42cli.cmds.securitydata_output_formats import get_file_events_output_format_func
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.output_formats import format_option
+from code42cli.output_formats import format_option, get_output_format_func
 
 logger = get_main_cli_logger()
 
@@ -41,7 +41,7 @@ file_events_format_option = click.option(
     "--format",
     type=click.Choice(enum.FileEventsOutputFormat(), case_sensitive=False),
     help="The output format of the result. Defaults to table format.",
-    callback=file_events_output_format,
+    default=enum.FileEventsOutputFormat.TABLE,
 )
 
 
@@ -205,7 +205,7 @@ def search(
 ):
     """Search for file events."""
     output_header = ext.handle_include_all(include_all, SEARCH_DEFAULT_HEADER, format)
-
+    format_func = get_file_events_output_format_func(format)
     cursor = (
         _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
     )
@@ -215,7 +215,7 @@ def search(
         cursor,
         use_checkpoint,
         include_all,
-        format_func=format,
+        format_func=format_func,
         output_header=output_header,
     )
     extractor = _get_file_event_extractor(state.sdk, handlers)
@@ -246,10 +246,11 @@ def saved_search(state):
 @sdk_options()
 def _list(state, format=None):
     """List available saved searches."""
+    format_func = get_output_format_func(format)
     response = state.sdk.securitydata.savedsearches.get()
     result = response["searches"]
     if result:
-        output = format(result, _HEADER_KEYS_MAP)
+        output = format_func(result, _HEADER_KEYS_MAP)
         echo(output)
 
 

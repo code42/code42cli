@@ -18,6 +18,7 @@ from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
+from code42cli.output_formats import get_output_format_func
 from code42cli.util import format_string_list_to_columns
 
 
@@ -75,9 +76,10 @@ def remove_user(state, matter_id, username):
 @sdk_options()
 def _list(state, format=None):
     """Fetch existing legal hold matters."""
+    format_func = get_output_format_func(format)
     matters = _get_all_active_matters(state.sdk)
     if matters:
-        output = format(matters, _MATTER_KEYS_MAP)
+        output = format_func(matters, _MATTER_KEYS_MAP)
         echo(output)
 
 
@@ -98,6 +100,7 @@ def _list(state, format=None):
 @sdk_options()
 def show(state, matter_id, include_inactive=False, include_policy=False, format=None):
     """Display details of a given legal hold matter."""
+    format_func = get_output_format_func(format)
     matter = _check_matter_is_accessible(state.sdk, matter_id)
     matter["creator_username"] = matter["creator"]["username"]
 
@@ -114,7 +117,7 @@ def show(state, matter_id, include_inactive=False, include_policy=False, format=
         member["user"]["username"] for member in memberships if not member["active"]
     ]
 
-    output = format([matter], _MATTER_KEYS_MAP)
+    output = format_func([matter], _MATTER_KEYS_MAP)
     echo(output)
 
     _print_matter_members(active_usernames, member_type="active")

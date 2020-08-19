@@ -22,7 +22,7 @@ class OutputFormat:
         return iter([self.TABLE, self.CSV, self.JSON, self.RAW])
 
 
-def output_format(_, __, value):
+def get_output_format_func(value):
     if value is not None:
         value = value.upper()
         if value == OutputFormat.CSV:
@@ -42,7 +42,7 @@ format_option = click.option(
     "--format",
     type=click.Choice(OutputFormat(), case_sensitive=False),
     help="The output format of the result. Defaults to table format.",
-    callback=output_format,
+    default=OutputFormat.TABLE
 )
 
 

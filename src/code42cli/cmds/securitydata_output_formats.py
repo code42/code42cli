@@ -9,13 +9,13 @@ from c42eventextractor.maps import JSON_TO_CEF_MAP
 import code42cli.cmds.search.enums as enum
 from code42cli.output_formats import CEF_DEFAULT_PRODUCT_NAME
 from code42cli.output_formats import CEF_DEFAULT_SEVERITY_LEVEL
-from code42cli.output_formats import output_format
+from code42cli.output_formats import get_output_format_func
 
 
-def file_events_output_format(_, __, value):
+def get_file_events_output_format_func(value):
     if value == enum.FileEventsOutputFormat.CEF:
         return to_cef
-    return output_format(None, None, value)
+    return get_output_format_func(value)
 
 
 def to_cef(output, header):

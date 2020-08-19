@@ -3,7 +3,7 @@ import json
 import pytest
 from c42eventextractor.maps import FILE_EVENT_TO_SIGNATURE_ID_MAP
 
-from code42cli.cmds.securitydata_output_formats import file_events_output_format
+from code42cli.cmds.securitydata_output_formats import get_file_events_output_format_func
 from code42cli.cmds.securitydata_output_formats import to_cef
 from code42cli.output_formats import to_csv
 from code42cli.output_formats import to_formatted_json
@@ -123,22 +123,22 @@ def mock_file_event():
 
 
 def test_file_events_output_format_returns_to_dynamic_csv_function_when_csv_option_is_passed():
-    extraction_output_format_function = file_events_output_format(None, None, "CSV")
+    extraction_output_format_function = get_file_events_output_format_func("CSV")
     assert id(extraction_output_format_function) == id(to_csv)
 
 
 def test_file_events_output_format_returns_to_formatted_json_function_when_json__option_is_passed():
-    format_function = file_events_output_format(None, None, "JSON")
+    format_function = get_file_events_output_format_func("JSON")
     assert id(format_function) == id(to_formatted_json)
 
 
 def test_file_events_output_format_returns_to_json_function_when_raw_json_format_option_is_passed():
-    format_function = file_events_output_format(None, None, "RAW-JSON")
+    format_function = get_file_events_output_format_func("RAW-JSON")
     assert id(format_function) == id(to_json)
 
 
 def test_file_events_output_format_returns_to_cef_function_when_cef_format_option_is_passed():
-    format_function = file_events_output_format(None, None, "CEF")
+    format_function = get_file_events_output_format_func("CEF")
     assert id(format_function) == id(to_cef)
 
 

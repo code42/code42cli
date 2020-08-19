@@ -2,7 +2,7 @@ import json
 from collections import OrderedDict
 
 from code42cli.output_formats import get_dynamic_header
-from code42cli.output_formats import output_format
+from code42cli.output_formats import get_output_format_func
 from code42cli.output_formats import to_csv
 from code42cli.output_formats import to_formatted_json
 from code42cli.output_formats import to_json
@@ -169,27 +169,27 @@ def test_to_formatted_json():
 
 
 def test_output_format_returns_to_formatted_json_function_when_json_format_option_is_passed():
-    format_function = output_format(None, None, "JSON")
+    format_function = get_output_format_func("JSON")
     assert id(format_function) == id(to_formatted_json)
 
 
 def test_output_format_returns_to_json_function_when_raw_json_format_option_is_passed():
-    format_function = output_format(None, None, "RAW-JSON")
+    format_function = get_output_format_func("RAW-JSON")
     assert id(format_function) == id(to_json)
 
 
 def test_output_format_returns_to_table_function_when_ascii_table_format_option_is_passed():
-    format_function = output_format(None, None, "TABLE")
+    format_function = get_output_format_func("TABLE")
     assert id(format_function) == id(to_table)
 
 
 def test_output_format_returns_to_csv_function_when_csv_format_option_is_passed():
-    format_function = output_format(None, None, "CSV")
+    format_function = get_output_format_func("CSV")
     assert id(format_function) == id(to_csv)
 
 
 def test_output_format_returns_to_table_function_when_no_format_option_is_passed():
-    format_function = output_format(None, None, None)
+    format_function = get_output_format_func(None)
     assert id(format_function) == id(to_table)
 
 
