@@ -401,10 +401,6 @@ def test_list_with_format_option_returns_expected_format(runner, cli_state):
     cli_state.sdk.legalhold.get_all_matters.return_value = TEST_LEGAL_HOLD_LIST
 
     result = runner.invoke(cli, ["legal-hold", "list", "-f", "csv"], obj=cli_state)
-    # assert (
-    #     "legalHoldUid,name,description,active,creationDate,lastModified,creator,holdPolicyUid,creator_username"
-    #     in result.output
-    # )
     assert "legalHoldUid" in result.output
     assert "name" in result.output
     assert "description" in result.output
