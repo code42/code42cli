@@ -181,7 +181,7 @@ def search(
     **kwargs
 ):
     """Search for alerts."""
-    output_header = ext.handle_include_all(include_all, SEARCH_DEFAULT_HEADER)
+    output_header = ext.handle_include_all(include_all, SEARCH_DEFAULT_HEADER, format)
 
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
     handlers = ext.create_handlers(

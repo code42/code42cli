@@ -16,9 +16,9 @@ logger = get_main_cli_logger()
 _ALERT_DETAIL_BATCH_SIZE = 100
 
 
-def handle_include_all(include_all, default_header):
+def handle_include_all(include_all, default_header, format_func):
     output_header = None
-    if format.__name__ == to_table.__name__:
+    if format_func.__name__ == to_table.__name__:
         if not include_all:
             output_header = default_header
     elif include_all:

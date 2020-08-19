@@ -204,7 +204,7 @@ def search(
     **kwargs
 ):
     """Search for file events."""
-    output_header = ext.handle_include_all(include_all, SEARCH_DEFAULT_HEADER)
+    output_header = ext.handle_include_all(include_all, SEARCH_DEFAULT_HEADER, format)
 
     cursor = (
         _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None

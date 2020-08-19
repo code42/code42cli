@@ -77,7 +77,6 @@ def to_formatted_json(output, header=None):
 
 
 def get_dynamic_header(header_items):
-    print(header_items)
     return {
         key: key.capitalize()
         for key in header_items.keys()
