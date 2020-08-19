@@ -41,11 +41,13 @@ def send_events(output_format, hostname, protocol, output_header):
             handler = NoPrioritySysLogHandler(
                 url_parts[0], port=port, protocol=protocol
             )
+            for page in paginate():
+                print("here", page)
+                handler.emit(page)
+            handler.socket.close()
         except Exception as e:
             raise Exception(
-                "Unable to connect to {}. Error: {}".format(hostname, str(e))
+                "Failed to send data at {}. Error: {}".format(hostname, str(e))
             )
-        for page in paginate():
-            handler.emit(page)
 
     return decorator

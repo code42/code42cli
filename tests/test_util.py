@@ -5,6 +5,7 @@ from code42cli.util import _PADDING_SIZE
 from code42cli.util import does_user_agree
 from code42cli.util import find_format_width
 from code42cli.util import format_string_list_to_columns
+from code42cli.util import get_url_parts
 
 TEST_HEADER = {"key1": "Column 1", "key2": "Column 10", "key3": "Column 100"}
 
@@ -155,3 +156,17 @@ def test_format_string_list_to_columns_uses_width_of_longest_string(echo_output)
     printed_row = echo_output.call_args_list[1][0][0]
     assert len(printed_row) == expected_row_width
     assert printed_row == "col2_that_is_really_long   "
+
+
+def test_url_parts():
+    server, port = get_url_parts("localhost:3000")
+    assert server == "localhost"
+    assert port == 3000
+
+    server, port = get_url_parts("localhost")
+    assert server == "localhost"
+    assert port is None
+
+    server, port = get_url_parts("127.0.0.1")
+    assert server == "127.0.0.1"
+    assert port is None
