@@ -69,14 +69,47 @@ python3 -m pip install code42cli --upgrade
 ## Authentication
 
 ```eval_rst
-.. important:: the Code42 CLI currently only supports token-based authentication.
+.. important:: The Code42 CLI currently only supports token-based authentication.
 ```
 
-To use the CLI, you must provide your credentials (basic authentication). The CLI uses keyring when storing passwords.
-If you choose not to store your password in the CLI, you must enter it for each command that requires a connection.
+To use the CLI, you must provide your credentials (basic authentication). If you choose not to store your password in the CLI, you must enter it for each command that requires a connection.
 
 The Code42 CLI currently does **not** support SSO login providers or any other identity providers such as Active
 Directory or Okta.
+
+### Windows and Mac 
+
+For Windows and Mac systems, the CLI uses Keyring when storing passwords.
+
+### Red Hat Enterprise Linux
+
+To use Keyring to store the credentials you enter in the Code42 CLI, enter the following commands before installing.
+```bash
+yum -y install python-pip python3 dbus-python gnome-keyring libsecret dbus-x11
+pip3 install code42cli
+```
+If the following directories do not already exist, create them: 
+```bash
+mkdir -p ~/.cache
+mkdir -p ~/.local/share/keyring
+```
+In the following commands, replace the example value `\n` with the Keyring password (if the default Keyring already exists).
+```bash
+eval "$(dbus-launch --sh-syntax)"
+eval "$(printf '\n' | gnome-keyring-daemon --unlock)"
+eval "$(printf '\n' | /usr/bin/gnome-keyring-daemon --start)"
+```
+Close out your D-bus session and GNOME Keyring: 
+```bash
+pkill gnome
+pkill dbus
+```
+If you do not use Keyring to store your credentials, the Code42 CLI will ask permission to store your credentials in a local flat file with read/write permissions for only the operating system user who set the password. Alternatively, you can enter your password with each command you enter.
+
+### Ubuntu
+If Keyring doesn't support your Ubuntu system, the Code42 CLI will ask permission to store your credentials in a local flat file with read/write permissions for only the operating system user who set the password. Alternatively, you can enter your password with each command you enter.
+
+
 
 To learn more about authenticating in the CLI, follow the [Configure profile guide](profile.md).
 
