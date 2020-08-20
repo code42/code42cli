@@ -161,7 +161,7 @@ def server_options(f):
     protocol_option = click.option(
         "-p",
         "--protocol",
-        type=click.Choice(ServerProtocol()),
+        type=click.Choice(ServerProtocol(), case_sensitive=False),
         default=ServerProtocol.UDP,
         help="Protocol used to send logs to server.",
     )
