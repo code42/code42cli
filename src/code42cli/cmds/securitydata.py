@@ -21,8 +21,10 @@ from code42cli.options import format_option
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
+from code42cli.options import send_to_options
 from code42cli.options import server_options
 from code42cli.output_formats import get_output_format_func
+
 
 logger = get_main_cli_logger()
 
@@ -163,7 +165,6 @@ def file_event_options(f):
     f = process_owner_option(f)
     f = tab_url_option(f)
     f = include_non_exposure_option(f)
-    f = file_events_format_option(f)
     f = saved_search_option(f)
     return f
 
@@ -197,6 +198,7 @@ def clear_checkpoint(state, checkpoint_name):
     is_flag=True,
     help="Display simple properties of the primary level of the nested response.",
 )
+@file_events_format_option
 def search(
     state,
     format,
@@ -274,6 +276,7 @@ def show(state, search_id):
     is_flag=True,
     help="Display simple properties of the primary level of the nested response.",
 )
+@send_to_options
 def send_to(
     state,
     format,

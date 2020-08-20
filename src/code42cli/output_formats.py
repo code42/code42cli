@@ -20,6 +20,15 @@ class OutputFormat:
         return iter([self.TABLE, self.CSV, self.JSON, self.RAW])
 
 
+class SendToOutputFormat(OutputFormat):
+    CEF = "CEF"
+    JSON = "JSON"
+    RAW = "RAW-JSON"
+
+    def __iter__(self):
+        return iter([self.CEF, self.JSON, self.RAW])
+
+
 def get_output_format_func(value):
     if value is not None:
         value = value.upper()

@@ -14,6 +14,7 @@ from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.cmds.search.output_processor import print_events
 from code42cli.cmds.search.output_processor import send_events
 from code42cli.options import format_option
+from code42cli.options import send_to_options
 from code42cli.options import server_options
 from code42cli.output_formats import get_output_format_func
 
@@ -142,7 +143,6 @@ def alert_options(f):
     f = description_option(f)
     f = severity_option(f)
     f = state_option(f)
-    f = format_option(f)
     return f
 
 
@@ -175,6 +175,7 @@ def clear_checkpoint(state, checkpoint_name):
     is_flag=True,
     help="Display simple properties of the primary level of the nested response.",
 )
+@format_option
 def search(
     cli_state,
     format,
@@ -220,6 +221,7 @@ def search(
     is_flag=True,
     help="Display simple properties of the primary level of the nested response.",
 )
+@send_to_options
 def send_to(
     cli_state,
     format,
