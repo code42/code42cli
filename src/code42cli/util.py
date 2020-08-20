@@ -46,7 +46,7 @@ def find_format_width(record, header, include_header=True):
     Args:
         record (list of dict), data to be formatted.
         header (dict), key-value where keys should map to keys of record dict and
-          value is the corresponding column name to be displayed on the cli.
+          value is the corresponding column name to be displayed on the CLI.
         include_header (bool), include header in output, defaults to True.
 
     Returns:

@@ -11,13 +11,15 @@ import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
+from code42cli.cmds.securitydata_output_formats import (
+    get_file_events_output_format_func,
+)
 from code42cli.logger import get_main_cli_logger
+from code42cli.options import format_option
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.output_formats import extraction_format_option
-from code42cli.output_formats import format_option
-
+from code42cli.output_formats import get_output_format_func
 
 logger = get_main_cli_logger()
 
@@ -35,6 +37,15 @@ SEARCH_DEFAULT_HEADER["fileSize"] = "FileSize"
 SEARCH_DEFAULT_HEADER["fileOwner"] = "FileOwner"
 SEARCH_DEFAULT_HEADER["md5Checksum"] = "MD5Checksum"
 SEARCH_DEFAULT_HEADER["sha256Checksum"] = "SHA256Checksum"
+
+
+file_events_format_option = click.option(
+    "-f",
+    "--format",
+    type=click.Choice(enum.FileEventsOutputFormat(), case_sensitive=False),
+    help="The output format of the result. Defaults to table format.",
+    default=enum.FileEventsOutputFormat.TABLE,
+)
 
 
 search_options = searchopt.create_search_options("file events")
@@ -149,7 +160,7 @@ def file_event_options(f):
     f = process_owner_option(f)
     f = tab_url_option(f)
     f = include_non_exposure_option(f)
-    f = extraction_format_option(f)
+    f = file_events_format_option(f)
     f = saved_search_option(f)
     return f
 
@@ -196,18 +207,20 @@ def search(
     **kwargs
 ):
     """Search for file events."""
+    output_header = ext.try_get_default_header(
+        include_all, SEARCH_DEFAULT_HEADER, format
+    )
+    format_func = get_file_events_output_format_func(format)
     cursor = (
         _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
     )
-
     handlers = ext.create_handlers(
         state.sdk,
         FileEventExtractor,
         cursor,
         use_checkpoint,
-        include_all,
-        output_format=format,
-        output_header=SEARCH_DEFAULT_HEADER,
+        format_func=format_func,
+        output_header=output_header,
     )
     extractor = _get_file_event_extractor(state.sdk, handlers)
     extractor.use_or_query = or_query
@@ -237,10 +250,11 @@ def saved_search(state):
 @sdk_options()
 def _list(state, format=None):
     """List available saved searches."""
+    format_func = get_output_format_func(format)
     response = state.sdk.securitydata.savedsearches.get()
     result = response["searches"]
     if result:
-        output = format(result, _HEADER_KEYS_MAP)
+        output = format_func(result, _HEADER_KEYS_MAP)
         echo(output)
 
 

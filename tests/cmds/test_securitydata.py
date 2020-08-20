@@ -14,6 +14,7 @@ from code42cli import PRODUCT_NAME
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.main import cli
 
+
 BEGIN_TIMESTAMP = 1577858400.0
 END_TIMESTAMP = 1580450400.0
 CURSOR_TIMESTAMP = 1579500000.0
@@ -303,7 +304,7 @@ def test_search_when_end_date_is_before_begin_date_causes_exit(runner, cli_state
 
 
 def test_search_with_only_begin_calls_extract_with_expected_args(
-    runner, cli_state, file_event_extractor, stdout_logger, begin_option
+    runner, cli_state, file_event_extractor, begin_option
 ):
     result = runner.invoke(
         cli, ["security-data", "search", "--begin", "1h"], obj=cli_state
@@ -335,7 +336,6 @@ def test_search_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_
     file_event_extractor,
     begin_option,
     file_event_cursor_without_checkpoint,
-    stdout_logger,
 ):
     result = runner.invoke(
         cli,
@@ -350,11 +350,7 @@ def test_search_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_
 
 
 def test_search_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_calls_extract_with_checkpoint_and_ignores_begin_arg(
-    runner,
-    cli_state,
-    file_event_extractor,
-    file_event_cursor_with_checkpoint,
-    stdout_logger,
+    runner, cli_state, file_event_extractor, file_event_cursor_with_checkpoint,
 ):
     result = runner.invoke(
         cli,
@@ -711,10 +707,15 @@ def test_saved_search_list_with_format_option_returns_csv_formatted_response(
 ):
     cli_state.sdk.securitydata.savedsearches.get.return_value = TEST_LIST_RESPONSE
     result = runner.invoke(
-        cli, ["security-data", "saved-search", "list", "-f", "csv"], obj=cli_state
+        cli, ["security-data", "saved-search", "list", "-f", "CSV"], obj=cli_state
     )
-    assert "Name,Id" in result.output
-    assert "test-events,a083f08d-8f33-4cbd-81c4-8d1820b61185" in result.output
+    assert "id" in result.output
+    assert "name" in result.output
+    assert "notes" in result.output
+
+    assert "083f08d-8f33-4cbd-81c4-8d1820b61185" in result.output
+    assert "test-events" in result.output
+    assert "py42 is here" in result.output
 
 
 def test_saved_search_list_with_format_option_does_not_return_when_response_is_empty(

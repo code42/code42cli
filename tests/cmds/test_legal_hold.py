@@ -401,7 +401,15 @@ def test_list_with_format_option_returns_expected_format(runner, cli_state):
     cli_state.sdk.legalhold.get_all_matters.return_value = TEST_LEGAL_HOLD_LIST
 
     result = runner.invoke(cli, ["legal-hold", "list", "-f", "csv"], obj=cli_state)
-    assert "Matter ID,Name,Description,Creator,Creation Date" in result.output
+    assert "legalHoldUid" in result.output
+    assert "name" in result.output
+    assert "description" in result.output
+    assert "active" in result.output
+    assert "creationDate" in result.output
+    assert "lastModified" in result.output
+    assert "creator" in result.output
+    assert "holdPolicyUid" in result.output
+    assert "creator_username" in result.output
     assert "932880202064992021" in result.output
 
 
@@ -422,9 +430,9 @@ def test_show_with_format_option_returns_expected_format(
     result = runner.invoke(
         cli, ["legal-hold", "show", TEST_MATTER_ID, "-f", "csv"], obj=cli_state
     )
-
-    assert "Matter ID,Name,Description,Creator,Creation Date" in result.output
-    assert (
-        "88888,Test_Matter,,legal_admin@example.com,2020-01-01T00:00:00.000-06:00"
-        in result.output
-    )
+    assert "88888" in result.output
+    assert "Test_Matter" in result.output
+    assert "942564422882759874" in result.output
+    assert "legal_admin@example.com" in result.output
+    assert "66666" in result.output
+    assert "legal_admin@example.com" in result.output
