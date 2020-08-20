@@ -8,7 +8,8 @@ from code42cli.cmds.search.cursor_store import BaseCursorStore
 from code42cli.cmds.search.extraction import create_handlers
 from code42cli.cmds.search.extraction import try_get_default_header
 from code42cli.output_formats import OutputFormat
-
+from code42cli.output_formats import to_csv
+from code42cli.cmds.search.output_processor import print_events
 
 key = "events"
 header = {"property": "Property"}
@@ -54,14 +55,19 @@ def test_create_handlers_creates_handlers_that_pass_events_to_output_format(
         def _get_timestamp_from_item(self, item):
             pass
 
-    output_function = mocker.MagicMock()
+    output_format = mocker.MagicMock()
     cursor_store = mocker.MagicMock(sepc=BaseCursorStore)
+    output_function = print_events(output_format, header)
     handlers = create_handlers(
-        sdk, TestExtractor, cursor_store, "chk-name", output_function=output_function,
+        sdk,
+        TestExtractor,
+        cursor_store,
+        "chk-name",
+        output_function=output_function,
     )
     http_response = mocker.MagicMock(spec=Response)
     events = [{"property": "bar"}]
     http_response.text = '{{"{0}": [{{"property": "bar"}}]}}'.format(key)
     py42_response = Py42Response(http_response)
     handlers.handle_response(py42_response)
-    output_function.assert_called_once_with(events)
+    output_format.assert_called_once_with(events, header)

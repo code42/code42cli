@@ -9,7 +9,6 @@ from requests import Request
 from requests import Response
 from tests.conftest import convert_str_to_date
 
-from code42cli import PRODUCT_NAME
 from code42cli.logger import CliLogger
 
 
@@ -32,15 +31,6 @@ def logger(mocker):
 @pytest.fixture
 def cli_logger(mocker):
     mock = mocker.MagicMock(spec=CliLogger)
-    return mock
-
-
-@pytest.fixture
-def stdout_logger(mocker):
-    mock = mocker.patch(
-        "{}.cmds.search.logger_factory.get_logger_for_stdout".format(PRODUCT_NAME)
-    )
-    mock.return_value = mocker.MagicMock()
     return mock
 
 
