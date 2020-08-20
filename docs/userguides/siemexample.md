@@ -14,7 +14,7 @@ First install and configure the Code42 CLI following the instructions in
 [Getting Started](gettingstarted.md).
 
 ## Run queries
-You can get file events in either a JSON or CEF format for use by your SIEM tool. Alerts data is available in either JSON or RAW-JSON format. You can query the data as a
+You can get file events in either a JSON or CEF format for use by your SIEM tool. Alerts data is available in JSON format. You can query the data as a
 scheduled job or run ad-hoc queries. Learn more about [searching](../commands/securitydata.md) using the CLI.
 
 ### Run a query as a scheduled job
