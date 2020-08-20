@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 import click
 
-from code42cli.cmds.enums import ServerProtocol
+from code42cli.cmds.search.enums import ServerProtocol
 from code42cli.errors import Code42CLIError
 from code42cli.output_formats import OutputFormat
 from code42cli.profile import get_profile

@@ -5,6 +5,9 @@ import traceback
 from logging.handlers import RotatingFileHandler
 from threading import Lock
 
+from c42eventextractor.logging.handlers import NoPrioritySysLogHandlerWrapper
+
+from code42cli.util import get_url_parts
 from code42cli.util import get_user_project_path
 
 
@@ -38,6 +41,36 @@ def get_logger_for_stdout(name_suffix="main", formatter=None):
             formatter = formatter or _get_standard_formatter()
             logger.setLevel(logging.INFO)
             return add_handler_to_logger(logger, handler, formatter)
+    return logger
+
+
+def get_logger_for_server(hostname, protocol, output_format):
+    """Gets the logger that sends logs to a server for the given format.
+
+    Args:
+        hostname: The hostname of the server. It may include the port.
+        protocol: The transfer protocol for sending logs.
+        output_format: CEF, JSON, or RAW_JSON. Each type results in a different logger instance.
+    """
+    logger = logging.getLogger("code42_syslog_{}".format(output_format.lower()))
+    if logger_has_handlers(logger):
+        return logger
+
+    with logger_deps_lock:
+        if not logger_has_handlers(logger):
+            url_parts = get_url_parts(hostname)
+            port = url_parts[1] or 514
+            try:
+                handler = NoPrioritySysLogHandlerWrapper(
+                    url_parts[0], port=port, protocol=protocol
+                ).handler
+            except Exception as e:
+                raise Exception(
+                    "Unable to connect {}. Failed with error {}".format(
+                        hostname, str(e)
+                    )
+                )
+            return add_handler_to_logger(logger, handler, output_format)
     return logger
 
 

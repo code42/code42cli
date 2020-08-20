@@ -11,17 +11,18 @@ import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
+from code42cli.cmds.search.output_processor import print_events
+from code42cli.cmds.search.output_processor import send_events
 from code42cli.cmds.securitydata_output_formats import (
     get_file_events_output_format_func,
 )
-from code42cli.cmds.search.output_processor import print_events
-from code42cli.cmds.search.output_processor import send_events
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import format_option
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
 from code42cli.options import server_options
+from code42cli.output_formats import get_output_format_func
 
 logger = get_main_cli_logger()
 
@@ -212,9 +213,9 @@ def search(
     output_header = ext.try_get_default_header(
         include_all, SEARCH_DEFAULT_HEADER, format
     )
-    # format_func = get_file_events_output_format_func(format)
+    format_func = get_file_events_output_format_func(format)
 
-    print_events_decorator = print_events(format, include_all, SEARCH_DEFAULT_HEADER)
+    print_events_decorator = print_events(format_func, include_all, output_header)
     handlers = _extract_events(
         state,
         begin,
@@ -266,6 +267,12 @@ def show(state, search_id):
 )
 @sdk_options()
 @server_options
+@click.option(
+    "--include-all",
+    default=False,
+    is_flag=True,
+    help="Display simple properties of the primary level of the nested response.",
+)
 def send_to(
     state,
     format,
@@ -277,11 +284,16 @@ def send_to(
     use_checkpoint,
     saved_search,
     or_query,
+    include_all,
     **kwargs
 ):
     """Send events to the given server address."""
+    output_header = ext.try_get_default_header(
+        include_all, SEARCH_DEFAULT_HEADER, format
+    )
+    format_func = get_file_events_output_format_func(format)
     send_events_decorator = send_events(
-        format, hostname, protocol, SEARCH_DEFAULT_HEADER
+        format, hostname, protocol, output_header, format_func
     )
     handlers = _extract_events(
         state,

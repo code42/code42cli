@@ -1,8 +1,7 @@
 import click
-from c42eventextractor.logging.handlers import NoPrioritySysLogHandler
 
+from code42cli.logger import get_logger_for_server
 from code42cli.output_formats import get_dynamic_header
-from code42cli.util import get_url_parts
 
 
 def _process_events(output_format, events, output_header, include_all=False):
@@ -29,24 +28,14 @@ def print_events(output_format, include_all, output_header):
     return decorator
 
 
-def send_events(output_format, hostname, protocol, output_header):
+def send_events(output_format, hostname, protocol, output_header, format_function):
     """Sends events to server/hostname"""
 
     def decorator(events):
-        paginate = _process_events(output_format, events, output_header)
+        paginate = _process_events(format_function, events, output_header)
 
-        url_parts = get_url_parts(hostname)
-        port = url_parts[1] or 514
-        try:
-            handler = NoPrioritySysLogHandler(
-                url_parts[0], port=port, protocol=protocol
-            )
-            for page in paginate():
-                handler.emit(page)
-            handler.socket.close()
-        except Exception as e:
-            raise Exception(
-                "Failed to send data at {}. Error: {}".format(hostname, str(e))
-            )
+        logger = get_logger_for_server(hostname, protocol, output_format)
+        for page in paginate():
+            logger.handlers[0].emit(page)
 
     return decorator
