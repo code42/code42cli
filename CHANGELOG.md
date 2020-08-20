@@ -48,7 +48,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `code42 legal-hold list`
     - `code42 legal-hold show`
     - `code42 security-data saved-search list`
-- Added back `send-to` subcommand to `alerts` and `security-data` command to output to server via UDP or TCP.
+- Re-added `send-to` command to `alerts` and `security-data` that accepts a host address and a `--protocol` option with choices UDP or TCP.
 
 ### Removed
 
