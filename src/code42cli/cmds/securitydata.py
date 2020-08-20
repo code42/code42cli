@@ -212,11 +212,10 @@ def search(
     """Search for file events."""
     output_header = ext.try_get_default_header(
         include_all, SEARCH_DEFAULT_HEADER, format
-
     )
     format_func = get_file_events_output_format_func(format)
     print_events_decorator = print_events(format_func, output_header)
-    
+
     handlers = _extract_events(
         state,
         begin,
@@ -228,7 +227,6 @@ def search(
         output_function=print_events_decorator,
         **kwargs,
     )
-    
 
     if not handlers.TOTAL_EVENTS and not errors.ERRORED:
         echo("No results found.")

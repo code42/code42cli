@@ -7,9 +7,9 @@ from code42cli import errors
 from code42cli.cmds.search.cursor_store import BaseCursorStore
 from code42cli.cmds.search.extraction import create_handlers
 from code42cli.cmds.search.extraction import try_get_default_header
-from code42cli.output_formats import OutputFormat
-from code42cli.output_formats import to_csv
 from code42cli.cmds.search.output_processor import print_events
+from code42cli.output_formats import OutputFormat
+
 
 key = "events"
 header = {"property": "Property"}
@@ -59,11 +59,7 @@ def test_create_handlers_creates_handlers_that_pass_events_to_output_format(
     cursor_store = mocker.MagicMock(sepc=BaseCursorStore)
     output_function = print_events(output_format, header)
     handlers = create_handlers(
-        sdk,
-        TestExtractor,
-        cursor_store,
-        "chk-name",
-        output_function=output_function,
+        sdk, TestExtractor, cursor_store, "chk-name", output_function=output_function,
     )
     http_response = mocker.MagicMock(spec=Response)
     events = [{"property": "bar"}]
