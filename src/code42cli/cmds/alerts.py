@@ -192,7 +192,7 @@ def search(
     )
     format_func = get_output_format_func(format)
 
-    print_events_decorator = print_events(format_func, include_all, output_header)
+    print_events_decorator = print_events(format_func, output_header)
     handlers = _extract_events(
         cli_state,
         begin,

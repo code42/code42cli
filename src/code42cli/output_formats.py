@@ -38,8 +38,11 @@ def get_output_format_func(value):
 def to_csv(output, header):
     if not output:
         return
+    fieldnames = output[0].keys()
+    # if header:
+    #    fieldnames = header
     string_io = io.StringIO()
-    writer = csv.DictWriter(string_io, fieldnames=output[0].keys())
+    writer = csv.DictWriter(string_io, fieldnames=fieldnames, extrasaction="ignore")
     writer.writeheader()
     writer.writerows(output)
     return string_io.getvalue()
@@ -62,7 +65,9 @@ def to_json(output, header=None):
 
 
 def to_formatted_json(output, header=None):
-    return json.dumps(_filter(output, header), indent=4)
+    if header:
+        return json.dumps(_filter(output, header), indent=4)
+    return json.dumps(output, indent=4)
 
 
 def get_dynamic_header(header_items):
