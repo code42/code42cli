@@ -61,8 +61,10 @@ def to_json(output, header=None):
     return json.dumps(output)
 
 
-def to_formatted_json(output, header=None):
-    return json.dumps(_filter(output, header), indent=4)
+def to_formatted_json(output, header):
+    print(header)
+    filtered_json = [{header[key]: row[key] for key in header.keys()} for row in output]
+    return json.dumps(filtered_json, indent=4)
 
 
 def get_dynamic_header(header_items):
