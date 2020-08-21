@@ -232,13 +232,10 @@ def send_to(
     advanced_query,
     use_checkpoint,
     or_query,
-    include_all,
     **kwargs
 ):
     """Send alerts to the given server address."""
-    output_header = ext.try_get_default_header(
-        include_all, SEARCH_DEFAULT_HEADER, format
-    )
+    output_header = ext.try_get_default_header(False, SEARCH_DEFAULT_HEADER, format)
     format_func = get_output_format_func(format)
     send_events_decorator = send_events(
         format, hostname, protocol, output_header, format_func

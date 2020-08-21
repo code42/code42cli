@@ -19,7 +19,9 @@ def get_file_events_output_format_func(value):
 
 
 def to_cef(output, header):
-    return [_convert_event_to_cef(e) for e in output]
+    if type(output) == list:
+        return [_convert_event_to_cef(e) for e in output]
+    return _convert_event_to_cef(output)
 
 
 def _convert_event_to_cef(event):
@@ -30,7 +32,6 @@ def _convert_event_to_cef(event):
     }
 
     extension = " ".join(_format_cef_kvp(key, kvp_list[key]) for key in kvp_list)
-
     event_name = event.get("eventType", "UNKNOWN")
     signature_id = FILE_EVENT_TO_SIGNATURE_ID_MAP.get(event_name, "C42000")
 

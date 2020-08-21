@@ -23,12 +23,9 @@ def send_events(output_format, hostname, protocol, output_header, format_functio
     """Sends events to server/hostname"""
 
     def decorator(events):
-        def paginate():
-            yield format_function(events, output_header)
-
         logger = get_logger_for_server(hostname, protocol, output_format)
 
-        for page in paginate():
-            logger.handlers[0].emit(page)
+        for event in events:
+            logger.handlers[0].emit(format_function(event, output_header))
 
     return decorator
