@@ -20,35 +20,67 @@ class OutputFormat:
         return iter([self.TABLE, self.CSV, self.JSON, self.RAW])
 
 
-def get_output_format_func(value):
-    if value is not None:
-        value = value.upper()
-        if value == OutputFormat.CSV:
-            return to_csv
-        if value == OutputFormat.RAW:
-            return to_json
-        if value == OutputFormat.TABLE:
-            return to_table
-        if value == OutputFormat.JSON:
-            return to_formatted_json
-    # default option
-    return to_table
+class OutputFormatter:
+    def __init__(self, output_format, header=None):
+        output_format = output_format.upper()
+        self.output_format = output_format
+        self._format_func = to_table
+        self.header = header
+        if output_format is None:
+            return
+
+        if output_format == OutputFormat.CSV:
+            self._format_func = to_csv
+        elif output_format == OutputFormat.RAW:
+            self._format_func = to_json
+        elif output_format == OutputFormat.TABLE:
+            self._format_func = to_table
+        elif output_format == OutputFormat.JSON:
+            self._format_func = to_formatted_json
+
+    def _format_output(self, output):
+        return self._format_func(output, self.header)
+    
+    def get_formatted_output(self, output):
+        if self._requires_list_output:
+            yield self._format_output(output)
+        else:
+            for item in output:
+                yield self._format_output(item)
+
+    @property
+    def _requires_list_output(self):
+        return (
+            self.output_format == OutputFormat.TABLE
+            or self.output_format == OutputFormat.CSV
+        )
 
 
-def to_csv(output, header):
+def to_csv(output, header=None):
+    """Output is a list of records"""
     if not output:
         return
     string_io = io.StringIO()
-    writer = csv.DictWriter(string_io, fieldnames=output[0].keys())
+    
+    fieldnames = list(output[0].keys())
+    if "stateLastModifiedBy" not in fieldnames:
+        fieldnames.append("stateLastModifiedBy")
+    if "stateLastModifiedAt" not in fieldnames:
+        fieldnames.append("stateLastModifiedAt")
+    if "note" not in fieldnames:
+        fieldnames.append("note")
+    
+    writer = csv.DictWriter(string_io, fieldnames=fieldnames)
     writer.writeheader()
     writer.writerows(output)
     return string_io.getvalue()
 
 
 def to_table(output, header):
+    """Output is a list of records"""
     if not output:
         return
-    header = header or get_dynamic_header(output[0])
+    header = header or get_dynamic_header(output)
     rows, column_size = find_format_width(output, header)
     return format_to_table(rows, column_size)
 
@@ -58,12 +90,14 @@ def _filter(output, header):
 
 
 def to_json(output, header=None):
+    """Output is a single record"""
     return json.dumps(output)
 
 
 def to_formatted_json(output, header):
-    filtered_json = [{header[key]: row[key] for key in header.keys()} for row in output]
-    return json.dumps(filtered_json, indent=4)
+    """Output is a single record"""
+    json_str = json.dumps(output, indent=4)
+    return json_str
 
 
 def get_dynamic_header(header_items):

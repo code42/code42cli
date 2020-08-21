@@ -44,7 +44,7 @@ def find_format_width(record, header, include_header=True):
     Finds the largest string against each column so as to decide the padding size for the column.
 
     Args:
-        record (list of dict), data to be formatted.
+        record (dict), data to be formatted.
         header (dict), key-value where keys should map to keys of record dict and
           value is the corresponding column name to be displayed on the CLI.
         include_header (bool), include header in output, defaults to True.

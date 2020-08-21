@@ -12,7 +12,7 @@ import code42cli.errors as errors
 import code42cli.options as opt
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.options import format_option
-from code42cli.output_formats import get_output_format_func
+from code42cli.output_formats import OutputFormatter
 
 SEARCH_DEFAULT_HEADER = OrderedDict()
 SEARCH_DEFAULT_HEADER["name"] = "RuleName"
@@ -185,15 +185,10 @@ def search(
     output_header = ext.try_get_default_header(
         include_all, SEARCH_DEFAULT_HEADER, format
     )
-    format_func = get_output_format_func(format)
+    formatter = OutputFormatter(format, output_header)
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
     handlers = ext.create_handlers(
-        cli_state.sdk,
-        AlertExtractor,
-        cursor,
-        use_checkpoint,
-        format_func=format_func,
-        output_header=output_header,
+        cli_state.sdk, AlertExtractor, cursor, use_checkpoint, formatter=formatter,
     )
     extractor = _get_alert_extractor(cli_state.sdk, handlers)
     extractor.use_or_query = or_query

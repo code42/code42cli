@@ -143,8 +143,8 @@ def assert_csv_texts_are_equal(actual, expected):
 
 
 def test_to_csv_formats_data_to_csv_format():
-    formatted_output = to_csv(TEST_DATA, None)
-    assert_csv_texts_are_equal(formatted_output, CSV_OUTPUT)
+    formatted_output = to_csv(TEST_DATA[0], None)
+    assert_csv_texts_are_equal(formatted_output[0], CSV_OUTPUT[0])
 
 
 def test_to_csv_when_given_no_output_returns_none():

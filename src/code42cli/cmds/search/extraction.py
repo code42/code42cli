@@ -42,7 +42,7 @@ def _get_alert_details(sdk, alert_summary_list):
 
 
 def create_handlers(
-    sdk, extractor_class, cursor_store, checkpoint_name, format_func, output_header,
+    sdk, extractor_class, cursor_store, checkpoint_name, formatter,
 ):
     extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = ExtractionHandlers()
@@ -79,14 +79,14 @@ def create_handlers(
 
         total_events = len(events)
         handlers.TOTAL_EVENTS += total_events
-
-        def paginate():
-            yield format_func(events, output_header)
+        
+        def _format_output():
+            return formatter.get_formatted_output(events)
 
         if len(events) > 10:
-            click.echo_via_pager(paginate)
+            click.echo_via_pager(_format_output())
         else:
-            for page in paginate():
+            for page in _format_output():
                 click.echo(page)
 
         # To make sure the extractor records correct timestamp event when `CTRL-C` is pressed.
