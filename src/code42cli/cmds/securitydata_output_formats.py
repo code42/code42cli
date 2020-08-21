@@ -13,11 +13,15 @@ from code42cli.output_formats import OutputFormatter
 
 
 class FileEventsOutputFormatter(OutputFormatter):
-    def __init__(self, output_format, header):
-        output_format = output_format.upper()
+    def __init__(self, output_format, header=None):
+        output_format = (
+            output_format.upper()
+            if output_format
+            else enum.FileEventsOutputFormat.TABLE
+        )
         super().__init__(output_format, header)
         if output_format == enum.FileEventsOutputFormat.CEF:
-            self._format_output = to_cef
+            self._format_func = to_cef
 
 
 def to_cef(output, header=None):

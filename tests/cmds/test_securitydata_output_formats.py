@@ -3,13 +3,13 @@ import json
 import pytest
 from c42eventextractor.maps import FILE_EVENT_TO_SIGNATURE_ID_MAP
 
-from code42cli.cmds.securitydata_output_formats import (
-    get_file_events_output_format_func,
-)
+from code42cli.cmds.search.enums import FileEventsOutputFormat
+from code42cli.cmds.securitydata_output_formats import FileEventsOutputFormatter
 from code42cli.cmds.securitydata_output_formats import to_cef
 from code42cli.output_formats import to_csv
 from code42cli.output_formats import to_formatted_json
 from code42cli.output_formats import to_json
+from code42cli.output_formats import to_table
 
 
 AED_CLOUD_ACTIVITY_EVENT_DICT = json.loads(
@@ -106,42 +106,61 @@ AED_EVENT_DICT = json.loads(
 
 @pytest.fixture
 def mock_file_event_removable_media_event():
-    return [AED_REMOVABLE_MEDIA_EVENT_DICT]
+    return AED_REMOVABLE_MEDIA_EVENT_DICT
 
 
 @pytest.fixture
 def mock_file_event_cloud_activity_event():
-    return [AED_CLOUD_ACTIVITY_EVENT_DICT]
+    return AED_CLOUD_ACTIVITY_EVENT_DICT
 
 
 @pytest.fixture
 def mock_file_event_email_event():
-    return [AED_EMAIL_EVENT_DICT]
+    return AED_EMAIL_EVENT_DICT
 
 
 @pytest.fixture
 def mock_file_event():
-    return [AED_EVENT_DICT]
+    return AED_EVENT_DICT
 
 
-def test_file_events_output_format_returns_to_dynamic_csv_function_when_csv_option_is_passed():
-    extraction_output_format_function = get_file_events_output_format_func("CSV")
-    assert id(extraction_output_format_function) == id(to_csv)
+class TestFileEventsOutputFormatter:
+    def test_init_sets_format_func_to_dynamic_csv_function_when_csv_option_is_passed(
+        self,
+    ):
+        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.CSV)
+        assert id(formatter._format_func) == id(to_csv)
 
+    def test_init_sets_format_func_to_formatted_json_function_when_json__option_is_passed(
+        self,
+    ):
+        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.JSON)
+        assert id(formatter._format_func) == id(to_formatted_json)
 
-def test_file_events_output_format_returns_to_formatted_json_function_when_json__option_is_passed():
-    format_function = get_file_events_output_format_func("JSON")
-    assert id(format_function) == id(to_formatted_json)
+    def test_init_sets_format_func_to_json_function_when_raw_json_format_option_is_passed(
+        self,
+    ):
+        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.RAW)
+        assert id(formatter._format_func) == id(to_json)
 
+    def test_init_sets_format_func_to_cef_function_when_cef_format_option_is_passed(
+        self,
+    ):
+        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.CEF)
+        print(formatter._format_func.__name__)
+        assert id(formatter._format_func) == id(to_cef)
 
-def test_file_events_output_format_returns_to_json_function_when_raw_json_format_option_is_passed():
-    format_function = get_file_events_output_format_func("RAW-JSON")
-    assert id(format_function) == id(to_json)
+    def test_init_sets_format_func_to_table_function_when_table_format_option_is_passed(
+        self,
+    ):
+        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.TABLE)
+        assert id(formatter._format_func) == id(to_table)
 
-
-def test_file_events_output_format_returns_to_cef_function_when_cef_format_option_is_passed():
-    format_function = get_file_events_output_format_func("CEF")
-    assert id(format_function) == id(to_cef)
+    def test_init_sets_format_func_to_table_function_when_no_format_option_is_passed(
+        self,
+    ):
+        formatter = FileEventsOutputFormatter(None)
+        assert id(formatter._format_func) == id(to_table)
 
 
 def test_to_cef_returns_cef_tagged_string(mock_file_event):
@@ -182,10 +201,10 @@ def test_to_cef_excludes_empty_values_from_output(mock_file_event):
 
 def test_to_cef_excludes_file_event_fields_not_in_cef_map(mock_file_event):
     test_value = "definitelyExcludedValue"
-    mock_file_event[0]["unmappedFieldName"] = test_value
+    mock_file_event["unmappedFieldName"] = test_value
     cef_out = to_cef(mock_file_event, None)
     cef_parts = get_cef_parts(cef_out)
-    del mock_file_event[0]["unmappedFieldName"]
+    del mock_file_event["unmappedFieldName"]
     assert test_value not in cef_parts[-1]
 
 
@@ -525,7 +544,7 @@ def test_to_cef_includes_correct_event_name_and_signature_id_for_emailed(
 
 
 def get_cef_parts(cef_str):
-    return cef_str[0].split("|")
+    return cef_str.split("|")
 
 
 def key_value_pair_in_cef_extension(field_name, field_value, cef_str):

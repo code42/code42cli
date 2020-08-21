@@ -17,7 +17,6 @@ from code42cli.options import format_option
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
 
 logger = get_main_cli_logger()

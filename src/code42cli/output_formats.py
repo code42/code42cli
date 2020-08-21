@@ -22,7 +22,7 @@ class OutputFormat:
 
 class OutputFormatter:
     def __init__(self, output_format, header=None):
-        output_format = output_format.upper()
+        output_format = output_format.upper() if output_format else OutputFormat.TABLE
         self.output_format = output_format
         self._format_func = to_table
         self.header = header
@@ -40,7 +40,7 @@ class OutputFormatter:
 
     def _format_output(self, output):
         return self._format_func(output, self.header)
-    
+
     def get_formatted_output(self, output):
         if self._requires_list_output:
             yield self._format_output(output)
@@ -61,7 +61,7 @@ def to_csv(output, header=None):
     if not output:
         return
     string_io = io.StringIO()
-    
+
     fieldnames = list(output[0].keys())
     if "stateLastModifiedBy" not in fieldnames:
         fieldnames.append("stateLastModifiedBy")
@@ -69,7 +69,7 @@ def to_csv(output, header=None):
         fieldnames.append("stateLastModifiedAt")
     if "note" not in fieldnames:
         fieldnames.append("note")
-    
+
     writer = csv.DictWriter(string_io, fieldnames=fieldnames)
     writer.writeheader()
     writer.writerows(output)
@@ -101,8 +101,11 @@ def to_formatted_json(output, header):
 
 
 def get_dynamic_header(header_items):
+    if not header_items:
+        return
+
     return {
         key: key.capitalize()
-        for key in header_items.keys()
-        if type(header_items[key]) == str
+        for key in header_items[0].keys()
+        if type(header_items[0][key]) == str
     }

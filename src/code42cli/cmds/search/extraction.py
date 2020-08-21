@@ -79,7 +79,7 @@ def create_handlers(
 
         total_events = len(events)
         handlers.TOTAL_EVENTS += total_events
-        
+
         def _format_output():
             return formatter.get_formatted_output(events)
 
