@@ -62,7 +62,6 @@ def to_json(output, header=None):
 
 
 def to_formatted_json(output, header):
-    print(header)
     filtered_json = [{header[key]: row[key] for key in header.keys()} for row in output]
     return json.dumps(filtered_json, indent=4)
 

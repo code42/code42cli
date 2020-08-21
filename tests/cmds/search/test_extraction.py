@@ -30,7 +30,7 @@ def test_try_get_default_header_raises_cli_error_when_using_include_all_with_non
     assert str(err.value) == "--include-all only allowed for non-Table output formats."
 
 
-def test_try_get_default_header_uses_default_header_when_not_include_all_and_is_table():
+def test_try_get_default_header_uses_default_header_when_not_include_all():
     default_header = {"default": "header"}
     actual = try_get_default_header(False, default_header, OutputFormat.TABLE)
     assert actual is default_header
