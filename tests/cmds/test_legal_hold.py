@@ -31,7 +31,7 @@ MATTER_RESPONSE = """
     "lastModified": "2019-12-19T20:32:10.781Z",
     "creator": {
         "userUid": "12345",
-        "username": "user@example.com",
+        "username": "creator@example.com",
         "email": "user@example.com",
         "userExtRef": null
     },
@@ -103,7 +103,7 @@ ALL_ACTIVE_CUSTODIANS_RESPONSE = """
                 "name": "test"
             },
             "user": {
-                "userUid": "66666",
+                "userUid": "12345",
                 "username": "user@example.com",
                 "email": "user@example.com",
                 "userExtRef": null
@@ -112,9 +112,27 @@ ALL_ACTIVE_CUSTODIANS_RESPONSE = """
     ]
 }
 """
-ALL_INACTIVE_CUSTODIANS_RESPONSE = ALL_ACTIVE_CUSTODIANS_RESPONSE.replace(
-    "true", "false"
-)
+ALL_INACTIVE_CUSTODIANS_RESPONSE = """
+{
+    "legalHoldMemberships": [
+        {
+            "legalHoldMembershipUid": "88888",
+            "active": false,
+            "creationDate": "2020-07-16T08:50:23.405Z",
+            "legalHold": {
+                "legalHoldUid": "99999",
+                "name": "test"
+            },
+            "user": {
+                "userUid": "02345",
+                "username": "inactive@example.com",
+                "email": "user@example.com",
+                "userExtRef": null
+            }
+        }
+    ]
+}
+"""
 ALL_ACTIVE_AND_INACTIVE_CUSTODIANS_RESPONSE = """
 {
     "legalHoldMemberships": [
@@ -127,13 +145,13 @@ ALL_ACTIVE_AND_INACTIVE_CUSTODIANS_RESPONSE = """
                 "name": "test"
             },
             "user": {
-                "userUid": "66666",
+                "userUid": "12345",
                 "username": "user@example.com",
                 "email": "user@example.com",
                 "userExtRef": null
             }
         },
-                {
+        {
             "legalHoldMembershipUid": "88888",
             "active": false,
             "creationDate": "2020-07-16T08:50:23.405Z",
@@ -142,8 +160,8 @@ ALL_ACTIVE_AND_INACTIVE_CUSTODIANS_RESPONSE = """
                 "name": "test"
             },
             "user": {
-                "userUid": "66666",
-                "username": "user@example.com",
+                "userUid": "02345",
+                "username": "inactive@example.com",
                 "email": "user@example.com",
                 "userExtRef": null
             }
@@ -151,8 +169,8 @@ ALL_ACTIVE_AND_INACTIVE_CUSTODIANS_RESPONSE = """
     ]
 }
 """
-EMPTY_MATTERS_RESPONSE = """{legalholds: []}"""
-ALL_MATTERS_RESPONSE = """{{legalholds: [{}]}}""".format(MATTER_RESPONSE)
+EMPTY_MATTERS_RESPONSE = """{"legalHolds": []}"""
+ALL_MATTERS_RESPONSE = """{{"legalHolds": [{}]}}""".format(MATTER_RESPONSE)
 
 
 def _create_py42_response(mocker, text):
@@ -175,23 +193,22 @@ def preservation_policy_response(mocker):
 
 @pytest.fixture
 def empty_legal_hold_memberships_response(mocker):
-    response = _create_py42_response(mocker, EMPTY_CUSTODIANS_RESPONSE)
-    return response
+    return [_create_py42_response(mocker, EMPTY_CUSTODIANS_RESPONSE)]
 
 
 @pytest.fixture
 def active_legal_hold_memberships_response(mocker):
-    return _create_py42_response(mocker, ALL_ACTIVE_CUSTODIANS_RESPONSE)
+    return [_create_py42_response(mocker, ALL_ACTIVE_CUSTODIANS_RESPONSE)]
 
 
 @pytest.fixture
 def inactive_legal_hold_memberships_response(mocker):
-    return _create_py42_response(mocker, ALL_INACTIVE_CUSTODIANS_RESPONSE)
+    return [_create_py42_response(mocker, ALL_INACTIVE_CUSTODIANS_RESPONSE)]
 
 
 @pytest.fixture
 def active_and_inactive_legal_hold_memberships_response(mocker):
-    return _create_py42_response(mocker, ALL_ACTIVE_AND_INACTIVE_CUSTODIANS_RESPONSE)
+    return [_create_py42_response(mocker, ALL_ACTIVE_AND_INACTIVE_CUSTODIANS_RESPONSE)]
 
 
 @pytest.fixture
@@ -203,12 +220,12 @@ def get_user_id_success(cli_state):
 
 @pytest.fixture
 def empty_matters_response(mocker):
-    return _create_py42_response(mocker, EMPTY_MATTERS_RESPONSE)
+    return [_create_py42_response(mocker, EMPTY_MATTERS_RESPONSE)]
 
 
 @pytest.fixture
 def all_matters_response(mocker):
-    return _create_py42_response(mocker, ALL_MATTERS_RESPONSE)
+    return [_create_py42_response(mocker, ALL_MATTERS_RESPONSE)]
 
 
 @pytest.fixture
@@ -351,26 +368,30 @@ def test_remove_user_raises_user_not_in_matter_error_if_user_not_active_in_matte
     )
 
 
-# def test_remove_user_removes_user_if_user_in_matter(
-#     runner, cli_state, check_matter_accessible_success, get_user_id_success, active_legal_hold_memberships_response
-# ):
-#     cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
-#         active_legal_hold_memberships_response
-#     )
-#     membership_uid = "88888"
-#     runner.invoke(
-#         cli,
-#         [
-#             "legal-hold",
-#             "remove-user",
-#             "--matter-id",
-#             TEST_MATTER_ID,
-#             "--username",
-#             ACTIVE_TEST_USERNAME,
-#         ],
-#         obj=cli_state,
-#     )
-#     cli_state.sdk.legalhold.remove_from_matter.assert_called_with(membership_uid)
+def test_remove_user_removes_user_if_user_in_matter(
+    runner,
+    cli_state,
+    check_matter_accessible_success,
+    get_user_id_success,
+    active_legal_hold_memberships_response,
+):
+    cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
+        active_legal_hold_memberships_response
+    )
+    membership_uid = "88888"
+    runner.invoke(
+        cli,
+        [
+            "legal-hold",
+            "remove-user",
+            "--matter-id",
+            TEST_MATTER_ID,
+            "--username",
+            ACTIVE_TEST_USERNAME,
+        ],
+        obj=cli_state,
+    )
+    cli_state.sdk.legalhold.remove_from_matter.assert_called_with(membership_uid)
 
 
 def test_matter_accessible_check_only_makes_one_http_call_when_called_multiple_times_with_same_matter_id(
@@ -387,10 +408,10 @@ def test_show_matter_prints_active_and_inactive_results_when_include_inactive_fl
     runner,
     cli_state,
     check_matter_accessible_success,
-    active_legal_hold_memberships_response,
+    active_and_inactive_legal_hold_memberships_response,
 ):
     cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
-        active_legal_hold_memberships_response
+        active_and_inactive_legal_hold_memberships_response
     )
     result = runner.invoke(
         cli, ["legal-hold", "show", TEST_MATTER_ID, "--include-inactive"], obj=cli_state
@@ -480,9 +501,11 @@ def test_show_matter_prints_no_active_members_when_no_active_membership_and_inac
 
 
 def test_show_matter_prints_preservation_policy_when_include_policy_flag_set(
-    runner, cli_state, check_matter_accessible_success, matter_response
+    runner, cli_state, check_matter_accessible_success, preservation_policy_response
 ):
-    cli_state.sdk.legalhold.get_policy_by_uid.return_value = matter_response
+    cli_state.sdk.legalhold.get_policy_by_uid.return_value = (
+        preservation_policy_response
+    )
     result = runner.invoke(
         cli, ["legal-hold", "show", TEST_MATTER_ID, "--include-policy"], obj=cli_state
     )
@@ -523,7 +546,7 @@ def test_remove_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
         ]
 
 
-def test_list_with_format_option_returns_expected_format(
+def test_list_with_format_csv_returns_csv_format(
     runner, cli_state, all_matters_response
 ):
     cli_state.sdk.legalhold.get_all_matters.return_value = all_matters_response
@@ -537,10 +560,13 @@ def test_list_with_format_option_returns_expected_format(
     assert "creator" in result.output
     assert "holdPolicyUid" in result.output
     assert "creator_username" in result.output
-    assert "932880202064992021" in result.output
+    assert "88888" in result.output
+    assert "Test_Matter" in result.output
+    comma_count = [c for c in result.output if c == ","]
+    assert len(comma_count) >= 13
 
 
-def test_list_with_format_option_returns_no_response_when_response_is_empty(
+def test_list_with_csv_format_returns_no_response_when_response_is_empty(
     runner, cli_state, empty_legal_hold_memberships_response, empty_matters_response
 ):
     cli_state.sdk.legalhold.get_all_matters.return_value = empty_matters_response
@@ -548,7 +574,7 @@ def test_list_with_format_option_returns_no_response_when_response_is_empty(
     assert "Matter ID,Name,Description,Creator,Creation Date" not in result.output
 
 
-def test_show_with_format_option_returns_expected_format(
+def test_show_with_csv_format_option_returns_expected_format(
     runner,
     cli_state,
     check_matter_accessible_success,
@@ -561,9 +587,16 @@ def test_show_with_format_option_returns_expected_format(
     result = runner.invoke(
         cli, ["legal-hold", "show", TEST_MATTER_ID, "-f", "csv"], obj=cli_state
     )
+    assert "legalHoldUid" in result.output
+    assert "name" in result.output
+    assert "description" in result.output
+    assert "active" in result.output
+    assert "creationDate" in result.output
+    assert "lastModified" in result.output
+    assert "creator" in result.output
+    assert "holdPolicyUid" in result.output
+    assert "creator_username" in result.output
     assert "88888" in result.output
     assert "Test_Matter" in result.output
-    assert "942564422882759874" in result.output
-    assert "legal_admin@example.com" in result.output
-    assert "66666" in result.output
-    assert "legal_admin@example.com" in result.output
+    comma_count = [c for c in result.output if c == ","]
+    assert len(comma_count) >= 13

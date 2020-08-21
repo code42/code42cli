@@ -221,13 +221,9 @@ def _get_legal_hold_membership_id_for_user_and_matter(sdk, username, matter_id):
 
 
 def _get_legal_hold_memberships_for_matter(sdk, matter_id, active=True):
-    try:
-        memberships_generator = sdk.legalhold.get_all_matter_custodians(
-            legal_hold_uid=matter_id, active=active
-        )
-    except Exception as err:
-        print(err)
-
+    memberships_generator = sdk.legalhold.get_all_matter_custodians(
+        legal_hold_uid=matter_id, active=active
+    )
     memberships = [
         member
         for page in memberships_generator

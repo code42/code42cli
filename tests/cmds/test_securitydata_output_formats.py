@@ -502,7 +502,7 @@ def test_to_cef_includes_correct_event_name_and_signature_id_for_created(
     mock_file_event,
 ):
     event_type = "CREATED"
-    mock_file_event[0]["eventType"] = event_type
+    mock_file_event["eventType"] = event_type
     cef_out = to_cef(mock_file_event, None)
     assert event_name_assigned_correct_signature_id(event_type, "C42200", cef_out)
 
@@ -511,7 +511,7 @@ def test_to_cef_includes_correct_event_name_and_signature_id_for_modified(
     mock_file_event,
 ):
     event_type = "MODIFIED"
-    mock_file_event[0]["eventType"] = event_type
+    mock_file_event["eventType"] = event_type
     cef_out = to_cef(mock_file_event, None)
     assert event_name_assigned_correct_signature_id(event_type, "C42201", cef_out)
 
@@ -520,7 +520,7 @@ def test_to_cef_includes_correct_event_name_and_signature_id_for_deleted(
     mock_file_event,
 ):
     event_type = "DELETED"
-    mock_file_event[0]["eventType"] = event_type
+    mock_file_event["eventType"] = event_type
     cef_out = to_cef(mock_file_event, None)
     assert event_name_assigned_correct_signature_id(event_type, "C42202", cef_out)
 
@@ -529,7 +529,7 @@ def test_to_cef_includes_correct_event_name_and_signature_id_for_read_by_app(
     mock_file_event,
 ):
     event_type = "READ_BY_APP"
-    mock_file_event[0]["eventType"] = event_type
+    mock_file_event["eventType"] = event_type
     cef_out = to_cef(mock_file_event, None)
     assert event_name_assigned_correct_signature_id(event_type, "C42203", cef_out)
 
@@ -538,7 +538,7 @@ def test_to_cef_includes_correct_event_name_and_signature_id_for_emailed(
     mock_file_event_email_event,
 ):
     event_type = "EMAILED"
-    mock_file_event_email_event[0]["eventType"] = event_type
+    mock_file_event_email_event["eventType"] = event_type
     cef_out = to_cef(mock_file_event_email_event, None)
     assert event_name_assigned_correct_signature_id(event_type, "C42204", cef_out)
 
