@@ -1,6 +1,6 @@
 # Ingest file event data or alerts into a SIEM tool
 
-This guide provides instructions on using the CLI to ingest Code42 file event data or alerts 
+This guide provides instructions on using the CLI to ingest Code42 file event data or alerts
 into a security information and event management (SIEM) tool like LogRhythm, Sumo Logic, or IBM QRadar.
 
 ## Considerations
@@ -25,7 +25,7 @@ the profile to use by including `--profile`. An example using `netcat` to forwar
 code42 security-data search --profile profile1 -c syslog_sender | nc syslog.example.com 514
 ```
 
-An example to send to the syslog server only the new alerts that meet the filter criteria since the previous request: 
+An example to send to the syslog server only the new alerts that meet the filter criteria since the previous request:
 ```bash
 code42 alerts send-to "https://syslog.example.com:514" -p UDP --profile profile1 --rule-name “Source code exfiltration” --state OPEN -i
 ```
@@ -52,10 +52,10 @@ March 5:
 code42 security-data search -f RAW-JSON -b 2020-03-05 -t ApplicationRead --c42-username 'sean.cassidy@example.com' > /Users/sangita.maskey/Downloads/c42cli_output.txt
 ```
 
-Print alerts since May 5 where a file's cloud share permissions changed: 
+Print alerts since May 5 where a file's cloud share permissions changed:
 ```bash
 code42 alerts print -b 2020-05-05 --rule-type FedCloudSharePermissions
-``` 
+```
 
 Example output for a single file exposure event (in default JSON format):
 
@@ -97,33 +97,33 @@ Example output for a single file exposure event (in default JSON format):
 Example output for a single alert (in default JSON format):
 
 ```json
-{"type$": "ALERT_DETAILS", 
-"tenantId": "c4b5e830-824a-40a3-a6d9-345664cfbb33", 
-"type": "FED_CLOUD_SHARE_PERMISSIONS", 
-"name": "Cloud Share", 
-"description": "Alert Rule for data exfiltration via Cloud Share", 
-"actor": "leland.stewart@example.com", 
-"target": "N/A", 
-"severity": "HIGH", 
-"ruleId": "408eb1ae-587e-421a-9444-f75d5399eacb", 
-"ruleSource": "Alerting", 
-"id": "7d936d0d-e783-4b24-817d-f19f625e0965", 
-"createdAt": "2020-05-22T09:47:33.8863230Z", 
-"state": "OPEN", 
-"observations": [{"type$": "OBSERVATION", 
-"id": "4bc378e6-bfbd-40f0-9572-6ed605ea9f6c", 
-"observedAt": "2020-05-22T09:40:00.0000000Z", 
-"type": "FedCloudSharePermissions", 
-"data": {"type$": "OBSERVED_CLOUD_SHARE_ACTIVITY", 
-"id": "4bc378e6-bfbd-40f0-9572-6ed605ea9f6c", 
-"sources": ["GoogleDrive"], 
-"exposureTypes": ["PublicLinkShare"], 
-"firstActivityAt": "2020-05-22T09:40:00.0000000Z", 
-"lastActivityAt": "2020-05-22T09:45:00.0000000Z", 
-"fileCount": 1, 
-"totalFileSize": 6025, 
-"fileCategories": [{"type$": "OBSERVED_FILE_CATEGORY", "category": "Document", "fileCount": 1, "totalFileSize": 6025, "isSignificant": false}], 
-"files": [{"type$": "OBSERVED_FILE", "eventId": "1hHdK6Qe6hez4vNCtS-UimDf-sbaFd-D7_3_baac33d0-a1d3-4e0a-9957-25632819eda7", "name": "1590140395_Longfellow_Cloud_Arch_Redesign.drawio", "category": "Document", "size": 6025}], 
+{"type$": "ALERT_DETAILS",
+"tenantId": "c4b5e830-824a-40a3-a6d9-345664cfbb33",
+"type": "FED_CLOUD_SHARE_PERMISSIONS",
+"name": "Cloud Share",
+"description": "Alert Rule for data exfiltration via Cloud Share",
+"actor": "leland.stewart@example.com",
+"target": "N/A",
+"severity": "HIGH",
+"ruleId": "408eb1ae-587e-421a-9444-f75d5399eacb",
+"ruleSource": "Alerting",
+"id": "7d936d0d-e783-4b24-817d-f19f625e0965",
+"createdAt": "2020-05-22T09:47:33.8863230Z",
+"state": "OPEN",
+"observations": [{"type$": "OBSERVATION",
+"id": "4bc378e6-bfbd-40f0-9572-6ed605ea9f6c",
+"observedAt": "2020-05-22T09:40:00.0000000Z",
+"type": "FedCloudSharePermissions",
+"data": {"type$": "OBSERVED_CLOUD_SHARE_ACTIVITY",
+"id": "4bc378e6-bfbd-40f0-9572-6ed605ea9f6c",
+"sources": ["GoogleDrive"],
+"exposureTypes": ["PublicLinkShare"],
+"firstActivityAt": "2020-05-22T09:40:00.0000000Z",
+"lastActivityAt": "2020-05-22T09:45:00.0000000Z",
+"fileCount": 1,
+"totalFileSize": 6025,
+"fileCategories": [{"type$": "OBSERVED_FILE_CATEGORY", "category": "Document", "fileCount": 1, "totalFileSize": 6025, "isSignificant": false}],
+"files": [{"type$": "OBSERVED_FILE", "eventId": "1hHdK6Qe6hez4vNCtS-UimDf-sbaFd-D7_3_baac33d0-a1d3-4e0a-9957-25632819eda7", "name": "1590140395_Longfellow_Cloud_Arch_Redesign.drawio", "category": "Document", "size": 6025}],
 "outsideTrustedDomainsEmailsCount": 0, "outsideTrustedDomainsTotalDomainCount": 0, "outsideTrustedDomainsTotalDomainCountTruncated": false}}]}
 ```
 
