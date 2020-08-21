@@ -12,7 +12,7 @@ import code42cli.errors as errors
 import code42cli.options as opt
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.cmds.search.output_processor import print_events
-from code42cli.cmds.search.output_processor import send_events
+from code42cli.logger import get_logger_for_server
 from code42cli.options import format_option
 from code42cli.options import send_to_options
 from code42cli.options import server_options
@@ -235,21 +235,22 @@ def send_to(
     **kwargs
 ):
     """Send alerts to the given server address."""
-    output_header = ext.try_get_default_header(False, SEARCH_DEFAULT_HEADER, format)
-    format_func = get_output_format_func(format)
-    send_events_decorator = send_events(
-        format, hostname, protocol, output_header, format_func
+    logger = get_logger_for_server(hostname, protocol, format)
+    cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
+    handlers = ext.create_send_to_handlers(
+        cli_state.sdk, AlertExtractor, cursor, use_checkpoint, logger,
     )
-    handlers = _extract_events(
-        cli_state,
-        begin,
-        end,
-        advanced_query,
-        use_checkpoint,
-        or_query,
-        output_function=send_events_decorator,
-        **kwargs
-    )
+    extractor = _get_alert_extractor(cli_state.sdk, handlers)
+    extractor.use_or_query = or_query
+    if advanced_query:
+        extractor.extract_advanced(advanced_query)
+    else:
+        if begin or end:
+            cli_state.search_filters.append(
+                ext.create_time_range_filter(f.DateObserved, begin, end)
+            )
+        extractor.extract(*cli_state.search_filters)
+
     if not handlers.TOTAL_EVENTS and not errors.ERRORED:
         echo("No results found.")
 

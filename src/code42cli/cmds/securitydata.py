@@ -12,10 +12,10 @@ import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.cmds.search.output_processor import print_events
-from code42cli.cmds.search.output_processor import send_events
 from code42cli.cmds.securitydata_output_formats import (
     get_file_events_output_format_func,
 )
+from code42cli.logger import get_logger_for_server
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import format_option
 from code42cli.options import incompatible_with
@@ -291,22 +291,26 @@ def send_to(
     **kwargs
 ):
     """Send events to the given server address."""
-    output_header = ext.try_get_default_header(False, SEARCH_DEFAULT_HEADER, format)
-    format_func = get_file_events_output_format_func(format)
-    send_events_decorator = send_events(
-        format, hostname, protocol, output_header, format_func
+    logger = get_logger_for_server(hostname, protocol, format)
+    cursor = (
+        _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
     )
-    handlers = _extract_events(
-        state,
-        begin,
-        end,
-        advanced_query,
-        use_checkpoint,
-        saved_search,
-        or_query,
-        output_function=send_events_decorator,
-        **kwargs,
+    handlers = ext.create_send_to_handlers(
+        state.sdk, FileEventExtractor, cursor, use_checkpoint, logger
     )
+    extractor = _get_file_event_extractor(state.sdk, handlers)
+    extractor.use_or_query = or_query
+    extractor.or_query_exempt_filters.append(f.ExposureType.exists())
+    if advanced_query:
+        extractor.extract_advanced(advanced_query)
+    elif saved_search:
+        extractor.extract(*saved_search._filter_group_list)
+    else:
+        if begin or end:
+            state.search_filters.append(
+                ext.create_time_range_filter(f.EventTimestamp, begin, end)
+            )
+        extractor.extract(*state.search_filters)
     if not handlers.TOTAL_EVENTS and not errors.ERRORED:
         echo("No results found.")
 

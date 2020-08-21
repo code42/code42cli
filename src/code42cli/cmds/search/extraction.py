@@ -116,3 +116,54 @@ def create_time_range_filter(filter_cls, begin_date=None, end_date=None):
 
     elif end_date and not begin_date:
         return filter_cls.on_or_before(end_date)
+
+
+def create_send_to_handlers(
+    sdk, extractor_class, cursor_store, checkpoint_name, logger
+):
+    extractor = extractor_class(sdk, ExtractionHandlers())
+    handlers = ExtractionHandlers()
+    handlers.TOTAL_EVENTS = 0
+
+    def handle_error(exception):
+        errors.ERRORED = True
+        if hasattr(exception, "response") and hasattr(exception.response, "text"):
+            message = "{}: {}".format(exception, exception.response.text)
+        else:
+            message = exception
+        logger.log_error(message)
+        secho(str(message), err=True, fg="red")
+
+    handlers.handle_error = handle_error
+
+    if cursor_store:
+        handlers.record_cursor_position = lambda value: cursor_store.replace(
+            checkpoint_name, value
+        )
+        handlers.get_cursor_position = lambda: cursor_store.get(checkpoint_name)
+
+    @warn_interrupt(
+        warning="Attempting to cancel cleanly to keep checkpoint data accurate. One moment..."
+    )
+    def handle_response(response):
+        response_dict = json.loads(response.text)
+        events = response_dict.get(extractor._key)
+        if extractor._key == "alerts":
+            try:
+                events = _get_alert_details(sdk, events)
+            except Exception as ex:
+                handlers.handle_error(ex)
+
+        total_events = len(events)
+        handlers.TOTAL_EVENTS += total_events
+
+        for event in events:
+            logger.info(event)
+
+        # To make sure the extractor records correct timestamp event when `CTRL-C` is pressed.
+        if total_events:
+            last_event_timestamp = extractor._get_timestamp_from_item(events[-1])
+            handlers.record_cursor_position(last_event_timestamp)
+
+    handlers.handle_response = handle_response
+    return handlers

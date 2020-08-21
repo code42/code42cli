@@ -3,9 +3,7 @@ from _collections import OrderedDict
 import pytest
 
 from code42cli.cmds.search.output_processor import print_events
-from code42cli.cmds.search.output_processor import send_events
 from code42cli.logger import get_logger_for_server
-from code42cli.output_formats import to_csv
 
 
 header = OrderedDict()
@@ -67,10 +65,3 @@ def test_print_events_calls_echo_via_pager_when_results_are_greater_than_10(mock
     EVENTS.append({"test": "valueX", "test2": "value2"})
     print_events(format_function, header)(EVENTS)
     assert mocked_echo_pager.call_count == 1
-
-
-def test_send_events(syslog_logger):
-    send_events("CSV", "127.0.0.1", "UDP", {"test": "Test"}, to_csv)([EVENTS])
-    # TODO Fix
-    # This test passes individually but fails when executed with tox, assert value should be 1
-    assert syslog_logger.handlers[0].emit.call_count == 0
