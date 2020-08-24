@@ -48,10 +48,7 @@ class OutputFormatter:
 
     @property
     def _requires_list_output(self):
-        return (
-            self.output_format == OutputFormat.TABLE
-            or self.output_format == OutputFormat.CSV
-        )
+        return self.output_format in (OutputFormat.TABLE, OutputFormat.CSV)
 
 
 def to_csv(output, header=None):
