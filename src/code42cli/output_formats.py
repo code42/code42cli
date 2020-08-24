@@ -67,7 +67,7 @@ def to_table(output, header):
     """Output is a list of records"""
     if not output:
         return
-    header = header or _get_csv_header(output)
+    header = header or _get_table_header(output)
     rows, column_size = find_format_width(output, header)
     return format_to_table(rows, column_size)
 
@@ -87,7 +87,7 @@ def to_formatted_json(output, header):
     return json_str
 
 
-def _get_csv_header(header_items):
+def _get_table_header(header_items):
     if not header_items:
         return
 
