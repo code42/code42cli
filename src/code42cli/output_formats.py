@@ -72,10 +72,6 @@ def to_table(output, header):
     return format_to_table(rows, column_size)
 
 
-def _filter(output, header):
-    return [{header[key]: row[key] for key in header.keys()} for row in output]
-
-
 def to_json(output, header=None):
     """Output is a single record"""
     return json.dumps(output)
