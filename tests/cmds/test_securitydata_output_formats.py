@@ -147,7 +147,6 @@ class TestFileEventsOutputFormatter:
         self,
     ):
         formatter = FileEventsOutputFormatter(FileEventsOutputFormat.CEF)
-        print(formatter._format_func.__name__)
         assert id(formatter._format_func) == id(to_cef)
 
     def test_init_sets_format_func_to_table_function_when_table_format_option_is_passed(
