@@ -21,7 +21,7 @@ def try_get_default_header(include_all, default_header, output_format):
     the CLI format option will figure out the header based on the data keys."""
     output_header = None if include_all else default_header
     if output_format != OutputFormat.TABLE and include_all:
-        err_text = "--include-all only allowed for non-Table output formats."
+        err_text = "--include-all only allowed for Table output format."
         logger.log_error(err_text)
         raise errors.Code42CLIError(err_text)
     return output_header
