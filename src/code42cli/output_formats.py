@@ -87,8 +87,11 @@ def _get_table_header(header_items):
     if not header_items:
         return
 
-    return {
-        key: key.capitalize()
-        for key in header_items[0].keys()
-        if type(header_items[0][key]) == str
-    }
+    header = {}
+
+    for item in header_items:
+        keys = item.keys()
+        for key in keys:
+            if key not in header and isinstance(key, str):
+                header[key] = key.capitalize()
+    return header
