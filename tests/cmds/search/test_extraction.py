@@ -26,7 +26,7 @@ def test_try_get_default_header_raises_cli_error_when_using_include_all_with_non
     with pytest.raises(errors.Code42CLIError) as err:
         try_get_default_header(True, {}, OutputFormat.CSV)
 
-    assert str(err.value) == "--include-all only allowed for non-Table output formats."
+    assert str(err.value) == "--include-all only allowed for Table output format."
 
 
 def test_try_get_default_header_uses_default_header_when_not_include_all():
