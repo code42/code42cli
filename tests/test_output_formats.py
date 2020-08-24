@@ -83,10 +83,10 @@ TABLE_OUTPUT = "\n".join(
 )
 
 
-CSV_OUTPUT = """type$,modifiedBy,modifiedAt,name,note,description,severity,stateLastModifiedAt,stateLastModifiedBy,isSystem,isEnabled,ruleSource,tenantId,observerRuleId,type,id,createdBy,createdAt\r
-RULE_METADATA,test.user+partners@code42.com,2020-06-22T16:26:16.3875180Z,outside td,,,HIGH,,,False,True,Alerting,1d71796f-af5b-4231-9d8e-df6434da4663,d12d54f0-5160-47a8-a48f-7d5fa5b051c5,FED_CLOUD_SHARE_PERMISSIONS,5157f1df-cb3e-4755-92a2-0f42c7841020,test.user+partners@code42.com,2020-06-22T16:26:16.3875180Z\r
-RULE_METADATA,testuser@code42.com,2020-07-16T08:09:44.4345110Z,Test different filters,,Test different filters,MEDIUM,,,False,True,Alerting,1d71796f-af5b-4231-9d8e-df6434da4663,8b393324-c34c-44ac-9f79-4313601dd859,FED_ENDPOINT_EXFILTRATION,88354829-0958-4d60-a20d-69a53cf603b6,test.user+partners@code42.com,2020-05-20T11:56:41.2324240Z\r
-RULE_METADATA,testuser@code42.com,2020-05-28T16:19:19.5250970Z,Test Alerts using CLI,,user,HIGH,,,False,True,Alerting,1d71796f-af5b-4231-9d8e-df6434da4663,5eabed1d-a406-4dfc-af81-f7485ee09b19,FED_ENDPOINT_EXFILTRATION,b2cb33e6-6683-4822-be1d-8de5ef87728e,testuser@code42.com,2020-05-18T11:47:16.6109560Z\r
+CSV_OUTPUT = """type$,modifiedBy,modifiedAt,name,description,severity,isSystem,isEnabled,ruleSource,tenantId,observerRuleId,type,id,createdBy,createdAt\r
+RULE_METADATA,test.user+partners@code42.com,2020-06-22T16:26:16.3875180Z,outside td,,HIGH,False,True,Alerting,1d71796f-af5b-4231-9d8e-df6434da4663,d12d54f0-5160-47a8-a48f-7d5fa5b051c5,FED_CLOUD_SHARE_PERMISSIONS,5157f1df-cb3e-4755-92a2-0f42c7841020,test.user+partners@code42.com,2020-06-22T16:26:16.3875180Z\r
+RULE_METADATA,testuser@code42.com,2020-07-16T08:09:44.4345110Z,Test different filters,Test different filters,MEDIUM,,,False,True,Alerting,1d71796f-af5b-4231-9d8e-df6434da4663,8b393324-c34c-44ac-9f79-4313601dd859,FED_ENDPOINT_EXFILTRATION,88354829-0958-4d60-a20d-69a53cf603b6,test.user+partners@code42.com,2020-05-20T11:56:41.2324240Z\r
+RULE_METADATA,testuser@code42.com,2020-05-28T16:19:19.5250970Z,Test Alerts using CLI,user,HIGH,False,True,Alerting,1d71796f-af5b-4231-9d8e-df6434da4663,5eabed1d-a406-4dfc-af81-f7485ee09b19,FED_ENDPOINT_EXFILTRATION,b2cb33e6-6683-4822-be1d-8de5ef87728e,testuser@code42.com,2020-05-18T11:47:16.6109560Z\r
 """
 
 

@@ -61,15 +61,7 @@ def to_csv(output, header=None):
     if not output:
         return
     string_io = io.StringIO()
-
-    fieldnames = list(output[0].keys())
-    if "stateLastModifiedBy" not in fieldnames:
-        fieldnames.append("stateLastModifiedBy")
-    if "stateLastModifiedAt" not in fieldnames:
-        fieldnames.append("stateLastModifiedAt")
-    if "note" not in fieldnames:
-        fieldnames.append("note")
-
+    fieldnames = list({k for d in output for k in d.keys()})
     writer = csv.DictWriter(string_io, fieldnames=fieldnames)
     writer.writeheader()
     writer.writerows(output)
