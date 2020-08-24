@@ -1,7 +1,6 @@
 import json
 from collections import OrderedDict
 
-from code42cli.output_formats import get_dynamic_header
 from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
 from code42cli.output_formats import to_csv
@@ -180,15 +179,3 @@ class TestOutputFormatter:
     ):
         formatter = OutputFormatter(None)
         assert id(formatter._format_func) == id(to_table)
-
-
-def test_get_dynamic_header_returns_all_keys_only_which_are_not_nested():
-    header = get_dynamic_header([TEST_NESTED_DATA])
-    assert header == {
-        "test": "Test",
-        "name": "Name",
-        "description": "Description",
-        "severity": "Severity",
-        "tenantId": "Tenantid",
-        "id": "Id",
-    }
