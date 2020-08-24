@@ -1,9 +1,6 @@
 from _collections import OrderedDict
 
-import pytest
-
 from code42cli.cmds.search.output_processor import print_events
-from code42cli.logger import get_logger_for_server
 
 
 header = OrderedDict()
@@ -39,15 +36,6 @@ CSV_RESPONSE = "\r\n".join(
         "",
     ]
 )
-
-
-@pytest.fixture
-def syslog_logger(mocker):
-    mocker.patch(
-        "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper.handler"
-    )
-    logger = get_logger_for_server("example.com", "TCP", "CEF")
-    return logger
 
 
 def test_print_events_calls_echo_when_results_are_less_than_equal_to_10(mocker):
