@@ -26,8 +26,6 @@ class OutputFormatter:
         self.output_format = output_format
         self._format_func = to_table
         self.header = header
-        if output_format is None:
-            return
 
         if output_format == OutputFormat.CSV:
             self._format_func = to_csv
