@@ -53,7 +53,7 @@ def create_handlers(
         if hasattr(exception, "response") and hasattr(exception.response, "text"):
             message = "{}: {}".format(exception, exception.response.text)
         else:
-            message = exception()
+            message = exception
         logger.log_error(message)
         secho(str(message), err=True, fg="red")
 
