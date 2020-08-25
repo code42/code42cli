@@ -70,7 +70,6 @@ def to_table(output, header):
     """Output is a list of records"""
     if not output:
         return
-    header = header or _get_table_header(output)
     rows, column_size = find_format_width(output, header)
     return format_to_table(rows, column_size)
 
@@ -84,17 +83,3 @@ def to_formatted_json(output):
     """Output is a single record"""
     json_str = "{}\n".format(json.dumps(output, indent=4))
     return json_str
-
-
-def _get_table_header(header_items):
-    if not header_items:
-        return
-
-    # Creates dict where keys and values are the same for `find_format_width()`.
-    header = {}
-    for item in header_items:
-        keys = item.keys()
-        for key in keys:
-            if key not in header and isinstance(key, str):
-                header[key] = key
-    return header

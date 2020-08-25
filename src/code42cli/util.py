@@ -54,6 +54,8 @@ def find_format_width(record, header, include_header=True):
     """
     rows = []
     if include_header:
+        if not header:
+            header = _get_default_header(record)
         rows.append(header)
 
     max_width_item = dict(header.items())  # Copy
@@ -143,3 +145,17 @@ class warn_interrupt:
                 return func(*args, **kwargs)
 
         return inner
+
+
+def _get_default_header(header_items):
+    if not header_items:
+        return
+
+    # Creates dict where keys and values are the same for `find_format_width()`.
+    header = {}
+    for item in header_items:
+        keys = item.keys()
+        for key in keys:
+            if key not in header and isinstance(key, str):
+                header[key] = key
+    return header
