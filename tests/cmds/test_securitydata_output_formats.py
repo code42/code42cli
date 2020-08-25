@@ -124,42 +124,59 @@ def mock_file_event():
     return AED_EVENT_DICT
 
 
+@pytest.fixture
+def mock_to_cef(mocker):
+    return mocker.patch("code42cli.cmds.securitydata_output_formats.to_cef")
+
+
 class TestFileEventsOutputFormatter:
     def test_init_sets_format_func_to_dynamic_csv_function_when_csv_option_is_passed(
-        self,
+        self, mock_to_csv
     ):
         formatter = FileEventsOutputFormatter(FileEventsOutputFormat.CSV)
-        assert id(formatter._format_func) == id(to_csv)
+        for _ in formatter.get_formatted_output("TEST"):
+            pass
+        mock_to_csv.assert_called_once_with("TEST")
 
     def test_init_sets_format_func_to_formatted_json_function_when_json__option_is_passed(
-        self,
+        self, mock_to_formatted_json
     ):
         formatter = FileEventsOutputFormatter(FileEventsOutputFormat.JSON)
-        assert id(formatter._format_func) == id(to_formatted_json)
+        for _ in formatter.get_formatted_output(["TEST"]):
+            pass
+        mock_to_formatted_json.assert_called_once_with("TEST")
 
     def test_init_sets_format_func_to_json_function_when_raw_json_format_option_is_passed(
-        self,
+        self, mock_to_json
     ):
         formatter = FileEventsOutputFormatter(FileEventsOutputFormat.RAW)
-        assert id(formatter._format_func) == id(to_json)
+        for _ in formatter.get_formatted_output(["TEST"]):
+            pass
+        mock_to_json.assert_called_once_with("TEST")
 
     def test_init_sets_format_func_to_cef_function_when_cef_format_option_is_passed(
-        self,
+        self, mock_to_cef
     ):
         formatter = FileEventsOutputFormatter(FileEventsOutputFormat.CEF)
-        assert id(formatter._format_func) == id(to_cef)
+        for _ in formatter.get_formatted_output(["TEST"]):
+            pass
+        mock_to_cef.assert_called_once_with("TEST")
 
     def test_init_sets_format_func_to_table_function_when_table_format_option_is_passed(
-        self,
+        self, mock_to_table
     ):
         formatter = FileEventsOutputFormatter(FileEventsOutputFormat.TABLE)
-        assert id(formatter._format_func) == id(to_table)
+        for _ in formatter.get_formatted_output("TEST"):
+            pass
+        mock_to_table.assert_called_once_with("TEST", None)
 
     def test_init_sets_format_func_to_table_function_when_no_format_option_is_passed(
-        self,
+        self, mock_to_table
     ):
         formatter = FileEventsOutputFormatter(None)
-        assert id(formatter._format_func) == id(to_table)
+        for _ in formatter.get_formatted_output("TEST"):
+            pass
+        mock_to_table.assert_called_once_with("TEST", None)
 
 
 def test_to_cef_returns_cef_tagged_string(mock_file_event):

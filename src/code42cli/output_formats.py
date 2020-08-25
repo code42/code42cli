@@ -32,12 +32,15 @@ class OutputFormatter:
         elif output_format == OutputFormat.RAW:
             self._format_func = to_json
         elif output_format == OutputFormat.TABLE:
-            self._format_func = to_table
+            self._format_func = self._to_table
         elif output_format == OutputFormat.JSON:
             self._format_func = to_formatted_json
 
     def _format_output(self, output):
-        return self._format_func(output, self.header)
+        return self._format_func(output)
+    
+    def _to_table(self, output):
+        return to_table(output, self.header)
 
     def get_formatted_output(self, output):
         if self._requires_list_output:
@@ -51,7 +54,7 @@ class OutputFormatter:
         return self.output_format in (OutputFormat.TABLE, OutputFormat.CSV)
 
 
-def to_csv(output, header=None):
+def to_csv(output):
     """Output is a list of records"""
     if not output:
         return
@@ -72,12 +75,12 @@ def to_table(output, header):
     return format_to_table(rows, column_size)
 
 
-def to_json(output, header=None):
+def to_json(output):
     """Output is a single record"""
     return "{}\n".format(json.dumps(output))
 
 
-def to_formatted_json(output, header):
+def to_formatted_json(output):
     """Output is a single record"""
     json_str = "{}\n".format(json.dumps(output, indent=4))
     return json_str
