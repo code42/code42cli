@@ -14,6 +14,9 @@ from code42cli.util import warn_interrupt
 logger = get_main_cli_logger()
 
 _ALERT_DETAIL_BATCH_SIZE = 100
+INTERRUPT_WARNING = (
+    "Attempting to cancel cleanly to keep checkpoint data accurate. One moment..."
+)
 
 
 def try_get_default_header(include_all, default_header, output_format):
@@ -72,9 +75,7 @@ def create_handlers(
     extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = _set_handlers(cursor_store, checkpoint_name)
 
-    @warn_interrupt(
-        warning="Attempting to cancel cleanly to keep checkpoint data accurate. One moment..."
-    )
+    @warn_interrupt(warning=INTERRUPT_WARNING)
     def handle_response(response):
         response_dict = json.loads(response.text)
         events = response_dict.get(extractor._key)
@@ -136,9 +137,7 @@ def create_send_to_handlers(
     extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = _set_handlers(cursor_store, checkpoint_name)
 
-    @warn_interrupt(
-        warning="Attempting to cancel cleanly to keep checkpoint data accurate. One moment..."
-    )
+    @warn_interrupt(warning=INTERRUPT_WARNING)
     def handle_response(response):
         response_dict = json.loads(response.text)
         events = response_dict.get(extractor._key)
