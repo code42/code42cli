@@ -44,10 +44,7 @@ def _get_alert_details(sdk, alert_summary_list):
     return results
 
 
-def create_handlers(
-    sdk, extractor_class, cursor_store, checkpoint_name, format_function, header
-):
-    extractor = extractor_class(sdk, ExtractionHandlers())
+def _set_handlers(cursor_store, checkpoint_name):
     handlers = ExtractionHandlers()
     handlers.TOTAL_EVENTS = 0
 
@@ -61,12 +58,19 @@ def create_handlers(
         secho(str(message), err=True, fg="red")
 
     handlers.handle_error = handle_error
-
     if cursor_store:
         handlers.record_cursor_position = lambda value: cursor_store.replace(
             checkpoint_name, value
         )
         handlers.get_cursor_position = lambda: cursor_store.get(checkpoint_name)
+    return handlers
+
+
+def create_handlers(
+    sdk, extractor_class, cursor_store, checkpoint_name, format_function, header
+):
+    extractor = extractor_class(sdk, ExtractionHandlers())
+    handlers = _set_handlers(cursor_store, checkpoint_name)
 
     @warn_interrupt(
         warning="Attempting to cancel cleanly to keep checkpoint data accurate. One moment..."
@@ -130,25 +134,7 @@ def create_send_to_handlers(
     sdk, extractor_class, cursor_store, checkpoint_name, logger
 ):
     extractor = extractor_class(sdk, ExtractionHandlers())
-    handlers = ExtractionHandlers()
-    handlers.TOTAL_EVENTS = 0
-
-    def handle_error(exception):
-        errors.ERRORED = True
-        if hasattr(exception, "response") and hasattr(exception.response, "text"):
-            message = "{}: {}".format(exception, exception.response.text)
-        else:
-            message = exception
-        logger.log_error(message)
-        secho(str(message), err=True, fg="red")
-
-    handlers.handle_error = handle_error
-
-    if cursor_store:
-        handlers.record_cursor_position = lambda value: cursor_store.replace(
-            checkpoint_name, value
-        )
-        handlers.get_cursor_position = lambda: cursor_store.get(checkpoint_name)
+    handlers = _set_handlers(cursor_store, checkpoint_name)
 
     @warn_interrupt(
         warning="Attempting to cancel cleanly to keep checkpoint data accurate. One moment..."
