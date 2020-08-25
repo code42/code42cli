@@ -14,9 +14,9 @@ from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.cmds.search.output_processor import print_events
 from code42cli.logger import get_logger_for_server
 from code42cli.options import format_option
-from code42cli.options import send_to_options
 from code42cli.options import server_options
 from code42cli.output_formats import get_output_format_func
+from code42cli.output_formats import JsonOutputFormat
 
 
 SEARCH_DEFAULT_HEADER = OrderedDict()
@@ -128,6 +128,14 @@ description_option = click.option(
     help="Filter alerts by description. Does fuzzy search by default.",
 )
 
+send_to_format_options = click.option(
+    "-f",
+    "--format",
+    type=click.Choice(JsonOutputFormat(), case_sensitive=False),
+    help="The output format of the result. Defaults to json format.",
+    default=JsonOutputFormat.JSON,
+)
+
 
 def alert_options(f):
     f = actor_option(f)
@@ -221,7 +229,7 @@ def search(
     is_flag=True,
     help="Display simple properties of the primary level of the nested response.",
 )
-@send_to_options
+@send_to_format_options
 def send_to(
     cli_state,
     format,

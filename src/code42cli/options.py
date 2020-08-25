@@ -5,7 +5,6 @@ import click
 from code42cli.cmds.search.enums import ServerProtocol
 from code42cli.errors import Code42CLIError
 from code42cli.output_formats import OutputFormat
-from code42cli.output_formats import SendToOutputFormat
 from code42cli.profile import get_profile
 from code42cli.sdk_client import create_sdk
 
@@ -168,16 +167,4 @@ def server_options(f):
     )
     f = hostname_arg(f)
     f = protocol_option(f)
-    return f
-
-
-def send_to_options(f):
-    file_events_format_option = click.option(
-        "-f",
-        "--format",
-        type=click.Choice(SendToOutputFormat(), case_sensitive=False),
-        help="The output format of the result. Defaults to table format.",
-        default=SendToOutputFormat.JSON,
-    )
-    f = file_events_format_option(f)
     return f

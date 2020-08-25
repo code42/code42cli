@@ -10,20 +10,24 @@ CEF_DEFAULT_PRODUCT_NAME = "Advanced Exfiltration Detection"
 CEF_DEFAULT_SEVERITY_LEVEL = "5"
 
 
-class OutputFormat:
-    TABLE = "TABLE"
-    CSV = "CSV"
+class JsonOutputFormat:
     JSON = "JSON"
     RAW = "RAW-JSON"
+
+    def __iter__(self):
+        return iter([self.JSON, self.RAW])
+
+
+class OutputFormat(JsonOutputFormat):
+    TABLE = "TABLE"
+    CSV = "CSV"
 
     def __iter__(self):
         return iter([self.TABLE, self.CSV, self.JSON, self.RAW])
 
 
-class SendToOutputFormat(OutputFormat):
+class SendToOutputFormat(JsonOutputFormat):
     CEF = "CEF"
-    JSON = "JSON"
-    RAW = "RAW-JSON"
 
     def __iter__(self):
         return iter([self.CEF, self.JSON, self.RAW])
