@@ -42,7 +42,7 @@ def _get_alert_details(sdk, alert_summary_list):
 
 
 def create_handlers(
-    sdk, extractor_class, cursor_store, checkpoint_name, formatter,
+    sdk, extractor_class, cursor_store, checkpoint_name, formatter, force_pager,
 ):
     extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = ExtractionHandlers()
@@ -83,7 +83,7 @@ def create_handlers(
         def _format_output():
             return formatter.get_formatted_output(events)
 
-        if len(events) > 10:
+        if len(events) > 10 or force_pager:
             click.echo_via_pager(_format_output())
         else:
             for page in _format_output():

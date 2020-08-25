@@ -213,7 +213,12 @@ def search(
         _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
     )
     handlers = ext.create_handlers(
-        state.sdk, FileEventExtractor, cursor, use_checkpoint, formatter=formatter,
+        state.sdk,
+        FileEventExtractor,
+        cursor,
+        use_checkpoint,
+        formatter=formatter,
+        force_pager=include_all,
     )
     extractor = _get_file_event_extractor(state.sdk, handlers)
     extractor.use_or_query = or_query

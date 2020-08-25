@@ -54,7 +54,9 @@ def test_create_handlers_creates_handlers_that_pass_events_to_output_format(
 
     formatter = mocker.MagicMock()
     cursor_store = mocker.MagicMock(sepc=BaseCursorStore)
-    handlers = create_handlers(sdk, TestExtractor, cursor_store, "chk-name", formatter,)
+    handlers = create_handlers(
+        sdk, TestExtractor, cursor_store, "chk-name", formatter, force_pager=False
+    )
     http_response = mocker.MagicMock(spec=Response)
     events = [{"property": "bar"}]
     http_response.text = '{{"{0}": [{{"property": "bar"}}]}}'.format(key)

@@ -188,7 +188,12 @@ def search(
     formatter = OutputFormatter(format, output_header)
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
     handlers = ext.create_handlers(
-        cli_state.sdk, AlertExtractor, cursor, use_checkpoint, formatter=formatter,
+        cli_state.sdk,
+        AlertExtractor,
+        cursor,
+        use_checkpoint,
+        formatter=formatter,
+        force_pager=include_all,
     )
     extractor = _get_alert_extractor(cli_state.sdk, handlers)
     extractor.use_or_query = or_query
