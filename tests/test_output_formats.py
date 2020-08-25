@@ -141,12 +141,12 @@ def test_to_table_when_not_given_header_creates_header_dynamically():
 
 def test_to_json():
     formatted_output = to_json(TEST_DATA, TEST_HEADER)
-    assert formatted_output == json.dumps(TEST_DATA)
+    assert formatted_output == "{}\n".format(json.dumps(TEST_DATA))
 
 
 def test_to_formatted_json():
     formatted_output = to_formatted_json(TEST_DATA, None)
-    assert formatted_output == json.dumps(TEST_DATA, indent=4)
+    assert formatted_output == "{}\n".format(json.dumps(TEST_DATA, indent=4))
 
 
 class TestOutputFormatter:

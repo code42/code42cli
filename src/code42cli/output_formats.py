@@ -74,12 +74,12 @@ def to_table(output, header):
 
 def to_json(output, header=None):
     """Output is a single record"""
-    return json.dumps(output)
+    return "{}\n".format(json.dumps(output))
 
 
 def to_formatted_json(output, header):
     """Output is a single record"""
-    json_str = json.dumps(output, indent=4)
+    json_str = "{}\n".format(json.dumps(output, indent=4))
     return json_str
 
 

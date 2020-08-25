@@ -26,7 +26,7 @@ class FileEventsOutputFormatter(OutputFormatter):
 
 def to_cef(output, header=None):
     """Output is a single record"""
-    return _convert_event_to_cef(output)
+    return "{}\n".format(_convert_event_to_cef(output))
 
 
 def _convert_event_to_cef(event):
