@@ -87,11 +87,11 @@ def _get_table_header(header_items):
     if not header_items:
         return
 
+    # Creates dict where keys and values are the same for `find_format_width()`.
     header = {}
-
     for item in header_items:
         keys = item.keys()
         for key in keys:
             if key not in header and isinstance(key, str):
-                header[key] = key.capitalize()
+                header[key] = key
     return header
