@@ -248,7 +248,6 @@ class ErrorTrackerTestHelper:
 TEST_FILE_PATH = "some/path"
 
 
-
 @pytest.fixture
 def mock_to_table(mocker):
     return mocker.patch("code42cli.output_formats.to_table")

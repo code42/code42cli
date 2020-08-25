@@ -38,7 +38,7 @@ class OutputFormatter:
 
     def _format_output(self, output):
         return self._format_func(output)
-    
+
     def _to_table(self, output):
         return to_table(output, self.header)
 

@@ -1,5 +1,4 @@
 import json
-import pytest
 from collections import OrderedDict
 
 import code42cli.output_formats as output_formats_module

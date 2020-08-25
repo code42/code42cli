@@ -6,10 +6,6 @@ from c42eventextractor.maps import FILE_EVENT_TO_SIGNATURE_ID_MAP
 from code42cli.cmds.search.enums import FileEventsOutputFormat
 from code42cli.cmds.securitydata_output_formats import FileEventsOutputFormatter
 from code42cli.cmds.securitydata_output_formats import to_cef
-from code42cli.output_formats import to_csv
-from code42cli.output_formats import to_formatted_json
-from code42cli.output_formats import to_json
-from code42cli.output_formats import to_table
 
 
 AED_CLOUD_ACTIVITY_EVENT_DICT = json.loads(
