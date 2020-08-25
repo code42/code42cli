@@ -11,7 +11,6 @@ import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
-from code42cli.cmds.search.output_processor import print_events
 from code42cli.cmds.securitydata_output_formats import (
     get_file_events_output_format_func,
 )
@@ -225,19 +224,31 @@ def search(
         include_all, SEARCH_DEFAULT_HEADER, format
     )
     format_func = get_file_events_output_format_func(format)
-    print_events_decorator = print_events(format_func, output_header)
 
-    handlers = _extract_events(
-        state,
-        begin,
-        end,
-        advanced_query,
-        use_checkpoint,
-        saved_search,
-        or_query,
-        output_function=print_events_decorator,
-        **kwargs,
+    cursor = (
+        _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
     )
+    handlers = ext.create_handlers(
+        state.sdk,
+        FileEventExtractor,
+        cursor,
+        use_checkpoint,
+        format_function=format_func,
+        header=output_header,
+    )
+    extractor = _get_file_event_extractor(state.sdk, handlers)
+    extractor.use_or_query = or_query
+    extractor.or_query_exempt_filters.append(f.ExposureType.exists())
+    if advanced_query:
+        extractor.extract_advanced(advanced_query)
+    elif saved_search:
+        extractor.extract(*saved_search._filter_group_list)
+    else:
+        if begin or end:
+            state.search_filters.append(
+                ext.create_time_range_filter(f.EventTimestamp, begin, end)
+            )
+        extractor.extract(*state.search_filters)
 
     if not handlers.TOTAL_EVENTS and not errors.ERRORED:
         echo("No results found.")
@@ -330,40 +341,3 @@ def _get_file_event_extractor(sdk, handlers):
 
 def _get_file_event_cursor_store(profile_name):
     return FileEventCursorStore(profile_name)
-
-
-def _extract_events(
-    state,
-    begin,
-    end,
-    advanced_query,
-    use_checkpoint,
-    saved_search,
-    or_query,
-    output_function,
-    **kwargs
-):
-    cursor = (
-        _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
-    )
-    handlers = ext.create_handlers(
-        state.sdk,
-        FileEventExtractor,
-        cursor,
-        use_checkpoint,
-        output_function=output_function,
-    )
-    extractor = _get_file_event_extractor(state.sdk, handlers)
-    extractor.use_or_query = or_query
-    extractor.or_query_exempt_filters.append(f.ExposureType.exists())
-    if advanced_query:
-        extractor.extract_advanced(advanced_query)
-    elif saved_search:
-        extractor.extract(*saved_search._filter_group_list)
-    else:
-        if begin or end:
-            state.search_filters.append(
-                ext.create_time_range_filter(f.EventTimestamp, begin, end)
-            )
-        extractor.extract(*state.search_filters)
-    return handlers

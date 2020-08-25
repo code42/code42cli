@@ -1,5 +1,6 @@
 import json
 
+import click
 from c42eventextractor import ExtractionHandlers
 from click import secho
 from py42.sdk.queries.query_filter import QueryFilterTimestampField
@@ -44,7 +45,7 @@ def _get_alert_details(sdk, alert_summary_list):
 
 
 def create_handlers(
-    sdk, extractor_class, cursor_store, checkpoint_name, output_function
+    sdk, extractor_class, cursor_store, checkpoint_name, format_function, header
 ):
     extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = ExtractionHandlers()
@@ -82,7 +83,14 @@ def create_handlers(
         total_events = len(events)
         handlers.TOTAL_EVENTS += total_events
 
-        output_function(events)
+        def paginate():
+            yield format_function(events, header)
+
+        if len(events) > 10:
+            click.echo_via_pager(paginate)
+        else:
+            for page in paginate():
+                click.echo(page)
 
         # To make sure the extractor records correct timestamp event when `CTRL-C` is pressed.
         if total_events:

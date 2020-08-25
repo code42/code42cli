@@ -11,7 +11,6 @@ import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 import code42cli.options as opt
 from code42cli.cmds.search.cursor_store import AlertCursorStore
-from code42cli.cmds.search.output_processor import print_events
 from code42cli.logger import get_logger_for_server
 from code42cli.options import format_option
 from code42cli.options import server_options
@@ -200,17 +199,26 @@ def search(
         include_all, SEARCH_DEFAULT_HEADER, format
     )
     format_func = get_output_format_func(format)
-    print_events_decorator = print_events(format_func, output_header)
-    handlers = _extract_events(
-        cli_state,
-        begin,
-        end,
-        advanced_query,
+
+    cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
+    handlers = ext.create_handlers(
+        cli_state.sdk,
+        AlertExtractor,
+        cursor,
         use_checkpoint,
-        or_query,
-        output_function=print_events_decorator,
-        **kwargs
+        header=output_header,
+        format_function=format_func,
     )
+    extractor = _get_alert_extractor(cli_state.sdk, handlers)
+    extractor.use_or_query = or_query
+    if advanced_query:
+        extractor.extract_advanced(advanced_query)
+    else:
+        if begin or end:
+            cli_state.search_filters.append(
+                ext.create_time_range_filter(f.DateObserved, begin, end)
+            )
+        extractor.extract(*cli_state.search_filters)
     if not handlers.TOTAL_EVENTS and not errors.ERRORED:
         echo("No results found.")
 
@@ -269,35 +277,3 @@ def _get_alert_extractor(sdk, handlers):
 
 def _get_alert_cursor_store(profile_name):
     return AlertCursorStore(profile_name)
-
-
-def _extract_events(
-    cli_state,
-    begin,
-    end,
-    advanced_query,
-    use_checkpoint,
-    or_query,
-    output_function,
-    **kwargs
-):
-    cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
-    handlers = ext.create_handlers(
-        cli_state.sdk,
-        AlertExtractor,
-        cursor,
-        use_checkpoint,
-        output_function=output_function,
-    )
-    extractor = _get_alert_extractor(cli_state.sdk, handlers)
-    extractor.use_or_query = or_query
-    if advanced_query:
-        extractor.extract_advanced(advanced_query)
-    else:
-        if begin or end:
-            cli_state.search_filters.append(
-                ext.create_time_range_filter(f.DateObserved, begin, end)
-            )
-        extractor.extract(*cli_state.search_filters)
-
-    return handlers
