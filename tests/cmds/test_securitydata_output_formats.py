@@ -3,13 +3,9 @@ import json
 import pytest
 from c42eventextractor.maps import FILE_EVENT_TO_SIGNATURE_ID_MAP
 
-from code42cli.cmds.securitydata_output_formats import (
-    get_file_events_output_format_func,
-)
+from code42cli.cmds.search.enums import FileEventsOutputFormat
+from code42cli.cmds.securitydata_output_formats import FileEventsOutputFormatter
 from code42cli.cmds.securitydata_output_formats import to_cef
-from code42cli.output_formats import to_csv
-from code42cli.output_formats import to_formatted_json
-from code42cli.output_formats import to_json
 
 
 AED_CLOUD_ACTIVITY_EVENT_DICT = json.loads(
@@ -106,114 +102,149 @@ AED_EVENT_DICT = json.loads(
 
 @pytest.fixture
 def mock_file_event_removable_media_event():
-    return [AED_REMOVABLE_MEDIA_EVENT_DICT]
+    return AED_REMOVABLE_MEDIA_EVENT_DICT
 
 
 @pytest.fixture
 def mock_file_event_cloud_activity_event():
-    return [AED_CLOUD_ACTIVITY_EVENT_DICT]
+    return AED_CLOUD_ACTIVITY_EVENT_DICT
 
 
 @pytest.fixture
 def mock_file_event_email_event():
-    return [AED_EMAIL_EVENT_DICT]
+    return AED_EMAIL_EVENT_DICT
 
 
 @pytest.fixture
 def mock_file_event():
-    return [AED_EVENT_DICT]
+    return AED_EVENT_DICT
 
 
-def test_file_events_output_format_returns_to_dynamic_csv_function_when_csv_option_is_passed():
-    extraction_output_format_function = get_file_events_output_format_func("CSV")
-    assert id(extraction_output_format_function) == id(to_csv)
+@pytest.fixture
+def mock_to_cef(mocker):
+    return mocker.patch("code42cli.cmds.securitydata_output_formats.to_cef")
 
 
-def test_file_events_output_format_returns_to_formatted_json_function_when_json__option_is_passed():
-    format_function = get_file_events_output_format_func("JSON")
-    assert id(format_function) == id(to_formatted_json)
+class TestFileEventsOutputFormatter:
+    def test_init_sets_format_func_to_dynamic_csv_function_when_csv_option_is_passed(
+        self, mock_to_csv
+    ):
+        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.CSV)
+        for _ in formatter.get_formatted_output("TEST"):
+            pass
+        mock_to_csv.assert_called_once_with("TEST")
 
+    def test_init_sets_format_func_to_formatted_json_function_when_json__option_is_passed(
+        self, mock_to_formatted_json
+    ):
+        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.JSON)
+        for _ in formatter.get_formatted_output(["TEST"]):
+            pass
+        mock_to_formatted_json.assert_called_once_with("TEST")
 
-def test_file_events_output_format_returns_to_json_function_when_raw_json_format_option_is_passed():
-    format_function = get_file_events_output_format_func("RAW-JSON")
-    assert id(format_function) == id(to_json)
+    def test_init_sets_format_func_to_json_function_when_raw_json_format_option_is_passed(
+        self, mock_to_json
+    ):
+        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.RAW)
+        for _ in formatter.get_formatted_output(["TEST"]):
+            pass
+        mock_to_json.assert_called_once_with("TEST")
 
+    def test_init_sets_format_func_to_cef_function_when_cef_format_option_is_passed(
+        self, mock_to_cef
+    ):
+        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.CEF)
+        for _ in formatter.get_formatted_output(["TEST"]):
+            pass
+        mock_to_cef.assert_called_once_with("TEST")
 
-def test_file_events_output_format_returns_to_cef_function_when_cef_format_option_is_passed():
-    format_function = get_file_events_output_format_func("CEF")
-    assert id(format_function) == id(to_cef)
+    def test_init_sets_format_func_to_table_function_when_table_format_option_is_passed(
+        self, mock_to_table
+    ):
+        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.TABLE)
+        for _ in formatter.get_formatted_output("TEST"):
+            pass
+        mock_to_table.assert_called_once_with("TEST", None)
+
+    def test_init_sets_format_func_to_table_function_when_no_format_option_is_passed(
+        self, mock_to_table
+    ):
+        formatter = FileEventsOutputFormatter(None)
+        for _ in formatter.get_formatted_output("TEST"):
+            pass
+        mock_to_table.assert_called_once_with("TEST", None)
 
 
 def test_to_cef_returns_cef_tagged_string(mock_file_event):
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     cef_parts = get_cef_parts(cef_out)
     assert cef_parts[0] == "CEF:0"
 
 
 def test_to_cef_uses_correct_vendor_name(mock_file_event):
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     cef_parts = get_cef_parts(cef_out)
     assert cef_parts[1] == "Code42"
 
 
 def test_to_cef_uses_correct_default_product_name(mock_file_event):
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     cef_parts = get_cef_parts(cef_out)
     assert cef_parts[2] == "Advanced Exfiltration Detection"
 
 
 def test_to_cef_uses_correct_default_severity(mock_file_event):
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     cef_parts = get_cef_parts(cef_out)
     assert cef_parts[6] == "5"
 
 
 def test_to_cef_excludes_none_values_from_output(mock_file_event):
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     cef_parts = get_cef_parts(cef_out)
     assert "=None " not in cef_parts[-1]
 
 
 def test_to_cef_excludes_empty_values_from_output(mock_file_event):
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     cef_parts = get_cef_parts(cef_out)
     assert "= " not in cef_parts[-1]
 
 
 def test_to_cef_excludes_file_event_fields_not_in_cef_map(mock_file_event):
     test_value = "definitelyExcludedValue"
-    mock_file_event[0]["unmappedFieldName"] = test_value
-    cef_out = to_cef(mock_file_event, None)
+    mock_file_event["unmappedFieldName"] = test_value
+    cef_out = to_cef(mock_file_event)
     cef_parts = get_cef_parts(cef_out)
-    del mock_file_event[0]["unmappedFieldName"]
+    del mock_file_event["unmappedFieldName"]
     assert test_value not in cef_parts[-1]
 
 
 def test_to_cef_includes_os_hostname_if_present(mock_file_event):
     expected_field_name = "shost"
     expected_value = "Test's MacBook Air"
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_public_ip_address_if_present(mock_file_event):
     expected_field_name = "src"
     expected_value = "71.34.4.22"
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_user_uid_if_present(mock_file_event):
     expected_field_name = "suid"
     expected_value = "912338501981077099"
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_device_username_if_present(mock_file_event):
     expected_field_name = "suser"
     expected_value = "test.testerson+testair@code42.com"
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
@@ -222,7 +253,7 @@ def test_to_cef_includes_removable_media_capacity_if_present(
 ):
     expected_field_name = "cn1"
     expected_value = "5000000"
-    cef_out = to_cef(mock_file_event_removable_media_event, None)
+    cef_out = to_cef(mock_file_event_removable_media_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
@@ -231,7 +262,7 @@ def test_to_cef_includes_removable_media_capacity_label_if_present(
 ):
     expected_field_name = "cn1Label"
     expected_value = "Code42AEDRemovableMediaCapacity"
-    cef_out = to_cef(mock_file_event_removable_media_event, None)
+    cef_out = to_cef(mock_file_event_removable_media_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
@@ -240,7 +271,7 @@ def test_to_cef_includes_removable_media_bus_type_if_present(
 ):
     expected_field_name = "cs1"
     expected_value = "TEST_BUS_TYPE"
-    cef_out = to_cef(mock_file_event_removable_media_event, None)
+    cef_out = to_cef(mock_file_event_removable_media_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
@@ -249,7 +280,7 @@ def test_to_cef_includes_removable_media_bus_type_label_if_present(
 ):
     expected_field_name = "cs1Label"
     expected_value = "Code42AEDRemovableMediaBusType"
-    cef_out = to_cef(mock_file_event_removable_media_event, None)
+    cef_out = to_cef(mock_file_event_removable_media_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
@@ -258,7 +289,7 @@ def test_to_cef_includes_removable_media_vendor_if_present(
 ):
     expected_field_name = "cs2"
     expected_value = "TEST_VENDOR_NAME"
-    cef_out = to_cef(mock_file_event_removable_media_event, None)
+    cef_out = to_cef(mock_file_event_removable_media_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
@@ -267,7 +298,7 @@ def test_to_cef_includes_removable_media_vendor_label_if_present(
 ):
     expected_field_name = "cs2Label"
     expected_value = "Code42AEDRemovableMediaVendor"
-    cef_out = to_cef(mock_file_event_removable_media_event, None)
+    cef_out = to_cef(mock_file_event_removable_media_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
@@ -276,7 +307,7 @@ def test_to_cef_includes_removable_media_name_if_present(
 ):
     expected_field_name = "cs3"
     expected_value = "TEST_NAME"
-    cef_out = to_cef(mock_file_event_removable_media_event, None)
+    cef_out = to_cef(mock_file_event_removable_media_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
@@ -285,7 +316,7 @@ def test_to_cef_includes_removable_media_name_label_if_present(
 ):
     expected_field_name = "cs3Label"
     expected_value = "Code42AEDRemovableMediaName"
-    cef_out = to_cef(mock_file_event_removable_media_event, None)
+    cef_out = to_cef(mock_file_event_removable_media_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
@@ -294,7 +325,7 @@ def test_to_cef_includes_removable_media_serial_number_if_present(
 ):
     expected_field_name = "cs4"
     expected_value = "TEST_SERIAL_NUMBER"
-    cef_out = to_cef(mock_file_event_removable_media_event, None)
+    cef_out = to_cef(mock_file_event_removable_media_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
@@ -303,14 +334,14 @@ def test_to_cef_includes_removable_media_serial_number_label_if_present(
 ):
     expected_field_name = "cs4Label"
     expected_value = "Code42AEDRemovableMediaSerialNumber"
-    cef_out = to_cef(mock_file_event_removable_media_event, None)
+    cef_out = to_cef(mock_file_event_removable_media_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_actor_if_present(mock_file_event_cloud_activity_event,):
     expected_field_name = "suser"
     expected_value = "actor@example.com"
-    cef_out = to_cef(mock_file_event_cloud_activity_event, None)
+    cef_out = to_cef(mock_file_event_cloud_activity_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
@@ -319,119 +350,119 @@ def test_to_cef_includes_sync_destination_if_present(
 ):
     expected_field_name = "destinationServiceName"
     expected_value = "TEST_SYNC_DESTINATION"
-    cef_out = to_cef(mock_file_event_cloud_activity_event, None)
+    cef_out = to_cef(mock_file_event_cloud_activity_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_event_timestamp_if_present(mock_file_event):
     expected_field_name = "end"
     expected_value = "1567996943851"
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_create_timestamp_if_present(mock_file_event):
     expected_field_name = "fileCreateTime"
     expected_value = "1342923569000"
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_md5_checksum_if_present(mock_file_event):
     expected_field_name = "fileHash"
     expected_value = "19b92e63beb08c27ab4489fcfefbbe44"
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_modify_timestamp_if_present(mock_file_event):
     expected_field_name = "fileModificationTime"
     expected_value = "1355886008000"
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_file_path_if_present(mock_file_event):
     expected_field_name = "filePath"
     expected_value = "/Users/testtesterson/Downloads/About Downloads.lpdf/Contents/Resources/English.lproj/"
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_file_name_if_present(mock_file_event):
     expected_field_name = "fname"
     expected_value = "InfoPlist.strings"
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_file_size_if_present(mock_file_event):
     expected_field_name = "fsize"
     expected_value = "86"
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_file_category_if_present(mock_file_event):
     expected_field_name = "fileType"
     expected_value = "UNCATEGORIZED"
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_exposure_if_present(mock_file_event):
     expected_field_name = "reason"
     expected_value = "ApplicationRead"
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_url_if_present(mock_file_event_cloud_activity_event,):
     expected_field_name = "filePath"
     expected_value = "https://www.example.com"
-    cef_out = to_cef(mock_file_event_cloud_activity_event, None)
+    cef_out = to_cef(mock_file_event_cloud_activity_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_insertion_timestamp_if_present(mock_file_event):
     expected_field_name = "rt"
     expected_value = "1568069262724"
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_process_name_if_present(mock_file_event):
     expected_field_name = "sproc"
     expected_value = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_event_id_if_present(mock_file_event):
     expected_field_name = "externalId"
     expected_value = "0_1d71796f-af5b-4231-9d8e-df6434da4663_912339407325443353_918253081700247636_16"
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_device_uid_if_present(mock_file_event):
     expected_field_name = "deviceExternalId"
     expected_value = "912339407325443353"
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_domain_name_if_present(mock_file_event):
     expected_field_name = "dvchost"
     expected_value = "192.168.0.3"
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_source_if_present(mock_file_event):
     expected_field_name = "sourceServiceName"
     expected_value = "Endpoint"
-    cef_out = to_cef(mock_file_event, None)
+    cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
@@ -440,42 +471,42 @@ def test_to_cef_includes_cloud_drive_id_if_present(
 ):
     expected_field_name = "aid"
     expected_value = "TEST_CLOUD_DRIVE_ID"
-    cef_out = to_cef(mock_file_event_cloud_activity_event, None)
+    cef_out = to_cef(mock_file_event_cloud_activity_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_shared_with_if_present(mock_file_event_cloud_activity_event,):
     expected_field_name = "duser"
     expected_value = "example1@example.com,example2@example.com"
-    cef_out = to_cef(mock_file_event_cloud_activity_event, None)
+    cef_out = to_cef(mock_file_event_cloud_activity_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_tab_url_if_present(mock_file_event_cloud_activity_event,):
     expected_field_name = "request"
     expected_value = "TEST_TAB_URL"
-    cef_out = to_cef(mock_file_event_cloud_activity_event, None)
+    cef_out = to_cef(mock_file_event_cloud_activity_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_window_title_if_present(mock_file_event_cloud_activity_event,):
     expected_field_name = "requestClientApplication"
     expected_value = "TEST_WINDOW_TITLE"
-    cef_out = to_cef(mock_file_event_cloud_activity_event, None)
+    cef_out = to_cef(mock_file_event_cloud_activity_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_email_recipients_if_present(mock_file_event_email_event,):
     expected_field_name = "duser"
     expected_value = "test.recipient1@example.com,test.recipient2@example.com"
-    cef_out = to_cef(mock_file_event_email_event, None)
+    cef_out = to_cef(mock_file_event_email_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
 def test_to_cef_includes_email_sender_if_present(mock_file_event_email_event,):
     expected_field_name = "suser"
     expected_value = "TEST_EMAIL_SENDER"
-    cef_out = to_cef(mock_file_event_email_event, None)
+    cef_out = to_cef(mock_file_event_email_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
@@ -483,8 +514,8 @@ def test_to_cef_includes_correct_event_name_and_signature_id_for_created(
     mock_file_event,
 ):
     event_type = "CREATED"
-    mock_file_event[0]["eventType"] = event_type
-    cef_out = to_cef(mock_file_event, None)
+    mock_file_event["eventType"] = event_type
+    cef_out = to_cef(mock_file_event)
     assert event_name_assigned_correct_signature_id(event_type, "C42200", cef_out)
 
 
@@ -492,8 +523,8 @@ def test_to_cef_includes_correct_event_name_and_signature_id_for_modified(
     mock_file_event,
 ):
     event_type = "MODIFIED"
-    mock_file_event[0]["eventType"] = event_type
-    cef_out = to_cef(mock_file_event, None)
+    mock_file_event["eventType"] = event_type
+    cef_out = to_cef(mock_file_event)
     assert event_name_assigned_correct_signature_id(event_type, "C42201", cef_out)
 
 
@@ -501,8 +532,8 @@ def test_to_cef_includes_correct_event_name_and_signature_id_for_deleted(
     mock_file_event,
 ):
     event_type = "DELETED"
-    mock_file_event[0]["eventType"] = event_type
-    cef_out = to_cef(mock_file_event, None)
+    mock_file_event["eventType"] = event_type
+    cef_out = to_cef(mock_file_event)
     assert event_name_assigned_correct_signature_id(event_type, "C42202", cef_out)
 
 
@@ -510,8 +541,8 @@ def test_to_cef_includes_correct_event_name_and_signature_id_for_read_by_app(
     mock_file_event,
 ):
     event_type = "READ_BY_APP"
-    mock_file_event[0]["eventType"] = event_type
-    cef_out = to_cef(mock_file_event, None)
+    mock_file_event["eventType"] = event_type
+    cef_out = to_cef(mock_file_event)
     assert event_name_assigned_correct_signature_id(event_type, "C42203", cef_out)
 
 
@@ -519,13 +550,13 @@ def test_to_cef_includes_correct_event_name_and_signature_id_for_emailed(
     mock_file_event_email_event,
 ):
     event_type = "EMAILED"
-    mock_file_event_email_event[0]["eventType"] = event_type
-    cef_out = to_cef(mock_file_event_email_event, None)
+    mock_file_event_email_event["eventType"] = event_type
+    cef_out = to_cef(mock_file_event_email_event)
     assert event_name_assigned_correct_signature_id(event_type, "C42204", cef_out)
 
 
 def get_cef_parts(cef_str):
-    return cef_str[0].split("|")
+    return cef_str.split("|")
 
 
 def key_value_pair_in_cef_extension(field_name, field_value, cef_str):

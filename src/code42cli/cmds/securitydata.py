@@ -11,15 +11,13 @@ import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
-from code42cli.cmds.securitydata_output_formats import (
-    get_file_events_output_format_func,
-)
+from code42cli.cmds.securitydata_output_formats import FileEventsOutputFormatter
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import format_option
 from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.output_formats import get_output_format_func
+from code42cli.output_formats import OutputFormatter
 
 logger = get_main_cli_logger()
 
@@ -210,7 +208,7 @@ def search(
     output_header = ext.try_get_default_header(
         include_all, SEARCH_DEFAULT_HEADER, format
     )
-    format_func = get_file_events_output_format_func(format)
+    formatter = FileEventsOutputFormatter(format, output_header)
     cursor = (
         _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
     )
@@ -219,8 +217,8 @@ def search(
         FileEventExtractor,
         cursor,
         use_checkpoint,
-        format_func=format_func,
-        output_header=output_header,
+        formatter=formatter,
+        force_pager=include_all,
     )
     extractor = _get_file_event_extractor(state.sdk, handlers)
     extractor.use_or_query = or_query
@@ -250,12 +248,12 @@ def saved_search(state):
 @sdk_options()
 def _list(state, format=None):
     """List available saved searches."""
-    format_func = get_output_format_func(format)
+    formatter = OutputFormatter(format, _HEADER_KEYS_MAP)
     response = state.sdk.securitydata.savedsearches.get()
-    result = response["searches"]
-    if result:
-        output = format_func(result, _HEADER_KEYS_MAP)
-        echo(output)
+    saved_searches = response["searches"]
+    if saved_searches:
+        for output in formatter.get_formatted_output(saved_searches):
+            echo(output)
 
 
 @saved_search.command()

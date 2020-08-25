@@ -246,3 +246,23 @@ class ErrorTrackerTestHelper:
 
 
 TEST_FILE_PATH = "some/path"
+
+
+@pytest.fixture
+def mock_to_table(mocker):
+    return mocker.patch("code42cli.output_formats.to_table")
+
+
+@pytest.fixture
+def mock_to_csv(mocker):
+    return mocker.patch("code42cli.output_formats.to_csv")
+
+
+@pytest.fixture
+def mock_to_json(mocker):
+    return mocker.patch("code42cli.output_formats.to_json")
+
+
+@pytest.fixture
+def mock_to_formatted_json(mocker):
+    return mocker.patch("code42cli.output_formats.to_formatted_json")
