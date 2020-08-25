@@ -53,7 +53,7 @@ def create_handlers(
         if hasattr(exception, "response") and hasattr(exception.response, "text"):
             message = "{}: {}".format(exception, exception.response.text)
         else:
-            message = exception
+            message = exception()
         logger.log_error(message)
         secho(str(message), err=True, fg="red")
 
@@ -87,7 +87,9 @@ def create_handlers(
             click.echo_via_pager(_format_output())
         else:
             for page in _format_output():
-                click.echo(page)
+                click.echo(page, nl=False)
+            if formatter.output_format == OutputFormat.TABLE:
+                click.echo()
 
         # To make sure the extractor records correct timestamp event when `CTRL-C` is pressed.
         if total_events:
