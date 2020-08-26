@@ -14,6 +14,9 @@ from code42cli.util import warn_interrupt
 logger = get_main_cli_logger()
 
 _ALERT_DETAIL_BATCH_SIZE = 100
+INTERRUPT_WARNING = (
+    "Attempting to cancel cleanly to keep checkpoint data accurate. One moment..."
+)
 
 
 def try_get_default_header(include_all, default_header, output_format):
@@ -41,10 +44,7 @@ def _get_alert_details(sdk, alert_summary_list):
     return results
 
 
-def create_handlers(
-    sdk, extractor_class, cursor_store, checkpoint_name, formatter, force_pager,
-):
-    extractor = extractor_class(sdk, ExtractionHandlers())
+def _set_handlers(cursor_store, checkpoint_name):
     handlers = ExtractionHandlers()
     handlers.TOTAL_EVENTS = 0
 
@@ -58,32 +58,46 @@ def create_handlers(
         secho(str(message), err=True, fg="red")
 
     handlers.handle_error = handle_error
-
     if cursor_store:
         handlers.record_cursor_position = lambda value: cursor_store.replace(
             checkpoint_name, value
         )
         handlers.get_cursor_position = lambda: cursor_store.get(checkpoint_name)
+    return handlers
 
-    @warn_interrupt(
-        warning="Attempting to cancel cleanly to keep checkpoint data accurate. One moment..."
-    )
+
+def _get_events(sdk, handlers, extractor_key, response):
+    response_dict = json.loads(response.text)
+    events = response_dict.get(extractor_key)
+    if extractor_key == "alerts":
+        try:
+            events = _get_alert_details(sdk, events)
+        except Exception as ex:
+            handlers.handle_error(ex)
+    return events
+
+
+def _record_timestamp(extractor, handlers, event):
+    last_event_timestamp = extractor._get_timestamp_from_item(event)
+    handlers.record_cursor_position(last_event_timestamp)
+
+
+def create_handlers(
+    sdk, extractor_class, cursor_store, checkpoint_name, formatter, force_pager
+):
+    extractor = extractor_class(sdk, ExtractionHandlers())
+    handlers = _set_handlers(cursor_store, checkpoint_name)
+
+    @warn_interrupt(warning=INTERRUPT_WARNING)
     def handle_response(response):
-        response_dict = json.loads(response.text)
-        events = response_dict.get(extractor._key)
-        if extractor._key == "alerts":
-            try:
-                events = _get_alert_details(sdk, events)
-            except Exception as ex:
-                handlers.handle_error(ex)
-
+        events = _get_events(sdk, handlers, extractor._key, response)
         total_events = len(events)
         handlers.TOTAL_EVENTS += total_events
 
         def _format_output():
             return formatter.get_formatted_output(events)
 
-        if len(events) > 10 or force_pager:
+        if total_events > 10 or force_pager:
             click.echo_via_pager(_format_output())
         else:
             for page in _format_output():
@@ -93,8 +107,7 @@ def create_handlers(
 
         # To make sure the extractor records correct timestamp event when `CTRL-C` is pressed.
         if total_events:
-            last_event_timestamp = extractor._get_timestamp_from_item(events[-1])
-            handlers.record_cursor_position(last_event_timestamp)
+            _record_timestamp(extractor, handlers, events[-1])
 
     handlers.handle_response = handle_response
     return handlers
@@ -123,3 +136,32 @@ def create_time_range_filter(filter_cls, begin_date=None, end_date=None):
 
     elif end_date and not begin_date:
         return filter_cls.on_or_before(end_date)
+
+
+def create_send_to_handlers(
+    sdk, extractor_class, cursor_store, checkpoint_name, logger
+):
+    extractor = extractor_class(sdk, ExtractionHandlers())
+    handlers = _set_handlers(cursor_store, checkpoint_name)
+
+    @warn_interrupt(warning=INTERRUPT_WARNING)
+    def handle_response(response):
+        events = _get_events(sdk, handlers, extractor._key, response)
+
+        total_events = len(events)
+        handlers.TOTAL_EVENTS += total_events
+
+        for event in events:
+            logger.info(event)
+
+        # To make sure the extractor records correct timestamp event when `CTRL-C` is pressed.
+        if total_events:
+            _record_timestamp(extractor, handlers, events[-1])
+
+    handlers.handle_response = handle_response
+    return handlers
+
+
+def handle_no_events(no_events):
+    if no_events:
+        click.echo("No results found.")
