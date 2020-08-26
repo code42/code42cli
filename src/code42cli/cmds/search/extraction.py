@@ -160,3 +160,8 @@ def create_send_to_handlers(
 
     handlers.handle_response = handle_response
     return handlers
+
+
+def handle_no_events(no_events):
+    if no_events:
+        click.echo("No results found.")

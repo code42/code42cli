@@ -3,7 +3,6 @@ from _collections import OrderedDict
 import click
 import py42.sdk.queries.alerts.filters as f
 from c42eventextractor.extractors import AlertExtractor
-from click import echo
 
 import code42cli.cmds.search.enums as enum
 import code42cli.cmds.search.extraction as ext
@@ -11,11 +10,13 @@ import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 import code42cli.options as opt
 from code42cli.cmds.search.cursor_store import AlertCursorStore
+from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.logger import get_logger_for_server
 from code42cli.options import format_option
 from code42cli.options import server_options
 from code42cli.output_formats import JsonOutputFormat
 from code42cli.output_formats import OutputFormatter
+
 
 SEARCH_DEFAULT_HEADER = OrderedDict()
 SEARCH_DEFAULT_HEADER["name"] = "RuleName"
@@ -223,8 +224,7 @@ def search(
         force_pager=include_all,
     )
     _call_extractor(cli_state, handlers, begin, end, or_query, advanced_query, **kwargs)
-    if not handlers.TOTAL_EVENTS and not errors.ERRORED:
-        echo("No results found.")
+    handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
 
 
 @alerts.command()
@@ -261,8 +261,7 @@ def send_to(
         cli_state.sdk, AlertExtractor, cursor, use_checkpoint, logger,
     )
     _call_extractor(cli_state, handlers, begin, end, or_query, advanced_query, **kwargs)
-    if not handlers.TOTAL_EVENTS and not errors.ERRORED:
-        echo("No results found.")
+    handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
 
 
 def _get_alert_extractor(sdk, handlers):

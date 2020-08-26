@@ -11,6 +11,7 @@ import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
+from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.cmds.securitydata_output_formats import FileEventsOutputFormatter
 from code42cli.logger import get_logger_for_server
 from code42cli.logger import get_main_cli_logger
@@ -21,6 +22,7 @@ from code42cli.options import sdk_options
 from code42cli.options import server_options
 from code42cli.output_formats import OutputFormatter
 from code42cli.output_formats import SendToFileEventsOutputFormat
+
 
 logger = get_main_cli_logger()
 
@@ -255,8 +257,7 @@ def search(
         state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
     )
 
-    if not handlers.TOTAL_EVENTS and not errors.ERRORED:
-        echo("No results found.")
+    handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
 
 
 @security_data.group(cls=OrderedGroup)
@@ -326,8 +327,7 @@ def send_to(
     _call_extractor(
         state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
     )
-    if not handlers.TOTAL_EVENTS and not errors.ERRORED:
-        echo("No results found.")
+    handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
 
 
 def _get_file_event_extractor(sdk, handlers):
