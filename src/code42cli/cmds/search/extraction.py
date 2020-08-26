@@ -66,6 +66,22 @@ def _set_handlers(cursor_store, checkpoint_name):
     return handlers
 
 
+def _get_events(sdk, handlers, extractor_key, response):
+    response_dict = json.loads(response.text)
+    events = response_dict.get(extractor_key)
+    if extractor_key == "alerts":
+        try:
+            events = _get_alert_details(sdk, events)
+        except Exception as ex:
+            handlers.handle_error(ex)
+    return events
+
+
+def _record_timestamp(extractor, handlers, event):
+    last_event_timestamp = extractor._get_timestamp_from_item(event)
+    handlers.record_cursor_position(last_event_timestamp)
+
+
 def create_handlers(
     sdk, extractor_class, cursor_store, checkpoint_name, formatter, force_pager
 ):
@@ -74,21 +90,14 @@ def create_handlers(
 
     @warn_interrupt(warning=INTERRUPT_WARNING)
     def handle_response(response):
-        response_dict = json.loads(response.text)
-        events = response_dict.get(extractor._key)
-        if extractor._key == "alerts":
-            try:
-                events = _get_alert_details(sdk, events)
-            except Exception as ex:
-                handlers.handle_error(ex)
-
+        events = _get_events(sdk, handlers, extractor._key, response)
         total_events = len(events)
         handlers.TOTAL_EVENTS += total_events
 
         def _format_output():
             return formatter.get_formatted_output(events)
 
-        if len(events) > 10 or force_pager:
+        if total_events > 10 or force_pager:
             click.echo_via_pager(_format_output())
         else:
             for page in _format_output():
@@ -98,8 +107,7 @@ def create_handlers(
 
         # To make sure the extractor records correct timestamp event when `CTRL-C` is pressed.
         if total_events:
-            last_event_timestamp = extractor._get_timestamp_from_item(events[-1])
-            handlers.record_cursor_position(last_event_timestamp)
+            _record_timestamp(extractor, handlers, events[-1])
 
     handlers.handle_response = handle_response
     return handlers
@@ -138,13 +146,7 @@ def create_send_to_handlers(
 
     @warn_interrupt(warning=INTERRUPT_WARNING)
     def handle_response(response):
-        response_dict = json.loads(response.text)
-        events = response_dict.get(extractor._key)
-        if extractor._key == "alerts":
-            try:
-                events = _get_alert_details(sdk, events)
-            except Exception as ex:
-                handlers.handle_error(ex)
+        events = _get_events(sdk, handlers, extractor._key, response)
 
         total_events = len(events)
         handlers.TOTAL_EVENTS += total_events
@@ -154,8 +156,7 @@ def create_send_to_handlers(
 
         # To make sure the extractor records correct timestamp event when `CTRL-C` is pressed.
         if total_events:
-            last_event_timestamp = extractor._get_timestamp_from_item(events[-1])
-            handlers.record_cursor_position(last_event_timestamp)
+            _record_timestamp(extractor, handlers, events[-1])
 
     handlers.handle_response = handle_response
     return handlers
