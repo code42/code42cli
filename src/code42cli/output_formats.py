@@ -26,7 +26,7 @@ class OutputFormat(JsonOutputFormat):
         return iter([self.TABLE, self.CSV, self.JSON, self.RAW])
 
 
-class SendToOutputFormat(JsonOutputFormat):
+class SendToFileEventsOutputFormat(JsonOutputFormat):
     CEF = "CEF"
 
     def __iter__(self):

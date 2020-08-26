@@ -22,7 +22,7 @@ from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
 from code42cli.options import server_options
 from code42cli.output_formats import get_output_format_func
-from code42cli.output_formats import SendToOutputFormat
+from code42cli.output_formats import SendToFileEventsOutputFormat
 
 
 logger = get_main_cli_logger()
@@ -155,9 +155,9 @@ saved_search_option = click.option(
 send_to_format_options = click.option(
     "-f",
     "--format",
-    type=click.Choice(SendToOutputFormat(), case_sensitive=False),
+    type=click.Choice(SendToFileEventsOutputFormat(), case_sensitive=False),
     help="The output format of the result. Defaults to json format.",
-    default=SendToOutputFormat.JSON,
+    default=SendToFileEventsOutputFormat.JSON,
 )
 
 
