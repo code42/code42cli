@@ -12,7 +12,6 @@ from code42cli.output_formats import OutputFormat
 
 
 key = "events"
-header = {"property": "Property"}
 
 
 class TestQuery:
@@ -29,10 +28,10 @@ def test_try_get_default_header_raises_cli_error_when_using_include_all_with_non
     with pytest.raises(errors.Code42CLIError) as err:
         try_get_default_header(True, {}, OutputFormat.CSV)
 
-    assert str(err.value) == "--include-all only allowed for non-Table output formats."
+    assert str(err.value) == "--include-all only allowed for Table output format."
 
 
-def test_try_get_default_header_uses_default_header_when_not_include_all_and_is_table():
+def test_try_get_default_header_uses_default_header_when_not_include_all():
     default_header = {"default": "header"}
     actual = try_get_default_header(False, default_header, OutputFormat.TABLE)
     assert actual is default_header
@@ -55,22 +54,17 @@ def test_create_handlers_creates_handlers_that_pass_events_to_output_format(
         def _get_timestamp_from_item(self, item):
             pass
 
-    output_format = mocker.MagicMock()
+    formatter = mocker.MagicMock()
     cursor_store = mocker.MagicMock(sepc=BaseCursorStore)
     handlers = create_handlers(
-        sdk,
-        TestExtractor,
-        cursor_store,
-        "chk-name",
-        format_function=output_format,
-        header=header,
+        sdk, TestExtractor, cursor_store, "chk-name", formatter, force_pager=False
     )
     http_response = mocker.MagicMock(spec=Response)
     events = [{"property": "bar"}]
     http_response.text = '{{"{0}": [{{"property": "bar"}}]}}'.format(key)
     py42_response = Py42Response(http_response)
     handlers.handle_response(py42_response)
-    output_format.assert_called_once_with(events, header)
+    formatter.get_formatted_output.assert_called_once_with(events)
 
 
 def test_send_to_handlers_creates_handlers_that_pass_events_to_logger(

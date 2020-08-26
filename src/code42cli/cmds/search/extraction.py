@@ -22,12 +22,9 @@ INTERRUPT_WARNING = (
 def try_get_default_header(include_all, default_header, output_format):
     """Returns appropriate header based on include-all and output format. If returns None,
     the CLI format option will figure out the header based on the data keys."""
-    output_header = None
-
-    if output_format == OutputFormat.TABLE and not include_all:
-        output_header = default_header
-    elif output_format != OutputFormat.TABLE and include_all:
-        err_text = "--include-all only allowed for non-Table output formats."
+    output_header = None if include_all else default_header
+    if output_format != OutputFormat.TABLE and include_all:
+        err_text = "--include-all only allowed for Table output format."
         logger.log_error(err_text)
         raise errors.Code42CLIError(err_text)
     return output_header
@@ -70,7 +67,7 @@ def _set_handlers(cursor_store, checkpoint_name):
 
 
 def create_handlers(
-    sdk, extractor_class, cursor_store, checkpoint_name, format_function, header
+    sdk, extractor_class, cursor_store, checkpoint_name, formatter, force_pager
 ):
     extractor = extractor_class(sdk, ExtractionHandlers())
     handlers = _set_handlers(cursor_store, checkpoint_name)
@@ -88,14 +85,16 @@ def create_handlers(
         total_events = len(events)
         handlers.TOTAL_EVENTS += total_events
 
-        def paginate():
-            yield format_function(events, header)
+        def _format_output():
+            return formatter.get_formatted_output(events)
 
-        if len(events) > 10:
-            click.echo_via_pager(paginate)
+        if len(events) > 10 or force_pager:
+            click.echo_via_pager(_format_output())
         else:
-            for page in paginate():
-                click.echo(page)
+            for page in _format_output():
+                click.echo(page, nl=False)
+            if formatter.output_format == OutputFormat.TABLE:
+                click.echo()
 
         # To make sure the extractor records correct timestamp event when `CTRL-C` is pressed.
         if total_events:

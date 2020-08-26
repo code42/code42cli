@@ -1,12 +1,7 @@
 import json
 from collections import OrderedDict
 
-from code42cli.output_formats import get_dynamic_header
-from code42cli.output_formats import get_output_format_func
-from code42cli.output_formats import to_csv
-from code42cli.output_formats import to_formatted_json
-from code42cli.output_formats import to_json
-from code42cli.output_formats import to_table
+import code42cli.output_formats as output_formats_module
 
 
 TEST_DATA = [
@@ -63,33 +58,6 @@ TEST_DATA = [
     },
 ]
 
-FILTERED_OUTPUT = [
-    {
-        "RuleId": "d12d54f0-5160-47a8-a48f-7d5fa5b051c5",
-        "Name": "outside td",
-        "Severity": "HIGH",
-        "Type": "FED_CLOUD_SHARE_PERMISSIONS",
-        "Source": "Alerting",
-        "Enabled": True,
-    },
-    {
-        "RuleId": "8b393324-c34c-44ac-9f79-4313601dd859",
-        "Name": "Test different filters",
-        "Severity": "MEDIUM",
-        "Type": "FED_ENDPOINT_EXFILTRATION",
-        "Source": "Alerting",
-        "Enabled": True,
-    },
-    {
-        "RuleId": "5eabed1d-a406-4dfc-af81-f7485ee09b19",
-        "Name": "Test Alerts using CLI",
-        "Severity": "HIGH",
-        "Type": "FED_ENDPOINT_EXFILTRATION",
-        "Source": "Alerting",
-        "Enabled": True,
-    },
-]
-
 TEST_HEADER = OrderedDict()
 TEST_HEADER["observerRuleId"] = "RuleId"
 TEST_HEADER["name"] = "Name"
@@ -143,71 +111,80 @@ def assert_csv_texts_are_equal(actual, expected):
 
 
 def test_to_csv_formats_data_to_csv_format():
-    formatted_output = to_csv(TEST_DATA, None)
+    formatted_output = output_formats_module.to_csv(TEST_DATA)
     assert_csv_texts_are_equal(formatted_output, CSV_OUTPUT)
 
 
 def test_to_csv_when_given_no_output_returns_none():
-    assert to_csv(None, None) is None
+    assert output_formats_module.to_csv(None) is None
 
 
 def test_to_table_formats_data_to_table_format():
-    formatted_output = to_table(TEST_DATA, TEST_HEADER)
+    formatted_output = output_formats_module.to_table(TEST_DATA, TEST_HEADER)
     assert formatted_output == TABLE_OUTPUT
 
 
 def test_to_table_formats_when_given_no_output_returns_none():
-    assert to_table(None, None) is None
+    assert output_formats_module.to_table(None, None) is None
 
 
 def test_to_table_when_not_given_header_creates_header_dynamically():
-    formatted_output = to_table(TEST_DATA, None)
+    formatted_output = output_formats_module.to_table(TEST_DATA, None)
     assert len(formatted_output) > len(TABLE_OUTPUT)
     assert "test.user+partners@code42.com" in formatted_output
 
 
 def test_to_json():
-    formatted_output = to_json(TEST_DATA, TEST_HEADER)
-    assert formatted_output == json.dumps(TEST_DATA)
+    formatted_output = output_formats_module.to_json(TEST_DATA)
+    assert formatted_output == "{}\n".format(json.dumps(TEST_DATA))
 
 
 def test_to_formatted_json():
-    formatted_output = to_formatted_json(TEST_DATA, TEST_HEADER)
-    assert formatted_output == json.dumps(FILTERED_OUTPUT, indent=4)
+    formatted_output = output_formats_module.to_formatted_json(TEST_DATA)
+    assert formatted_output == "{}\n".format(json.dumps(TEST_DATA, indent=4))
 
 
-def test_output_format_returns_to_formatted_json_function_when_json_format_option_is_passed():
-    format_function = get_output_format_func("JSON")
-    assert id(format_function) == id(to_formatted_json)
+class TestOutputFormatter:
+    def test_init_sets_format_func_to_formatted_json_function_when_json_format_option_is_passed(
+        self, mock_to_json
+    ):
+        output_format = output_formats_module.OutputFormat.RAW
+        formatter = output_formats_module.OutputFormatter(output_format)
+        for _ in formatter.get_formatted_output([{"TEST": "FOOBAR"}]):
+            pass
+        mock_to_json.assert_called_once_with({"TEST": "FOOBAR"})
 
+    def test_init_sets_format_func_to_json_function_when_raw_json_format_option_is_passed(
+        self, mock_to_formatted_json
+    ):
+        output_format = output_formats_module.OutputFormat.JSON
+        formatter = output_formats_module.OutputFormatter(output_format)
+        for _ in formatter.get_formatted_output(["TEST"]):
+            pass
+        mock_to_formatted_json.assert_called_once_with("TEST")
 
-def test_output_format_returns_to_json_function_when_raw_json_format_option_is_passed():
-    format_function = get_output_format_func("RAW-JSON")
-    assert id(format_function) == id(to_json)
+    def test_init_sets_format_func_to_table_function_when_table_format_option_is_passed(
+        self, mock_to_table
+    ):
+        output_format = output_formats_module.OutputFormat.TABLE
+        formatter = output_formats_module.OutputFormatter(output_format)
+        for _ in formatter.get_formatted_output("TEST"):
+            pass
+        mock_to_table.assert_called_once_with("TEST", None)
 
+    def test_init_sets_format_func_to_csv_function_when_csv_format_option_is_passed(
+        self, mock_to_csv
+    ):
+        output_format = output_formats_module.OutputFormat.CSV
+        formatter = output_formats_module.OutputFormatter(output_format)
+        for _ in formatter.get_formatted_output("TEST"):
+            pass
+        mock_to_csv.assert_called_once_with("TEST")
 
-def test_output_format_returns_to_table_function_when_ascii_table_format_option_is_passed():
-    format_function = get_output_format_func("TABLE")
-    assert id(format_function) == id(to_table)
-
-
-def test_output_format_returns_to_csv_function_when_csv_format_option_is_passed():
-    format_function = get_output_format_func("CSV")
-    assert id(format_function) == id(to_csv)
-
-
-def test_output_format_returns_to_table_function_when_no_format_option_is_passed():
-    format_function = get_output_format_func(None)
-    assert id(format_function) == id(to_table)
-
-
-def test_get_dynamic_header_returns_all_keys_only_which_are_not_nested():
-    header = get_dynamic_header(TEST_NESTED_DATA)
-    assert header == {
-        "test": "Test",
-        "name": "Name",
-        "description": "Description",
-        "severity": "Severity",
-        "tenantId": "Tenantid",
-        "id": "Id",
-    }
+    def test_init_sets_format_func_to_table_function_when_no_format_option_is_passed(
+        self, mock_to_table
+    ):
+        formatter = output_formats_module.OutputFormatter(None)
+        for _ in formatter.get_formatted_output("TEST"):
+            pass
+        mock_to_table.assert_called_once_with("TEST", None)

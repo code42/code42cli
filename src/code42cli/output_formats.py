@@ -33,59 +33,67 @@ class SendToFileEventsOutputFormat(JsonOutputFormat):
         return iter([self.CEF, self.JSON, self.RAW])
 
 
-def get_output_format_func(value):
-    if value is not None:
-        value = value.upper()
-        if value == OutputFormat.CSV:
-            return to_csv
-        if value == OutputFormat.RAW:
-            return to_json
-        if value == OutputFormat.TABLE:
-            return to_table
-        if value == OutputFormat.JSON:
-            return to_formatted_json
-    # default option
-    return to_table
+class OutputFormatter:
+    def __init__(self, output_format, header=None):
+        output_format = output_format.upper() if output_format else OutputFormat.TABLE
+        self.output_format = output_format
+        self._format_func = to_table
+        self.header = header
+
+        if output_format == OutputFormat.CSV:
+            self._format_func = to_csv
+        elif output_format == OutputFormat.RAW:
+            self._format_func = to_json
+        elif output_format == OutputFormat.TABLE:
+            self._format_func = self._to_table
+        elif output_format == OutputFormat.JSON:
+            self._format_func = to_formatted_json
+
+    def _format_output(self, output):
+        return self._format_func(output)
+
+    def _to_table(self, output):
+        return to_table(output, self.header)
+
+    def get_formatted_output(self, output):
+        if self._requires_list_output:
+            yield self._format_output(output)
+        else:
+            for item in output:
+                yield self._format_output(item)
+
+    @property
+    def _requires_list_output(self):
+        return self.output_format in (OutputFormat.TABLE, OutputFormat.CSV)
 
 
-def to_csv(output, header):
+def to_csv(output):
+    """Output is a list of records"""
+
     if not output:
         return
-    fieldnames = output[0].keys()
-    # if header:
-    #    fieldnames = header
     string_io = io.StringIO()
-    writer = csv.DictWriter(string_io, fieldnames=fieldnames, extrasaction="ignore")
+    fieldnames = list({k for d in output for k in d.keys()})
+    writer = csv.DictWriter(string_io, fieldnames=fieldnames)
     writer.writeheader()
     writer.writerows(output)
     return string_io.getvalue()
 
 
 def to_table(output, header):
+    """Output is a list of records"""
     if not output:
         return
-    header = header or get_dynamic_header(output[0])
     rows, column_size = find_format_width(output, header)
     return format_to_table(rows, column_size)
 
 
-def _filter(output, header):
-    return [{header[key]: row[key] for key in header.keys()} for row in output]
+def to_json(output):
+    """Output is a single record"""
+    return "{}\n".format(json.dumps(output))
 
 
-def to_json(output, header=None):
-    return json.dumps(output)
-
-
-def to_formatted_json(output, header=None):
-    if header:
-        return json.dumps(_filter(output, header), indent=4)
-    return json.dumps(output, indent=4)
-
-
-def get_dynamic_header(header_items):
-    return {
-        key: key.capitalize()
-        for key in header_items.keys()
-        if type(header_items[key]) == str
-    }
+def to_formatted_json(output):
+    """Output is a single record"""
+    json_str = "{}\n".format(json.dumps(output, indent=4))
+    return json_str

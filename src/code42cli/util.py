@@ -44,20 +44,21 @@ def find_format_width(record, header, include_header=True):
     Finds the largest string against each column so as to decide the padding size for the column.
 
     Args:
-        record (list of dict), data to be formatted.
-        header (dict), key-value where keys should map to keys of record dict and
+        record (dict): data to be formatted.
+        header (dict): key-value where keys should map to keys of record dict and
           value is the corresponding column name to be displayed on the CLI.
-        include_header (bool), include header in output, defaults to True.
+        include_header (bool): include header in output, defaults to True.
 
     Returns:
-        tuple (list of dict, dict), i.e Filtered records, padding size of columns.
+        tuple (list of dict, dict): i.e Filtered records, padding size of columns.
     """
     rows = []
     if include_header:
+        if not header:
+            header = _get_default_header(record)
         rows.append(header)
 
-    # Set default max width items to column names
-    max_width_item = dict(header.items())
+    max_width_item = dict(header.items())  # Copy
     for record_row in record:
         row = OrderedDict()
         for header_key in header.keys():
@@ -152,3 +153,17 @@ def get_url_parts(url_str):
     if len(parts) > 1 and parts[1] != "":
         port = int(parts[1])
     return parts[0], port
+
+
+def _get_default_header(header_items):
+    if not header_items:
+        return
+
+    # Creates dict where keys and values are the same for `find_format_width()`.
+    header = {}
+    for item in header_items:
+        keys = item.keys()
+        for key in keys:
+            if key not in header and isinstance(key, str):
+                header[key] = key
+    return header
