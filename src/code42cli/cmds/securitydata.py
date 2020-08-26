@@ -190,6 +190,24 @@ def clear_checkpoint(state, checkpoint_name):
     _get_file_event_cursor_store(state.profile.name).delete(checkpoint_name)
 
 
+def _call_extractor(
+    state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
+):
+    extractor = _get_file_event_extractor(state.sdk, handlers)
+    extractor.use_or_query = or_query
+    extractor.or_query_exempt_filters.append(f.ExposureType.exists())
+    if advanced_query:
+        extractor.extract_advanced(advanced_query)
+    elif saved_search:
+        extractor.extract(*saved_search._filter_group_list)
+    else:
+        if begin or end:
+            state.search_filters.append(
+                ext.create_time_range_filter(f.EventTimestamp, begin, end)
+            )
+        extractor.extract(*state.search_filters)
+
+
 @security_data.command()
 @file_event_options
 @search_options
@@ -233,19 +251,9 @@ def search(
         formatter=formatter,
         force_pager=include_all,
     )
-    extractor = _get_file_event_extractor(state.sdk, handlers)
-    extractor.use_or_query = or_query
-    extractor.or_query_exempt_filters.append(f.ExposureType.exists())
-    if advanced_query:
-        extractor.extract_advanced(advanced_query)
-    elif saved_search:
-        extractor.extract(*saved_search._filter_group_list)
-    else:
-        if begin or end:
-            state.search_filters.append(
-                ext.create_time_range_filter(f.EventTimestamp, begin, end)
-            )
-        extractor.extract(*state.search_filters)
+    _call_extractor(
+        state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
+    )
 
     if not handlers.TOTAL_EVENTS and not errors.ERRORED:
         echo("No results found.")
@@ -315,19 +323,9 @@ def send_to(
     handlers = ext.create_send_to_handlers(
         state.sdk, FileEventExtractor, cursor, use_checkpoint, logger
     )
-    extractor = _get_file_event_extractor(state.sdk, handlers)
-    extractor.use_or_query = or_query
-    extractor.or_query_exempt_filters.append(f.ExposureType.exists())
-    if advanced_query:
-        extractor.extract_advanced(advanced_query)
-    elif saved_search:
-        extractor.extract(*saved_search._filter_group_list)
-    else:
-        if begin or end:
-            state.search_filters.append(
-                ext.create_time_range_filter(f.EventTimestamp, begin, end)
-            )
-        extractor.extract(*state.search_filters)
+    _call_extractor(
+        state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
+    )
     if not handlers.TOTAL_EVENTS and not errors.ERRORED:
         echo("No results found.")
 

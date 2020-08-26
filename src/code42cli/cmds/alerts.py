@@ -168,6 +168,21 @@ def clear_checkpoint(state, checkpoint_name):
     _get_alert_cursor_store(state.profile.name).delete(checkpoint_name)
 
 
+def _call_extractor(
+    cli_state, handlers, begin, end, or_query, advanced_query, **kwargs
+):
+    extractor = _get_alert_extractor(cli_state.sdk, handlers)
+    extractor.use_or_query = or_query
+    if advanced_query:
+        extractor.extract_advanced(advanced_query)
+    else:
+        if begin or end:
+            cli_state.search_filters.append(
+                ext.create_time_range_filter(f.DateObserved, begin, end)
+            )
+        extractor.extract(*cli_state.search_filters)
+
+
 @alerts.command()
 @alert_options
 @search_options
@@ -207,16 +222,7 @@ def search(
         formatter=formatter,
         force_pager=include_all,
     )
-    extractor = _get_alert_extractor(cli_state.sdk, handlers)
-    extractor.use_or_query = or_query
-    if advanced_query:
-        extractor.extract_advanced(advanced_query)
-    else:
-        if begin or end:
-            cli_state.search_filters.append(
-                ext.create_time_range_filter(f.DateObserved, begin, end)
-            )
-        extractor.extract(*cli_state.search_filters)
+    _call_extractor(cli_state, handlers, begin, end, or_query, advanced_query, **kwargs)
     if not handlers.TOTAL_EVENTS and not errors.ERRORED:
         echo("No results found.")
 
@@ -254,17 +260,7 @@ def send_to(
     handlers = ext.create_send_to_handlers(
         cli_state.sdk, AlertExtractor, cursor, use_checkpoint, logger,
     )
-    extractor = _get_alert_extractor(cli_state.sdk, handlers)
-    extractor.use_or_query = or_query
-    if advanced_query:
-        extractor.extract_advanced(advanced_query)
-    else:
-        if begin or end:
-            cli_state.search_filters.append(
-                ext.create_time_range_filter(f.DateObserved, begin, end)
-            )
-        extractor.extract(*cli_state.search_filters)
-
+    _call_extractor(cli_state, handlers, begin, end, or_query, advanced_query, **kwargs)
     if not handlers.TOTAL_EVENTS and not errors.ERRORED:
         echo("No results found.")
 
