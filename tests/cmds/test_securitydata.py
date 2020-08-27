@@ -102,10 +102,6 @@ def test_search_when_is_advanced_query_uses_only_the_extract_advanced_method(
     assert file_event_extractor.extract_advanced.call_count == 1
 
 
-<<<<<<< HEAD
-def test_search_when_is_not_advanced_query_uses_only_the_extract_method(
-    runner, cli_state, file_event_extractor
-=======
 @pytest.mark.parametrize(
     "command",
     (
@@ -115,7 +111,6 @@ def test_search_when_is_not_advanced_query_uses_only_the_extract_method(
 )
 def test_search_when_is_not_advanced_query_uses_only_the_extract_advanced_method(
     runner, cli_state, file_event_extractor, command
->>>>>>> master
 ):
     runner.invoke(cli, command, obj=cli_state)
     assert file_event_extractor.extract_advanced.call_count == 0

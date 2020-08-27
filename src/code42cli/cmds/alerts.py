@@ -4,10 +4,9 @@ import click
 import py42.sdk.queries.alerts.filters as f
 from c42eventextractor.extractors import AlertExtractor
 from py42.sdk.queries.alerts.filters import AlertState
-from py42.sdk.queries.alerts.filters import Severity
 from py42.sdk.queries.alerts.filters import RuleType
+from py42.sdk.queries.alerts.filters import Severity
 
-import code42cli.cmds.search.enums as enum
 import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
