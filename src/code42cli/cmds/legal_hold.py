@@ -11,9 +11,10 @@ from code42cli.bulk import run_bulk_process
 from code42cli.cmds.shared import get_user_id
 from code42cli.errors import UserNotInLegalHoldError
 from code42cli.file_readers import read_csv_arg
+from code42cli.options import format_option
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.output_formats import format_option
+from code42cli.output_formats import OutputFormatter
 from code42cli.util import format_string_list_to_columns
 
 
@@ -28,7 +29,7 @@ _MATTER_KEYS_MAP["creationDate"] = "Creation Date"
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def legal_hold(state):
-    """For adding and removing employees to legal hold matters."""
+    """For adding and removing custodians from legal hold matters."""
     pass
 
 
@@ -37,14 +38,14 @@ matter_id_option = click.option(
     "--matter-id",
     required=True,
     type=str,
-    help="ID of the legal hold matter user will be added to.",
+    help="Identification number of the legal hold matter the custodian will be added to.",
 )
 user_id_option = click.option(
     "-u",
     "--username",
     required=True,
     type=str,
-    help="The username of the user to add to the matter.",
+    help="The username of the custodian to add to the matter.",
 )
 
 
@@ -53,7 +54,7 @@ user_id_option = click.option(
 @user_id_option
 @sdk_options()
 def add_user(state, matter_id, username):
-    """Add a user to a legal hold matter."""
+    """Add a custodian to a legal hold matter."""
     _add_user_to_legal_hold(state.sdk, matter_id, username)
 
 
@@ -62,7 +63,7 @@ def add_user(state, matter_id, username):
 @user_id_option
 @sdk_options()
 def remove_user(state, matter_id, username):
-    """Remove a user from a legal hold matter."""
+    """Release a custodian from a legal hold matter."""
     _remove_user_from_legal_hold(state.sdk, matter_id, username)
 
 
@@ -71,22 +72,34 @@ def remove_user(state, matter_id, username):
 @sdk_options()
 def _list(state, format=None):
     """Fetch existing legal hold matters."""
+    formatter = OutputFormatter(format, _MATTER_KEYS_MAP)
     matters = _get_all_active_matters(state.sdk)
     if matters:
-        output = format(matters, _MATTER_KEYS_MAP)
-        echo(output)
+        for output in formatter.get_formatted_output(matters):
+            echo(output)
 
 
 @legal_hold.command()
 @click.argument("matter-id")
-@click.option("--include-inactive", is_flag=True)
-@click.option("--include-policy", is_flag=True)
+@click.option(
+    "--include-inactive",
+    is_flag=True,
+    help="View all custodians associated with the legal hold matter, "
+    "including inactive custodians.",
+)
+@click.option(
+    "--include-policy",
+    is_flag=True,
+    help="View details of the preservation policy associated with the legal hold matter.",
+)
 @format_option
 @sdk_options()
 def show(state, matter_id, include_inactive=False, include_policy=False, format=None):
     """Display details of a given legal hold matter."""
+    formatter = OutputFormatter(format, _MATTER_KEYS_MAP)
     matter = _check_matter_is_accessible(state.sdk, matter_id)
     matter["creator_username"] = matter["creator"]["username"]
+    matter = json.loads(matter.text)
 
     # if `active` is None then all matters (whether active or inactive) are returned. True returns
     # only those that are active.
@@ -101,8 +114,8 @@ def show(state, matter_id, include_inactive=False, include_policy=False, format=
         member["user"]["username"] for member in memberships if not member["active"]
     ]
 
-    output = format([matter], _MATTER_KEYS_MAP)
-    echo(output)
+    for output in formatter.get_formatted_output([matter]):
+        echo(output)
 
     _print_matter_members(active_usernames, member_type="active")
 
@@ -133,7 +146,7 @@ bulk.add_command(legal_hold_generate_template)
 
 @bulk.command(
     name="add",
-    help="Bulk add users to legal hold matters from a csv file. CSV file format: {}".format(
+    help="Bulk add custodians to legal hold matters using a CSV file. CSV file format: {}".format(
         ",".join(LEGAL_HOLD_CSV_HEADERS)
     ),
 )
@@ -149,7 +162,7 @@ def bulk_add(state, csv_rows):
 
 
 @bulk.command(
-    help="Bulk remove users from legal hold matters from a csv file. CSV file format: {}".format(
+    help="Bulk release custodians from legal hold matters using a CSV file. CSV file format: {}".format(
         ",".join(LEGAL_HOLD_CSV_HEADERS)
     )
 )

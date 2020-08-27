@@ -93,6 +93,7 @@ def test_add_high_risk_employee_when_user_already_added_exits_with_correct_messa
     assert result.exit_code == 1
     assert (
         "User with ID TEST_ID is already on the high-risk-employee list."
+        "'{}' is already on the high risk employees list.".format(_EMPLOYEE)
         in result.output
     )
 

@@ -269,4 +269,9 @@ def test_list_cmd_formats_to_csv_when_format_is_passed(runner, cli_state):
     cli_state.sdk.alerts.rules.get_all.return_value = [TEST_RULE_RESPONSE]
     result = runner.invoke(cli, ["alert-rules", "list", "-f", "csv"], obj=cli_state)
     assert cli_state.sdk.alerts.rules.get_all.call_count == 1
-    assert "RuleId,Name,Severity,Type,Source,Enabled" in result.output
+    assert "observerRuleId" in result.output
+    assert "type" in result.output
+    assert "isEnabled" in result.output
+    assert "ruleSource" in result.output
+    assert "name" in result.output
+    assert "severity" in result.output

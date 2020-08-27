@@ -9,7 +9,6 @@ from requests import Request
 from requests import Response
 from tests.conftest import convert_str_to_date
 
-from code42cli import PRODUCT_NAME
 from code42cli.logger import CliLogger
 
 
@@ -36,11 +35,11 @@ def cli_logger(mocker):
 
 
 @pytest.fixture
-def stdout_logger(mocker):
+def event_extractor_logger(mocker):
     mock = mocker.patch(
-        "{}.cmds.search.logger_factory.get_logger_for_stdout".format(PRODUCT_NAME)
+        "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper"
     )
-    mock.return_value = mocker.MagicMock()
+    mock.emit.return_value = mocker.MagicMock()
     return mock
 
 

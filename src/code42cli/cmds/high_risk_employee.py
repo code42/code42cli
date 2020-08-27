@@ -28,7 +28,7 @@ risk_tag_option = click.option(
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def high_risk_employee(state):
-    """For adding and removing employees from the high risk employee detection list."""
+    """For adding and removing employees from the high risk employees detection list."""
     pass
 
 
@@ -39,7 +39,7 @@ def high_risk_employee(state):
 @username_arg
 @sdk_options()
 def add(state, username, cloud_alias, risk_tag, notes):
-    """Add a user to the high-risk-employee detection list."""
+    """Add a user to the high risk employees detection list."""
     _add_high_risk_employee(state.sdk, username, cloud_alias, risk_tag, notes)
 
 
@@ -47,7 +47,7 @@ def add(state, username, cloud_alias, risk_tag, notes):
 @username_arg
 @sdk_options()
 def remove(state, username):
-    """Remove a user from the high-risk-employee detection list."""
+    """Remove a user from the high risk employees detection list."""
     _remove_high_risk_employee(state.sdk, username)
 
 
@@ -72,7 +72,7 @@ def remove_risk_tags(state, username, risk_tag):
 @high_risk_employee.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def bulk(state):
-    """Tools for executing bulk high risk employee actions."""
+    """Tools for executing high risk employee actions in bulk."""
     pass
 
 
@@ -93,7 +93,7 @@ bulk.add_command(high_risk_employee_generate_template)
 
 @bulk.command(
     name="add",
-    help="Bulk add users to the high-risk-employee detection list using a csv file with "
+    help="Bulk add users to the high risk employees detection list using a CSV file with "
     "format: {}".format(",".join(HIGH_RISK_EMPLOYEE_CSV_HEADERS)),
 )
 @read_csv_arg(headers=HIGH_RISK_EMPLOYEE_CSV_HEADERS)
@@ -113,7 +113,7 @@ def bulk_add(state, csv_rows):
 
 @bulk.command(
     name="remove",
-    help="Bulk remove users from the high-risk-employee detection list using a newline separated "
+    help="Bulk remove users from the high risk employees detection list using a line-separated "
     "file of usernames.",
 )
 @read_flat_file_arg
@@ -133,7 +133,7 @@ def bulk_remove(state, file_rows):
 
 @bulk.command(
     name="add-risk-tags",
-    help="Adds risk tags to users in bulk using a csv file with format: {}".format(
+    help="Adds risk tags to users in bulk using a CSV file with format: {}".format(
         ",".join(RISK_TAG_CSV_HEADERS)
     ),
 )
@@ -152,7 +152,7 @@ def bulk_add_risk_tags(state, csv_rows):
 
 @bulk.command(
     name="remove-risk-tags",
-    help="Removes risk tags from users in bulk using a csv file with format: {}".format(
+    help="Removes risk tags from users in bulk using a CSV file with format: {}".format(
         ",".join(RISK_TAG_CSV_HEADERS)
     ),
 )

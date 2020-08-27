@@ -14,6 +14,7 @@ from code42cli import PRODUCT_NAME
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.main import cli
 
+
 BEGIN_TIMESTAMP = 1577858400.0
 END_TIMESTAMP = 1580450400.0
 CURSOR_TIMESTAMP = 1579500000.0
@@ -77,14 +78,23 @@ def begin_option(mocker):
 ADVANCED_QUERY_JSON = '{"some": "complex json"}'
 
 
-def test_search_when_is_advanced_query_uses_only_the_extract_advanced_method(
-    runner, cli_state, file_event_extractor
-):
-    runner.invoke(
-        cli,
+@pytest.mark.parametrize(
+    "command",
+    (
         ["security-data", "search", "--advanced-query", ADVANCED_QUERY_JSON],
-        obj=cli_state,
-    )
+        [
+            "security-data",
+            "send-to",
+            "0.0.0.0",
+            "--advanced-query",
+            ADVANCED_QUERY_JSON,
+        ],
+    ),
+)
+def test_search_when_is_advanced_query_uses_only_the_extract_advanced_method(
+    runner, cli_state, file_event_extractor, command
+):
+    runner.invoke(cli, command, obj=cli_state)
     file_event_extractor.extract_advanced.assert_called_once_with(
         '{"some": "complex json"}'
     )
@@ -92,10 +102,17 @@ def test_search_when_is_advanced_query_uses_only_the_extract_advanced_method(
     assert file_event_extractor.extract_advanced.call_count == 1
 
 
+@pytest.mark.parametrize(
+    "command",
+    (
+        ["security-data", "search", "--begin", "1d"],
+        ["security-data", "send-to", "0.0.0.0", "--begin", "1d"],
+    ),
+)
 def test_search_when_is_not_advanced_query_uses_only_the_extract_advanced_method(
-    runner, cli_state, file_event_extractor
+    runner, cli_state, file_event_extractor, command
 ):
-    runner.invoke(cli, ["security-data", "search", "--begin", "1d"], obj=cli_state)
+    runner.invoke(cli, command, obj=cli_state)
     assert file_event_extractor.extract_advanced.call_count == 0
     assert file_event_extractor.extract.call_count == 1
 
@@ -162,15 +179,35 @@ def test_search_with_saved_search_and_incompatible_argument_errors(
     assert "{} can't be used with: --saved-search".format(arg[0]) in result.output
 
 
-def test_search_when_given_begin_and_end_dates_uses_expected_query(
-    runner, cli_state, file_event_extractor
+@pytest.mark.parametrize(
+    "command",
+    (
+        [
+            "security-data",
+            "search",
+            "--begin",
+            get_test_date_str(days_ago=89),
+            "--end",
+            get_test_date_str(days_ago=1),
+        ],
+        [
+            "security-data",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            get_test_date_str(days_ago=89),
+            "--end",
+            get_test_date_str(days_ago=1),
+        ],
+    ),
+)
+def test_command_when_given_begin_and_end_dates_uses_expected_query(
+    runner, cli_state, file_event_extractor, command
 ):
     begin_date = get_test_date_str(days_ago=89)
     end_date = get_test_date_str(days_ago=1)
     runner.invoke(
-        cli,
-        ["security-data", "search", "--begin", begin_date, "--end", end_date],
-        obj=cli_state,
+        cli, command, obj=cli_state,
     )
     filters = file_event_extractor.extract.call_args[0][1]
     actual_begin = get_filter_value_from_json(filters, filter_index=0)
@@ -250,13 +287,28 @@ def test_search_when_given_end_date_and_time_uses_expected_query(
     assert actual == expected
 
 
-def test_search_when_given_begin_date_more_than_ninety_days_back_errors(
-    runner, cli_state,
+@pytest.mark.parametrize(
+    "command",
+    (
+        [
+            "security-data",
+            "search",
+            "--begin",
+            get_test_date_str(days_ago=91) + " 12:51:00",
+        ],
+        [
+            "security-data",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            get_test_date_str(days_ago=91) + " 12:51:00",
+        ],
+    ),
+)
+def test_command_when_given_begin_date_more_than_ninety_days_back_errors(
+    runner, cli_state, command
 ):
-    begin_date = get_test_date_str(days_ago=91) + " 12:51:00"
-    result = runner.invoke(
-        cli, ["security-data", "search", "--begin", begin_date], obj=cli_state
-    )
+    result = runner.invoke(cli, command, obj=cli_state)
     assert result.exit_code == 2
     assert "must be within 90 days" in result.output
 
@@ -303,7 +355,7 @@ def test_search_when_end_date_is_before_begin_date_causes_exit(runner, cli_state
 
 
 def test_search_with_only_begin_calls_extract_with_expected_args(
-    runner, cli_state, file_event_extractor, stdout_logger, begin_option
+    runner, cli_state, file_event_extractor, begin_option
 ):
     result = runner.invoke(
         cli, ["security-data", "search", "--begin", "1h"], obj=cli_state
@@ -329,19 +381,30 @@ def test_search_with_use_checkpoint_and_without_begin_and_without_checkpoint_cau
     )
 
 
-def test_search_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_extract_with_begin_date(
+@pytest.mark.parametrize(
+    "command",
+    (
+        ["security-data", "search", "--use-checkpoint", "test", "--begin", "1h"],
+        [
+            "security-data",
+            "send-to",
+            "0.0.0.0",
+            "--use-checkpoint",
+            "test",
+            "--begin",
+            "1h",
+        ],
+    ),
+)
+def test_command_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_extract_with_begin_date(
     runner,
     cli_state,
     file_event_extractor,
     begin_option,
     file_event_cursor_without_checkpoint,
-    stdout_logger,
+    command,
 ):
-    result = runner.invoke(
-        cli,
-        ["security-data", "search", "--use-checkpoint", "test", "--begin", "1h"],
-        obj=cli_state,
-    )
+    result = runner.invoke(cli, command, obj=cli_state,)
     assert result.exit_code == 0
     assert len(file_event_extractor.extract.call_args[0]) == 2
     assert begin_option.expected_timestamp in str(
@@ -349,18 +412,25 @@ def test_search_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_
     )
 
 
-def test_search_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_calls_extract_with_checkpoint_and_ignores_begin_arg(
-    runner,
-    cli_state,
-    file_event_extractor,
-    file_event_cursor_with_checkpoint,
-    stdout_logger,
-):
-    result = runner.invoke(
-        cli,
+@pytest.mark.parametrize(
+    "command",
+    (
         ["security-data", "search", "--use-checkpoint", "test", "--begin", "1h"],
-        obj=cli_state,
-    )
+        [
+            "security-data",
+            "send-to",
+            "0.0.0.0",
+            "--use-checkpoint",
+            "test",
+            "--begin",
+            "1h",
+        ],
+    ),
+)
+def test_command_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_calls_extract_with_checkpoint_and_ignores_begin_arg(
+    runner, cli_state, file_event_extractor, file_event_cursor_with_checkpoint, command,
+):
+    result = runner.invoke(cli, command, obj=cli_state,)
     assert result.exit_code == 0
     assert len(file_event_extractor.extract.call_args[0]) == 1
     assert (
@@ -371,159 +441,243 @@ def test_search_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_ca
     )
 
 
-def test_search_when_given_invalid_exposure_type_causes_exit(runner, cli_state):
-    result = runner.invoke(
-        cli,
+@pytest.mark.parametrize(
+    "command",
+    (
         ["security-data", "search", "--begin", "1d", "-t", "NotValid"],
-        obj=cli_state,
-    )
+        ["security-data", "send-to", "0.0.0.0", "--begin", "1d", "-t", "NotValid"],
+    ),
+)
+def test_command_when_given_invalid_exposure_type_causes_exit(
+    runner, cli_state, command
+):
+    result = runner.invoke(cli, command, obj=cli_state,)
     assert result.exit_code == 2
     assert "invalid choice: NotValid" in result.output
 
 
-def test_search_when_given_username_uses_username_filter(
-    runner, cli_state, file_event_extractor
+@pytest.mark.parametrize(
+    "command",
+    (
+        ["security-data", "search", "--begin", "1h", "--c42-username"],
+        ["security-data", "send-to", "0.0.0.0", "--begin", "1h", "--c42-username"],
+    ),
+)
+def test_command_when_given_username_uses_username_filter(
+    runner, cli_state, file_event_extractor, command
 ):
     c42_username = "test@code42.com"
+    command.append(c42_username)
     runner.invoke(
-        cli,
-        ["security-data", "search", "--begin", "1h", "--c42-username", c42_username],
-        obj=cli_state,
+        cli, command, obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
     assert str(f.DeviceUsername.is_in([c42_username])) in filter_strings
 
 
-def test_search_when_given_actor_is_uses_username_filter(
-    runner, cli_state, file_event_extractor
+@pytest.mark.parametrize(
+    "command",
+    (
+        ["security-data", "search", "--begin", "1h", "--actor"],
+        ["security-data", "send-to", "0.0.0.0", "--begin", "1h", "--actor"],
+    ),
+)
+def test_command_when_given_actor_is_uses_username_filter(
+    runner, cli_state, file_event_extractor, command
 ):
     actor_name = "test.testerson"
+    command.append(actor_name)
     runner.invoke(
-        cli,
-        ["security-data", "search", "--begin", "1h", "--actor", actor_name],
-        obj=cli_state,
+        cli, command, obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
     assert str(f.Actor.is_in([actor_name])) in filter_strings
 
 
-def test_search_when_given_md5_uses_md5_filter(runner, cli_state, file_event_extractor):
+@pytest.mark.parametrize(
+    "command",
+    (
+        ["security-data", "search", "--begin", "1h", "--md5"],
+        ["security-data", "send-to", "0.0.0.0", "--begin", "1h", "--md5"],
+    ),
+)
+def test_command_when_given_md5_uses_md5_filter(
+    runner, cli_state, file_event_extractor, command
+):
     md5 = "abcd12345"
-    runner.invoke(
-        cli, ["security-data", "search", "--begin", "1h", "--md5", md5], obj=cli_state
-    )
+    command.append(md5)
+    runner.invoke(cli, command, obj=cli_state)
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
     assert str(f.MD5.is_in([md5])) in filter_strings
 
 
-def test_search_when_given_sha256_uses_sha256_filter(
-    runner, cli_state, file_event_extractor
+@pytest.mark.parametrize(
+    "command",
+    (
+        ["security-data", "search", "--begin", "1h", "--sha256"],
+        ["security-data", "send-to", "0.0.0.0", "--begin", "1h", "--sha256"],
+    ),
+)
+def test_command_when_given_sha256_uses_sha256_filter(
+    runner, cli_state, file_event_extractor, command
 ):
     sha_256 = "abcd12345"
+    command.append(sha_256)
     runner.invoke(
-        cli,
-        ["security-data", "search", "--begin", "1h", "--sha256", sha_256],
-        obj=cli_state,
+        cli, command, obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
     assert str(f.SHA256.is_in([sha_256])) in filter_strings
 
 
-def test_search_when_given_source_uses_source_filter(
-    runner, cli_state, file_event_extractor
+@pytest.mark.parametrize(
+    "command",
+    (
+        ["security-data", "search", "--begin", "1h", "--source"],
+        ["security-data", "send-to", "0.0.0.0", "--begin", "1h", "--source"],
+    ),
+)
+def test_command_when_given_source_uses_source_filter(
+    runner, cli_state, file_event_extractor, command
 ):
     source = "Gmail"
-    runner.invoke(
-        cli,
-        ["security-data", "search", "--begin", "1h", "--source", source],
-        obj=cli_state,
-    )
+    command.append(source)
+    runner.invoke(cli, command, obj=cli_state)
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
     assert str(f.Source.is_in([source])) in filter_strings
 
 
-def test_search_when_given_file_name_uses_file_name_filter(
-    runner, cli_state, file_event_extractor
+@pytest.mark.parametrize(
+    "command",
+    (
+        ["security-data", "search", "--begin", "1h", "--file-name"],
+        ["security-data", "send-to", "0.0.0.0", "--begin", "1h", "--file-name"],
+    ),
+)
+def test_command_when_given_file_name_uses_file_name_filter(
+    runner, cli_state, file_event_extractor, command
 ):
     filename = "test.txt"
+    command.append(filename)
     runner.invoke(
-        cli,
-        ["security-data", "search", "--begin", "1h", "--file-name", filename],
-        obj=cli_state,
+        cli, command, obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
     assert str(f.FileName.is_in([filename])) in filter_strings
 
 
-def test_search_when_given_file_path_uses_file_path_filter(
-    runner, cli_state, file_event_extractor
+@pytest.mark.parametrize(
+    "command",
+    (
+        ["security-data", "search", "--begin", "1h", "--file-path"],
+        ["security-data", "send-to", "0.0.0.0", "--begin", "1h", "--file-path"],
+    ),
+)
+def test_command_when_given_file_path_uses_file_path_filter(
+    runner, cli_state, file_event_extractor, command
 ):
     filepath = "C:\\Program Files"
+    command.append(filepath)
     runner.invoke(
-        cli,
-        ["security-data", "search", "--begin", "1h", "--file-path", filepath],
-        obj=cli_state,
+        cli, command, obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
     assert str(f.FilePath.is_in([filepath])) in filter_strings
 
 
+@pytest.mark.parametrize(
+    "command",
+    (
+        ["security-data", "search", "--begin", "1h", "--process-owner"],
+        ["security-data", "send-to", "0.0.0.0", "--begin", "1h", "--process-owner"],
+    ),
+)
 def test_when_given_process_owner_uses_process_owner_filter(
-    runner, cli_state, file_event_extractor
+    runner, cli_state, file_event_extractor, command
 ):
     process_owner = "root"
+    command.append(process_owner)
     runner.invoke(
-        cli,
-        ["security-data", "search", "--begin", "1h", "--process-owner", process_owner],
-        obj=cli_state,
+        cli, command, obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
     assert str(f.ProcessOwner.is_in([process_owner])) in filter_strings
 
 
+@pytest.mark.parametrize(
+    "command",
+    (
+        ["security-data", "search", "--begin", "1h", "--tab-url"],
+        ["security-data", "send-to", "0.0.0.0", "--begin", "1h", "--tab-url"],
+    ),
+)
 def test_when_given_tab_url_uses_process_tab_url_filter(
-    runner, cli_state, file_event_extractor
+    runner, cli_state, file_event_extractor, command
 ):
     tab_url = "https://example.com"
+    command.append(tab_url)
     runner.invoke(
-        cli,
-        ["security-data", "search", "--begin", "1h", "--tab-url", tab_url],
-        obj=cli_state,
+        cli, command, obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
     assert str(f.TabURL.is_in([tab_url])) in filter_strings
 
 
+@pytest.mark.parametrize(
+    "command",
+    (
+        ["security-data", "search", "--begin", "1h", "--type"],
+        ["security-data", "send-to", "0.0.0.0", "--begin", "1h", "--type"],
+    ),
+)
 def test_when_given_exposure_types_uses_exposure_type_is_in_filter(
-    runner, cli_state, file_event_extractor
+    runner, cli_state, file_event_extractor, command
 ):
     exposure_type = "SharedViaLink"
+    command.append(exposure_type)
     runner.invoke(
-        cli,
-        ["security-data", "search", "--begin", "1h", "--type", exposure_type],
-        obj=cli_state,
+        cli, command, obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
     assert str(f.ExposureType.is_in([exposure_type])) in filter_strings
 
 
+@pytest.mark.parametrize(
+    "command",
+    (
+        ["security-data", "search", "--begin", "1h", "--include-non-exposure"],
+        [
+            "security-data",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1h",
+            "--include-non-exposure",
+        ],
+    ),
+)
 def test_when_given_include_non_exposure_does_not_include_exposure_type_exists(
-    runner, cli_state, file_event_extractor
+    runner, cli_state, file_event_extractor, command
 ):
     runner.invoke(
-        cli,
-        ["security-data", "search", "--begin", "1h", "--include-non-exposure"],
-        obj=cli_state,
+        cli, command, obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
     assert str(f.ExposureType.exists()) not in filter_strings
 
 
+@pytest.mark.parametrize(
+    "command",
+    (
+        ["security-data", "search", "--begin", "1h"],
+        ["security-data", "send-to", "0.0.0.0", "--begin", "1h"],
+    ),
+)
 def test_when_not_given_include_non_exposure_includes_exposure_type_exists(
-    runner, cli_state, file_event_extractor
+    runner, cli_state, file_event_extractor, command
 ):
     runner.invoke(
-        cli, ["security-data", "search", "--begin", "1h"], obj=cli_state,
+        cli, command, obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
     assert str(f.ExposureType.exists()) in filter_strings
@@ -711,10 +865,15 @@ def test_saved_search_list_with_format_option_returns_csv_formatted_response(
 ):
     cli_state.sdk.securitydata.savedsearches.get.return_value = TEST_LIST_RESPONSE
     result = runner.invoke(
-        cli, ["security-data", "saved-search", "list", "-f", "csv"], obj=cli_state
+        cli, ["security-data", "saved-search", "list", "-f", "CSV"], obj=cli_state
     )
-    assert "Name,Id" in result.output
-    assert "test-events,a083f08d-8f33-4cbd-81c4-8d1820b61185" in result.output
+    assert "id" in result.output
+    assert "name" in result.output
+    assert "notes" in result.output
+
+    assert "083f08d-8f33-4cbd-81c4-8d1820b61185" in result.output
+    assert "test-events" in result.output
+    assert "py42 is here" in result.output
 
 
 def test_saved_search_list_with_format_option_does_not_return_when_response_is_empty(
@@ -725,3 +884,34 @@ def test_saved_search_list_with_format_option_does_not_return_when_response_is_e
         cli, ["security-data", "saved-search", "list", "-f", "csv"], obj=cli_state
     )
     assert "Name,Id" not in result.output
+
+
+def test_send_to_when_is_advanced_query_uses_only_the_extract_advanced_method(
+    runner, cli_state, file_event_extractor, event_extractor_logger
+):
+    runner.invoke(
+        cli,
+        [
+            "security-data",
+            "send-to",
+            "localhost",
+            "--advanced-query",
+            ADVANCED_QUERY_JSON,
+        ],
+        obj=cli_state,
+    )
+    file_event_extractor.extract_advanced.assert_called_once_with(
+        '{"some": "complex json"}'
+    )
+    assert file_event_extractor.extract.call_count == 0
+    assert file_event_extractor.extract_advanced.call_count == 1
+
+
+def test_send_to_when_is_not_advanced_query_uses_only_the_extract_advanced_method(
+    runner, cli_state, file_event_extractor
+):
+    runner.invoke(
+        cli, ["security-data", "send-to", "localhost", "--begin", "1d"], obj=cli_state
+    )
+    assert file_event_extractor.extract_advanced.call_count == 0
+    assert file_event_extractor.extract.call_count == 1

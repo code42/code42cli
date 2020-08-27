@@ -1,25 +1,35 @@
+from _collections import OrderedDict
+
 import click
 import py42.sdk.queries.alerts.filters as f
 from c42eventextractor.extractors import AlertExtractor
-from click import echo
 
 import code42cli.cmds.search.enums as enum
 import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 import code42cli.options as opt
-from code42cli.cmds.search import logger_factory
 from code42cli.cmds.search.cursor_store import AlertCursorStore
+from code42cli.cmds.search.extraction import handle_no_events
+from code42cli.logger import get_logger_for_server
+from code42cli.options import format_option
+from code42cli.options import server_options
+from code42cli.output_formats import JsonOutputFormat
+from code42cli.output_formats import OutputFormatter
+
+
+SEARCH_DEFAULT_HEADER = OrderedDict()
+SEARCH_DEFAULT_HEADER["name"] = "RuleName"
+SEARCH_DEFAULT_HEADER["actor"] = "Username"
+SEARCH_DEFAULT_HEADER["createdAt"] = "ObservedDate"
+SEARCH_DEFAULT_HEADER["state"] = "Status"
+SEARCH_DEFAULT_HEADER["severity"] = "Severity"
+SEARCH_DEFAULT_HEADER["description"] = "Description"
+
 
 search_options = searchopt.create_search_options("alerts")
 
-format_option = click.option(
-    "-f",
-    "--format",
-    type=click.Choice(enum.AlertOutputFormat()),
-    default=enum.AlertOutputFormat.JSON,
-    help="The format used for outputting alerts.",
-)
+
 severity_option = click.option(
     "--severity",
     multiple=True,
@@ -34,7 +44,7 @@ state_option = click.option(
     type=click.Choice(enum.AlertState()),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     callback=searchopt.is_in_filter(f.AlertState),
-    help="Filter alerts by state. Defaults to returning all states.",
+    help="Filter alerts by status. Defaults to returning all statuses.",
 )
 actor_option = click.option(
     "--actor",
@@ -42,14 +52,14 @@ actor_option = click.option(
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     callback=searchopt.is_in_filter(f.Actor),
     help="Filter alerts by including the given actor(s) who triggered the alert. "
-    "Args must match actor username exactly.",
+    "Arguments must match the actor's cloud alias exactly.",
 )
 actor_contains_option = click.option(
     "--actor-contains",
     multiple=True,
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     callback=searchopt.contains_filter(f.Actor),
-    help="Filter alerts by including actor(s) whose username contains the given string.",
+    help="Filter alerts by including actor(s) whose cloud alias contains the given string.",
 )
 exclude_actor_option = click.option(
     "--exclude-actor",
@@ -57,14 +67,14 @@ exclude_actor_option = click.option(
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     callback=searchopt.not_in_filter(f.Actor),
     help="Filter alerts by excluding the given actor(s) who triggered the alert. "
-    "Args must match actor username exactly.",
+    "Arguments must match actor's cloud alias exactly.",
 )
 exclude_actor_contains_option = click.option(
     "--exclude-actor-contains",
     multiple=True,
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     callback=searchopt.not_contains_filter(f.Actor),
-    help="Filter alerts by excluding actor(s) whose username contains the given string.",
+    help="Filter alerts by excluding actor(s) whose cloud alias contains the given string.",
 )
 rule_name_option = click.option(
     "--rule-name",
@@ -117,6 +127,14 @@ description_option = click.option(
     help="Filter alerts by description. Does fuzzy search by default.",
 )
 
+send_to_format_options = click.option(
+    "-f",
+    "--format",
+    type=click.Choice(JsonOutputFormat(), case_sensitive=False),
+    help="The output format of the result. Defaults to json format.",
+    default=JsonOutputFormat.JSON,
+)
+
 
 def alert_options(f):
     f = actor_option(f)
@@ -132,7 +150,6 @@ def alert_options(f):
     f = description_option(f)
     f = severity_option(f)
     f = state_option(f)
-    f = format_option(f)
     return f
 
 
@@ -148,26 +165,13 @@ def alerts(state):
 @click.argument("checkpoint-name")
 @opt.sdk_options()
 def clear_checkpoint(state, checkpoint_name):
-    """Remove the saved alert checkpoint from '--use-checkpoint/-c' mode."""
+    """Remove the saved alert checkpoint from `--use-checkpoint/-c` mode."""
     _get_alert_cursor_store(state.profile.name).delete(checkpoint_name)
 
 
-@alerts.command()
-@alert_options
-@search_options
-@click.option(
-    "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
-)
-@opt.sdk_options()
-def search(
-    cli_state, format, begin, end, advanced_query, use_checkpoint, or_query, **kwargs
+def _call_extractor(
+    cli_state, handlers, begin, end, or_query, advanced_query, **kwargs
 ):
-    """Search for alerts."""
-    output_logger = logger_factory.get_logger_for_stdout(format)
-    cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
-    handlers = ext.create_handlers(
-        cli_state.sdk, AlertExtractor, output_logger, cursor, use_checkpoint
-    )
     extractor = _get_alert_extractor(cli_state.sdk, handlers)
     extractor.use_or_query = or_query
     if advanced_query:
@@ -178,8 +182,86 @@ def search(
                 ext.create_time_range_filter(f.DateObserved, begin, end)
             )
         extractor.extract(*cli_state.search_filters)
-    if handlers.TOTAL_EVENTS == 0 and not errors.ERRORED:
-        echo("No results found.")
+
+
+@alerts.command()
+@alert_options
+@search_options
+@click.option(
+    "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
+)
+@opt.sdk_options()
+@click.option(
+    "--include-all",
+    default=False,
+    is_flag=True,
+    help="Display simple properties of the primary level of the nested response.",
+)
+@format_option
+def search(
+    cli_state,
+    format,
+    begin,
+    end,
+    advanced_query,
+    use_checkpoint,
+    or_query,
+    include_all,
+    **kwargs
+):
+    """Search for alerts."""
+    output_header = ext.try_get_default_header(
+        include_all, SEARCH_DEFAULT_HEADER, format
+    )
+    formatter = OutputFormatter(format, output_header)
+    cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
+    handlers = ext.create_handlers(
+        cli_state.sdk,
+        AlertExtractor,
+        cursor,
+        use_checkpoint,
+        formatter=formatter,
+        force_pager=include_all,
+    )
+    _call_extractor(cli_state, handlers, begin, end, or_query, advanced_query, **kwargs)
+    handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
+
+
+@alerts.command()
+@alert_options
+@search_options
+@click.option(
+    "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
+)
+@opt.sdk_options()
+@server_options
+@click.option(
+    "--include-all",
+    default=False,
+    is_flag=True,
+    help="Display simple properties of the primary level of the nested response.",
+)
+@send_to_format_options
+def send_to(
+    cli_state,
+    format,
+    hostname,
+    protocol,
+    begin,
+    end,
+    advanced_query,
+    use_checkpoint,
+    or_query,
+    **kwargs
+):
+    """Send alerts to the given server address."""
+    logger = get_logger_for_server(hostname, protocol, format)
+    cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
+    handlers = ext.create_send_to_handlers(
+        cli_state.sdk, AlertExtractor, cursor, use_checkpoint, logger,
+    )
+    _call_extractor(cli_state, handlers, begin, end, or_query, advanced_query, **kwargs)
+    handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
 
 
 def _get_alert_extractor(sdk, handlers):

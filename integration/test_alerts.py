@@ -24,9 +24,9 @@ def _validate_field_value(field, value, response):
         ("{} --state OPEN".format(ALERT_COMMAND), "state", "OPEN"),
         ("{} --state RESOLVED".format(ALERT_COMMAND), "state", "RESOLVED"),
         (
-            "{} --actor spatel@code42.com".format(ALERT_COMMAND),
+            "{} --actor user@code42.com".format(ALERT_COMMAND),
             "actor",
-            "spatel@code42.com",
+            "user@code42.com",
         ),
         (
             "{} --rule-name 'File Upload Alert'".format(ALERT_COMMAND),
