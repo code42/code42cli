@@ -111,7 +111,7 @@ class ExceptionHandlingGroup(click.Group):
             Py42InvalidRuleOperationError,
         ) as err:
             self.logger.log_error(err)
-            raise LoggedCLIError(str(err))
+            raise Code42CLIError(str(err))
 
         except Py42ForbiddenError as err:
             self.logger.log_verbose_error(self._original_args, err.response.request)
