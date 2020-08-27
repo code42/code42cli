@@ -82,19 +82,6 @@ def test_add_user_adds_user_list_to_alert_rules(runner, cli_state):
     )
 
 
-def test_add_user_when_non_existent_alert_prints_no_rules_message(runner, cli_state):
-    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = (
-        TEST_EMPTY_RULE_RESPONSE
-    )
-    result = runner.invoke(
-        cli,
-        ["alert-rules", "add-user", "--rule-id", TEST_RULE_ID, "-u", TEST_USERNAME],
-        obj=cli_state,
-    )
-    msg = "No alert rules with RuleId {} found".format(TEST_RULE_ID)
-    assert msg in result.output
-
-
 def test_add_user_when_returns_invalid_rule_type_error_and_system_rule_exits(
     mocker, runner, cli_state
 ):
@@ -143,19 +130,6 @@ def test_remove_user_removes_user_list_from_alert_rules(runner, cli_state):
     cli_state.sdk.alerts.rules.remove_user.assert_called_once_with(
         TEST_RULE_ID, TEST_USER_ID
     )
-
-
-def test_remove_user_when_non_existent_alert_prints_no_rules_message(runner, cli_state):
-    cli_state.sdk.alerts.rules.get_by_observer_id.return_value = (
-        TEST_EMPTY_RULE_RESPONSE
-    )
-    result = runner.invoke(
-        cli,
-        ["alert-rules", "remove-user", "--rule-id", TEST_RULE_ID, "-u", TEST_USERNAME],
-        obj=cli_state,
-    )
-    msg = "No alert rules with RuleId {} found".format(TEST_RULE_ID)
-    assert msg in result.output
 
 
 def test_remove_user_when_raise_invalid_rule_type_error_and_system_rule_raises_InvalidRuleTypeError(

@@ -149,13 +149,11 @@ def remove(state, csv_rows):
 
 def _add_user(sdk, rule_id, username):
     user_id = get_user_id(sdk, username)
-    _get_rule_metadata(sdk, rule_id)  # Verifies rule exists
     sdk.alerts.rules.add_user(rule_id, user_id)
 
 
 def _remove_user(sdk, rule_id, username):
     user_id = get_user_id(sdk, username)
-    _get_rule_metadata(sdk, rule_id)  # Verifies rule exists
     sdk.alerts.rules.remove_user(rule_id, user_id)
 
 
