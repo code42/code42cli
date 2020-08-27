@@ -1,4 +1,6 @@
 from py42.exceptions import Py42UserAlreadyAddedError
+from requests import HTTPError
+from requests import Response
 from tests.cmds.conftest import thread_safe_side_effect
 from tests.conftest import TEST_ID
 
@@ -80,10 +82,14 @@ def test_add_high_risk_employee_when_user_does_not_exist_exits_with_correct_mess
 
 
 def test_add_high_risk_employee_when_user_already_added_exits_with_correct_message(
-    runner, cli_state_with_user
+    mocker, runner, cli_state_with_user
 ):
     def add_user(user):
-        raise Py42UserAlreadyAddedError(user, "high-risk-employee list")
+        err = mocker.MagicMock(spec=HTTPError)
+        resp = mocker.MagicMock(spec=Response)
+        resp.text = "TEST_ERR"
+        err.response = resp
+        raise Py42UserAlreadyAddedError(err, user, "high-risk-employee list")
 
     cli_state_with_user.sdk.detectionlists.high_risk_employee.add.side_effect = add_user
 
@@ -93,7 +99,6 @@ def test_add_high_risk_employee_when_user_already_added_exits_with_correct_messa
     assert result.exit_code == 1
     assert (
         "User with ID TEST_ID is already on the high-risk-employee list."
-        "'{}' is already on the high risk employees list.".format(_EMPLOYEE)
         in result.output
     )
 

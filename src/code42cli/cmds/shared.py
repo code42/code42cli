@@ -1,5 +1,7 @@
 from functools import lru_cache
 
+from code42cli.errors import UserDoesNotExistError
+
 
 @lru_cache(maxsize=None)
 def get_user_id(sdk, username):
@@ -13,4 +15,6 @@ def get_user_id(sdk, username):
          str: The user ID for the user with the given username.
     """
     users = sdk.users.get_by_username(username)["users"]
+    if not users:
+        raise UserDoesNotExistError(username)
     return users[0]["userUid"]

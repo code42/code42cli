@@ -5,9 +5,8 @@ import click
 from click._compat import get_text_stderr
 from py42.exceptions import Py42ForbiddenError
 from py42.exceptions import Py42HTTPError
-from py42.exceptions import Py42InvalidRuleTypeError
+from py42.exceptions import Py42InvalidRuleOperationError
 from py42.exceptions import Py42UserAlreadyAddedError
-from py42.exceptions import Py42UserDoesNotExistError
 
 from code42cli.logger import get_main_cli_logger
 from code42cli.logger import get_view_error_details_message
@@ -55,10 +54,19 @@ class LoggedCLIError(Code42CLIError):
         )
 
 
+class UserDoesNotExistError(Code42CLIError):
+    """An error to represent a username that is not in our system. The CLI shows this error when
+    the user tries to add or remove a user that does not exist. This error is not shown during
+    bulk add or remove."""
+
+    def __init__(self, username):
+        super().__init__("User '{}' does not exist.".format(username))
+
+
 class UserNotInLegalHoldError(Code42CLIError):
     def __init__(self, username, matter_id):
         super().__init__(
-            "User '{}' is not an active member of legal hold matter '{}'".format(
+            "User '{}' is not an active member of legal hold matter '{}'.".format(
                 username, matter_id
             )
         )
@@ -98,9 +106,9 @@ class ExceptionHandlingGroup(click.Group):
             raise
 
         except (
-            Py42UserDoesNotExistError,
+            UserDoesNotExistError,
             Py42UserAlreadyAddedError,
-            Py42InvalidRuleTypeError,
+            Py42InvalidRuleOperationError,
         ) as err:
             self.logger.log_error(err)
             raise LoggedCLIError(str(err))

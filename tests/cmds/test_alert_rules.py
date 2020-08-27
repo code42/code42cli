@@ -1,7 +1,9 @@
 import logging
 
 import pytest
-from py42.exceptions import Py42InvalidRuleTypeError
+from py42.exceptions import Py42InvalidRuleOperationError
+from requests import HTTPError
+from requests import Response
 
 from code42cli.main import cli
 
@@ -40,8 +42,15 @@ TEST_GET_ALL_RESPONSE_FILE_TYPE_MISMATCH = {
 }
 
 
-def invalid_rule_type_side_effect(*args, **kwargs):
-    raise Py42InvalidRuleTypeError(TEST_RULE_ID, TEST_SOURCE)
+def create_invalid_rule_type_side_effect(mocker):
+    def side_effect(*args, **kwargs):
+        err = mocker.MagicMock(spec=HTTPError)
+        resp = mocker.MagicMock(spec=Response)
+        resp.text = "TEST_ERR"
+        err.response = resp
+        raise Py42InvalidRuleOperationError(err, TEST_RULE_ID, TEST_SOURCE)
+
+    return side_effect
 
 
 @pytest.fixture
@@ -89,9 +98,11 @@ def test_add_user_when_non_existent_alert_prints_no_rules_message(runner, cli_st
 
 
 def test_add_user_when_returns_invalid_rule_type_error_and_system_rule_exits(
-    runner, cli_state
+    mocker, runner, cli_state
 ):
-    cli_state.sdk.alerts.rules.add_user.side_effect = invalid_rule_type_side_effect
+    cli_state.sdk.alerts.rules.add_user.side_effect = create_invalid_rule_type_side_effect(
+        mocker
+    )
     result = runner.invoke(
         cli,
         ["alert-rules", "add-user", "--rule-id", TEST_RULE_ID, "-u", TEST_USERNAME],
@@ -105,9 +116,11 @@ def test_add_user_when_returns_invalid_rule_type_error_and_system_rule_exits(
 
 
 def test_add_user_when_raises_invalid_rules_type_error_shows_correct_message(
-    runner, cli_state, caplog
+    mocker, runner, cli_state, caplog
 ):
-    cli_state.sdk.alerts.rules.add_user.side_effect = invalid_rule_type_side_effect
+    cli_state.sdk.alerts.rules.add_user.side_effect = create_invalid_rule_type_side_effect(
+        mocker
+    )
     with caplog.at_level(logging.ERROR):
         result = runner.invoke(
             cli,
@@ -149,9 +162,11 @@ def test_remove_user_when_non_existent_alert_prints_no_rules_message(runner, cli
 
 
 def test_remove_user_when_raise_invalid_rule_type_error_and_system_rule_raises_InvalidRuleTypeError(
-    runner, cli_state
+    mocker, runner, cli_state
 ):
-    cli_state.sdk.alerts.rules.remove_user.side_effect = invalid_rule_type_side_effect
+    cli_state.sdk.alerts.rules.remove_user.side_effect = create_invalid_rule_type_side_effect(
+        mocker
+    )
     result = runner.invoke(
         cli,
         ["alert-rules", "remove-user", "--rule-id", TEST_RULE_ID, "-u", TEST_USERNAME],
@@ -165,9 +180,11 @@ def test_remove_user_when_raise_invalid_rule_type_error_and_system_rule_raises_I
 
 
 def test_remove_user_when_raises_invalid_rule_type_side_effect_and_not_system_rule_raises_Py42InternalServerError(
-    runner, cli_state, caplog
+    mocker, runner, cli_state, caplog
 ):
-    cli_state.sdk.alerts.rules.remove_user.side_effect = invalid_rule_type_side_effect
+    cli_state.sdk.alerts.rules.remove_user.side_effect = create_invalid_rule_type_side_effect(
+        mocker
+    )
     with caplog.at_level(logging.ERROR):
         result = runner.invoke(
             cli,
