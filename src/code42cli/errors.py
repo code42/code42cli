@@ -6,6 +6,7 @@ from click._compat import get_text_stderr
 from py42.exceptions import Py42ForbiddenError
 from py42.exceptions import Py42HTTPError
 from py42.exceptions import Py42InvalidRuleOperationError
+from py42.exceptions import Py42LegalHoldNotFoundOrPermissionDeniedError
 from py42.exceptions import Py42UserAlreadyAddedError
 
 from code42cli.logger import get_main_cli_logger
@@ -109,6 +110,7 @@ class ExceptionHandlingGroup(click.Group):
             UserDoesNotExistError,
             Py42UserAlreadyAddedError,
             Py42InvalidRuleOperationError,
+            Py42LegalHoldNotFoundOrPermissionDeniedError,
         ) as err:
             self.logger.log_error(err)
             raise Code42CLIError(str(err))
