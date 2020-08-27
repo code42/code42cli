@@ -1,10 +1,8 @@
 from tests.cmds.conftest import thread_safe_side_effect
 from tests.conftest import TEST_ID
 
+from .conftest import TEST_EMPLOYEE
 from code42cli.main import cli
-
-
-_EMPLOYEE = "departing employee"
 
 
 def test_add_departing_employee_when_given_cloud_alias_adds_alias(
@@ -13,7 +11,7 @@ def test_add_departing_employee_when_given_cloud_alias_adds_alias(
     alias = "departing employee alias"
     runner.invoke(
         cli,
-        ["departing-employee", "add", _EMPLOYEE, "--cloud-alias", alias],
+        ["departing-employee", "add", TEST_EMPLOYEE, "--cloud-alias", alias],
         obj=cli_state_with_user,
     )
     cli_state_with_user.sdk.detectionlists.add_user_cloud_alias.assert_called_once_with(
@@ -27,7 +25,7 @@ def test_add_departing_employee_when_given_notes_updates_notes(
     notes = "is leaving"
     runner.invoke(
         cli,
-        ["departing-employee", "add", _EMPLOYEE, "--notes", notes],
+        ["departing-employee", "add", TEST_EMPLOYEE, "--notes", notes],
         obj=cli_state_with_user,
     )
     cli_state_with_user.sdk.detectionlists.update_user_notes.assert_called_once_with(
@@ -41,7 +39,13 @@ def test_add_departing_employee_adds(
     departure_date = "2020-02-02"
     runner.invoke(
         cli,
-        ["departing-employee", "add", _EMPLOYEE, "--departure-date", departure_date],
+        [
+            "departing-employee",
+            "add",
+            TEST_EMPLOYEE,
+            "--departure-date",
+            departure_date,
+        ],
         obj=cli_state_with_user,
     )
     cli_state_with_user.sdk.detectionlists.departing_employee.add.assert_called_once_with(
@@ -53,42 +57,29 @@ def test_add_departing_employee_when_user_does_not_exist_exits(
     runner, cli_state_without_user
 ):
     result = runner.invoke(
-        cli, ["departing-employee", "add", _EMPLOYEE], obj=cli_state_without_user
+        cli, ["departing-employee", "add", TEST_EMPLOYEE], obj=cli_state_without_user
     )
     assert result.exit_code == 1
-    assert "User '{}' does not exist.".format(_EMPLOYEE) in result.output
+    assert "User '{}' does not exist.".format(TEST_EMPLOYEE) in result.output
 
 
-def test_add_departing_employee_when_user_already_added_raises_UserAlreadyAddedError(
-    runner, cli_state_with_user, bad_request_for_user_already_added
+def test_add_departing_employee_when_user_already_exits_with_correct_message(
+    mocker, runner, cli_state_with_user, user_already_added_error
 ):
-    cli_state_with_user.sdk.detectionlists.departing_employee.add.side_effect = (
-        bad_request_for_user_already_added
-    )
+    def add_user(user):
+        raise user_already_added_error
+
+    cli_state_with_user.sdk.detectionlists.departing_employee.add.side_effect = add_user
     result = runner.invoke(
-        cli, ["departing-employee", "add", _EMPLOYEE], obj=cli_state_with_user
+        cli, ["departing-employee", "add", TEST_EMPLOYEE], obj=cli_state_with_user
     )
     assert result.exit_code == 1
-    assert "'{}' is already on the departing-employee list.".format(_EMPLOYEE)
-
-
-def test_add_departing_employee_when_bad_request_but_not_user_already_added_raises_Py42BadRequestError(
-    runner, cli_state_with_user, generic_bad_request
-):
-    cli_state_with_user.sdk.detectionlists.departing_employee.add.side_effect = (
-        generic_bad_request
-    )
-    result = runner.invoke(
-        cli, ["departing-employee", "add", _EMPLOYEE], obj=cli_state_with_user
-    )
-    assert result.exit_code == 1
-    assert "Problem making request to server." in result.output
-    assert "View details in" in result.output
+    assert "'{}' is already on the departing-employee list.".format(TEST_EMPLOYEE)
 
 
 def test_remove_departing_employee_calls_remove(runner, cli_state_with_user):
     runner.invoke(
-        cli, ["departing-employee", "remove", _EMPLOYEE], obj=cli_state_with_user
+        cli, ["departing-employee", "remove", TEST_EMPLOYEE], obj=cli_state_with_user
     )
     cli_state_with_user.sdk.detectionlists.departing_employee.remove.assert_called_once_with(
         TEST_ID
@@ -99,10 +90,10 @@ def test_remove_departing_employee_when_user_does_not_exist_exits(
     runner, cli_state_without_user
 ):
     result = runner.invoke(
-        cli, ["departing-employee", "remove", _EMPLOYEE], obj=cli_state_without_user
+        cli, ["departing-employee", "remove", TEST_EMPLOYEE], obj=cli_state_without_user
     )
     assert result.exit_code == 1
-    assert "User '{}' does not exist.".format(_EMPLOYEE) in result.output
+    assert "User '{}' does not exist.".format(TEST_EMPLOYEE) in result.output
 
 
 def test_add_bulk_users_calls_expected_py42_methods(runner, mocker, cli_state):
@@ -167,7 +158,13 @@ def test_add_departing_employee_when_invalid_date_validation_raises_error(
     departure_date = "2020-02-30"
     result = runner.invoke(
         cli,
-        ["departing-employee", "add", _EMPLOYEE, "--departure-date", departure_date],
+        [
+            "departing-employee",
+            "add",
+            TEST_EMPLOYEE,
+            "--departure-date",
+            departure_date,
+        ],
         obj=cli_state_with_user,
     )
     assert result.exit_code == 2
@@ -182,7 +179,13 @@ def test_add_departing_employee_when_invalid_date_format_validation_raises_error
     departure_date = "2020-30-01"
     result = runner.invoke(
         cli,
-        ["departing-employee", "add", _EMPLOYEE, "--departure-date", departure_date],
+        [
+            "departing-employee",
+            "add",
+            TEST_EMPLOYEE,
+            "--departure-date",
+            departure_date,
+        ],
         obj=cli_state_with_user,
     )
     assert result.exit_code == 2
