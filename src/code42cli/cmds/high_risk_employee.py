@@ -1,6 +1,6 @@
 import click
-from py42.exceptions import Py42BadRequestError
 from py42.clients.detectionlists import RiskTags
+from py42.exceptions import Py42BadRequestError
 
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
