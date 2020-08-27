@@ -6,6 +6,7 @@ from code42cli.errors import UserDoesNotExistError
 @lru_cache(maxsize=None)
 def get_user_id(sdk, username):
     """Returns the user's UID (referred to by `user_id` in detection lists).
+    `UserDoesNotExistError` if the user doesn't exist in the Code42 server.
 
     Args:
         sdk (py42.sdk.SDKClient): The py42 sdk.
