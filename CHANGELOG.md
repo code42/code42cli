@@ -13,6 +13,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Fixed
 
 - Bug where `code42 legal-hold show` would error when terminal was too small.
+- Fixed bug in `departing_employee bulk add` command that allowed invalid dates to be passed without validation.
 
 ### Changed
 
@@ -29,6 +30,13 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - A profile created with the `--disable-ssl-errors` flag will now correctly not verify SSL certs when making requests. A warning message is printed
     each time the CLI is run with a profile configured this way, as it is not recommended.
 
+- The `path` positional argument for bulk `generate-template` commands is now an option (`--p/-p`).
+- Below `search` subcommands accept argument `--format/-f` to display result in formats `csv`, `table`, `json`, `raw-json`:
+    - Default output format is changed to `table` format from `raw-json`, returns a paginated response.
+    A predefined properties would be displayed by default, pass `--include-all` to view all non-nested top-level properties.
+    - `code42 alerts search`
+    - `code42 security-data search`
+
 ### Added
 
 - `--or-query` option added to `security-data search` and `alerts search` commands which combines the provided filter arguments into an 'OR' query instead of the default 'AND' query.
@@ -40,6 +48,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `code42 legal-hold list`
     - `code42 legal-hold show`
     - `code42 security-data saved-search list`
+- Re-added `send-to` command to `alerts` and `security-data` that accepts a host address and a `--protocol` option with choices UDP or TCP.
 
 ### Removed
 

@@ -1,11 +1,11 @@
-# Ingest file event data into a SIEM tool
+# Ingest file event data or alerts into a SIEM tool
 
-This guide provides instructions on using the CLI to ingest Code42 file event data
+This guide provides instructions on using the CLI to ingest Code42 file event data or alerts
 into a security information and event management (SIEM) tool like LogRhythm, Sumo Logic, or IBM QRadar.
 
 ## Considerations
 
-To ingest file events into a SIEM tool using the Code42 command-line interface, the Code42 user account running the integration
+To ingest file events or alerts into a SIEM tool using the Code42 command-line interface, the Code42 user account running the integration
 must be assigned roles that provide the necessary permissions.
 
 ## Before you begin
@@ -13,45 +13,51 @@ must be assigned roles that provide the necessary permissions.
 First install and configure the Code42 CLI following the instructions in
 [Getting Started](gettingstarted.md).
 
-## Run file event queries
-You can get security events in either a JSON or CEF format for use by your SIEM tool. You can query the data as a
+## Run queries
+You can get file events in either a JSON or CEF format for use by your SIEM tool. Alerts data is available in JSON format. You can query the data as a
 scheduled job or run ad-hoc queries. Learn more about [searching](../commands/securitydata.md) using the CLI.
 
-## Run a query as a scheduled job
+### Run a query as a scheduled job
 
 Use your favorite scheduling tool, such as cron or Windows Task Scheduler, to run a query on a regular basis. Specify
-the profile to use by including `--profile`. An example using `netcat` to forward results to an external syslog server:
-
+the profile to use by including `--profile`. An example using `netcat` to forward only the new file event data since the previous request to an external syslog server:
 ```bash
 code42 security-data search --profile profile1 -c syslog_sender | nc syslog.example.com 514
 ```
 
+An example to send to the syslog server only the new alerts that meet the filter criteria since the previous request:
+```bash
+code42 alerts send-to "https://syslog.example.com:514" -p UDP --profile profile1 --rule-name “Source code exfiltration” --state OPEN -i
+```
+
 As a best practice, use a separate profile when executing a scheduled task. Using separate profiles can help prevent accidental updates to your stored checkpoints, for example, by adding `--use-checkpoint` to adhoc queries.
 
-This query will send to the syslog server only the new security event data since the previous request.
-
-## Run an ad-hoc query
+### Run an ad-hoc query
 
 Examples of ad-hoc queries you can run are as follows.
 
-Print security data since March 5 for a user in raw JSON format:
-
+Print file events since March 5 for a user in raw JSON format:
 ```bash
 code42 security-data search -f RAW-JSON -b 2020-03-05 --c42-username 'sean.cassidy@example.com'
 ```
 
-Print security events since March 5 where a file was synced to a cloud service:
+Print file events since March 5 where a file was synced to a cloud service:
 ```bash
 code42 security-data search -t  CloudStorage -b 2020-03-05
 ```
 
-Write to a text file security events in raw JSON format where a file was read by browser or other app for a user since
+Write to a text file the file events in raw JSON format where a file was read by browser or other app for a user since
 March 5:
 ```bash
 code42 security-data search -f RAW-JSON -b 2020-03-05 -t ApplicationRead --c42-username 'sean.cassidy@example.com' > /Users/sangita.maskey/Downloads/c42cli_output.txt
 ```
 
-Example output for a single exposure event (in default JSON format):
+Print alerts since May 5 where a file's cloud share permissions changed:
+```bash
+code42 alerts print -b 2020-05-05 --rule-type FedCloudSharePermissions
+```
+
+Example output for a single file exposure event (in default JSON format):
 
 ```json
 {
@@ -88,10 +94,42 @@ Example output for a single exposure event (in default JSON format):
     "syncDestination": "GoogleBackupAndSync"
 }
 ```
+Example output for a single alert (in default JSON format):
+
+```json
+{"type$": "ALERT_DETAILS",
+"tenantId": "c4b5e830-824a-40a3-a6d9-345664cfbb33",
+"type": "FED_CLOUD_SHARE_PERMISSIONS",
+"name": "Cloud Share",
+"description": "Alert Rule for data exfiltration via Cloud Share",
+"actor": "leland.stewart@example.com",
+"target": "N/A",
+"severity": "HIGH",
+"ruleId": "408eb1ae-587e-421a-9444-f75d5399eacb",
+"ruleSource": "Alerting",
+"id": "7d936d0d-e783-4b24-817d-f19f625e0965",
+"createdAt": "2020-05-22T09:47:33.8863230Z",
+"state": "OPEN",
+"observations": [{"type$": "OBSERVATION",
+"id": "4bc378e6-bfbd-40f0-9572-6ed605ea9f6c",
+"observedAt": "2020-05-22T09:40:00.0000000Z",
+"type": "FedCloudSharePermissions",
+"data": {"type$": "OBSERVED_CLOUD_SHARE_ACTIVITY",
+"id": "4bc378e6-bfbd-40f0-9572-6ed605ea9f6c",
+"sources": ["GoogleDrive"],
+"exposureTypes": ["PublicLinkShare"],
+"firstActivityAt": "2020-05-22T09:40:00.0000000Z",
+"lastActivityAt": "2020-05-22T09:45:00.0000000Z",
+"fileCount": 1,
+"totalFileSize": 6025,
+"fileCategories": [{"type$": "OBSERVED_FILE_CATEGORY", "category": "Document", "fileCount": 1, "totalFileSize": 6025, "isSignificant": false}],
+"files": [{"type$": "OBSERVED_FILE", "eventId": "1hHdK6Qe6hez4vNCtS-UimDf-sbaFd-D7_3_baac33d0-a1d3-4e0a-9957-25632819eda7", "name": "1590140395_Longfellow_Cloud_Arch_Redesign.drawio", "category": "Document", "size": 6025}],
+"outsideTrustedDomainsEmailsCount": 0, "outsideTrustedDomainsTotalDomainCount": 0, "outsideTrustedDomainsTotalDomainCountTruncated": false}}]}
+```
 
 ## CEF Mapping
 
-The following tables map the data from the Code42 CLI to common event format (CEF).
+The following tables map the file event data from the Code42 CLI to common event format (CEF).
 
 ### Attribute mapping
 
@@ -177,7 +215,7 @@ to one another.
 
 ### Event mapping
 
-See the table below to map exfiltration events to CEF signature IDs.
+See the table below to map file events to CEF signature IDs.
 
 ```eval_rst
 

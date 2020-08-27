@@ -1,6 +1,7 @@
 - [Set up your Development environment](#set-up-your-development-environment)
   - [macOS](#macos)
   - [Windows/Linux](#windowslinux)
+- [Installation](#installation)
 - [Run a full build](#run-a-full-build)
 - [Coding Style](#coding-style)
   - [Style linter](#style-linter)
@@ -68,6 +69,8 @@ To leave the virtual environment, simply use:
 ```bash
 deactivate
 ```
+
+## Installation
 
 Next, with your virtual environment activated, install code42cli and its development dependencies. The `-e` option installs code42cli in
 ["editable mode"](https://pip.pypa.io/en/stable/reference/pip_install/#editable-installs).

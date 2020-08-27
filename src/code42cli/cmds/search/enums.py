@@ -1,21 +1,13 @@
+from code42cli.output_formats import OutputFormat
+
 IS_CHECKPOINT_KEY = "use_checkpoint"
 
 
-class OutputFormat:
+class FileEventsOutputFormat(OutputFormat):
     CEF = "CEF"
-    JSON = "JSON"
-    RAW = "RAW-JSON"
 
     def __iter__(self):
-        return iter([self.CEF, self.JSON, self.RAW])
-
-
-class AlertOutputFormat:
-    JSON = "JSON"
-    RAW = "RAW-JSON"
-
-    def __iter__(self):
-        return iter([self.JSON, self.RAW])
+        return iter([self.TABLE, self.CSV, self.JSON, self.RAW, self.CEF])
 
 
 class ServerProtocol:

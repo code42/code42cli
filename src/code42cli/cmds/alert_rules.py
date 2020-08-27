@@ -12,9 +12,10 @@ from code42cli.cmds.shared import get_user_id
 from code42cli.errors import Code42CLIError
 from code42cli.errors import InvalidRuleTypeError
 from code42cli.file_readers import read_csv_arg
+from code42cli.options import format_option
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.output_formats import format_option
+from code42cli.output_formats import OutputFormatter
 
 
 class AlertRuleTypes:
@@ -35,14 +36,13 @@ _HEADER_KEYS_MAP["isEnabled"] = "Enabled"
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def alert_rules(state):
-    """Manage alert rules."""
+    """Manage users associated with alert rules."""
     pass
 
 
 rule_id_option = click.option(
-    "--rule-id", required=True, help="Observer ID of the rule."
+    "--rule-id", required=True, help="Identification number of the alert rule."
 )
-username_option = click.option("-u", "--username", required=True)
 
 
 @alert_rules.command()
@@ -78,10 +78,11 @@ def remove_user(state, rule_id, username):
 @sdk_options()
 def list_alert_rules(state, format=None):
     """Fetch existing alert rules."""
+    formatter = OutputFormatter(format, _HEADER_KEYS_MAP)
     selected_rules = _get_all_rules_metadata(state.sdk)
     if selected_rules:
-        formatted_output = format(selected_rules, _HEADER_KEYS_MAP)
-        echo(formatted_output)
+        for output in formatter.get_formatted_output(selected_rules):
+            echo(output)
 
 
 @alert_rules.command()
@@ -131,7 +132,7 @@ def add(state, csv_rows):
 
 
 @bulk.command(
-    help="Bulk remove users from alert rules from a csv file. CSV file format: {}".format(
+    help="Bulk remove users from alert rules using a CSV file. CSV file format: {}".format(
         ",".join(ALERT_RULES_CSV_HEADERS)
     )
 )

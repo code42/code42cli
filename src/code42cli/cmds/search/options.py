@@ -145,13 +145,13 @@ def create_search_options(search_term):
         callback=lambda ctx, param, arg: parse_max_timestamp(arg),
         cls=AdvancedQueryAndSavedSearchIncompatible,
         help="The end of the date range in which to look for {}, argument format options are "
-        "the same as --begin.".format(search_term),
+        "the same as `--begin`.".format(search_term),
     )
     advanced_query_option = click.option(
         "--advanced-query",
         help="\b\nA raw JSON {} query. "
         "Useful for when the provided query parameters do not satisfy your requirements."
-        "\nWARNING: Using advanced queries is incompatible with other query-building args.".format(
+        "\nWARNING: Using advanced queries is incompatible with other query-building arguments.".format(
             search_term
         ),
         callback=validate_advanced_query_is_json,

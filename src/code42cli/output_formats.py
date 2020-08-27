@@ -1,59 +1,99 @@
+import csv
+import io
 import json
 
-import click
-
-from code42cli.cmds.enums import OutputFormat
 from code42cli.util import find_format_width
 from code42cli.util import format_to_table
 
 
-def output_format(_, __, value):
-    if value is not None:
-        if value == OutputFormat.CSV:
-            return to_csv
-        if value == OutputFormat.RAW:
-            return to_json
-        if value == OutputFormat.TABLE:
-            return to_table
-        if value == OutputFormat.JSON:
-            return to_formatted_json
-    # default option
-    return to_table
+CEF_DEFAULT_PRODUCT_NAME = "Advanced Exfiltration Detection"
+CEF_DEFAULT_SEVERITY_LEVEL = "5"
 
 
-format_option = click.option(
-    "-f",
-    "--format",
-    type=click.Choice(OutputFormat(), case_sensitive=False),
-    help="The output format of the result. Defaults to table format.",
-    callback=output_format,
-)
+class JsonOutputFormat:
+    JSON = "JSON"
+    RAW = "RAW-JSON"
+
+    def __iter__(self):
+        return iter([self.JSON, self.RAW])
 
 
-def to_csv(output, header):
-    columns = ",".join(header.values())
+class OutputFormat(JsonOutputFormat):
+    TABLE = "TABLE"
+    CSV = "CSV"
 
-    lines = []
-    lines.append(columns)
-    for row in output:
-        items = [str(row[key]) for key in header.keys()]
-        line = ",".join(items)
-        lines.append(line)
-    return "\n".join(lines)
+    def __iter__(self):
+        return iter([self.TABLE, self.CSV, self.JSON, self.RAW])
+
+
+class SendToFileEventsOutputFormat(JsonOutputFormat):
+    CEF = "CEF"
+
+    def __iter__(self):
+        return iter([self.CEF, self.JSON, self.RAW])
+
+
+class OutputFormatter:
+    def __init__(self, output_format, header=None):
+        output_format = output_format.upper() if output_format else OutputFormat.TABLE
+        self.output_format = output_format
+        self._format_func = to_table
+        self.header = header
+
+        if output_format == OutputFormat.CSV:
+            self._format_func = to_csv
+        elif output_format == OutputFormat.RAW:
+            self._format_func = to_json
+        elif output_format == OutputFormat.TABLE:
+            self._format_func = self._to_table
+        elif output_format == OutputFormat.JSON:
+            self._format_func = to_formatted_json
+
+    def _format_output(self, output):
+        return self._format_func(output)
+
+    def _to_table(self, output):
+        return to_table(output, self.header)
+
+    def get_formatted_output(self, output):
+        if self._requires_list_output:
+            yield self._format_output(output)
+        else:
+            for item in output:
+                yield self._format_output(item)
+
+    @property
+    def _requires_list_output(self):
+        return self.output_format in (OutputFormat.TABLE, OutputFormat.CSV)
+
+
+def to_csv(output):
+    """Output is a list of records"""
+
+    if not output:
+        return
+    string_io = io.StringIO()
+    fieldnames = list({k for d in output for k in d.keys()})
+    writer = csv.DictWriter(string_io, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(output)
+    return string_io.getvalue()
 
 
 def to_table(output, header):
+    """Output is a list of records"""
+    if not output:
+        return
     rows, column_size = find_format_width(output, header)
     return format_to_table(rows, column_size)
 
 
-def _filter(output, header):
-    return [{header[key]: row[key] for key in header.keys()} for row in output]
+def to_json(output):
+    """Output is a single record"""
+    return "{}\n".format(json.dumps(output))
 
 
-def to_json(output, header=None):
-    return json.dumps(_filter(output, header))
-
-
-def to_formatted_json(output, header=None):
-    return json.dumps(_filter(output, header), indent=4)
+def to_formatted_json(output):
+    """Output is a single record"""
+    json_str = "{}\n".format(json.dumps(output, indent=4))
+    return json_str
