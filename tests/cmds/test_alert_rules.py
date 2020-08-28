@@ -1,10 +1,9 @@
-import logging
 import json
+import logging
 
 import pytest
 from py42.exceptions import Py42InternalServerError
 from py42.exceptions import Py42InvalidRuleOperationError
-from py42.exceptions import Py42NotFoundError
 from py42.response import Py42Response
 from requests import HTTPError
 from requests import Request
@@ -52,8 +51,9 @@ def get_rule_not_found_side_effect(mocker):
         response = mocker.MagicMock(spec=Response)
         response.text = json.dumps(TEST_EMPTY_RULE_RESPONSE)
         return Py42Response(response)
+
     return side_effect
-        
+
 
 def create_invalid_rule_type_side_effect(mocker):
     def side_effect(*args, **kwargs):
@@ -144,12 +144,9 @@ def test_add_user_when_returns_500_and_not_system_rule_raises_Py42InternalServer
         )
         assert result.exit_code == 1
         assert "Py42InternalServerError" in caplog.text
-    
 
-def test_add_user_when_rule_not_found_prints_expected_output(
-    mocker, runner, cli_state
 
-):
+def test_add_user_when_rule_not_found_prints_expected_output(mocker, runner, cli_state):
     cli_state.sdk.alerts.rules.get_by_observer_id.side_effect = get_rule_not_found_side_effect(
         mocker
     )
@@ -196,7 +193,6 @@ def test_remove_user_when_raise_invalid_rule_type_error_and_system_rule_raises_I
 
 def test_remove_user_when_rule_not_found_prints_expected_output(
     mocker, runner, cli_state
-
 ):
     cli_state.sdk.alerts.rules.get_by_observer_id.side_effect = get_rule_not_found_side_effect(
         mocker

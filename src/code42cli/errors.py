@@ -126,7 +126,7 @@ class ExceptionHandlingGroup(click.Group):
             self.logger.log_verbose_error(self._original_args, err.response.request)
             raise LoggedCLIError("Problem making request to server.")
 
-        except Exception as err:
+        except Exception:
             self.logger.log_verbose_error()
             raise LoggedCLIError("Unknown problem occurred.")
 
