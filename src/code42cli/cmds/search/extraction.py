@@ -95,7 +95,7 @@ def create_handlers(
         handlers.TOTAL_EVENTS += total_events
 
         if total_events > 10 or force_pager:
-            click.echo_via_pager(events)
+            click.echo_via_pager(formatter.get_formatted_output(events))
         else:
             formatter.echo_formatted_list(events)
 
