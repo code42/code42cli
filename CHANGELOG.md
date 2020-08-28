@@ -36,6 +36,9 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     A predefined properties would be displayed by default, pass `--include-all` to view all non-nested top-level properties.
     - `code42 alerts search`
     - `code42 security-data search`
+    - `code42 security-data saved-search list`
+    - `code42 legal-hold list`
+    - `code42 alert-rules list`
 
 ### Added
 
