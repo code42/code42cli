@@ -102,7 +102,7 @@ def create_handlers(
         else:
             for page in _format_output():
                 click.echo(page, nl=False)
-            if formatter.output_format == OutputFormat.TABLE:
+            if formatter.output_format in [OutputFormat.TABLE]:
                 click.echo()
 
         # To make sure the extractor records correct timestamp event when `CTRL-C` is pressed.

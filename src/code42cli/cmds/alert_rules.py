@@ -15,6 +15,7 @@ from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
+from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
 
 
@@ -82,7 +83,9 @@ def list_alert_rules(state, format=None):
     selected_rules = _get_all_rules_metadata(state.sdk)
     if selected_rules:
         for output in formatter.get_formatted_output(selected_rules):
-            echo(output)
+            echo(output, nl=False)
+        if formatter.output_format in [OutputFormat.TABLE]:
+            click.echo()
 
 
 @alert_rules.command()

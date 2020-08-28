@@ -22,6 +22,7 @@ from code42cli.options import incompatible_with
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
 from code42cli.options import server_options
+from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
 from code42cli.output_formats import SendToFileEventsOutputFormat
 
@@ -287,7 +288,9 @@ def _list(state, format=None):
     saved_searches = response["searches"]
     if saved_searches:
         for output in formatter.get_formatted_output(saved_searches):
-            echo(output)
+            echo(output, nl=False)
+        if formatter.output_format in [OutputFormat.TABLE]:
+            click.echo()
 
 
 @saved_search.command()
