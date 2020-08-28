@@ -1,11 +1,12 @@
 import logging
 
 import pytest
+from py42.exceptions import Py42InternalServerError
 from py42.exceptions import Py42InvalidRuleOperationError
-from requests import HTTPError, Request
+from requests import HTTPError
+from requests import Request
 from requests import Response
 
-from py42.exceptions import Py42InternalServerError
 from code42cli.main import cli
 
 TEST_RULE_ID = "rule-id"
