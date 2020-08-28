@@ -65,7 +65,8 @@ class OutputFormatter:
                 yield self._format_output(item)
 
     def echo_formatted_list(self, output_list):
-        for output in self.get_formatted_output(output_list):
+        formatted_output = self.get_formatted_output(output_list)
+        for output in formatted_output:
             click.echo(output, nl=False)
         if self.output_format in [OutputFormat.TABLE]:
             click.echo()

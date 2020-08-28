@@ -136,7 +136,6 @@ class ExceptionHandlingGroup(click.Group):
             raise LoggedCLIError("Problem making request to server.")
 
         except Exception:
-            
             self.logger.log_verbose_error()
             raise LoggedCLIError("Unknown problem occurred.")
 
