@@ -1,4 +1,5 @@
 import click
+from py42.clients.detectionlists import RiskTags
 from py42.exceptions import Py42BadRequestError
 
 from code42cli.bulk import generate_template_cmd_factory
@@ -8,7 +9,6 @@ from code42cli.cmds.detectionlists import handle_list_args
 from code42cli.cmds.detectionlists import remove_risk_tags as _remove_risk_tags
 from code42cli.cmds.detectionlists import try_handle_user_already_added_error
 from code42cli.cmds.detectionlists import update_user
-from code42cli.cmds.detectionlists.enums import RiskTags
 from code42cli.cmds.detectionlists.options import cloud_alias_option
 from code42cli.cmds.detectionlists.options import notes_option
 from code42cli.cmds.detectionlists.options import username_arg
@@ -22,7 +22,7 @@ risk_tag_option = click.option(
     "-t",
     "--risk-tag",
     multiple=True,
-    type=click.Choice(RiskTags()),
+    type=click.Choice(RiskTags.choices()),
     help="Risk tags associated with the employee.",
 )
 
