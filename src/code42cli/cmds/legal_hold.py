@@ -18,7 +18,6 @@ from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
 from code42cli.util import format_string_list_to_columns
 
@@ -80,10 +79,7 @@ def _list(state, format=None):
     formatter = OutputFormatter(format, _MATTER_KEYS_MAP)
     matters = _get_all_active_matters(state.sdk)
     if matters:
-        for output in formatter.get_formatted_output(matters):
-            echo(output, nl=False)
-        if formatter.output_format in [OutputFormat.TABLE]:
-            click.echo()
+        formatter.echo_formatted_list(matters)
 
 
 @legal_hold.command()
