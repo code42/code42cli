@@ -90,7 +90,7 @@ def to_table(output, header):
 
 def to_json(output):
     """Output is a single record"""
-    return "{}".format(json.dumps(output))
+    return "{}\n".format(json.dumps(output))
 
 
 def to_formatted_json(output):
