@@ -57,7 +57,7 @@ class OutputFormatter:
 
     def get_formatted_output(self, output):
         if self._requires_list_output:
-            yield self._format_output(output)
+            yield self._format_output(output).strip()
         else:
             for item in output:
                 yield self._format_output(item)
