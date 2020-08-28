@@ -94,13 +94,10 @@ def create_handlers(
         total_events = len(events)
         handlers.TOTAL_EVENTS += total_events
 
-        def _format_output():
-            return formatter.get_formatted_output(events)
-
         if total_events > 10 or force_pager:
-            click.echo_via_pager(_format_output())
+            click.echo_via_pager(events)
         else:
-            formatter.echo_formatters_output(_format_output())
+            formatter.echo_formatted_list(events)
 
         # To make sure the extractor records correct timestamp event when `CTRL-C` is pressed.
         if total_events:
