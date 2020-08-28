@@ -18,7 +18,8 @@ from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.output_formats import OutputFormatter, OutputFormat
+from code42cli.output_formats import OutputFormat
+from code42cli.output_formats import OutputFormatter
 from code42cli.util import format_string_list_to_columns
 
 
