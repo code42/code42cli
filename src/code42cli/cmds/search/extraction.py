@@ -101,9 +101,8 @@ def create_handlers(
             click.echo_via_pager(_format_output())
         else:
             for page in _format_output():
-                click.echo(page, nl=False)
-            if formatter.output_format == OutputFormat.TABLE:
-                click.echo()
+                newline = formatter.output_format in [OutputFormat.TABLE]
+                click.echo(page, nl=newline)
 
         # To make sure the extractor records correct timestamp event when `CTRL-C` is pressed.
         if total_events:

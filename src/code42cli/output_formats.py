@@ -57,10 +57,10 @@ class OutputFormatter:
 
     def get_formatted_output(self, output):
         if self._requires_list_output:
-            yield self._format_output(output).strip()
+            yield self._format_output(output)
         else:
             for item in output:
-                yield self._format_output(item).strip()
+                yield self._format_output(item)
 
     @property
     def _requires_list_output(self):
@@ -95,5 +95,5 @@ def to_json(output):
 
 def to_formatted_json(output):
     """Output is a single record"""
-    json_str = "{}\n".format(json.dumps(output, indent=4))
+    json_str = "{}".format(json.dumps(output, indent=4))
     return json_str
