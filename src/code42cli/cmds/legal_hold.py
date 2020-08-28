@@ -18,7 +18,7 @@ from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from code42cli.output_formats import OutputFormatter
+from code42cli.output_formats import OutputFormatter, OutputFormat
 from code42cli.util import format_string_list_to_columns
 
 
@@ -96,11 +96,9 @@ def _list(state, format=None):
     is_flag=True,
     help="View details of the preservation policy associated with the legal hold matter.",
 )
-@format_option
 @sdk_options()
-def show(state, matter_id, include_inactive=False, include_policy=False, format=None):
+def show(state, matter_id, include_inactive=False, include_policy=False):
     """Display details of a given legal hold matter."""
-    formatter = OutputFormatter(format, _MATTER_KEYS_MAP)
     matter = _check_matter_is_accessible(state.sdk, matter_id)
     matter["creator_username"] = matter["creator"]["username"]
     matter = json.loads(matter.text)
@@ -118,6 +116,7 @@ def show(state, matter_id, include_inactive=False, include_policy=False, format=
         member["user"]["username"] for member in memberships if not member["active"]
     ]
 
+    formatter = OutputFormatter(OutputFormat.TABLE, _MATTER_KEYS_MAP)
     for output in formatter.get_formatted_output([matter]):
         echo(output)
 
