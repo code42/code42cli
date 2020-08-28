@@ -10,6 +10,8 @@ from code42cli.config import ConfigAccessor
 from code42cli.options import CLIState
 from code42cli.profile import Code42Profile
 
+TEST_ID = "TEST_ID"
+
 
 @pytest.fixture
 def runner():
@@ -91,9 +93,6 @@ def create_profile_values_dict(authority=None, username=None, ignore_ssl=False):
 @pytest.fixture
 def sdk(mocker):
     return mocker.MagicMock(spec=SDKClient)
-
-
-TEST_ID = "TEST_ID"
 
 
 @pytest.fixture

@@ -1,13 +1,11 @@
 import click
 from py42.clients.detectionlists import RiskTags
-from py42.exceptions import Py42BadRequestError
 
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
 from code42cli.cmds.detectionlists import add_risk_tags as _add_risk_tags
 from code42cli.cmds.detectionlists import handle_list_args
 from code42cli.cmds.detectionlists import remove_risk_tags as _remove_risk_tags
-from code42cli.cmds.detectionlists import try_handle_user_already_added_error
 from code42cli.cmds.detectionlists import update_user
 from code42cli.cmds.detectionlists.options import cloud_alias_option
 from code42cli.cmds.detectionlists.options import notes_option
@@ -174,15 +172,8 @@ def bulk_remove_risk_tags(state, csv_rows):
 def _add_high_risk_employee(sdk, username, cloud_alias, risk_tag, notes):
     risk_tag = handle_list_args(risk_tag)
     user_id = get_user_id(sdk, username)
-
-    try:
-        sdk.detectionlists.high_risk_employee.add(user_id)
-        update_user(
-            sdk, username, cloud_alias=cloud_alias, risk_tag=risk_tag, notes=notes
-        )
-    except Py42BadRequestError as err:
-        try_handle_user_already_added_error(err, username, "high risk employees list")
-        raise
+    sdk.detectionlists.high_risk_employee.add(user_id)
+    update_user(sdk, username, cloud_alias=cloud_alias, risk_tag=risk_tag, notes=notes)
 
 
 def _remove_high_risk_employee(sdk, username):

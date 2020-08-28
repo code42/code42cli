@@ -1,5 +1,4 @@
 from code42cli.cmds.shared import get_user_id
-from code42cli.errors import UserAlreadyAddedError
 
 
 def update_user(sdk, username, cloud_alias=None, risk_tag=None, notes=None):
@@ -31,18 +30,6 @@ def remove_risk_tags(sdk, username, risk_tag):
     risk_tag = handle_list_args(risk_tag)
     user_id = get_user_id(sdk, username)
     sdk.detectionlists.remove_user_risk_tags(user_id, risk_tag)
-
-
-def try_handle_user_already_added_error(
-    bad_request_err, username_tried_adding, list_name
-):
-    if _error_is_user_already_added(bad_request_err.response.text):
-        raise UserAlreadyAddedError(username_tried_adding, list_name)
-    return False
-
-
-def _error_is_user_already_added(bad_request_error_text):
-    return "User already on list" in bad_request_error_text
 
 
 def handle_list_args(list_arg):

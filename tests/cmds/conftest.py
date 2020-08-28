@@ -2,14 +2,17 @@ import json as json_module
 import threading
 
 import pytest
-from py42.exceptions import Py42BadRequestError
+from py42.exceptions import Py42UserAlreadyAddedError
 from py42.sdk import SDKClient
 from requests import HTTPError
-from requests import Request
 from requests import Response
 from tests.conftest import convert_str_to_date
+from tests.conftest import TEST_ID
 
 from code42cli.logger import CliLogger
+
+
+TEST_EMPLOYEE = "risky employee"
 
 
 @pytest.fixture
@@ -56,26 +59,12 @@ def cli_state_without_user(sdk_without_user, cli_state):
 
 
 @pytest.fixture
-def bad_request_for_user_already_added(mocker):
+def user_already_added_error(mocker):
+    err = mocker.MagicMock(spec=HTTPError)
     resp = mocker.MagicMock(spec=Response)
-    resp.text = "User already on list"
-    return _create_bad_request_mock(resp)
-
-
-@pytest.fixture
-def generic_bad_request(mocker):
-    resp = mocker.MagicMock(spec=Response)
-    req = mocker.MagicMock(spec=Request)
-    req.body = '{"test":"body"}'
-    resp.request = req
-    resp.text = "TEST"
-    return _create_bad_request_mock(resp)
-
-
-def _create_bad_request_mock(resp):
-    base_err = HTTPError()
-    base_err.response = resp
-    return Py42BadRequestError(base_err)
+    resp.text = "TEST_ERR"
+    err.response = resp
+    return Py42UserAlreadyAddedError(err, TEST_ID, "detection list")
 
 
 def get_filter_value_from_json(json, filter_index):

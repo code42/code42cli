@@ -5,14 +5,10 @@ from pprint import pformat
 
 import click
 from click import echo
-from py42.exceptions import Py42BadRequestError
-from py42.exceptions import Py42ForbiddenError
 
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
 from code42cli.cmds.shared import get_user_id
-from code42cli.errors import LegalHoldNotFoundOrPermissionDeniedError
-from code42cli.errors import UserAlreadyAddedError
 from code42cli.errors import UserNotInLegalHoldError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
@@ -185,16 +181,8 @@ def remove(state, csv_rows):
 
 def _add_user_to_legal_hold(sdk, matter_id, username):
     user_id = get_user_id(sdk, username)
-    matter = _check_matter_is_accessible(sdk, matter_id)
-    try:
-        sdk.legalhold.add_to_matter(user_id, matter_id)
-    except Py42BadRequestError as e:
-        if "USER_ALREADY_IN_HOLD" in e.response.text:
-            matter_id_and_name_text = "legal hold matter id={}, name={}".format(
-                matter_id, matter["name"]
-            )
-            raise UserAlreadyAddedError(username, matter_id_and_name_text)
-        raise
+    _check_matter_is_accessible(sdk, matter_id)
+    sdk.legalhold.add_to_matter(user_id, matter_id)
 
 
 def _remove_user_from_legal_hold(sdk, matter_id, username):
@@ -255,8 +243,4 @@ def _print_matter_members(username_list, member_type="active"):
 
 @lru_cache(maxsize=None)
 def _check_matter_is_accessible(sdk, matter_id):
-    try:
-        matter = sdk.legalhold.get_matter_by_uid(matter_id)
-        return matter
-    except (Py42BadRequestError, Py42ForbiddenError):
-        raise LegalHoldNotFoundOrPermissionDeniedError(matter_id)
+    return sdk.legalhold.get_matter_by_uid(matter_id)

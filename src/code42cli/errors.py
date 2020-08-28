@@ -5,6 +5,9 @@ import click
 from click._compat import get_text_stderr
 from py42.exceptions import Py42ForbiddenError
 from py42.exceptions import Py42HTTPError
+from py42.exceptions import Py42InvalidRuleOperationError
+from py42.exceptions import Py42LegalHoldNotFoundOrPermissionDeniedError
+from py42.exceptions import Py42UserAlreadyAddedError
 
 from code42cli.logger import get_main_cli_logger
 from code42cli.logger import get_view_error_details_message
@@ -52,19 +55,6 @@ class LoggedCLIError(Code42CLIError):
         )
 
 
-class UserAlreadyAddedError(Code42CLIError):
-    def __init__(self, username, list_name):
-        msg = "'{}' is already on the {}.".format(username, list_name)
-        super().__init__(msg)
-
-
-class InvalidRuleTypeError(Code42CLIError):
-    def __init__(self, rule_id, source):
-        msg = "Only alert rules with a source of 'Alerting' can be targeted by this command. "
-        msg += "Rule {0} has a source of '{1}'."
-        super().__init__(msg.format(rule_id, source))
-
-
 class UserDoesNotExistError(Code42CLIError):
     """An error to represent a username that is not in our system. The CLI shows this error when
     the user tries to add or remove a user that does not exist. This error is not shown during
@@ -77,17 +67,9 @@ class UserDoesNotExistError(Code42CLIError):
 class UserNotInLegalHoldError(Code42CLIError):
     def __init__(self, username, matter_id):
         super().__init__(
-            "User '{}' is not an active member of legal hold matter '{}'".format(
+            "User '{}' is not an active member of legal hold matter '{}'.".format(
                 username, matter_id
             )
-        )
-
-
-class LegalHoldNotFoundOrPermissionDeniedError(Code42CLIError):
-    def __init__(self, matter_id):
-        super().__init__(
-            "Matter with id={} either does not exist or your profile does not have permission to "
-            "view it.".format(matter_id)
         )
 
 
@@ -123,6 +105,15 @@ class ExceptionHandlingGroup(click.Group):
 
         except click.exceptions.Exit:
             raise
+
+        except (
+            UserDoesNotExistError,
+            Py42UserAlreadyAddedError,
+            Py42InvalidRuleOperationError,
+            Py42LegalHoldNotFoundOrPermissionDeniedError,
+        ) as err:
+            self.logger.log_error(err)
+            raise Code42CLIError(str(err))
 
         except Py42ForbiddenError as err:
             self.logger.log_verbose_error(self._original_args, err.response.request)
