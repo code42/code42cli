@@ -1,8 +1,11 @@
+import logging
+
 import pytest
 from py42.exceptions import Py42InvalidRuleOperationError
-from requests import HTTPError
+from requests import HTTPError, Request
 from requests import Response
 
+from py42.exceptions import Py42InternalServerError
 from code42cli.main import cli
 
 TEST_RULE_ID = "rule-id"
@@ -46,7 +49,7 @@ def create_invalid_rule_type_side_effect(mocker):
         resp = mocker.MagicMock(spec=Response)
         resp.text = "TEST_ERR"
         err.response = resp
-        raise Py42InvalidRuleOperationError(err, TEST_RULE_ID)
+        raise Py42InvalidRuleOperationError(err, TEST_RULE_ID, TEST_SOURCE)
 
     return side_effect
 
@@ -54,6 +57,18 @@ def create_invalid_rule_type_side_effect(mocker):
 @pytest.fixture
 def get_user_id(mocker):
     return mocker.patch("code42cli.cmds.alert_rules.get_user_id")
+
+
+@pytest.fixture
+def mock_server_error(mocker):
+    base_err = HTTPError()
+    mock_response = mocker.MagicMock(spec=Response)
+    base_err.response = mock_response
+    request = mocker.MagicMock(spec=Request)
+    request.body = '{"test":"body"}'
+    base_err.response.request = request
+
+    return Py42InternalServerError(base_err)
 
 
 @pytest.fixture
@@ -95,27 +110,24 @@ def test_add_user_when_returns_invalid_rule_type_error_and_system_rule_exits(
     )
     assert result.exit_code == 1
     assert (
-        "Unable to find or access Rule with ID 'rule-id'. You might be trying to access a system rule."
+        "Only alert rules with a source of 'Alerting' can be targeted by this command."
         in result.output
     )
+    assert "Rule rule-id has a source of 'rule source'." in result.output
 
 
-def test_add_user_when_raises_invalid_rules_type_error_shows_correct_message(
-    mocker, runner, cli_state
+def test_add_user_when_returns_500_and_not_system_rule_raises_Py42InternalServerError(
+    runner, cli_state, mock_server_error, caplog
 ):
-    cli_state.sdk.alerts.rules.add_user.side_effect = create_invalid_rule_type_side_effect(
-        mocker
-    )
-    result = runner.invoke(
-        cli,
-        ["alert-rules", "add-user", "--rule-id", TEST_RULE_ID, "-u", TEST_USERNAME],
-        obj=cli_state,
-    )
-    assert result.exit_code == 1
-    assert (
-        "Unable to find or access Rule with ID 'rule-id'. You might be trying to access a system rule."
-        in result.output
-    )
+    cli_state.sdk.alerts.rules.add_user.side_effect = mock_server_error
+    with caplog.at_level(logging.ERROR):
+        result = runner.invoke(
+            cli,
+            ["alert-rules", "add-user", "--rule-id", TEST_RULE_ID, "-u", TEST_USERNAME],
+            obj=cli_state,
+        )
+        assert result.exit_code == 1
+        assert "Py42InternalServerError" in caplog.text
 
 
 def test_remove_user_removes_user_list_from_alert_rules(runner, cli_state):
@@ -145,9 +157,10 @@ def test_remove_user_when_raise_invalid_rule_type_error_and_system_rule_raises_I
     )
     assert result.exit_code == 1
     assert (
-        "Unable to find or access Rule with ID 'rule-id'. You might be trying to access a system rule."
+        "Only alert rules with a source of 'Alerting' can be targeted by this command."
         in result.output
     )
+    assert "Rule rule-id has a source of 'rule source'." in result.output
 
 
 def test_remove_user_when_raises_invalid_rule_type_side_effect_and_not_system_rule_raises_Py42InternalServerError(
@@ -164,9 +177,10 @@ def test_remove_user_when_raises_invalid_rule_type_side_effect_and_not_system_ru
 
     assert result.exit_code == 1
     assert (
-        "Unable to find or access Rule with ID 'rule-id'. You might be trying to access a system rule."
+        "Only alert rules with a source of 'Alerting' can be targeted by this command."
         in result.output
     )
+    assert "Rule rule-id has a source of 'rule source'." in result.output
 
 
 def test_list_gets_alert_rules(runner, cli_state):

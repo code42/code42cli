@@ -9,7 +9,8 @@ import code42cli.errors as error_tracker
 from code42cli.config import ConfigAccessor
 from code42cli.options import CLIState
 from code42cli.profile import Code42Profile
-
+from requests import HTTPError, Request
+from requests import Response
 
 TEST_ID = "TEST_ID"
 
