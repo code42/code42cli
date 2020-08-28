@@ -5,6 +5,8 @@ import click
 import py42.sdk.queries.fileevents.filters as f
 from c42eventextractor.extractors import FileEventExtractor
 from click import echo
+from py42.sdk.queries.fileevents.filters.exposure_filter import ExposureType
+from py42.sdk.queries.fileevents.filters.file_filter import FileCategory
 
 import code42cli.cmds.search.enums as enum
 import code42cli.cmds.search.extraction as ext
@@ -58,7 +60,7 @@ exposure_type_option = click.option(
     "-t",
     "--type",
     multiple=True,
-    type=click.Choice(list(enum.ExposureType())),
+    type=click.Choice(list(ExposureType.choices())),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     callback=searchopt.is_in_filter(f.ExposureType),
     help="Limits events to those with given exposure types.",
@@ -112,6 +114,14 @@ file_path_option = click.option(
     callback=searchopt.is_in_filter(f.FilePath),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to file events where the file is located at one of these paths. Applies to endpoint file events only.",
+)
+file_category_option = click.option(
+    "--file-category",
+    multiple=True,
+    type=click.Choice(list(FileCategory.choices())),
+    callback=searchopt.is_in_filter(f.FileCategory),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
+    help="Limits events to file events where the file can be classified by one of these categories.",
 )
 process_owner_option = click.option(
     "--process-owner",
@@ -169,6 +179,7 @@ def file_event_options(f):
     f = source_option(f)
     f = file_name_option(f)
     f = file_path_option(f)
+    f = file_category_option(f)
     f = process_owner_option(f)
     f = tab_url_option(f)
     f = include_non_exposure_option(f)

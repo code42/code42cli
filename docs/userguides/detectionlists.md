@@ -1,7 +1,8 @@
 # Manage Detection List Users
 
-Use the `departing-employee` commands to add or remove employees on the Departing Employees list or High Risk list, or update the details for a user. To
-see a list of all the users currently in your organization, you can export a list from the
+Use the `departing-employee` commands to add employees to or remove employees from the Departing Employees list. Use the `high-risk-employee` commands to add employees to or remove employees from the High Risk list, or update risk tags for those users.
+
+To see a list of all the users currently in your organization, you can export a list from the
 [Users action menu](https://support.code42.com/Administrator/Cloud/Administration_console_reference/Users_reference#Action_menu).
 
 ## Get CSV template

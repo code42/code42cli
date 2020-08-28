@@ -129,6 +129,7 @@ def test_search_when_is_not_advanced_query_uses_only_the_extract_advanced_method
         ("--source", "Gmail"),
         ("--file-name", "test.txt"),
         ("--file-path", "C:\\Program Files"),
+        ("--file-category", "IMAGE"),
         ("--process-owner", "root"),
         ("--tab-url", "https://example.com"),
         ("--type", "SharedViaLink"),
@@ -160,6 +161,7 @@ def test_search_with_advanced_query_and_incompatible_argument_errors(
         ("--source", "Gmail"),
         ("--file-name", "test.txt"),
         ("--file-path", "C:\\Program Files"),
+        ("--file-category", "IMAGE"),
         ("--process-owner", "root"),
         ("--tab-url", "https://example.com"),
         ("--type", "SharedViaLink"),
@@ -583,6 +585,19 @@ def test_command_when_given_file_path_uses_file_path_filter(
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
     assert str(f.FilePath.is_in([filepath])) in filter_strings
+
+
+def test_search_when_given_file_category_uses_file_category_filter(
+    runner, cli_state, file_event_extractor
+):
+    file_category = "IMAGE"
+    runner.invoke(
+        cli,
+        ["security-data", "search", "--begin", "1h", "--file-category", file_category],
+        obj=cli_state,
+    )
+    filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
+    assert str(f.FileCategory.is_in([file_category])) in filter_strings
 
 
 @pytest.mark.parametrize(
