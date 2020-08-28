@@ -1,8 +1,11 @@
 import logging
+import json
 
 import pytest
 from py42.exceptions import Py42InternalServerError
 from py42.exceptions import Py42InvalidRuleOperationError
+from py42.exceptions import Py42NotFoundError
+from py42.response import Py42Response
 from requests import HTTPError
 from requests import Request
 from requests import Response
@@ -44,6 +47,14 @@ TEST_GET_ALL_RESPONSE_FILE_TYPE_MISMATCH = {
 }
 
 
+def get_rule_not_found_side_effect(mocker):
+    def side_effect(*args, **kwargs):
+        response = mocker.MagicMock(spec=Response)
+        response.text = json.dumps(TEST_EMPTY_RULE_RESPONSE)
+        return Py42Response(response)
+    return side_effect
+        
+
 def create_invalid_rule_type_side_effect(mocker):
     def side_effect(*args, **kwargs):
         err = mocker.MagicMock(spec=HTTPError)
@@ -62,14 +73,18 @@ def get_user_id(mocker):
 
 @pytest.fixture
 def mock_server_error(mocker):
+    base_err = _get_error_base(mocker)
+    return Py42InternalServerError(base_err)
+
+
+def _get_error_base(mocker):
     base_err = HTTPError()
     mock_response = mocker.MagicMock(spec=Response)
     base_err.response = mock_response
     request = mocker.MagicMock(spec=Request)
     request.body = '{"test":"body"}'
     base_err.response.request = request
-
-    return Py42InternalServerError(base_err)
+    return base_err
 
 
 @pytest.fixture
@@ -129,6 +144,21 @@ def test_add_user_when_returns_500_and_not_system_rule_raises_Py42InternalServer
         )
         assert result.exit_code == 1
         assert "Py42InternalServerError" in caplog.text
+    
+
+def test_add_user_when_rule_not_found_prints_expected_output(
+    mocker, runner, cli_state
+
+):
+    cli_state.sdk.alerts.rules.get_by_observer_id.side_effect = get_rule_not_found_side_effect(
+        mocker
+    )
+    result = runner.invoke(
+        cli,
+        ["alert-rules", "add-user", "--rule-id", TEST_RULE_ID, "-u", TEST_USERNAME],
+        obj=cli_state,
+    )
+    assert "No alert rules with RuleId rule-id found." in result.output
 
 
 def test_remove_user_removes_user_list_from_alert_rules(runner, cli_state):
@@ -162,6 +192,21 @@ def test_remove_user_when_raise_invalid_rule_type_error_and_system_rule_raises_I
         in result.output
     )
     assert "Rule rule-id has a source of 'rule source'." in result.output
+
+
+def test_remove_user_when_rule_not_found_prints_expected_output(
+    mocker, runner, cli_state
+
+):
+    cli_state.sdk.alerts.rules.get_by_observer_id.side_effect = get_rule_not_found_side_effect(
+        mocker
+    )
+    result = runner.invoke(
+        cli,
+        ["alert-rules", "remove-user", "--rule-id", TEST_RULE_ID, "-u", TEST_USERNAME],
+        obj=cli_state,
+    )
+    assert "No alert rules with RuleId rule-id found." in result.output
 
 
 def test_remove_user_when_raises_invalid_rule_type_side_effect_and_not_system_rule_raises_Py42InternalServerError(

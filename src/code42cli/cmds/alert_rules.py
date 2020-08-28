@@ -149,12 +149,16 @@ def remove(state, csv_rows):
 
 def _add_user(sdk, rule_id, username):
     user_id = get_user_id(sdk, username)
-    sdk.alerts.rules.add_user(rule_id, user_id)
+    rules = _get_rule_metadata(sdk, rule_id)
+    if rules:
+        sdk.alerts.rules.add_user(rule_id, user_id)
 
 
 def _remove_user(sdk, rule_id, username):
     user_id = get_user_id(sdk, username)
-    sdk.alerts.rules.remove_user(rule_id, user_id)
+    rules = _get_rule_metadata(sdk, rule_id)
+    if rules:
+        sdk.alerts.rules.remove_user(rule_id, user_id)
 
 
 def _get_all_rules_metadata(sdk):
