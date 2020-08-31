@@ -11,10 +11,12 @@ from code42cli.cmds.detectionlists.options import cloud_alias_option
 from code42cli.cmds.detectionlists.options import notes_option
 from code42cli.cmds.detectionlists.options import username_arg
 from code42cli.cmds.shared import get_user_id
+from code42cli.errors import Code42CLIError
 from code42cli.file_readers import read_csv_arg
 from code42cli.file_readers import read_flat_file_arg
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
+from py42.exceptions import Py42NotFoundError
 
 risk_tag_option = click.option(
     "-t",
@@ -48,8 +50,10 @@ def add(state, username, cloud_alias, risk_tag, notes):
 @sdk_options()
 def remove(state, username):
     """Remove a user from the high risk employees detection list."""
-    _remove_high_risk_employee(state.sdk, username)
-
+    try:
+        _remove_high_risk_employee(state.sdk, username)
+    except Py42NotFoundError:
+        raise Code42CLIError("User {} is not currently on the high-risk-employee detection list.".format(username))
 
 @high_risk_employee.command()
 @username_arg
