@@ -14,7 +14,7 @@ from code42cli.options import format_option
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
 from code42cli.output_formats import OutputFormatter
-
+from py42.exceptions import Py42BadRequestError
 
 class AlertRuleTypes:
     EXFILTRATION = "FED_ENDPOINT_EXFILTRATION"
@@ -68,8 +68,10 @@ def add_user(state, rule_id, username):
 @sdk_options()
 def remove_user(state, rule_id, username):
     """Remove a user from an alert rule."""
-    _remove_user(state.sdk, rule_id, username)
-
+    try:
+        _remove_user(state.sdk, rule_id, username)
+    except Py42BadRequestError:
+        raise Code42CLIError("User {} is not currently assigned to rule-id {}.".format(username, rule_id))
 
 @alert_rules.command("list")
 @format_option
