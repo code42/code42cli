@@ -49,7 +49,7 @@ def _set_handlers(cursor_store, checkpoint_name):
     handlers.TOTAL_EVENTS = 0
 
     def handle_error(exception):
-        if isinstance(exception, IOError):  # let click handle it
+        if isinstance(exception, OSError):  # let click handle it
             raise
 
         errors.ERRORED = True
