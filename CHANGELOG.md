@@ -63,7 +63,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `code42 legal-hold list`
     - `code42 legal-hold show`
     - `code42 security-data saved-search list`
- 
+
 ### Removed
 
 - The `write-to` command for `security-data` and `alerts` command groups.
