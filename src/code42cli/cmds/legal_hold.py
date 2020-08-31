@@ -117,9 +117,7 @@ def show(state, matter_id, include_inactive=False, include_policy=False):
     ]
 
     formatter = OutputFormatter(OutputFormat.TABLE, _MATTER_KEYS_MAP)
-    for output in formatter.get_formatted_output([matter]):
-        echo(output)
-
+    formatter.echo_formatted_list([matter])
     _print_matter_members(active_usernames, member_type="active")
 
     if include_inactive:
