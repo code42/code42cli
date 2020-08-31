@@ -1,3 +1,7 @@
+from py42.exceptions import Py42NotFoundError
+from requests import HTTPError
+from requests import Request
+from requests import Response
 from tests.cmds.conftest import TEST_EMPLOYEE
 from tests.cmds.conftest import thread_safe_side_effect
 from tests.conftest import TEST_ID
@@ -5,6 +9,18 @@ from tests.conftest import TEST_ID
 from code42cli.main import cli
 
 _NAMESPACE = "code42cli.cmds.high_risk_employee"
+
+
+def get_user_not_on_high_risk_employee_list_side_effect(mocker):
+    def side_effect(*args, **kwargs):
+        err = mocker.MagicMock(spec=HTTPError)
+        resp = mocker.MagicMock(spec=Response)
+        resp.text = "TEST_ERR"
+        err.response = resp
+        err.response.request = mocker.MagicMock(spec=Request)
+        raise Py42NotFoundError(err)
+
+    return side_effect
 
 
 def test_add_high_risk_employee_adds(runner, cli_state_with_user):
@@ -219,3 +235,21 @@ def test_bulk_remove_risk_tags_uses_expected_arguments(runner, cli_state, mocker
             {"username": "test@example.com", "tag": "tag1"},
             {"username": "test2@example.com", "tag": "tag2"},
         ]
+
+
+def test_remove_high_risk_employee_when_user_not_on_list_prints_expected_error(
+    mocker, runner, cli_state
+):
+    cli_state.sdk.detectionlists.high_risk_employee.remove.side_effect = get_user_not_on_high_risk_employee_list_side_effect(
+        mocker
+    )
+    test_username = "test@example.com"
+    result = runner.invoke(
+        cli, ["high-risk-employee", "remove", test_username], obj=cli_state
+    )
+    assert (
+        "User {} is not currently on the high-risk-employee detection list.".format(
+            test_username
+        )
+        in result.output
+    )
