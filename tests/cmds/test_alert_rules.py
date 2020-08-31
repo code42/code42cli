@@ -4,6 +4,7 @@ import logging
 import pytest
 from py42.exceptions import Py42InternalServerError
 from py42.exceptions import Py42InvalidRuleOperationError
+from py42.exceptions import Py42BadRequestError
 from py42.response import Py42Response
 from requests import HTTPError
 from requests import Request
@@ -51,6 +52,17 @@ def get_rule_not_found_side_effect(mocker):
         response = mocker.MagicMock(spec=Response)
         response.text = json.dumps(TEST_EMPTY_RULE_RESPONSE)
         return Py42Response(response)
+
+    return side_effect
+
+
+def get_user_not_on_alert_rule_side_effect(mocker):
+    def side_effect(*args, **kwargs):
+        err = mocker.MagicMock(spec=HTTPError)
+        resp = mocker.MagicMock(spec=Response)
+        resp.text = "TEST_ERR"
+        err.response = resp
+        raise Py42BadRequestError(err)
 
     return side_effect
 
@@ -312,3 +324,10 @@ def test_list_cmd_formats_to_csv_when_format_is_passed(runner, cli_state):
     assert "ruleSource" in result.output
     assert "name" in result.output
     assert "severity" in result.output
+
+def test_remove_when_user_not_on_rule_raises_expected_error(runner, cli_state, mocker):
+    cli_state.sdk.alerts.rules.remove_user.side_effect = get_user_not_on_alert_rule_side_effect(mocker)
+    test_username = "test@example.com"
+    test_rule_id = "101010"
+    result = runner.invoke(cli, ["alert-rules", "remove-user", "-u", test_username, "--rule-id", test_rule_id], obj=cli_state)
+    assert "User {} is not currently assigned to rule-id {}.".format(test_username, test_rule_id) in result.output
