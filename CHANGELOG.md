@@ -8,14 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-## Unreleased
+## 1.0.0 - 2020-08-31
 
 ### Fixed
 
 - Bug where `code42 legal-hold show` would error when terminal was too small.
+
 - Fixed bug in `departing_employee bulk add` command that allowed invalid dates to be passed without validation.
 
 ### Changed
+
+- The follow commands now print a nicer error message when trying to remove a user who is not on the list:
+    - `code42 departing-employee remove`
+    - `code42 high-risk-employee remove`
+    - `code42 alert-rules remove-user`
 
 - `-i` (`--incremental`) has been removed, use `-c` (`--use-checkpoint`) with a string name for the checkpoint instead.
 
@@ -31,6 +37,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     each time the CLI is run with a profile configured this way, as it is not recommended.
 
 - The `path` positional argument for bulk `generate-template` commands is now an option (`--p/-p`).
+
 - Below `search` subcommands accept argument `--format/-f` to display result in formats `csv`, `table`, `json`, `raw-json`:
     - Default output format is changed to `table` format from `raw-json`, returns a paginated response.
     All properties would be displayed by default except when using `-f table`.
@@ -44,19 +51,22 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Added
 
 - `--or-query` option added to `security-data search` and `alerts search` commands which combines the provided filter arguments into an 'OR' query instead of the default 'AND' query.
+
 - `--password` option added to `profile create` and `profile update` commands, enabling creating profiles while bypassing the interactive password prompt.
+
 - Profiles can now save multiple alert and file event checkpoints. The name of the checkpoint to be used for a given query should be passed to `-c` (`--use-checkpoint`).
+
 - `-y/--assume-yes` option added to `profile delete` and `profile delete-all` commands to not require interactive prompt.
+
 - Below subcommands accept argument `--format/-f` to display result in formats `csv`, `table`, `json`, `formatted-json`:
     - `code42 alert-rules list`
     - `code42 legal-hold list`
     - `code42 legal-hold show`
     - `code42 security-data saved-search list`
-- Re-added `send-to` command to `alerts` and `security-data` that accepts a host address and a `--protocol` option with choices UDP or TCP.
-
+ 
 ### Removed
 
-- The `write-to` and `send-to` commands on `security-data` and `alerts` command groups.
+- The `write-to` command for `security-data` and `alerts` command groups.
 
 ## 0.7.3 - 2020-06-23
 
