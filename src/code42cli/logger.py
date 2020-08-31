@@ -9,6 +9,7 @@ from c42eventextractor.logging.formatters import FileEventDictToCEFFormatter
 from c42eventextractor.logging.formatters import FileEventDictToJSONFormatter
 from c42eventextractor.logging.formatters import FileEventDictToRawJSONFormatter
 from c42eventextractor.logging.handlers import NoPrioritySysLogHandlerWrapper
+from click.exceptions import ClickException
 
 from code42cli.cmds.search.enums import FileEventsOutputFormat
 from code42cli.util import get_url_parts
@@ -38,28 +39,12 @@ def _init_logger(logger, handler, output_format):
 
 def handleError(record):
     """Override logger's `handleError` method to exit if an exception is raised while trying to
-    log, and replace stdout with devnull because if we're here it's usually because stdout has
-    been closed on us.
+    log, otherwise it would continue to gather and process events if the connection breaks but send
+    them nowhere.
     """
     t, v, tb = sys.exc_info()
     if t == BrokenPipeError:
-        sys.stdout = open(os.devnull)
-    sys.exit()
-
-
-def get_logger_for_stdout(name_suffix="main", formatter=None):
-    logger = logging.getLogger("code42_stdout_{}".format(name_suffix))
-    if logger_has_handlers(logger):
-        return logger
-
-    with logger_deps_lock:
-        if not logger_has_handlers(logger):
-            handler = logging.StreamHandler(sys.stdout)
-            handler.handleError = handleError
-            formatter = formatter or _get_standard_formatter()
-            logger.setLevel(logging.INFO)
-            return add_handler_to_logger(logger, handler, formatter)
-    return logger
+        raise ClickException("Network connection broken while sending results.")
 
 
 def get_logger_for_server(hostname, protocol, output_format):

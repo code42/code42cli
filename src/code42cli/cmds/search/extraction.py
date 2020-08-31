@@ -49,6 +49,9 @@ def _set_handlers(cursor_store, checkpoint_name):
     handlers.TOTAL_EVENTS = 0
 
     def handle_error(exception):
+        if isinstance(exception, OSError):  # let click handle it
+            raise
+
         errors.ERRORED = True
         if hasattr(exception, "response") and hasattr(exception.response, "text"):
             message = "{}: {}".format(exception, exception.response.text)
