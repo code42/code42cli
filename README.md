@@ -132,8 +132,8 @@ To write events to a file, just redirect your output:
 code42 security-data search -b 2020-02-02 > filename.txt
 ```
 
-To send events to an external server, use the `send-to` command, which behaves exactly the same as `search` but sends
-results to an external server instead of to stdout:
+To send events to an external server, use the `send-to` command, which behaves the same as `search` except for defaulting
+to `RAW-JSON` output and sending results to an external server instead of to stdout:
 
 The default port (if none is specified on the address) is the standard syslog port 514, and default protocol is UDP:
 
