@@ -79,8 +79,7 @@ def list_alert_rules(state, format=None):
     formatter = OutputFormatter(format, _HEADER_KEYS_MAP)
     selected_rules = _get_all_rules_metadata(state.sdk)
     if selected_rules:
-        for output in formatter.get_formatted_output(selected_rules):
-            echo(output)
+        formatter.echo_formatted_list(selected_rules)
 
 
 @alert_rules.command()

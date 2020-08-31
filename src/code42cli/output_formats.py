@@ -2,6 +2,8 @@ import csv
 import io
 import json
 
+import click
+
 from code42cli.util import find_format_width
 from code42cli.util import format_to_table
 
@@ -62,6 +64,13 @@ class OutputFormatter:
             for item in output:
                 yield self._format_output(item)
 
+    def echo_formatted_list(self, output_list):
+        formatted_output = self.get_formatted_output(output_list)
+        for output in formatted_output:
+            click.echo(output, nl=False)
+        if self.output_format in [OutputFormat.TABLE]:
+            click.echo()
+
     @property
     def _requires_list_output(self):
         return self.output_format in (OutputFormat.TABLE, OutputFormat.CSV)
@@ -90,7 +99,7 @@ def to_table(output, header):
 
 def to_json(output):
     """Output is a single record"""
-    return "{}".format(json.dumps(output))
+    return "{}\n".format(json.dumps(output))
 
 
 def to_formatted_json(output):

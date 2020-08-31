@@ -572,31 +572,3 @@ def test_list_with_csv_format_returns_no_response_when_response_is_empty(
     cli_state.sdk.legalhold.get_all_matters.return_value = empty_matters_response
     result = runner.invoke(cli, ["legal-hold", "list", "-f", "csv"], obj=cli_state)
     assert "Matter ID,Name,Description,Creator,Creation Date" not in result.output
-
-
-def test_show_with_csv_format_option_returns_expected_format(
-    runner,
-    cli_state,
-    check_matter_accessible_success,
-    get_user_id_success,
-    active_and_inactive_legal_hold_memberships_response,
-):
-    cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
-        active_and_inactive_legal_hold_memberships_response
-    )
-    result = runner.invoke(
-        cli, ["legal-hold", "show", TEST_MATTER_ID, "-f", "csv"], obj=cli_state
-    )
-    assert "legalHoldUid" in result.output
-    assert "name" in result.output
-    assert "description" in result.output
-    assert "active" in result.output
-    assert "creationDate" in result.output
-    assert "lastModified" in result.output
-    assert "creator" in result.output
-    assert "holdPolicyUid" in result.output
-    assert "creator_username" in result.output
-    assert "88888" in result.output
-    assert "Test_Matter" in result.output
-    comma_count = [c for c in result.output if c == ","]
-    assert len(comma_count) >= 13

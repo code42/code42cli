@@ -166,7 +166,7 @@ send_to_format_options = click.option(
     "--format",
     type=click.Choice(SendToFileEventsOutputFormat(), case_sensitive=False),
     help="The output format of the result. Defaults to json format.",
-    default=SendToFileEventsOutputFormat.JSON,
+    default=SendToFileEventsOutputFormat.RAW,
 )
 
 
@@ -286,8 +286,7 @@ def _list(state, format=None):
     response = state.sdk.securitydata.savedsearches.get()
     saved_searches = response["searches"]
     if saved_searches:
-        for output in formatter.get_formatted_output(saved_searches):
-            echo(output)
+        formatter.echo_formatted_list(saved_searches)
 
 
 @saved_search.command()
