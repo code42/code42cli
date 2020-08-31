@@ -132,37 +132,19 @@ To write events to a file, just redirect your output:
 code42 security-data search -b 2020-02-02 > filename.txt
 ```
 
-To send events to an external server using `netcat` on Linux/Mac:
+To send events to an external server, use the `send-to` command, which behaves exactly the same as `search` but sends
+results to an external server instead of to stdout:
 
-UDP:
+The default port (if none is specified on the address) is the standard syslog port 514, and default protocol is UDP:
+
 ```bash
-code42 security-data search -b 10d | nc -u syslog.company.com 514
+code42 security-data send-to 10.10.10.42 -b 1d
 ```
 
-TCP:
+Results can also be sent over TCP to any port by using the `-p/--protocol` flag and adding a port to the address argument:
+
 ```bash
-code42 security-data search -b 10d | nc server.company.com 8080
-```
-
-Using `powershell` on Windows:
-
-UDP:
-```powershell
-# set up connection
-$Connection = New-Object System.Net.Sockets.UDPClient("syslog.company.com",514)
-
-# pipe code42 output through connection
-code42 security-data search -b 10d | foreach {$Message = [Text.Encoding]::UTF8.GetBytes($_); $Connection.Send($Message, $Message.Length)}
-```
-
-TCP:
-```powershell
-# set up connection
-$Connection = New-Object System.Net.Sockets.TcpClient("127.0.0.1","65432")
-$Writer = New-Object System.IO.StreamWriter($Connection.GetStream())
-
-# pipe code42 output through connection
-code42 security-data search -b 10d | foreach { $Writer.WriteLine($_); $Writer.Flush() }
+code42 security-data send-to 10.10.10.42:8080 -p TCP -b 1d
 ```
 
 Note: For more complex requirements when sending to an external server (SSL, special formatting, etc.), use a dedicated

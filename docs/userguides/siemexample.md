@@ -20,14 +20,14 @@ scheduled job or run ad-hoc queries. Learn more about [searching](../commands/se
 ### Run a query as a scheduled job
 
 Use your favorite scheduling tool, such as cron or Windows Task Scheduler, to run a query on a regular basis. Specify
-the profile to use by including `--profile`. An example using `netcat` to forward only the new file event data since the previous request to an external syslog server:
+the profile to use by including `--profile`. An example using the `send-to` command to forward only the new file event data since the previous request to an external syslog server:
 ```bash
-code42 security-data search --profile profile1 -c syslog_sender | nc syslog.example.com 514
+code42 security-data send-to syslog.example.com:514 -p UDP --profile profile1 -c syslog_sender
 ```
 
 An example to send to the syslog server only the new alerts that meet the filter criteria since the previous request:
 ```bash
-code42 alerts send-to "https://syslog.example.com:514" -p UDP --profile profile1 --rule-name “Source code exfiltration” --state OPEN -i
+code42 alerts send-to syslog.example.com:514 -p UDP --profile profile1 --rule-name “Source code exfiltration” --state OPEN -i
 ```
 
 As a best practice, use a separate profile when executing a scheduled task. Using separate profiles can help prevent accidental updates to your stored checkpoints, for example, by adding `--use-checkpoint` to adhoc queries.

@@ -163,7 +163,7 @@ def server_options(f):
         "--protocol",
         type=click.Choice(ServerProtocol(), case_sensitive=False),
         default=ServerProtocol.UDP,
-        help="Protocol used to send logs to server.",
+        help="Protocol used to send logs to server. Defaults to UDP",
     )
     f = hostname_arg(f)
     f = protocol_option(f)
