@@ -1,5 +1,6 @@
 import click
 from py42.clients.detectionlists import RiskTags
+from py42.exceptions import Py42NotFoundError
 
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
@@ -16,7 +17,6 @@ from code42cli.file_readers import read_csv_arg
 from code42cli.file_readers import read_flat_file_arg
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from py42.exceptions import Py42NotFoundError
 
 risk_tag_option = click.option(
     "-t",
@@ -53,7 +53,12 @@ def remove(state, username):
     try:
         _remove_high_risk_employee(state.sdk, username)
     except Py42NotFoundError:
-        raise Code42CLIError("User {} is not currently on the high-risk-employee detection list.".format(username))
+        raise Code42CLIError(
+            "User {} is not currently on the high-risk-employee detection list.".format(
+                username
+            )
+        )
+
 
 @high_risk_employee.command()
 @username_arg

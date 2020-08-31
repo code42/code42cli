@@ -1,4 +1,5 @@
 import click
+from py42.exceptions import Py42NotFoundError
 
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
@@ -12,7 +13,6 @@ from code42cli.file_readers import read_csv_arg
 from code42cli.file_readers import read_flat_file_arg
 from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
-from py42.exceptions import Py42NotFoundError
 
 
 DATE_FORMAT = "%Y-%m-%d"
@@ -50,7 +50,12 @@ def remove(state, username):
     try:
         _remove_departing_employee(state.sdk, username)
     except Py42NotFoundError:
-        raise Code42CLIError("User {} is not currently on the departing-employee detection list.".format(username))
+        raise Code42CLIError(
+            "User {} is not currently on the departing-employee detection list.".format(
+                username
+            )
+        )
+
 
 @departing_employee.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
