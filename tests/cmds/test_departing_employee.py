@@ -1,12 +1,12 @@
+from py42.exceptions import Py42NotFoundError
+from requests import HTTPError
+from requests import Request
+from requests import Response
 from tests.cmds.conftest import thread_safe_side_effect
 from tests.conftest import TEST_ID
 
 from .conftest import TEST_EMPLOYEE
 from code42cli.main import cli
-from py42.exceptions import Py42NotFoundError
-from requests import HTTPError
-from requests import Request
-from requests import Response
 
 
 def get_user_not_on_departing_employee_list_side_effect(mocker):
@@ -19,6 +19,7 @@ def get_user_not_on_departing_employee_list_side_effect(mocker):
         raise Py42NotFoundError(err)
 
     return side_effect
+
 
 def test_add_departing_employee_when_given_cloud_alias_adds_alias(
     runner, cli_state_with_user
@@ -208,8 +209,20 @@ def test_add_departing_employee_when_invalid_date_format_validation_raises_error
         "Invalid value for '--departure-date': invalid datetime format" in result.output
     )
 
-def test_remove_departing_employee_when_user_not_on_list_prints_expected_error(mocker, runner, cli_state):
-    cli_state.sdk.detectionlists.departing_employee.remove.side_effect = get_user_not_on_departing_employee_list_side_effect(mocker)
+
+def test_remove_departing_employee_when_user_not_on_list_prints_expected_error(
+    mocker, runner, cli_state
+):
+    cli_state.sdk.detectionlists.departing_employee.remove.side_effect = get_user_not_on_departing_employee_list_side_effect(
+        mocker
+    )
     test_username = "test@example.com"
-    result = runner.invoke(cli, ["departing-employee", "remove", test_username], obj=cli_state)
-    assert "User {} is not currently on the departing-employee detection list.".format(test_username) in result.output
+    result = runner.invoke(
+        cli, ["departing-employee", "remove", test_username], obj=cli_state
+    )
+    assert (
+        "User {} is not currently on the departing-employee detection list.".format(
+            test_username
+        )
+        in result.output
+    )
