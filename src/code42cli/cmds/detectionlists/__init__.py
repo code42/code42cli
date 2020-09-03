@@ -12,6 +12,12 @@ def update_user(sdk, username, cloud_alias=None, risk_tag=None, notes=None):
         notes (str or unicode): Notes about the user.
     """
     user_id = get_user_id(sdk, username)
+    _update_cloud_alias(sdk, user_id, cloud_alias)
+    _update_risk_tags(sdk, username, risk_tag)
+    _update_notes(sdk, user_id, notes)
+
+
+def _update_cloud_alias(sdk, user_id, cloud_alias):
     if cloud_alias:
         profile = sdk.detectionlists.get_user_by_id(user_id)
         cloud_aliases = profile.data.get("cloudUsernames") or []
@@ -19,8 +25,14 @@ def update_user(sdk, username, cloud_alias=None, risk_tag=None, notes=None):
             if alias != profile["userName"]:
                 sdk.detectionlists.remove_user_cloud_alias(user_id, alias)
         sdk.detectionlists.add_user_cloud_alias(user_id, cloud_alias)
+
+
+def _update_risk_tags(sdk, username, risk_tag):
     if risk_tag:
         add_risk_tags(sdk, username, risk_tag)
+
+
+def _update_notes(sdk, user_id, notes):
     if notes:
         sdk.detectionlists.update_user_notes(user_id, notes)
 
