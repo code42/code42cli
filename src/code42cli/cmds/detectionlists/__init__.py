@@ -13,6 +13,11 @@ def update_user(sdk, username, cloud_alias=None, risk_tag=None, notes=None):
     """
     user_id = get_user_id(sdk, username)
     if cloud_alias:
+        profile = sdk.detectionlists.get_user_by_id(user_id)
+        cloud_aliases = profile.data.get("cloudUsernames")
+        for alias in cloud_aliases:
+            if alias != profile["userName"]:
+                sdk.detectionlists.remove_user_cloud_alias(user_id, alias)
         sdk.detectionlists.add_user_cloud_alias(user_id, cloud_alias)
     if risk_tag:
         add_risk_tags(sdk, username, risk_tag)
