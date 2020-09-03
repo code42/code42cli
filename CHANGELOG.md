@@ -13,6 +13,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Changed
 
 - Now, when adding a cloud alias to a detection list user, such as during `departing-employee add`, it will remove the existing cloud alias if one exists.
+    - Before, it would error and the cloud alias would not get added.
 
 ## 1.0.0 - 2020-08-31
 
