@@ -1,5 +1,5 @@
 You accept and agree to the following terms and conditions of this Individual Contributor License Agreement (“Agreement”) for Your present and future Contributions submitted to Code42 Software, Inc. (“Code42”). Except for the license granted herein to Code42 and recipients of software distributed by Code42, You reserve all right, title, and interest in and to Your Contributions.
-### Definitions. 
+### Definitions.
 
 "You" (or "Your") means the copyright owner or legal entity authorized by the copyright owner that is making this Agreement with Code42. For legal entities, the entity making a Contribution and all other entities that control, are controlled by, or are under common control with that entity are considered to be a single Contributor. For the purposes of this definition, "control" means (i) the power, direct or indirect, to cause the direction or management of such entity, whether by contract or otherwise, or (ii) ownership of fifty percent (50%) or more of the outstanding shares, or (iii) beneficial ownership of such entity.
 
