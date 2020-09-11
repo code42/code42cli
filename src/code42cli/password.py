@@ -7,7 +7,7 @@ from code42cli.util import does_user_agree
 
 
 def get_stored_password(profile):
-    """Gets your currently stored password for the given profile name."""
+    """Gets your currently stored password for the given profile."""
     service_name = _get_keyring_service_name(profile.name)
     return keyring.get_password(service_name, profile.username)
 
@@ -28,7 +28,7 @@ def set_password(profile, new_password):
 
 
 def delete_password(profile):
-    """Deletes password for the given profile name."""
+    """Deletes password for the given profile."""
     service_name = _get_keyring_service_name(profile.name)
     keyring.delete_password(service_name, profile.username)
 
