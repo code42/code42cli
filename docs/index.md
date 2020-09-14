@@ -11,7 +11,7 @@ list.
 ## Requirements
 To use the Code42 CLI, you must have:
 
-* A Code42 Diamond or Platinum product plan
+* A [Code42 product plan](https://code42.com/r/support/product-plans) that supports the feature or functionality for your use case
 * Endpoint monitoring enabled in the Code42 console
 * Python version 3.5 and later installed
 
