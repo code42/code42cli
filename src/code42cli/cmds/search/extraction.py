@@ -162,3 +162,18 @@ def create_send_to_handlers(
 def handle_no_events(no_events):
     if no_events:
         click.echo("No results found.")
+
+
+def create_simple_send_to_hanlder(logger, func, key, **kwargs):
+    handler = ExtractionHandlers()
+
+    @warn_interrupt(warning=INTERRUPT_WARNING)
+    def handle_response():
+        response = func(**kwargs)
+        for events in response:
+            for event in events[key]:
+                logger.info(event)
+
+    handler.handle_response = handle_response
+
+    return handler

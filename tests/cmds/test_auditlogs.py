@@ -1,3 +1,6 @@
+from py42.response import Py42Response
+from requests import Response
+
 from code42cli.main import cli
 
 
@@ -68,3 +71,17 @@ def test_search_audit_logs_with_all_filter_parameters(runner, cli_state):
         user_ids=("userid",),
         user_ip_addresses=("0.0.0.0",),
     )
+
+
+def test_send_to_makes_call_to_the_extract_method(
+    cli_state, runner, event_extractor_logger, mocker
+):
+    http_response = mocker.MagicMock(spec=Response)
+    http_response.text = '{"events": [{"property": "bar"}]}'
+    py42_response = Py42Response(http_response)
+    cli_state.sdk.auditlogs.get_all.return_value = [py42_response["events"]]
+    runner.invoke(
+        cli, ["audit-logs", "send-to", "localhost", "--begin", "1d"], obj=cli_state
+    )
+    assert cli_state.sdk.auditlogs.get_all.call_count == 1
+    # assert event_extractor_logger.info.assert_called_once_with({"property": "bar"})
