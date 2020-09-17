@@ -1,4 +1,3 @@
-import json
 from _collections import OrderedDict
 from pprint import pformat
 
