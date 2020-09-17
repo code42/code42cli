@@ -3,11 +3,13 @@ from datetime import datetime
 from datetime import timezone
 
 import click
+from py42.sdk.queries.query_filter import FilterGroup
 
+from code42cli.click_ext.options import incompatible_with
+from code42cli.click_ext.types import JSONFileOrString
 from code42cli.date_helper import parse_max_timestamp
 from code42cli.date_helper import parse_min_timestamp
 from code42cli.logger import get_main_cli_logger
-from code42cli.options import incompatible_with
 
 logger = get_main_cli_logger()
 
@@ -57,18 +59,6 @@ def not_contains_filter(filter_cls):
         return arg
 
     return callback
-
-
-def validate_advanced_query_is_json(ctx, param, arg):
-    if arg is None:
-        return
-    try:
-        json.loads(arg)
-        return arg
-    except json.JSONDecodeError:
-        raise click.ClickException(
-            "Failed to parse advanced query, must be a valid json string."
-        )
 
 
 AdvancedQueryAndSavedSearchIncompatible = incompatible_with(
@@ -127,6 +117,16 @@ class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
         return super().handle_parse_result(ctx, opts, args)
 
 
+def _convert_advanced_query_dict_to_filter_groups(ctx, param, arg):
+    if arg is None:
+        return
+    try:
+        filter_groups = [FilterGroup.from_dict(group) for group in arg["groups"]]
+        return filter_groups
+    except KeyError as e:
+        raise click.ClickException("Failed to validate query from JSON. {}".format(e))
+
+
 def create_search_options(search_term):
     begin_option = click.option(
         "-b",
@@ -154,13 +154,14 @@ def create_search_options(search_term):
         "\nWARNING: Using advanced queries is incompatible with other query-building arguments.".format(
             search_term
         ),
-        callback=validate_advanced_query_is_json,
+        type=JSONFileOrString(),
+        callback=_convert_advanced_query_dict_to_filter_groups,
     )
     checkpoint_option = click.option(
         "-c",
         "--use-checkpoint",
-        cls=AdvancedQueryAndSavedSearchIncompatible,
         help="Only get {} that were not previously retrieved.".format(search_term),
+        cls=incompatible_with("saved_search"),
     )
 
     def search_options(f):

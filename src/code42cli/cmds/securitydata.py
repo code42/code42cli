@@ -1,3 +1,4 @@
+import json
 from _collections import OrderedDict
 from pprint import pformat
 
@@ -12,14 +13,14 @@ import code42cli.cmds.search.enums as enum
 import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
+from code42cli.click_ext.groups import OrderedGroup
+from code42cli.click_ext.options import incompatible_with
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.cmds.securitydata_output_formats import FileEventsOutputFormatter
 from code42cli.logger import get_logger_for_server
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import format_option
-from code42cli.options import incompatible_with
-from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
 from code42cli.options import server_options
 from code42cli.output_formats import OutputFormatter
@@ -206,12 +207,12 @@ def clear_checkpoint(state, checkpoint_name):
 def _call_extractor(
     state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
 ):
+    if advanced_query:
+        state.search_filters = advanced_query
     extractor = _get_file_event_extractor(state.sdk, handlers)
     extractor.use_or_query = or_query
     extractor.or_query_exempt_filters.append(f.ExposureType.exists())
-    if advanced_query:
-        extractor.extract_advanced(advanced_query)
-    elif saved_search:
+    if saved_search:
         extractor.extract(*saved_search._filter_group_list)
     else:
         if begin or end:

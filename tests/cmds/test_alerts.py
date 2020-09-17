@@ -106,6 +106,85 @@ SORTED_ALERT_DETAILS = [
     {"id": 3, "createdAt": "2020-01-01"},
 ]
 
+ADVANCED_QUERY_VALUES = {
+    "state_1": "OPEN",
+    "state_2": "PENDING",
+    "state_3": "IN_PROGRESS",
+    "actor": "test@example.com",
+    "on_or_after": "2020-01-01T06:00:00.000Z",
+    "on_or_after_timestamp": 1577858400.0,
+    "on_or_before": "2020-02-01T06:00:00.000Z",
+    "on_or_before_timestamp": 1580536800.0,
+    "rule_id": "xyz123",
+}
+ADVANCED_QUERY_JSON = """
+{{
+    "srtDirection": "DESC",
+    "pgNum": 0,
+    "pgSize": 100,
+    "srtKey": "CreatedAt",
+    "groups": [
+        {{
+            "filterClause": "OR",
+            "filters": [
+                {{
+                    "value": "{state_1}",
+                    "term": "state",
+                    "operator": "IS"
+                }},
+                {{
+                    "value": "{state_2}",
+                    "term": "state",
+                    "operator": "IS"
+                }},
+                {{
+                    "value": "{state_3}",
+                    "term": "state",
+                    "operator": "IS"
+                }}
+            ]
+        }},
+        {{
+            "filterClause": "OR",
+            "filters": [
+                {{
+                    "value": "{actor}",
+                    "term": "actor",
+                    "operator": "CONTAINS"
+                }}
+            ]
+        }},
+        {{
+            "filterClause": "AND",
+            "filters": [
+                {{
+                    "value": "{on_or_after}",
+                    "term": "createdAt",
+                    "operator": "ON_OR_AFTER"
+                }},
+                {{
+                    "value": "{on_or_before}",
+                    "term": "createdAt",
+                    "operator": "ON_OR_BEFORE"
+                }}
+            ]
+        }},
+        {{
+            "filterClause": "OR",
+            "filters": [
+                {{
+                    "value": "{rule_id}",
+                    "term": "ruleId",
+                    "operator": "IS"
+                }}
+            ]
+        }}
+    ],
+    "groupClause": "AND"
+}}""".format(
+    **ADVANCED_QUERY_VALUES
+)
+
 
 @pytest.fixture
 def alert_extractor(mocker):
@@ -148,10 +227,7 @@ def alert_extract_func(mocker):
     return mocker.patch("{}.cmds.alerts._extract".format(PRODUCT_NAME))
 
 
-ADVANCED_QUERY_JSON = '{"some": "complex json"}'
-
-
-def test_search_with_advanced_query_uses_only_the_extract_advanced_method(
+def test_search_when_advanced_query_passed_as_json_string_builds_expected_query(
     cli_state, alert_extractor, runner
 ):
     runner.invoke(
@@ -159,8 +235,26 @@ def test_search_with_advanced_query_uses_only_the_extract_advanced_method(
         ["alerts", "search", "--advanced-query", ADVANCED_QUERY_JSON],
         obj=cli_state,
     )
-    alert_extractor.extract_advanced.assert_called_once_with('{"some": "complex json"}')
-    assert alert_extractor.extract.call_count == 0
+    passed_filter_groups = alert_extractor.extract.call_args[0]
+    expected_actor_filter = f.Actor.contains(ADVANCED_QUERY_VALUES["actor"])
+    expected_actor_filter.filter_clause = "OR"
+    expected_timestamp_filter = f.DateObserved.in_range(
+        ADVANCED_QUERY_VALUES["on_or_after_timestamp"],
+        ADVANCED_QUERY_VALUES["on_or_before_timestamp"],
+    )
+    expected_state_filter = f.AlertState.is_in(
+        [
+            ADVANCED_QUERY_VALUES["state_1"],
+            ADVANCED_QUERY_VALUES["state_2"],
+            ADVANCED_QUERY_VALUES["state_3"],
+        ]
+    )
+    expected_rule_id_filter = f.RuleId.eq(ADVANCED_QUERY_VALUES["rule_id"])
+    expected_rule_id_filter.filter_clause = "OR"
+    assert expected_actor_filter in passed_filter_groups
+    assert expected_timestamp_filter in passed_filter_groups
+    assert expected_state_filter in passed_filter_groups
+    assert expected_rule_id_filter in passed_filter_groups
 
 
 def test_search_without_advanced_query_uses_only_the_extract_method(
@@ -190,7 +284,6 @@ def test_search_without_advanced_query_uses_only_the_extract_method(
         ("--exclude-rule-type", "FedEndpointExfiltration"),
         ("--description", "test"),
         ("--state", "OPEN"),
-        ("--use-checkpoint", "test"),
     ],
 )
 def test_search_with_advanced_query_and_incompatible_argument_errors(
@@ -639,19 +732,6 @@ def test_send_to_makes_call_to_the_extract_method(
     assert alert_extractor.extract_advanced.call_count == 0
 
 
-def test_send_to_makes_call_to_the_extract_advnced_method(
-    cli_state, alert_extractor, runner
-):
-
-    runner.invoke(
-        cli,
-        ["alerts", "send-to", "localhost", "--advanced-query", ADVANCED_QUERY_JSON],
-        obj=cli_state,
-    )
-    assert alert_extractor.extract.call_count == 0
-    alert_extractor.extract_advanced.assert_called_once_with('{"some": "complex json"}')
-
-
 def test_send_to_when_given_description_uses_description_filter(
     cli_state, alert_extractor, runner
 ):
@@ -664,27 +744,6 @@ def test_send_to_when_given_description_uses_description_filter(
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(f.Description.contains(description)) in filter_strings
-
-
-def test_send_to_with_advanced_query_uses_only_the_extract_advanced_method(
-    cli_state, alert_extractor, runner
-):
-    runner.invoke(
-        cli,
-        ["alerts", "send-to", "0.0.0.0", "--advanced-query", ADVANCED_QUERY_JSON],
-        obj=cli_state,
-    )
-    alert_extractor.extract_advanced.assert_called_once_with('{"some": "complex json"}')
-    assert alert_extractor.extract.call_count == 0
-
-
-def test_send_to_without_advanced_query_uses_only_the_extract_method(
-    cli_state, alert_extractor, runner
-):
-
-    runner.invoke(cli, ["alerts", "send-to", "0.0.0.0", "--begin", "1d"], obj=cli_state)
-    assert alert_extractor.extract.call_count == 1
-    assert alert_extractor.extract_advanced.call_count == 0
 
 
 @pytest.mark.parametrize(
@@ -705,7 +764,6 @@ def test_send_to_without_advanced_query_uses_only_the_extract_method(
         ("--exclude-rule-type", "FedEndpointExfiltration"),
         ("--description", "test"),
         ("--state", "OPEN"),
-        ("--use-checkpoint", "test"),
     ],
 )
 def test_send_to_with_advanced_query_and_incompatible_argument_errors(

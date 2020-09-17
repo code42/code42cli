@@ -4,6 +4,7 @@ from py42.exceptions import Py42NotFoundError
 
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
+from code42cli.click_ext.groups import OrderedGroup
 from code42cli.cmds.detectionlists import add_risk_tags as _add_risk_tags
 from code42cli.cmds.detectionlists import handle_list_args
 from code42cli.cmds.detectionlists import remove_risk_tags as _remove_risk_tags
@@ -15,7 +16,6 @@ from code42cli.cmds.shared import get_user_id
 from code42cli.errors import Code42CLIError
 from code42cli.file_readers import read_csv_arg
 from code42cli.file_readers import read_flat_file_arg
-from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
 
 risk_tag_option = click.option(
