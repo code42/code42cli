@@ -10,6 +10,12 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
+### Added
+
+- `code42 audit-logs` commands:
+    - `search` to search for audit-logs.
+    - `send-to` to send audit-logs to server.
+
 ### Changed
 
 - The `--advanced-query` option on `alerts search` and `security-data (search|send-to)` commands has been updated:
