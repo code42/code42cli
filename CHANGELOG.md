@@ -14,7 +14,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - The `--advanced-query` option on `alerts search` and `security-data (search|send-to)` commands has been updated:
     - It can now accept the query as a JSON string or as the path to a file containing the JSON query.
-    - It can be used with the `--use-checkpoint/-c` option.  
+    - It can be used with the `--use-checkpoint/-c` option.
 
 - Now, when adding a cloud alias to a detection list user, such as during `departing-employee add`, it will remove the existing cloud alias if one exists.
     - Before, it would error and the cloud alias would not get added.
