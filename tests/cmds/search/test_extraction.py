@@ -7,6 +7,7 @@ from code42cli import errors
 from code42cli.cmds.search.cursor_store import BaseCursorStore
 from code42cli.cmds.search.extraction import create_handlers
 from code42cli.cmds.search.extraction import create_send_to_handlers
+from code42cli.cmds.search.extraction import create_simple_send_to_handler
 from code42cli.cmds.search.extraction import try_get_default_header
 from code42cli.output_formats import OutputFormat
 
@@ -88,3 +89,19 @@ def test_send_to_handlers_creates_handlers_that_pass_events_to_logger(
     py42_response = Py42Response(http_response)
     handlers.handle_response(py42_response)
     event_extractor_logger.info.assert_called_once_with(events[0])
+
+
+def test_create_simple_send_to_handler(mocker, event_extractor_logger):
+    http_response = mocker.MagicMock(spec=Response)
+    http_response.text = '{"events": [{"property": "bar"}]}'
+    py42_response = Py42Response(http_response)
+
+    def test_func(**kwargs):
+        return [py42_response]
+
+    response_handler = create_simple_send_to_handler(
+        event_extractor_logger, test_func, "events"
+    )
+
+    response_handler()
+    event_extractor_logger.info.assert_called_once_with({"property": "bar"})

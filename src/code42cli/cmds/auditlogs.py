@@ -1,6 +1,6 @@
 import click
 
-from code42cli.cmds.search.extraction import create_simple_send_to_hanlder
+from code42cli.cmds.search.extraction import create_simple_send_to_handler
 from code42cli.date_helper import parse_max_timestamp
 from code42cli.date_helper import parse_min_timestamp
 from code42cli.logger import get_logger_for_server
@@ -153,7 +153,7 @@ def _search(sdk, **filter_args):
 
 def _send_to(sdk, hostname, protocol, **filter_args):
     logger = get_logger_for_server(hostname, protocol, "JSON")
-    handler = create_simple_send_to_hanlder(
+    response_handler = create_simple_send_to_handler(
         logger, sdk.auditlogs.get_all, EVENT_KEY, **filter_args
     )
-    handler.handle_response()
+    response_handler()
