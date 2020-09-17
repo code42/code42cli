@@ -6,38 +6,6 @@ def test_search_audit_logs_json_format(runner, cli_state):
     assert cli_state.sdk.auditlogs.get_all.call_count == 1
 
 
-def test_search_audit_logs_csv_format(runner, cli_state):
-    runner.invoke(cli, ["audit-logs", "search", "-f", "CSV"], obj=cli_state)
-    assert cli_state.sdk.auditlogs.export.call_count == 1
-    cli_state.sdk.auditlogs.export.assert_called_once_with(
-        format="CSV",
-        affected_user_ids=(),
-        affected_usernames=(),
-        begin_time=None,
-        end_time=None,
-        event_types=(),
-        user_ids=(),
-        user_ip_addresses=(),
-        usernames=(),
-    )
-
-
-def test_search_audit_logs_cef_format(runner, cli_state):
-    runner.invoke(cli, ["audit-logs", "search", "-f", "CEF"], obj=cli_state)
-    assert cli_state.sdk.auditlogs.export.call_count == 1
-    cli_state.sdk.auditlogs.export.assert_called_once_with(
-        format="CEF",
-        affected_user_ids=(),
-        affected_usernames=(),
-        begin_time=None,
-        end_time=None,
-        event_types=(),
-        user_ids=(),
-        user_ip_addresses=(),
-        usernames=(),
-    )
-
-
 def test_search_audit_logs_with_filter_parameters(runner, cli_state):
     runner.invoke(
         cli,

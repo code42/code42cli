@@ -60,13 +60,6 @@ filter_option_end_time = click.option(
     "the same as `--begin`.",
     default=None,
 )
-format_option = click.option(
-    "-f",
-    "--format",
-    type=click.Choice(["CSV", "CEF", "JSON"]),
-    default="JSON",
-    help="The output format of the result. Defaults to JSON.",
-)
 
 
 @click.group(cls=OrderedGroup)
@@ -77,7 +70,6 @@ def audit_logs(state):
 
 
 @audit_logs.command()
-@format_option
 @filter_option_begin_time
 @filter_option_end_time
 @filter_option_event_types
@@ -89,7 +81,6 @@ def audit_logs(state):
 @sdk_options()
 def search(
     state,
-    format,
     begin,
     end,
     event_types,
@@ -101,7 +92,6 @@ def search(
 ):
     _search(
         state.sdk,
-        format,
         begin_time=begin,
         end_time=end,
         event_types=event_types,
@@ -113,11 +103,7 @@ def search(
     )
 
 
-def _search(sdk, format, **filter_args):
+def _search(sdk, **filter_args):
 
-    if format.upper() != "JSON":
-        click.echo(sdk.auditlogs.export(format=format, **filter_args))
-    else:
-        print("here")
-        for page in sdk.auditlogs.get_all(**filter_args):
-            click.echo(page)
+    for page in sdk.auditlogs.get_all(**filter_args):
+        click.echo(page)
