@@ -188,4 +188,8 @@ Document all notable consumer-affecting changes in CHANGELOG.md per principles a
 
 When you're satisfied with your changes, open a PR and fill out the pull request template file. We recommend prefixing the name of your branch and/or PR title with `bugfix`, `chore`, or `feature` to help quickly categorize your change. Your unit tests and other checks will run against all supported python versions when you do this.
 
+For contributions from non-Code42 employees, we require you to agree to our [Contributor License Agreement](https://code42.github.io/code42-cla/Code42_Individual_Contributor_License_Agreement).
+
+On submission of your first PR, a GitHub action will run requiring you to reply in a comment with your affirmation of the CLA before the PR will be able to be merged.
+
 A team member should get in contact with you shortly to help merge your PR to completion and get it ready for a release!
