@@ -102,8 +102,8 @@ def reset_pw(profile_name):
     Change the stored password for a profile. Only affects what's stored in the local profile,
     does not make any changes to the Code42 user account."""
     password = getpass()
-    _set_pw(profile_name, password)
-    echo("Password updated for profile '{}'".format(profile_name))
+    profile_name_saved = _set_pw(profile_name, password)
+    echo("Password updated for profile '{}'.".format(profile_name_saved))
 
 
 @profile.command("list")
@@ -171,3 +171,4 @@ def _set_pw(profile_name, password):
         secho("Password not stored!", bold=True)
         raise
     cliprofile.set_password(password, c42profile.name)
+    return c42profile.name
