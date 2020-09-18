@@ -390,7 +390,7 @@ def test_delete_all_deletes_all_existing_profiles(
     mock_cliprofile_namespace.delete_profile.assert_any_call("test2")
 
 
-def test_reset_password_reset_if_credentials_valid_password_saved(
+def test_reset_pw_if_credentials_valid_password_saved(
     runner, mocker, user_agreement, mock_verify, mock_cliprofile_namespace
 ):
     mock_verify.return_value = True
@@ -401,7 +401,7 @@ def test_reset_password_reset_if_credentials_valid_password_saved(
     )
 
 
-def test_reset_password_reset_if_credentials_invalid_password_not_saved(
+def test_reset_pw_if_credentials_invalid_password_not_saved(
     runner, user_agreement, mock_verify, mock_cliprofile_namespace
 ):
     mock_verify.side_effect = Code42CLIError("Invalid credentials for user")
@@ -410,6 +410,16 @@ def test_reset_password_reset_if_credentials_invalid_password_not_saved(
     assert not mock_cliprofile_namespace.set_password.call_count
 
 
+def test_reset_pw_uses_default_profile_when_not_given_one(
+    runner, mocker, user_agreement, mock_verify, mock_cliprofile_namespace
+):
+    mock_verify.return_value = True
+    mock_cliprofile_namespace.profile_exists.return_value = False
+    res = runner.invoke(cli, ["profile", "reset-pw"])
+    mock_cliprofile_namespace.set_password.assert_called_once_with(
+        "newpassword", mocker.ANY
+    )
+    assert "Password updated for profile ''." in res.output
 def test_list_profiles(runner, mock_cliprofile_namespace):
     profiles = [
         create_mock_profile("one"),
