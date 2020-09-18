@@ -390,7 +390,7 @@ def test_delete_all_deletes_all_existing_profiles(
     mock_cliprofile_namespace.delete_profile.assert_any_call("test2")
 
 
-def test_prompt_for_password_reset_if_credentials_valid_password_saved(
+def test_reset_password_reset_if_credentials_valid_password_saved(
     runner, mocker, user_agreement, mock_verify, mock_cliprofile_namespace
 ):
     mock_verify.return_value = True
@@ -401,7 +401,7 @@ def test_prompt_for_password_reset_if_credentials_valid_password_saved(
     )
 
 
-def test_prompt_for_password_reset_if_credentials_invalid_password_not_saved(
+def test_reset_password_reset_if_credentials_invalid_password_not_saved(
     runner, user_agreement, mock_verify, mock_cliprofile_namespace
 ):
     mock_verify.side_effect = Code42CLIError("Invalid credentials for user")
