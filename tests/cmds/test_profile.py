@@ -415,11 +415,15 @@ def test_reset_pw_uses_default_profile_when_not_given_one(
 ):
     mock_verify.return_value = True
     mock_cliprofile_namespace.profile_exists.return_value = False
+    mock_profile = create_mock_profile("one")
+    mock_cliprofile_namespace.get_profile.return_value = mock_profile
     res = runner.invoke(cli, ["profile", "reset-pw"])
     mock_cliprofile_namespace.set_password.assert_called_once_with(
         "newpassword", mocker.ANY
     )
-    assert "Password updated for profile ''." in res.output
+    assert "Password updated for profile 'one'." in res.output
+
+
 def test_list_profiles(runner, mock_cliprofile_namespace):
     profiles = [
         create_mock_profile("one"),
