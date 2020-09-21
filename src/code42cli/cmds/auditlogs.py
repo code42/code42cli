@@ -4,11 +4,15 @@ from code42cli.cmds.search.extraction import create_simple_send_to_handler
 from code42cli.date_helper import parse_max_timestamp
 from code42cli.date_helper import parse_min_timestamp
 from code42cli.logger import get_logger_for_server
-from code42cli.options import OrderedGroup
+from code42cli.options import begin_option
+from code42cli.options import end_option
+from code42cli.click_ext.groups import OrderedGroup
 from code42cli.options import sdk_options
 from code42cli.options import server_options
 
+
 EVENT_KEY = "events"
+AUDIT_LOGS_KEYWORD = "audit-logs"
 
 
 filter_option_usernames = click.option(
@@ -43,33 +47,14 @@ filter_option_event_types = click.option(
     multiple=True,
 )
 
-filter_option_begin_time = click.option(
-    "-b",
-    "--begin",
-    required=False,
-    callback=lambda ctx, param, arg: parse_min_timestamp(arg),
-    help="The beginning of the date range in which to look for audit-logs, can be a date/time in "
-    "yyyy-MM-dd (UTC) or yyyy-MM-dd HH:MM:SS (UTC+24-hr time) format where the 'time' "
-    "portion of the string can be partial (e.g. '2020-01-01 12' or '2020-01-01 01:15') "
-    "or a short value representing days (30d), hours (24h) or minutes (15m) from current "
-    "time.",
-    default=None,
-)
-
-filter_option_end_time = click.option(
-    "-e",
-    "--end",
-    callback=lambda ctx, param, arg: parse_max_timestamp(arg),
-    required=False,
-    help="The end of the date range in which to look for audit-logs, argument format options are "
-    "the same as `--begin`.",
-    default=None,
-)
-
 
 def filter_options(f):
-    f = filter_option_begin_time(f)
-    f = filter_option_end_time(f)
+    f = begin_option(
+        f, AUDIT_LOGS_KEYWORD, callback=lambda ctx, param, arg: parse_min_timestamp(arg)
+    )
+    f = end_option(
+        f, AUDIT_LOGS_KEYWORD, callback=lambda ctx, param, arg: parse_max_timestamp(arg)
+    )
     f = filter_option_event_types(f)
     f = filter_option_usernames(f)
     f = filter_option_user_ids(f)

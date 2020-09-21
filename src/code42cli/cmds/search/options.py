@@ -10,6 +10,9 @@ from code42cli.click_ext.types import FileOrString
 from code42cli.date_helper import parse_max_timestamp
 from code42cli.date_helper import parse_min_timestamp
 from code42cli.logger import get_main_cli_logger
+from code42cli.options import begin_option
+from code42cli.options import end_option
+
 
 logger = get_main_cli_logger()
 
@@ -132,26 +135,24 @@ def _parse_query_from_json(ctx, param, arg):
         )
 
 
-def create_search_options(search_term):
-    begin_option = click.option(
-        "-b",
-        "--begin",
-        callback=lambda ctx, param, arg: parse_min_timestamp(arg),
+def search_interval_options(f, search_term):
+    f = begin_option(
+        f,
+        search_term,
         cls=BeginOption,
-        help="The beginning of the date range in which to look for {}, can be a date/time in "
-        "yyyy-MM-dd (UTC) or yyyy-MM-dd HH:MM:SS (UTC+24-hr time) format where the 'time' "
-        "portion of the string can be partial (e.g. '2020-01-01 12' or '2020-01-01 01:15') "
-        "or a short value representing days (30d), hours (24h) or minutes (15m) from current "
-        "time.".format(search_term),
+        callback=lambda ctx, param, arg: parse_min_timestamp(arg),
     )
-    end_option = click.option(
-        "-e",
-        "--end",
-        callback=lambda ctx, param, arg: parse_max_timestamp(arg),
+    f = end_option(
+        f,
+        search_term,
         cls=AdvancedQueryAndSavedSearchIncompatible,
-        help="The end of the date range in which to look for {}, argument format options are "
-        "the same as `--begin`.".format(search_term),
+        callback=lambda ctx, param, arg: parse_max_timestamp(arg),
     )
+    return f
+
+
+def create_search_options(search_term):
+
     advanced_query_option = click.option(
         "--advanced-query",
         help="A raw JSON {} query. "
@@ -173,8 +174,8 @@ def create_search_options(search_term):
     )
 
     def search_options(f):
-        f = begin_option(f)
-        f = end_option(f)
+
+        f = search_interval_options(f, search_term)
         f = checkpoint_option(f)
         f = advanced_query_option(f)
         return f
