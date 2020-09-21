@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from datetime import timezone
 
@@ -5,7 +6,7 @@ import click
 from py42.sdk.queries.query_filter import FilterGroup
 
 from code42cli.click_ext.options import incompatible_with
-from code42cli.click_ext.types import JSONFileOrString
+from code42cli.click_ext.types import FileOrString
 from code42cli.date_helper import parse_max_timestamp
 from code42cli.date_helper import parse_min_timestamp
 from code42cli.logger import get_main_cli_logger
@@ -116,14 +117,19 @@ class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
         return super().handle_parse_result(ctx, opts, args)
 
 
-def _convert_advanced_query_dict_to_filter_groups(ctx, param, arg):
+def _parse_query_from_json(ctx, param, arg):
     if arg is None:
         return
     try:
-        filter_groups = [FilterGroup.from_dict(group) for group in arg["groups"]]
+        query = json.loads(arg)
+        filter_groups = [FilterGroup.from_dict(group) for group in query["groups"]]
         return filter_groups
-    except KeyError as e:
-        raise click.ClickException("Failed to validate query from JSON. {}".format(e))
+    except json.JSONDecodeError as json_error:
+        raise click.BadParameter("Unable to parse JSON: {}".format(json_error))
+    except KeyError as key_error:
+        raise click.BadParameter(
+            "Unable to parse query from JSON: {}".format(key_error)
+        )
 
 
 def create_search_options(search_term):
@@ -148,13 +154,16 @@ def create_search_options(search_term):
     )
     advanced_query_option = click.option(
         "--advanced-query",
-        help="\b\nA raw JSON {} query. "
-        "Useful for when the provided query parameters do not satisfy your requirements."
-        "\nWARNING: Using advanced queries is incompatible with other query-building arguments.".format(
+        help="A raw JSON {} query. "
+        "Useful for when the provided query parameters do not satisfy your requirements. "
+        "Argument can be passed as a string, read from stdin by passing '-', or from a filename if "
+        "prefixed with '@', e.g. '--advanced-query @query.json'. "
+        "WARNING: Using advanced queries is incompatible with other query-building arguments.".format(
             search_term
         ),
-        type=JSONFileOrString(),
-        callback=_convert_advanced_query_dict_to_filter_groups,
+        metavar="QUERY_JSON",
+        type=FileOrString(),
+        callback=_parse_query_from_json,
     )
     checkpoint_option = click.option(
         "-c",

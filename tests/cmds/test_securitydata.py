@@ -172,8 +172,8 @@ def test_search_when_advanced_query_passed_as_json_string_builds_expected_query(
 @pytest.mark.parametrize(
     "command",
     (
-        ["security-data", "search", "--advanced-query", "query.json"],
-        ["security-data", "send-to", "0.0.0.0", "--advanced-query", "query.json"],
+        ["security-data", "search", "--advanced-query", "@query.json"],
+        ["security-data", "send-to", "0.0.0.0", "--advanced-query", "@query.json"],
     ),
 )
 def test_search_when_advanced_query_passed_as_filename_builds_expected_query(
@@ -203,8 +203,8 @@ def test_search_when_advanced_query_passed_as_filename_builds_expected_query(
 @pytest.mark.parametrize(
     "command",
     (
-        ["security-data", "search", "--advanced-query", "not_a_file"],
-        ["security-data", "send-to", "0.0.0.0", "--advanced-query", "not_a_file"],
+        ["security-data", "search", "--advanced-query", "@not_a_file"],
+        ["security-data", "send-to", "0.0.0.0", "--advanced-query", "@not_a_file"],
     ),
 )
 def test_search_when_advanced_query_passed_non_existent_filename_raises_error(
