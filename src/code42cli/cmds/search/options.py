@@ -128,7 +128,7 @@ def _parse_query_from_json(ctx, param, arg):
         raise click.BadParameter("Unable to parse JSON: {}".format(json_error))
     except KeyError as key_error:
         raise click.BadParameter(
-            "Unable to parse query from JSON: {}".format(key_error)
+            "Unable to build query from input JSON: {}".format(key_error)
         )
 
 
