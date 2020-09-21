@@ -12,32 +12,32 @@ EVENT_KEY = "events"
 
 
 filter_option_usernames = click.option(
-    "--usernames", required=False, help="Filter results by usernames.", multiple=True,
+    "--username", required=False, help="Filter results by usernames.", multiple=True,
 )
 filter_option_user_ids = click.option(
-    "--user-ids", required=False, help="Filter results by user ids.", multiple=True,
+    "--user-id", required=False, help="Filter results by user ids.", multiple=True,
 )
 
 filter_option_user_ip_addresses = click.option(
-    "--user-ips",
+    "--user-ip",
     required=False,
     help="Filter results by user ip addresses.",
     multiple=True,
 )
 filter_option_affected_user_ids = click.option(
-    "--affected-user-ids",
+    "--affected-user-id",
     required=False,
     help="Filter results by affected user ids.",
     multiple=True,
 )
 filter_option_affected_usernames = click.option(
-    "--affected-usernames",
+    "--affected-username",
     required=False,
     help="Filter results by affected usernames.",
     multiple=True,
 )
 filter_option_event_types = click.option(
-    "--event-types",
+    "--event-type",
     required=False,
     help="Filter results by event types.",
     multiple=True,
@@ -93,23 +93,23 @@ def search(
     state,
     begin,
     end,
-    event_types,
-    usernames,
-    user_ids,
-    user_ips,
-    affected_user_ids,
-    affected_usernames,
+    event_type,
+    username,
+    user_id,
+    user_ip,
+    affected_user_id,
+    affected_username,
 ):
     _search(
         state.sdk,
         begin_time=begin,
         end_time=end,
-        event_types=event_types,
-        usernames=usernames,
-        user_ids=user_ids,
-        user_ip_addresses=user_ips,
-        affected_user_ids=affected_user_ids,
-        affected_usernames=affected_usernames,
+        event_types=event_type,
+        usernames=username,
+        user_ids=user_id,
+        user_ip_addresses=user_ip,
+        affected_user_ids=affected_user_id,
+        affected_usernames=affected_username,
     )
 
 
@@ -123,12 +123,12 @@ def send_to(
     protocol,
     begin,
     end,
-    event_types,
-    usernames,
-    user_ids,
-    user_ips,
-    affected_user_ids,
-    affected_usernames,
+    event_type,
+    username,
+    user_id,
+    user_ip,
+    affected_user_id,
+    affected_username,
 ):
     _send_to(
         state.sdk,
@@ -136,12 +136,12 @@ def send_to(
         protocol,
         begin_time=begin,
         end_time=end,
-        event_types=event_types,
-        usernames=usernames,
-        user_ids=user_ids,
-        user_ip_addresses=user_ips,
-        affected_user_ids=affected_user_ids,
-        affected_usernames=affected_usernames,
+        event_types=event_type,
+        usernames=username,
+        user_ids=user_id,
+        user_ip_addresses=user_ip,
+        affected_user_ids=affected_user_id,
+        affected_usernames=affected_username,
     )
 
 
