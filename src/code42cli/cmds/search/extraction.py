@@ -169,7 +169,10 @@ def create_simple_send_to_handler(logger, func, key, **kwargs):
     def handle_response():
         response = func(**kwargs)
         for events in response:
-            for event in events[key]:
-                logger.info(event)
+            try:
+                for event in events[key]:
+                    logger.info(event)
+            except KeyError:
+                pass
 
     return handle_response
