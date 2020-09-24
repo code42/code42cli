@@ -55,7 +55,7 @@ filter_option_event_types = click.option(
 
 def filter_options(f):
     f = begin_option(
-        f, AUDIT_LOGS_KEYWORD, callback=lambda ctx, param, arg: parse_min_timestamp(arg)
+        f, AUDIT_LOGS_KEYWORD, callback=lambda ctx, param, arg: parse_min_timestamp(arg), required=True
     )
     f = end_option(
         f, AUDIT_LOGS_KEYWORD, callback=lambda ctx, param, arg: parse_max_timestamp(arg)
