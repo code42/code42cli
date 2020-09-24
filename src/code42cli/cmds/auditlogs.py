@@ -55,7 +55,10 @@ filter_option_event_types = click.option(
 
 def filter_options(f):
     f = begin_option(
-        f, AUDIT_LOGS_KEYWORD, callback=lambda ctx, param, arg: parse_min_timestamp(arg), required=True
+        f,
+        AUDIT_LOGS_KEYWORD,
+        callback=lambda ctx, param, arg: parse_min_timestamp(arg),
+        required=True,
     )
     f = end_option(
         f, AUDIT_LOGS_KEYWORD, callback=lambda ctx, param, arg: parse_max_timestamp(arg)
@@ -142,24 +145,22 @@ def send_to(
 
 
 def _search(sdk, format, **filter_args):
-    formatter = OutputFormatter(format, None)
 
+    formatter = OutputFormatter(format, None)
     response_gen = sdk.auditlogs.get_all(**filter_args)
 
-    def get_events():
-        events = []
-        try:
-            for response in response_gen:
-                response_dict = json.loads(response.text)
-                if EVENT_KEY in response_dict:
-                    events.extend(response_dict.get(EVENT_KEY))
-        except KeyError:
-            # API endpoint (get_page) returns a response without events key when no records are found
-            # e.g {"paginationRangeStartIndex": 10000, "paginationRangeEndIndex": 10000, "totalResultCount": 1593}
-            pass
-        return len(events), events
+    events = []
+    try:
+        for response in response_gen:
+            response_dict = json.loads(response.text)
+            if EVENT_KEY in response_dict:
+                events.extend(response_dict.get(EVENT_KEY))
+    except KeyError:
+        # API endpoint (get_page) returns a response without events key when no records are found
+        # e.g {"paginationRangeStartIndex": 10000, "paginationRangeEndIndex": 10000, "totalResultCount": 1593}
+        pass
 
-    event_count, events = get_events()
+    event_count = len(events)
 
     if event_count > 10:
         click.echo_via_pager(formatter.get_formatted_output(events))
