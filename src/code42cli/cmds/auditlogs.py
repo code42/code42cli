@@ -7,8 +7,11 @@ from code42cli.logger import get_logger_for_server
 from code42cli.options import begin_option
 from code42cli.options import end_option
 from code42cli.click_ext.groups import OrderedGroup
+from code42cli.options import format_option
 from code42cli.options import sdk_options
+from code42cli.options import send_to_format_options
 from code42cli.options import server_options
+from code42cli.output_formats import OutputFormatter
 
 
 EVENT_KEY = "events"
@@ -73,6 +76,7 @@ def audit_logs(state):
 
 @audit_logs.command()
 @filter_options
+@format_option
 @sdk_options()
 def search(
     state,
@@ -84,9 +88,11 @@ def search(
     user_ip,
     affected_user_id,
     affected_username,
+    format,
 ):
     _search(
         state.sdk,
+        format,
         begin_time=begin,
         end_time=end,
         event_types=event_type,
@@ -101,11 +107,13 @@ def search(
 @audit_logs.command()
 @filter_options
 @server_options
+@send_to_format_options
 @sdk_options()
 def send_to(
     state,
     hostname,
     protocol,
+    format,
     begin,
     end,
     event_type,
@@ -119,6 +127,7 @@ def send_to(
         state.sdk,
         hostname,
         protocol,
+        format,
         begin_time=begin,
         end_time=end,
         event_types=event_type,
@@ -130,14 +139,14 @@ def send_to(
     )
 
 
-def _search(sdk, **filter_args):
-    for page in sdk.auditlogs.get_all(**filter_args):
-        for event in page[EVENT_KEY]:
-            click.echo(event)
+def _search(sdk, format, **filter_args):
+    formatter = OutputFormatter(format, None)
+    for page in sdk.auditlogs.get_all(page_size=10000, **filter_args):
+        click.echo_via_pager(formatter.get_formatted_output(page[EVENT_KEY]))
 
 
-def _send_to(sdk, hostname, protocol, **filter_args):
-    logger = get_logger_for_server(hostname, protocol, "JSON")
+def _send_to(sdk, hostname, protocol, format, **filter_args):
+    logger = get_logger_for_server(hostname, protocol, format)
     response_handler = create_simple_send_to_handler(
         logger, sdk.auditlogs.get_all, EVENT_KEY, **filter_args
     )
