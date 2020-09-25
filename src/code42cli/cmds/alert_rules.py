@@ -8,11 +8,11 @@ from py42.util import format_json
 from code42cli import PRODUCT_NAME
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
+from code42cli.click_ext.groups import OrderedGroup
 from code42cli.cmds.shared import get_user_id
 from code42cli.errors import Code42CLIError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
-from code42cli.options import OrderedGroup
 from code42cli.options import sdk_options
 from code42cli.output_formats import OutputFormatter
 

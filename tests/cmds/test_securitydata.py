@@ -14,7 +14,6 @@ from code42cli import PRODUCT_NAME
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.main import cli
 
-
 BEGIN_TIMESTAMP = 1577858400.0
 END_TIMESTAMP = 1580450400.0
 CURSOR_TIMESTAMP = 1579500000.0
@@ -31,6 +30,68 @@ TEST_LIST_RESPONSE = {
 }
 
 TEST_EMPTY_LIST_RESPONSE = {"searches": []}
+
+ADVANCED_QUERY_VALUES = {
+    "within_last_value": "P30D",
+    "hostname_1": "DESKTOP-H88BEKO",
+    "hostname_2": "W10E-X64-FALLCR",
+    "event_type": "CREATED",
+}
+ADVANCED_QUERY_JSON = """
+{{
+    "purpose": "USER_EXECUTED_SEARCH",
+    "groups": [
+        {{
+            "filterClause": "AND",
+            "filters": [
+                {{
+                    "value": "{within_last_value}",
+                    "operator": "WITHIN_THE_LAST",
+                    "term": "eventTimestamp"
+                }}
+            ]
+        }},
+        {{
+            "filterClause": "AND",
+            "filters": [
+                {{
+                    "value": ".*",
+                    "operator": "IS",
+                    "term": "fileName"
+                }}
+            ]
+        }},
+        {{
+            "filterClause": "OR",
+            "filters": [
+                {{
+                    "value": "{hostname_1}",
+                    "operator": "IS",
+                    "term": "osHostName"
+                }},
+                {{
+                    "value": "{hostname_2}",
+                    "operator": "IS",
+                    "term": "osHostName"
+                }}
+            ]
+        }},
+        {{
+            "filterClause": "OR",
+            "filters": [
+                {{
+                    "value": "{event_type}",
+                    "operator": "IS",
+                    "term": "eventType"
+                }}
+            ]
+        }}
+    ],
+    "pgSize": 100,
+    "pgNum": 1
+}}""".format(
+    **ADVANCED_QUERY_VALUES
+)
 
 
 @pytest.fixture
@@ -75,9 +136,6 @@ def begin_option(mocker):
     return mock
 
 
-ADVANCED_QUERY_JSON = '{"some": "complex json"}'
-
-
 @pytest.mark.parametrize(
     "command",
     (
@@ -91,30 +149,71 @@ ADVANCED_QUERY_JSON = '{"some": "complex json"}'
         ],
     ),
 )
-def test_search_when_is_advanced_query_uses_only_the_extract_advanced_method(
+def test_search_when_advanced_query_passed_as_json_string_builds_expected_query(
     runner, cli_state, file_event_extractor, command
 ):
     runner.invoke(cli, command, obj=cli_state)
-    file_event_extractor.extract_advanced.assert_called_once_with(
-        '{"some": "complex json"}'
+    passed_filter_groups = file_event_extractor.extract.call_args[0]
+    expected_event_filter = f.EventTimestamp.within_the_last(
+        ADVANCED_QUERY_VALUES["within_last_value"]
     )
-    assert file_event_extractor.extract.call_count == 0
-    assert file_event_extractor.extract_advanced.call_count == 1
+    expected_hostname_filter = f.OSHostname.is_in(
+        [ADVANCED_QUERY_VALUES["hostname_1"], ADVANCED_QUERY_VALUES["hostname_2"]]
+    )
+    expected_event_type_filter = f.EventType.is_in(
+        [ADVANCED_QUERY_VALUES["event_type"]]
+    )
+    expected_event_type_filter.filter_clause = "OR"
+    assert expected_event_filter in passed_filter_groups
+    assert expected_hostname_filter in passed_filter_groups
+    assert expected_event_type_filter in passed_filter_groups
 
 
 @pytest.mark.parametrize(
     "command",
     (
-        ["security-data", "search", "--begin", "1d"],
-        ["security-data", "send-to", "0.0.0.0", "--begin", "1d"],
+        ["security-data", "search", "--advanced-query", "@query.json"],
+        ["security-data", "send-to", "0.0.0.0", "--advanced-query", "@query.json"],
     ),
 )
-def test_search_when_is_not_advanced_query_uses_only_the_extract_advanced_method(
+def test_search_when_advanced_query_passed_as_filename_builds_expected_query(
     runner, cli_state, file_event_extractor, command
 ):
-    runner.invoke(cli, command, obj=cli_state)
-    assert file_event_extractor.extract_advanced.call_count == 0
-    assert file_event_extractor.extract.call_count == 1
+    with runner.isolated_filesystem():
+        with open("query.json", "w") as jsonfile:
+            jsonfile.write(ADVANCED_QUERY_JSON)
+
+        runner.invoke(cli, command, obj=cli_state)
+        passed_filter_groups = file_event_extractor.extract.call_args[0]
+        expected_event_filter = f.EventTimestamp.within_the_last(
+            ADVANCED_QUERY_VALUES["within_last_value"]
+        )
+        expected_hostname_filter = f.OSHostname.is_in(
+            [ADVANCED_QUERY_VALUES["hostname_1"], ADVANCED_QUERY_VALUES["hostname_2"]]
+        )
+        expected_event_type_filter = f.EventType.is_in(
+            [ADVANCED_QUERY_VALUES["event_type"]]
+        )
+        expected_event_type_filter.filter_clause = "OR"
+        assert expected_event_filter in passed_filter_groups
+        assert expected_hostname_filter in passed_filter_groups
+        assert expected_event_type_filter in passed_filter_groups
+
+
+@pytest.mark.parametrize(
+    "command",
+    (
+        ["security-data", "search", "--advanced-query", "@not_a_file"],
+        ["security-data", "send-to", "0.0.0.0", "--advanced-query", "@not_a_file"],
+    ),
+)
+def test_search_when_advanced_query_passed_non_existent_filename_raises_error(
+    runner, cli_state, command
+):
+    with runner.isolated_filesystem():
+        result = runner.invoke(cli, command, obj=cli_state)
+        assert result.exit_code == 2
+        assert "Could not open file: not_a_file" in result.stdout
 
 
 @pytest.mark.parametrize(
@@ -134,7 +233,6 @@ def test_search_when_is_not_advanced_query_uses_only_the_extract_advanced_method
         ("--tab-url", "https://example.com"),
         ("--type", "SharedViaLink"),
         ("--include-non-exposure",),
-        ("--use-checkpoint", "test"),
     ],
 )
 def test_search_with_advanced_query_and_incompatible_argument_errors(
@@ -899,34 +997,3 @@ def test_saved_search_list_with_format_option_does_not_return_when_response_is_e
         cli, ["security-data", "saved-search", "list", "-f", "csv"], obj=cli_state
     )
     assert "Name,Id" not in result.output
-
-
-def test_send_to_when_is_advanced_query_uses_only_the_extract_advanced_method(
-    runner, cli_state, file_event_extractor, event_extractor_logger
-):
-    runner.invoke(
-        cli,
-        [
-            "security-data",
-            "send-to",
-            "localhost",
-            "--advanced-query",
-            ADVANCED_QUERY_JSON,
-        ],
-        obj=cli_state,
-    )
-    file_event_extractor.extract_advanced.assert_called_once_with(
-        '{"some": "complex json"}'
-    )
-    assert file_event_extractor.extract.call_count == 0
-    assert file_event_extractor.extract_advanced.call_count == 1
-
-
-def test_send_to_when_is_not_advanced_query_uses_only_the_extract_advanced_method(
-    runner, cli_state, file_event_extractor
-):
-    runner.invoke(
-        cli, ["security-data", "send-to", "localhost", "--begin", "1d"], obj=cli_state
-    )
-    assert file_event_extractor.extract_advanced.call_count == 0
-    assert file_event_extractor.extract.call_count == 1

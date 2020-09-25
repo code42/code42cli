@@ -3,11 +3,13 @@ from datetime import datetime
 from datetime import timezone
 
 import click
+from py42.sdk.queries.query_filter import FilterGroup
 
+from code42cli.click_ext.options import incompatible_with
+from code42cli.click_ext.types import FileOrString
 from code42cli.date_helper import parse_max_timestamp
 from code42cli.date_helper import parse_min_timestamp
 from code42cli.logger import get_main_cli_logger
-from code42cli.options import incompatible_with
 
 logger = get_main_cli_logger()
 
@@ -57,18 +59,6 @@ def not_contains_filter(filter_cls):
         return arg
 
     return callback
-
-
-def validate_advanced_query_is_json(ctx, param, arg):
-    if arg is None:
-        return
-    try:
-        json.loads(arg)
-        return arg
-    except json.JSONDecodeError:
-        raise click.ClickException(
-            "Failed to parse advanced query, must be a valid json string."
-        )
 
 
 AdvancedQueryAndSavedSearchIncompatible = incompatible_with(
@@ -127,6 +117,21 @@ class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
         return super().handle_parse_result(ctx, opts, args)
 
 
+def _parse_query_from_json(ctx, param, arg):
+    if arg is None:
+        return
+    try:
+        query = json.loads(arg)
+        filter_groups = [FilterGroup.from_dict(group) for group in query["groups"]]
+        return filter_groups
+    except json.JSONDecodeError as json_error:
+        raise click.BadParameter("Unable to parse JSON: {}".format(json_error))
+    except KeyError as key_error:
+        raise click.BadParameter(
+            "Unable to build query from input JSON: {}".format(key_error)
+        )
+
+
 def create_search_options(search_term):
     begin_option = click.option(
         "-b",
@@ -149,18 +154,22 @@ def create_search_options(search_term):
     )
     advanced_query_option = click.option(
         "--advanced-query",
-        help="\b\nA raw JSON {} query. "
-        "Useful for when the provided query parameters do not satisfy your requirements."
-        "\nWARNING: Using advanced queries is incompatible with other query-building arguments.".format(
+        help="A raw JSON {} query. "
+        "Useful for when the provided query parameters do not satisfy your requirements. "
+        "Argument can be passed as a string, read from stdin by passing '-', or from a filename if "
+        "prefixed with '@', e.g. '--advanced-query @query.json'. "
+        "WARNING: Using advanced queries is incompatible with other query-building arguments.".format(
             search_term
         ),
-        callback=validate_advanced_query_is_json,
+        metavar="QUERY_JSON",
+        type=FileOrString(),
+        callback=_parse_query_from_json,
     )
     checkpoint_option = click.option(
         "-c",
         "--use-checkpoint",
-        cls=AdvancedQueryAndSavedSearchIncompatible,
         help="Only get {} that were not previously retrieved.".format(search_term),
+        cls=incompatible_with("saved_search"),
     )
 
     def search_options(f):

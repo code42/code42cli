@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 import click
 
 from code42cli.cmds.search.enums import ServerProtocol
@@ -108,52 +106,6 @@ def sdk_options(hidden=False):
         return f
 
     return decorator
-
-
-def incompatible_with(incompatible_opts):
-
-    if isinstance(incompatible_opts, str):
-        incompatible_opts = [incompatible_opts]
-
-    class IncompatibleOption(click.Option):
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-
-        def handle_parse_result(self, ctx, opts, args):
-            # if None it means we're in autocomplete mode and don't want to validate
-            if ctx.obj is not None:
-                found_incompatible = ", ".join(
-                    [
-                        "--{}".format(opt.replace("_", "-"))
-                        for opt in opts
-                        if opt in incompatible_opts
-                    ]
-                )
-                if self.name in opts and found_incompatible:
-                    name = self.name.replace("_", "-")
-                    raise click.BadOptionUsage(
-                        option_name=self.name,
-                        message="--{} can't be used with: {}".format(
-                            name, found_incompatible
-                        ),
-                    )
-            return super().handle_parse_result(ctx, opts, args)
-
-    return IncompatibleOption
-
-
-class OrderedGroup(click.Group):
-    """A click.Group subclass that uses OrderedDict to store commands so the help text lists them
-    in the order they were defined/added to the group.
-    """
-
-    def __init__(self, name=None, commands=None, **attrs):
-        super().__init__(name, commands, **attrs)
-        # the registered subcommands by their exported names.
-        self.commands = commands or OrderedDict()
-
-    def list_commands(self, ctx):
-        return self.commands
 
 
 def server_options(f):

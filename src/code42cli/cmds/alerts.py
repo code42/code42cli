@@ -7,6 +7,7 @@ from py42.sdk.queries.alerts.filters import AlertState
 from py42.sdk.queries.alerts.filters import RuleType
 from py42.sdk.queries.alerts.filters import Severity
 
+import code42cli.click_ext.groups
 import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
@@ -155,7 +156,7 @@ def alert_options(f):
     return f
 
 
-@click.group(cls=opt.OrderedGroup)
+@click.group(cls=code42cli.click_ext.groups.OrderedGroup)
 @opt.sdk_options(hidden=True)
 def alerts(state):
     """Tools for getting alert data."""
@@ -177,13 +178,12 @@ def _call_extractor(
     extractor = _get_alert_extractor(cli_state.sdk, handlers)
     extractor.use_or_query = or_query
     if advanced_query:
-        extractor.extract_advanced(advanced_query)
-    else:
-        if begin or end:
-            cli_state.search_filters.append(
-                ext.create_time_range_filter(f.DateObserved, begin, end)
-            )
-        extractor.extract(*cli_state.search_filters)
+        cli_state.search_filters = advanced_query
+    if begin or end:
+        cli_state.search_filters.append(
+            ext.create_time_range_filter(f.DateObserved, begin, end)
+        )
+    extractor.extract(*cli_state.search_filters)
 
 
 @alerts.command()
