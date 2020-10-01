@@ -1,14 +1,15 @@
 import json
+from _collections import OrderedDict
 
 import click
 
+from code42cli.click_ext.groups import OrderedGroup
 from code42cli.cmds.search.extraction import create_simple_send_to_handler
 from code42cli.date_helper import parse_max_timestamp
 from code42cli.date_helper import parse_min_timestamp
 from code42cli.logger import get_logger_for_server
 from code42cli.options import begin_option
 from code42cli.options import end_option
-from code42cli.click_ext.groups import OrderedGroup
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.options import send_to_format_options
@@ -19,6 +20,13 @@ from code42cli.output_formats import OutputFormatter
 EVENT_KEY = "events"
 AUDIT_LOGS_KEYWORD = "audit-logs"
 
+AUDIT_LOGS_DEFAULT_HEADER = OrderedDict()
+AUDIT_LOGS_DEFAULT_HEADER["timestamp"] = "Timestamp"
+AUDIT_LOGS_DEFAULT_HEADER["type"] = "Type"
+AUDIT_LOGS_DEFAULT_HEADER["actorName"] = "ActorName"
+AUDIT_LOGS_DEFAULT_HEADER["actorIpAddress"] = "ActorIpAddress"
+AUDIT_LOGS_DEFAULT_HEADER["success"] = "Success"
+AUDIT_LOGS_DEFAULT_HEADER["resultCount"] = "ResultCount"
 
 filter_option_usernames = click.option(
     "--username", required=False, help="Filter results by usernames.", multiple=True,
@@ -146,7 +154,7 @@ def send_to(
 
 def _search(sdk, format, **filter_args):
 
-    formatter = OutputFormatter(format, None)
+    formatter = OutputFormatter(format, AUDIT_LOGS_DEFAULT_HEADER)
     response_gen = sdk.auditlogs.get_all(**filter_args)
 
     events = []
@@ -161,8 +169,9 @@ def _search(sdk, format, **filter_args):
         pass
 
     event_count = len(events)
-
-    if event_count > 10:
+    if not event_count:
+        click.echo("No results found.")
+    elif event_count > 10:
         click.echo_via_pager(formatter.get_formatted_output(events))
     else:
         formatter.echo_formatted_list(events)
