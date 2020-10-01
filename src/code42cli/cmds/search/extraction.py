@@ -167,12 +167,14 @@ def handle_no_events(no_events):
 def create_simple_send_to_handler(logger, func, key, **kwargs):
     @warn_interrupt(warning=INTERRUPT_WARNING)
     def handle_response():
-        response = func(**kwargs)
-        for events in response:
-            try:
-                for event in events[key]:
-                    logger.info(event)
-            except KeyError:
-                pass
+        response_gen = func(**kwargs)
+        try:
+            for response in response_gen:
+                response_dict = json.loads(response.text)
+                if key in response_dict:
+                    for event in response_dict.get(key):
+                        logger.info(event)
+        except KeyError:
+            click.echo("No results found.")
 
     return handle_response
