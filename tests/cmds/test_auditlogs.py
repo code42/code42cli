@@ -17,7 +17,6 @@ def date_str():
 
 
 def test_search_audit_logs_json_format(runner, cli_state, date_str):
-    print(date_str)
     runner.invoke(cli, ["audit-logs", "search", "-b", date_str], obj=cli_state)
     assert cli_state.sdk.auditlogs.get_all.call_count == 1
 
