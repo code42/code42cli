@@ -161,10 +161,18 @@ def bulk(state):
 
 
 @bulk.command(name="info", help="Get information about many devices")
+@click.option(
+    '--drop-most-recent',
+    required=False,
+    type=int,
+    help="Will drop the X most recently connected devices for each user from the result list where X is the number you provide as this argument. Can be used to avoid passing the most recently connected device for a user to the deactivate command"
+)
 @sdk_options()
-def bulk_list(state):
+def bulk_list(state, drop_most_recent):
     """Outputs a list of all devices in the tenant"""
     devices_dataframe = _get_device_dataframe(state.sdk)
+    if drop_most_recent:
+        devices_dataframe = _drop_n_devices_per_user(devices_dataframe, 1)
     click.echo(devices_dataframe.to_csv())
 
 
@@ -180,12 +188,17 @@ def _get_device_dataframe(sdk, include_backup_usage=False):
             "guid",
             "name",
             "osHostname",
-            "guid",
             "status",
             "lastConnected",
             "backupUsage",
             "productVersion",
             "osName",
             "osVersion",
+            "userUid"
         ],
     )
+
+def _drop_n_devices_per_user(device_dataframe,number_to_drop,sort_field='lastConnected',sort_ascending=False,group_field='userUid'):
+    return device_dataframe.sort_values(by=sort_field, ascending=sort_ascending).drop(
+        device_dataframe.groupby(group_field).head(number_to_drop).index
+    ).reset_index(drop=True)

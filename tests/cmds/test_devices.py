@@ -1,5 +1,5 @@
 from datetime import date
-
+from pandas import DataFrame, testing
 import pytest
 from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42ForbiddenError
@@ -8,7 +8,7 @@ from py42.response import Py42Response
 from requests import HTTPError
 from requests import Response
 
-from code42cli.cmds.devices import _get_device_dataframe
+from code42cli.cmds.devices import _get_device_dataframe, _drop_n_devices_per_user
 from code42cli.main import cli
 
 TEST_DEVICE_ID = "12345"
@@ -204,8 +204,8 @@ def empty_backupusage_success(cli_state, empty_backupusage_response):
 
 
 @pytest.fixture
-def get_all_devices_success(sdk, devices_list_generator):
-    sdk.devices.get_all.return_value = devices_list_generator
+def get_all_devices_success(cli_state, devices_list_generator):
+    cli_state.sdk.devices.get_all.return_value = devices_list_generator
 
 
 def test_deactivate_deactivates_device(runner, cli_state, deactivate_device_success):
@@ -319,8 +319,8 @@ def test_get_info_returns_empty_values_if_no_backupusage(
     assert '"lastCompletedBackup": null' in result.output
 
 
-def test_get_device_dataframe_returns_correct_columns(sdk, get_all_devices_success):
-    result = _get_device_dataframe(sdk)
+def test_get_device_dataframe_returns_correct_columns(cli_state, get_all_devices_success):
+    result = _get_device_dataframe(cli_state.sdk)
     assert "computerId" in result.columns
     assert "guid" in result.columns
     assert "name" in result.columns
@@ -335,3 +335,29 @@ def test_get_device_dataframe_returns_correct_columns(sdk, get_all_devices_succe
     assert "modelInfo" not in result.columns
     assert "address" not in result.columns
     assert "buildVersion" not in result.columns
+
+def test_bulk_list_outputs_csv(runner, cli_state, get_all_devices_success):
+    result = runner.invoke(
+        cli,
+        ["devices",
+        "bulk",
+        "info"],
+        obj=cli_state
+    )
+    assert 'computerId,guid,name,osHostname,status,lastConnected,backupUsage,productVersion,osName,osVersion,userUid' in result.output
+
+def test_drop_n_devices_per_user_drops_correct_devices():
+    testdf = DataFrame.from_records(
+        [
+            {"userUid":0,"lastConnected":0},
+            {"userUid":0,"lastConnected":1},
+            {"userUid":1,"lastConnected":0}
+        ]
+    )
+    expected_return = DataFrame.from_records(
+        [
+            {"userUid":0,"lastConnected":1}
+        ]
+    )
+    returndf = _drop_n_devices_per_user(testdf,1)
+    testing.assert_frame_equal(expected_return, returndf)
