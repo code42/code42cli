@@ -162,22 +162,42 @@ def bulk(state):
 
 @bulk.command(name="info", help="Get information about many devices")
 @click.option(
+    '--active',
+    required=False,
+    type=bool,
+    default=None,
+    help='Include to return only active devices.'
+)
+@click.option(
+    '--org-uid',
+    required=False,
+    type=str,
+    default=None,
+    help="Optionally provide to limit devices to only the ones in the org you specify. Note that child orgs will be included."
+)
+@click.option(
     '--drop-most-recent',
     required=False,
     type=int,
     help="Will drop the X most recently connected devices for each user from the result list where X is the number you provide as this argument. Can be used to avoid passing the most recently connected device for a user to the deactivate command"
 )
+@click.option(
+    '--include-backup-usage',
+    required=False,
+    default=False,
+    help='Include to return backup usage information for each device (may significantly lengthen the size of the return)'
+)
 @sdk_options()
-def bulk_list(state, drop_most_recent):
+def bulk_list(state, active, drop_most_recent, org_uid, include_backup_usage):
     """Outputs a list of all devices in the tenant"""
-    devices_dataframe = _get_device_dataframe(state.sdk)
+    devices_dataframe = _get_device_dataframe(state.sdk, active, org_uid, include_backup_usage)
     if drop_most_recent:
-        devices_dataframe = _drop_n_devices_per_user(devices_dataframe, 1)
+        devices_dataframe = _drop_n_devices_per_user(devices_dataframe, drop_most_recent)
     click.echo(devices_dataframe.to_csv())
 
 
-def _get_device_dataframe(sdk, include_backup_usage=False):
-    devices_generator = sdk.devices.get_all(include_backup_usage=include_backup_usage)
+def _get_device_dataframe(sdk, active=None, org_uid=None, include_backup_usage=False):
+    devices_generator = sdk.devices.get_all(active=active, include_backup_usage=include_backup_usage, org_uid=org_uid)
     devices_list = []
     for page in devices_generator:
         devices_list.extend(page["computers"])
