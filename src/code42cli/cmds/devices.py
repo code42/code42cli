@@ -2,6 +2,7 @@ from collections import OrderedDict
 from datetime import date
 
 import click
+from pandas import DataFrame
 from py42 import exceptions
 
 from code42cli.click_ext.groups import OrderedGroup
@@ -91,6 +92,7 @@ def _change_device_name(sdk, guid, name):
 
 
 _DEVICE_INFO_KEYS_MAP = OrderedDict()
+_DEVICE_INFO_KEYS_MAP["computerId"] = "Device ID"
 _DEVICE_INFO_KEYS_MAP["name"] = "Name"
 _DEVICE_INFO_KEYS_MAP["osHostname"] = "Hostname"
 _DEVICE_INFO_KEYS_MAP["guid"] = "GUID"
@@ -118,19 +120,72 @@ def get_info(state, device_id, format=None):
 
 def _get_device_info(sdk, device_id):
     device = sdk.devices.get_by_id(device_id, include_backup_usage=True).data
-    device["archiveBytes"] = max(
-        [
-            backupDestination["archiveBytes"]
-            for backupDestination in device["backupUsage"]
-        ]
-    ) if len(device["backupUsage"]) > 0 else 0
-    device["lastBackup"] = max(
-        [backupDestination["lastBackup"] for backupDestination in device["backupUsage"]]
-    ) if len(device["backupUsage"]) > 0 else None
-    device["lastCompletedBackup"] = max(
-        [
-            backupDestination["lastCompletedBackup"]
-            for backupDestination in device["backupUsage"]
-        ]
-    ) if len(device["backupUsage"]) > 0 else None
+    device["archiveBytes"] = (
+        max(
+            [
+                backupDestination["archiveBytes"]
+                for backupDestination in device["backupUsage"]
+            ]
+        )
+        if len(device["backupUsage"]) > 0
+        else 0
+    )
+    device["lastBackup"] = (
+        max(
+            [
+                backupDestination["lastBackup"]
+                for backupDestination in device["backupUsage"]
+            ]
+        )
+        if len(device["backupUsage"]) > 0
+        else None
+    )
+    device["lastCompletedBackup"] = (
+        max(
+            [
+                backupDestination["lastCompletedBackup"]
+                for backupDestination in device["backupUsage"]
+            ]
+        )
+        if len(device["backupUsage"]) > 0
+        else None
+    )
     return device
+
+
+@devices.group(cls=OrderedGroup)
+@sdk_options(hidden=True)
+def bulk(state):
+    """Tools for managing devices in bulk"""
+    pass
+
+
+@bulk.command(name="info", help="Get information about many devices")
+@sdk_options()
+def bulk_list(state):
+    """Outputs a list of all devices in the tenant"""
+    devices_dataframe = _get_device_dataframe(state.sdk)
+    click.echo(devices_dataframe.to_csv())
+
+
+def _get_device_dataframe(sdk, include_backup_usage=False):
+    devices_generator = sdk.devices.get_all(include_backup_usage=include_backup_usage)
+    devices_list = []
+    for page in devices_generator:
+        devices_list.extend(page["computers"])
+    return DataFrame.from_records(
+        devices_list,
+        columns=[
+            "computerId",
+            "guid",
+            "name",
+            "osHostname",
+            "guid",
+            "status",
+            "lastConnected",
+            "backupUsage",
+            "productVersion",
+            "osName",
+            "osVersion",
+        ],
+    )
