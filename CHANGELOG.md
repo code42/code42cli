@@ -10,6 +10,12 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
+- The `devices` command is added. Included are:
+    - `devices deactivate` to deactivate a single computer
+    - `devices get-info` to retrieve detailed information about a computer
+    - `devices bulk info` to retrieve info about many devices
+    - `devices bulk deactivate` to deactivate a list of devices
+
 ### Changed
 
 - The `--advanced-query` option on `alerts search` and `security-data (search|send-to)` commands has been updated:
