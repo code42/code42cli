@@ -9,6 +9,8 @@ from code42cli.click_ext.groups import OrderedGroup
 from code42cli.errors import Code42CLIError
 from code42cli.options import format_option
 from code42cli.options import sdk_options
+from code42cli.file_readers import read_csv_arg
+from code42cli.bulk import run_bulk_process
 from code42cli.output_formats import OutputFormatter
 
 
@@ -195,7 +197,6 @@ def bulk_list(state, active, drop_most_recent, org_uid, include_backup_usage):
         devices_dataframe = _drop_n_devices_per_user(devices_dataframe, drop_most_recent)
     click.echo(devices_dataframe.to_csv())
 
-
 def _get_device_dataframe(sdk, active=None, org_uid=None, include_backup_usage=False):
     devices_generator = sdk.devices.get_all(active=active, include_backup_usage=include_backup_usage, org_uid=org_uid)
     devices_list = []
@@ -222,3 +223,21 @@ def _drop_n_devices_per_user(device_dataframe,number_to_drop,sort_field='lastCon
     return device_dataframe.sort_values(by=sort_field, ascending=sort_ascending).drop(
         device_dataframe.groupby(group_field).head(number_to_drop).index
     ).reset_index(drop=True)
+
+@bulk.command(name='deactivate', help="Deactivate all devices on the given list. Takes as input a CSV with a deviceId column")
+@read_csv_arg(headers=["deviceId"])
+@change_device_name_option
+@purge_date_option
+@sdk_options()
+def bulk_deactivate(state, csv_rows, change_device_name, purge_date):
+    sdk = state.sdk
+    for row in csv_rows:
+        row["change_device_name"] = change_device_name
+        row["purge_date"] = purge_date
+    click.echo(csv_rows)
+    def handle_row(deviceId, change_device_name, purge_date):
+        _deactivate_device(sdk, deviceId, change_device_name, purge_date)
+
+    run_bulk_process(
+        handle_row, csv_rows, progress_label="Deactivating devices:"
+    )
