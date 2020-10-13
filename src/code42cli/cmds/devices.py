@@ -186,6 +186,7 @@ def bulk(state):
 @click.option(
     '--include-backup-usage',
     required=False,
+    type=bool,
     default=False,
     help='Include to return backup usage information for each device (may significantly lengthen the size of the return)'
 )
