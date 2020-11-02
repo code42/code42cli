@@ -1,6 +1,8 @@
 from datetime import date
-from pandas import DataFrame, testing
+
 import pytest
+from pandas import DataFrame
+from pandas import testing
 from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42ForbiddenError
 from py42.exceptions import Py42NotFoundError
@@ -8,7 +10,9 @@ from py42.response import Py42Response
 from requests import HTTPError
 from requests import Response
 
-from code42cli.cmds.devices import _get_device_dataframe, _drop_n_devices_per_user
+from code42cli.cmds.devices import _add_usernames_to_device_dataframe
+from code42cli.cmds.devices import _drop_n_devices_per_user
+from code42cli.cmds.devices import _get_device_dataframe
 from code42cli.main import cli
 
 TEST_DEVICE_ID = "12345"
@@ -116,6 +120,63 @@ TEST_COMPUTER_PAGE = {
         },
     ]
 }
+TEST_USERS_LIST_PAGE = {
+    "totalCount": 2,
+    "users": [
+        {
+            "userId": 1320,
+            "userUid": "840103986007089121",
+            "status": "Active",
+            "username": "ttranda_deactivated@ttrantest.com",
+            "email": "ttranda@ttrantest.com",
+            "firstName": "Thomas",
+            "lastName": "Tran",
+            "quotaInBytes": -1,
+            "orgId": 1034,
+            "orgUid": "840098081282695137",
+            "orgName": "Okta SSO",
+            "userExtRef": None,
+            "notes": None,
+            "active": True,
+            "blocked": False,
+            "emailPromo": True,
+            "invited": False,
+            "orgType": "ENTERPRISE",
+            "usernameIsAnEmail": True,
+            "creationDate": "2018-03-19T19:43:16.742Z",
+            "modificationDate": "2018-10-26T20:22:05.726Z",
+            "passwordReset": False,
+            "localAuthenticationOnly": False,
+            "licenses": ["admin.securityTools"],
+        },
+        {
+            "userId": 1014,
+            "userUid": "836473273124890369",
+            "status": "Active",
+            "username": "qatest@code42.com",
+            "email": "qatest@code42.com",
+            "firstName": "Chad",
+            "lastName": "Valentine",
+            "quotaInBytes": -1,
+            "orgId": 1017,
+            "orgUid": "836473214639515393",
+            "orgName": "Holy SaaS-a-roli",
+            "userExtRef": None,
+            "notes": None,
+            "active": True,
+            "blocked": False,
+            "emailPromo": True,
+            "invited": False,
+            "orgType": "ENTERPRISE",
+            "usernameIsAnEmail": True,
+            "creationDate": "2018-02-22T18:35:23.217Z",
+            "modificationDate": "2018-04-25T11:12:11.504Z",
+            "passwordReset": False,
+            "localAuthenticationOnly": False,
+            "licenses": ["admin.securityTools"],
+        },
+    ],
+}
 
 
 def _create_py42_response(mocker, text):
@@ -151,6 +212,11 @@ def archives_list_generator(mocker):
 @pytest.fixture
 def devices_list_generator(mocker):
     return [TEST_COMPUTER_PAGE]
+
+
+@pytest.fixture
+def users_list_generator(mocker):
+    return [TEST_USERS_LIST_PAGE]
 
 
 @pytest.fixture
@@ -206,6 +272,11 @@ def empty_backupusage_success(cli_state, empty_backupusage_response):
 @pytest.fixture
 def get_all_devices_success(cli_state, devices_list_generator):
     cli_state.sdk.devices.get_all.return_value = devices_list_generator
+
+
+@pytest.fixture
+def get_all_users_success(cli_state, users_list_generator):
+    cli_state.sdk.users.get_all.return_value = users_list_generator
 
 
 def test_deactivate_deactivates_device(runner, cli_state, deactivate_device_success):
@@ -319,7 +390,9 @@ def test_get_info_returns_empty_values_if_no_backupusage(
     assert '"lastCompletedBackup": null' in result.output
 
 
-def test_get_device_dataframe_returns_correct_columns(cli_state, get_all_devices_success):
+def test_get_device_dataframe_returns_correct_columns(
+    cli_state, get_all_devices_success
+):
     result = _get_device_dataframe(cli_state.sdk)
     assert "computerId" in result.columns
     assert "guid" in result.columns
@@ -336,28 +409,33 @@ def test_get_device_dataframe_returns_correct_columns(cli_state, get_all_devices
     assert "address" not in result.columns
     assert "buildVersion" not in result.columns
 
+
 def test_bulk_list_outputs_csv(runner, cli_state, get_all_devices_success):
-    result = runner.invoke(
-        cli,
-        ["devices",
-        "bulk",
-        "info"],
-        obj=cli_state
+    result = runner.invoke(cli, ["devices", "bulk", "info"], obj=cli_state)
+    assert (
+        "computerId,guid,name,osHostname,status,lastConnected,backupUsage,productVersion,osName,osVersion,userUid"
+        in result.output
     )
-    assert 'computerId,guid,name,osHostname,status,lastConnected,backupUsage,productVersion,osName,osVersion,userUid' in result.output
+
 
 def test_drop_n_devices_per_user_drops_correct_devices():
     testdf = DataFrame.from_records(
         [
-            {"userUid":0,"lastConnected":0},
-            {"userUid":0,"lastConnected":1},
-            {"userUid":1,"lastConnected":0}
+            {"userUid": 0, "lastConnected": 0},
+            {"userUid": 0, "lastConnected": 1},
+            {"userUid": 1, "lastConnected": 0},
         ]
     )
-    expected_return = DataFrame.from_records(
-        [
-            {"userUid":0,"lastConnected":1}
-        ]
-    )
-    returndf = _drop_n_devices_per_user(testdf,1)
+    expected_return = DataFrame.from_records([{"userUid": 0, "lastConnected": 1}])
+    returndf = _drop_n_devices_per_user(testdf, 1)
     testing.assert_frame_equal(expected_return, returndf)
+
+
+def test_add_usernames_to_device_dataframe_adds_usernames_to_dataframe(
+    cli_state, get_all_users_success
+):
+    testdf = DataFrame.from_records(
+        [{"userUid": "840103986007089121"}, {"userUid": "836473273124890369"}]
+    )
+    result = _add_usernames_to_device_dataframe(cli_state.sdk, testdf)
+    assert "username" in result.columns
