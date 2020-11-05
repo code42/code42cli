@@ -296,7 +296,6 @@ def bulk_deactivate(state, csv_rows, change_device_name, purge_date):
     for row in csv_rows:
         row["change_device_name"] = change_device_name
         row["purge_date"] = purge_date
-    click.echo(csv_rows)
 
     def handle_row(deviceId, change_device_name, purge_date):
         _deactivate_device(sdk, deviceId, change_device_name, purge_date)
