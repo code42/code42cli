@@ -2,8 +2,9 @@ from collections import OrderedDict
 from datetime import date
 
 import click
-from pandas import DataFrame
+from pandas import DataFrame, to_datetime, to_timedelta
 from py42 import exceptions
+from datetime import datetime, timedelta
 
 from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
@@ -172,6 +173,12 @@ def bulk(state):
     help="Include to return only active devices.",
 )
 @click.option(
+    "--days-since-last-connected",
+    required=False,
+    type=int,
+    help="Return only devices that have not connected in the number of days specified."
+)
+@click.option(
     "--org-uid",
     required=False,
     type=str,
@@ -202,12 +209,14 @@ def bulk(state):
 )
 @sdk_options()
 def bulk_list(
-    state, active, drop_most_recent, org_uid, include_backup_usage, include_usernames
+    state, active, days_since_last_connected, drop_most_recent, org_uid, include_backup_usage, include_usernames
 ):
     """Outputs a list of all devices in the tenant"""
     devices_dataframe = _get_device_dataframe(
         state.sdk, active, org_uid, include_backup_usage
     )
+    if days_since_last_connected:
+        devices_dataframe = _drop_devices_which_have_not_connected_in_some_number_of_days(devices_dataframe, days_since_last_connected)
     if drop_most_recent:
         devices_dataframe = _drop_n_devices_per_user(
             devices_dataframe, drop_most_recent
@@ -243,6 +252,11 @@ def _get_device_dataframe(sdk, active=None, org_uid=None, include_backup_usage=F
         ],
     )
 
+def _drop_devices_which_have_not_connected_in_some_number_of_days(
+    devices_dataframe,
+    days_since_last_connected
+):
+    return devices_dataframe.loc[to_datetime(datetime.now(),utc=True) - to_datetime(devices_dataframe["lastConnected"], utc=True) > to_timedelta(days_since_last_connected, unit="days"), :]
 
 def _drop_n_devices_per_user(
     device_dataframe,

@@ -20,19 +20,28 @@ def read_csv(file, headers=None):
     """Helper to read a csv file object into dict rows, automatically removing header row
     if it exists, and errors if column count doesn't match header list length.
     """
-    reader = csv.DictReader(file, fieldnames=headers)
+    reader = csv.DictReader(file)
     first_row = next(reader)
-    if None in first_row or None in first_row.values():
-        raise click.BadParameter(
-            "Column count in {} doesn't match expected headers: {}".format(
-                file.name, headers
-            )
-        )
-    # skip first row if it's the header values
-    if tuple(first_row.keys()) == tuple(first_row.values()):
-        return list(reader)
+    if all(header in first_row for header in headers):
+        return [
+            {key: value for (key, value) in row.items() if key in headers}
+            for row in [first_row, *list(reader)]
+        ]
     else:
-        return [first_row, *list(reader)]
+        file.seek(0)
+        reader = csv.DictReader(file, fieldnames=headers)
+        first_row = next(reader)
+        if None in first_row or None in first_row.values():
+            raise click.BadParameter(
+                "Expected headers {} not found in {} and column count doesn't match expected size".format(
+                    headers, file.name
+                )
+            )
+        # skip first row if it's the header values
+        if tuple(first_row.keys()) == tuple(first_row.values()):
+            return list(reader)
+        else:
+            return [first_row, *list(reader)]
 
 
 def read_flat_file(file):
