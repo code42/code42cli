@@ -215,12 +215,12 @@ def bulk_list(
     devices_dataframe = _get_device_dataframe(
         state.sdk, active, org_uid, include_backup_usage
     )
-    if days_since_last_connected:
-        devices_dataframe = _drop_devices_which_have_not_connected_in_some_number_of_days(devices_dataframe, days_since_last_connected)
     if drop_most_recent:
         devices_dataframe = _drop_n_devices_per_user(
             devices_dataframe, drop_most_recent
         )
+    if days_since_last_connected:
+        devices_dataframe = _drop_devices_which_have_not_connected_in_some_number_of_days(devices_dataframe, days_since_last_connected)
     if include_usernames:
         devices_dataframe = _add_usernames_to_device_dataframe(
             state.sdk, devices_dataframe
@@ -302,3 +302,4 @@ def bulk_deactivate(state, csv_rows, change_device_name, purge_date):
         _deactivate_device(sdk, deviceId, change_device_name, purge_date)
 
     run_bulk_process(handle_row, csv_rows, progress_label="Deactivating devices:")
+    click.echo("Run complete. All devices deactivated.") # if there were any errors, a different message is displayed by the error handler
