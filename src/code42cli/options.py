@@ -7,7 +7,7 @@ from code42cli.output_formats import SendToFileEventsOutputFormat
 from code42cli.profile import get_profile
 from code42cli.sdk_client import create_sdk
 
-BEGIN_OPTION_HEP_MESSAGE = (
+BEGIN_OPTION_HELP_MESSAGE = (
     "The beginning of the date range in which to look for {}, can be a date/time in "
     "yyyy-MM-dd (UTC) or yyyy-MM-dd HH:MM:SS (UTC+24-hr time) format where the 'time' "
     "portion of the string can be partial (e.g. '2020-01-01 12' or '2020-01-01 01:15') "
@@ -40,7 +40,7 @@ format_option = click.option(
 
 def begin_option(f, search_term, **kwargs):
     start_time = click.option(
-        "-b", "--begin", help=BEGIN_OPTION_HEP_MESSAGE.format(search_term), **kwargs
+        "-b", "--begin", help=BEGIN_OPTION_HELP_MESSAGE.format(search_term), **kwargs
     )
 
     f = start_time(f)

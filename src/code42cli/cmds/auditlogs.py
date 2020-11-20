@@ -103,6 +103,7 @@ def search(
     affected_username,
     format,
 ):
+    """Search audit logs."""
     _search(
         state.sdk,
         format,
@@ -136,6 +137,7 @@ def send_to(
     affected_user_id,
     affected_username,
 ):
+    """Send audit logs to given server address."""
     _send_to(
         state.sdk,
         hostname,
