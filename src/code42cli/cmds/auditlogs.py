@@ -4,7 +4,6 @@ from _collections import OrderedDict
 import click
 
 from code42cli.click_ext.groups import OrderedGroup
-from code42cli.cmds.search.extraction import create_simple_send_to_handler
 from code42cli.date_helper import parse_max_timestamp
 from code42cli.date_helper import parse_min_timestamp
 from code42cli.logger import get_logger_for_server
@@ -15,7 +14,7 @@ from code42cli.options import sdk_options
 from code42cli.options import send_to_format_options
 from code42cli.options import server_options
 from code42cli.output_formats import OutputFormatter
-
+from code42cli.util import warn_interrupt
 
 EVENT_KEY = "events"
 AUDIT_LOGS_KEYWORD = "audit-logs"
@@ -181,7 +180,14 @@ def _search(sdk, format, **filter_args):
 
 def _send_to(sdk, hostname, protocol, format, **filter_args):
     logger = get_logger_for_server(hostname, protocol, format)
-    response_handler = create_simple_send_to_handler(
-        logger, sdk.auditlogs.get_all, EVENT_KEY, **filter_args
-    )
-    response_handler()
+    with warn_interrupt():
+        response_gen = sdk.auditlogs.get_all(**filter_args)
+        try:
+            for response in response_gen:
+                if EVENT_KEY in response:
+                    for event in response[EVENT_KEY]:
+                        logger.info(event)
+                else:
+                    logger.info("No results found.")
+        except KeyError:
+            pass
