@@ -136,7 +136,7 @@ def send_to(
     affected_user_id,
     affected_username,
 ):
-    """Send audit logs to given server address."""
+    """Send audit logs to the given server address."""
     _send_to(
         state.sdk,
         hostname,

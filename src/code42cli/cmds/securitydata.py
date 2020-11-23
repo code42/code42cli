@@ -264,6 +264,7 @@ def search(
 @security_data.group(cls=OrderedGroup)
 @sdk_options()
 def saved_search(state):
+    """Search for file events using saved searches."""
     pass
 
 
