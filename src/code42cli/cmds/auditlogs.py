@@ -21,11 +21,13 @@ AUDIT_LOGS_KEYWORD = "audit-logs"
 
 AUDIT_LOGS_DEFAULT_HEADER = OrderedDict()
 AUDIT_LOGS_DEFAULT_HEADER["timestamp"] = "Timestamp"
-AUDIT_LOGS_DEFAULT_HEADER["type"] = "Type"
+AUDIT_LOGS_DEFAULT_HEADER["type$"] = "Type"
 AUDIT_LOGS_DEFAULT_HEADER["actorName"] = "ActorName"
 AUDIT_LOGS_DEFAULT_HEADER["actorIpAddress"] = "ActorIpAddress"
-AUDIT_LOGS_DEFAULT_HEADER["success"] = "Success"
-AUDIT_LOGS_DEFAULT_HEADER["resultCount"] = "ResultCount"
+AUDIT_LOGS_DEFAULT_HEADER["userName"] = "AffectedUser"
+AUDIT_LOGS_DEFAULT_HEADER["userId"] = "AffectedUserUID"
+# AUDIT_LOGS_DEFAULT_HEADER["success"] = "Success"
+# AUDIT_LOGS_DEFAULT_HEADER["resultCount"] = "ResultCount"
 
 filter_option_usernames = click.option(
     "--username", required=False, help="Filter results by usernames.", multiple=True,
