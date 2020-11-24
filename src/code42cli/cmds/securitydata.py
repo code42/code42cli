@@ -21,10 +21,9 @@ from code42cli.logger import get_logger_for_server
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import format_option
 from code42cli.options import sdk_options
+from code42cli.options import send_to_format_options
 from code42cli.options import server_options
 from code42cli.output_formats import OutputFormatter
-from code42cli.output_formats import SendToFileEventsOutputFormat
-
 
 logger = get_main_cli_logger()
 
@@ -161,15 +160,6 @@ saved_search_option = click.option(
 )
 
 
-send_to_format_options = click.option(
-    "-f",
-    "--format",
-    type=click.Choice(SendToFileEventsOutputFormat(), case_sensitive=False),
-    help="The output format of the result. Defaults to json format.",
-    default=SendToFileEventsOutputFormat.RAW,
-)
-
-
 def file_event_options(f):
     f = exposure_type_option(f)
     f = username_option(f)
@@ -274,6 +264,7 @@ def search(
 @security_data.group(cls=OrderedGroup)
 @sdk_options()
 def saved_search(state):
+    """Search for file events using saved searches."""
     pass
 
 
