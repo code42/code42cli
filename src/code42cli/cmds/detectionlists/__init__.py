@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 import click
 
 from code42cli.cmds.shared import get_user_id
