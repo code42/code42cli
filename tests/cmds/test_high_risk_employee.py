@@ -1,9 +1,7 @@
-from py42.exceptions import Py42NotFoundError
 from py42.response import Py42Response
-from requests import HTTPError
 from requests import Request
-from requests import Response
-from tests.cmds.conftest import TEST_EMPLOYEE, get_user_not_on_list_side_effect
+from tests.cmds.conftest import get_user_not_on_list_side_effect
+from tests.cmds.conftest import TEST_EMPLOYEE
 from tests.cmds.conftest import thread_safe_side_effect
 from tests.conftest import TEST_ID
 
@@ -27,7 +25,9 @@ HIGH_RISK_EMPLOYEE_ITEM = """{
 """
 
 
-def test_list_high_risk_employees_lists_expected_properties(runner, cli_state_with_user, mocker):
+def test_list_high_risk_employees_lists_expected_properties(
+    runner, cli_state_with_user, mocker
+):
     def gen(*args, **kwargs):
         response = mocker.MagicMock(spec=Request)
         response.text = """{{"items": [{0}]}}""".format(HIGH_RISK_EMPLOYEE_ITEM)
@@ -42,7 +42,9 @@ def test_list_high_risk_employees_lists_expected_properties(runner, cli_state_wi
     assert "test.testerson@example.com" in res.output
 
 
-def test_list_high_risk_employees_when_given_raw_json_lists_expected_properties(runner, cli_state_with_user, mocker):
+def test_list_high_risk_employees_when_given_raw_json_lists_expected_properties(
+    runner, cli_state_with_user, mocker
+):
     def gen(*args, **kwargs):
         response = mocker.MagicMock(spec=Request)
         response.text = """{{"items": [{0}]}}""".format(HIGH_RISK_EMPLOYEE_ITEM)
@@ -51,7 +53,9 @@ def test_list_high_risk_employees_when_given_raw_json_lists_expected_properties(
             yield Py42Response(page)
 
     cli_state_with_user.sdk.detectionlists.high_risk_employee.get_all.side_effect = gen
-    res = runner.invoke(cli, ["high-risk-employee", "list", "-f", "RAW-JSON"], obj=cli_state_with_user)
+    res = runner.invoke(
+        cli, ["high-risk-employee", "list", "-f", "RAW-JSON"], obj=cli_state_with_user
+    )
     assert "userName" in res.output
     assert "notes" in res.output
     assert "test.testerson@example.com" in res.output

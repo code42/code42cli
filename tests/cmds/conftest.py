@@ -2,9 +2,11 @@ import json as json_module
 import threading
 
 import pytest
-from py42.exceptions import Py42UserAlreadyAddedError, Py42NotFoundError
+from py42.exceptions import Py42NotFoundError
+from py42.exceptions import Py42UserAlreadyAddedError
 from py42.sdk import SDKClient
-from requests import HTTPError, Request
+from requests import HTTPError
+from requests import Request
 from requests import Response
 from tests.conftest import convert_str_to_date
 from tests.conftest import TEST_ID
