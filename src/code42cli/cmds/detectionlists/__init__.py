@@ -5,17 +5,13 @@ import click
 from code42cli.cmds.shared import get_user_id
 from code42cli.output_formats import OutputFormatter
 
-HEADER_KEYS_MAP = OrderedDict()
-HEADER_KEYS_MAP["userName"] = "Username"
-HEADER_KEYS_MAP["notes"] = "Notes"
-
 
 def list_employees(
     employee_generator, output_format, list_name, additional_header_items=None
 ):
-    employee_list = []
     additional_header_items = additional_header_items or {}
-    header = {**HEADER_KEYS_MAP, **additional_header_items}
+    header = {"userName": "Username", "notes": "Notes", **additional_header_items}
+    employee_list = []
     for employees in employee_generator:
         for employee in employees["items"]:
             employee_list.append(employee)
