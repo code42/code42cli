@@ -5,9 +5,8 @@ from py42.exceptions import Py42NotFoundError
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
-from code42cli.cmds.detectionlists import add_risk_tags as _add_risk_tags
+from code42cli.cmds.detectionlists import add_risk_tags as _add_risk_tags, list_employees
 from code42cli.cmds.detectionlists import handle_list_args
-from code42cli.cmds.detectionlists import HEADER_KEYS_MAP
 from code42cli.cmds.detectionlists import remove_risk_tags as _remove_risk_tags
 from code42cli.cmds.detectionlists import update_user
 from code42cli.cmds.detectionlists.options import cloud_alias_option
@@ -19,7 +18,6 @@ from code42cli.file_readers import read_csv_arg
 from code42cli.file_readers import read_flat_file_arg
 from code42cli.options import format_option
 from code42cli.options import sdk_options
-from code42cli.output_formats import OutputFormatter
 
 
 risk_tag_option = click.option(
@@ -43,11 +41,7 @@ def high_risk_employee(state):
 @sdk_options()
 def _list(state, format):
     employee_generator = _get_high_risk_employees(state.sdk)
-    employee_list = [
-        employee for employees in employee_generator for employee in employees["items"]
-    ]
-    formatter = OutputFormatter(format, HEADER_KEYS_MAP)
-    formatter.echo_formatted_list(employee_list)
+    list_employees(employee_generator, format, "high risk employee")
 
 
 @high_risk_employee.command()

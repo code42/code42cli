@@ -66,6 +66,23 @@ def test_list_high_risk_employees_when_given_raw_json_lists_expected_properties(
     assert "PERFORMANCE_CONCERNS" in res.output
 
 
+def test_list_departing_employee_when_no_employees_echos_expected_message(runner,
+                                                                          cli_state_with_user,
+                                                                          mocker):
+    def gen(*args, **kwargs):
+        response = mocker.MagicMock(spec=Request)
+        response.text = """{"items": []}"""
+        pages = [response]
+        for page in pages:
+            yield Py42Response(page)
+
+    cli_state_with_user.sdk.detectionlists.departing_employee.get_all.side_effect = gen
+    res = runner.invoke(
+        cli, ["high-risk-employee", "list"], obj=cli_state_with_user
+    )
+    assert "There are currently no users on the high risk employee list." in res.output
+
+
 def test_add_high_risk_employee_adds(runner, cli_state_with_user):
     runner.invoke(
         cli, ["high-risk-employee", "add", TEST_EMPLOYEE], obj=cli_state_with_user

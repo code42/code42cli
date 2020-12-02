@@ -4,7 +4,7 @@ from py42.exceptions import Py42NotFoundError
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
-from code42cli.cmds.detectionlists import HEADER_KEYS_MAP
+from code42cli.cmds.detectionlists import HEADER_KEYS_MAP, list_employees
 from code42cli.cmds.detectionlists import update_user
 from code42cli.cmds.detectionlists.options import cloud_alias_option
 from code42cli.cmds.detectionlists.options import notes_option
@@ -15,7 +15,6 @@ from code42cli.file_readers import read_csv_arg
 from code42cli.file_readers import read_flat_file_arg
 from code42cli.options import format_option
 from code42cli.options import sdk_options
-from code42cli.output_formats import OutputFormatter
 
 DATE_FORMAT = "%Y-%m-%d"
 
@@ -32,11 +31,7 @@ def departing_employee(state):
 @sdk_options()
 def _list(state, format):
     employee_generator = _get_departing_employees(state.sdk)
-    employee_list = [
-        employee for employees in employee_generator for employee in employees["items"]
-    ]
-    formatter = OutputFormatter(format, HEADER_KEYS_MAP)
-    formatter.echo_formatted_list(employee_list)
+    list_employees(employee_generator, format, "departing employee")
 
 
 @departing_employee.command()

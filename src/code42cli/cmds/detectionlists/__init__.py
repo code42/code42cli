@@ -1,11 +1,26 @@
 from collections import OrderedDict
 
-from code42cli.cmds.shared import get_user_id
+import click
 
+from code42cli.cmds.shared import get_user_id
+from code42cli.output_formats import OutputFormatter
 
 HEADER_KEYS_MAP = OrderedDict()
 HEADER_KEYS_MAP["userName"] = "Username"
 HEADER_KEYS_MAP["notes"] = "Notes"
+
+
+def list_employees(employee_generator, output_format, list_name):
+    employee_list = []
+    for employees in employee_generator:
+        for employee in employees["items"]:
+            employee_list.append(employee)
+    if employee_list:
+        formatter = OutputFormatter(output_format, HEADER_KEYS_MAP)
+        formatter.echo_formatted_list(employee_list)
+    else:
+        click.echo("There are currently no users on the {} list.".format(list_name))
+
 
 
 def update_user(sdk, username, cloud_alias=None, risk_tag=None, notes=None):

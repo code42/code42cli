@@ -65,6 +65,21 @@ def test_list_departing_employees_when_given_raw_json_lists_expected_properties(
     assert "2020-07-07" in res.output
 
 
+def test_list_departing_employee_when_no_employees_echos_expected_message(runner, cli_state_with_user, mocker):
+    def gen(*args, **kwargs):
+        response = mocker.MagicMock(spec=Request)
+        response.text = """{"items": []}"""
+        pages = [response]
+        for page in pages:
+            yield Py42Response(page)
+        
+    cli_state_with_user.sdk.detectionlists.departing_employee.get_all.side_effect = gen
+    res = runner.invoke(
+        cli, ["departing-employee", "list"], obj=cli_state_with_user
+    )
+    assert "There are currently no users on the departing employee list." in res.output
+
+
 def test_add_departing_employee_when_given_cloud_alias_adds_alias(
     runner, cli_state_with_user
 ):
