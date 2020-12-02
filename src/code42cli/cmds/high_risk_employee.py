@@ -5,8 +5,9 @@ from py42.exceptions import Py42NotFoundError
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
-from code42cli.cmds.detectionlists import add_risk_tags as _add_risk_tags, list_employees
+from code42cli.cmds.detectionlists import add_risk_tags as _add_risk_tags
 from code42cli.cmds.detectionlists import handle_list_args
+from code42cli.cmds.detectionlists import list_employees
 from code42cli.cmds.detectionlists import remove_risk_tags as _remove_risk_tags
 from code42cli.cmds.detectionlists import update_user
 from code42cli.cmds.detectionlists.options import cloud_alias_option

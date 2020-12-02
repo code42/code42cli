@@ -4,7 +4,7 @@ from py42.exceptions import Py42NotFoundError
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
-from code42cli.cmds.detectionlists import HEADER_KEYS_MAP, list_employees
+from code42cli.cmds.detectionlists import list_employees
 from code42cli.cmds.detectionlists import update_user
 from code42cli.cmds.detectionlists.options import cloud_alias_option
 from code42cli.cmds.detectionlists.options import notes_option

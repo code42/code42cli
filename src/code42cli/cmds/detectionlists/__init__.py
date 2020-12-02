@@ -22,7 +22,6 @@ def list_employees(employee_generator, output_format, list_name):
         click.echo("There are currently no users on the {} list.".format(list_name))
 
 
-
 def update_user(sdk, username, cloud_alias=None, risk_tag=None, notes=None):
     """Updates a detection list user.
 
