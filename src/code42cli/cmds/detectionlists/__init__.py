@@ -1,4 +1,11 @@
+from collections import OrderedDict
+
 from code42cli.cmds.shared import get_user_id
+
+
+HEADER_KEYS_MAP = OrderedDict()
+HEADER_KEYS_MAP["userName"] = "Username"
+HEADER_KEYS_MAP["notes"] = "Notes"
 
 
 def update_user(sdk, username, cloud_alias=None, risk_tag=None, notes=None):

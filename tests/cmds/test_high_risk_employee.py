@@ -1,8 +1,9 @@
 from py42.exceptions import Py42NotFoundError
+from py42.response import Py42Response
 from requests import HTTPError
 from requests import Request
 from requests import Response
-from tests.cmds.conftest import TEST_EMPLOYEE
+from tests.cmds.conftest import TEST_EMPLOYEE, get_user_not_on_list_side_effect
 from tests.cmds.conftest import thread_safe_side_effect
 from tests.conftest import TEST_ID
 
@@ -11,16 +12,54 @@ from code42cli.main import cli
 _NAMESPACE = "code42cli.cmds.high_risk_employee"
 
 
-def get_user_not_on_high_risk_employee_list_side_effect(mocker):
-    def side_effect(*args, **kwargs):
-        err = mocker.MagicMock(spec=HTTPError)
-        resp = mocker.MagicMock(spec=Response)
-        resp.text = "TEST_ERR"
-        err.response = resp
-        err.response.request = mocker.MagicMock(spec=Request)
-        raise Py42NotFoundError(err)
+HIGH_RISK_EMPLOYEE_ITEM = """{
+    "type$": "HIGH_RISK_EMPLOYEE_V2",
+    "tenantId": "1111111-af5b-4231-9d8e-000000000",
+    "userId": "TEST USER UID",
+    "userName": "test.testerson@example.com",
+    "displayName": "Testerson",
+    "notes": "Leaving for competitor",
+    "createdAt": "2020-06-23T19:57:37.1345130Z",
+    "status": "OPEN",
+    "cloudUsernames": ["cloud@example.com"],
+    "riskFactors": ["PERFORMANCE_CONCERNS"]
+}
+"""
 
-    return side_effect
+
+def test_list_high_risk_employees_lists_expected_properties(runner, cli_state_with_user, mocker):
+    def gen(*args, **kwargs):
+        response = mocker.MagicMock(spec=Request)
+        response.text = """{{"items": [{0}]}}""".format(HIGH_RISK_EMPLOYEE_ITEM)
+        pages = [response, response, response]
+        for page in pages:
+            yield Py42Response(page)
+
+    cli_state_with_user.sdk.detectionlists.high_risk_employee.get_all.side_effect = gen
+    res = runner.invoke(cli, ["high-risk-employee", "list"], obj=cli_state_with_user)
+    assert "Username" in res.output
+    assert "Notes" in res.output
+    assert "test.testerson@example.com" in res.output
+
+
+def test_list_high_risk_employees_when_given_raw_json_lists_expected_properties(runner, cli_state_with_user, mocker):
+    def gen(*args, **kwargs):
+        response = mocker.MagicMock(spec=Request)
+        response.text = """{{"items": [{0}]}}""".format(HIGH_RISK_EMPLOYEE_ITEM)
+        pages = [response, response, response]
+        for page in pages:
+            yield Py42Response(page)
+
+    cli_state_with_user.sdk.detectionlists.high_risk_employee.get_all.side_effect = gen
+    res = runner.invoke(cli, ["high-risk-employee", "list", "-f", "RAW-JSON"], obj=cli_state_with_user)
+    assert "userName" in res.output
+    assert "notes" in res.output
+    assert "test.testerson@example.com" in res.output
+    assert "Leaving for competitor" in res.output
+    assert "cloudUsernames" in res.output
+    assert "cloud@example.com" in res.output
+    assert "riskFactors" in res.output
+    assert "PERFORMANCE_CONCERNS" in res.output
 
 
 def test_add_high_risk_employee_adds(runner, cli_state_with_user):
@@ -240,7 +279,7 @@ def test_bulk_remove_risk_tags_uses_expected_arguments(runner, cli_state, mocker
 def test_remove_high_risk_employee_when_user_not_on_list_prints_expected_error(
     mocker, runner, cli_state
 ):
-    cli_state.sdk.detectionlists.high_risk_employee.remove.side_effect = get_user_not_on_high_risk_employee_list_side_effect(
+    cli_state.sdk.detectionlists.high_risk_employee.remove.side_effect = get_user_not_on_list_side_effect(
         mocker
     )
     test_username = "test@example.com"

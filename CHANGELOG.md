@@ -12,6 +12,10 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
+- `code42 departing-employee list` command.
+
+- `code42 high-risk-employee list` command.
+
 - `code42 audit-logs` commands:
     - `search` to search for audit-logs.
     - `send-to` to send audit-logs to server.

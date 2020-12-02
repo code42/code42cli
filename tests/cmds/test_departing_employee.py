@@ -1,24 +1,64 @@
 from py42.exceptions import Py42NotFoundError
+from py42.response import Py42Response
 from requests import HTTPError
 from requests import Request
 from requests import Response
-from tests.cmds.conftest import thread_safe_side_effect
+from tests.cmds.conftest import thread_safe_side_effect, get_user_not_on_list_side_effect
 from tests.conftest import TEST_ID
 
 from .conftest import TEST_EMPLOYEE
 from code42cli.main import cli
 
 
-def get_user_not_on_departing_employee_list_side_effect(mocker):
-    def side_effect(*args, **kwargs):
-        err = mocker.MagicMock(spec=HTTPError)
-        resp = mocker.MagicMock(spec=Response)
-        resp.text = "TEST_ERR"
-        err.response = resp
-        err.response.request = mocker.MagicMock(spec=Request)
-        raise Py42NotFoundError(err)
+DEPARTING_EMPLOYEE_ITEM = """{
+    "type$": "DEPARTING_EMPLOYEE_V2",
+    "tenantId": "1111111-af5b-4231-9d8e-000000000",
+    "userId": "TEST USER UID",
+    "userName": "test.testerson@example.com",
+    "displayName": "Testerson",
+    "notes": "Leaving for competitor",
+    "createdAt": "2020-06-23T19:57:37.1345130Z",
+    "status": "OPEN",
+    "cloudUsernames": ["cloud@example.com"],
+    "departureDate": "2020-07-07"
+}
+"""
 
-    return side_effect
+
+def test_list_departing_employees_lists_expected_properties(runner, cli_state_with_user, mocker):
+    def gen(*args, **kwargs):
+        response = mocker.MagicMock(spec=Request)
+        response.text = """{{"items": [{0}]}}""".format(DEPARTING_EMPLOYEE_ITEM)
+        pages = [response, response, response]
+        for page in pages:
+            yield Py42Response(page)
+
+    cli_state_with_user.sdk.detectionlists.departing_employee.get_all.side_effect = gen
+    res = runner.invoke(cli, ["departing-employee", "list"], obj=cli_state_with_user)
+    assert "Username" in res.output
+    assert "Notes" in res.output
+    assert "test.testerson@example.com" in res.output
+    assert "Leaving for competitor" in res.output
+
+
+def test_list_departing_employees_when_given_raw_json_lists_expected_properties(runner, cli_state_with_user, mocker):
+    def gen(*args, **kwargs):
+        response = mocker.MagicMock(spec=Request)
+        response.text = """{{"items": [{0}]}}""".format(DEPARTING_EMPLOYEE_ITEM)
+        pages = [response, response, response]
+        for page in pages:
+            yield Py42Response(page)
+
+    cli_state_with_user.sdk.detectionlists.departing_employee.get_all.side_effect = gen
+    res = runner.invoke(cli, ["departing-employee", "list", "-f", "RAW-JSON"], obj=cli_state_with_user)
+    assert "userName" in res.output
+    assert "notes" in res.output
+    assert "test.testerson@example.com" in res.output
+    assert "Leaving for competitor" in res.output
+    assert "cloudUsernames" in res.output
+    assert "cloud@example.com" in res.output
+    assert "departureDate" in res.output
+    assert "2020-07-07" in res.output
 
 
 def test_add_departing_employee_when_given_cloud_alias_adds_alias(
@@ -213,7 +253,7 @@ def test_add_departing_employee_when_invalid_date_format_validation_raises_error
 def test_remove_departing_employee_when_user_not_on_list_prints_expected_error(
     mocker, runner, cli_state
 ):
-    cli_state.sdk.detectionlists.departing_employee.remove.side_effect = get_user_not_on_departing_employee_list_side_effect(
+    cli_state.sdk.detectionlists.departing_employee.remove.side_effect = get_user_not_on_list_side_effect(
         mocker
     )
     test_username = "test@example.com"

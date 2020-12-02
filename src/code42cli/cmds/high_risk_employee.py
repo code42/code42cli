@@ -7,6 +7,7 @@ from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.cmds.detectionlists import add_risk_tags as _add_risk_tags
 from code42cli.cmds.detectionlists import handle_list_args
+from code42cli.cmds.detectionlists import HEADER_KEYS_MAP
 from code42cli.cmds.detectionlists import remove_risk_tags as _remove_risk_tags
 from code42cli.cmds.detectionlists import update_user
 from code42cli.cmds.detectionlists.options import cloud_alias_option
@@ -16,7 +17,10 @@ from code42cli.cmds.shared import get_user_id
 from code42cli.errors import Code42CLIError
 from code42cli.file_readers import read_csv_arg
 from code42cli.file_readers import read_flat_file_arg
+from code42cli.options import format_option
 from code42cli.options import sdk_options
+from code42cli.output_formats import OutputFormatter
+
 
 risk_tag_option = click.option(
     "-t",
@@ -32,6 +36,18 @@ risk_tag_option = click.option(
 def high_risk_employee(state):
     """For adding and removing employees from the high risk employees detection list."""
     pass
+
+
+@high_risk_employee.command("list")
+@format_option
+@sdk_options()
+def _list(state, format):
+    employee_generator = _get_high_risk_employees(state.sdk)
+    employee_list = [
+        employee for employees in employee_generator for employee in employees["items"]
+    ]
+    formatter = OutputFormatter(format, HEADER_KEYS_MAP)
+    formatter.echo_formatted_list(employee_list)
 
 
 @high_risk_employee.command()
@@ -176,6 +192,10 @@ def bulk_remove_risk_tags(state, csv_rows):
     run_bulk_process(
         handle_row, csv_rows, progress_label="Removing risk tags from users:",
     )
+
+
+def _get_high_risk_employees(sdk):
+    return sdk.detectionlists.high_risk_employee.get_all()
 
 
 def _add_high_risk_employee(sdk, username, cloud_alias, risk_tag, notes):

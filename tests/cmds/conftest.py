@@ -2,9 +2,9 @@ import json as json_module
 import threading
 
 import pytest
-from py42.exceptions import Py42UserAlreadyAddedError
+from py42.exceptions import Py42UserAlreadyAddedError, Py42NotFoundError
 from py42.sdk import SDKClient
-from requests import HTTPError
+from requests import HTTPError, Request
 from requests import Response
 from tests.conftest import convert_str_to_date
 from tests.conftest import TEST_ID
@@ -13,6 +13,18 @@ from code42cli.logger import CliLogger
 
 
 TEST_EMPLOYEE = "risky employee"
+
+
+def get_user_not_on_list_side_effect(mocker):
+    def side_effect(*args, **kwargs):
+        err = mocker.MagicMock(spec=HTTPError)
+        resp = mocker.MagicMock(spec=Response)
+        resp.text = "TEST_ERR"
+        err.response = resp
+        err.response.request = mocker.MagicMock(spec=Request)
+        raise Py42NotFoundError(err)
+
+    return side_effect
 
 
 @pytest.fixture
