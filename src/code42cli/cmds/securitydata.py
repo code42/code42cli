@@ -293,7 +293,10 @@ def show(state, search_id):
 @file_event_options
 @search_options
 @click.option(
-    "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
+    "--or-query",
+    is_flag=True,
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
+    help="Combine query filter options with 'OR' logic instead of the default 'AND'.",
 )
 @sdk_options()
 @server_options
