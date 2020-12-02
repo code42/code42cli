@@ -10,13 +10,17 @@ HEADER_KEYS_MAP["userName"] = "Username"
 HEADER_KEYS_MAP["notes"] = "Notes"
 
 
-def list_employees(employee_generator, output_format, list_name):
+def list_employees(
+    employee_generator, output_format, list_name, additional_header_items=None
+):
     employee_list = []
+    additional_header_items = additional_header_items or {}
+    header = {**HEADER_KEYS_MAP, **additional_header_items}
     for employees in employee_generator:
         for employee in employees["items"]:
             employee_list.append(employee)
     if employee_list:
-        formatter = OutputFormatter(output_format, HEADER_KEYS_MAP)
+        formatter = OutputFormatter(output_format, header)
         formatter.echo_formatted_list(employee_list)
     else:
         click.echo("There are currently no users on the {} list.".format(list_name))

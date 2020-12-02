@@ -39,6 +39,8 @@ def test_list_departing_employees_lists_expected_properties(
     assert "Notes" in res.output
     assert "test.testerson@example.com" in res.output
     assert "Leaving for competitor" in res.output
+    assert "Departure Date" in res.output
+    assert "2020-07-07" in res.output
 
 
 def test_list_departing_employees_when_given_raw_json_lists_expected_properties(

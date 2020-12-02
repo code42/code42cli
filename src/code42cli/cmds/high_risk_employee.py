@@ -41,6 +41,8 @@ def high_risk_employee(state):
 @format_option
 @sdk_options()
 def _list(state, format):
+    """Lists the employees on the High Risk Employee list."""
+    
     employee_generator = _get_high_risk_employees(state.sdk)
     list_employees(employee_generator, format, "high risk employee")
 

@@ -30,8 +30,15 @@ def departing_employee(state):
 @format_option
 @sdk_options()
 def _list(state, format):
+    """Lists the employees on the Departing Employee list."""
+    
     employee_generator = _get_departing_employees(state.sdk)
-    list_employees(employee_generator, format, "departing employee")
+    list_employees(
+        employee_generator,
+        format,
+        "departing employee",
+        {"departureDate": "Departure Date"},
+    )
 
 
 @departing_employee.command()
