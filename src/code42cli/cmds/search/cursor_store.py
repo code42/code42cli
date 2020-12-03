@@ -73,15 +73,13 @@ class AlertCursorStore(BaseCursorStore):
     def __init__(self, profile_name):
         dir_path = get_user_project_path("alert_checkpoints", profile_name)
         super().__init__(dir_path)
-
-
-def get_file_event_cursor_store(profile_name):
-    return FileEventCursorStore(profile_name)
-
-
-def get_alert_cursor_store(profile_name):
-    return AlertCursorStore(profile_name)
+        
+        
+class AuditLogCursorStore(BaseCursorStore):
+    def __init__(self, profile_name):
+        dir_path = get_user_project_path("audit_log_checkpoints", profile_name)
+        super().__init__(dir_path)
 
 
 def get_all_cursor_stores_for_profile(profile_name):
-    return [FileEventCursorStore(profile_name), AlertCursorStore(profile_name)]
+    return [FileEventCursorStore(profile_name), AlertCursorStore(profile_name), AuditLogCursorStore(profile_name)]

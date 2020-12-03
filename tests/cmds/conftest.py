@@ -36,7 +36,6 @@ def cli_logger(mocker):
     mock = mocker.MagicMock(spec=CliLogger)
     return mock
 
-
 @pytest.fixture
 def event_extractor_logger(mocker):
     mock = mocker.patch(
