@@ -1,8 +1,8 @@
 import json
-from datetime import datetime
-from datetime import timezone
-from datetime import timedelta
 from _collections import OrderedDict
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
 
 import click
 
@@ -89,7 +89,7 @@ def filter_options(f):
 checkpoint_option = click.option(
     "-c",
     "--use-checkpoint",
-    help="Only get audit-log events that were not previously retrieved."
+    help="Only get audit-log events that were not previously retrieved.",
 )
 
 
@@ -131,9 +131,12 @@ def search(
     save_checkpoint = None
     if use_checkpoint:
         cursor = _get_audit_log_cursor_store(state.profile.name)
-        save_checkpoint = lambda ts: cursor.replace(use_checkpoint, ts)
+
+        def save_checkpoint(ts):
+            cursor.replace(use_checkpoint, ts)
+
         begin = cursor.get(use_checkpoint)
-    
+
     _search(
         state.sdk,
         format,
@@ -174,10 +177,13 @@ def send_to(
     save_checkpoint = None
     if use_checkpoint:
         cursor = _get_audit_log_cursor_store(state.profile.name)
-        save_checkpoint = lambda ts: cursor.replace(use_checkpoint, ts)
+
+        def save_checkpoint(ts):
+            cursor.replace(use_checkpoint, ts)
+
         if not begin:
             begin = cursor.get(use_checkpoint)
-    
+
     _send_to(
         state.sdk,
         hostname,
@@ -239,7 +245,7 @@ def _get_all_audit_log_events(response_gen, sort_descending=True):
         # e.g {"paginationRangeStartIndex": 10000, "paginationRangeEndIndex": 10000, "totalResultCount": 1593}
         pass
     return sorted(events, key=lambda x: x.get("timestamp"), reverse=sort_descending)
-    
+
 
 def _parse_audit_log_timestamp_string_to_timestamp(ts):
     # example: {"property": "bar", "timestamp": "2020-11-23T17:13:26.239647Z"}

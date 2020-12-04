@@ -1,22 +1,22 @@
 from datetime import datetime
 from datetime import timedelta
-from datetime import timezone
 from logging import Logger
 
 import pytest
 from py42.response import Py42Response
 from requests import Response
 
-from code42cli.cmds.search.cursor_store import AuditLogCursorStore
-from code42cli.cmds.auditlogs import AUDIT_LOG_TIMESTAMP_FORMAT
 from code42cli.cmds.auditlogs import _parse_audit_log_timestamp_string_to_timestamp
+from code42cli.cmds.search.cursor_store import AuditLogCursorStore
 from code42cli.date_helper import parse_max_timestamp
 from code42cli.date_helper import parse_min_timestamp
 from code42cli.main import cli
 
 TEST_AUDIT_LOG_TIMESTAMP_1 = "2020-01-01T12:00:00.000Z"
 TEST_AUDIT_LOG_TIMESTAMP_2 = "2020-01-01T12:01:00.000111Z"
-CURSOR_TIMESTAMP = _parse_audit_log_timestamp_string_to_timestamp(TEST_AUDIT_LOG_TIMESTAMP_2)
+CURSOR_TIMESTAMP = _parse_audit_log_timestamp_string_to_timestamp(
+    TEST_AUDIT_LOG_TIMESTAMP_2
+)
 
 
 @pytest.fixture
@@ -38,7 +38,9 @@ def date_str():
 @pytest.fixture
 def send_to_logger(mocker):
     mock_logger = mocker.MagicMock(spec=Logger)
-    mocker.patch("code42cli.cmds.auditlogs.get_logger_for_server", return_value=mock_logger)
+    mocker.patch(
+        "code42cli.cmds.auditlogs.get_logger_for_server", return_value=mock_logger
+    )
     return mock_logger
 
 
@@ -146,8 +148,14 @@ def test_send_to_emits_events_in_chronological_order(
     runner.invoke(
         cli, ["audit-logs", "send-to", "localhost", "--begin", "1d"], obj=cli_state
     )
-    assert send_to_logger.info.call_args_list[0][0][0]["timestamp"] == TEST_AUDIT_LOG_TIMESTAMP_1
-    assert send_to_logger.info.call_args_list[1][0][0]["timestamp"] == TEST_AUDIT_LOG_TIMESTAMP_2
+    assert (
+        send_to_logger.info.call_args_list[0][0][0]["timestamp"]
+        == TEST_AUDIT_LOG_TIMESTAMP_1
+    )
+    assert (
+        send_to_logger.info.call_args_list[1][0][0]["timestamp"]
+        == TEST_AUDIT_LOG_TIMESTAMP_2
+    )
 
 
 def test_search_with_checkpoint_saves_expected_cursor_timestamp(
@@ -155,9 +163,13 @@ def test_search_with_checkpoint_saves_expected_cursor_timestamp(
 ):
     cli_state.sdk.auditlogs.get_all.return_value = [test_audit_log_response]
     runner.invoke(
-        cli, ["audit-logs", "search", "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state
+        cli,
+        ["audit-logs", "search", "--begin", "1d", "--use-checkpoint", "test"],
+        obj=cli_state,
     )
-    assert audit_log_cursor_with_checkpoint.replace.called_once_with("test", CURSOR_TIMESTAMP)
+    assert audit_log_cursor_with_checkpoint.replace.called_once_with(
+        "test", CURSOR_TIMESTAMP
+    )
 
 
 def test_send_to_with_checkpoint_saves_expected_cursor_timestamp(
@@ -165,27 +177,56 @@ def test_send_to_with_checkpoint_saves_expected_cursor_timestamp(
 ):
     cli_state.sdk.auditlogs.get_all.return_value = [test_audit_log_response]
     runner.invoke(
-        cli, ["audit-logs", "send-to", "localhost", "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state
+        cli,
+        [
+            "audit-logs",
+            "send-to",
+            "localhost",
+            "--begin",
+            "1d",
+            "--use-checkpoint",
+            "test",
+        ],
+        obj=cli_state,
     )
     assert audit_log_cursor_with_checkpoint.replace.call_count == 2
-    assert audit_log_cursor_with_checkpoint.replace.call_args_list[1][0] == ("test", CURSOR_TIMESTAMP)
+    assert audit_log_cursor_with_checkpoint.replace.call_args_list[1][0] == (
+        "test",
+        CURSOR_TIMESTAMP,
+    )
 
-    
+
 def test_search_with_existing_checkpoint_replaces_begin_arg_if_passed(
     cli_state, runner, test_audit_log_response, audit_log_cursor_with_checkpoint
 ):
     runner.invoke(
-        cli, ["audit-logs", "search", "--begin", "1d", "--use-checkpoint", "test"],
-        obj=cli_state
+        cli,
+        ["audit-logs", "search", "--begin", "1d", "--use-checkpoint", "test"],
+        obj=cli_state,
     )
-    assert cli_state.sdk.auditlogs.get_all.call_args_list[0].kwargs["begin_time"] == CURSOR_TIMESTAMP
+    assert (
+        cli_state.sdk.auditlogs.get_all.call_args_list[0].kwargs["begin_time"]
+        == CURSOR_TIMESTAMP
+    )
 
 
 def test_send_to_with_existing_checkpoint_replaces_begin_arg_if_passed(
     cli_state, runner, test_audit_log_response, audit_log_cursor_with_checkpoint
 ):
     runner.invoke(
-        cli, ["audit-logs", "send-to", "localhost", "--begin", "1d", "--use-checkpoint", "test"],
-        obj=cli_state
+        cli,
+        [
+            "audit-logs",
+            "send-to",
+            "localhost",
+            "--begin",
+            "1d",
+            "--use-checkpoint",
+            "test",
+        ],
+        obj=cli_state,
     )
-    assert cli_state.sdk.auditlogs.get_all.call_args_list[0].kwargs["begin_time"] == CURSOR_TIMESTAMP
+    assert (
+        cli_state.sdk.auditlogs.get_all.call_args_list[0].kwargs["begin_time"]
+        == CURSOR_TIMESTAMP
+    )
