@@ -205,8 +205,7 @@ def test_search_with_existing_checkpoint_replaces_begin_arg_if_passed(
         obj=cli_state,
     )
     assert (
-        cli_state.sdk.auditlogs.get_all.call_args_list[0].kwargs["begin_time"]
-        == CURSOR_TIMESTAMP
+        cli_state.sdk.auditlogs.get_all.call_args[1]["begin_time"] == CURSOR_TIMESTAMP
     )
 
 
@@ -227,6 +226,5 @@ def test_send_to_with_existing_checkpoint_replaces_begin_arg_if_passed(
         obj=cli_state,
     )
     assert (
-        cli_state.sdk.auditlogs.get_all.call_args_list[0].kwargs["begin_time"]
-        == CURSOR_TIMESTAMP
+        cli_state.sdk.auditlogs.get_all.call_args[1]["begin_time"] == CURSOR_TIMESTAMP
     )
