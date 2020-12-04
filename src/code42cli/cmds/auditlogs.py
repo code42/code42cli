@@ -32,8 +32,7 @@ AUDIT_LOGS_DEFAULT_HEADER["actorName"] = "ActorName"
 AUDIT_LOGS_DEFAULT_HEADER["actorIpAddress"] = "ActorIpAddress"
 AUDIT_LOGS_DEFAULT_HEADER["userName"] = "AffectedUser"
 AUDIT_LOGS_DEFAULT_HEADER["userId"] = "AffectedUserUID"
-# AUDIT_LOGS_DEFAULT_HEADER["success"] = "Success"
-# AUDIT_LOGS_DEFAULT_HEADER["resultCount"] = "ResultCount"
+
 
 filter_option_usernames = click.option(
     "--username", required=False, help="Filter results by usernames.", multiple=True,
@@ -217,18 +216,18 @@ def _send_to(sdk, hostname, protocol, format, save_checkpoint, **filter_args):
     logger = get_logger_for_server(hostname, protocol, format)
     with warn_interrupt():
         response_gen = sdk.auditlogs.get_all(**filter_args)
-        events = _get_all_audit_log_events(response_gen)
+        events = _get_all_audit_log_events(response_gen, sort_descending=False)
         if not events:
             click.echo("No results found.")
             return
-        for event in reversed(events):
+        for event in events:
             logger.info(event)
             if save_checkpoint:
                 ts = _parse_audit_log_timestamp_string_to_timestamp(event["timestamp"])
                 save_checkpoint(ts)
 
 
-def _get_all_audit_log_events(response_gen):
+def _get_all_audit_log_events(response_gen, sort_descending=True):
     events = []
     try:
         for response in response_gen:
@@ -239,7 +238,7 @@ def _get_all_audit_log_events(response_gen):
         # API endpoint (get_page) returns a response without events key when no records are found
         # e.g {"paginationRangeStartIndex": 10000, "paginationRangeEndIndex": 10000, "totalResultCount": 1593}
         pass
-    return events
+    return sorted(events, key=lambda x: x.get("timestamp"), reverse=sort_descending)
     
 
 def _parse_audit_log_timestamp_string_to_timestamp(ts):
