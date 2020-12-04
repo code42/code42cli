@@ -173,7 +173,11 @@ def test_search_with_checkpoint_saves_expected_cursor_timestamp(
 
 
 def test_send_to_with_checkpoint_saves_expected_cursor_timestamp(
-    cli_state, runner, test_audit_log_response, audit_log_cursor_with_checkpoint
+    cli_state,
+    runner,
+    test_audit_log_response,
+    audit_log_cursor_with_checkpoint,
+    send_to_logger,
 ):
     cli_state.sdk.auditlogs.get_all.return_value = [test_audit_log_response]
     runner.invoke(
