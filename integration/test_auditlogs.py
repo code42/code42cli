@@ -28,11 +28,15 @@ end_date_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
         ("{0} '{1}' -f '{2}'".format(BASE_COMMAND, begin_date_str, "TABLE")),
         ("{0} '{1}' -f '{2}'".format(BASE_COMMAND, begin_date_str, "JSON")),
         ("{0} '{1}' -f '{2}'".format(BASE_COMMAND, begin_date_str, "RAW-JSON")),
-        ("{0} --begin '{1}' -f '{2}'".format(SEARCH_COMMAND, begin_date_str, "RAW-JSON")),
+        ("{0} '{1}' --format {2}".format(BASE_COMMAND, begin_date_str, "CSV")),
+        ("{0} '{1}' --format '{2}'".format(BASE_COMMAND, begin_date_str, "TABLE")),
+        ("{0} '{1}' --format '{2}'".format(BASE_COMMAND, begin_date_str, "JSON")),
+        ("{0} '{1}' --format '{2}'".format(BASE_COMMAND, begin_date_str, "RAW-JSON")),
+        ("{0} --begin '{1}'".format(SEARCH_COMMAND, begin_date_str)),
         ("{0} '{1}' -d".format(BASE_COMMAND, begin_date_str)),
         ("{0} '{1}' --debug".format(BASE_COMMAND, begin_date_str)),
     ]
 )
-def test_auditlogs_search(command):
+def test_auditlogs_search_command_returns_success_return_code(command):
     return_code, response = run_command(command)
     assert return_code == 0
