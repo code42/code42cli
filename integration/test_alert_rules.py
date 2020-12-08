@@ -27,18 +27,34 @@ def test_alert_rules_command_returns_success_return_code(command):
 @pytest.mark.parametrize(
     "command, error_msg",
     [
-        (f"{ALERT_RULES_COMMAND} add-user", "Missing option '--rule-id'."),
         (f"{ALERT_RULES_COMMAND} add-user --rule-id test-rule-id", 
          "Missing option '-u' / '--username'."),
         (f"{ALERT_RULES_COMMAND} remove-user --rule-id test-rule-id", 
          "Missing option '-u' / '--username'."),
+        (f"{ALERT_RULES_COMMAND} add-user", "Missing option '--rule-id'."),
         (f"{ALERT_RULES_COMMAND} remove-user", "Missing option '--rule-id'."),
         (f"{ALERT_RULES_COMMAND} show", "Missing argument 'RULE_ID'."),
         (f"{ALERT_RULES_COMMAND} bulk add", "Error: Missing argument 'CSV_FILE'."),
         (f"{ALERT_RULES_COMMAND} bulk remove", "Error: Missing argument 'CSV_FILE'."),
     ]
 )
-def test_alert_rules_command_return_error_code_when_missing_required_parameters(command, error_msg):
+def test_alert_rules_command_returns_error_exit_status_when_missing_required_parameters(
+    command, error_msg
+):
     return_code, response = run_command(command)
     assert return_code == 2
     assert error_msg in "".join(response)
+
+
+"""
+def test_alert_rules_add_user_command(command):
+    pass
+
+
+def test_alert_rules_remove_user_command(command):
+    pass
+
+
+def test_alert_rules_bulk_command(command):
+    pass
+"""
