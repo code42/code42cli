@@ -81,20 +81,6 @@ class AuditLogCursorStore(BaseCursorStore):
         dir_path = get_user_project_path("audit_log_checkpoints", profile_name)
         super().__init__(dir_path)
         
-    def get(self, cursor_name):
-        try:
-            location = path.join(self._dir_path, cursor_name)
-            with open(location) as checkpoint:
-                return float(checkpoint.read())
-        except FileNotFoundError:
-            return None
-
-    def replace(self, cursor_name, new_timestamp):
-        """Replaces the last stored date observed timestamp with the given one."""
-        location = path.join(self._dir_path, cursor_name)
-        with open(location, "w") as checkpoint:
-            return checkpoint.write(str(new_timestamp))
-    
     def get_events(self, cursor_name):
         try:
             location = path.join(self._dir_path, cursor_name) + "_events"
