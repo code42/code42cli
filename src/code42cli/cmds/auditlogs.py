@@ -1,7 +1,6 @@
-import json
-from _collections import OrderedDict
+from collections import OrderedDict
+from collections import defaultdict
 from datetime import datetime
-from datetime import timedelta
 from datetime import timezone
 
 import click
@@ -20,6 +19,7 @@ from code42cli.options import send_to_format_options
 from code42cli.options import server_options
 from code42cli.output_formats import OutputFormatter
 from code42cli.util import warn_interrupt
+from code42cli.util import hash_event
 
 EVENT_KEY = "events"
 AUDIT_LOGS_KEYWORD = "audit-logs"
@@ -128,19 +128,15 @@ def search(
     use_checkpoint,
 ):
     """Search audit logs."""
-    save_checkpoint = None
+    formatter = OutputFormatter(format, AUDIT_LOGS_DEFAULT_HEADER)
+    cursor = _get_audit_log_cursor_store(state.profile.name)
     if use_checkpoint:
-        cursor = _get_audit_log_cursor_store(state.profile.name)
-
-        def save_checkpoint(ts):
-            cursor.replace(use_checkpoint, ts)
-
-        begin = cursor.get(use_checkpoint)
-
-    _search(
+        checkpoint = cursor.get(use_checkpoint)
+        if checkpoint is not None:
+            begin = checkpoint
+    
+    events = _get_all_audit_log_events(
         state.sdk,
-        format,
-        save_checkpoint,
         begin_time=begin,
         end_time=end,
         event_types=event_type,
@@ -148,8 +144,17 @@ def search(
         user_ids=user_id,
         user_ip_addresses=user_ip,
         affected_user_ids=affected_user_id,
-        affected_usernames=affected_username,
+        affected_usernames=affected_username
     )
+    if use_checkpoint:
+        events = list(_dedupe_checkpointed_events_and_store_updated_checkpoint(cursor, use_checkpoint, events))
+    if not events:
+        click.echo("No results found.")
+        return
+    elif len(events) > 10:
+        click.echo_via_pager(formatter.get_formatted_output(events))
+    else:
+        formatter.echo_formatted_list(events)
 
 
 @audit_logs.command()
@@ -174,22 +179,15 @@ def send_to(
     use_checkpoint,
 ):
     """Send audit logs to the given server address."""
-    save_checkpoint = None
+    logger = get_logger_for_server(hostname, protocol, format)
+    cursor = _get_audit_log_cursor_store(state.profile.name)
     if use_checkpoint:
-        cursor = _get_audit_log_cursor_store(state.profile.name)
+        checkpoint = cursor.get(use_checkpoint)
+        if checkpoint is not None:
+            begin = checkpoint
 
-        def save_checkpoint(ts):
-            cursor.replace(use_checkpoint, ts)
-
-        if not begin:
-            begin = cursor.get(use_checkpoint)
-
-    _send_to(
+    events = _get_all_audit_log_events(
         state.sdk,
-        hostname,
-        protocol,
-        format,
-        save_checkpoint,
         begin_time=begin,
         end_time=end,
         event_types=event_type,
@@ -197,64 +195,60 @@ def send_to(
         user_ids=user_id,
         user_ip_addresses=user_ip,
         affected_user_ids=affected_user_id,
-        affected_usernames=affected_username,
+        affected_usernames=affected_username
     )
-
-
-def _search(sdk, format, save_checkpoint, **filter_args):
-    formatter = OutputFormatter(format, AUDIT_LOGS_DEFAULT_HEADER)
-    response_gen = sdk.auditlogs.get_all(**filter_args)
-    events = _get_all_audit_log_events(response_gen)
-    event_count = len(events)
-    if not event_count:
-        click.echo("No results found.")
-        return
-    elif event_count > 10:
-        click.echo_via_pager(formatter.get_formatted_output(events))
-    else:
-        formatter.echo_formatted_list(events)
-    if save_checkpoint:
-        ts = _parse_audit_log_timestamp_string_to_timestamp(events[0]["timestamp"])
-        save_checkpoint(ts)
-
-
-def _send_to(sdk, hostname, protocol, format, save_checkpoint, **filter_args):
-    logger = get_logger_for_server(hostname, protocol, format)
+    if use_checkpoint:
+        events = _dedupe_checkpointed_events_and_store_updated_checkpoint(cursor, use_checkpoint, events)
     with warn_interrupt():
-        response_gen = sdk.auditlogs.get_all(**filter_args)
-        events = _get_all_audit_log_events(response_gen, sort_descending=False)
-        if not events:
-            click.echo("No results found.")
-            return
+        event = None
         for event in events:
             logger.info(event)
-            if save_checkpoint:
-                ts = _parse_audit_log_timestamp_string_to_timestamp(event["timestamp"])
-                save_checkpoint(ts)
+        if event is None:  # generator was empty
+            click.echo("No results found.")
 
 
-def _get_all_audit_log_events(response_gen, sort_descending=True):
+def _get_all_audit_log_events(sdk, **filter_args):
+    response_gen = sdk.auditlogs.get_all(**filter_args)
     events = []
     try:
-        for response in response_gen:
-            response_dict = json.loads(response.text)
-            if EVENT_KEY in response_dict:
-                events.extend(response_dict.get(EVENT_KEY))
+        responses = list(response_gen)
     except KeyError:
         # API endpoint (get_page) returns a response without events key when no records are found
         # e.g {"paginationRangeStartIndex": 10000, "paginationRangeEndIndex": 10000, "totalResultCount": 1593}
-        pass
-    return sorted(events, key=lambda x: x.get("timestamp"), reverse=sort_descending)
+        # we can remove this check once PL-93211 is resolved and deployed.
+        return events
+    
+    for response in responses:
+        if EVENT_KEY in response.data:
+            response_events = response.data.get(EVENT_KEY)
+            events.extend(response_events)
+
+    return sorted(events, key=lambda x: x.get("timestamp"))
+
+
+def _dedupe_checkpointed_events_and_store_updated_checkpoint(cursor, checkpoint_name, events):
+    checkpoint_events = cursor.get_events(checkpoint_name)
+    new_timestamp = None
+    new_events = []
+    for event in events:
+        event_hash = hash_event(event)
+        if event_hash not in checkpoint_events:
+            if event["timestamp"] != new_timestamp:
+                new_timestamp = event["timestamp"]
+                new_events.clear()
+            new_events.append(event_hash)
+            yield event
+            ts = _parse_audit_log_timestamp_string_to_timestamp(new_timestamp)
+            cursor.replace(checkpoint_name, ts)
+            cursor.replace_events(checkpoint_name, new_events)
+
+
+def _get_audit_log_cursor_store(profile_name):
+    return AuditLogCursorStore(profile_name)
 
 
 def _parse_audit_log_timestamp_string_to_timestamp(ts):
     # example: {"property": "bar", "timestamp": "2020-11-23T17:13:26.239647Z"}
     ts = ts[:-1]
     dt = datetime.strptime(ts, AUDIT_LOG_TIMESTAMP_FORMAT).replace(tzinfo=timezone.utc)
-    # add one ms so we don't get the last retrieved event again
-    dt = dt + timedelta(milliseconds=1)
     return dt.timestamp()
-
-
-def _get_audit_log_cursor_store(profile_name):
-    return AuditLogCursorStore(profile_name)
