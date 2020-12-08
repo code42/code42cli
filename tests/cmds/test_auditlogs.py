@@ -57,7 +57,10 @@ TEST_EVENTS_WITH_DIFFERENT_TIMESTAMPS = [
         "timestamp": TEST_AUDIT_LOG_TIMESTAMP_3,
     },
 ]
-TEST_CHECKPOINT_EVENT_HASHLIST = [hash_event(event) for event in TEST_EVENTS_WITH_SAME_TIMESTAMP]
+TEST_CHECKPOINT_EVENT_HASHLIST = [
+    hash_event(event) for event in TEST_EVENTS_WITH_SAME_TIMESTAMP
+]
+
 
 @pytest.fixture
 def audit_log_cursor_with_checkpoint(mocker):
@@ -73,7 +76,9 @@ def audit_log_cursor_with_checkpoint(mocker):
 def audit_log_cursor_with_checkpoint_and_events(mocker):
     mock_cursor = mocker.MagicMock(spec=AuditLogCursorStore)
     mock_cursor.get.return_value = CURSOR_TIMESTAMP
-    mock_cursor.get_events.return_value = [hash_event(TEST_EVENTS_WITH_SAME_TIMESTAMP[0])]
+    mock_cursor.get_events.return_value = [
+        hash_event(TEST_EVENTS_WITH_SAME_TIMESTAMP[0])
+    ]
     mocker.patch(
         "code42cli.cmds.auditlogs._get_audit_log_cursor_store", return_value=mock_cursor
     )
@@ -99,7 +104,21 @@ def send_to_logger(mocker):
 def test_audit_log_response(mocker):
     http_response = mocker.MagicMock(spec=Response)
     http_response.status_code = 200
-    http_response.text = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP + TEST_EVENTS_WITH_DIFFERENT_TIMESTAMPS})
+    http_response.text = json.dumps(
+        {
+            "events": TEST_EVENTS_WITH_SAME_TIMESTAMP
+            + TEST_EVENTS_WITH_DIFFERENT_TIMESTAMPS
+        }
+    )
+    http_response._content_consumed = ""
+    return Py42Response(http_response)
+
+
+@pytest.fixture
+def test_audit_log_response_with_only_same_timestamps(mocker):
+    http_response = mocker.MagicMock(spec=Response)
+    http_response.status_code = 200
+    http_response.text = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
     http_response._content_consumed = ""
     return Py42Response(http_response)
 
@@ -224,8 +243,10 @@ def test_search_with_checkpoint_saves_expected_cursor_timestamp(
         ["audit-logs", "search", "--begin", "1d", "--use-checkpoint", "test"],
         obj=cli_state,
     )
-    assert audit_log_cursor_with_checkpoint.replace.called_once_with(
-        "test", CURSOR_TIMESTAMP
+    assert audit_log_cursor_with_checkpoint.replace.call_count == 4
+    assert audit_log_cursor_with_checkpoint.replace.call_args_list[3][0] == (
+        "test",
+        CURSOR_TIMESTAMP,
     )
 
 
@@ -270,16 +291,6 @@ def test_search_with_existing_checkpoint_replaces_begin_arg_if_passed(
     )
 
 
-def test_search_with_existing_checkpoint_events_skips_duplicate_events(
-    cli_state, runner, test_audit_log_response, audit_log_cursor_with_checkpoint_and_events
-):
-    output = runner.invoke(
-        cli,
-        ["audit-logs", "search", "--begin", "1d", "--use-checkpoint", "test"],
-        obj=cli_state,
-    )
-    assert False
-
 def test_send_to_with_existing_checkpoint_replaces_begin_arg_if_passed(
     cli_state, runner, test_audit_log_response, audit_log_cursor_with_checkpoint
 ):
@@ -299,3 +310,94 @@ def test_send_to_with_existing_checkpoint_replaces_begin_arg_if_passed(
     assert (
         cli_state.sdk.auditlogs.get_all.call_args[1]["begin_time"] == CURSOR_TIMESTAMP
     )
+
+
+def test_search_with_existing_checkpoint_events_skips_duplicate_events(
+    cli_state,
+    runner,
+    test_audit_log_response,
+    audit_log_cursor_with_checkpoint_and_events,
+):
+    cli_state.sdk.auditlogs.get_all.return_value = [test_audit_log_response]
+    result = runner.invoke(
+        cli,
+        ["audit-logs", "search", "--begin", "1d", "--use-checkpoint", "test"],
+        obj=cli_state,
+    )
+    assert "42@code42.com" not in result.stdout
+    assert "43@code42.com" in result.stdout
+
+
+def test_send_to_with_existing_checkpoint_events_skips_duplicate_events(
+    cli_state,
+    runner,
+    test_audit_log_response,
+    audit_log_cursor_with_checkpoint_and_events,
+    send_to_logger,
+):
+    cli_state.sdk.auditlogs.get_all.return_value = [test_audit_log_response]
+    runner.invoke(
+        cli,
+        [
+            "audit-logs",
+            "send-to",
+            "localhost",
+            "--begin",
+            "1d",
+            "--use-checkpoint",
+            "test",
+        ],
+        obj=cli_state,
+    )
+    assert send_to_logger.info.call_count == 3
+    assert send_to_logger.info.call_args_list[0][0][0]["actorName"] != "42@code42.com"
+
+
+def test_search_without_existing_checkpoint_writes_both_event_hashes_with_same_timestamp(
+    cli_state,
+    runner,
+    test_audit_log_response_with_only_same_timestamps,
+    audit_log_cursor_with_checkpoint,
+):
+    cli_state.sdk.auditlogs.get_all.return_value = [
+        test_audit_log_response_with_only_same_timestamps
+    ]
+    runner.invoke(
+        cli,
+        ["audit-logs", "search", "--begin", "1d", "--use-checkpoint", "test"],
+        obj=cli_state,
+    )
+    assert audit_log_cursor_with_checkpoint.replace_events.call_count == 2
+    assert audit_log_cursor_with_checkpoint.replace_events.call_args_list[1][0][1] == [
+        hash_event(TEST_EVENTS_WITH_SAME_TIMESTAMP[0]),
+        hash_event(TEST_EVENTS_WITH_SAME_TIMESTAMP[1]),
+    ]
+
+
+def test_send_to_without_existing_checkpoint_writes_both_event_hashes_with_same_timestamp(
+    cli_state,
+    runner,
+    test_audit_log_response_with_only_same_timestamps,
+    audit_log_cursor_with_checkpoint,
+):
+    cli_state.sdk.auditlogs.get_all.return_value = [
+        test_audit_log_response_with_only_same_timestamps
+    ]
+    runner.invoke(
+        cli,
+        [
+            "audit-logs",
+            "send-to",
+            "localhost",
+            "--begin",
+            "1d",
+            "--use-checkpoint",
+            "test",
+        ],
+        obj=cli_state,
+    )
+    assert audit_log_cursor_with_checkpoint.replace_events.call_count == 2
+    assert audit_log_cursor_with_checkpoint.replace_events.call_args_list[1][0][1] == [
+        hash_event(TEST_EVENTS_WITH_SAME_TIMESTAMP[0]),
+        hash_event(TEST_EVENTS_WITH_SAME_TIMESTAMP[1]),
+    ]

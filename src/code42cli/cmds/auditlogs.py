@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from collections import defaultdict
 from datetime import datetime
 from datetime import timezone
 
@@ -18,8 +17,8 @@ from code42cli.options import sdk_options
 from code42cli.options import send_to_format_options
 from code42cli.options import server_options
 from code42cli.output_formats import OutputFormatter
-from code42cli.util import warn_interrupt
 from code42cli.util import hash_event
+from code42cli.util import warn_interrupt
 
 EVENT_KEY = "events"
 AUDIT_LOGS_KEYWORD = "audit-logs"
@@ -134,7 +133,7 @@ def search(
         checkpoint = cursor.get(use_checkpoint)
         if checkpoint is not None:
             begin = checkpoint
-    
+
     events = _get_all_audit_log_events(
         state.sdk,
         begin_time=begin,
@@ -144,10 +143,14 @@ def search(
         user_ids=user_id,
         user_ip_addresses=user_ip,
         affected_user_ids=affected_user_id,
-        affected_usernames=affected_username
+        affected_usernames=affected_username,
     )
     if use_checkpoint:
-        events = list(_dedupe_checkpointed_events_and_store_updated_checkpoint(cursor, use_checkpoint, events))
+        events = list(
+            _dedupe_checkpointed_events_and_store_updated_checkpoint(
+                cursor, use_checkpoint, events
+            )
+        )
     if not events:
         click.echo("No results found.")
         return
@@ -195,10 +198,12 @@ def send_to(
         user_ids=user_id,
         user_ip_addresses=user_ip,
         affected_user_ids=affected_user_id,
-        affected_usernames=affected_username
+        affected_usernames=affected_username,
     )
     if use_checkpoint:
-        events = _dedupe_checkpointed_events_and_store_updated_checkpoint(cursor, use_checkpoint, events)
+        events = _dedupe_checkpointed_events_and_store_updated_checkpoint(
+            cursor, use_checkpoint, events
+        )
     with warn_interrupt():
         event = None
         for event in events:
@@ -217,7 +222,7 @@ def _get_all_audit_log_events(sdk, **filter_args):
         # e.g {"paginationRangeStartIndex": 10000, "paginationRangeEndIndex": 10000, "totalResultCount": 1593}
         # we can remove this check once PL-93211 is resolved and deployed.
         return events
-    
+
     for response in responses:
         if EVENT_KEY in response.data:
             response_events = response.data.get(EVENT_KEY)
@@ -226,7 +231,9 @@ def _get_all_audit_log_events(sdk, **filter_args):
     return sorted(events, key=lambda x: x.get("timestamp"))
 
 
-def _dedupe_checkpointed_events_and_store_updated_checkpoint(cursor, checkpoint_name, events):
+def _dedupe_checkpointed_events_and_store_updated_checkpoint(
+    cursor, checkpoint_name, events
+):
     checkpoint_events = cursor.get_events(checkpoint_name)
     new_timestamp = None
     new_events = []

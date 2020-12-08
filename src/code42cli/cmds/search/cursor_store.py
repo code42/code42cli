@@ -80,7 +80,7 @@ class AuditLogCursorStore(BaseCursorStore):
     def __init__(self, profile_name):
         dir_path = get_user_project_path("audit_log_checkpoints", profile_name)
         super().__init__(dir_path)
-        
+
     def get_events(self, cursor_name):
         try:
             location = path.join(self._dir_path, cursor_name) + "_events"
@@ -91,12 +91,11 @@ class AuditLogCursorStore(BaseCursorStore):
                     return []
         except FileNotFoundError:
             return []
-    
+
     def replace_events(self, cursor_name, new_events):
         location = path.join(self._dir_path, cursor_name) + "_events"
         with open(location, "w") as checkpoint:
             return checkpoint.write(json.dumps(new_events))
-    
 
 
 def get_all_cursor_stores_for_profile(profile_name):
