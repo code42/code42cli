@@ -44,17 +44,3 @@ def test_alert_rules_command_returns_error_exit_status_when_missing_required_par
     return_code, response = run_command(command)
     assert return_code == 2
     assert error_msg in "".join(response)
-
-
-"""
-def test_alert_rules_add_user_command(command):
-    pass
-
-
-def test_alert_rules_remove_user_command(command):
-    pass
-
-
-def test_alert_rules_bulk_command(command):
-    pass
-"""

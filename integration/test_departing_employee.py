@@ -20,17 +20,3 @@ def test_departing_employee_command_returns_error_exit_status_when_missing_requi
     return_code, response = run_command(command)
     assert return_code == 2
     assert error_msg in "".join(response)
-
-
-"""
-def test_departing_employee_add_user_command(command):
-    pass
-
-
-def test_departing_employee_remove_user_command(command):
-    pass
-
-
-def test_departing_employee_bulk_command(command):
-    pass
-"""
