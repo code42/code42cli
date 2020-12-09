@@ -1,6 +1,8 @@
+import pytest
+
 from py42.response import Py42Response
 from requests import Request
-from tests.cmds.conftest import get_user_not_on_list_side_effect
+from tests.cmds.conftest import get_user_not_on_list_side_effect, get_generator_for_get_all
 from tests.cmds.conftest import thread_safe_side_effect
 from tests.conftest import TEST_ID
 
@@ -23,18 +25,24 @@ DEPARTING_EMPLOYEE_ITEM = """{
 """
 
 
-def test_list_departing_employees_lists_expected_properties(
-    runner, cli_state_with_user, mocker
-):
-    def gen(*args, **kwargs):
-        response = mocker.MagicMock(spec=Request)
-        response.text = """{{"items": [{0}]}}""".format(DEPARTING_EMPLOYEE_ITEM)
-        pages = [response, response, response]
-        for page in pages:
-            yield Py42Response(page)
+@pytest.fixture()
+def mock_get_all_empty_state(mocker, cli_state_with_user):
+    generator = get_generator_for_get_all(mocker, None)
+    cli_state_with_user.sdk.detectionlists.departing_employee.get_all.side_effect = generator
+    return cli_state_with_user
 
-    cli_state_with_user.sdk.detectionlists.departing_employee.get_all.side_effect = gen
-    res = runner.invoke(cli, ["departing-employee", "list"], obj=cli_state_with_user)
+
+@pytest.fixture()
+def mock_get_all_state(mocker, cli_state_with_user):
+    generator = get_generator_for_get_all(mocker, DEPARTING_EMPLOYEE_ITEM)
+    cli_state_with_user.sdk.detectionlists.departing_employee.get_all.side_effect = generator
+    return cli_state_with_user
+
+
+def test_list_departing_employees_lists_expected_properties(
+    runner, mock_get_all_state
+):
+    res = runner.invoke(cli, ["departing-employee", "list"], obj=mock_get_all_state)
     assert "Username" in res.output
     assert "Notes" in res.output
     assert "test.testerson@example.com" in res.output
@@ -44,18 +52,10 @@ def test_list_departing_employees_lists_expected_properties(
 
 
 def test_list_departing_employees_when_given_raw_json_lists_expected_properties(
-    runner, cli_state_with_user, mocker
+    runner, mock_get_all_state
 ):
-    def gen(*args, **kwargs):
-        response = mocker.MagicMock(spec=Request)
-        response.text = """{{"items": [{0}]}}""".format(DEPARTING_EMPLOYEE_ITEM)
-        pages = [response, response, response]
-        for page in pages:
-            yield Py42Response(page)
-
-    cli_state_with_user.sdk.detectionlists.departing_employee.get_all.side_effect = gen
     res = runner.invoke(
-        cli, ["departing-employee", "list", "-f", "RAW-JSON"], obj=cli_state_with_user
+        cli, ["departing-employee", "list", "-f", "RAW-JSON"], obj=mock_get_all_state
     )
     assert "userName" in res.output
     assert "notes" in res.output
@@ -67,19 +67,25 @@ def test_list_departing_employees_when_given_raw_json_lists_expected_properties(
     assert "2020-07-07" in res.output
 
 
-def test_list_departing_employee_when_no_employees_echos_expected_message(
-    runner, cli_state_with_user, mocker
+def test_list_departing_employees_when_no_employees_echos_expected_message(
+    runner, mock_get_all_empty_state
 ):
-    def gen(*args, **kwargs):
-        response = mocker.MagicMock(spec=Request)
-        response.text = """{"items": []}"""
-        pages = [response]
-        for page in pages:
-            yield Py42Response(page)
-
-    cli_state_with_user.sdk.detectionlists.departing_employee.get_all.side_effect = gen
-    res = runner.invoke(cli, ["departing-employee", "list"], obj=cli_state_with_user)
+    res = runner.invoke(cli, ["departing-employee", "list"], obj=mock_get_all_empty_state)
     assert "There are currently no users on the departing employee list." in res.output
+
+
+def test_list_departing_employees_when_table_format_and_notes_contains_newlines_converts_them(
+    runner, mocker, cli_state_with_user
+): 
+    new_line_text = str(DEPARTING_EMPLOYEE_ITEM).replace(
+        "Leaving for competitor", r"Line1\nLine2"
+    )
+    generator = get_generator_for_get_all(mocker, new_line_text)
+    cli_state_with_user.sdk.detectionlists.departing_employee.get_all.side_effect = generator
+    res = runner.invoke(
+        cli, ["departing-employee", "list"], obj=cli_state_with_user
+    )
+    assert "Line1. Line2" in res.output
 
 
 def test_add_departing_employee_when_given_cloud_alias_adds_alias(
