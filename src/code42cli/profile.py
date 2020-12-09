@@ -108,6 +108,7 @@ def create_profile(name, server, username, ignore_ssl_errors):
 
 def delete_profile(profile_name):
     profile = _get_profile(profile_name)
+    profile_name = profile.name
     if password.get_stored_password(profile) is not None:
         password.delete_password(profile)
     cursor_stores = get_all_cursor_stores_for_profile(profile_name)
