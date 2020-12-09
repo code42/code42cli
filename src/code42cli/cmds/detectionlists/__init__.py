@@ -1,6 +1,7 @@
 import click
 
 from code42cli.cmds.shared import get_user_id
+from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
 
 
@@ -12,6 +13,10 @@ def list_employees(
     employee_list = []
     for employees in employee_generator:
         for employee in employees["items"]:
+            if employee["notes"] and output_format == OutputFormat.TABLE:
+                employee["notes"] = (
+                    employee["notes"].replace("\n", ". ").replace("\t", ". ")
+                )
             employee_list.append(employee)
     if employee_list:
         formatter = OutputFormatter(output_format, header)
