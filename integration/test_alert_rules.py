@@ -3,6 +3,7 @@ from integration import run_command
 
 ALERT_RULES_COMMAND = "code42 alert-rules"
 
+
 @pytest.mark.parametrize(
     "command",
     [
@@ -16,8 +17,7 @@ ALERT_RULES_COMMAND = "code42 alert-rules"
         f"{ALERT_RULES_COMMAND} list --format TABLE",
         f"{ALERT_RULES_COMMAND} list --format JSON",
         f"{ALERT_RULES_COMMAND} list --format RAW-JSON",
-
-    ]
+    ],
 )
 def test_alert_rules_command_returns_success_return_code(command):
     return_code, response = run_command(command)
@@ -27,16 +27,20 @@ def test_alert_rules_command_returns_success_return_code(command):
 @pytest.mark.parametrize(
     "command, error_msg",
     [
-        (f"{ALERT_RULES_COMMAND} add-user --rule-id test-rule-id", 
-         "Missing option '-u' / '--username'."),
-        (f"{ALERT_RULES_COMMAND} remove-user --rule-id test-rule-id", 
-         "Missing option '-u' / '--username'."),
+        (
+            f"{ALERT_RULES_COMMAND} add-user --rule-id test-rule-id",
+            "Missing option '-u' / '--username'.",
+        ),
+        (
+            f"{ALERT_RULES_COMMAND} remove-user --rule-id test-rule-id",
+            "Missing option '-u' / '--username'.",
+        ),
         (f"{ALERT_RULES_COMMAND} add-user", "Missing option '--rule-id'."),
         (f"{ALERT_RULES_COMMAND} remove-user", "Missing option '--rule-id'."),
         (f"{ALERT_RULES_COMMAND} show", "Missing argument 'RULE_ID'."),
         (f"{ALERT_RULES_COMMAND} bulk add", "Error: Missing argument 'CSV_FILE'."),
         (f"{ALERT_RULES_COMMAND} bulk remove", "Error: Missing argument 'CSV_FILE'."),
-    ]
+    ],
 )
 def test_alert_rules_command_returns_error_exit_status_when_missing_required_parameters(
     command, error_msg

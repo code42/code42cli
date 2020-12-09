@@ -11,12 +11,14 @@ begin_date_str = begin_date.strftime("%Y-%m-%d")
 end_date_str = end_date.strftime("%Y-%m-%d")
 
 ALERT_COMMAND = "code42 alerts search -b {} -e {}".format(begin_date_str, end_date_str)
-ADVANCED_QUERY = """{"groupClause":"AND", "groups":[{"filterClause":"AND", 
+ADVANCED_QUERY = """{"groupClause":"AND", "groups":[{"filterClause":"AND",
 "filters":[{"operator":"ON_OR_AFTER", "term":"eventTimestamp", "value":"2020-09-13T00:00:00.000Z"},
-{"operator":"ON_OR_BEFORE", "term":"eventTimestamp", "value":"2020-12-07T13:20:15.195Z"}]}], 
+{"operator":"ON_OR_BEFORE", "term":"eventTimestamp", "value":"2020-12-07T13:20:15.195Z"}]}],
 "srtDir":"asc", "srtKey":"eventId", "pgNum":1, "pgSize":10000}
 """
-ALERT_ADVANCED_QUERY_COMMAND = f"code42 alerts search --advanced-query '{ADVANCED_QUERY}'"
+ALERT_ADVANCED_QUERY_COMMAND = (
+    f"code42 alerts search --advanced-query '{ADVANCED_QUERY}'"
+)
 
 
 @pytest.mark.parametrize(
@@ -45,10 +47,7 @@ def test_alert_command_returns_success_return_code(command):
 
 
 @pytest.mark.parametrize(
-    "command",
-    [
-        f"{ALERT_COMMAND} --advanced-query '{ADVANCED_QUERY}'",
-    ]
+    "command", [f"{ALERT_COMMAND} --advanced-query '{ADVANCED_QUERY}'"]
 )
 def test_begin_cant_be_used_with_advanced_query(command):
     return_code, response = run_command(command)

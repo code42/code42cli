@@ -1,4 +1,3 @@
-
 import pytest
 from integration import run_command
 
@@ -12,7 +11,7 @@ DEPARTING_EMPLOYEE_COMMAND = "code42 departing-employee"
         (f"{DEPARTING_EMPLOYEE_COMMAND} remove", "Missing argument 'USERNAME'."),
         (f"{DEPARTING_EMPLOYEE_COMMAND} bulk add", "Missing argument 'CSV_FILE'."),
         (f"{DEPARTING_EMPLOYEE_COMMAND} bulk remove", "Missing argument 'FILE'."),
-    ]
+    ],
 )
 def test_departing_employee_command_returns_error_exit_status_when_missing_required_parameters(
     command, error_msg
