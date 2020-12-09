@@ -1,8 +1,6 @@
 import pytest
-
-from py42.response import Py42Response
-from requests import Request
-from tests.cmds.conftest import get_user_not_on_list_side_effect, get_generator_for_get_all
+from tests.cmds.conftest import get_generator_for_get_all
+from tests.cmds.conftest import get_user_not_on_list_side_effect
 from tests.cmds.conftest import TEST_EMPLOYEE
 from tests.cmds.conftest import thread_safe_side_effect
 from tests.conftest import TEST_ID
@@ -30,20 +28,22 @@ HIGH_RISK_EMPLOYEE_ITEM = """{
 @pytest.fixture()
 def mock_get_all_empty_state(mocker, cli_state_with_user):
     generator = get_generator_for_get_all(mocker, None)
-    cli_state_with_user.sdk.detectionlists.high_risk_employee.get_all.side_effect = generator
+    cli_state_with_user.sdk.detectionlists.high_risk_employee.get_all.side_effect = (
+        generator
+    )
     return cli_state_with_user
 
 
 @pytest.fixture()
 def mock_get_all_state(mocker, cli_state_with_user):
     generator = get_generator_for_get_all(mocker, HIGH_RISK_EMPLOYEE_ITEM)
-    cli_state_with_user.sdk.detectionlists.high_risk_employee.get_all.side_effect = generator
+    cli_state_with_user.sdk.detectionlists.high_risk_employee.get_all.side_effect = (
+        generator
+    )
     return cli_state_with_user
 
 
-def test_list_high_risk_employees_lists_expected_properties(
-    runner, mock_get_all_state
-):
+def test_list_high_risk_employees_lists_expected_properties(runner, mock_get_all_state):
     res = runner.invoke(cli, ["high-risk-employee", "list"], obj=mock_get_all_state)
     assert "Username" in res.output
     assert "Notes" in res.output
@@ -69,21 +69,23 @@ def test_list_high_risk_employees_when_given_raw_json_lists_expected_properties(
 def test_list_high_risk_employees_when_no_employees_echos_expected_message(
     runner, mock_get_all_empty_state
 ):
-    res = runner.invoke(cli, ["high-risk-employee", "list"], obj=mock_get_all_empty_state)
+    res = runner.invoke(
+        cli, ["high-risk-employee", "list"], obj=mock_get_all_empty_state
+    )
     assert "There are currently no users on the high risk employee list." in res.output
 
 
 def test_list_high_risk_employees_when_table_format_and_notes_contains_newlines_converts_them(
     runner, mocker, cli_state_with_user
-): 
+):
     new_line_text = str(HIGH_RISK_EMPLOYEE_ITEM).replace(
         "Leaving for competitor", r"Line1\nLine2"
     )
     generator = get_generator_for_get_all(mocker, new_line_text)
-    cli_state_with_user.sdk.detectionlists.high_risk_employee.get_all.side_effect = generator
-    res = runner.invoke(
-        cli, ["high-risk-employee", "list"], obj=cli_state_with_user
+    cli_state_with_user.sdk.detectionlists.high_risk_employee.get_all.side_effect = (
+        generator
     )
+    res = runner.invoke(cli, ["high-risk-employee", "list"], obj=cli_state_with_user)
     assert "Line1. Line2" in res.output
 
 
