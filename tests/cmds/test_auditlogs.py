@@ -379,6 +379,7 @@ def test_send_to_without_existing_checkpoint_writes_both_event_hashes_with_same_
     runner,
     test_audit_log_response_with_only_same_timestamps,
     audit_log_cursor_with_checkpoint,
+    send_to_logger,
 ):
     cli_state.sdk.auditlogs.get_all.return_value = [
         test_audit_log_response_with_only_same_timestamps
