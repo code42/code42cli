@@ -15,7 +15,11 @@ def list_employees(
             employee_list.append(employee)
     if employee_list:
         formatter = OutputFormatter(output_format, header)
-        formatter.echo_formatted_list(employee_list)
+        if len(employee_list) > 10:
+            output = formatter.get_formatted_output(employee_list)
+            click.echo_via_pager(output)
+        else:
+            formatter.echo_formatted_list(employee_list)
     else:
         click.echo("There are currently no users on the {} list.".format(list_name))
 
