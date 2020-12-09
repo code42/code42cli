@@ -5,6 +5,9 @@ from logging import Logger
 
 import pytest
 from py42.response import Py42Response
+from tests.integration.util import DockerDaemon
+from tests.integration.util import SyslogServer
+from tests.integration import run_command
 from requests import Response
 
 from code42cli.click_ext.types import MagicDate
@@ -435,3 +438,32 @@ def test_audit_log_parse_timestamp_handles_possible_strings():
     ts1 = _parse_audit_log_timestamp_string_to_timestamp(TIMESTAMP_WITH_MILLISECONDS)
     ts2 = _parse_audit_log_timestamp_string_to_timestamp(TIMESTAMP_WITHOUT_MILLISECONDS)
     assert ts1 == ts2
+
+
+begin_date = datetime.utcnow() - timedelta(days=-10)
+begin_date_str = begin_date.strftime("%Y-%m-%d %H:%M:%S")
+
+@pytest.fixture
+def data_transfer():
+    with DockerDaemon():
+        print("docker daemon started")
+        with SyslogServer():
+            print("syslog server started")
+            yield run_command
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        (
+            "code42 audit-logs send-to localhost -p TCP -b '{}'".format(
+                begin_date_str
+            )
+        )
+    ],
+)
+def test_auditlogs_send_to(data_transfer, command):
+    exit_status, response = data_transfer(command)
+    print(exit_status)
+    print(response)
+    assert exit_status == 0
