@@ -1,4 +1,5 @@
 import pytest
+from py42.services.detectionlists.departing_employee import DepartingEmployeeFilters
 from tests.cmds.conftest import get_generator_for_get_all
 from tests.cmds.conftest import get_user_not_on_list_side_effect
 from tests.cmds.conftest import thread_safe_side_effect
@@ -73,7 +74,7 @@ def test_list_departing_employees_when_no_employees_echos_expected_message(
     res = runner.invoke(
         cli, ["departing-employee", "list"], obj=mock_get_all_empty_state
     )
-    assert "There are currently no users on the departing employee list." in res.output
+    assert "No users found." in res.output
 
 
 def test_list_departing_employees_when_table_format_and_notes_contains_newlines_converts_them(
@@ -88,6 +89,22 @@ def test_list_departing_employees_when_table_format_and_notes_contains_newlines_
     )
     res = runner.invoke(cli, ["departing-employee", "list"], obj=cli_state_with_user)
     assert "Line1. Line2" in res.output
+
+
+def test_list_departing_employees_uses_filter_option(runner, mock_get_all_state):
+    runner.invoke(
+        cli,
+        [
+            "departing-employee",
+            "list",
+            "--filter",
+            DepartingEmployeeFilters.EXFILTRATION_30_DAYS,
+        ],
+        obj=mock_get_all_state,
+    )
+    mock_get_all_state.sdk.detectionlists.departing_employee.get_all.assert_called_once_with(
+        DepartingEmployeeFilters.EXFILTRATION_30_DAYS
+    )
 
 
 def test_add_departing_employee_when_given_cloud_alias_adds_alias(

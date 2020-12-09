@@ -1,6 +1,7 @@
 import click
 from py42.clients.detectionlists import RiskTags
 from py42.exceptions import Py42NotFoundError
+from py42.services.detectionlists.high_risk_employee import HighRiskEmployeeFilters
 
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
@@ -21,6 +22,14 @@ from code42cli.options import format_option
 from code42cli.options import sdk_options
 
 
+filter_option = click.option(
+    "--filter",
+    help="High risk employee filter options.",
+    type=click.Choice(HighRiskEmployeeFilters.choices()),
+    default=HighRiskEmployeeFilters.OPEN,
+)
+
+
 risk_tag_option = click.option(
     "-t",
     "--risk-tag",
@@ -38,13 +47,14 @@ def high_risk_employee(state):
 
 
 @high_risk_employee.command("list")
-@format_option
 @sdk_options()
-def _list(state, format):
+@format_option
+@filter_option
+def _list(state, format, filter):
     """Lists the employees on the High Risk Employee list."""
 
-    employee_generator = _get_high_risk_employees(state.sdk)
-    list_employees(employee_generator, format, "high risk employee")
+    employee_generator = _get_high_risk_employees(state.sdk, filter)
+    list_employees(employee_generator, format)
 
 
 @high_risk_employee.command()
@@ -191,8 +201,8 @@ def bulk_remove_risk_tags(state, csv_rows):
     )
 
 
-def _get_high_risk_employees(sdk):
-    return sdk.detectionlists.high_risk_employee.get_all()
+def _get_high_risk_employees(sdk, filter):
+    return sdk.detectionlists.high_risk_employee.get_all(filter)
 
 
 def _add_high_risk_employee(sdk, username, cloud_alias, risk_tag, notes):

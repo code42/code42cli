@@ -5,9 +5,7 @@ from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
 
 
-def list_employees(
-    employee_generator, output_format, list_name, additional_header_items=None
-):
+def list_employees(employee_generator, output_format, additional_header_items=None):
     additional_header_items = additional_header_items or {}
     header = {"userName": "Username", "notes": "Notes", **additional_header_items}
     employee_list = []
@@ -26,7 +24,7 @@ def list_employees(
         else:
             formatter.echo_formatted_list(employee_list)
     else:
-        click.echo("There are currently no users on the {} list.".format(list_name))
+        click.echo("No users found.")
 
 
 def update_user(sdk, username, cloud_alias=None, risk_tag=None, notes=None):

@@ -1,4 +1,5 @@
 import pytest
+from py42.services.detectionlists.high_risk_employee import HighRiskEmployeeFilters
 from tests.cmds.conftest import get_generator_for_get_all
 from tests.cmds.conftest import get_user_not_on_list_side_effect
 from tests.cmds.conftest import TEST_EMPLOYEE
@@ -72,7 +73,23 @@ def test_list_high_risk_employees_when_no_employees_echos_expected_message(
     res = runner.invoke(
         cli, ["high-risk-employee", "list"], obj=mock_get_all_empty_state
     )
-    assert "There are currently no users on the high risk employee list." in res.output
+    assert "No users found." in res.output
+
+
+def test_list_high_risk_employees_uses_filter_option(runner, mock_get_all_state):
+    runner.invoke(
+        cli,
+        [
+            "high-risk-employee",
+            "list",
+            "--filter",
+            HighRiskEmployeeFilters.EXFILTRATION_30_DAYS,
+        ],
+        obj=mock_get_all_state,
+    )
+    mock_get_all_state.sdk.detectionlists.high_risk_employee.get_all.assert_called_once_with(
+        HighRiskEmployeeFilters.EXFILTRATION_30_DAYS,
+    )
 
 
 def test_list_high_risk_employees_when_table_format_and_notes_contains_newlines_converts_them(
