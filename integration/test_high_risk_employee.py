@@ -7,13 +7,16 @@ HR_EMPLOYEE_COMMAND = "code42 high-risk-employee"
 @pytest.mark.parametrize(
     "command, error_msg",
     [
-        (f"{HR_EMPLOYEE_COMMAND} add", "Missing argument 'USERNAME'."),
-        (f"{HR_EMPLOYEE_COMMAND} remove", "Missing argument 'USERNAME'."),
-        (f"{HR_EMPLOYEE_COMMAND} bulk add", "Missing argument 'CSV_FILE'."),
-        (f"{HR_EMPLOYEE_COMMAND} bulk remove", "Missing argument 'FILE'."),
-        (f"{HR_EMPLOYEE_COMMAND} bulk add-risk-tags", "Missing argument 'CSV_FILE'."),
+        ("{} add".format(HR_EMPLOYEE_COMMAND), "Missing argument 'USERNAME'."),
+        ("{} remove".format(HR_EMPLOYEE_COMMAND), "Missing argument 'USERNAME'."),
+        ("{} bulk add".format(HR_EMPLOYEE_COMMAND), "Missing argument 'CSV_FILE'."),
+        ("{} bulk remove".format(HR_EMPLOYEE_COMMAND), "Missing argument 'FILE'."),
         (
-            f"{HR_EMPLOYEE_COMMAND} bulk remove-risk-tags",
+            "{} bulk add-risk-tags".format(HR_EMPLOYEE_COMMAND),
+            "Missing argument 'CSV_FILE'.",
+        ),
+        (
+            "{} bulk remove-risk-tags".format(HR_EMPLOYEE_COMMAND),
             "Missing argument 'CSV_FILE'.",
         ),
     ],

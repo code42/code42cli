@@ -7,16 +7,16 @@ ALERT_RULES_COMMAND = "code42 alert-rules"
 @pytest.mark.parametrize(
     "command",
     [
-        f"{ALERT_RULES_COMMAND} list",
-        f"{ALERT_RULES_COMMAND} show test-rule-id",
-        f"{ALERT_RULES_COMMAND} list -f CSV",
-        f"{ALERT_RULES_COMMAND} list -f TABLE",
-        f"{ALERT_RULES_COMMAND} list -f RAW-JSON",
-        f"{ALERT_RULES_COMMAND} list -f JSON",
-        f"{ALERT_RULES_COMMAND} list --format CSV",
-        f"{ALERT_RULES_COMMAND} list --format TABLE",
-        f"{ALERT_RULES_COMMAND} list --format JSON",
-        f"{ALERT_RULES_COMMAND} list --format RAW-JSON",
+        "{} list".format(ALERT_RULES_COMMAND),
+        "{} show test-rule-id".format(ALERT_RULES_COMMAND),
+        "{} list -f CSV".format(ALERT_RULES_COMMAND),
+        "{} list -f TABLE".format(ALERT_RULES_COMMAND),
+        "{} list -f RAW-JSON".format(ALERT_RULES_COMMAND),
+        "{} list -f JSON".format(ALERT_RULES_COMMAND),
+        "{} list --format CSV".format(ALERT_RULES_COMMAND),
+        "{} list --format TABLE".format(ALERT_RULES_COMMAND),
+        "{} list --format JSON".format(ALERT_RULES_COMMAND),
+        "{} list --format RAW-JSON".format(ALERT_RULES_COMMAND),
     ],
 )
 def test_alert_rules_command_returns_success_return_code(command):
@@ -28,18 +28,24 @@ def test_alert_rules_command_returns_success_return_code(command):
     "command, error_msg",
     [
         (
-            f"{ALERT_RULES_COMMAND} add-user --rule-id test-rule-id",
+            "{} add-user --rule-id test-rule-id".format(ALERT_RULES_COMMAND),
             "Missing option '-u' / '--username'.",
         ),
         (
-            f"{ALERT_RULES_COMMAND} remove-user --rule-id test-rule-id",
+            "{} remove-user --rule-id test-rule-id".format(ALERT_RULES_COMMAND),
             "Missing option '-u' / '--username'.",
         ),
-        (f"{ALERT_RULES_COMMAND} add-user", "Missing option '--rule-id'."),
-        (f"{ALERT_RULES_COMMAND} remove-user", "Missing option '--rule-id'."),
-        (f"{ALERT_RULES_COMMAND} show", "Missing argument 'RULE_ID'."),
-        (f"{ALERT_RULES_COMMAND} bulk add", "Error: Missing argument 'CSV_FILE'."),
-        (f"{ALERT_RULES_COMMAND} bulk remove", "Error: Missing argument 'CSV_FILE'."),
+        ("{} add-user".format(ALERT_RULES_COMMAND), "Missing option '--rule-id'."),
+        ("{} remove-user".format(ALERT_RULES_COMMAND), "Missing option '--rule-id'."),
+        ("{} show".format(ALERT_RULES_COMMAND), "Missing argument 'RULE_ID'."),
+        (
+            "{} bulk add".format(ALERT_RULES_COMMAND),
+            "Error: Missing argument 'CSV_FILE'.",
+        ),
+        (
+            "{} bulk remove".format(ALERT_RULES_COMMAND),
+            "Error: Missing argument 'CSV_FILE'.",
+        ),
     ],
 )
 def test_alert_rules_command_returns_error_exit_status_when_missing_required_parameters(

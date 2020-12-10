@@ -16,28 +16,30 @@ ADVANCED_QUERY = """{"groupClause":"AND", "groups":[{"filterClause":"AND",
 {"operator":"ON_OR_BEFORE", "term":"eventTimestamp", "value":"2020-12-07T13:20:15.195Z"}]}],
 "srtDir":"asc", "srtKey":"eventId", "pgNum":1, "pgSize":10000}
 """
-ALERT_ADVANCED_QUERY_COMMAND = (
-    f"code42 alerts search --advanced-query '{ADVANCED_QUERY}'"
+ALERT_ADVANCED_QUERY_COMMAND = "code42 alerts search --advanced-query '{}'".format(
+    ADVANCED_QUERY
 )
 
 
 @pytest.mark.parametrize(
     "command",
     [
-        f"{ALERT_COMMAND}",
-        f"{ALERT_COMMAND} --state OPEN",
-        f"{ALERT_COMMAND} --state RESOLVED",
-        f"{ALERT_COMMAND} --actor user@code42.com",
-        f"{ALERT_COMMAND} --rule-name 'File Upload Alert'",
-        f"{ALERT_COMMAND} --rule-id 962a6a1c-54f6-4477-90bd-a08cc74cbf71",
-        f"{ALERT_COMMAND} --rule-type FedEndpointExfiltration",
-        f"{ALERT_COMMAND} --description 'Alert on any file upload'",
-        f"{ALERT_COMMAND} --exclude-rule-type 'FedEndpointExfiltration'",
-        f"{ALERT_COMMAND} --exclude-rule-id '962a6a1c-54f6-4477-90bd-a08cc74cbf71'",
-        f"{ALERT_COMMAND} --exclude-rule-name 'File Upload Alert'",
-        f"{ALERT_COMMAND} --exclude-actor-contains 'user@code42.com'",
-        f"{ALERT_COMMAND} --exclude-actor 'user@code42.com'",
-        f"{ALERT_COMMAND} --actor-contains 'user@code42.com'",
+        ALERT_COMMAND,
+        "{} --state OPEN".format(ALERT_COMMAND),
+        "{} --state RESOLVED".format(ALERT_COMMAND),
+        "{} --actor user@code42.com".format(ALERT_COMMAND),
+        "{} --rule-name 'File Upload Alert'".format(ALERT_COMMAND),
+        "{} --rule-id 962a6a1c-54f6-4477-90bd-a08cc74cbf71".format(ALERT_COMMAND),
+        "{} --rule-type FedEndpointExfiltration".format(ALERT_COMMAND),
+        "{} --description 'Alert on any file upload'".format(ALERT_COMMAND),
+        "{} --exclude-rule-type 'FedEndpointExfiltration'".format(ALERT_COMMAND),
+        "{} --exclude-rule-id '962a6a1c-54f6-4477-90bd-a08cc74cbf71'".format(
+            ALERT_COMMAND
+        ),
+        "{} --exclude-rule-name 'File Upload Alert'".format(ALERT_COMMAND),
+        "{} --exclude-actor-contains 'user@code42.com'".format(ALERT_COMMAND),
+        "{} --exclude-actor 'user@code42.com'".format(ALERT_COMMAND),
+        "{} --actor-contains 'user@code42.com'".format(ALERT_COMMAND),
         ALERT_ADVANCED_QUERY_COMMAND,
     ],
 )
@@ -47,7 +49,7 @@ def test_alert_command_returns_success_return_code(command):
 
 
 @pytest.mark.parametrize(
-    "command", [f"{ALERT_COMMAND} --advanced-query '{ADVANCED_QUERY}'"]
+    "command", ["{} --advanced-query '{}'".format(ALERT_COMMAND, ADVANCED_QUERY)]
 )
 def test_begin_cant_be_used_with_advanced_query(command):
     return_code, response = run_command(command)

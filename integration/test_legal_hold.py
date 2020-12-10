@@ -7,16 +7,16 @@ LEGAL_HOLD_COMMAND = "code42 legal-hold"
 @pytest.mark.parametrize(
     "command",
     [
-        f"{LEGAL_HOLD_COMMAND} list",
-        f"{LEGAL_HOLD_COMMAND} show 984140047896012577",
-        f"{LEGAL_HOLD_COMMAND} list -f CSV",
-        f"{LEGAL_HOLD_COMMAND} list -f TABLE",
-        f"{LEGAL_HOLD_COMMAND} list -f RAW-JSON",
-        f"{LEGAL_HOLD_COMMAND} list -f JSON",
-        f"{LEGAL_HOLD_COMMAND} list --format CSV",
-        f"{LEGAL_HOLD_COMMAND} list --format TABLE",
-        f"{LEGAL_HOLD_COMMAND} list --format JSON",
-        f"{LEGAL_HOLD_COMMAND} list --format RAW-JSON",
+        "{} list".format(LEGAL_HOLD_COMMAND),
+        "{} show 984140047896012577".format(LEGAL_HOLD_COMMAND),
+        "{} list -f CSV".format(LEGAL_HOLD_COMMAND),
+        "{} list -f TABLE".format(LEGAL_HOLD_COMMAND),
+        "{} list -f RAW-JSON".format(LEGAL_HOLD_COMMAND),
+        "{} list -f JSON".format(LEGAL_HOLD_COMMAND),
+        "{} list --format CSV".format(LEGAL_HOLD_COMMAND),
+        "{} list --format TABLE".format(LEGAL_HOLD_COMMAND),
+        "{} list --format JSON".format(LEGAL_HOLD_COMMAND),
+        "{} list --format RAW-JSON".format(LEGAL_HOLD_COMMAND),
     ],
 )
 def test_alert_rules_command_returns_success_return_code(command):
@@ -28,18 +28,30 @@ def test_alert_rules_command_returns_success_return_code(command):
     "command, error_msg",
     [
         (
-            f"{LEGAL_HOLD_COMMAND} add-user --matter-id test-matter-id",
+            "{} add-user --matter-id test-matter-id".format(LEGAL_HOLD_COMMAND),
             "Missing option '-u' / '--username'.",
         ),
         (
-            f"{LEGAL_HOLD_COMMAND} remove-user --matter-id test-matter-id",
+            "{} remove-user --matter-id test-matter-id".format(LEGAL_HOLD_COMMAND),
             "Missing option '-u' / '--username'.",
         ),
-        (f"{LEGAL_HOLD_COMMAND} add-user", "Missing option '-m' / '--matter-id'."),
-        (f"{LEGAL_HOLD_COMMAND} remove-user", "Missing option '-m' / '--matter-id'."),
-        (f"{LEGAL_HOLD_COMMAND} show", "Missing argument 'MATTER_ID'."),
-        (f"{LEGAL_HOLD_COMMAND} bulk add", "Error: Missing argument 'CSV_FILE'."),
-        (f"{LEGAL_HOLD_COMMAND} bulk remove", "Error: Missing argument 'CSV_FILE'."),
+        (
+            "{} add-user".format(LEGAL_HOLD_COMMAND),
+            "Missing option '-m' / '--matter-id'.",
+        ),
+        (
+            "{} remove-user".format(LEGAL_HOLD_COMMAND),
+            "Missing option '-m' / '--matter-id'.",
+        ),
+        ("{} show".format(LEGAL_HOLD_COMMAND), "Missing argument 'MATTER_ID'."),
+        (
+            "{} bulk add".format(LEGAL_HOLD_COMMAND),
+            "Error: Missing argument 'CSV_FILE'.",
+        ),
+        (
+            "{} bulk remove".format(LEGAL_HOLD_COMMAND),
+            "Error: Missing argument 'CSV_FILE'.",
+        ),
     ],
 )
 def test_alert_rules_command_returns_error_exit_status_when_missing_required_parameters(
