@@ -24,7 +24,7 @@ from code42cli.options import sdk_options
 
 filter_option = click.option(
     "--filter",
-    help="High risk employee filter options.",
+    help="High risk employee filter options. Defaults to OPEN.",
     type=click.Choice(HighRiskEmployeeFilters.choices()),
     default=HighRiskEmployeeFilters.OPEN,
 )

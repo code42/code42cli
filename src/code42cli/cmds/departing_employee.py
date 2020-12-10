@@ -21,7 +21,7 @@ from code42cli.options import sdk_options
 DATE_FORMAT = "%Y-%m-%d"
 filter_option = click.option(
     "--filter",
-    help="Departing employee filter options.",
+    help="Departing employee filter options. Defaults to OPEN.",
     type=click.Choice(DepartingEmployeeFilters.choices()),
     default=DepartingEmployeeFilters.OPEN,
 )
