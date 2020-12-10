@@ -10,12 +10,16 @@ from py42.response import Py42Response
 from requests import HTTPError
 from requests import Response
 
+from code42cli import PRODUCT_NAME
 from code42cli.cmds.devices import _add_usernames_to_device_dataframe
+from code42cli.cmds.devices import (
+    _drop_devices_which_have_not_connected_in_some_number_of_days,
+)
 from code42cli.cmds.devices import _drop_n_devices_per_user
 from code42cli.cmds.devices import _get_device_dataframe
-from code42cli.cmds.devices import _drop_devices_which_have_not_connected_in_some_number_of_days
 from code42cli.main import cli
 
+_NAMESPACE = "{}.cmds.devices".format(PRODUCT_NAME)
 TEST_DEVICE_ID = "12345"
 TEST_ARCHIVE_GUID = "954143426849296547"
 TEST_PURGE_DATE = "2020-10-12"
@@ -441,10 +445,34 @@ def test_add_usernames_to_device_dataframe_adds_usernames_to_dataframe(
     result = _add_usernames_to_device_dataframe(cli_state.sdk, testdf)
     assert "username" in result.columns
 
+
 def test_drop_devices_which_have_not_connected_in_some_number_of_days_drops_appropriate_devices():
-    testdf= DataFrame.from_records(
-        [{"lastConnected":"2019-01-09T17:09:26.432Z"},{"lastConnected":date.today().isoformat()+"T17:09:26.432Z"}]
+    testdf = DataFrame.from_records(
+        [
+            {"lastConnected": "2019-01-09T17:09:26.432Z"},
+            {"lastConnected": date.today().isoformat() + "T17:09:26.432Z"},
+        ]
     )
     result = _drop_devices_which_have_not_connected_in_some_number_of_days(testdf, 30)
     assert "2019-01-09T17:09:26.432Z" in result.values
-    assert date.today().isoformat()+"T17:09:26.432Z" not in result.values
+    assert date.today().isoformat() + "T17:09:26.432Z" not in result.values
+
+
+def test_bulk_deactivate_uses_expected_arguments(runner, mocker, cli_state):
+    bulk_processor = mocker.patch("{}.run_bulk_process".format(_NAMESPACE))
+    with runner.isolated_filesystem():
+        with open("test_bulk_deactivate.csv", "w") as csv:
+            csv.writelines(["deviceId,username\n", "test,value\n"])
+        runner.invoke(
+            cli,
+            ["devices", "bulk", "deactivate", "test_bulk_deactivate.csv"],
+            obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {
+            "deviceId": "test",
+            "deactivated": False,
+            "change_device_name": False,
+            "purge_date": None,
+        }
+    ]

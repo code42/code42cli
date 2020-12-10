@@ -1,10 +1,12 @@
 from collections import OrderedDict
 from datetime import date
+from datetime import datetime
 
 import click
-from pandas import DataFrame, to_datetime, to_timedelta
+from pandas import DataFrame
+from pandas import to_datetime
+from pandas import to_timedelta
 from py42 import exceptions
-from datetime import datetime, timedelta
 
 from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
@@ -176,7 +178,7 @@ def bulk(state):
     "--days-since-last-connected",
     required=False,
     type=int,
-    help="Return only devices that have not connected in the number of days specified."
+    help="Return only devices that have not connected in the number of days specified.",
 )
 @click.option(
     "--org-uid",
@@ -209,7 +211,13 @@ def bulk(state):
 )
 @sdk_options()
 def bulk_list(
-    state, active, days_since_last_connected, drop_most_recent, org_uid, include_backup_usage, include_usernames
+    state,
+    active,
+    days_since_last_connected,
+    drop_most_recent,
+    org_uid,
+    include_backup_usage,
+    include_usernames,
 ):
     """Outputs a list of all devices in the tenant"""
     devices_dataframe = _get_device_dataframe(
@@ -220,7 +228,9 @@ def bulk_list(
             devices_dataframe, drop_most_recent
         )
     if days_since_last_connected:
-        devices_dataframe = _drop_devices_which_have_not_connected_in_some_number_of_days(devices_dataframe, days_since_last_connected)
+        devices_dataframe = _drop_devices_which_have_not_connected_in_some_number_of_days(
+            devices_dataframe, days_since_last_connected
+        )
     if include_usernames:
         devices_dataframe = _add_usernames_to_device_dataframe(
             state.sdk, devices_dataframe
@@ -252,11 +262,17 @@ def _get_device_dataframe(sdk, active=None, org_uid=None, include_backup_usage=F
         ],
     )
 
+
 def _drop_devices_which_have_not_connected_in_some_number_of_days(
-    devices_dataframe,
-    days_since_last_connected
+    devices_dataframe, days_since_last_connected
 ):
-    return devices_dataframe.loc[to_datetime(datetime.now(),utc=True) - to_datetime(devices_dataframe["lastConnected"], utc=True) > to_timedelta(days_since_last_connected, unit="days"), :]
+    return devices_dataframe.loc[
+        to_datetime(datetime.now(), utc=True)
+        - to_datetime(devices_dataframe["lastConnected"], utc=True)
+        > to_timedelta(days_since_last_connected, unit="days"),
+        :,
+    ]
+
 
 def _drop_n_devices_per_user(
     device_dataframe,
@@ -290,15 +306,28 @@ def _add_usernames_to_device_dataframe(sdk, device_dataframe):
 @read_csv_arg(headers=["deviceId"])
 @change_device_name_option
 @purge_date_option
+@format_option
 @sdk_options()
-def bulk_deactivate(state, csv_rows, change_device_name, purge_date):
+def bulk_deactivate(state, csv_rows, change_device_name, purge_date, format):
     sdk = state.sdk
+    csv_rows[0]["deactivated"] = False
+    formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
     for row in csv_rows:
         row["change_device_name"] = change_device_name
         row["purge_date"] = purge_date
 
-    def handle_row(deviceId, change_device_name, purge_date):
-        _deactivate_device(sdk, deviceId, change_device_name, purge_date)
+    def handle_row(**row):
+        try:
+            _deactivate_device(
+                sdk, row["deviceId"], row["change_device_name"], row["purge_date"]
+            )
+            row["deactivated"] = "True"
+        except Exception as e:
+            row["deactivated"] = "False: {}".format(e)
+        return row
 
-    run_bulk_process(handle_row, csv_rows, progress_label="Deactivating devices:")
-    click.echo("Run complete. All devices deactivated.") # if there were any errors, a different message is displayed by the error handler
+    result_rows = run_bulk_process(
+        handle_row, csv_rows, progress_label="Deactivating devices:"
+    )
+    click.echo("Run complete.")
+    formatter.echo_formatted_list(result_rows)

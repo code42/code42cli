@@ -18,8 +18,10 @@ class WorkerStats:
 
     _total_processed = 0
     _total_errors = 0
+    _results = []
     __total_processed_lock = Lock()
     __total_errors_lock = Lock()
+    __results_lock = Lock()
 
     @property
     def total_processed(self):
@@ -36,6 +38,10 @@ class WorkerStats:
         val = self._total_processed - self._total_errors
         return val if val >= 0 else 0
 
+    @property
+    def results(self):
+        return self._results
+
     def __str__(self):
         return "{} succeeded, {} failed out of {}".format(
             self.total_successes, self._total_errors, self.total
@@ -50,6 +56,11 @@ class WorkerStats:
         """+1 to self.total_errors"""
         with self.__total_errors_lock:
             self._total_errors += 1
+
+    def add_result(self, result):
+        """add a result to the list"""
+        with self.__results_lock:
+            self._results.append(result)
 
 
 class Worker:
@@ -98,7 +109,7 @@ class Worker:
                 func = task["func"]
                 args = task["args"]
                 kwargs = task["kwargs"]
-                func(*args, **kwargs)
+                self._stats.add_result(func(*args, **kwargs))
             except Code42CLIError as err:
                 self._increment_total_errors()
                 self._logger.log_error(err)
