@@ -12,7 +12,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Fixed
 
-- Issue where `code42 profile delete` was allowed even deleting the default profile is not allowed.
+- Issue where `code42 profile delete` was allowed even though deleting the default profile is not allowed.
 
 ### Added
 
