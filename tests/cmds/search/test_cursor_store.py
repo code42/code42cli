@@ -4,9 +4,9 @@ import pytest
 
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.search.cursor_store import AlertCursorStore
+from code42cli.cmds.search.cursor_store import AuditLogCursorStore
 from code42cli.cmds.search.cursor_store import Cursor
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
-from code42cli.cmds.search.cursor_store import AuditLogCursorStore
 from code42cli.errors import Code42CLIError
 
 PROFILE_NAME = "testprofile"
@@ -311,9 +311,9 @@ class TestAuditLogCursorStore:
         mock_open = mocker.patch("{}.open".format(_NAMESPACE))
         mock_open.side_effect = FileNotFoundError
         assert event_list == []
-        
+
     def test_get_events_when_checkpoint_not_valid_json_returns_empty_list(self, mocker):
-        mocker.patch("builtins.open", mocker.mock_open(read_data='invalid_json'))
+        mocker.patch("builtins.open", mocker.mock_open(read_data="invalid_json"))
         store = AuditLogCursorStore(PROFILE_NAME)
         event_list = store.get_events(CURSOR_NAME)
         assert event_list == []
@@ -323,7 +323,10 @@ class TestAuditLogCursorStore:
         store.replace_events("checkpointname", ["hash1", "hash2"])
         user_path = path.join(path.expanduser("~"), ".code42cli")
         expected_path = path.join(
-            user_path, AUDIT_LOG_CHECKPOINT_FOLDER_NAME, PROFILE_NAME, "checkpointname_events"
+            user_path,
+            AUDIT_LOG_CHECKPOINT_FOLDER_NAME,
+            PROFILE_NAME,
+            "checkpointname_events",
         )
         mock_open.assert_called_once_with(expected_path, "w")
 
@@ -332,6 +335,11 @@ class TestAuditLogCursorStore:
         store.replace_events("checkpointname", ["hash1", "hash2"])
         user_path = path.join(path.expanduser("~"), ".code42cli")
         path.join(
-            user_path, AUDIT_LOG_CHECKPOINT_FOLDER_NAME, PROFILE_NAME, "checkpointname_events"
+            user_path,
+            AUDIT_LOG_CHECKPOINT_FOLDER_NAME,
+            PROFILE_NAME,
+            "checkpointname_events",
         )
-        mock_open_events.return_value.write.assert_called_once_with('["hash1", "hash2"]')
+        mock_open_events.return_value.write.assert_called_once_with(
+            '["hash1", "hash2"]'
+        )

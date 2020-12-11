@@ -5,8 +5,8 @@ from .conftest import create_mock_profile
 from .conftest import MockSection
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.search.cursor_store import AlertCursorStore
-from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.cmds.search.cursor_store import AuditLogCursorStore
+from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.config import ConfigAccessor
 from code42cli.config import NoConfigProfileError
 from code42cli.errors import Code42CLIError

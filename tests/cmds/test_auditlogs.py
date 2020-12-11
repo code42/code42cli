@@ -106,13 +106,13 @@ def test_audit_log_response(mocker):
     http_response1.status_code = 200
     http_response1.text = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
     http_response1._content_consumed = ""
-    
+
     http_response2 = mocker.MagicMock(spec=Response)
     http_response2.status_code = 200
     http_response2.text = json.dumps({"events": TEST_EVENTS_WITH_DIFFERENT_TIMESTAMPS})
     http_response2._content_consumed = ""
     Py42Response(http_response2)
-    
+
     def response_gen():
         yield Py42Response(http_response1)
         yield Py42Response(http_response2)
@@ -126,10 +126,10 @@ def test_audit_log_response_with_only_same_timestamps(mocker):
     http_response.status_code = 200
     http_response.text = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
     http_response._content_consumed = ""
-    
+
     def response_gen():
         yield Py42Response(http_response)
-    
+
     return response_gen()
 
 
@@ -369,7 +369,9 @@ def test_search_without_existing_checkpoint_writes_both_event_hashes_with_same_t
     test_audit_log_response_with_only_same_timestamps,
     audit_log_cursor_with_checkpoint,
 ):
-    cli_state.sdk.auditlogs.get_all.return_value = test_audit_log_response_with_only_same_timestamps
+    cli_state.sdk.auditlogs.get_all.return_value = (
+        test_audit_log_response_with_only_same_timestamps
+    )
     runner.invoke(
         cli,
         ["audit-logs", "search", "--begin", "1d", "--use-checkpoint", "test"],
@@ -389,7 +391,9 @@ def test_send_to_without_existing_checkpoint_writes_both_event_hashes_with_same_
     audit_log_cursor_with_checkpoint,
     send_to_logger,
 ):
-    cli_state.sdk.auditlogs.get_all.return_value = test_audit_log_response_with_only_same_timestamps
+    cli_state.sdk.auditlogs.get_all.return_value = (
+        test_audit_log_response_with_only_same_timestamps
+    )
     runner.invoke(
         cli,
         [
