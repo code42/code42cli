@@ -105,7 +105,7 @@ def audit_logs(state):
 @click.argument("checkpoint-name")
 @sdk_options()
 def clear_checkpoint(state, checkpoint_name):
-    """Remove the saved file event checkpoint from `--use-checkpoint/-c` mode."""
+    """Remove the saved audit log checkpoint from `--use-checkpoint/-c` mode."""
     _get_audit_log_cursor_store(state.profile.name).delete(checkpoint_name)
 
 
