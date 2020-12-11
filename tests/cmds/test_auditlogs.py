@@ -412,3 +412,11 @@ def test_send_to_without_existing_checkpoint_writes_both_event_hashes_with_same_
         hash_event(TEST_EVENTS_WITH_SAME_TIMESTAMP[0]),
         hash_event(TEST_EVENTS_WITH_SAME_TIMESTAMP[1]),
     ]
+
+
+def test_audit_log_parse_timestamp_handles_possible_strings():
+    TIMESTAMP_WITH_MILLISECONDS = "2020-01-01T12:00:00.000Z"
+    TIMESTAMP_WITHOUT_MILLISECONDS = "2020-01-01T12:00:00Z"
+    ts1 = _parse_audit_log_timestamp_string_to_timestamp(TIMESTAMP_WITH_MILLISECONDS)
+    ts2 = _parse_audit_log_timestamp_string_to_timestamp(TIMESTAMP_WITHOUT_MILLISECONDS)
+    assert ts1 == ts2

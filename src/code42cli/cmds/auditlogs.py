@@ -272,5 +272,9 @@ def _get_audit_log_cursor_store(profile_name):
 def _parse_audit_log_timestamp_string_to_timestamp(ts):
     # example: {"property": "bar", "timestamp": "2020-11-23T17:13:26.239647Z"}
     ts = ts[:-1]
-    dt = datetime.strptime(ts, AUDIT_LOG_TIMESTAMP_FORMAT).replace(tzinfo=timezone.utc)
+    try:
+        dt = datetime.strptime(ts, AUDIT_LOG_TIMESTAMP_FORMAT).replace(tzinfo=timezone.utc)
+    except ValueError:
+        ts = ts + ".0"  # handle timestamps that are missing ms
+        dt = datetime.strptime(ts, AUDIT_LOG_TIMESTAMP_FORMAT).replace(tzinfo=timezone.utc)
     return dt.timestamp()
