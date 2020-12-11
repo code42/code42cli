@@ -333,6 +333,12 @@ def test_delete_profile_warns_if_deleting_default(runner, mock_cliprofile_namesp
     assert "'mockdefault' is currently the default profile!" in result.output
 
 
+def test_delete_profile_requires_profile_name_arg(runner, mock_cliprofile_namespace):
+    result = runner.invoke(cli, ["profile", "delete"])
+    assert "Error: Missing argument 'PROFILE_NAME'." in result.output
+    assert mock_cliprofile_namespace.delete_profile.call_count == 0
+
+
 def test_delete_profile_does_nothing_if_user_doesnt_agree(
     runner, user_disagreement, mock_cliprofile_namespace
 ):
