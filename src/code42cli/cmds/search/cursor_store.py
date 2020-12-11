@@ -38,7 +38,7 @@ class BaseCursorStore:
         """Replaces the last stored date observed timestamp with the given one."""
         location = path.join(self._dir_path, cursor_name)
         with open(location, "w") as checkpoint:
-            return checkpoint.write(str(new_timestamp))
+            checkpoint.write(str(new_timestamp))
 
     def delete(self, cursor_name):
         """Removes a single cursor from the store."""
@@ -95,7 +95,7 @@ class AuditLogCursorStore(BaseCursorStore):
     def replace_events(self, cursor_name, new_events):
         location = path.join(self._dir_path, cursor_name) + "_events"
         with open(location, "w") as checkpoint:
-            return checkpoint.write(json.dumps(new_events))
+            checkpoint.write(json.dumps(new_events))
 
 
 def get_all_cursor_stores_for_profile(profile_name):
