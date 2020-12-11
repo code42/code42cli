@@ -88,6 +88,7 @@ def filter_options(f):
 checkpoint_option = click.option(
     "-c",
     "--use-checkpoint",
+    metavar="checkpoint",
     help="Only get audit-log events that were not previously retrieved.",
 )
 
@@ -130,7 +131,8 @@ def search(
     formatter = OutputFormatter(format, AUDIT_LOGS_DEFAULT_HEADER)
     cursor = _get_audit_log_cursor_store(state.profile.name)
     if use_checkpoint:
-        checkpoint = cursor.get(use_checkpoint)
+        checkpoint_name = use_checkpoint
+        checkpoint = cursor.get(checkpoint_name)
         if checkpoint is not None:
             begin = checkpoint
 
@@ -146,9 +148,10 @@ def search(
         affected_usernames=affected_username,
     )
     if use_checkpoint:
+        checkpoint_name = use_checkpoint
         events = list(
             _dedupe_checkpointed_events_and_store_updated_checkpoint(
-                cursor, use_checkpoint, events
+                cursor, checkpoint_name, events
             )
         )
     if not events:
@@ -185,7 +188,8 @@ def send_to(
     logger = get_logger_for_server(hostname, protocol, format)
     cursor = _get_audit_log_cursor_store(state.profile.name)
     if use_checkpoint:
-        checkpoint = cursor.get(use_checkpoint)
+        checkpoint_name = use_checkpoint
+        checkpoint = cursor.get(checkpoint_name)
         if checkpoint is not None:
             begin = checkpoint
 
@@ -201,8 +205,11 @@ def send_to(
         affected_usernames=affected_username,
     )
     if use_checkpoint:
-        events = _dedupe_checkpointed_events_and_store_updated_checkpoint(
-            cursor, use_checkpoint, events
+        checkpoint_name = use_checkpoint
+        events = list(
+            _dedupe_checkpointed_events_and_store_updated_checkpoint(
+                cursor, checkpoint_name, events
+            )
         )
     with warn_interrupt():
         event = None
