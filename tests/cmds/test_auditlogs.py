@@ -102,16 +102,22 @@ def send_to_logger(mocker):
 
 @pytest.fixture
 def test_audit_log_response(mocker):
-    http_response = mocker.MagicMock(spec=Response)
-    http_response.status_code = 200
-    http_response.text = json.dumps(
-        {
-            "events": TEST_EVENTS_WITH_SAME_TIMESTAMP
-            + TEST_EVENTS_WITH_DIFFERENT_TIMESTAMPS
-        }
-    )
-    http_response._content_consumed = ""
-    return Py42Response(http_response)
+    http_response1 = mocker.MagicMock(spec=Response)
+    http_response1.status_code = 200
+    http_response1.text = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
+    http_response1._content_consumed = ""
+    
+    http_response2 = mocker.MagicMock(spec=Response)
+    http_response2.status_code = 200
+    http_response2.text = json.dumps({"events": TEST_EVENTS_WITH_DIFFERENT_TIMESTAMPS})
+    http_response2._content_consumed = ""
+    Py42Response(http_response2)
+    
+    def response_gen():
+        yield Py42Response(http_response1)
+        yield Py42Response(http_response2)
+
+    return response_gen()
 
 
 @pytest.fixture
@@ -120,7 +126,11 @@ def test_audit_log_response_with_only_same_timestamps(mocker):
     http_response.status_code = 200
     http_response.text = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
     http_response._content_consumed = ""
-    return Py42Response(http_response)
+    
+    def response_gen():
+        yield Py42Response(http_response)
+    
+    return response_gen()
 
 
 def test_search_audit_logs_json_format(runner, cli_state, date_str):
@@ -202,7 +212,7 @@ def test_search_audit_logs_with_all_filter_parameters(runner, cli_state, date_st
 def test_send_to_makes_expected_call_count_to_the_logger_method(
     cli_state, runner, send_to_logger, test_audit_log_response
 ):
-    cli_state.sdk.auditlogs.get_all.return_value = [test_audit_log_response]
+    cli_state.sdk.auditlogs.get_all.return_value = test_audit_log_response
     runner.invoke(
         cli, ["audit-logs", "send-to", "localhost", "--begin", "1d"], obj=cli_state
     )
@@ -212,7 +222,7 @@ def test_send_to_makes_expected_call_count_to_the_logger_method(
 def test_send_to_emits_events_in_chronological_order(
     cli_state, runner, send_to_logger, test_audit_log_response
 ):
-    cli_state.sdk.auditlogs.get_all.return_value = [test_audit_log_response]
+    cli_state.sdk.auditlogs.get_all.return_value = test_audit_log_response
     runner.invoke(
         cli, ["audit-logs", "send-to", "localhost", "--begin", "1d"], obj=cli_state
     )
@@ -237,7 +247,7 @@ def test_send_to_emits_events_in_chronological_order(
 def test_search_with_checkpoint_saves_expected_cursor_timestamp(
     cli_state, runner, test_audit_log_response, audit_log_cursor_with_checkpoint
 ):
-    cli_state.sdk.auditlogs.get_all.return_value = [test_audit_log_response]
+    cli_state.sdk.auditlogs.get_all.return_value = test_audit_log_response
     runner.invoke(
         cli,
         ["audit-logs", "search", "--begin", "1d", "--use-checkpoint", "test"],
@@ -257,7 +267,7 @@ def test_send_to_with_checkpoint_saves_expected_cursor_timestamp(
     audit_log_cursor_with_checkpoint,
     send_to_logger,
 ):
-    cli_state.sdk.auditlogs.get_all.return_value = [test_audit_log_response]
+    cli_state.sdk.auditlogs.get_all.return_value = test_audit_log_response
     runner.invoke(
         cli,
         [
@@ -318,7 +328,7 @@ def test_search_with_existing_checkpoint_events_skips_duplicate_events(
     test_audit_log_response,
     audit_log_cursor_with_checkpoint_and_events,
 ):
-    cli_state.sdk.auditlogs.get_all.return_value = [test_audit_log_response]
+    cli_state.sdk.auditlogs.get_all.return_value = test_audit_log_response
     result = runner.invoke(
         cli,
         ["audit-logs", "search", "--begin", "1d", "--use-checkpoint", "test"],
@@ -335,7 +345,7 @@ def test_send_to_with_existing_checkpoint_events_skips_duplicate_events(
     audit_log_cursor_with_checkpoint_and_events,
     send_to_logger,
 ):
-    cli_state.sdk.auditlogs.get_all.return_value = [test_audit_log_response]
+    cli_state.sdk.auditlogs.get_all.return_value = test_audit_log_response
     runner.invoke(
         cli,
         [
@@ -359,9 +369,7 @@ def test_search_without_existing_checkpoint_writes_both_event_hashes_with_same_t
     test_audit_log_response_with_only_same_timestamps,
     audit_log_cursor_with_checkpoint,
 ):
-    cli_state.sdk.auditlogs.get_all.return_value = [
-        test_audit_log_response_with_only_same_timestamps
-    ]
+    cli_state.sdk.auditlogs.get_all.return_value = test_audit_log_response_with_only_same_timestamps
     runner.invoke(
         cli,
         ["audit-logs", "search", "--begin", "1d", "--use-checkpoint", "test"],
@@ -381,9 +389,7 @@ def test_send_to_without_existing_checkpoint_writes_both_event_hashes_with_same_
     audit_log_cursor_with_checkpoint,
     send_to_logger,
 ):
-    cli_state.sdk.auditlogs.get_all.return_value = [
-        test_audit_log_response_with_only_same_timestamps
-    ]
+    cli_state.sdk.auditlogs.get_all.return_value = test_audit_log_response_with_only_same_timestamps
     runner.invoke(
         cli,
         [
