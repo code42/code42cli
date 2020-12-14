@@ -10,6 +10,11 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
+### Changed
+
+- The error text when removing an employee from a detection list now references the employee 
+  by ID rather the username.
+
 ### Fixed
 
 - Issue where `code42 profile delete` was allowed without giving a `profile_name` even
