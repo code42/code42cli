@@ -19,7 +19,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - The `devices` command is added. Included are:
     - `devices deactivate` to deactivate a single computer
     - `devices get-info` to retrieve detailed information about a computer
-    - `devices bulk info` to retrieve info about many devices
+    - `devices bulk info` to retrieve info about many devices, including device settings
     - `devices bulk deactivate` to deactivate a list of devices
 
 ### Changed

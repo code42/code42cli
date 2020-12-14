@@ -273,16 +273,19 @@ def _get_device_dataframe(sdk, active=None, org_uid=None, include_backup_usage=F
     )
 
 def _add_settings_to_dataframe(sdk, device_dataframe):
-    device_settings_list = []
     macos_guids = device_dataframe.loc[device_dataframe["osName"]=="mac", "guid"].values
-    for guid in device_dataframe["guid"].values:
-        current_device_settings = sdk.devices.get_settings(guid)
+    rows = [{"guid": guid, "macos_guid": guid in macos_guids} for guid in device_dataframe["guid"].values]
+    def handle_row(guid, macos_guid):
+        try:
+            current_device_settings = sdk.devices.get_settings(guid) 
+        except Exception as e:
+            return {"guid": guid, "ERROR":"Unable to retrieve device settings for {}: {}".format(guid, e)}
         current_result_dict = {
             "guid": current_device_settings.guid,
             "included_files": list({path for backup_set in current_device_settings.backup_sets for path in backup_set.included_files}),
             "excluded_files": list({path for backup_set in current_device_settings.backup_sets for path in backup_set.excluded_files}),
         }
-        if guid in macos_guids:
+        if macos_guid:
             try:
                 full_disk_access_status = sdk.devices.get_agent_full_disk_access_state(guid).data["value"] # returns 404 error if device isn't a Mac or doesn't have full disk access
             except:
@@ -290,8 +293,10 @@ def _add_settings_to_dataframe(sdk, device_dataframe):
         else:
             full_disk_access_status=""
         current_result_dict["full_disk_access"] = full_disk_access_status
-        device_settings_list.append(current_result_dict)
-    return device_dataframe.merge(DataFrame.from_records(device_settings_list), on="guid")
+        return current_result_dict
+
+    result_list = run_bulk_process(handle_row, rows, progress_label="Getting device settings")
+    return device_dataframe.merge(DataFrame.from_records(result_list), on="guid")
 
 def _drop_devices_which_have_not_connected_in_some_number_of_days(
     devices_dataframe, days_since_last_connected
