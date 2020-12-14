@@ -2,6 +2,7 @@ from py42.exceptions import Py42NotFoundError
 from requests import HTTPError
 from requests import Request
 from requests import Response
+from tests.cmds.conftest import get_user_not_on_list_side_effect
 from tests.cmds.conftest import thread_safe_side_effect
 from tests.conftest import TEST_ID
 
@@ -213,16 +214,16 @@ def test_add_departing_employee_when_invalid_date_format_validation_raises_error
 def test_remove_departing_employee_when_user_not_on_list_prints_expected_error(
     mocker, runner, cli_state
 ):
-    cli_state.sdk.detectionlists.departing_employee.remove.side_effect = get_user_not_on_departing_employee_list_side_effect(
-        mocker
+    cli_state.sdk.detectionlists.departing_employee.remove.side_effect = get_user_not_on_list_side_effect(
+        mocker, "departing-employee"
     )
     test_username = "test@example.com"
     result = runner.invoke(
         cli, ["departing-employee", "remove", test_username], obj=cli_state
     )
     assert (
-        "User {} is not currently on the departing-employee detection list.".format(
-            test_username
+        "User with ID '{}' is not currently on the departing-employee list.".format(
+            TEST_ID
         )
         in result.output
     )

@@ -1,5 +1,4 @@
 import click
-from py42.exceptions import Py42NotFoundError
 
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
@@ -47,14 +46,7 @@ def add(state, username, cloud_alias, departure_date, notes):
 @sdk_options()
 def remove(state, username):
     """Remove a user from the departing-employee detection list."""
-    try:
-        _remove_departing_employee(state.sdk, username)
-    except Py42NotFoundError:
-        raise Code42CLIError(
-            "User {} is not currently on the departing-employee detection list.".format(
-                username
-            )
-        )
+    _remove_departing_employee(state.sdk, username)
 
 
 @departing_employee.group(cls=OrderedGroup)

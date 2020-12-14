@@ -2,6 +2,7 @@ from py42.exceptions import Py42NotFoundError
 from requests import HTTPError
 from requests import Request
 from requests import Response
+from tests.cmds.conftest import get_user_not_on_list_side_effect
 from tests.cmds.conftest import TEST_EMPLOYEE
 from tests.cmds.conftest import thread_safe_side_effect
 from tests.conftest import TEST_ID
@@ -240,16 +241,16 @@ def test_bulk_remove_risk_tags_uses_expected_arguments(runner, cli_state, mocker
 def test_remove_high_risk_employee_when_user_not_on_list_prints_expected_error(
     mocker, runner, cli_state
 ):
-    cli_state.sdk.detectionlists.high_risk_employee.remove.side_effect = get_user_not_on_high_risk_employee_list_side_effect(
-        mocker
+    cli_state.sdk.detectionlists.high_risk_employee.remove.side_effect = get_user_not_on_list_side_effect(
+        mocker, "high-risk-employee"
     )
     test_username = "test@example.com"
     result = runner.invoke(
         cli, ["high-risk-employee", "remove", test_username], obj=cli_state
     )
     assert (
-        "User {} is not currently on the high-risk-employee detection list.".format(
-            test_username
+        "User with ID '{}' is not currently on the high-risk-employee list.".format(
+            TEST_ID
         )
         in result.output
     )
