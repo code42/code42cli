@@ -18,7 +18,10 @@ def profile():
     pass
 
 
-profile_name_arg = click.argument("profile_name", required=False)
+def profile_name_arg(required=False):
+    return click.argument("profile_name", required=required)
+
+
 name_option = click.option(
     "-n",
     "--name",
@@ -48,7 +51,7 @@ disable_ssl_option = click.option(
 
 
 @profile.command()
-@profile_name_arg
+@profile_name_arg()
 def show(profile_name):
     """Print the details of a profile."""
     c42profile = cliprofile.get_profile(profile_name)
@@ -96,7 +99,7 @@ def update(name, server, username, password, disable_ssl_errors):
 
 
 @profile.command()
-@profile_name_arg
+@profile_name_arg()
 def reset_pw(profile_name):
     """\b
     Change the stored password for a profile. Only affects what's stored in the local profile,
@@ -117,7 +120,7 @@ def _list():
 
 
 @profile.command()
-@profile_name_arg
+@profile_name_arg()
 def use(profile_name):
     """Set a profile as the default."""
     cliprofile.switch_default_profile(profile_name)
@@ -126,7 +129,7 @@ def use(profile_name):
 
 @profile.command()
 @yes_option
-@profile_name_arg
+@profile_name_arg(required=True)
 def delete(profile_name):
     """Deletes a profile and its stored password (if any)."""
     message = "\nDeleting this profile will also delete any stored passwords and checkpoints. Are you sure? (y/n): "

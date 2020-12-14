@@ -10,6 +10,11 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
+### Fixed
+
+- Issue where `code42 profile delete` was allowed without giving a `profile_name` even
+  though deleting the default profile is not allowed.
+
 ### Added
 
 - `code42 departing-employee list` command.
@@ -21,6 +26,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `send-to` to send audit-logs to server.
 
 ### Changed
+
+- `profile_name` argument is now required for `code42 profile delete`, as it was meant to be.
 
 - The `--advanced-query` option on `alerts search` and `security-data (search|send-to)` commands has been updated:
     - It can now accept the query as a JSON string or as the path to a file containing the JSON query.
