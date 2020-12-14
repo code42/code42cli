@@ -209,8 +209,16 @@ def bulk(state):
     is_flag=True,
     help="Include to add the username associated with a device to the output",
 )
+@click.option(
+    "--include-settings",
+    required=False,
+    type=bool,
+    default=False,
+    is_flag=True,
+    help="Include to include device settings in output"
+)
 @sdk_options()
-def bulk_list(
+def bulk_info(
     state,
     active,
     days_since_last_connected,
@@ -218,6 +226,7 @@ def bulk_list(
     org_uid,
     include_backup_usage,
     include_usernames,
+    include_settings,
 ):
     """Outputs a list of all devices in the tenant"""
     devices_dataframe = _get_device_dataframe(
@@ -231,12 +240,13 @@ def bulk_list(
         devices_dataframe = _drop_devices_which_have_not_connected_in_some_number_of_days(
             devices_dataframe, days_since_last_connected
         )
+    if include_settings:
+        devices_dataframe = _add_settings_to_dataframe(state.sdk, devices_dataframe)
     if include_usernames:
         devices_dataframe = _add_usernames_to_device_dataframe(
             state.sdk, devices_dataframe
         )
     click.echo(devices_dataframe.to_csv())
-
 
 def _get_device_dataframe(sdk, active=None, org_uid=None, include_backup_usage=False):
     devices_generator = sdk.devices.get_all(
@@ -262,6 +272,26 @@ def _get_device_dataframe(sdk, active=None, org_uid=None, include_backup_usage=F
         ],
     )
 
+def _add_settings_to_dataframe(sdk, device_dataframe):
+    device_settings_list = []
+    macos_guids = device_dataframe.loc[device_dataframe["osName"]=="mac", "guid"].values
+    for guid in device_dataframe["guid"].values:
+        current_device_settings = sdk.devices.get_settings(guid)
+        current_result_dict = {
+            "guid": current_device_settings.guid,
+            "included_files": list({path for backup_set in current_device_settings.backup_sets for path in backup_set.included_files}),
+            "excluded_files": list({path for backup_set in current_device_settings.backup_sets for path in backup_set.excluded_files}),
+        }
+        if guid in macos_guids:
+            try:
+                full_disk_access_status = sdk.devices.get_agent_full_disk_access_state(guid).data["value"] # returns 404 error if device isn't a Mac or doesn't have full disk access
+            except:
+                full_disk_access_status = False
+        else:
+            full_disk_access_status=""
+        current_result_dict["full_disk_access"] = full_disk_access_status
+        device_settings_list.append(current_result_dict)
+    return device_dataframe.merge(DataFrame.from_records(device_settings_list), on="guid")
 
 def _drop_devices_which_have_not_connected_in_some_number_of_days(
     devices_dataframe, days_since_last_connected
