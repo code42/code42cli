@@ -12,7 +12,6 @@ from code42cli.cmds.detectionlists.options import cloud_alias_option
 from code42cli.cmds.detectionlists.options import notes_option
 from code42cli.cmds.detectionlists.options import username_arg
 from code42cli.cmds.shared import get_user_id
-from code42cli.errors import Code42CLIError
 from code42cli.file_readers import read_csv_arg
 from code42cli.file_readers import read_flat_file_arg
 from code42cli.options import sdk_options
