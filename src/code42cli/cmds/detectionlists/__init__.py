@@ -29,7 +29,7 @@ def list_employees(employee_generator, output_format, additional_header_items=No
         for employee in employees["items"]:
             if employee["notes"] and output_format == OutputFormat.TABLE:
                 employee["notes"] = (
-                    employee["notes"].replace("\n", ". ").replace("\t", ". ")
+                    employee["notes"].replace("\n", "\\n").replace("\t", "\\t")
                 )
             employee_list.append(employee)
     if employee_list:
