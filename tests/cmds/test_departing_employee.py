@@ -52,6 +52,15 @@ def test_list_departing_employees_lists_expected_properties(runner, mock_get_all
     assert "2020-07-07" in res.output
 
 
+def test_list_departing_employees_converts_all_to_open(runner, mock_get_all_state):
+    runner.invoke(
+        cli, ["departing-employee", "list", "--filter", "ALL"], obj=mock_get_all_state
+    )
+    mock_get_all_state.sdk.detectionlists.departing_employee.get_all.assert_called_once_with(
+        DepartingEmployeeFilters.OPEN
+    )
+
+
 def test_list_departing_employees_when_given_raw_json_lists_expected_properties(
     runner, mock_get_all_state
 ):

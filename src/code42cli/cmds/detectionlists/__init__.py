@@ -1,8 +1,24 @@
 import click
+from py42.services.detectionlists import _DetectionListFilters
 
 from code42cli.cmds.shared import get_user_id
 from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
+
+
+ALL_FILTER = "ALL"
+
+
+def get_choices(filters):
+    filters.remove(_DetectionListFilters.OPEN)
+    filters.append(ALL_FILTER)
+    return filters
+
+
+def handle_filter_choice(choice):
+    if choice == ALL_FILTER:
+        return _DetectionListFilters.OPEN
+    return choice
 
 
 def list_employees(employee_generator, output_format, additional_header_items=None):

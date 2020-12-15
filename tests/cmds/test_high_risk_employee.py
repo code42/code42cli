@@ -51,6 +51,15 @@ def test_list_high_risk_employees_lists_expected_properties(runner, mock_get_all
     assert "test.testerson@example.com" in res.output
 
 
+def test_list_departing_employees_converts_all_to_open(runner, mock_get_all_state):
+    runner.invoke(
+        cli, ["high-risk-employee", "list", "--filter", "ALL"], obj=mock_get_all_state
+    )
+    mock_get_all_state.sdk.detectionlists.high_risk_employee.get_all.assert_called_once_with(
+        HighRiskEmployeeFilters.OPEN
+    )
+
+
 def test_list_high_risk_employees_when_given_raw_json_lists_expected_properties(
     runner, mock_get_all_state
 ):

@@ -7,6 +7,9 @@ from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.cmds.detectionlists import add_risk_tags as _add_risk_tags
+from code42cli.cmds.detectionlists import ALL_FILTER
+from code42cli.cmds.detectionlists import get_choices
+from code42cli.cmds.detectionlists import handle_filter_choice
 from code42cli.cmds.detectionlists import handle_list_args
 from code42cli.cmds.detectionlists import list_employees
 from code42cli.cmds.detectionlists import remove_risk_tags as _remove_risk_tags
@@ -22,11 +25,17 @@ from code42cli.options import format_option
 from code42cli.options import sdk_options
 
 
+def _get_filter_choices():
+    filters = HighRiskEmployeeFilters.choices()
+    return get_choices(filters)
+
+
 filter_option = click.option(
     "--filter",
-    help="High risk employee filter options. Defaults to OPEN.",
-    type=click.Choice(HighRiskEmployeeFilters.choices()),
-    default=HighRiskEmployeeFilters.OPEN,
+    help="High risk employee filter options. Defaults to {}.".format(ALL_FILTER),
+    type=click.Choice(_get_filter_choices()),
+    default=ALL_FILTER,
+    callback=lambda ctx, param, arg: handle_filter_choice(arg),
 )
 
 
