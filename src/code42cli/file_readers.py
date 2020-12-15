@@ -16,7 +16,7 @@ def read_csv_arg(headers):
     )
 
 
-def read_csv(file, headers=None):
+def read_csv(file, headers):
     """Helper to read a csv file object into dict rows, automatically removing header row
     if it exists, and errors if column count doesn't match header list length.
     """
