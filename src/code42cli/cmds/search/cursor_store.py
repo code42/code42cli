@@ -1,3 +1,4 @@
+import json
 import os
 from os import path
 
@@ -37,7 +38,7 @@ class BaseCursorStore:
         """Replaces the last stored date observed timestamp with the given one."""
         location = path.join(self._dir_path, cursor_name)
         with open(location, "w") as checkpoint:
-            return checkpoint.write(str(new_timestamp))
+            checkpoint.write(str(new_timestamp))
 
     def delete(self, cursor_name):
         """Removes a single cursor from the store."""
@@ -75,13 +76,31 @@ class AlertCursorStore(BaseCursorStore):
         super().__init__(dir_path)
 
 
-def get_file_event_cursor_store(profile_name):
-    return FileEventCursorStore(profile_name)
+class AuditLogCursorStore(BaseCursorStore):
+    def __init__(self, profile_name):
+        dir_path = get_user_project_path("audit_log_checkpoints", profile_name)
+        super().__init__(dir_path)
 
+    def get_events(self, cursor_name):
+        try:
+            location = path.join(self._dir_path, cursor_name) + "_events"
+            with open(location) as checkpoint:
+                try:
+                    return json.loads(checkpoint.read())
+                except json.JSONDecodeError:
+                    return []
+        except FileNotFoundError:
+            return []
 
-def get_alert_cursor_store(profile_name):
-    return AlertCursorStore(profile_name)
+    def replace_events(self, cursor_name, new_events):
+        location = path.join(self._dir_path, cursor_name) + "_events"
+        with open(location, "w") as checkpoint:
+            checkpoint.write(json.dumps(new_events))
 
 
 def get_all_cursor_stores_for_profile(profile_name):
-    return [FileEventCursorStore(profile_name), AlertCursorStore(profile_name)]
+    return [
+        FileEventCursorStore(profile_name),
+        AlertCursorStore(profile_name),
+        AuditLogCursorStore(profile_name),
+    ]
