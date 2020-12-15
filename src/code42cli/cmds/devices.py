@@ -115,7 +115,7 @@ _DEVICE_INFO_KEYS_MAP["osVersion"] = "Operating System Version"
 @device_id_option
 @format_option
 @sdk_options()
-def get_info(state, device_id, format=None):
+def show(state, device_id, format=None):
     """Print device info."""
     formatter = OutputFormatter(format, _DEVICE_INFO_KEYS_MAP)
     device_info = _get_device_info(state.sdk, device_id)
@@ -165,7 +165,7 @@ def bulk(state):
     pass
 
 
-@bulk.command(name="info", help="Get information about many devices")
+@bulk.command(name="list", help="Get information about many devices")
 @click.option(
     "--active",
     required=False,
@@ -218,7 +218,7 @@ def bulk(state):
     help="Include to include device settings in output"
 )
 @sdk_options()
-def bulk_info(
+def bulk_list(
     state,
     active,
     days_since_last_connected,
@@ -364,5 +364,4 @@ def bulk_deactivate(state, csv_rows, change_device_name, purge_date, format):
     result_rows = run_bulk_process(
         handle_row, csv_rows, progress_label="Deactivating devices:"
     )
-    click.echo("Run complete.")
     formatter.echo_formatted_list(result_rows)

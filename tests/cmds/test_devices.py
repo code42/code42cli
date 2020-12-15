@@ -371,9 +371,9 @@ def test_deactivate_fails_if_device_deactivation_forbidden(
     assert "Unable to deactivate {}.".format(TEST_DEVICE_ID)
 
 
-def test_get_info_prints_device_info(runner, cli_state, backupusage_success):
+def test_show_prints_device_info(runner, cli_state, backupusage_success):
     result = runner.invoke(
-        cli, ["devices", "get-info", "--device-id", TEST_DEVICE_ID], obj=cli_state
+        cli, ["devices", "show", "--device-id", TEST_DEVICE_ID], obj=cli_state
     )
     assert "SNWINTEST1" in result.output
     assert "843290890230648046" in result.output
@@ -382,12 +382,12 @@ def test_get_info_prints_device_info(runner, cli_state, backupusage_success):
     assert "6.7.1" in result.output
 
 
-def test_get_info_returns_empty_values_if_no_backupusage(
+def test_show_returns_empty_values_if_no_backupusage(
     runner, cli_state, empty_backupusage_success
 ):
     result = runner.invoke(
         cli,
-        ["devices", "get-info", "--device-id", TEST_DEVICE_ID, "-f", "json"],
+        ["devices", "show", "--device-id", TEST_DEVICE_ID, "-f", "json"],
         obj=cli_state,
     )
     assert '"lastBackup": null' in result.output
@@ -416,7 +416,7 @@ def test_get_device_dataframe_returns_correct_columns(
 
 
 def test_bulk_list_outputs_csv(runner, cli_state, get_all_devices_success):
-    result = runner.invoke(cli, ["devices", "bulk", "info"], obj=cli_state)
+    result = runner.invoke(cli, ["devices", "bulk", "list"], obj=cli_state)
     assert (
         "computerId,guid,name,osHostname,status,lastConnected,backupUsage,productVersion,osName,osVersion,userUid"
         in result.output
