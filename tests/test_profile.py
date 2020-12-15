@@ -5,6 +5,7 @@ from .conftest import create_mock_profile
 from .conftest import MockSection
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.search.cursor_store import AlertCursorStore
+from code42cli.cmds.search.cursor_store import AuditLogCursorStore
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.config import ConfigAccessor
 from code42cli.config import NoConfigProfileError
@@ -236,10 +237,12 @@ def test_delete_profile_clears_checkpoints(config_accessor, mocker):
     mock_get_profile.return_value = profile
     event_store = mocker.MagicMock(spec=FileEventCursorStore)
     alert_store = mocker.MagicMock(spec=AlertCursorStore)
+    auditlog_store = mocker.MagicMock(spec=AuditLogCursorStore)
     mock_get_cursor_store = mocker.patch(
         "code42cli.profile.get_all_cursor_stores_for_profile"
     )
-    mock_get_cursor_store.return_value = [event_store, alert_store]
+    mock_get_cursor_store.return_value = [event_store, alert_store, auditlog_store]
     cliprofile.delete_profile("deleteme")
     assert event_store.clean.call_count == 1
     assert alert_store.clean.call_count == 1
+    assert auditlog_store.clean.call_count == 1
