@@ -86,7 +86,7 @@ def test_list_departing_employees_when_no_employees_echos_expected_message(
     assert "No users found." in res.output
 
 
-def test_list_departing_employees_when_table_format_and_notes_contains_newlines_converts_them(
+def test_list_departing_employees_when_table_format_and_notes_contains_newlines_escapes_them(
     runner, mocker, cli_state_with_user
 ):
     new_line_text = str(DEPARTING_EMPLOYEE_ITEM).replace(
@@ -97,7 +97,7 @@ def test_list_departing_employees_when_table_format_and_notes_contains_newlines_
         generator
     )
     res = runner.invoke(cli, ["departing-employee", "list"], obj=cli_state_with_user)
-    assert "Line1. Line2" in res.output
+    assert "Line1\\nLine2" in res.output
 
 
 def test_list_departing_employees_uses_filter_option(runner, mock_get_all_state):

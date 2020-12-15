@@ -101,7 +101,7 @@ def test_list_high_risk_employees_uses_filter_option(runner, mock_get_all_state)
     )
 
 
-def test_list_high_risk_employees_when_table_format_and_notes_contains_newlines_converts_them(
+def test_list_high_risk_employees_when_table_format_and_notes_contains_newlines_escapes_them(
     runner, mocker, cli_state_with_user
 ):
     new_line_text = str(HIGH_RISK_EMPLOYEE_ITEM).replace(
@@ -112,7 +112,7 @@ def test_list_high_risk_employees_when_table_format_and_notes_contains_newlines_
         generator
     )
     res = runner.invoke(cli, ["high-risk-employee", "list"], obj=cli_state_with_user)
-    assert "Line1. Line2" in res.output
+    assert "Line1\\nLine2" in res.output
 
 
 def test_add_high_risk_employee_adds(runner, cli_state_with_user):
