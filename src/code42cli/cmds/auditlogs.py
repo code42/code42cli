@@ -61,7 +61,7 @@ filter_option_affected_usernames = click.option(
 filter_option_event_types = click.option(
     "--event-type",
     required=False,
-    help="Filter results by event types.",
+    help="Filter results by event types (e.g. search_issued, user_registered, user_deactivated).",
     multiple=True,
 )
 
