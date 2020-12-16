@@ -20,23 +20,19 @@ from code42cli.output_formats import OutputFormatter
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def devices(state):
-    """For managing computers within Code42."""
+    """For managing devices within your Code42 environment."""
     pass
 
 
-device_id_option = click.option(
-    "--device-id",
-    required=True,
-    type=str,
-    help="The device ID for the device on which you wish to act.",
-)
+device_id_argument = click.argument("device-id", type=str)
 
 change_device_name_option = click.option(
     "--change-device-name",
     required=False,
     is_flag=True,
     default=False,
-    help='Include to prepend "deactivated_" and today\'s date to the name of any deactivated devices.',
+    help="""Include to prepend "deactivated_" and today\'s date to the name of any
+    deactivated devices.""",
 )
 
 purge_date_option = click.option(
@@ -44,17 +40,18 @@ purge_date_option = click.option(
     required=False,
     type=str,
     default=None,
-    help="The date on which the archive should be purged from cold storage in yyyy-MM-dd format. If not provided, the date will be set according to the appropriate org settings.",
+    help="""The date on which the archive should be purged from cold storage in yyyy-MM-dd format.
+    If not provided, the date will be set according to the appropriate org settings.""",
 )
 
 
 @devices.command()
-@device_id_option
+@device_id_argument
 @change_device_name_option
 @purge_date_option
 @sdk_options()
 def deactivate(state, device_id, change_device_name, purge_date):
-    """Deactivate a device within Code42"""
+    """Deactivate a device within Code42. Requires the device ID to deactivate."""
     _deactivate_device(state.sdk, device_id, change_device_name, purge_date)
 
 
@@ -96,31 +93,28 @@ def _change_device_name(sdk, guid, name):
     sdk.devices.update_settings(device_settings)
 
 
-_DEVICE_INFO_KEYS_MAP = OrderedDict()
-_DEVICE_INFO_KEYS_MAP["computerId"] = "Device ID"
-_DEVICE_INFO_KEYS_MAP["name"] = "Name"
-_DEVICE_INFO_KEYS_MAP["osHostname"] = "Hostname"
-_DEVICE_INFO_KEYS_MAP["guid"] = "GUID"
-_DEVICE_INFO_KEYS_MAP["status"] = "Status"
-_DEVICE_INFO_KEYS_MAP["archiveBytes"] = "Largest Archive Size in Bytes"
-_DEVICE_INFO_KEYS_MAP["lastConnected"] = "Last Connected Date"
-_DEVICE_INFO_KEYS_MAP["lastBackup"] = "Last Backup Date"
-_DEVICE_INFO_KEYS_MAP["lastCompletedBackup"] = "Last Completed Backup Date"
-_DEVICE_INFO_KEYS_MAP["productVersion"] = "Code42 Version"
-_DEVICE_INFO_KEYS_MAP["osName"] = "Operating System"
-_DEVICE_INFO_KEYS_MAP["osVersion"] = "Operating System Version"
-
-
 @devices.command()
-@device_id_option
+@device_id_argument
 @format_option
 @sdk_options()
 def show(state, device_id, format=None):
     """Print device info."""
+    _DEVICE_INFO_KEYS_MAP = OrderedDict()
+    _DEVICE_INFO_KEYS_MAP["computerId"] = "Device ID"
+    _DEVICE_INFO_KEYS_MAP["name"] = "Name"
+    _DEVICE_INFO_KEYS_MAP["osHostname"] = "Hostname"
+    _DEVICE_INFO_KEYS_MAP["guid"] = "GUID"
+    _DEVICE_INFO_KEYS_MAP["status"] = "Status"
+    _DEVICE_INFO_KEYS_MAP["archiveBytes"] = "Largest Archive Size in Bytes"
+    _DEVICE_INFO_KEYS_MAP["lastConnected"] = "Last Connected Date"
+    _DEVICE_INFO_KEYS_MAP["lastBackup"] = "Last Backup Date"
+    _DEVICE_INFO_KEYS_MAP["lastCompletedBackup"] = "Last Completed Backup Date"
+    _DEVICE_INFO_KEYS_MAP["productVersion"] = "Code42 Version"
+    _DEVICE_INFO_KEYS_MAP["osName"] = "Operating System"
+    _DEVICE_INFO_KEYS_MAP["osVersion"] = "Operating System Version"
     formatter = OutputFormatter(format, _DEVICE_INFO_KEYS_MAP)
     device_info = _get_device_info(state.sdk, device_id)
-    if device_info:
-        formatter.echo_formatted_list([device_info])
+    formatter.echo_formatted_list([device_info])
 
 
 def _get_device_info(sdk, device_id):
@@ -161,7 +155,7 @@ def _get_device_info(sdk, device_id):
 @devices.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def bulk(state):
-    """Tools for managing devices in bulk"""
+    """Tools for managing devices in bulk."""
     pass
 
 
@@ -185,13 +179,16 @@ def bulk(state):
     required=False,
     type=str,
     default=None,
-    help="Optionally provide to limit devices to only the ones in the org you specify. Note that child orgs will be included.",
+    help="""Optionally provide to limit devices to only the ones in the org you specify.
+    Note that child orgs will be included.""",
 )
 @click.option(
     "--drop-most-recent",
     required=False,
     type=int,
-    help="Will drop the X most recently connected devices for each user from the result list where X is the number you provide as this argument. Can be used to avoid passing the most recently connected device for a user to the deactivate command",
+    help="""Will drop the X most recently connected devices for each user from the
+    result list where X is the number you provide as this argument. Can be used to
+    avoid passing the most recently connected device for a user to the deactivate command.""",
 )
 @click.option(
     "--include-backup-usage",
@@ -199,7 +196,8 @@ def bulk(state):
     type=bool,
     default=False,
     is_flag=True,
-    help="Include to return backup usage information for each device (may significantly lengthen the size of the return)",
+    help="""Include to return backup usage information for each device
+    (may significantly lengthen the size of the return).""",
 )
 @click.option(
     "--include-usernames",
@@ -207,7 +205,7 @@ def bulk(state):
     type=bool,
     default=False,
     is_flag=True,
-    help="Include to add the username associated with a device to the output",
+    help="Include to add the username associated with a device to the output.",
 )
 @click.option(
     "--include-settings",
@@ -215,7 +213,7 @@ def bulk(state):
     type=bool,
     default=False,
     is_flag=True,
-    help="Include to include device settings in output",
+    help="Include to include device settings in output.",
 )
 @sdk_options()
 def bulk_list(
@@ -228,7 +226,7 @@ def bulk_list(
     include_usernames,
     include_settings,
 ):
-    """Outputs a list of all devices in the tenant"""
+    """Outputs a list of all devices."""
     devices_dataframe = _get_device_dataframe(
         state.sdk, active, org_uid, include_backup_usage
     )
@@ -246,7 +244,7 @@ def bulk_list(
         devices_dataframe = _add_usernames_to_device_dataframe(
             state.sdk, devices_dataframe
         )
-    click.echo(devices_dataframe.to_csv())
+    click.echo_via_pager(devices_dataframe.to_csv())
 
 
 def _get_device_dataframe(sdk, active=None, org_uid=None, include_backup_usage=False):
@@ -368,7 +366,8 @@ def _add_usernames_to_device_dataframe(sdk, device_dataframe):
 
 @bulk.command(
     name="deactivate",
-    help="Deactivate all devices on the given list. Takes as input a CSV with a deviceId column",
+    help="""Deactivate all devices on the given list.
+            Takes as input a CSV with a deviceId column""",
 )
 @read_csv_arg(headers=["deviceId"])
 @change_device_name_option
