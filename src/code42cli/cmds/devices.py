@@ -166,7 +166,7 @@ def bulk(state):
     type=bool,
     is_flag=True,
     default=None,
-    help="Include to return only active devices.",
+    help="Include to get only active or deactivated devices. Defaults to getting all devices.",
 )
 @click.option(
     "--days-since-last-connected",
