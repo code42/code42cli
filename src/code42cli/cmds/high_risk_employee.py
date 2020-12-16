@@ -122,9 +122,8 @@ def bulk_add(state, csv_rows):
 
 @bulk.command(
     name="remove",
-    help="Bulk remove users from the high risk employees "
-    "detection list using a line-separated "
-    "file of usernames.",
+    help="Bulk remove users from the high risk employees detection list using a line-separated file "
+    "of usernames.",
 )
 @read_flat_file_arg
 @sdk_options()
