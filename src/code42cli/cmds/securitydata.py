@@ -308,6 +308,7 @@ def show(state, search_id):
     is_flag=True,
     help="Display simple properties of the primary level of the nested response.",
 )
+@send_to_format_options
 @send_to_insecure_option
 @certificates_option
 def send_to(
