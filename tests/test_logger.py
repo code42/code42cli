@@ -8,11 +8,11 @@ from c42eventextractor.logging.formatters import FileEventDictToJSONFormatter
 from c42eventextractor.logging.formatters import FileEventDictToRawJSONFormatter
 from requests import Request
 
-from code42cli.logger import add_handler_to_logger
-from code42cli.logger import CliLogger
-from code42cli.logger import get_logger_for_server
-from code42cli.logger import get_view_error_details_message
-from code42cli.logger import logger_has_handlers
+from code42cli.logging.logger import add_handler_to_logger
+from code42cli.logging.logger import CliLogger
+from code42cli.logging.logger import get_logger_for_server
+from code42cli.logging.logger import get_view_error_details_message
+from code42cli.logging.logger import logger_has_handlers
 from code42cli.util import get_user_project_path
 
 

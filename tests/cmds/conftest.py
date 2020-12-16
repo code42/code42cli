@@ -9,7 +9,7 @@ from requests import Response
 from tests.conftest import convert_str_to_date
 from tests.conftest import TEST_ID
 
-from code42cli.logger import CliLogger
+from code42cli.logging.logger import CliLogger
 
 
 TEST_EMPLOYEE = "risky employee"

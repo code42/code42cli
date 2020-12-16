@@ -12,7 +12,7 @@ from py42.exceptions import Py42UserAlreadyAddedError
 from code42cli.errors import Code42CLIError
 from code42cli.errors import LoggedCLIError
 from code42cli.errors import UserDoesNotExistError
-from code42cli.logger import get_main_cli_logger
+from code42cli.logging.logger import get_main_cli_logger
 
 _DIFFLIB_CUT_OFF = 0.6
 

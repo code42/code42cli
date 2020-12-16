@@ -17,11 +17,13 @@ from code42cli.click_ext.options import incompatible_with
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.cmds.securitydata_output_formats import FileEventsOutputFormatter
-from code42cli.logger import get_logger_for_server
-from code42cli.logger import get_main_cli_logger
+from code42cli.logging.logger import get_logger_for_server
+from code42cli.logging.logger import get_main_cli_logger
+from code42cli.options import certificates_option
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.options import send_to_format_options
+from code42cli.options import send_to_insecure_option
 from code42cli.options import server_options
 from code42cli.output_formats import OutputFormatter
 
@@ -306,7 +308,8 @@ def show(state, search_id):
     is_flag=True,
     help="Display simple properties of the primary level of the nested response.",
 )
-@send_to_format_options
+@send_to_insecure_option
+@certificates_option
 def send_to(
     state,
     format,
@@ -318,15 +321,17 @@ def send_to(
     use_checkpoint,
     saved_search,
     or_query,
+    use_insecure,
+    ca_certs,
     **kwargs
 ):
     """Send events to the given server address."""
-    logger = get_logger_for_server(hostname, protocol, format)
+    server_logger = get_logger_for_server(hostname, protocol, format, use_insecure, ca_certs)
     cursor = (
         _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
     )
     handlers = ext.create_send_to_handlers(
-        state.sdk, FileEventExtractor, cursor, use_checkpoint, logger
+        state.sdk, FileEventExtractor, cursor, use_checkpoint, server_logger
     )
     _call_extractor(
         state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs

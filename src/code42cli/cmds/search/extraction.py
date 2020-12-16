@@ -7,7 +7,7 @@ from py42.sdk.queries.query_filter import QueryFilterTimestampField
 
 import code42cli.errors as errors
 from code42cli.date_helper import verify_timestamp_order
-from code42cli.logger import get_main_cli_logger
+from code42cli.logging.logger import get_main_cli_logger
 from code42cli.output_formats import OutputFormat
 from code42cli.util import warn_interrupt
 

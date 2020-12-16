@@ -12,6 +12,7 @@ from c42eventextractor.logging.handlers import NoPrioritySysLogHandlerWrapper
 from click.exceptions import ClickException
 
 from code42cli.cmds.search.enums import FileEventsOutputFormat
+from code42cli.logging.ssl_server_logger import SSLSysLogHandler
 from code42cli.util import get_url_parts
 from code42cli.util import get_user_project_path
 
@@ -47,13 +48,15 @@ def handleError(record):
         raise ClickException("Network connection broken while sending results.")
 
 
-def get_logger_for_server(hostname, protocol, output_format):
+def get_logger_for_server(hostname, protocol, output_format, use_insecure, ca_certs):
     """Gets the logger that sends logs to a server for the given format.
 
     Args:
         hostname: The hostname of the server. It may include the port.
         protocol: The transfer protocol for sending logs.
         output_format: CEF, JSON, or RAW_JSON. Each type results in a different logger instance.
+        use_insecure: Use to not use SSL.
+        ca_certs: Use for passing SSL certificates.
     """
     logger = logging.getLogger("code42_syslog_{}".format(output_format.lower()))
     if logger_has_handlers(logger):
@@ -61,12 +64,15 @@ def get_logger_for_server(hostname, protocol, output_format):
 
     with logger_deps_lock:
         if not logger_has_handlers(logger):
-            url_parts = get_url_parts(hostname)
-            port = url_parts[1] or 514
             try:
-                handler = NoPrioritySysLogHandlerWrapper(
-                    url_parts[0], port=port, protocol=protocol
-                ).handler
+                url_parts = get_url_parts(hostname)
+                port = url_parts[1] or 514
+                if use_insecure:
+                    handler = NoPrioritySysLogHandlerWrapper(
+                        url_parts[0], port=port, protocol=protocol
+                    ).handler
+                else:
+                    handler = SSLSysLogHandler(hostname, ca_certs)
             except Exception as e:
                 raise Exception(
                     "Unable to connect {}. Failed with error {}".format(

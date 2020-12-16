@@ -1,7 +1,7 @@
 import click
 from click._compat import get_text_stderr
 
-from code42cli.logger import get_view_error_details_message
+from code42cli.logging.logger import get_view_error_details_message
 
 ERRORED = False
 

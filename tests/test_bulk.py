@@ -6,7 +6,7 @@ from code42cli import errors
 from code42cli import PRODUCT_NAME
 from code42cli.bulk import BulkProcessor
 from code42cli.bulk import run_bulk_process
-from code42cli.logger import get_view_error_details_message
+from code42cli.logging.logger import get_view_error_details_message
 
 _NAMESPACE = "{}.bulk".format(PRODUCT_NAME)
 

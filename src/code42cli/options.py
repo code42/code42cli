@@ -159,3 +159,15 @@ send_to_format_options = click.option(
     help="The output format of the result. Defaults to json format.",
     default=SendToFileEventsOutputFormat.RAW,
 )
+
+
+send_to_insecure_option = click.option(
+    "--use-insecure",
+    is_flag=True,
+    help="Use to turn off SSL. Pass in certificates file optionally.",
+)
+
+
+certificates_option = click.option(
+    "--ca-certs", type=str, help="Use to pass in a CA certificates-chain file path."
+)
