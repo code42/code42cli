@@ -453,8 +453,8 @@ def test_get_device_dataframe_returns_correct_columns(
     assert "buildVersion" not in result.columns
 
 
-def test_bulk_list_outputs_csv(runner, cli_state, get_all_devices_success):
-    result = runner.invoke(cli, ["devices", "bulk", "list"], obj=cli_state)
+def test_list_outputs_csv(runner, cli_state, get_all_devices_success):
+    result = runner.invoke(cli, ["devices", "list"], obj=cli_state)
     assert (
         "computerId,guid,name,osHostname,status,lastConnected,backupUsage,productVersion,osName,osVersion,userUid"
         in result.output

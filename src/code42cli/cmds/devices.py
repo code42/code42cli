@@ -31,7 +31,7 @@ change_device_name_option = click.option(
     required=False,
     is_flag=True,
     default=False,
-    help="""Include to prepend "deactivated_" and today\'s date to the name of any
+    help="""Include to prepend "deactivated_" and today's date to the name of any
     deactivated devices.""",
 )
 
@@ -152,14 +152,7 @@ def _get_device_info(sdk, device_id):
     return device
 
 
-@devices.group(cls=OrderedGroup)
-@sdk_options(hidden=True)
-def bulk(state):
-    """Tools for managing devices in bulk."""
-    pass
-
-
-@bulk.command(name="list", help="Get information about many devices")
+@devices.command(name="list", help="Get information about many devices")
 @click.option(
     "--active",
     required=False,
@@ -216,7 +209,7 @@ def bulk(state):
     help="Include to include device settings in output.",
 )
 @sdk_options()
-def bulk_list(
+def list(
     state,
     active,
     days_since_last_connected,
@@ -363,6 +356,12 @@ def _add_usernames_to_device_dataframe(sdk, device_dataframe):
     )
     return device_dataframe.merge(users_dataframe, how="left", on="userUid")
 
+
+@devices.group(cls=OrderedGroup)
+@sdk_options(hidden=True)
+def bulk(state):
+    """Tools for managing devices in bulk."""
+    pass
 
 @bulk.command(
     name="deactivate",
