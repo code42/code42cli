@@ -20,7 +20,8 @@ from code42cli.cmds.devices import _get_device_dataframe
 from code42cli.main import cli
 
 _NAMESPACE = "{}.cmds.devices".format(PRODUCT_NAME)
-TEST_DEVICE_ID = "12345"
+TEST_DEVICE_GUID = "954143368874689941"
+TEST_DEVICE_ID = 139527
 TEST_ARCHIVE_GUID = "954143426849296547"
 TEST_PURGE_DATE = "2020-10-12"
 TEST_ARCHIVES_RESPONSE = [
@@ -282,6 +283,11 @@ def device_info_success(cli_state, device_info_response):
 
 
 @pytest.fixture
+def get_device_by_guid_success(cli_state, device_info_response):
+    cli_state.sdk.devices.get_by_guid.return_value = device_info_response
+
+
+@pytest.fixture
 def archives_list_success(cli_state, archives_list_generator):
     cli_state.sdk.archive.get_all_by_device_guid.return_value = archives_list_generator
 
@@ -308,12 +314,12 @@ def deactivate_device_not_allowed_failure(cli_state):
 
 @pytest.fixture
 def backupusage_success(cli_state, backupusage_response):
-    cli_state.sdk.devices.get_by_id.return_value = backupusage_response
+    cli_state.sdk.devices.get_by_guid.return_value = backupusage_response
 
 
 @pytest.fixture
 def empty_backupusage_success(cli_state, empty_backupusage_response):
-    cli_state.sdk.devices.get_by_id.return_value = empty_backupusage_response
+    cli_state.sdk.devices.get_by_guid.return_value = empty_backupusage_response
 
 
 @pytest.fixture
@@ -326,8 +332,10 @@ def get_all_users_success(cli_state, users_list_generator):
     cli_state.sdk.users.get_all.return_value = users_list_generator
 
 
-def test_deactivate_deactivates_device(runner, cli_state, deactivate_device_success):
-    runner.invoke(cli, ["devices", "deactivate", TEST_DEVICE_ID], obj=cli_state)
+def test_deactivate_deactivates_device(
+    runner, cli_state, deactivate_device_success, get_device_by_guid_success
+):
+    runner.invoke(cli, ["devices", "deactivate", TEST_DEVICE_GUID], obj=cli_state)
     cli_state.sdk.devices.deactivate.assert_called_once_with(TEST_DEVICE_ID)
 
 
@@ -335,12 +343,13 @@ def test_deactivate_when_given_flag_updates_purge_date(
     runner,
     cli_state,
     deactivate_device_success,
+    get_device_by_guid_success,
     device_info_success,
     archives_list_success,
 ):
     runner.invoke(
         cli,
-        ["devices", "deactivate", TEST_DEVICE_ID, "--purge-date", TEST_PURGE_DATE],
+        ["devices", "deactivate", TEST_DEVICE_GUID, "--purge-date", TEST_PURGE_DATE],
         obj=cli_state,
     )
     cli_state.sdk.archive.update_cold_storage_purge_date.assert_called_once_with(
@@ -352,13 +361,14 @@ def test_deactivate_when_given_flag_changes_device_name(
     runner,
     cli_state,
     deactivate_device_success,
+    get_device_by_guid_success,
     device_info_success,
     mock_device_settings,
 ):
     cli_state.sdk.devices.get_settings.return_value = mock_device_settings
     runner.invoke(
         cli,
-        ["devices", "deactivate", TEST_DEVICE_ID, "--change-device-name"],
+        ["devices", "deactivate", TEST_DEVICE_GUID, "--change-device-name"],
         obj=cli_state,
     )
     assert (
@@ -414,7 +424,7 @@ def test_deactivate_fails_if_device_deactivation_forbidden(
 
 
 def test_show_prints_device_info(runner, cli_state, backupusage_success):
-    result = runner.invoke(cli, ["devices", "show", TEST_DEVICE_ID], obj=cli_state)
+    result = runner.invoke(cli, ["devices", "show", TEST_DEVICE_GUID], obj=cli_state)
     assert "SNWINTEST1" in result.output
     assert "843290890230648046" in result.output
     assert "119501" in result.output
@@ -426,7 +436,7 @@ def test_show_returns_empty_values_if_no_backupusage(
     runner, cli_state, empty_backupusage_success
 ):
     result = runner.invoke(
-        cli, ["devices", "show", TEST_DEVICE_ID, "-f", "json"], obj=cli_state,
+        cli, ["devices", "show", TEST_DEVICE_GUID, "-f", "json"], obj=cli_state,
     )
     assert '"lastBackup": null' in result.output
     assert '"archiveBytes": 0' in result.output

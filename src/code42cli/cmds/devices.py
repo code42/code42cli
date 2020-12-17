@@ -25,7 +25,7 @@ def devices(state):
     pass
 
 
-device_id_argument = click.argument("device-id", type=str)
+device_guid_argument = click.argument("device-guid", type=str)
 
 change_device_name_option = click.option(
     "--change-device-name",
@@ -47,33 +47,35 @@ purge_date_option = click.option(
 
 
 @devices.command()
-@device_id_argument
+@device_guid_argument
 @change_device_name_option
 @purge_date_option
 @sdk_options()
-def deactivate(state, device_id, change_device_name, purge_date):
-    """Deactivate a device within Code42. Requires the device ID to deactivate."""
-    _deactivate_device(state.sdk, device_id, change_device_name, purge_date)
+def deactivate(state, device_guid, change_device_name, purge_date):
+    """Deactivate a device within Code42. Requires the device GUID to deactivate."""
+    _deactivate_device(state.sdk, device_guid, change_device_name, purge_date)
 
 
-def _deactivate_device(sdk, device_id, change_device_name, purge_date):
+def _deactivate_device(sdk, device_guid, change_device_name, purge_date):
+    device = sdk.devices.get_by_guid(device_guid)
     try:
-        sdk.devices.deactivate(device_id)
+        sdk.devices.deactivate(device.data["computerId"])
     except exceptions.Py42BadRequestError:
-        raise Code42CLIError("The device {} is in legal hold.".format(device_id))
+        raise Code42CLIError("The device {} is in legal hold.".format(device_guid))
     except exceptions.Py42NotFoundError:
-        raise Code42CLIError("The device {} was not found.".format(device_id))
+        raise Code42CLIError("The device {} was not found.".format(device_guid))
     except exceptions.Py42ForbiddenError:
-        raise Code42CLIError("Unable to deactivate {}.".format(device_id))
+        raise Code42CLIError("Unable to deactivate {}.".format(device_guid))
     if purge_date or change_device_name:
-        device = sdk.devices.get_by_id(device_id)
-        guid = device.data["guid"]
+        guid = device_guid
         name = device.data["name"]
     if purge_date:
         _update_cold_storage_purge_date(sdk, guid, purge_date)
     if change_device_name and not name.startswith("deactivated_"):
         _change_device_name(
-            sdk, guid, "deactivated_" + date.today().strftime("%Y-%m-%d") + "_" + name
+            sdk,
+            device_guid,
+            "deactivated_" + date.today().strftime("%Y-%m-%d") + "_" + name,
         )
 
 
@@ -95,11 +97,11 @@ def _change_device_name(sdk, guid, name):
 
 
 @devices.command()
-@device_id_argument
+@device_guid_argument
 @format_option
 @sdk_options()
-def show(state, device_id, format=None):
-    """Print device info."""
+def show(state, device_guid, format=None):
+    """Print device info. Requires device GUID."""
     _DEVICE_INFO_KEYS_MAP = OrderedDict()
     _DEVICE_INFO_KEYS_MAP["computerId"] = "Device ID"
     _DEVICE_INFO_KEYS_MAP["name"] = "Name"
@@ -114,12 +116,12 @@ def show(state, device_id, format=None):
     _DEVICE_INFO_KEYS_MAP["osName"] = "Operating System"
     _DEVICE_INFO_KEYS_MAP["osVersion"] = "Operating System Version"
     formatter = OutputFormatter(format, _DEVICE_INFO_KEYS_MAP)
-    device_info = _get_device_info(state.sdk, device_id)
+    device_info = _get_device_info(state.sdk, device_guid)
     formatter.echo_formatted_list([device_info])
 
 
-def _get_device_info(sdk, device_id):
-    device = sdk.devices.get_by_id(device_id, include_backup_usage=True).data
+def _get_device_info(sdk, device_guid):
+    device = sdk.devices.get_by_guid(device_guid, include_backup_usage=True).data
     if len(device["backupUsage"]) == 0:
         device["archiveBytes"] = 0
         device["lastBackup"] = None
@@ -353,7 +355,8 @@ def bulk(state):
 @bulk.command(
     name="deactivate",
     help="""Deactivate all devices on the given list.
-            Takes as input a CSV with a deviceId column""",
+            Takes as input a CSV with a deviceId column.
+            The deviceId column must have the legacy deviceId value, not GUID.""",
 )
 @read_csv_arg(headers=["deviceId"])
 @change_device_name_option
