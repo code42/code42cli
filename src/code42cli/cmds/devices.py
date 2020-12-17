@@ -106,10 +106,10 @@ def show(state, device_id, format=None):
     _DEVICE_INFO_KEYS_MAP["osHostname"] = "Hostname"
     _DEVICE_INFO_KEYS_MAP["guid"] = "GUID"
     _DEVICE_INFO_KEYS_MAP["status"] = "Status"
-    _DEVICE_INFO_KEYS_MAP["archiveBytes"] = "Largest Archive Size in Bytes"
     _DEVICE_INFO_KEYS_MAP["lastConnected"] = "Last Connected Date"
-    _DEVICE_INFO_KEYS_MAP["lastBackup"] = "Last Backup Date"
-    _DEVICE_INFO_KEYS_MAP["lastCompletedBackup"] = "Last Completed Backup Date"
+    _DEVICE_INFO_KEYS_MAP["lastBackup"] = "Last Backup Activity Date"
+    _DEVICE_INFO_KEYS_MAP["lastCompleted"] = "Last Completed Backup Date"
+    _DEVICE_INFO_KEYS_MAP["archiveBytes"] = "Archive Size in Bytes"
     _DEVICE_INFO_KEYS_MAP["productVersion"] = "Code42 Version"
     _DEVICE_INFO_KEYS_MAP["osName"] = "Operating System"
     _DEVICE_INFO_KEYS_MAP["osVersion"] = "Operating System Version"
@@ -120,37 +120,25 @@ def show(state, device_id, format=None):
 
 def _get_device_info(sdk, device_id):
     device = sdk.devices.get_by_id(device_id, include_backup_usage=True).data
-    device["archiveBytes"] = (
-        max(
-            [
-                backupDestination["archiveBytes"]
-                for backupDestination in device["backupUsage"]
-            ]
+    if len(device["backupUsage"]) == 0:
+        device["archiveBytes"] = 0
+        device["lastBackup"] = None
+        device["lastCompletedBackup"] = None
+    else:
+        device["lastBackup"] = _get_key_from_list_of_dicts(
+            "lastBackup", device["backupUsage"]
         )
-        if len(device["backupUsage"]) > 0
-        else 0
-    )
-    device["lastBackup"] = (
-        max(
-            [
-                backupDestination["lastBackup"]
-                for backupDestination in device["backupUsage"]
-            ]
+        device["lastCompletedBackup"] = _get_key_from_list_of_dicts(
+            "lastCompletedBackup", device["backupUsage"]
         )
-        if len(device["backupUsage"]) > 0
-        else None
-    )
-    device["lastCompletedBackup"] = (
-        max(
-            [
-                backupDestination["lastCompletedBackup"]
-                for backupDestination in device["backupUsage"]
-            ]
+        device["archiveBytes"] = _get_key_from_list_of_dicts(
+            "archiveBytes", device["backupUsage"]
         )
-        if len(device["backupUsage"]) > 0
-        else None
-    )
     return device
+
+
+def _get_key_from_list_of_dicts(key, list_of_dicts):
+    return [item[key] for item in list_of_dicts]
 
 
 @devices.command(name="list", help="Get information about many devices")
