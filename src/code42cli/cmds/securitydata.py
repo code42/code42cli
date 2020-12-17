@@ -16,7 +16,6 @@ from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
-from code42cli.cmds.securitydata_output_formats import FileEventsOutputFormatter
 from code42cli.logging.logger import get_logger_for_server
 from code42cli.logging.logger import get_main_cli_logger
 from code42cli.options import certificates_option
@@ -25,6 +24,7 @@ from code42cli.options import sdk_options
 from code42cli.options import send_to_format_options
 from code42cli.options import send_to_insecure_option
 from code42cli.options import server_options
+from code42cli.output_formats import FileEventsOutputFormatter
 from code42cli.output_formats import OutputFormatter
 
 logger = get_main_cli_logger()
@@ -327,7 +327,9 @@ def send_to(
     **kwargs
 ):
     """Send events to the given server address."""
-    server_logger = get_logger_for_server(hostname, protocol, format, use_insecure, ca_certs)
+    server_logger = get_logger_for_server(
+        hostname, protocol, format, use_insecure, ca_certs
+    )
     cursor = (
         _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
     )

@@ -4,6 +4,9 @@ import json
 
 import click
 
+import code42cli.cmds.search.enums as enum
+from code42cli.logging.formatters import CEF_TEMPLATE
+from code42cli.logging.formatters import map_event_to_cef
 from code42cli.util import find_format_width
 from code42cli.util import format_to_table
 
@@ -106,3 +109,32 @@ def to_formatted_json(output):
     """Output is a single record"""
     json_str = "{}\n".format(json.dumps(output, indent=4))
     return json_str
+
+
+class FileEventsOutputFormatter(OutputFormatter):
+    def __init__(self, output_format, header=None):
+        output_format = (
+            output_format.upper()
+            if output_format
+            else enum.FileEventsOutputFormat.TABLE
+        )
+        super().__init__(output_format, header)
+        if output_format == enum.FileEventsOutputFormat.CEF:
+            self._format_func = to_cef
+
+
+def to_cef(output):
+    """Output is a single record"""
+    return "{}\n".format(_convert_event_to_cef(output))
+
+
+def _convert_event_to_cef(event):
+    ext, evt, sig_id = map_event_to_cef(event)
+    cef_log = CEF_TEMPLATE.format(
+        productName=CEF_DEFAULT_PRODUCT_NAME,
+        signatureID=sig_id,
+        eventName=evt,
+        severity=CEF_DEFAULT_SEVERITY_LEVEL,
+        extension=ext,
+    )
+    return cef_log

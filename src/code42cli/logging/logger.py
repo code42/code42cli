@@ -5,14 +5,13 @@ import traceback
 from logging.handlers import RotatingFileHandler
 from threading import Lock
 
-from c42eventextractor.logging.formatters import FileEventDictToCEFFormatter
-from c42eventextractor.logging.formatters import FileEventDictToJSONFormatter
-from c42eventextractor.logging.formatters import FileEventDictToRawJSONFormatter
-from c42eventextractor.logging.handlers import NoPrioritySysLogHandlerWrapper
 from click.exceptions import ClickException
 
 from code42cli.cmds.search.enums import FileEventsOutputFormat
-from code42cli.logging.ssl_server_logger import SSLSysLogHandler
+from code42cli.logging.formatters import FileEventDictToCEFFormatter
+from code42cli.logging.formatters import FileEventDictToJSONFormatter
+from code42cli.logging.formatters import FileEventDictToRawJSONFormatter
+from code42cli.logging.handlers import NoPrioritySysLogHandlerWrapper
 from code42cli.util import get_url_parts
 from code42cli.util import get_user_project_path
 
@@ -63,16 +62,14 @@ def get_logger_for_server(hostname, protocol, output_format, use_insecure, ca_ce
         return logger
 
     with logger_deps_lock:
+        url_parts = get_url_parts(hostname)
+        hostname = url_parts[0]
+        port = url_parts[1] or 514
         if not logger_has_handlers(logger):
             try:
-                url_parts = get_url_parts(hostname)
-                port = url_parts[1] or 514
-                if use_insecure:
-                    handler = NoPrioritySysLogHandlerWrapper(
-                        url_parts[0], port=port, protocol=protocol
-                    ).handler
-                else:
-                    handler = SSLSysLogHandler(hostname, ca_certs)
+                handler = NoPrioritySysLogHandlerWrapper(
+                    hostname, port, protocol, use_insecure, ca_certs
+                ).handler
             except Exception as e:
                 raise Exception(
                     "Unable to connect {}. Failed with error {}".format(
