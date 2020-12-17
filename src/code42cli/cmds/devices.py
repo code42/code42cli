@@ -7,6 +7,7 @@ from pandas import DataFrame
 from pandas import to_datetime
 from pandas import to_timedelta
 from py42 import exceptions
+from py42.exceptions import Py42NotFoundError
 
 from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
@@ -286,20 +287,14 @@ def _add_settings_to_dataframe(sdk, device_dataframe):
             }
         current_result_dict = {
             "guid": current_device_settings.guid,
-            "included_files": list(
-                {
-                    path
-                    for backup_set in current_device_settings.backup_sets
-                    for path in backup_set.included_files
-                }
-            ),
-            "excluded_files": list(
-                {
-                    path
-                    for backup_set in current_device_settings.backup_sets
-                    for path in backup_set.excluded_files
-                }
-            ),
+            "included_files": [
+                backup_set.included_files
+                for backup_set in current_device_settings.backup_sets
+            ],
+            "excluded_files": [
+                backup_set.excluded_files
+                for backup_set in current_device_settings.backup_sets
+            ],
         }
         if macos_guid:
             try:
@@ -308,7 +303,7 @@ def _add_settings_to_dataframe(sdk, device_dataframe):
                 ).data[
                     "value"
                 ]  # returns 404 error if device isn't a Mac or doesn't have full disk access
-            except Exception:
+            except Py42NotFoundError:
                 full_disk_access_status = False
         else:
             full_disk_access_status = ""
@@ -318,7 +313,10 @@ def _add_settings_to_dataframe(sdk, device_dataframe):
     result_list = run_bulk_process(
         handle_row, rows, progress_label="Getting device settings"
     )
-    return device_dataframe.merge(DataFrame.from_records(result_list), on="guid")
+    try:
+        return device_dataframe.merge(DataFrame.from_records(result_list), on="guid")
+    except KeyError:
+        return device_dataframe
 
 
 def _drop_devices_which_have_not_connected_in_some_number_of_days(
@@ -362,6 +360,7 @@ def _add_usernames_to_device_dataframe(sdk, device_dataframe):
 def bulk(state):
     """Tools for managing devices in bulk."""
     pass
+
 
 @bulk.command(
     name="deactivate",
