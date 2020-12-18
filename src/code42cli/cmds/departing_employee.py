@@ -106,7 +106,7 @@ bulk.add_command(departing_employee_generate_template)
 @bulk.command(
     name="add",
     help="Bulk add users to the departing employees detection list using a CSV file with "
-    "format: {}".format(",".join(DEPARTING_EMPLOYEE_CSV_HEADERS)),
+    "format: {}.".format(",".join(DEPARTING_EMPLOYEE_CSV_HEADERS)),
 )
 @read_csv_arg(headers=DEPARTING_EMPLOYEE_CSV_HEADERS)
 @sdk_options()
