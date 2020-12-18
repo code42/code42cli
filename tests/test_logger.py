@@ -3,11 +3,12 @@ import os
 from logging.handlers import RotatingFileHandler
 
 import pytest
-from c42eventextractor.logging.formatters import FileEventDictToCEFFormatter
-from c42eventextractor.logging.formatters import FileEventDictToJSONFormatter
-from c42eventextractor.logging.formatters import FileEventDictToRawJSONFormatter
 from requests import Request
 
+from code42cli.cmds.search.enums import ServerProtocol
+from code42cli.logging.formatters import FileEventDictToCEFFormatter
+from code42cli.logging.formatters import FileEventDictToJSONFormatter
+from code42cli.logging.formatters import FileEventDictToRawJSONFormatter
 from code42cli.logging.logger import add_handler_to_logger
 from code42cli.logging.logger import CliLogger
 from code42cli.logging.logger import get_logger_for_server
@@ -19,11 +20,11 @@ from code42cli.util import get_user_project_path
 @pytest.fixture
 def no_priority_syslog_handler(mocker):
     mock = mocker.patch(
-        "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper.handler"
+        "code42cli.logging.handlers.NoPrioritySysLogHandlerWrapper.handler"
     )
 
     # Set handlers to empty list so it gets initialized each test
-    get_logger_for_server("example.com", "TCP", "CEF").handlers = []
+    get_logger_for_server("example.com", "TCP", "CEF", True, "").handlers = []
     return mock
 
 
@@ -57,14 +58,14 @@ def test_get_view_exceptions_location_message_returns_expected_message():
 
 
 def test_get_logger_for_server_has_info_level(no_priority_syslog_handler):
-    logger = get_logger_for_server("example.com", "TCP", "CEF")
+    logger = get_logger_for_server("example.com", "TCP", "CEF", True, None)
     assert logger.level == logging.INFO
 
 
 def test_get_logger_for_server_when_given_cef_format_uses_cef_formatter(
     no_priority_syslog_handler,
 ):
-    get_logger_for_server("example.com", "TCP", "CEF")
+    get_logger_for_server("example.com", "TCP", "CEF", False, None)
     assert (
         type(no_priority_syslog_handler.setFormatter.call_args[0][0])
         == FileEventDictToCEFFormatter
@@ -74,8 +75,8 @@ def test_get_logger_for_server_when_given_cef_format_uses_cef_formatter(
 def test_get_logger_for_server_when_given_json_format_uses_json_formatter(
     no_priority_syslog_handler,
 ):
-    get_logger_for_server("example.com", "TCP", "JSON").handlers = []
-    get_logger_for_server("example.com", "TCP", "JSON")
+    get_logger_for_server("example.com", "TCP", "JSON", True, "").handlers = []
+    get_logger_for_server("example.com", "TCP", "JSON", True, "")
     actual = type(no_priority_syslog_handler.setFormatter.call_args[0][0])
     assert actual == FileEventDictToJSONFormatter
 
@@ -83,8 +84,8 @@ def test_get_logger_for_server_when_given_json_format_uses_json_formatter(
 def test_get_logger_for_server_when_given_raw_json_format_uses_raw_json_formatter(
     no_priority_syslog_handler,
 ):
-    get_logger_for_server("example.com", "TCP", "RAW-JSON").handlers = []
-    get_logger_for_server("example.com", "TCP", "RAW-JSON")
+    get_logger_for_server("example.com", "TCP", "RAW-JSON", True, "").handlers = []
+    get_logger_for_server("example.com", "TCP", "RAW-JSON", True, "")
     actual = type(no_priority_syslog_handler.setFormatter.call_args[0][0])
     assert actual == FileEventDictToRawJSONFormatter
 
@@ -92,15 +93,15 @@ def test_get_logger_for_server_when_given_raw_json_format_uses_raw_json_formatte
 def test_get_logger_for_server_when_called_twice_only_has_one_handler(
     no_priority_syslog_handler,
 ):
-    get_logger_for_server("example.com", "TCP", "JSON")
-    logger = get_logger_for_server("example.com", "TCP", "CEF")
+    get_logger_for_server("example.com", "TCP", "JSON", True, "")
+    logger = get_logger_for_server("example.com", "TCP", "CEF", True, "")
     assert len(logger.handlers) == 1
 
 
 def test_get_logger_for_server_uses_no_priority_syslog_handler(
     no_priority_syslog_handler,
 ):
-    logger = get_logger_for_server("example.com", "TCP", "CEF")
+    logger = get_logger_for_server("example.com", "TCP", "CEF", True, "")
     assert logger.handlers[0] == no_priority_syslog_handler
 
 
@@ -108,12 +109,12 @@ def test_get_logger_for_server_constructs_handler_with_expected_args(
     mocker, no_priority_syslog_handler, monkeypatch
 ):
     no_priority_syslog_handler_wrapper = mocker.patch(
-        "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper.__init__"
+        "code42cli.logging.handlers.NoPrioritySysLogHandlerWrapper.__init__"
     )
     no_priority_syslog_handler_wrapper.return_value = None
-    get_logger_for_server("example.com", "TCP", "CEF")
+    get_logger_for_server("example.com", "TCP", "CEF", True, "cert")
     no_priority_syslog_handler_wrapper.assert_called_once_with(
-        "example.com", port=514, protocol="TCP"
+        "example.com", 514, ServerProtocol.TCP, True, "cert"
     )
 
 
@@ -121,12 +122,12 @@ def test_get_logger_for_server_when_hostname_includes_port_constructs_handler_wi
     mocker, no_priority_syslog_handler
 ):
     no_priority_syslog_handler_wrapper = mocker.patch(
-        "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper.__init__"
+        "code42cli.logging.handlers.NoPrioritySysLogHandlerWrapper.__init__"
     )
     no_priority_syslog_handler_wrapper.return_value = None
-    get_logger_for_server("example.com:999", "TCP", "CEF")
+    get_logger_for_server("example.com:999", "TCP", "CEF", False, None)
     no_priority_syslog_handler_wrapper.assert_called_once_with(
-        "example.com", port=999, protocol="TCP"
+        "example.com", 999, ServerProtocol.TCP, False, None,
     )
 
 

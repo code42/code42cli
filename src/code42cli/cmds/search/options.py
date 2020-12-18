@@ -7,11 +7,13 @@ from py42.sdk.queries.query_filter import FilterGroup
 
 from code42cli.click_ext.options import incompatible_with
 from code42cli.click_ext.types import FileOrString
+from code42cli.cmds.search.enums import ServerProtocol
 from code42cli.date_helper import parse_max_timestamp
 from code42cli.date_helper import parse_min_timestamp
 from code42cli.logging.logger import get_main_cli_logger
 from code42cli.options import begin_option
 from code42cli.options import end_option
+from code42cli.output_formats import SendToFileEventsOutputFormat
 
 
 logger = get_main_cli_logger()
@@ -181,3 +183,39 @@ def create_search_options(search_term):
         return f
 
     return search_options
+
+
+def server_options(f):
+    hostname_arg = click.argument("hostname")
+    protocol_option = click.option(
+        "-p",
+        "--protocol",
+        type=click.Choice(ServerProtocol(), case_sensitive=False),
+        default=ServerProtocol.UDP,
+        help="Protocol used to send logs to server. Always TCP when --use-ssl is passed, "
+        "otherwise Defaults to UDP.",
+        cls=incompatible_with("use_ssl"),
+    )
+    send_to_ssl_option = click.option(
+        "--use-ssl",
+        is_flag=True,
+        help="Use for SSL. Pass in certificates file, else uses ssl.CERT_NONE.",
+        cls=incompatible_with("protocol"),
+    )
+    certs_option = click.option(
+        "--certs", type=str, help="Use to pass in a CA certificates-chain file path."
+    )
+    f = hostname_arg(f)
+    f = protocol_option(f)
+    f = send_to_ssl_option(f)
+    f = certs_option(f)
+    return f
+
+
+send_to_format_options = click.option(
+    "-f",
+    "--format",
+    type=click.Choice(SendToFileEventsOutputFormat(), case_sensitive=False),
+    help="The output format of the result. Defaults to json format.",
+    default=SendToFileEventsOutputFormat.RAW,
+)

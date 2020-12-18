@@ -7,6 +7,7 @@ import click
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.cmds.search.cursor_store import AuditLogCursorStore
 from code42cli.cmds.search.options import BeginOption
+from code42cli.cmds.search.options import server_options
 from code42cli.date_helper import parse_max_timestamp
 from code42cli.date_helper import parse_min_timestamp
 from code42cli.logging.logger import get_logger_for_server
@@ -14,7 +15,6 @@ from code42cli.options import begin_option
 from code42cli.options import end_option
 from code42cli.options import format_option
 from code42cli.options import sdk_options
-from code42cli.options import server_options
 from code42cli.output_formats import OutputFormatter
 from code42cli.util import hash_event
 from code42cli.util import warn_interrupt
@@ -186,9 +186,11 @@ def send_to(
     affected_user_id,
     affected_username,
     use_checkpoint,
+    use_ssl,
+    certs,
 ):
     """Send audit logs to the given server address in JSON format."""
-    logger = get_logger_for_server(hostname, protocol, "RAW-JSON")
+    logger = get_logger_for_server(hostname, protocol, "RAW-JSON", not use_ssl, certs)
     cursor = _get_audit_log_cursor_store(state.profile.name)
     if use_checkpoint:
         checkpoint_name = use_checkpoint

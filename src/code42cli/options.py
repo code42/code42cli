@@ -1,11 +1,10 @@
 import click
 
-from code42cli.cmds.search.enums import ServerProtocol
 from code42cli.errors import Code42CLIError
 from code42cli.output_formats import OutputFormat
-from code42cli.output_formats import SendToFileEventsOutputFormat
 from code42cli.profile import get_profile
 from code42cli.sdk_client import create_sdk
+
 
 BEGIN_OPTION_HELP_MESSAGE = (
     "The beginning of the date range in which to look for {}, can be a date/time in "
@@ -136,38 +135,3 @@ def sdk_options(hidden=False):
         return f
 
     return decorator
-
-
-def server_options(f):
-    hostname_arg = click.argument("hostname")
-    protocol_option = click.option(
-        "-p",
-        "--protocol",
-        type=click.Choice(ServerProtocol(), case_sensitive=False),
-        default=ServerProtocol.UDP,
-        help="Protocol used to send logs to server. Defaults to UDP.",
-    )
-    f = hostname_arg(f)
-    f = protocol_option(f)
-    return f
-
-
-send_to_format_options = click.option(
-    "-f",
-    "--format",
-    type=click.Choice(SendToFileEventsOutputFormat(), case_sensitive=False),
-    help="The output format of the result. Defaults to json format.",
-    default=SendToFileEventsOutputFormat.RAW,
-)
-
-
-send_to_insecure_option = click.option(
-    "--use-insecure",
-    is_flag=True,
-    help="Use to turn off SSL. Pass in certificates file optionally.",
-)
-
-
-certs_option = click.option(
-    "--certs", type=str, help="Use to pass in a CA certificates-chain file path."
-)

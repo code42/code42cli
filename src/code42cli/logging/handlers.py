@@ -1,6 +1,5 @@
-import codecs
-import socket
 import logging
+import socket
 import ssl
 from logging.handlers import SysLogHandler
 
@@ -72,7 +71,7 @@ class NoPrioritySysLogHandler(SysLogHandler):
                         )
                     else:
                         sock = ssl.wrap_socket(sock, cert_reqs=ssl.CERT_NONE)
-    
+
                 if sock_type == socket.SOCK_STREAM:
                     sock.connect(sa)
                 break
@@ -131,6 +130,7 @@ class NoPrioritySysLogHandler(SysLogHandler):
                 self.socket.close()
                 raise
 
+
 def _get_socket_type_from_protocol(protocol):
     socket_type = None
     if protocol == "tcp":
@@ -139,7 +139,7 @@ def _get_socket_type_from_protocol(protocol):
         socket_type = socket.SOCK_DGRAM
 
     if socket_type is None:
-        msg = "Could not determine socket type. Expected TCP or UDP, got {}".format(
+        msg = "Could not determine socket type. Expected TCP or UDP, got {}.".format(
             protocol
         )
         raise ValueError(msg)

@@ -4,8 +4,8 @@ import pytest
 from c42eventextractor.maps import FILE_EVENT_TO_SIGNATURE_ID_MAP
 
 from code42cli.cmds.search.enums import FileEventsOutputFormat
-from code42cli.cmds.securitydata_output_formats import FileEventsOutputFormatter
-from code42cli.cmds.securitydata_output_formats import to_cef
+from code42cli.output_formats import FileEventsOutputFormatter
+from code42cli.output_formats import to_cef
 
 
 AED_CLOUD_ACTIVITY_EVENT_DICT = json.loads(
@@ -122,7 +122,7 @@ def mock_file_event():
 
 @pytest.fixture
 def mock_to_cef(mocker):
-    return mocker.patch("code42cli.cmds.securitydata_output_formats.to_cef")
+    return mocker.patch("code42cli.output_formats.to_cef")
 
 
 class TestFileEventsOutputFormatter:

@@ -14,9 +14,9 @@ import code42cli.errors as errors
 import code42cli.options as opt
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
+from code42cli.cmds.search.options import server_options
 from code42cli.logging.logger import get_logger_for_server
 from code42cli.options import format_option
-from code42cli.options import server_options
 from code42cli.output_formats import JsonOutputFormat
 from code42cli.output_formats import OutputFormatter
 
@@ -254,10 +254,12 @@ def send_to(
     advanced_query,
     use_checkpoint,
     or_query,
+    use_ssl,
+    certs,
     **kwargs
 ):
     """Send alerts to the given server address."""
-    logger = get_logger_for_server(hostname, protocol, format)
+    logger = get_logger_for_server(hostname, protocol, format, not use_ssl, certs)
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
     handlers = ext.create_send_to_handlers(
         cli_state.sdk, AlertExtractor, cursor, use_checkpoint, logger,

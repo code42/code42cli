@@ -16,14 +16,12 @@ from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
+from code42cli.cmds.search.options import send_to_format_options
+from code42cli.cmds.search.options import server_options
 from code42cli.logging.logger import get_logger_for_server
 from code42cli.logging.logger import get_main_cli_logger
-from code42cli.options import certs_option
 from code42cli.options import format_option
 from code42cli.options import sdk_options
-from code42cli.options import send_to_format_options
-from code42cli.options import send_to_insecure_option
-from code42cli.options import server_options
 from code42cli.output_formats import FileEventsOutputFormatter
 from code42cli.output_formats import OutputFormatter
 
@@ -196,24 +194,6 @@ def clear_checkpoint(state, checkpoint_name):
     _get_file_event_cursor_store(state.profile.name).delete(checkpoint_name)
 
 
-def _call_extractor(
-    state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
-):
-    if advanced_query:
-        state.search_filters = advanced_query
-    extractor = _get_file_event_extractor(state.sdk, handlers)
-    extractor.use_or_query = or_query
-    extractor.or_query_exempt_filters.append(f.ExposureType.exists())
-    if saved_search:
-        extractor.extract(*saved_search._filter_group_list)
-    else:
-        if begin or end:
-            state.search_filters.append(
-                ext.create_time_range_filter(f.EventTimestamp, begin, end)
-            )
-        extractor.extract(*state.search_filters)
-
-
 @security_data.command()
 @file_event_options
 @search_options
@@ -244,11 +224,8 @@ def search(
     output_header = ext.try_get_default_header(
         include_all, SEARCH_DEFAULT_HEADER, format
     )
-
     formatter = FileEventsOutputFormatter(format, output_header)
-    cursor = (
-        _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
-    )
+    cursor = _get_cursor(state, use_checkpoint)
     handlers = ext.create_handlers(
         state.sdk,
         FileEventExtractor,
@@ -257,11 +234,9 @@ def search(
         formatter=formatter,
         force_pager=include_all,
     )
-    _call_extractor(
+    _extract(
         state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
     )
-
-    handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
 
 
 @security_data.group(cls=OrderedGroup)
@@ -310,8 +285,6 @@ def show(state, search_id):
     help="Display simple properties of the primary level of the nested response.",
 )
 @send_to_format_options
-@send_to_insecure_option
-@certs_option
 def send_to(
     state,
     format,
@@ -323,29 +296,57 @@ def send_to(
     use_checkpoint,
     saved_search,
     or_query,
-    use_insecure,
+    use_ssl,
     certs,
     **kwargs
 ):
     """Send events to the given server address."""
     server_logger = get_logger_for_server(
-        hostname, protocol, format, use_insecure, certs
+        hostname, protocol, format, not use_ssl, certs
     )
-    cursor = (
-        _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
-    )
+    cursor = _get_cursor(state, use_checkpoint)
     handlers = ext.create_send_to_handlers(
         state.sdk, FileEventExtractor, cursor, use_checkpoint, server_logger
     )
-    _call_extractor(
+    _extract(
         state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
     )
-    handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
 
 
 def _get_file_event_extractor(sdk, handlers):
     return FileEventExtractor(sdk, handlers)
 
 
+def _get_cursor(state, use_checkpoint):
+    return _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
+
+
 def _get_file_event_cursor_store(profile_name):
     return FileEventCursorStore(profile_name)
+
+
+def _extract(
+    state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
+):
+    _call_extractor(
+        state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
+    )
+    handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
+
+
+def _call_extractor(
+    state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
+):
+    if advanced_query:
+        state.search_filters = advanced_query
+    extractor = _get_file_event_extractor(state.sdk, handlers)
+    extractor.use_or_query = or_query
+    extractor.or_query_exempt_filters.append(f.ExposureType.exists())
+    if saved_search:
+        extractor.extract(*saved_search._filter_group_list)
+    else:
+        if begin or end:
+            state.search_filters.append(
+                ext.create_time_range_filter(f.EventTimestamp, begin, end)
+            )
+        extractor.extract(*state.search_filters)
