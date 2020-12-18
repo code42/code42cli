@@ -144,9 +144,9 @@ def test_search_audit_logs_with_filter_parameters(runner, cli_state, date_str):
         [
             "audit-logs",
             "search",
-            "--actor",
+            "--actor-username",
             "test@test.com",
-            "--actor",
+            "--actor-username",
             "test2@test.test",
             "--begin",
             date_str,
@@ -173,9 +173,9 @@ def test_search_audit_logs_with_all_filter_parameters(runner, cli_state, date_st
         [
             "audit-logs",
             "search",
-            "--actor",
+            "--actor-username",
             "test@test.com",
-            "--actor",
+            "--actor-username",
             "test2@test.test",
             "--event-type",
             "saved-search",
