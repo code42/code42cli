@@ -1,9 +1,14 @@
 import click
 from py42.exceptions import Py42NotFoundError
+from py42.services.detectionlists.departing_employee import DepartingEmployeeFilters
 
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
+from code42cli.cmds.detectionlists import ALL_FILTER
+from code42cli.cmds.detectionlists import get_choices
+from code42cli.cmds.detectionlists import handle_filter_choice
+from code42cli.cmds.detectionlists import list_employees
 from code42cli.cmds.detectionlists import update_user
 from code42cli.cmds.detectionlists.options import cloud_alias_option
 from code42cli.cmds.detectionlists.options import notes_option
@@ -12,10 +17,23 @@ from code42cli.cmds.shared import get_user_id
 from code42cli.errors import Code42CLIError
 from code42cli.file_readers import read_csv_arg
 from code42cli.file_readers import read_flat_file_arg
+from code42cli.options import format_option
 from code42cli.options import sdk_options
 
 
+def _get_filter_choices():
+    filters = DepartingEmployeeFilters.choices()
+    return get_choices(filters)
+
+
 DATE_FORMAT = "%Y-%m-%d"
+filter_option = click.option(
+    "--filter",
+    help="Departing employee filter options. Defaults to {}.".format(ALL_FILTER),
+    type=click.Choice(_get_filter_choices()),
+    default=ALL_FILTER,
+    callback=lambda ctx, param, arg: handle_filter_choice(arg),
+)
 
 
 @click.group(cls=OrderedGroup)
@@ -23,6 +41,18 @@ DATE_FORMAT = "%Y-%m-%d"
 def departing_employee(state):
     """For adding and removing employees from the departing employees detection list."""
     pass
+
+
+@departing_employee.command("list")
+@sdk_options()
+@format_option
+@filter_option
+def _list(state, format, filter):
+    """Lists the employees on the Departing Employee list."""
+    employee_generator = _get_departing_employees(state.sdk, filter)
+    list_employees(
+        employee_generator, format, {"departureDate": "Departure Date"},
+    )
 
 
 @departing_employee.command()
@@ -126,6 +156,10 @@ def bulk_remove(state, file_rows):
         file_rows,
         progress_label="Removing users from departing employee detection list:",
     )
+
+
+def _get_departing_employees(sdk, filter):
+    return sdk.detectionlists.departing_employee.get_all(filter)
 
 
 def _add_departing_employee(sdk, username, cloud_alias, departure_date, notes):

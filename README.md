@@ -117,7 +117,7 @@ code42 security-data search -b 10d -e 12h
 
 Begin date will be ignored if provided on subsequent queries using `-c/--use-checkpoint`.
 
-Use different format with `-f`:
+Use other formats with `-f`:
 
 ```bash
 code42 security-data search -b 2020-02-02 -f CEF
