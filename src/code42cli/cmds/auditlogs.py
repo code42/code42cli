@@ -34,14 +34,14 @@ AUDIT_LOGS_DEFAULT_HEADER["userId"] = "AffectedUserUID"
 
 
 filter_option_usernames = click.option(
-    "--username", required=False, help="Filter results by usernames.", multiple=True,
+    "--actor", required=False, help="Filter results by actor.", multiple=True,
 )
 filter_option_user_ids = click.option(
-    "--user-id", required=False, help="Filter results by user ids.", multiple=True,
+    "--actor-user-id", required=False, help="Filter results by actor user ids.", multiple=True,
 )
 
 filter_option_user_ip_addresses = click.option(
-    "--user-ip",
+    "--actor-ip",
     required=False,
     help="Filter results by user ip addresses.",
     multiple=True,
@@ -119,9 +119,9 @@ def search(
     begin,
     end,
     event_type,
-    username,
-    user_id,
-    user_ip,
+    actor,
+    actor_user_id,
+    actor_ip,
     affected_user_id,
     affected_username,
     format,
@@ -141,9 +141,9 @@ def search(
         begin_time=begin,
         end_time=end,
         event_types=event_type,
-        usernames=username,
-        user_ids=user_id,
-        user_ip_addresses=user_ip,
+        usernames=actor,
+        user_ids=actor_user_id,
+        user_ip_addresses=actor_ip,
         affected_user_ids=affected_user_id,
         affected_usernames=affected_username,
     )
