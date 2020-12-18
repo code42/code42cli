@@ -1,4 +1,46 @@
+import click
+from py42.services.detectionlists import _DetectionListFilters
+
 from code42cli.cmds.shared import get_user_id
+from code42cli.output_formats import OutputFormat
+from code42cli.output_formats import OutputFormatter
+
+
+ALL_FILTER = "ALL"
+
+
+def get_choices(filters):
+    filters.remove(_DetectionListFilters.OPEN)
+    filters.append(ALL_FILTER)
+    return filters
+
+
+def handle_filter_choice(choice):
+    if choice == ALL_FILTER:
+        return _DetectionListFilters.OPEN
+    return choice
+
+
+def list_employees(employee_generator, output_format, additional_header_items=None):
+    additional_header_items = additional_header_items or {}
+    header = {"userName": "Username", "notes": "Notes", **additional_header_items}
+    employee_list = []
+    for employees in employee_generator:
+        for employee in employees["items"]:
+            if employee["notes"] and output_format == OutputFormat.TABLE:
+                employee["notes"] = (
+                    employee["notes"].replace("\n", "\\n").replace("\t", "\\t")
+                )
+            employee_list.append(employee)
+    if employee_list:
+        formatter = OutputFormatter(output_format, header)
+        if len(employee_list) > 10:
+            output = formatter.get_formatted_output(employee_list)
+            click.echo_via_pager(output)
+        else:
+            formatter.echo_formatted_list(employee_list)
+    else:
+        click.echo("No users found.")
 
 
 def update_user(sdk, username, cloud_alias=None, risk_tag=None, notes=None):
