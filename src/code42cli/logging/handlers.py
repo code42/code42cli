@@ -3,6 +3,8 @@ import socket
 import ssl
 from logging.handlers import SysLogHandler
 
+from code42cli.cmds.search.enums import ServerProtocol
+
 
 class NoPrioritySysLogHandlerWrapper:
     """
@@ -49,6 +51,11 @@ class NoPrioritySysLogHandler(SysLogHandler):
     def __init__(self, hostname, port, protocol, use_insecure, certs):
         self.address = (hostname, port)
         logging.Handler.__init__(self)
+        
+        # SSL required TCP
+        if not use_insecure:
+            protocol = ServerProtocol.TCP
+
         sock_type = _get_socket_type_from_protocol(protocol.lower().strip())
         self.unixsocket = False
         if sock_type is None:
