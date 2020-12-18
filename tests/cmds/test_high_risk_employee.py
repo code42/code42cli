@@ -323,15 +323,15 @@ def test_remove_high_risk_employee_when_user_not_on_list_prints_expected_error(
     mocker, runner, cli_state
 ):
     cli_state.sdk.detectionlists.high_risk_employee.remove.side_effect = get_user_not_on_list_side_effect(
-        mocker
+        mocker, "high-risk-employee"
     )
     test_username = "test@example.com"
     result = runner.invoke(
         cli, ["high-risk-employee", "remove", test_username], obj=cli_state
     )
     assert (
-        "User {} is not currently on the high-risk-employee detection list.".format(
-            test_username
+        "User with ID '{}' is not currently on the high-risk-employee list.".format(
+            TEST_ID
         )
         in result.output
     )

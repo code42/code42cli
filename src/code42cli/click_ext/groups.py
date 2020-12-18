@@ -8,6 +8,7 @@ from py42.exceptions import Py42HTTPError
 from py42.exceptions import Py42InvalidRuleOperationError
 from py42.exceptions import Py42LegalHoldNotFoundOrPermissionDeniedError
 from py42.exceptions import Py42UserAlreadyAddedError
+from py42.exceptions import Py42UserNotOnListError
 
 from code42cli.errors import Code42CLIError
 from code42cli.errors import LoggedCLIError
@@ -53,6 +54,7 @@ class ExceptionHandlingGroup(click.Group):
         except (
             UserDoesNotExistError,
             Py42UserAlreadyAddedError,
+            Py42UserNotOnListError,
             Py42InvalidRuleOperationError,
             Py42LegalHoldNotFoundOrPermissionDeniedError,
         ) as err:
