@@ -168,6 +168,6 @@ send_to_insecure_option = click.option(
 )
 
 
-certificates_option = click.option(
-    "--ca-certs", type=str, help="Use to pass in a CA certificates-chain file path."
+certs_option = click.option(
+    "--certs", type=str, help="Use to pass in a CA certificates-chain file path."
 )

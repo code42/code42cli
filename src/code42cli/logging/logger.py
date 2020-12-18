@@ -72,7 +72,7 @@ def get_logger_for_server(hostname, protocol, output_format, use_insecure, ca_ce
                 ).handler
             except Exception as e:
                 raise Exception(
-                    "Unable to connect {}. Failed with error {}".format(
+                    "Unable to connect to {}. Failed with error: {}.".format(
                         hostname, str(e)
                     )
                 )

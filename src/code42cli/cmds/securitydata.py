@@ -18,7 +18,7 @@ from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.logging.logger import get_logger_for_server
 from code42cli.logging.logger import get_main_cli_logger
-from code42cli.options import certificates_option
+from code42cli.options import certs_option
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.options import send_to_format_options
@@ -310,7 +310,7 @@ def show(state, search_id):
 )
 @send_to_format_options
 @send_to_insecure_option
-@certificates_option
+@certs_option
 def send_to(
     state,
     format,
@@ -323,12 +323,12 @@ def send_to(
     saved_search,
     or_query,
     use_insecure,
-    ca_certs,
+    certs,
     **kwargs
 ):
     """Send events to the given server address."""
     server_logger = get_logger_for_server(
-        hostname, protocol, format, use_insecure, ca_certs
+        hostname, protocol, format, use_insecure, certs
     )
     cursor = (
         _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
