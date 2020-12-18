@@ -25,7 +25,7 @@ jobs:
           src_file=( ./dist/*.tar.gz )
           wheel_file=( ./dist/*.whl )
           echo "RELEASE_ID=$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)" >> $GITHUB_ENV
-          echo "SOURCE_DIST_FILE=$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)" >> $GITHUB_ENV
+          echo "SOURCE_DIST_FILE=$(basename $src_file)" >> $GITHUB_ENV
           echo "WHEEL_FILE=$(basename $wheel_file)" >> $GITHUB_ENV
     - name: Set Upload Url
       run: |
