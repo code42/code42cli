@@ -129,7 +129,8 @@ process_owner_option = click.option(
     multiple=True,
     callback=searchopt.is_in_filter(f.ProcessOwner),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
-    help="Limits exposure events by process owner, as reported by the device’s operating system. Applies only to `Printed` and `Browser or app read` events",
+    help="Limits exposure events by process owner, as reported by the device’s operating system. "
+    "Applies only to `Printed` and `Browser or app read` events.",
 )
 tab_url_option = click.option(
     "--tab-url",
