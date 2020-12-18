@@ -14,7 +14,6 @@ from code42cli.options import begin_option
 from code42cli.options import end_option
 from code42cli.options import format_option
 from code42cli.options import sdk_options
-from code42cli.options import send_to_format_options
 from code42cli.options import server_options
 from code42cli.output_formats import OutputFormatter
 from code42cli.util import hash_event
@@ -34,14 +33,20 @@ AUDIT_LOGS_DEFAULT_HEADER["userId"] = "AffectedUserUID"
 
 
 filter_option_usernames = click.option(
-    "--username", required=False, help="Filter results by usernames.", multiple=True,
+    "--actor-username",
+    required=False,
+    help="Filter results by actor usernames.",
+    multiple=True,
 )
 filter_option_user_ids = click.option(
-    "--user-id", required=False, help="Filter results by user ids.", multiple=True,
+    "--actor-user-id",
+    required=False,
+    help="Filter results by actor user ids.",
+    multiple=True,
 )
 
 filter_option_user_ip_addresses = click.option(
-    "--user-ip",
+    "--actor-ip",
     required=False,
     help="Filter results by user ip addresses.",
     multiple=True,
@@ -119,9 +124,9 @@ def search(
     begin,
     end,
     event_type,
-    username,
-    user_id,
-    user_ip,
+    actor_username,
+    actor_user_id,
+    actor_ip,
     affected_user_id,
     affected_username,
     format,
@@ -141,9 +146,9 @@ def search(
         begin_time=begin,
         end_time=end,
         event_types=event_type,
-        usernames=username,
-        user_ids=user_id,
-        user_ip_addresses=user_ip,
+        usernames=actor_username,
+        user_ids=actor_user_id,
+        user_ip_addresses=actor_ip,
         affected_user_ids=affected_user_id,
         affected_usernames=affected_username,
     )
@@ -167,25 +172,23 @@ def search(
 @filter_options
 @checkpoint_option
 @server_options
-@send_to_format_options
 @sdk_options()
 def send_to(
     state,
     hostname,
     protocol,
-    format,
     begin,
     end,
     event_type,
-    username,
-    user_id,
-    user_ip,
+    actor_username,
+    actor_user_id,
+    actor_ip,
     affected_user_id,
     affected_username,
     use_checkpoint,
 ):
-    """Send audit logs to the given server address."""
-    logger = get_logger_for_server(hostname, protocol, format)
+    """Send audit logs to the given server address in JSON format."""
+    logger = get_logger_for_server(hostname, protocol, "RAW-JSON")
     cursor = _get_audit_log_cursor_store(state.profile.name)
     if use_checkpoint:
         checkpoint_name = use_checkpoint
@@ -198,9 +201,9 @@ def send_to(
         begin_time=begin,
         end_time=end,
         event_types=event_type,
-        usernames=username,
-        user_ids=user_id,
-        user_ip_addresses=user_ip,
+        usernames=actor_username,
+        user_ids=actor_user_id,
+        user_ip_addresses=actor_ip,
         affected_user_ids=affected_user_id,
         affected_usernames=affected_username,
     )
