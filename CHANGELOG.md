@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+# Unreleased
+
+# Added
+
+- `code42 departing-employee list` command.
+
+- `code42 high-risk-employee list` command.
+
 ## 1.1.0 - 2020-12-18
 
 ### Fixed
@@ -16,10 +24,6 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
   though deleting the default profile is not allowed.
 
 ### Added
-
-- `code42 departing-employee list` command.
-
-- `code42 high-risk-employee list` command.
 
 - `code42 audit-logs` commands:
     - `search` to search for audit-logs.
