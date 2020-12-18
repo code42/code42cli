@@ -182,7 +182,7 @@ def send_to(
     use_checkpoint,
 ):
     """Send audit logs to the given server address in JSON format."""
-    logger = get_logger_for_server(hostname, protocol, "JSON")
+    logger = get_logger_for_server(hostname, protocol, "RAW-JSON")
     cursor = _get_audit_log_cursor_store(state.profile.name)
     if use_checkpoint:
         checkpoint_name = use_checkpoint
