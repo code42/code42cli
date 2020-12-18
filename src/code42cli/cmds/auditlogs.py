@@ -34,7 +34,7 @@ AUDIT_LOGS_DEFAULT_HEADER["userId"] = "AffectedUserUID"
 
 
 filter_option_usernames = click.option(
-    "--actor", required=False, help="Filter results by actor.", multiple=True,
+    "--actor", required=False, help="Filter results by actors.", multiple=True,
 )
 filter_option_user_ids = click.option(
     "--actor-user-id", required=False, help="Filter results by actor user ids.", multiple=True,
