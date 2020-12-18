@@ -16,12 +16,12 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - `code42 high-risk-employee list` command.
 
-## 1.1.0 - 2020-12-18
-
 ### Changed
 
 - The error text when removing an employee from a detection list now references the employee
   by ID rather the username.
+
+## 1.1.0 - 2020-12-18
 
 ### Fixed
 
