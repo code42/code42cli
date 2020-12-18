@@ -1,11 +1,16 @@
 import click
 from py42.clients.detectionlists import RiskTags
+from py42.services.detectionlists.high_risk_employee import HighRiskEmployeeFilters
 
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.cmds.detectionlists import add_risk_tags as _add_risk_tags
+from code42cli.cmds.detectionlists import ALL_FILTER
+from code42cli.cmds.detectionlists import get_choices
+from code42cli.cmds.detectionlists import handle_filter_choice
 from code42cli.cmds.detectionlists import handle_list_args
+from code42cli.cmds.detectionlists import list_employees
 from code42cli.cmds.detectionlists import remove_risk_tags as _remove_risk_tags
 from code42cli.cmds.detectionlists import update_user
 from code42cli.cmds.detectionlists.options import cloud_alias_option
@@ -14,7 +19,23 @@ from code42cli.cmds.detectionlists.options import username_arg
 from code42cli.cmds.shared import get_user_id
 from code42cli.file_readers import read_csv_arg
 from code42cli.file_readers import read_flat_file_arg
+from code42cli.options import format_option
 from code42cli.options import sdk_options
+
+
+def _get_filter_choices():
+    filters = HighRiskEmployeeFilters.choices()
+    return get_choices(filters)
+
+
+filter_option = click.option(
+    "--filter",
+    help="High risk employee filter options. Defaults to {}.".format(ALL_FILTER),
+    type=click.Choice(_get_filter_choices()),
+    default=ALL_FILTER,
+    callback=lambda ctx, param, arg: handle_filter_choice(arg),
+)
+
 
 risk_tag_option = click.option(
     "-t",
@@ -30,6 +51,17 @@ risk_tag_option = click.option(
 def high_risk_employee(state):
     """For adding and removing employees from the high risk employees detection list."""
     pass
+
+
+@high_risk_employee.command("list")
+@sdk_options()
+@format_option
+@filter_option
+def _list(state, format, filter):
+    """Lists the employees on the High Risk Employee list."""
+
+    employee_generator = _get_high_risk_employees(state.sdk, filter)
+    list_employees(employee_generator, format)
 
 
 @high_risk_employee.command()
@@ -167,6 +199,10 @@ def bulk_remove_risk_tags(state, csv_rows):
     run_bulk_process(
         handle_row, csv_rows, progress_label="Removing risk tags from users:",
     )
+
+
+def _get_high_risk_employees(sdk, filter):
+    return sdk.detectionlists.high_risk_employee.get_all(filter)
 
 
 def _add_high_risk_employee(sdk, username, cloud_alias, risk_tag, notes):

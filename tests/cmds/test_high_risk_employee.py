@@ -1,7 +1,6 @@
-from py42.exceptions import Py42NotFoundError
-from requests import HTTPError
-from requests import Request
-from requests import Response
+import pytest
+from py42.services.detectionlists.high_risk_employee import HighRiskEmployeeFilters
+from tests.cmds.conftest import get_generator_for_get_all
 from tests.cmds.conftest import get_user_not_on_list_side_effect
 from tests.cmds.conftest import TEST_EMPLOYEE
 from tests.cmds.conftest import thread_safe_side_effect
@@ -12,16 +11,108 @@ from code42cli.main import cli
 _NAMESPACE = "code42cli.cmds.high_risk_employee"
 
 
-def get_user_not_on_high_risk_employee_list_side_effect(mocker):
-    def side_effect(*args, **kwargs):
-        err = mocker.MagicMock(spec=HTTPError)
-        resp = mocker.MagicMock(spec=Response)
-        resp.text = "TEST_ERR"
-        err.response = resp
-        err.response.request = mocker.MagicMock(spec=Request)
-        raise Py42NotFoundError(err)
+HIGH_RISK_EMPLOYEE_ITEM = """{
+    "type$": "HIGH_RISK_EMPLOYEE_V2",
+    "tenantId": "1111111-af5b-4231-9d8e-000000000",
+    "userId": "TEST USER UID",
+    "userName": "test.testerson@example.com",
+    "displayName": "Testerson",
+    "notes": "Leaving for competitor",
+    "createdAt": "2020-06-23T19:57:37.1345130Z",
+    "status": "OPEN",
+    "cloudUsernames": ["cloud@example.com"],
+    "riskFactors": ["PERFORMANCE_CONCERNS"]
+}
+"""
 
-    return side_effect
+
+@pytest.fixture()
+def mock_get_all_empty_state(mocker, cli_state_with_user):
+    generator = get_generator_for_get_all(mocker, None)
+    cli_state_with_user.sdk.detectionlists.high_risk_employee.get_all.side_effect = (
+        generator
+    )
+    return cli_state_with_user
+
+
+@pytest.fixture()
+def mock_get_all_state(mocker, cli_state_with_user):
+    generator = get_generator_for_get_all(mocker, HIGH_RISK_EMPLOYEE_ITEM)
+    cli_state_with_user.sdk.detectionlists.high_risk_employee.get_all.side_effect = (
+        generator
+    )
+    return cli_state_with_user
+
+
+def test_list_high_risk_employees_lists_expected_properties(runner, mock_get_all_state):
+    res = runner.invoke(cli, ["high-risk-employee", "list"], obj=mock_get_all_state)
+    assert "Username" in res.output
+    assert "Notes" in res.output
+    assert "test.testerson@example.com" in res.output
+
+
+def test_list_departing_employees_converts_all_to_open(runner, mock_get_all_state):
+    runner.invoke(
+        cli, ["high-risk-employee", "list", "--filter", "ALL"], obj=mock_get_all_state
+    )
+    mock_get_all_state.sdk.detectionlists.high_risk_employee.get_all.assert_called_once_with(
+        HighRiskEmployeeFilters.OPEN
+    )
+
+
+def test_list_high_risk_employees_when_given_raw_json_lists_expected_properties(
+    runner, mock_get_all_state
+):
+    res = runner.invoke(
+        cli, ["high-risk-employee", "list", "-f", "RAW-JSON"], obj=mock_get_all_state
+    )
+    assert "userName" in res.output
+    assert "notes" in res.output
+    assert "test.testerson@example.com" in res.output
+    assert "Leaving for competitor" in res.output
+    assert "cloudUsernames" in res.output
+    assert "cloud@example.com" in res.output
+    assert "riskFactors" in res.output
+    assert "PERFORMANCE_CONCERNS" in res.output
+
+
+def test_list_high_risk_employees_when_no_employees_echos_expected_message(
+    runner, mock_get_all_empty_state
+):
+    res = runner.invoke(
+        cli, ["high-risk-employee", "list"], obj=mock_get_all_empty_state
+    )
+    assert "No users found." in res.output
+
+
+def test_list_high_risk_employees_uses_filter_option(runner, mock_get_all_state):
+    runner.invoke(
+        cli,
+        [
+            "high-risk-employee",
+            "list",
+            "--filter",
+            HighRiskEmployeeFilters.EXFILTRATION_30_DAYS,
+        ],
+        obj=mock_get_all_state,
+    )
+    mock_get_all_state.sdk.detectionlists.high_risk_employee.get_all.assert_called_once_with(
+        HighRiskEmployeeFilters.EXFILTRATION_30_DAYS,
+    )
+
+
+def test_list_high_risk_employees_when_table_format_and_notes_contains_newlines_escapes_them(
+    runner, mocker, cli_state_with_user
+):
+    new_line_text = str(HIGH_RISK_EMPLOYEE_ITEM).replace(
+        "Leaving for competitor", r"Line1\nLine2"
+    )
+    generator = get_generator_for_get_all(mocker, new_line_text)
+    cli_state_with_user.sdk.detectionlists.high_risk_employee.get_all.side_effect = (
+        generator
+    )
+    res = runner.invoke(cli, ["high-risk-employee", "list"], obj=cli_state_with_user)
+    assert "Line1\\nLine2" in res.output
 
 
 def test_add_high_risk_employee_adds(runner, cli_state_with_user):
@@ -96,7 +187,7 @@ def test_add_high_risk_employee_when_user_does_not_exist_exits_with_correct_mess
 
 
 def test_add_high_risk_employee_when_user_already_added_exits_with_correct_message(
-    mocker, runner, cli_state_with_user, user_already_added_error
+    runner, cli_state_with_user, user_already_added_error
 ):
     def add_user(user):
         raise user_already_added_error
@@ -127,16 +218,6 @@ def test_remove_high_risk_employee_when_user_does_not_exist_exits_with_correct_m
     )
     assert result.exit_code == 1
     assert "User '{}' does not exist.".format(TEST_EMPLOYEE) in result.output
-
-
-def test_generate_template_file_when_given_add_generates_template_from_handler(
-    runner, cli_state
-):
-    pass
-
-
-def test_generate_template_file_when_given_remove_generates_template_from_handler():
-    pass
 
 
 def test_bulk_add_employees_calls_expected_py42_methods(runner, cli_state):

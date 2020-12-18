@@ -4,6 +4,7 @@ import threading
 import pytest
 from py42.exceptions import Py42UserAlreadyAddedError
 from py42.exceptions import Py42UserNotOnListError
+from py42.response import Py42Response
 from py42.sdk import SDKClient
 from requests import HTTPError
 from requests import Request
@@ -107,3 +108,14 @@ def thread_safe_side_effect():
     f.call_count = 0
     f.call_args_list = []
     return f
+
+
+def get_generator_for_get_all(mocker, mock_return_items):
+    mock_return_items = mock_return_items or ""
+
+    def gen(*args, **kwargs):
+        response = mocker.MagicMock(spec=Request)
+        response.text = """{{"items": [{0}]}}""".format(mock_return_items)
+        yield Py42Response(response)
+
+    return gen
