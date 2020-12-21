@@ -21,8 +21,8 @@ class NoPrioritySysLogHandlerWrapper:
         self.hostname = hostname
         self.port = port
         self.protocol = protocol
-        self._handler = None
         self.certs = certs
+        self._handler = None
 
     @property
     def handler(self):
