@@ -170,14 +170,14 @@ def _get_socket_type(protocol):
 
 
 def _get_socket_type_from_protocol(protocol):
-    if protocol in [ServerProtocol.TCP.lower(), ServerProtocol.TLS.lower()]:
+    if protocol in [ServerProtocol.TCP, ServerProtocol.TLS]:
         return socket.SOCK_STREAM
-    elif protocol == ServerProtocol.UDP.lower():
+    elif protocol == ServerProtocol.UDP:
         return socket.SOCK_DGRAM
 
 
 def _raise_socket_type_error(protocol):
-    msg = "Could not determine socket type. Expected one of {}, but got {}.".format(
-        ServerProtocol(), protocol
+    msg = "Could not determine socket type. Expected one of {}, but got {}".format(
+        list(ServerProtocol()), protocol
     )
     raise ValueError(msg)
