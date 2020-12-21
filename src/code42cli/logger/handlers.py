@@ -51,7 +51,7 @@ class NoPrioritySysLogHandler(SysLogHandler):
     def __init__(self, hostname, port, protocol, use_insecure, certs):
         self.address = (hostname, port)
         logging.Handler.__init__(self)
-        
+
         # SSL required TCP
         if not use_insecure:
             protocol = ServerProtocol.TCP

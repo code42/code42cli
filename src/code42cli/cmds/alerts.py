@@ -15,7 +15,7 @@ import code42cli.options as opt
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.cmds.search.options import server_options
-from code42cli.logging.logger import get_logger_for_server
+from code42cli.logger import get_logger_for_server
 from code42cli.options import format_option
 from code42cli.output_formats import JsonOutputFormat
 from code42cli.output_formats import OutputFormatter

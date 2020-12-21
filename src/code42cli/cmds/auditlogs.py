@@ -10,7 +10,7 @@ from code42cli.cmds.search.options import BeginOption
 from code42cli.cmds.search.options import server_options
 from code42cli.date_helper import parse_max_timestamp
 from code42cli.date_helper import parse_min_timestamp
-from code42cli.logging.logger import get_logger_for_server
+from code42cli.logger import get_logger_for_server
 from code42cli.options import begin_option
 from code42cli.options import end_option
 from code42cli.options import format_option

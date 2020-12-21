@@ -5,8 +5,8 @@ import json
 import click
 
 import code42cli.cmds.search.enums as enum
-from code42cli.logging.formatters import CEF_TEMPLATE
-from code42cli.logging.formatters import map_event_to_cef
+from code42cli.logger.formatters import CEF_TEMPLATE
+from code42cli.logger.formatters import map_event_to_cef
 from code42cli.util import find_format_width
 from code42cli.util import format_to_table
 

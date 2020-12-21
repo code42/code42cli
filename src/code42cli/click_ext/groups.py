@@ -13,7 +13,7 @@ from py42.exceptions import Py42UserNotOnListError
 from code42cli.errors import Code42CLIError
 from code42cli.errors import LoggedCLIError
 from code42cli.errors import UserDoesNotExistError
-from code42cli.logging.logger import get_main_cli_logger
+from code42cli.logger import get_main_cli_logger
 
 _DIFFLIB_CUT_OFF = 0.6
 
@@ -26,7 +26,7 @@ class ExceptionHandlingGroup(click.Group):
 
     def make_context(self, info_name, args, parent=None, **extra):
 
-        # grab the original command line arguments for logging purposes
+        # grab the original command line arguments for logger purposes
         self._original_args = " ".join(args)
 
         return super().make_context(info_name, args, parent=parent, **extra)

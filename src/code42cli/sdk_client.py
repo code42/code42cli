@@ -8,7 +8,7 @@ from requests.exceptions import ConnectionError
 
 from code42cli.errors import Code42CLIError
 from code42cli.errors import LoggedCLIError
-from code42cli.logging.logger import get_main_cli_logger
+from code42cli.logger import get_main_cli_logger
 
 py42.settings.items_per_page = 500
 

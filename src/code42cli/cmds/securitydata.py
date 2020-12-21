@@ -18,8 +18,8 @@ from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.cmds.search.options import send_to_format_options
 from code42cli.cmds.search.options import server_options
-from code42cli.logging.logger import get_logger_for_server
-from code42cli.logging.logger import get_main_cli_logger
+from code42cli.logger import get_logger_for_server
+from code42cli.logger import get_main_cli_logger
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.output_formats import FileEventsOutputFormatter

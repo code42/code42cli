@@ -6,21 +6,21 @@ import pytest
 from requests import Request
 
 from code42cli.cmds.search.enums import ServerProtocol
-from code42cli.logging.formatters import FileEventDictToCEFFormatter
-from code42cli.logging.formatters import FileEventDictToJSONFormatter
-from code42cli.logging.formatters import FileEventDictToRawJSONFormatter
-from code42cli.logging.logger import add_handler_to_logger
-from code42cli.logging.logger import CliLogger
-from code42cli.logging.logger import get_logger_for_server
-from code42cli.logging.logger import get_view_error_details_message
-from code42cli.logging.logger import logger_has_handlers
+from code42cli.logger import add_handler_to_logger
+from code42cli.logger import CliLogger
+from code42cli.logger import get_logger_for_server
+from code42cli.logger import get_view_error_details_message
+from code42cli.logger import logger_has_handlers
+from code42cli.logger.formatters import FileEventDictToCEFFormatter
+from code42cli.logger.formatters import FileEventDictToJSONFormatter
+from code42cli.logger.formatters import FileEventDictToRawJSONFormatter
 from code42cli.util import get_user_project_path
 
 
 @pytest.fixture
 def no_priority_syslog_handler(mocker):
     mock = mocker.patch(
-        "code42cli.logging.handlers.NoPrioritySysLogHandlerWrapper.handler"
+        "code42cli.logger.handlers.NoPrioritySysLogHandlerWrapper.handler"
     )
 
     # Set handlers to empty list so it gets initialized each test
@@ -109,7 +109,7 @@ def test_get_logger_for_server_constructs_handler_with_expected_args(
     mocker, no_priority_syslog_handler, monkeypatch
 ):
     no_priority_syslog_handler_wrapper = mocker.patch(
-        "code42cli.logging.handlers.NoPrioritySysLogHandlerWrapper.__init__"
+        "code42cli.logger.handlers.NoPrioritySysLogHandlerWrapper.__init__"
     )
     no_priority_syslog_handler_wrapper.return_value = None
     get_logger_for_server("example.com", "TCP", "CEF", True, "cert")
@@ -122,7 +122,7 @@ def test_get_logger_for_server_when_hostname_includes_port_constructs_handler_wi
     mocker, no_priority_syslog_handler
 ):
     no_priority_syslog_handler_wrapper = mocker.patch(
-        "code42cli.logging.handlers.NoPrioritySysLogHandlerWrapper.__init__"
+        "code42cli.logger.handlers.NoPrioritySysLogHandlerWrapper.__init__"
     )
     no_priority_syslog_handler_wrapper.return_value = None
     get_logger_for_server("example.com:999", "TCP", "CEF", False, None)

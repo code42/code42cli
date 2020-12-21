@@ -12,7 +12,7 @@ from requests import Response
 from tests.conftest import convert_str_to_date
 from tests.conftest import TEST_ID
 
-from code42cli.logging.logger import CliLogger
+from code42cli.logger import CliLogger
 
 
 TEST_EMPLOYEE = "risky employee"
@@ -54,9 +54,7 @@ def cli_logger(mocker):
 
 @pytest.fixture
 def event_extractor_logger(mocker):
-    mock = mocker.patch(
-        "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper"
-    )
+    mock = mocker.patch("code42cli.logger.handlers.NoPrioritySysLogHandlerWrapper")
     mock.emit.return_value = mocker.MagicMock()
     return mock
 

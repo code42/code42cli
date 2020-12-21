@@ -7,7 +7,7 @@ from py42.exceptions import Py42ForbiddenError
 from py42.exceptions import Py42HTTPError
 
 from code42cli.errors import Code42CLIError
-from code42cli.logging.logger import get_main_cli_logger
+from code42cli.logger import get_main_cli_logger
 
 
 class WorkerStats:
