@@ -15,7 +15,7 @@ from code42cli.errors import Code42CLIError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.options import sdk_options
-from code42cli.output_formats import OutputFormatter
+from code42cli.output_formats import OutputFormatter, DataFrameOutputFormatter
 
 
 @click.group(cls=OrderedGroup)
@@ -199,6 +199,7 @@ def _get_key_from_list_of_dicts(key, list_of_dicts):
     is_flag=True,
     help="Include to include device settings in output.",
 )
+@format_option
 @sdk_options()
 def list(
     state,
@@ -209,6 +210,7 @@ def list(
     include_backup_usage,
     include_usernames,
     include_settings,
+    format,
 ):
     """Outputs a list of all devices."""
     devices_dataframe = _get_device_dataframe(
@@ -228,7 +230,8 @@ def list(
         devices_dataframe = _add_usernames_to_device_dataframe(
             state.sdk, devices_dataframe
         )
-    click.echo_via_pager(devices_dataframe.to_csv())
+    formatter = DataFrameOutputFormatter(format)
+    formatter.echo_formatted_dataframe(devices_dataframe)
 
 
 def _get_device_dataframe(sdk, active=None, org_uid=None, include_backup_usage=False):

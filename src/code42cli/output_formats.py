@@ -3,6 +3,7 @@ import io
 import json
 
 import click
+from pandas import DataFrame
 
 from code42cli.util import find_format_width
 from code42cli.util import format_to_table
@@ -75,6 +76,29 @@ class OutputFormatter:
     def _requires_list_output(self):
         return self.output_format in (OutputFormat.TABLE, OutputFormat.CSV)
 
+class DataFrameOutputFormatter():
+    def __init__(self, output_format):
+        output_format = output_format.upper() if output_format else OutputFormat.TABLE
+        self.output_format = output_format
+        self._format_func = DataFrame.to_string
+        self._output_args = {}
+
+        if output_format == OutputFormat.CSV:
+            self._format_func = DataFrame.to_csv
+        elif output_format == OutputFormat.RAW:
+            self._format_func = DataFrame.to_json
+            self._output_args = {"orient":"records", "lines" : False}
+        elif output_format == OutputFormat.JSON:
+            self._format_func = DataFrame.to_json
+            self._output_args = {"orient":"records", "lines" : True}
+
+    def _format_output(self, output, *args, **kwargs):
+        self._output_args.update(kwargs)
+        return self._format_func(output, *args, **self._output_args)
+
+    def echo_formatted_dataframe(self, output, *args, **kwargs):
+        click.echo_via_pager(self._format_output(output, *args, **kwargs))
+        
 
 def to_csv(output):
     """Output is a list of records"""
