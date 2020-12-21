@@ -51,8 +51,7 @@ class NoPrioritySysLogHandler(SysLogHandler):
         self.address = (hostname, port)
         logging.Handler.__init__(self)
         use_insecure = protocol != ServerProtocol.TLS
-        protocol = ServerProtocol.TCP if not use_insecure else protocol
-        self.socktype = sock_type = _get_socket_type(protocol)
+        self.socktype = sock_type = _try_get_socket_type_from_protocol(protocol)
         self.socket = _create_socket(hostname, port, sock_type, use_insecure, certs)
   
 
@@ -162,7 +161,7 @@ def _wrap_socket_for_ssl(sock, certs):
     return ssl.wrap_socket(sock, ca_certs=certs, cert_reqs=cert_reqs)
 
 
-def _get_socket_type(protocol):
+def _try_get_socket_type_from_protocol(protocol):
     socket_type = _get_socket_type_from_protocol(protocol)
     if socket_type is None:
         _raise_socket_type_error(protocol)
