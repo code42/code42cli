@@ -51,8 +51,21 @@ class NoPrioritySysLogHandler(SysLogHandler):
         self.address = (hostname, port)
         logging.Handler.__init__(self)
         use_insecure = protocol != ServerProtocol.TLS
-        self.socktype = sock_type = _try_get_socket_type_from_protocol(protocol)
-        self.socket = _create_socket(hostname, port, sock_type, use_insecure, certs)
+        self.socktype = _try_get_socket_type_from_protocol(protocol)
+        self.socket = self._create_socket(hostname, port, use_insecure, certs)
+
+    def _create_socket(self, hostname, port, use_insecure, certs):
+        socket_info = self._get_socket_address_info(hostname, port)
+        err, sock = _create_socket_from_address_info_list(socket_info, use_insecure, certs)
+        if err is not None:
+            raise err
+        return sock
+
+    def _get_socket_address_info(self, hostname, port):
+        info = socket.getaddrinfo(hostname, port, 0, self.socktype)
+        if not info:
+            raise OSError("getaddrinfo() returns an empty list")
+        return info
 
     def emit(self, record):
         try:
@@ -99,21 +112,6 @@ class NoPrioritySysLogHandler(SysLogHandler):
             except OSError:
                 self.socket.close()
                 raise
-
-
-def _create_socket(hostname, port, sock_type, use_insecure, certs):
-    socket_info = _get_socket_address_info(hostname, port, sock_type)
-    err, sock = _create_socket_from_address_info_list(socket_info, use_insecure, certs)
-    if err is not None:
-        raise err
-    return sock
-
-
-def _get_socket_address_info(hostname, port, sock_type):
-    info = socket.getaddrinfo(hostname, port, 0, sock_type)
-    if not info:
-        raise OSError("getaddrinfo() returns an empty list")
-    return info
 
 
 def _create_socket_from_address_info_list(socket_info, use_insecure, certs):
