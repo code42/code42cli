@@ -26,7 +26,7 @@ class ExceptionHandlingGroup(click.Group):
 
     def make_context(self, info_name, args, parent=None, **extra):
 
-        # grab the original command line arguments for logger purposes
+        # grab the original command line arguments for logging purposes
         self._original_args = " ".join(args)
 
         return super().make_context(info_name, args, parent=parent, **extra)

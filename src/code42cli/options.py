@@ -119,7 +119,7 @@ def debug_option(hidden=False):
         expose_value=False,
         callback=set_debug,
         hidden=hidden,
-        help="Turn on debug logger.",
+        help="Turn on debug logging.",
     )
     return opt
 

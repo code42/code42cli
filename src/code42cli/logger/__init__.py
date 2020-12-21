@@ -140,7 +140,7 @@ class CliLogger:
             self._logger.error(message)
 
     def log_verbose_error(self, invocation_str=None, http_request=None):
-        """For logger traces, invocation strs, and request parameters during exceptions to the
+        """For logging traces, invocation strs, and request parameters during exceptions to the
         error log file."""
         prefix = (
             "Exception occurred."
