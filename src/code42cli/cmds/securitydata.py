@@ -296,14 +296,11 @@ def send_to(
     use_checkpoint,
     saved_search,
     or_query,
-    use_ssl,
     certs,
     **kwargs
 ):
     """Send events to the given server address."""
-    server_logger = get_logger_for_server(
-        hostname, protocol, format, not use_ssl, certs
-    )
+    server_logger = get_logger_for_server(hostname, protocol, format, certs)
     cursor = _get_cursor(state, use_checkpoint)
     handlers = ext.create_send_to_handlers(
         state.sdk, FileEventExtractor, cursor, use_checkpoint, server_logger

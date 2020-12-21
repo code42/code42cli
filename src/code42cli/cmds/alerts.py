@@ -254,12 +254,11 @@ def send_to(
     advanced_query,
     use_checkpoint,
     or_query,
-    use_ssl,
     certs,
     **kwargs
 ):
     """Send alerts to the given server address."""
-    logger = get_logger_for_server(hostname, protocol, format, not use_ssl, certs)
+    logger = get_logger_for_server(hostname, protocol, format, certs)
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
     handlers = ext.create_send_to_handlers(
         cli_state.sdk, AlertExtractor, cursor, use_checkpoint, logger,

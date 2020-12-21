@@ -194,20 +194,12 @@ def server_options(f):
         default=ServerProtocol.UDP,
         help="Protocol used to send logs to server. Always TCP when --use-ssl is passed, "
         "otherwise Defaults to UDP.",
-        cls=incompatible_with("use_ssl"),
-    )
-    send_to_ssl_option = click.option(
-        "--use-ssl",
-        is_flag=True,
-        help="Use for SSL. Pass in certificates file, else uses ssl.CERT_NONE.",
-        cls=incompatible_with("protocol"),
     )
     certs_option = click.option(
-        "--certs", type=str, help="Use to pass in a CA certificates-chain file path."
+        "--certs", type=str, help="A CA certificates-chain file for the TLS protocol."
     )
     f = hostname_arg(f)
     f = protocol_option(f)
-    f = send_to_ssl_option(f)
     f = certs_option(f)
     return f
 

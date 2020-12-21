@@ -17,12 +17,11 @@ class NoPrioritySysLogHandlerWrapper:
         protocol: The protocol over which to submit syslog messages. Accepts TCP or UDP.
     """
 
-    def __init__(self, hostname, port, protocol, use_insecure, certs):
+    def __init__(self, hostname, port, protocol, certs):
         self.hostname = hostname
         self.port = port
         self.protocol = protocol
         self._handler = None
-        self._use_insecure = use_insecure
         self.certs = certs
 
     @property
@@ -33,7 +32,7 @@ class NoPrioritySysLogHandlerWrapper:
 
     def _create_handler(self):
         return NoPrioritySysLogHandler(
-            self.hostname, self.port, self.protocol, self._use_insecure, self.certs
+            self.hostname, self.port, self.protocol, self.certs
         )
 
 
@@ -48,14 +47,11 @@ class NoPrioritySysLogHandler(SysLogHandler):
         protocol: The protocol over which to submit syslog messages. Accepts TCP or UDP.
     """
 
-    def __init__(self, hostname, port, protocol, use_insecure, certs):
+    def __init__(self, hostname, port, protocol, certs):
         self.address = (hostname, port)
         logging.Handler.__init__(self)
-
-        # SSL required TCP
-        if not use_insecure:
-            protocol = ServerProtocol.TCP
-
+        use_insecure = protocol != ServerProtocol.TLS
+        protocol = ServerProtocol.TCP if not use_insecure else protocol
         sock_type = _get_socket_type_from_protocol(protocol.lower().strip())
         self.unixsocket = False
         if sock_type is None:
