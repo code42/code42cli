@@ -44,7 +44,7 @@ class NoPrioritySysLogHandler(SysLogHandler):
     Args:
         hostname: The hostname of the syslog server to send log messages to.
         port: The port of the syslog server to send log messages to.
-        protocol: The protocol over which to submit syslog messages. Accepts TCP or UDP.
+        protocol: The protocol over which to submit syslog messages. Accepts TCP, UDP, or TLS.
     """
 
     def __init__(self, hostname, port, protocol, certs):
