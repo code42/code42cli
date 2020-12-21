@@ -11,7 +11,7 @@ from code42cli.cmds.search.enums import FileEventsOutputFormat
 from code42cli.logger.formatters import FileEventDictToCEFFormatter
 from code42cli.logger.formatters import FileEventDictToJSONFormatter
 from code42cli.logger.formatters import FileEventDictToRawJSONFormatter
-from code42cli.logger.handlers import NoPrioritySysLogHandlerWrapper
+from code42cli.logger.handlers import NoPrioritySysLogHandler
 from code42cli.util import get_url_parts
 from code42cli.util import get_user_project_path
 
@@ -66,9 +66,7 @@ def get_logger_for_server(hostname, protocol, output_format, certs):
         port = url_parts[1] or 514
         if not logger_has_handlers(logger):
             try:
-                handler = NoPrioritySysLogHandlerWrapper(
-                    hostname, port, protocol, certs
-                ).handler
+                handler = NoPrioritySysLogHandler(hostname, port, protocol, certs)
             except Exception as e:
                 raise Exception(
                     "Unable to connect to {}. Failed with error: {}.".format(

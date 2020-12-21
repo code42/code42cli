@@ -14,22 +14,18 @@ from code42cli.logger import logger_has_handlers
 from code42cli.logger.formatters import FileEventDictToCEFFormatter
 from code42cli.logger.formatters import FileEventDictToJSONFormatter
 from code42cli.logger.formatters import FileEventDictToRawJSONFormatter
+from code42cli.logger.handlers import NoPrioritySysLogHandler
 from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import SendToFileEventsOutputFormat
 from code42cli.util import get_user_project_path
 
 
-@pytest.fixture
-def no_priority_syslog_handler(mocker):
-    mock = mocker.patch(
-        "code42cli.logger.handlers.NoPrioritySysLogHandlerWrapper.handler"
-    )
-
+@pytest.fixture(autouse=True)
+def fresh_syslog_handler():
     # Set handlers to empty list so it gets initialized each test
     get_logger_for_server(
-        "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, ""
+        "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None
     ).handlers = []
-    return mock
 
 
 def test_add_handler_to_logger_does_as_expected():
@@ -61,49 +57,42 @@ def test_get_view_exceptions_location_message_returns_expected_message():
     assert actual == expected
 
 
-def test_get_logger_for_server_has_info_level(no_priority_syslog_handler):
+def test_get_logger_for_server_has_info_level(fresh_syslog_handler):
     logger = get_logger_for_server(
         "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None
     )
     assert logger.level == logging.INFO
 
 
-def test_get_logger_for_server_when_given_cef_format_uses_cef_formatter(
-    no_priority_syslog_handler,
-):
-    get_logger_for_server(
+def test_get_logger_for_server_when_given_cef_format_uses_cef_formatter(mocker):
+    logger = get_logger_for_server(
         "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None
     )
-    assert (
-        type(no_priority_syslog_handler.setFormatter.call_args[0][0])
-        == FileEventDictToCEFFormatter
-    )
+    assert type(logger.handlers[0].formatter) == FileEventDictToCEFFormatter
 
 
 def test_get_logger_for_server_when_given_json_format_uses_json_formatter(
-    no_priority_syslog_handler,
+    fresh_syslog_handler,
 ):
-    get_logger_for_server(
+    logger = get_logger_for_server(
         "example.com", ServerProtocol.TCP, OutputFormat.JSON, None
-    ).handlers = []
-    get_logger_for_server("example.com", ServerProtocol.TCP, OutputFormat.JSON, None)
-    actual = type(no_priority_syslog_handler.setFormatter.call_args[0][0])
+    )
+    actual = type(logger.handlers[0].formatter)
     assert actual == FileEventDictToJSONFormatter
 
 
 def test_get_logger_for_server_when_given_raw_json_format_uses_raw_json_formatter(
-    no_priority_syslog_handler,
+    fresh_syslog_handler,
 ):
-    get_logger_for_server(
+    logger = get_logger_for_server(
         "example.com", ServerProtocol.TCP, OutputFormat.RAW, None
-    ).handlers = []
-    get_logger_for_server("example.com", ServerProtocol.TCP, OutputFormat.RAW, None)
-    actual = type(no_priority_syslog_handler.setFormatter.call_args[0][0])
+    )
+    actual = type(logger.handlers[0].formatter)
     assert actual == FileEventDictToRawJSONFormatter
 
 
 def test_get_logger_for_server_when_called_twice_only_has_one_handler(
-    no_priority_syslog_handler,
+    fresh_syslog_handler,
 ):
     get_logger_for_server("example.com", ServerProtocol.TCP, OutputFormat.JSON, None)
     logger = get_logger_for_server(
@@ -112,48 +101,44 @@ def test_get_logger_for_server_when_called_twice_only_has_one_handler(
     assert len(logger.handlers) == 1
 
 
-def test_get_logger_for_server_uses_no_priority_syslog_handler(
-    no_priority_syslog_handler,
-):
+def test_get_logger_for_server_uses_no_priority_syslog_handler(fresh_syslog_handler,):
     logger = get_logger_for_server(
         "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None
     )
-    assert logger.handlers[0] == no_priority_syslog_handler
+    assert type(logger.handlers[0]) == NoPrioritySysLogHandler
 
 
 def test_get_logger_for_server_constructs_handler_with_expected_args(
-    mocker, no_priority_syslog_handler, monkeypatch
+    mocker, fresh_syslog_handler, monkeypatch
 ):
-    no_priority_syslog_handler_wrapper = mocker.patch(
-        "code42cli.logger.handlers.NoPrioritySysLogHandlerWrapper.__init__"
+    no_priority_syslog_handler = mocker.patch(
+        "code42cli.logger.handlers.NoPrioritySysLogHandler.__init__"
     )
-    no_priority_syslog_handler_wrapper.return_value = None
+    no_priority_syslog_handler.return_value = None
     get_logger_for_server(
         "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, "cert"
     )
-    no_priority_syslog_handler_wrapper.assert_called_once_with(
+    no_priority_syslog_handler.assert_called_once_with(
         "example.com", 514, ServerProtocol.TCP, "cert"
     )
 
 
 def test_get_logger_for_server_when_hostname_includes_port_constructs_handler_with_expected_args(
-    mocker, no_priority_syslog_handler
+    mocker, fresh_syslog_handler
 ):
-    no_priority_syslog_handler_wrapper = mocker.patch(
-        "code42cli.logger.handlers.NoPrioritySysLogHandlerWrapper.__init__"
+    no_priority_syslog_handler = mocker.patch(
+        "code42cli.logger.handlers.NoPrioritySysLogHandler.__init__"
     )
-    no_priority_syslog_handler_wrapper.return_value = None
+    no_priority_syslog_handler.return_value = None
     get_logger_for_server(
         "example.com:999", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None
     )
-    no_priority_syslog_handler_wrapper.assert_called_once_with(
+    no_priority_syslog_handler.assert_called_once_with(
         "example.com", 999, ServerProtocol.TCP, None,
     )
 
 
 class TestCliLogger:
-    _logger = CliLogger()
-
     def test_init_creates_user_error_logger_with_expected_handlers(self):
         logger = CliLogger()
         handler_types = [type(h) for h in logger._logger.handlers]
@@ -162,7 +147,7 @@ class TestCliLogger:
     def test_log_error_logs_expected_text_at_expected_level(self, caplog):
         with caplog.at_level(logging.ERROR):
             ex = Exception("TEST")
-            self._logger.log_error(ex)
+            CliLogger().log_error(ex)
             assert str(ex) in caplog.text
 
     def test_log_verbose_error_logs_expected_text_at_expected_level(
@@ -171,6 +156,6 @@ class TestCliLogger:
         with caplog.at_level(logging.ERROR):
             request = mocker.MagicMock(sepc=Request)
             request.body = {"foo": "bar"}
-            self._logger.log_verbose_error("code42 dothing --flag YES", request)
+            CliLogger().log_verbose_error("code42 dothing --flag YES", request)
             assert "'code42 dothing --flag YES'" in caplog.text
             assert "Request parameters: {'foo': 'bar'}" in caplog.text

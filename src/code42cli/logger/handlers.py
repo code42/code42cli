@@ -6,36 +6,6 @@ from logging.handlers import SysLogHandler
 from code42cli.cmds.search.enums import ServerProtocol
 
 
-class NoPrioritySysLogHandlerWrapper:
-    """
-    Uses NoPrioritySysLogHandler but does not make the connection in the constructor. Instead,
-    it connects the first time you access the handler property. This makes testing against
-    a syslog handler easier.
-    Args:
-        hostname: The hostname of the syslog server to send log messages to.
-        port: The port of the syslog server to send log messages to.
-        protocol: The protocol over which to submit syslog messages. Accepts TCP, UDP, or TLS.
-    """
-
-    def __init__(self, hostname, port, protocol, certs):
-        self.hostname = hostname
-        self.port = port
-        self.protocol = protocol
-        self.certs = certs
-        self._handler = None
-
-    @property
-    def handler(self):
-        if not self._handler:
-            self._handler = self._create_handler()
-        return self._handler
-
-    def _create_handler(self):
-        return NoPrioritySysLogHandler(
-            self.hostname, self.port, self.protocol, self.certs
-        )
-
-
 class NoPrioritySysLogHandler(SysLogHandler):
     """
     Overrides the default implementation of SysLogHandler to not send a `<PRI>` at the
@@ -48,11 +18,22 @@ class NoPrioritySysLogHandler(SysLogHandler):
     """
 
     def __init__(self, hostname, port, protocol, certs):
+        self._hostname = hostname
+        self._port = port
+        self._certs = certs
         self.address = (hostname, port)
         logging.Handler.__init__(self)
-        use_insecure = protocol != ServerProtocol.TLS
+        self._use_insecure = protocol != ServerProtocol.TLS
         self.socktype = _try_get_socket_type_from_protocol(protocol)
-        self.socket = self._create_socket(hostname, port, use_insecure, certs)
+        self._socket = None
+
+    @property
+    def socket(self):
+        if self._socket is None:
+            self._socket = self._create_socket(
+                self._hostname, self._port, self._use_insecure, self._certs
+            )
+        return self._socket
 
     def _create_socket(self, hostname, port, use_insecure, certs):
         socket_info = self._get_socket_address_info(hostname, port)
