@@ -104,40 +104,32 @@ def _change_device_name(sdk, guid, name):
 def show(state, device_guid, format=None):
     """Print device info. Requires device GUID."""
     _DEVICE_INFO_KEYS_MAP = OrderedDict()
-    _DEVICE_INFO_KEYS_MAP["computerId"] = "Device ID"
     _DEVICE_INFO_KEYS_MAP["name"] = "Name"
     _DEVICE_INFO_KEYS_MAP["osHostname"] = "Hostname"
     _DEVICE_INFO_KEYS_MAP["guid"] = "GUID"
     _DEVICE_INFO_KEYS_MAP["status"] = "Status"
     _DEVICE_INFO_KEYS_MAP["lastConnected"] = "Last Connected Date"
-    _DEVICE_INFO_KEYS_MAP["lastBackup"] = "Last Backup Activity Date"
-    _DEVICE_INFO_KEYS_MAP["lastCompleted"] = "Last Completed Backup Date"
-    _DEVICE_INFO_KEYS_MAP["archiveBytes"] = "Archive Size in Bytes"
     _DEVICE_INFO_KEYS_MAP["productVersion"] = "Code42 Version"
     _DEVICE_INFO_KEYS_MAP["osName"] = "Operating System"
     _DEVICE_INFO_KEYS_MAP["osVersion"] = "Operating System Version"
+
+    _BACKUP_SET_KEYS_MAP = OrderedDict()
+    _BACKUP_SET_KEYS_MAP["targetComputerName"] = "Destination"
+    _BACKUP_SET_KEYS_MAP["lastBackup"] = "Last Backup Activity"
+    _BACKUP_SET_KEYS_MAP["lastCompleted"] = "Last Completed Backup"
+    _BACKUP_SET_KEYS_MAP["archiveBytes"] = "Archive Size in Bytes"
+    _BACKUP_SET_KEYS_MAP["archiveGuid"] = "Archive GUID"
+
     formatter = OutputFormatter(format, _DEVICE_INFO_KEYS_MAP)
+    backup_set_formatter = OutputFormatter(format, _BACKUP_SET_KEYS_MAP)
     device_info = _get_device_info(state.sdk, device_guid)
     formatter.echo_formatted_list([device_info])
+    click.echo()
+    backup_set_formatter.echo_formatted_list(device_info["backupUsage"])
 
 
 def _get_device_info(sdk, device_guid):
-    device = sdk.devices.get_by_guid(device_guid, include_backup_usage=True).data
-    if len(device["backupUsage"]) == 0:
-        device["archiveBytes"] = 0
-        device["lastBackup"] = None
-        device["lastCompletedBackup"] = None
-    else:
-        device["lastBackup"] = _get_key_from_list_of_dicts(
-            "lastBackup", device["backupUsage"]
-        )
-        device["lastCompletedBackup"] = _get_key_from_list_of_dicts(
-            "lastCompletedBackup", device["backupUsage"]
-        )
-        device["archiveBytes"] = _get_key_from_list_of_dicts(
-            "archiveBytes", device["backupUsage"]
-        )
-    return device
+    return sdk.devices.get_by_guid(device_guid, include_backup_usage=True).data
 
 
 def _get_key_from_list_of_dicts(key, list_of_dicts):

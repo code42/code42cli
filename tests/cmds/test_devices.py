@@ -432,15 +432,10 @@ def test_show_prints_device_info(runner, cli_state, backupusage_success):
     assert "6.7.1" in result.output
 
 
-def test_show_returns_empty_values_if_no_backupusage(
-    runner, cli_state, empty_backupusage_success
-):
-    result = runner.invoke(
-        cli, ["devices", "show", TEST_DEVICE_GUID, "-f", "json"], obj=cli_state,
-    )
-    assert '"lastBackup": null' in result.output
-    assert '"archiveBytes": 0' in result.output
-    assert '"lastCompletedBackup": null' in result.output
+def test_show_prints_backup_set_info(runner, cli_state, backupusage_success):
+    result = runner.invoke(cli, ["devices", "show", TEST_DEVICE_GUID], obj=cli_state)
+    assert "Code42 Cloud USA West" in result.output
+    assert "843293524842941560" in result.output
 
 
 def test_get_device_dataframe_returns_correct_columns(
@@ -461,14 +456,6 @@ def test_get_device_dataframe_returns_correct_columns(
     assert "modelInfo" not in result.columns
     assert "address" not in result.columns
     assert "buildVersion" not in result.columns
-
-
-def test_list_outputs_csv(runner, cli_state, get_all_devices_success):
-    result = runner.invoke(cli, ["devices", "list"], obj=cli_state)
-    assert (
-        "computerId,guid,name,osHostname,status,lastConnected,backupUsage,productVersion,osName,osVersion,userUid"
-        in result.output
-    )
 
 
 def test_drop_n_devices_per_user_drops_correct_devices():
