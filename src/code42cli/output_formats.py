@@ -76,7 +76,8 @@ class OutputFormatter:
     def _requires_list_output(self):
         return self.output_format in (OutputFormat.TABLE, OutputFormat.CSV)
 
-class DataFrameOutputFormatter():
+
+class DataFrameOutputFormatter:
     def __init__(self, output_format):
         output_format = output_format.upper() if output_format else OutputFormat.TABLE
         self.output_format = output_format
@@ -87,10 +88,10 @@ class DataFrameOutputFormatter():
             self._format_func = DataFrame.to_csv
         elif output_format == OutputFormat.RAW:
             self._format_func = DataFrame.to_json
-            self._output_args = {"orient":"records", "lines" : False}
+            self._output_args = {"orient": "records", "lines": False}
         elif output_format == OutputFormat.JSON:
             self._format_func = DataFrame.to_json
-            self._output_args = {"orient":"records", "lines" : True}
+            self._output_args = {"orient": "records", "lines": True}
 
     def _format_output(self, output, *args, **kwargs):
         self._output_args.update(kwargs)
@@ -98,7 +99,7 @@ class DataFrameOutputFormatter():
 
     def echo_formatted_dataframe(self, output, *args, **kwargs):
         click.echo_via_pager(self._format_output(output, *args, **kwargs))
-        
+
 
 def to_csv(output):
     """Output is a list of records"""

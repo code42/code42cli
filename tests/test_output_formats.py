@@ -1,8 +1,9 @@
 import json
 from collections import OrderedDict
 
-import code42cli.output_formats as output_formats_module
 from pandas import DataFrame
+
+import code42cli.output_formats as output_formats_module
 
 
 TEST_DATA = [
@@ -101,6 +102,7 @@ TEST_NESTED_DATA = {
     "id": "5157f1df-cb3e-4755-92a2-0f42c7841020",
 }
 
+
 def assert_csv_texts_are_equal(actual, expected):
     """Have to be careful when testing ordering because of 3.5"""
     actual = actual.replace("\r", ",")
@@ -191,6 +193,7 @@ class TestOutputFormatter:
             pass
         mock_to_table.assert_called_once_with("TEST", None)
 
+
 class TestDataFrameOutputFormatter:
     def test_init_sets_format_func_to_formatted_json_function_when_json_format_option_is_passed(
         self, mock_dataframe_to_json
@@ -198,7 +201,9 @@ class TestDataFrameOutputFormatter:
         output_format = output_formats_module.OutputFormat.RAW
         formatter = output_formats_module.DataFrameOutputFormatter(output_format)
         formatter.echo_formatted_dataframe(TEST_DATAFRAME)
-        mock_dataframe_to_json.assert_called_once_with(TEST_DATAFRAME, orient="records", lines=False)
+        mock_dataframe_to_json.assert_called_once_with(
+            TEST_DATAFRAME, orient="records", lines=False
+        )
 
     def test_init_sets_format_func_to_json_function_when_raw_json_format_option_is_passed(
         self, mock_dataframe_to_json
@@ -206,7 +211,9 @@ class TestDataFrameOutputFormatter:
         output_format = output_formats_module.OutputFormat.JSON
         formatter = output_formats_module.DataFrameOutputFormatter(output_format)
         formatter.echo_formatted_dataframe(TEST_DATAFRAME)
-        mock_dataframe_to_json.assert_called_once_with(TEST_DATAFRAME, orient="records", lines=True)
+        mock_dataframe_to_json.assert_called_once_with(
+            TEST_DATAFRAME, orient="records", lines=True
+        )
 
     def test_init_sets_format_func_to_table_function_when_table_format_option_is_passed(
         self, mock_dataframe_to_string
@@ -230,4 +237,3 @@ class TestDataFrameOutputFormatter:
         formatter = output_formats_module.DataFrameOutputFormatter(None)
         formatter.echo_formatted_dataframe(TEST_DATAFRAME)
         mock_dataframe_to_string.assert_called_once_with(TEST_DATAFRAME)
-
