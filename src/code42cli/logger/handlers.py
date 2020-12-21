@@ -71,14 +71,17 @@ class NoPrioritySysLogHandler(SysLogHandler):
 
     def emit(self, record):
         try:
-            msg = self.format(record) + "\n"
-            msg = msg.encode("utf-8")
-            if self.socktype == socket.SOCK_DGRAM:
-                self.socket.sendto(msg, self.address)
-            else:
-                self.socket.sendall(msg)
+            self._send_record(record)
         except Exception:
             self.handleError(record)
+
+    def _send_record(self, record):
+        msg = self.format(record) + "\n"
+        msg = msg.encode("utf-8")
+        if self.socktype == socket.SOCK_DGRAM:
+            self.socket.sendto(msg, self.address)
+        else:
+            self.socket.sendall(msg)
 
     def close(self):
         self.socket.close()
