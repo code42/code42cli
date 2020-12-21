@@ -14,7 +14,8 @@ from code42cli.logger import logger_has_handlers
 from code42cli.logger.formatters import FileEventDictToCEFFormatter
 from code42cli.logger.formatters import FileEventDictToJSONFormatter
 from code42cli.logger.formatters import FileEventDictToRawJSONFormatter
-from code42cli.output_formats import OutputFormat, SendToFileEventsOutputFormat
+from code42cli.output_formats import OutputFormat
+from code42cli.output_formats import SendToFileEventsOutputFormat
 from code42cli.util import get_user_project_path
 
 
@@ -25,7 +26,9 @@ def no_priority_syslog_handler(mocker):
     )
 
     # Set handlers to empty list so it gets initialized each test
-    get_logger_for_server("example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, "").handlers = []
+    get_logger_for_server(
+        "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, ""
+    ).handlers = []
     return mock
 
 
@@ -59,14 +62,18 @@ def test_get_view_exceptions_location_message_returns_expected_message():
 
 
 def test_get_logger_for_server_has_info_level(no_priority_syslog_handler):
-    logger = get_logger_for_server("example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None)
+    logger = get_logger_for_server(
+        "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None
+    )
     assert logger.level == logging.INFO
 
 
 def test_get_logger_for_server_when_given_cef_format_uses_cef_formatter(
     no_priority_syslog_handler,
 ):
-    get_logger_for_server("example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None)
+    get_logger_for_server(
+        "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None
+    )
     assert (
         type(no_priority_syslog_handler.setFormatter.call_args[0][0])
         == FileEventDictToCEFFormatter
@@ -76,7 +83,9 @@ def test_get_logger_for_server_when_given_cef_format_uses_cef_formatter(
 def test_get_logger_for_server_when_given_json_format_uses_json_formatter(
     no_priority_syslog_handler,
 ):
-    get_logger_for_server("example.com", ServerProtocol.TCP, OutputFormat.JSON, None).handlers = []
+    get_logger_for_server(
+        "example.com", ServerProtocol.TCP, OutputFormat.JSON, None
+    ).handlers = []
     get_logger_for_server("example.com", ServerProtocol.TCP, OutputFormat.JSON, None)
     actual = type(no_priority_syslog_handler.setFormatter.call_args[0][0])
     assert actual == FileEventDictToJSONFormatter
@@ -85,7 +94,9 @@ def test_get_logger_for_server_when_given_json_format_uses_json_formatter(
 def test_get_logger_for_server_when_given_raw_json_format_uses_raw_json_formatter(
     no_priority_syslog_handler,
 ):
-    get_logger_for_server("example.com", ServerProtocol.TCP, OutputFormat.RAW, None).handlers = []
+    get_logger_for_server(
+        "example.com", ServerProtocol.TCP, OutputFormat.RAW, None
+    ).handlers = []
     get_logger_for_server("example.com", ServerProtocol.TCP, OutputFormat.RAW, None)
     actual = type(no_priority_syslog_handler.setFormatter.call_args[0][0])
     assert actual == FileEventDictToRawJSONFormatter
@@ -95,14 +106,18 @@ def test_get_logger_for_server_when_called_twice_only_has_one_handler(
     no_priority_syslog_handler,
 ):
     get_logger_for_server("example.com", ServerProtocol.TCP, OutputFormat.JSON, None)
-    logger = get_logger_for_server("example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None)
+    logger = get_logger_for_server(
+        "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None
+    )
     assert len(logger.handlers) == 1
 
 
 def test_get_logger_for_server_uses_no_priority_syslog_handler(
     no_priority_syslog_handler,
 ):
-    logger = get_logger_for_server("example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None)
+    logger = get_logger_for_server(
+        "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None
+    )
     assert logger.handlers[0] == no_priority_syslog_handler
 
 
@@ -113,7 +128,9 @@ def test_get_logger_for_server_constructs_handler_with_expected_args(
         "code42cli.logger.handlers.NoPrioritySysLogHandlerWrapper.__init__"
     )
     no_priority_syslog_handler_wrapper.return_value = None
-    get_logger_for_server("example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, "cert")
+    get_logger_for_server(
+        "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, "cert"
+    )
     no_priority_syslog_handler_wrapper.assert_called_once_with(
         "example.com", 514, ServerProtocol.TCP, "cert"
     )
@@ -126,7 +143,9 @@ def test_get_logger_for_server_when_hostname_includes_port_constructs_handler_wi
         "code42cli.logger.handlers.NoPrioritySysLogHandlerWrapper.__init__"
     )
     no_priority_syslog_handler_wrapper.return_value = None
-    get_logger_for_server("example.com:999", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None)
+    get_logger_for_server(
+        "example.com:999", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None
+    )
     no_priority_syslog_handler_wrapper.assert_called_once_with(
         "example.com", 999, ServerProtocol.TCP, None,
     )

@@ -15,7 +15,8 @@ from code42cli.options import begin_option
 from code42cli.options import end_option
 from code42cli.options import format_option
 from code42cli.options import sdk_options
-from code42cli.output_formats import OutputFormatter, OutputFormat
+from code42cli.output_formats import OutputFormat
+from code42cli.output_formats import OutputFormatter
 from code42cli.util import hash_event
 from code42cli.util import warn_interrupt
 

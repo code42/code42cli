@@ -154,7 +154,6 @@ def search_interval_options(f, search_term):
 
 
 def create_search_options(search_term):
-
     advanced_query_option = click.option(
         "--advanced-query",
         help="A raw JSON {} query. "
@@ -176,7 +175,6 @@ def create_search_options(search_term):
     )
 
     def search_options(f):
-
         f = search_interval_options(f, search_term)
         f = checkpoint_option(f)
         f = advanced_query_option(f)
@@ -192,8 +190,8 @@ def server_options(f):
         "--protocol",
         type=click.Choice(ServerProtocol(), case_sensitive=False),
         default=ServerProtocol.UDP,
-        help="Protocol used to send logs to server. Always TCP when --use-ssl is passed, "
-        "otherwise Defaults to UDP.",
+        help="Protocol used to send logs to server. "
+        "Use TLS for additional security. Defaults to UDP.",
     )
     certs_option = click.option(
         "--certs", type=str, help="A CA certificates-chain file for the TLS protocol."
@@ -208,6 +206,6 @@ send_to_format_options = click.option(
     "-f",
     "--format",
     type=click.Choice(SendToFileEventsOutputFormat(), case_sensitive=False),
-    help="The output format of the result. Defaults to json format.",
+    help="The output format of the result. Defaults to JSON format.",
     default=SendToFileEventsOutputFormat.RAW,
 )
