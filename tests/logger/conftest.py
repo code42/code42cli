@@ -15,8 +15,6 @@ AED_CLOUD_ACTIVITY_EVENT_DICT = json.loads(
     "windowTitle": "TEST_WINDOW_TITLE"
     }"""
 )
-
-
 AED_REMOVABLE_MEDIA_EVENT_DICT = json.loads(
     """{
     "removableMediaVendor": "TEST_VENDOR_NAME",
@@ -26,15 +24,12 @@ AED_REMOVABLE_MEDIA_EVENT_DICT = json.loads(
     "removableMediaBusType": "TEST_BUS_TYPE"
     }"""
 )
-
 AED_EMAIL_EVENT_DICT = json.loads(
     """{
     "emailSender": "TEST_EMAIL_SENDER",
     "emailRecipients": ["test.recipient1@example.com", "test.recipient2@example.com"]
     }"""
 )
-
-
 AED_EVENT_DICT = json.loads(
     """{
     "eventId": "0_1d71796f-af5b-4231-9d8e-df6434da4663_912339407325443353_918253081700247636_16",
