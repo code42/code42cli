@@ -38,38 +38,9 @@ class NoPrioritySysLogHandlerWrapper:
 
 def _create_socket(hostname, port, sock_type, use_insecure, certs):
     socket_info = _get_socket_address_info(hostname, port, sock_type)
-    err = sock = None
-    for info in socket_info:
-        af, sock_type, proto, _, sa = info
-        try:
-            sock = _create_socket_from_info(
-                af, sock_type, proto, use_insecure, certs, sa
-            )
-            break
-        except OSError as exc:
-            # reassign for validation outside except block
-            err = exc
-            if sock is not None:
-                sock.close()
+    err, sock = _create_socket_from_address_info_list(socket_info, use_insecure, certs)
     if err is not None:
         raise err
-    return sock
-
-
-def _wrap_socket_for_ssl(sock, certs):
-    certs = certs or None
-    cert_reqs = ssl.CERT_REQUIRED if certs else ssl.CERT_NONE
-    return ssl.wrap_socket(sock, ca_certs=certs, cert_reqs=cert_reqs)
-
-
-def _create_socket_from_info(af, sock_type, proto, use_insecure, certs, sa):
-    sock = socket.socket(af, sock_type, proto)
-    # SSL setup
-    if not use_insecure:
-        sock = _wrap_socket_for_ssl(sock, certs)
-
-    if sock_type == socket.SOCK_STREAM:
-        sock.connect(sa)
     return sock
 
 
@@ -78,6 +49,50 @@ def _get_socket_address_info(hostname, port, sock_type):
     if not info:
         raise OSError("getaddrinfo() returns an empty list")
     return info
+
+
+def _create_socket_from_address_info_list(socket_info, use_insecure, certs):
+    err = sock = None
+    for info in socket_info:
+        af, sock_type, proto, _, sa = info
+        err, sock = _try_create_socket_from_address_info(
+            info, use_insecure, certs, sock
+        )
+        if err:
+            break
+    return err, sock
+
+
+def _try_create_socket_from_address_info(info, use_insecure, certs, sock):
+    af, sock_type, proto, _, sa = info
+    err = None
+    try:
+        sock = _create_socket_from_uncoupled_address_info(
+            af, sock_type, proto, use_insecure, certs, sa
+        )
+    except OSError as exc:
+        # reassign for returning outside except block
+        err = exc
+        if sock is not None:
+            sock.close()
+    return err, sock
+
+
+def _create_socket_from_uncoupled_address_info(
+    af, sock_type, proto, use_insecure, certs, sa
+):
+    sock = socket.socket(af, sock_type, proto)
+    if not use_insecure:
+        sock = _wrap_socket_for_ssl(sock, certs)
+    if sock_type == socket.SOCK_STREAM:
+        sock.connect(sa)
+    return sock
+
+
+def _wrap_socket_for_ssl(sock, certs):
+    certs = certs or None
+    cert_reqs = ssl.CERT_REQUIRED if certs else ssl.CERT_NONE
+    return ssl.wrap_socket(sock, ca_certs=certs, cert_reqs=cert_reqs)
 
 
 def _get_socket_type(protocol):
