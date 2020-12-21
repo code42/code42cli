@@ -24,20 +24,26 @@ from code42cli.options import sdk_options
 from code42cli.output_formats import FileEventsOutputFormatter
 from code42cli.output_formats import OutputFormatter
 
-_HEADER_KEYS_MAP = OrderedDict()
-_HEADER_KEYS_MAP["name"] = "Name"
-_HEADER_KEYS_MAP["id"] = "Id"
 
-SEARCH_DEFAULT_HEADER = OrderedDict()
-SEARCH_DEFAULT_HEADER["fileName"] = "FileName"
-SEARCH_DEFAULT_HEADER["filePath"] = "FilePath"
-SEARCH_DEFAULT_HEADER["eventType"] = "Type"
-SEARCH_DEFAULT_HEADER["eventTimestamp"] = "EventTimestamp"
-SEARCH_DEFAULT_HEADER["fileCategory"] = "FileCategory"
-SEARCH_DEFAULT_HEADER["fileSize"] = "FileSize"
-SEARCH_DEFAULT_HEADER["fileOwner"] = "FileOwner"
-SEARCH_DEFAULT_HEADER["md5Checksum"] = "MD5Checksum"
-SEARCH_DEFAULT_HEADER["sha256Checksum"] = "SHA256Checksum"
+def _create_header_keys_map():
+    header_map = OrderedDict()
+    header_map["name"] = "Name"
+    header_map["id"] = "Id"
+    return header_map
+
+
+def _create_search_header_map():
+    search_default_header = OrderedDict()
+    search_default_header["fileName"] = "FileName"
+    search_default_header["filePath"] = "FilePath"
+    search_default_header["eventType"] = "Type"
+    search_default_header["eventTimestamp"] = "EventTimestamp"
+    search_default_header["fileCategory"] = "FileCategory"
+    search_default_header["fileSize"] = "FileSize"
+    search_default_header["fileOwner"] = "FileOwner"
+    search_default_header["md5Checksum"] = "MD5Checksum"
+    search_default_header["sha256Checksum"] = "SHA256Checksum"
+    return search_default_header
 
 
 file_events_format_option = click.option(
@@ -219,7 +225,7 @@ def search(
 ):
     """Search for file events."""
     output_header = ext.try_get_default_header(
-        include_all, SEARCH_DEFAULT_HEADER, format
+        include_all, _create_search_header_map(), format
     )
     formatter = FileEventsOutputFormatter(format, output_header)
     cursor = _get_cursor(state, use_checkpoint)
@@ -248,7 +254,7 @@ def saved_search(state):
 @sdk_options()
 def _list(state, format=None):
     """List available saved searches."""
-    formatter = OutputFormatter(format, _HEADER_KEYS_MAP)
+    formatter = OutputFormatter(format, _create_header_keys_map())
     response = state.sdk.securitydata.savedsearches.get()
     saved_searches = response["searches"]
     if saved_searches:
