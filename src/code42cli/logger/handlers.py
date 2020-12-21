@@ -36,6 +36,57 @@ class NoPrioritySysLogHandlerWrapper:
         )
 
 
+def _create_socket(hostname, port, sock_type, use_insecure, certs):
+    socket_info = _get_socket_address_info(hostname, port, sock_type)
+    err = sock = None
+    for info in socket_info:
+        af, sock_type, proto, _, sa = info
+        try:
+            sock = _create_socket_from_info(
+                af, sock_type, proto, use_insecure, certs, sa
+            )
+            break
+        except OSError as exc:
+            # reassign for validation outside except block
+            err = exc
+            if sock is not None:
+                sock.close()
+    if err is not None:
+        raise err
+    return sock
+
+
+def _wrap_socket_for_ssl(sock, certs):
+    certs = certs or None
+    cert_reqs = ssl.CERT_REQUIRED if certs else ssl.CERT_NONE
+    return ssl.wrap_socket(sock, ca_certs=certs, cert_reqs=cert_reqs)
+
+
+def _create_socket_from_info(af, sock_type, proto, use_insecure, certs, sa):
+    sock = socket.socket(af, sock_type, proto)
+    # SSL setup
+    if not use_insecure:
+        sock = _wrap_socket_for_ssl(sock, certs)
+
+    if sock_type == socket.SOCK_STREAM:
+        sock.connect(sa)
+    return sock
+
+
+def _get_socket_address_info(hostname, port, sock_type):
+    info = socket.getaddrinfo(hostname, port, 0, sock_type)
+    if not info:
+        raise OSError("getaddrinfo() returns an empty list")
+    return info
+
+
+def _get_socket_type(protocol):
+    sock_type = _get_socket_type_from_protocol(protocol.lower().strip())
+    if sock_type is None:
+        sock_type = socket.SOCK_DGRAM
+    return sock_type
+
+
 class NoPrioritySysLogHandler(SysLogHandler):
     """
     Overrides the default implementation of SysLogHandler to not send a <PRI> at the
@@ -52,39 +103,8 @@ class NoPrioritySysLogHandler(SysLogHandler):
         logging.Handler.__init__(self)
         use_insecure = protocol != ServerProtocol.TLS
         protocol = ServerProtocol.TCP if not use_insecure else protocol
-        sock_type = _get_socket_type_from_protocol(protocol.lower().strip())
-        self.unixsocket = False
-        if sock_type is None:
-            sock_type = socket.SOCK_DGRAM
-        ress = socket.getaddrinfo(hostname, port, 0, sock_type)
-        if not ress:
-            raise OSError("getaddrinfo returns an empty list")
-        err = None
-        sock = None
-        for res in ress:
-            af, sock_type, proto, _, sa = res
-            err = sock = None
-            try:
-                sock = socket.socket(af, sock_type, proto)
-                # SSL setup
-                if not use_insecure:
-                    if certs:
-                        sock = ssl.wrap_socket(
-                            sock, ca_certs=certs, cert_reqs=ssl.CERT_REQUIRED
-                        )
-                    else:
-                        sock = ssl.wrap_socket(sock, cert_reqs=ssl.CERT_NONE)
-
-                if sock_type == socket.SOCK_STREAM:
-                    sock.connect(sa)
-                break
-            except OSError as exc:
-                err = exc
-                if sock is not None:
-                    sock.close()
-        if err is not None:
-            raise err
-        self.socket = sock
+        sock_type = _get_socket_type(protocol)
+        self.socket = _create_socket(hostname, port, sock_type, use_insecure, certs)
         self.socktype = sock_type
 
     def emit(self, record):
