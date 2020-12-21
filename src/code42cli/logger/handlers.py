@@ -73,14 +73,7 @@ class NoPrioritySysLogHandler(SysLogHandler):
         try:
             msg = self.format(record) + "\n"
             msg = msg.encode("utf-8")
-            if self.unixsocket:
-                try:
-                    self.socket.send(msg)
-                except OSError:
-                    self.socket.close()
-                    self._connect_unixsocket(self.address)
-                    self.socket.send(msg)
-            elif self.socktype == socket.SOCK_DGRAM:
+            if self.socktype == socket.SOCK_DGRAM:
                 self.socket.sendto(msg, self.address)
             else:
                 self.socket.sendall(msg)
@@ -90,30 +83,6 @@ class NoPrioritySysLogHandler(SysLogHandler):
     def close(self):
         self.socket.close()
         logging.Handler.close(self)
-
-    def _connect_unixsocket(self, address):
-        use_socktype = self.socktype
-        if use_socktype is None:
-            use_socktype = socket.SOCK_DGRAM
-        self.socket = socket.socket(socket.AF_UNIX, use_socktype)
-        try:
-            self.socket.connect(address)
-            # it worked, so set self.socktype to the used type
-            self.socktype = use_socktype
-        except OSError:
-            self.socket.close()
-            if self.socktype is not None:
-                # user didn't specify falling back, so fail
-                raise
-            use_socktype = socket.SOCK_STREAM
-            self.socket = socket.socket(socket.AF_UNIX, use_socktype)
-            try:
-                self.socket.connect(address)
-                # it worked, so set self.socktype to the used type
-                self.socktype = use_socktype
-            except OSError:
-                self.socket.close()
-                raise
 
 
 def _create_socket_from_address_info_list(socket_info, use_insecure, certs):
