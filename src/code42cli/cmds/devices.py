@@ -33,7 +33,7 @@ change_device_name_option = click.option(
     required=False,
     is_flag=True,
     default=False,
-    help="""Include to prepend "deactivated_" and today's date to the name of any
+    help="""Prepend "deactivated_" and today's date to the name of any
     deactivated devices.""",
 )
 
@@ -143,7 +143,7 @@ def _get_key_from_list_of_dicts(key, list_of_dicts):
     type=bool,
     is_flag=True,
     default=None,
-    help="Include to get only active or deactivated devices. Defaults to getting all devices.",
+    help="Get only active or deactivated devices. Defaults to getting all devices.",
 )
 @click.option(
     "--days-since-last-connected",
@@ -156,7 +156,7 @@ def _get_key_from_list_of_dicts(key, list_of_dicts):
     required=False,
     type=str,
     default=None,
-    help="""Optionally provide to limit devices to only the ones in the org you specify.
+    help="""Limit devices to only the ones in the org you specify.
     Note that child orgs will be included.""",
 )
 @click.option(
@@ -173,7 +173,7 @@ def _get_key_from_list_of_dicts(key, list_of_dicts):
     type=bool,
     default=False,
     is_flag=True,
-    help="""Include to return backup usage information for each device
+    help="""Return backup usage information for each device
     (may significantly lengthen the size of the return).""",
 )
 @click.option(
@@ -182,7 +182,7 @@ def _get_key_from_list_of_dicts(key, list_of_dicts):
     type=bool,
     default=False,
     is_flag=True,
-    help="Include to add the username associated with a device to the output.",
+    help="Add the username associated with a device to the output.",
 )
 @click.option(
     "--include-settings",
@@ -190,7 +190,7 @@ def _get_key_from_list_of_dicts(key, list_of_dicts):
     type=bool,
     default=False,
     is_flag=True,
-    help="Include to include device settings in output.",
+    help="Include device settings in output.",
 )
 @format_option
 @sdk_options()
