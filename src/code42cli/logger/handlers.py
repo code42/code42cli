@@ -38,8 +38,8 @@ class NoPrioritySysLogHandlerWrapper:
 
 class NoPrioritySysLogHandler(SysLogHandler):
     """
-    Overrides the default implementation of SysLogHandler to not send a <PRI> at the
-    beginning of the message. Most CEF consumers seem to not expect the <PRI> to be
+    Overrides the default implementation of SysLogHandler to not send a `<PRI>` at the
+    beginning of the message. Most CEF consumers seem to not expect the `<PRI>` to be
     present in CEF messages. Attach to a logger via `.addHandler` to use.
     Args:
         hostname: The hostname of the syslog server to send log messages to.
