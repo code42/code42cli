@@ -11,6 +11,10 @@ class NoPrioritySysLogHandler(SysLogHandler):
     Overrides the default implementation of SysLogHandler to not send a `<PRI>` at the
     beginning of the message. Most CEF consumers seem to not expect the `<PRI>` to be
     present in CEF messages. Attach to a logger via `.addHandler` to use.
+
+    `self.socket` is lazily loaded for testing purposes, so the connection does not get
+    made for TCP/TLS until the first log record is about to be transmitted.
+
     Args:
         hostname: The hostname of the syslog server to send log messages to.
         port: The port of the syslog server to send log messages to.
@@ -37,11 +41,7 @@ class NoPrioritySysLogHandler(SysLogHandler):
 
     def _create_socket(self, hostname, port, use_insecure, certs):
         socket_info = self._get_socket_address_info(hostname, port)
-        err, sock = _create_socket_from_address_info_list(
-            socket_info, use_insecure, certs
-        )
-        if err is not None:
-            raise err
+        sock = _try_create_socket_from_address_info(socket_info[0], use_insecure, certs)
         return sock
 
     def _get_socket_address_info(self, hostname, port):
@@ -57,7 +57,8 @@ class NoPrioritySysLogHandler(SysLogHandler):
             self.handleError(record)
 
     def _send_record(self, record):
-        msg = self.format(record) + "\n"
+        formatted_record = self.format(record)
+        msg = formatted_record + "\n"
         msg = msg.encode("utf-8")
         if self.socktype == socket.SOCK_DGRAM:
             self.socket.sendto(msg, self.address)
@@ -69,34 +70,24 @@ class NoPrioritySysLogHandler(SysLogHandler):
         logging.Handler.close(self)
 
 
-def _create_socket_from_address_info_list(socket_info, use_insecure, certs):
-    err = sock = None
-    for info in socket_info:
-        err, sock = _try_create_socket_from_address_info(info, use_insecure, certs)
-        if err:
-            break
-    return err, sock
-
-
 def _try_create_socket_from_address_info(info, use_insecure, certs):
-    af, sock_type, proto, _, sa = info
-    err = sock = None
+    address_family, sock_type, proto, _, sa = info
+    sock = None
     try:
         sock = _create_socket_from_uncoupled_address_info(
-            af, sock_type, proto, use_insecure, certs, sa
+            address_family, sock_type, proto, use_insecure, certs, sa
         )
     except OSError as exc:
-        # reassign for returning outside except block
-        err = exc
         if sock is not None:
             sock.close()
-    return err, sock
+        raise exc
+    return sock
 
 
 def _create_socket_from_uncoupled_address_info(
-    af, sock_type, proto, use_insecure, certs, sa
+    address_family, sock_type, proto, use_insecure, certs, sa
 ):
-    sock = socket.socket(af, sock_type, proto)
+    sock = socket.socket(address_family, sock_type, proto)
     if not use_insecure:
         sock = _wrap_socket_for_ssl(sock, certs)
     if sock_type == socket.SOCK_STREAM:

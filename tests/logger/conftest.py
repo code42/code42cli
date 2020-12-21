@@ -90,29 +90,30 @@ AED_EVENT_DICT = json.loads(
 )
 
 
-@pytest.fixture
-def mock_file_event_log_record(mocker):
-    record = mocker.MagicMock(spec=logging.LogRecord)
-    record.msg = AED_EVENT_DICT
-    return record
+@pytest.fixture()
+def mock_log_record(mocker):
+    return mocker.MagicMock(spec=logging.LogRecord)
 
 
 @pytest.fixture
-def mock_file_event_removable_media_event_log_record(mocker):
-    record = mocker.MagicMock(spec=logging.LogRecord)
-    record.msg = AED_REMOVABLE_MEDIA_EVENT_DICT
-    return record
+def mock_file_event_log_record(mock_log_record):
+    mock_log_record.msg = AED_EVENT_DICT
+    return mock_log_record
 
 
 @pytest.fixture
-def mock_file_event_cloud_activity_event_log_record(mocker):
-    record = mocker.MagicMock(spec=logging.LogRecord)
-    record.msg = AED_CLOUD_ACTIVITY_EVENT_DICT
-    return record
+def mock_file_event_removable_media_event_log_record(mock_log_record):
+    mock_log_record.msg = AED_REMOVABLE_MEDIA_EVENT_DICT
+    return mock_log_record
 
 
 @pytest.fixture
-def mock_file_event_email_event_log_record(mocker):
-    record = mocker.MagicMock(spec=logging.LogRecord)
-    record.msg = AED_EMAIL_EVENT_DICT
-    return record
+def mock_file_event_cloud_activity_event_log_record(mock_log_record):
+    mock_log_record.msg = AED_CLOUD_ACTIVITY_EVENT_DICT
+    return mock_log_record
+
+
+@pytest.fixture
+def mock_file_event_email_event_log_record(mock_log_record):
+    mock_log_record.msg = AED_EMAIL_EVENT_DICT
+    return mock_log_record
