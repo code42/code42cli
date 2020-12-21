@@ -119,17 +119,15 @@ def _get_socket_address_info(hostname, port, sock_type):
 def _create_socket_from_address_info_list(socket_info, use_insecure, certs):
     err = sock = None
     for info in socket_info:
-        err, sock = _try_create_socket_from_address_info(
-            info, use_insecure, certs, sock
-        )
+        err, sock = _try_create_socket_from_address_info(info, use_insecure, certs)
         if err:
             break
     return err, sock
 
 
-def _try_create_socket_from_address_info(info, use_insecure, certs, sock):
+def _try_create_socket_from_address_info(info, use_insecure, certs):
     af, sock_type, proto, _, sa = info
-    err = None
+    err = sock = None
     try:
         sock = _create_socket_from_uncoupled_address_info(
             af, sock_type, proto, use_insecure, certs, sa
