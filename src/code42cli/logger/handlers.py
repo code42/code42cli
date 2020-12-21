@@ -53,7 +53,6 @@ class NoPrioritySysLogHandler(SysLogHandler):
         use_insecure = protocol != ServerProtocol.TLS
         self.socktype = sock_type = _try_get_socket_type_from_protocol(protocol)
         self.socket = _create_socket(hostname, port, sock_type, use_insecure, certs)
-  
 
     def emit(self, record):
         try:
