@@ -47,14 +47,14 @@ def handleError(record):
         raise ClickException("Network connection broken while sending results.")
 
 
-def get_logger_for_server(hostname, protocol, output_format, ca_certs):
+def get_logger_for_server(hostname, protocol, output_format, certs):
     """Gets the logger that sends logs to a server for the given format.
 
     Args:
         hostname: The hostname of the server. It may include the port.
         protocol: The transfer protocol for sending logs.
         output_format: CEF, JSON, or RAW_JSON. Each type results in a different logger instance.
-        ca_certs: Use for passing SSL certificates.
+        certs: Use for passing SSL/TLS certificates when connecting to the server.
     """
     logger = logging.getLogger("code42_syslog_{}".format(output_format.lower()))
     if logger_has_handlers(logger):
@@ -67,7 +67,7 @@ def get_logger_for_server(hostname, protocol, output_format, ca_certs):
         if not logger_has_handlers(logger):
             try:
                 handler = NoPrioritySysLogHandlerWrapper(
-                    hostname, port, protocol, ca_certs
+                    hostname, port, protocol, certs
                 ).handler
             except Exception as e:
                 raise Exception(
