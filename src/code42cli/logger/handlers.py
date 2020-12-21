@@ -56,7 +56,9 @@ class NoPrioritySysLogHandler(SysLogHandler):
 
     def _create_socket(self, hostname, port, use_insecure, certs):
         socket_info = self._get_socket_address_info(hostname, port)
-        err, sock = _create_socket_from_address_info_list(socket_info, use_insecure, certs)
+        err, sock = _create_socket_from_address_info_list(
+            socket_info, use_insecure, certs
+        )
         if err is not None:
             raise err
         return sock
