@@ -16,4 +16,4 @@ class ServerProtocol:
     TLS = "TLS"
 
     def __iter__(self):
-        return iter([self.TCP, self.UDP])
+        return iter([self.TCP, self.UDP, self.TLS])
