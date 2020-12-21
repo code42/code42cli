@@ -133,7 +133,6 @@ def test_get_logger_for_server_when_hostname_includes_port_constructs_handler_wi
 
 
 class TestCliLogger:
-
     _logger = CliLogger()
 
     def test_init_creates_user_error_logger_with_expected_handlers(self):
