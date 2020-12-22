@@ -5,6 +5,7 @@ import pytest
 from c42eventextractor.extractors import AlertExtractor
 from tests.cmds.conftest import filter_term_is_in_call_args
 from tests.cmds.conftest import get_filter_value_from_json
+from tests.cmds.conftest import get_mark_for_search_and_send_to
 from tests.conftest import get_test_date_str
 
 from code42cli import PRODUCT_NAME
@@ -16,10 +17,7 @@ from code42cli.main import cli
 BEGIN_TIMESTAMP = 1577858400.0
 END_TIMESTAMP = 1580450400.0
 CURSOR_TIMESTAMP = 1579500000.0
-
-
 ALERT_SUMMARY_LIST = [{"id": i} for i in range(20)]
-
 ALERT_DETAIL_RESULT = [
     {
         "alerts": [
@@ -82,7 +80,6 @@ ALERT_DETAIL_RESULT = [
         ]
     },
 ]
-
 SORTED_ALERT_DETAILS = [
     {"id": 12, "createdAt": "2020-01-20"},
     {"id": 2, "createdAt": "2020-01-19"},
@@ -105,7 +102,6 @@ SORTED_ALERT_DETAILS = [
     {"id": 13, "createdAt": "2020-01-02"},
     {"id": 3, "createdAt": "2020-01-01"},
 ]
-
 ADVANCED_QUERY_VALUES = {
     "state_1": "OPEN",
     "state_2": "PENDING",
@@ -184,6 +180,27 @@ ADVANCED_QUERY_JSON = """
 }}""".format(
     **ADVANCED_QUERY_VALUES
 )
+advanced_query_incompat_test_params = pytest.mark.parametrize(
+    "arg",
+    [
+        ("--begin", "1d"),
+        ("--end", "1d"),
+        ("--severity", "HIGH"),
+        ("--actor", "test"),
+        ("--actor-contains", "test"),
+        ("--exclude-actor", "test"),
+        ("--exclude-actor-contains", "test"),
+        ("--rule-name", "test"),
+        ("--exclude-rule-name", "test"),
+        ("--rule-id", "test"),
+        ("--exclude-rule-id", "test"),
+        ("--rule-type", "FedEndpointExfiltration"),
+        ("--exclude-rule-type", "FedEndpointExfiltration"),
+        ("--description", "test"),
+        ("--state", "OPEN"),
+    ],
+)
+search_and_send_to_test = get_mark_for_search_and_send_to("alerts")
 
 
 @pytest.fixture
@@ -227,13 +244,12 @@ def alert_extract_func(mocker):
     return mocker.patch("{}.cmds.alerts._extract".format(PRODUCT_NAME))
 
 
-def test_search_when_advanced_query_passed_as_json_string_builds_expected_query(
-    cli_state, alert_extractor, runner
+@search_and_send_to_test
+def test_search_and_send_to_when_advanced_query_passed_as_json_string_builds_expected_query(
+    cli_state, alert_extractor, runner, command
 ):
     runner.invoke(
-        cli,
-        ["alerts", "search", "--advanced-query", ADVANCED_QUERY_JSON],
-        obj=cli_state,
+        cli, [*command, "--advanced-query", ADVANCED_QUERY_JSON], obj=cli_state,
     )
     passed_filter_groups = alert_extractor.extract.call_args[0]
     expected_actor_filter = f.Actor.contains(ADVANCED_QUERY_VALUES["actor"])
@@ -257,35 +273,17 @@ def test_search_when_advanced_query_passed_as_json_string_builds_expected_query(
     assert expected_rule_id_filter in passed_filter_groups
 
 
-def test_search_without_advanced_query_uses_only_the_extract_method(
-    cli_state, alert_extractor, runner
+@search_and_send_to_test
+def test_search_and_send_to_without_advanced_query_uses_only_the_extract_method(
+    cli_state, alert_extractor, runner, command
 ):
 
-    runner.invoke(cli, ["alerts", "search", "--begin", "1d"], obj=cli_state)
+    runner.invoke(cli, [*command, "--begin", "1d"], obj=cli_state)
     assert alert_extractor.extract.call_count == 1
     assert alert_extractor.extract_advanced.call_count == 0
 
 
-@pytest.mark.parametrize(
-    "arg",
-    [
-        ("--begin", "1d"),
-        ("--end", "1d"),
-        ("--severity", "HIGH"),
-        ("--actor", "test"),
-        ("--actor-contains", "test"),
-        ("--exclude-actor", "test"),
-        ("--exclude-actor-contains", "test"),
-        ("--rule-name", "test"),
-        ("--exclude-rule-name", "test"),
-        ("--rule-id", "test"),
-        ("--exclude-rule-id", "test"),
-        ("--rule-type", "FedEndpointExfiltration"),
-        ("--exclude-rule-type", "FedEndpointExfiltration"),
-        ("--description", "test"),
-        ("--state", "OPEN"),
-    ],
-)
+@advanced_query_incompat_test_params
 def test_search_with_advanced_query_and_incompatible_argument_errors(
     arg, cli_state, runner
 ):
@@ -299,16 +297,29 @@ def test_search_with_advanced_query_and_incompatible_argument_errors(
     assert "{} can't be used with: --advanced-query".format(arg[0]) in result.output
 
 
-def test_search_when_given_begin_and_end_dates_uses_expected_query(
-    cli_state, alert_extractor, runner
+@advanced_query_incompat_test_params
+def test_send_to_with_advanced_query_and_incompatible_argument_errors(
+    arg, cli_state, runner
+):
+
+    result = runner.invoke(
+        cli,
+        ["alerts", "send-to", "0.0.0.0", "--advanced-query", ADVANCED_QUERY_JSON, *arg],
+        obj=cli_state,
+    )
+    assert result.exit_code == 2
+    assert "{} can't be used with: --advanced-query".format(arg[0]) in result.output
+
+
+@search_and_send_to_test
+def test_search_and_send_to_when_given_begin_and_end_dates_uses_expected_query(
+    cli_state, alert_extractor, runner, command
 ):
     begin_date = get_test_date_str(days_ago=89)
     end_date = get_test_date_str(days_ago=1)
 
     runner.invoke(
-        cli,
-        ["alerts", "search", "--begin", begin_date, "--end", end_date],
-        obj=cli_state,
+        cli, [*command, "--begin", begin_date, "--end", end_date], obj=cli_state,
     )
     filters = alert_extractor.extract.call_args[0][0]
     actual_begin = get_filter_value_from_json(filters, filter_index=0)
@@ -319,8 +330,9 @@ def test_search_when_given_begin_and_end_dates_uses_expected_query(
     assert actual_end == expected_end
 
 
+@search_and_send_to_test
 def test_search_when_given_begin_and_end_date_and_times_uses_expected_query(
-    cli_state, alert_extractor, runner
+    cli_state, alert_extractor, runner, command
 ):
     begin_date = get_test_date_str(days_ago=89)
     end_date = get_test_date_str(days_ago=1)
@@ -328,8 +340,7 @@ def test_search_when_given_begin_and_end_date_and_times_uses_expected_query(
     runner.invoke(
         cli,
         [
-            "alerts",
-            "search",
+            *command,
             "--begin",
             "{} {}".format(begin_date, time),
             "--end",
@@ -346,14 +357,13 @@ def test_search_when_given_begin_and_end_date_and_times_uses_expected_query(
     assert actual_end == expected_end
 
 
+@search_and_send_to_test
 def test_search_when_given_begin_date_and_time_without_seconds_uses_expected_query(
-    cli_state, alert_extractor, runner
+    cli_state, alert_extractor, runner, command
 ):
     date = get_test_date_str(days_ago=89)
     time = "15:33"
-    runner.invoke(
-        cli, ["alerts", "search", "--begin", "{} {}".format(date, time)], obj=cli_state
-    )
+    runner.invoke(cli, [*command, "--begin", "{} {}".format(date, time)], obj=cli_state)
     actual = get_filter_value_from_json(
         alert_extractor.extract.call_args[0][0], filter_index=0
     )
@@ -361,22 +371,16 @@ def test_search_when_given_begin_date_and_time_without_seconds_uses_expected_que
     assert actual == expected
 
 
-def test_search_when_given_end_date_and_time_uses_expected_query(
-    cli_state, alert_extractor, runner
+@search_and_send_to_test
+def test_search_and_send_to_when_given_end_date_and_time_uses_expected_query(
+    cli_state, alert_extractor, runner, command
 ):
     begin_date = get_test_date_str(days_ago=10)
     end_date = get_test_date_str(days_ago=1)
     time = "15:33"
     runner.invoke(
         cli,
-        [
-            "alerts",
-            "search",
-            "--begin",
-            begin_date,
-            "--end",
-            "{} {}".format(end_date, time),
-        ],
+        [*command, "--begin", begin_date, "--end", "{} {}".format(end_date, time)],
         obj=cli_state,
     )
     actual = get_filter_value_from_json(
@@ -386,34 +390,35 @@ def test_search_when_given_end_date_and_time_uses_expected_query(
     assert actual == expected
 
 
-def test_search_when_given_begin_date_more_than_ninety_days_back_errors(
-    cli_state, runner
+@search_and_send_to_test
+def test_search_and_send_to_when_given_begin_date_more_than_ninety_days_back_errors(
+    cli_state, runner, command
 ):
     begin_date = get_test_date_str(days_ago=91) + " 12:51:00"
-    result = runner.invoke(
-        cli, ["alerts", "search", "--begin", begin_date], obj=cli_state
-    )
+    result = runner.invoke(cli, [*command, "--begin", begin_date], obj=cli_state)
     assert "must be within 90 days" in result.output
     assert result.exit_code == 2
 
 
-def test_search_when_given_begin_date_past_90_days_and_use_checkpoint_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
-    cli_state, alert_cursor_with_checkpoint, alert_extractor, runner
+@search_and_send_to_test
+def test_search_and_send_to_when_given_begin_date_past_90_days_and_use_checkpoint_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
+    cli_state, alert_cursor_with_checkpoint, alert_extractor, runner, command
 ):
     begin_date = get_test_date_str(days_ago=91) + " 12:51:00"
     runner.invoke(
         cli,
-        ["alerts", "search", "--begin", begin_date, "--use-checkpoint", "test"],
+        [*command, "--begin", begin_date, "--use-checkpoint", "test"],
         obj=cli_state,
     )
     assert not filter_term_is_in_call_args(alert_extractor, f.DateObserved._term)
 
 
-def test_search_when_given_begin_date_and_not_use_checkpoint_and_cursor_exists_uses_begin_date(
-    cli_state, alert_extractor, runner
+@search_and_send_to_test
+def test_search_and_send_to_when_given_begin_date_and_not_use_checkpoint_and_cursor_exists_uses_begin_date(
+    cli_state, alert_extractor, runner, command
 ):
     begin_date = get_test_date_str(days_ago=1)
-    runner.invoke(cli, ["alerts", "search", "--begin", begin_date], obj=cli_state)
+    runner.invoke(cli, [*command, "--begin", begin_date], obj=cli_state)
     actual_ts = get_filter_value_from_json(
         alert_extractor.extract.call_args[0][0], filter_index=0
     )
@@ -422,37 +427,25 @@ def test_search_when_given_begin_date_and_not_use_checkpoint_and_cursor_exists_u
     assert filter_term_is_in_call_args(alert_extractor, f.DateObserved._term)
 
 
-def test_search_when_end_date_is_before_begin_date_causes_exit(cli_state, runner):
+@search_and_send_to_test
+def test_search_and_send_to_when_end_date_is_before_begin_date_causes_exit(
+    cli_state, runner, command
+):
     begin_date = get_test_date_str(days_ago=1)
     end_date = get_test_date_str(days_ago=3)
     result = runner.invoke(
-        cli,
-        ["alerts", "search", "--begin", begin_date, "--end", end_date],
-        obj=cli_state,
+        cli, [*command, "--begin", begin_date, "--end", end_date], obj=cli_state,
     )
     assert result.exit_code == 2
     assert "'--begin': cannot be after --end date" in result.output
 
 
-def test_get_alert_details_batches_results_according_to_batch_size(sdk):
-    extraction._ALERT_DETAIL_BATCH_SIZE = 2
-    sdk.alerts.get_details.side_effect = ALERT_DETAIL_RESULT
-    extraction._get_alert_details(sdk, ALERT_SUMMARY_LIST)
-    assert sdk.alerts.get_details.call_count == 10
-
-
-def test_get_alert_details_sorts_results_by_date(sdk):
-    extraction._ALERT_DETAIL_BATCH_SIZE = 2
-    sdk.alerts.get_details.side_effect = ALERT_DETAIL_RESULT
-    results = extraction._get_alert_details(sdk, ALERT_SUMMARY_LIST)
-    assert results == SORTED_ALERT_DETAILS
-
-
-def test_search_with_only_begin_calls_extract_with_expected_filters(
-    cli_state, alert_extractor, begin_option, runner
+@search_and_send_to_test
+def test_search_and_send_to_with_only_begin_calls_extract_with_expected_filters(
+    cli_state, alert_extractor, begin_option, runner, command
 ):
     result = runner.invoke(
-        cli, ["alerts", "search", "--begin", "<overridden by fixture>"], obj=cli_state
+        cli, [*command, "--begin", "<overridden by fixture>"], obj=cli_state
     )
     assert result.exit_code == 0
     assert str(
@@ -462,12 +455,11 @@ def test_search_with_only_begin_calls_extract_with_expected_filters(
     )
 
 
-def test_search_with_use_checkpoint_and_without_begin_and_without_stored_checkpoint_causes_expected_error(
-    cli_state, alert_cursor_without_checkpoint, runner
+@search_and_send_to_test
+def test_search_and_send_to_with_use_checkpoint_and_without_begin_and_without_stored_checkpoint_causes_expected_error(
+    cli_state, alert_cursor_without_checkpoint, runner, command
 ):
-    result = runner.invoke(
-        cli, ["alerts", "search", "--use-checkpoint", "test"], obj=cli_state
-    )
+    result = runner.invoke(cli, [*command, "--use-checkpoint", "test"], obj=cli_state)
     assert result.exit_code == 2
     assert (
         "--begin date is required for --use-checkpoint when no checkpoint exists yet."
@@ -475,19 +467,18 @@ def test_search_with_use_checkpoint_and_without_begin_and_without_stored_checkpo
     )
 
 
-def test_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_extract_with_begin_date(
-    cli_state, alert_extractor, begin_option, alert_cursor_without_checkpoint, runner,
+@search_and_send_to_test
+def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_extract_with_begin_date(
+    cli_state,
+    alert_extractor,
+    begin_option,
+    alert_cursor_without_checkpoint,
+    runner,
+    command,
 ):
     result = runner.invoke(
         cli,
-        [
-            "alerts",
-            "search",
-            "--use-checkpoint",
-            "test",
-            "--begin",
-            "<overridden by fixture>",
-        ],
+        [*command, "--use-checkpoint", "test", "--begin", "<overridden by fixture>"],
         obj=cli_state,
     )
     assert result.exit_code == 0
@@ -497,14 +488,13 @@ def test_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_extract
     )
 
 
-def test_search_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_calls_extract_with_checkpoint_and_ignores_begin_arg(
-    cli_state, alert_extractor, alert_cursor_with_checkpoint, runner
+@search_and_send_to_test
+def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_calls_extract_with_checkpoint_and_ignores_begin_arg(
+    cli_state, alert_extractor, alert_cursor_with_checkpoint, runner, command
 ):
 
     result = runner.invoke(
-        cli,
-        ["alerts", "search", "--use-checkpoint", "test", "--begin", "1h"],
-        obj=cli_state,
+        cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
     )
     assert result.exit_code == 0
     alert_extractor.extract.assert_called_with()
@@ -516,130 +506,119 @@ def test_search_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_ca
     )
 
 
-def test_search_when_given_actor_is_uses_username_filter(
-    cli_state, alert_extractor, runner
+@search_and_send_to_test
+def test_search_and_send_to_when_given_actor_is_uses_username_filter(
+    cli_state, alert_extractor, runner, command
 ):
     actor_name = "test.testerson"
-
     runner.invoke(
-        cli, ["alerts", "search", "--begin", "1h", "--actor", actor_name], obj=cli_state
+        cli, [*command, "--begin", "1h", "--actor", actor_name], obj=cli_state
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(f.Actor.is_in([actor_name])) in filter_strings
 
 
-def test_search_when_given_exclude_actor_uses_actor_filter(
-    cli_state, alert_extractor, runner
+@search_and_send_to_test
+def test_search_and_send_to_when_given_exclude_actor_uses_actor_filter(
+    cli_state, alert_extractor, runner, command
 ):
     actor_name = "test.testerson"
-
     runner.invoke(
-        cli,
-        ["alerts", "search", "--begin", "1h", "--exclude-actor", actor_name],
-        obj=cli_state,
+        cli, [*command, "--begin", "1h", "--exclude-actor", actor_name], obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(f.Actor.not_in([actor_name])) in filter_strings
 
 
-def test_search_when_given_rule_name_uses_rule_name_filter(
-    cli_state, alert_extractor, runner
+@search_and_send_to_test
+def test_search_and_send_to_when_given_rule_name_uses_rule_name_filter(
+    cli_state, alert_extractor, runner, command
 ):
     rule_name = "departing employee"
-
     runner.invoke(
-        cli,
-        ["alerts", "search", "--begin", "1h", "--rule-name", rule_name],
-        obj=cli_state,
+        cli, [*command, "--begin", "1h", "--rule-name", rule_name], obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(f.RuleName.is_in([rule_name])) in filter_strings
 
 
-def test_search_when_given_exclude_rule_name_uses_rule_name_not_filter(
-    cli_state, alert_extractor, runner
+@search_and_send_to_test
+def test_search_and_send_to_when_given_exclude_rule_name_uses_rule_name_not_filter(
+    cli_state, alert_extractor, runner, command
 ):
     rule_name = "departing employee"
-
     runner.invoke(
         cli,
-        ["alerts", "search", "--begin", "1h", "--exclude-rule-name", rule_name],
+        [*command, "--begin", "1h", "--exclude-rule-name", rule_name],
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(f.RuleName.not_in([rule_name])) in filter_strings
 
 
-def test_search_when_given_rule_type_uses_rule_name_filter(
-    cli_state, alert_extractor, runner
+@search_and_send_to_test
+def test_search_and_send_to_when_given_rule_type_uses_rule_name_filter(
+    cli_state, alert_extractor, runner, command
 ):
     rule_type = "FedEndpointExfiltration"
-
     runner.invoke(
-        cli,
-        ["alerts", "search", "--begin", "1h", "--rule-type", rule_type],
-        obj=cli_state,
+        cli, [*command, "--begin", "1h", "--rule-type", rule_type], obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(f.RuleType.is_in([rule_type])) in filter_strings
 
 
-def test_search_when_given_exclude_rule_type_uses_rule_name_not_filter(
-    cli_state, alert_extractor, runner
+@search_and_send_to_test
+def test_search_and_send_to_when_given_exclude_rule_type_uses_rule_name_not_filter(
+    cli_state, alert_extractor, runner, command
 ):
     rule_type = "FedEndpointExfiltration"
-
     runner.invoke(
         cli,
-        ["alerts", "search", "--begin", "1h", "--exclude-rule-type", rule_type],
+        [*command, "--begin", "1h", "--exclude-rule-type", rule_type],
         obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(f.RuleType.not_in([rule_type])) in filter_strings
 
 
-def test_search_when_given_rule_id_uses_rule_name_filter(
-    cli_state, alert_extractor, runner
+@search_and_send_to_test
+def test_search_and_send_to_when_given_rule_id_uses_rule_name_filter(
+    cli_state, alert_extractor, runner, command
 ):
     rule_id = "departing employee"
-
-    runner.invoke(
-        cli, ["alerts", "search", "--begin", "1h", "--rule-id", rule_id], obj=cli_state
-    )
+    runner.invoke(cli, [*command, "--begin", "1h", "--rule-id", rule_id], obj=cli_state)
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(f.RuleId.is_in([rule_id])) in filter_strings
 
 
-def test_search_when_given_exclude_rule_id_uses_rule_name_not_filter(
-    cli_state, alert_extractor, runner
+@search_and_send_to_test
+def test_search_and_send_to_when_given_exclude_rule_id_uses_rule_name_not_filter(
+    cli_state, alert_extractor, runner, command
 ):
     rule_id = "departing employee"
-
     runner.invoke(
-        cli,
-        ["alerts", "search", "--begin", "1h", "--exclude-rule-id", rule_id],
-        obj=cli_state,
+        cli, [*command, "--begin", "1h", "--exclude-rule-id", rule_id], obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(f.RuleId.not_in([rule_id])) in filter_strings
 
 
-def test_search_when_given_description_uses_description_filter(
-    cli_state, alert_extractor, runner
+@search_and_send_to_test
+def test_search_and_send_to_when_given_description_uses_description_filter(
+    cli_state, alert_extractor, runner, command
 ):
     description = "test description"
-
     runner.invoke(
-        cli,
-        ["alerts", "search", "--begin", "1h", "--description", description],
-        obj=cli_state,
+        cli, [*command, "--begin", "1h", "--description", description], obj=cli_state,
     )
     filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
     assert str(f.Description.contains(description)) in filter_strings
 
 
-def test_search_when_given_multiple_search_args_uses_expected_filters(
-    cli_state, alert_extractor, runner
+@search_and_send_to_test
+def test_search_and_send_to_when_given_multiple_search_args_uses_expected_filters(
+    cli_state, alert_extractor, runner, command
 ):
     actor = "test.testerson@example.com"
     exclude_actor = "flag.flagerson@code42.com"
@@ -648,8 +627,7 @@ def test_search_when_given_multiple_search_args_uses_expected_filters(
     runner.invoke(
         cli,
         [
-            "alerts",
-            "search",
+            *command,
             "--begin",
             "1h",
             "--actor",
@@ -667,15 +645,17 @@ def test_search_when_given_multiple_search_args_uses_expected_filters(
     assert str(f.RuleName.is_in([rule_name])) in filter_strings
 
 
-def test_search_with_or_query_flag_produces_expected_query(runner, cli_state):
+@search_and_send_to_test
+def test_search_and_send_to_with_or_query_flag_produces_expected_query(
+    runner, cli_state, command
+):
     begin_date = get_test_date_str(days_ago=10)
     test_actor = "test@example.com"
     test_rule_type = "FedEndpointExfiltration"
     runner.invoke(
         cli,
         [
-            "alerts",
-            "search",
+            *command,
             "--or-query",
             "--begin",
             begin_date,
@@ -721,411 +701,15 @@ def test_search_with_or_query_flag_produces_expected_query(runner, cli_state):
     assert actual_query == expected_query
 
 
-def test_send_to_makes_call_to_the_extract_method(
-    cli_state, alert_extractor, runner, event_extractor_logger
-):
-
-    runner.invoke(
-        cli, ["alerts", "send-to", "localhost", "--begin", "1d"], obj=cli_state
-    )
-    assert alert_extractor.extract.call_count == 1
-    assert alert_extractor.extract_advanced.call_count == 0
+def test_get_alert_details_batches_results_according_to_batch_size(sdk):
+    extraction._ALERT_DETAIL_BATCH_SIZE = 2
+    sdk.alerts.get_details.side_effect = ALERT_DETAIL_RESULT
+    extraction._get_alert_details(sdk, ALERT_SUMMARY_LIST)
+    assert sdk.alerts.get_details.call_count == 10
 
 
-def test_send_to_when_given_description_uses_description_filter(
-    cli_state, alert_extractor, runner
-):
-    description = "test description"
-
-    runner.invoke(
-        cli,
-        ["alerts", "send-to", "0.0.0.0", "--begin", "1h", "--description", description],
-        obj=cli_state,
-    )
-    filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(f.Description.contains(description)) in filter_strings
-
-
-@pytest.mark.parametrize(
-    "arg",
-    [
-        ("--begin", "1d"),
-        ("--end", "1d"),
-        ("--severity", "HIGH"),
-        ("--actor", "test"),
-        ("--actor-contains", "test"),
-        ("--exclude-actor", "test"),
-        ("--exclude-actor-contains", "test"),
-        ("--rule-name", "test"),
-        ("--exclude-rule-name", "test"),
-        ("--rule-id", "test"),
-        ("--exclude-rule-id", "test"),
-        ("--rule-type", "FedEndpointExfiltration"),
-        ("--exclude-rule-type", "FedEndpointExfiltration"),
-        ("--description", "test"),
-        ("--state", "OPEN"),
-    ],
-)
-def test_send_to_with_advanced_query_and_incompatible_argument_errors(
-    arg, cli_state, runner
-):
-
-    result = runner.invoke(
-        cli,
-        ["alerts", "send-to", "0.0.0.0", "--advanced-query", ADVANCED_QUERY_JSON, *arg],
-        obj=cli_state,
-    )
-    assert result.exit_code == 2
-    assert "{} can't be used with: --advanced-query".format(arg[0]) in result.output
-
-
-def test_send_to_when_given_begin_and_end_dates_uses_expected_query(
-    cli_state, alert_extractor, runner
-):
-    begin_date = get_test_date_str(days_ago=89)
-    end_date = get_test_date_str(days_ago=1)
-
-    runner.invoke(
-        cli,
-        ["alerts", "send-to", "0.0.0.0", "--begin", begin_date, "--end", end_date],
-        obj=cli_state,
-    )
-    filters = alert_extractor.extract.call_args[0][0]
-    actual_begin = get_filter_value_from_json(filters, filter_index=0)
-    expected_begin = "{}T00:00:00.000Z".format(begin_date)
-    actual_end = get_filter_value_from_json(filters, filter_index=1)
-    expected_end = "{}T23:59:59.999Z".format(end_date)
-    assert actual_begin == expected_begin
-    assert actual_end == expected_end
-
-
-def test_send_to_when_given_begin_and_end_date_and_times_uses_expected_query(
-    cli_state, alert_extractor, runner
-):
-    begin_date = get_test_date_str(days_ago=89)
-    end_date = get_test_date_str(days_ago=1)
-    time = "15:33:02"
-    runner.invoke(
-        cli,
-        [
-            "alerts",
-            "search",
-            "--begin",
-            "{} {}".format(begin_date, time),
-            "--end",
-            "{} {}".format(end_date, time),
-        ],
-        obj=cli_state,
-    )
-    filters = alert_extractor.extract.call_args[0][0]
-    actual_begin = get_filter_value_from_json(filters, filter_index=0)
-    expected_begin = "{}T{}.000Z".format(begin_date, time)
-    actual_end = get_filter_value_from_json(filters, filter_index=1)
-    expected_end = "{}T{}.000Z".format(end_date, time)
-    assert actual_begin == expected_begin
-    assert actual_end == expected_end
-
-
-def test_send_to_when_given_begin_date_and_time_without_seconds_uses_expected_query(
-    cli_state, alert_extractor, runner
-):
-    date = get_test_date_str(days_ago=89)
-    time = "15:33"
-    runner.invoke(
-        cli,
-        ["alerts", "send-to", "0.0.0.0", "--begin", "{} {}".format(date, time)],
-        obj=cli_state,
-    )
-    actual = get_filter_value_from_json(
-        alert_extractor.extract.call_args[0][0], filter_index=0
-    )
-    expected = "{}T{}:00.000Z".format(date, time)
-    assert actual == expected
-
-
-def test_send_to_when_given_end_date_and_time_uses_expected_query(
-    cli_state, alert_extractor, runner
-):
-    begin_date = get_test_date_str(days_ago=10)
-    end_date = get_test_date_str(days_ago=1)
-    time = "15:33"
-    runner.invoke(
-        cli,
-        [
-            "alerts",
-            "search",
-            "--begin",
-            begin_date,
-            "--end",
-            "{} {}".format(end_date, time),
-        ],
-        obj=cli_state,
-    )
-    actual = get_filter_value_from_json(
-        alert_extractor.extract.call_args[0][0], filter_index=1
-    )
-    expected = "{}T{}:00.000Z".format(end_date, time)
-    assert actual == expected
-
-
-def test_send_to_when_given_begin_date_more_than_ninety_days_back_errors(
-    cli_state, runner
-):
-    begin_date = get_test_date_str(days_ago=91) + " 12:51:00"
-    result = runner.invoke(
-        cli, ["alerts", "send-to", "0.0.0.0", "--begin", begin_date], obj=cli_state
-    )
-    assert "must be within 90 days" in result.output
-
-
-def test_send_to_when_given_begin_date_past_90_days_and_use_checkpoint_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
-    cli_state, alert_cursor_with_checkpoint, alert_extractor, runner
-):
-    begin_date = get_test_date_str(days_ago=91) + " 12:51:00"
-    runner.invoke(
-        cli,
-        [
-            "alerts",
-            "send-to",
-            "0.0.0.0",
-            "--begin",
-            begin_date,
-            "--use-checkpoint",
-            "test",
-        ],
-        obj=cli_state,
-    )
-    assert not filter_term_is_in_call_args(alert_extractor, f.DateObserved._term)
-
-
-def test_send_to_when_given_begin_date_and_not_use_checkpoint_and_cursor_exists_uses_begin_date(
-    cli_state, alert_extractor, runner
-):
-    begin_date = get_test_date_str(days_ago=1)
-    runner.invoke(
-        cli, ["alerts", "send-to", "0.0.0.0", "--begin", begin_date], obj=cli_state
-    )
-    actual_ts = get_filter_value_from_json(
-        alert_extractor.extract.call_args[0][0], filter_index=0
-    )
-    expected_ts = "{}T00:00:00.000Z".format(begin_date)
-    assert actual_ts == expected_ts
-    assert filter_term_is_in_call_args(alert_extractor, f.DateObserved._term)
-
-
-def test_send_to_when_end_date_is_before_begin_date_causes_exit(cli_state, runner):
-    begin_date = get_test_date_str(days_ago=1)
-    end_date = get_test_date_str(days_ago=3)
-    result = runner.invoke(
-        cli,
-        ["alerts", "send-to", "0.0.0.0", "--begin", begin_date, "--end", end_date],
-        obj=cli_state,
-    )
-    assert result.exit_code == 2
-    assert "'--begin': cannot be after --end date" in result.output
-
-
-def test_send_to_with_only_begin_calls_extract_with_expected_filters(
-    cli_state, alert_extractor, begin_option, runner
-):
-    result = runner.invoke(
-        cli,
-        ["alerts", "send-to", "0.0.0.0", "--begin", "<overridden by fixture>"],
-        obj=cli_state,
-    )
-    assert result.exit_code == 0
-    assert str(
-        alert_extractor.extract.call_args[0][0]
-    ) == '{{"filterClause":"AND", "filters":[{{"operator":"ON_OR_AFTER", "term":"createdAt", "value":"{}"}}]}}'.format(
-        begin_option.expected_timestamp
-    )
-
-
-def test_send_to_with_use_checkpoint_and_without_begin_and_without_stored_checkpoint_causes_expected_error(
-    cli_state, alert_cursor_without_checkpoint, runner
-):
-    result = runner.invoke(
-        cli, ["alerts", "send-to", "0.0.0.0", "--use-checkpoint", "test"], obj=cli_state
-    )
-    assert result.exit_code == 2
-    assert (
-        "--begin date is required for --use-checkpoint when no checkpoint exists yet."
-        in result.output
-    )
-
-
-def test_send_to_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_extract_with_begin_date(
-    cli_state, alert_extractor, begin_option, alert_cursor_without_checkpoint, runner,
-):
-    result = runner.invoke(
-        cli,
-        [
-            "alerts",
-            "search",
-            "--use-checkpoint",
-            "test",
-            "--begin",
-            "<overridden by fixture>",
-        ],
-        obj=cli_state,
-    )
-    assert result.exit_code == 0
-    assert len(alert_extractor.extract.call_args[0]) == 1
-    assert begin_option.expected_timestamp in str(
-        alert_extractor.extract.call_args[0][0]
-    )
-
-
-def test_send_to_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_calls_extract_with_checkpoint_and_ignores_begin_arg(
-    cli_state, alert_extractor, alert_cursor_with_checkpoint, runner
-):
-
-    result = runner.invoke(
-        cli,
-        ["alerts", "send-to", "0.0.0.0", "--use-checkpoint", "test", "--begin", "1h"],
-        obj=cli_state,
-    )
-    assert result.exit_code == 0
-    alert_extractor.extract.assert_called_with()
-    assert (
-        "checkpoint of {} exists".format(
-            alert_cursor_with_checkpoint.expected_timestamp
-        )
-        in result.output
-    )
-
-
-def test_send_to_when_given_actor_is_uses_username_filter(
-    cli_state, alert_extractor, runner
-):
-    actor_name = "test.testerson"
-
-    runner.invoke(
-        cli,
-        ["alerts", "send-to", "0.0.0.0", "--begin", "1h", "--actor", actor_name],
-        obj=cli_state,
-    )
-    filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(f.Actor.is_in([actor_name])) in filter_strings
-
-
-def test_send_to_when_given_exclude_actor_uses_actor_filter(
-    cli_state, alert_extractor, runner
-):
-    actor_name = "test.testerson"
-
-    runner.invoke(
-        cli,
-        [
-            "alerts",
-            "send-to",
-            "0.0.0.0",
-            "--begin",
-            "1h",
-            "--exclude-actor",
-            actor_name,
-        ],
-        obj=cli_state,
-    )
-    filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(f.Actor.not_in([actor_name])) in filter_strings
-
-
-def test_send_to_when_given_rule_name_uses_rule_name_filter(
-    cli_state, alert_extractor, runner
-):
-    rule_name = "departing employee"
-
-    runner.invoke(
-        cli,
-        ["alerts", "send-to", "0.0.0.0", "--begin", "1h", "--rule-name", rule_name],
-        obj=cli_state,
-    )
-    filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(f.RuleName.is_in([rule_name])) in filter_strings
-
-
-def test_send_to_when_given_exclude_rule_name_uses_rule_name_not_filter(
-    cli_state, alert_extractor, runner
-):
-    rule_name = "departing employee"
-
-    runner.invoke(
-        cli,
-        [
-            "alerts",
-            "send-to",
-            "0.0.0.0",
-            "--begin",
-            "1h",
-            "--exclude-rule-name",
-            rule_name,
-        ],
-        obj=cli_state,
-    )
-    filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(f.RuleName.not_in([rule_name])) in filter_strings
-
-
-def test_send_to_when_given_rule_type_uses_rule_name_filter(
-    cli_state, alert_extractor, runner
-):
-    rule_type = "FedEndpointExfiltration"
-
-    runner.invoke(
-        cli,
-        ["alerts", "send-to", "0.0.0.0", "--begin", "1h", "--rule-type", rule_type],
-        obj=cli_state,
-    )
-    filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(f.RuleType.is_in([rule_type])) in filter_strings
-
-
-def test_send_to_when_given_exclude_rule_type_uses_rule_name_not_filter(
-    cli_state, alert_extractor, runner
-):
-    rule_type = "FedEndpointExfiltration"
-
-    runner.invoke(
-        cli,
-        [
-            "alerts",
-            "send-to",
-            "0.0.0.0",
-            "--begin",
-            "1h",
-            "--exclude-rule-type",
-            rule_type,
-        ],
-        obj=cli_state,
-    )
-    filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(f.RuleType.not_in([rule_type])) in filter_strings
-
-
-def test_send_to_when_given_rule_id_uses_rule_name_filter(
-    cli_state, alert_extractor, runner
-):
-    rule_id = "departing employee"
-
-    runner.invoke(
-        cli,
-        ["alerts", "send-to", "0.0.0.0", "--begin", "1h", "--rule-id", rule_id],
-        obj=cli_state,
-    )
-    filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(f.RuleId.is_in([rule_id])) in filter_strings
-
-
-def test_send_to_when_given_exclude_rule_id_uses_rule_name_not_filter(
-    cli_state, alert_extractor, runner
-):
-    rule_id = "departing employee"
-
-    runner.invoke(
-        cli,
-        ["alerts", "send-to", "0.0.0.0", "--begin", "1h", "--exclude-rule-id", rule_id],
-        obj=cli_state,
-    )
-    filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(f.RuleId.not_in([rule_id])) in filter_strings
+def test_get_alert_details_sorts_results_by_date(sdk):
+    extraction._ALERT_DETAIL_BATCH_SIZE = 2
+    sdk.alerts.get_details.side_effect = ALERT_DETAIL_RESULT
+    results = extraction._get_alert_details(sdk, ALERT_SUMMARY_LIST)
+    assert results == SORTED_ALERT_DETAILS

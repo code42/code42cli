@@ -7,6 +7,7 @@ from c42eventextractor.extractors import FileEventExtractor
 from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
 from tests.cmds.conftest import filter_term_is_in_call_args
 from tests.cmds.conftest import get_filter_value_from_json
+from tests.cmds.conftest import get_mark_for_search_and_send_to
 from tests.conftest import get_test_date_str
 
 from code42cli import errors
@@ -88,8 +89,6 @@ ADVANCED_QUERY_JSON = """
 }}""".format(
     **ADVANCED_QUERY_VALUES
 )
-SEARCH_CMD = ["security-data", "search"]
-SEND_TO_CMD = ["security-data", "send-to", "0.0.0.0"]
 advanced_query_incompat_test_params = pytest.mark.parametrize(
     "arg",
     [
@@ -129,7 +128,7 @@ saved_search_incompat_test_params = pytest.mark.parametrize(
         ("--use-checkpoint", "test"),
     ],
 )
-search_and_send_to_test = pytest.mark.parametrize("command", (SEARCH_CMD, SEND_TO_CMD))
+search_and_send_to_test = get_mark_for_search_and_send_to("security-data")
 
 
 @pytest.fixture
@@ -240,7 +239,7 @@ def test_search_with_advanced_query_and_incompatible_argument_errors(
 ):
     result = runner.invoke(
         cli,
-        [*SEARCH_CMD, "--advanced-query", ADVANCED_QUERY_JSON, *arg],
+        ["security-data", "search", "--advanced-query", ADVANCED_QUERY_JSON, *arg],
         obj=cli_state,
     )
     assert result.exit_code == 2
@@ -253,7 +252,14 @@ def test_send_to_with_advanced_query_and_incompatible_argument_errors(
 ):
     result = runner.invoke(
         cli,
-        [*SEND_TO_CMD, "--advanced-query", ADVANCED_QUERY_JSON, *arg],
+        [
+            "security-data",
+            "send-to",
+            "0.0.0.0",
+            "--advanced-query",
+            ADVANCED_QUERY_JSON,
+            *arg,
+        ],
         obj=cli_state,
     )
     assert result.exit_code == 2
@@ -265,7 +271,9 @@ def test_search_with_saved_search_and_incompatible_argument_errors(
     runner, arg, cli_state
 ):
     result = runner.invoke(
-        cli, [*SEARCH_CMD, "--saved-search", "test_id", *arg], obj=cli_state,
+        cli,
+        ["security-data", "search", "--saved-search", "test_id", *arg],
+        obj=cli_state,
     )
     assert result.exit_code == 2
     assert "{} can't be used with: --saved-search".format(arg[0]) in result.output
@@ -276,7 +284,9 @@ def test_send_to_with_saved_search_and_incompatible_argument_errors(
     runner, arg, cli_state
 ):
     result = runner.invoke(
-        cli, [*SEND_TO_CMD, "--saved-search", "test_id", *arg], obj=cli_state,
+        cli,
+        ["security-data", "send-to", "0.0.0.0", "--saved-search", "test_id", *arg],
+        obj=cli_state,
     )
     assert result.exit_code == 2
     assert "{} can't be used with: --saved-search".format(arg[0]) in result.output
@@ -591,9 +601,7 @@ def test_search_and_send_to_when_given_file_category_uses_file_category_filter(
     file_category = "IMAGE"
     command = [*command, "--begin", "1h", "--file-category", file_category]
     runner.invoke(
-        cli,
-        command,
-        obj=cli_state,
+        cli, command, obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
     assert str(f.FileCategory.is_in([file_category])) in filter_strings
@@ -604,7 +612,7 @@ def test_search_and_send_to_when_given_process_owner_uses_process_owner_filter(
     runner, cli_state, file_event_extractor, command
 ):
     process_owner = "root"
-    command = [*command, "1h", "--process-owner", process_owner]
+    command = [*command, "-b", "1h", "--process-owner", process_owner]
     runner.invoke(
         cli, command, obj=cli_state,
     )
@@ -630,9 +638,9 @@ def test_search_and_send_to_when_given_exposure_types_uses_exposure_type_is_in_f
     runner, cli_state, file_event_extractor, command
 ):
     exposure_type = "SharedViaLink"
-    command.append(exposure_type)
+    command = [*command, "--begin", "1h", "--type", exposure_type]
     runner.invoke(
-        cli, [*command, "--begin", "1h", "--type"], obj=cli_state,
+        cli, command, obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
     assert str(f.ExposureType.is_in([exposure_type])) in filter_strings
@@ -707,6 +715,7 @@ def test_search_and_send_to_when_given_include_non_exposure_and_exposure_types_c
     assert result.exit_code == 2
 
 
+@search_and_send_to_test
 def test_search_and_send_to_when_extraction_handles_error_expected_message_logged_and_printed_and_global_errored_flag_set(
     runner, cli_state, caplog, command
 ):
