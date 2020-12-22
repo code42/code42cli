@@ -27,8 +27,10 @@ def run_command(command):
             output = process.before
             response = encode_response(output).splitlines()
     except pexpect.TIMEOUT:
-        return 1, response
-    return 0, response
+        process.close()
+        return process.exitstatus, response
+    process.close()
+    return process.exitstatus, response
 
 
 __all__ = [run_command]

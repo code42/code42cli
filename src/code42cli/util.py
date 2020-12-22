@@ -1,7 +1,9 @@
+import json
 import os
 import shutil
 from collections import OrderedDict
 from functools import wraps
+from hashlib import md5
 from os import path
 from signal import getsignal
 from signal import SIGINT
@@ -167,3 +169,9 @@ def _get_default_header(header_items):
             if key not in header and isinstance(key, str):
                 header[key] = key
     return header
+
+
+def hash_event(event):
+    if isinstance(event, dict):
+        event = json.dumps(event, sort_keys=True)
+    return md5(event.encode()).hexdigest()

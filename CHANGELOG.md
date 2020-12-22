@@ -8,6 +8,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+# Unreleased
+
+- The `devices` command is added. Included are:
+    - `devices deactivate` to deactivate a single computer
+    - `devices show` to retrieve detailed information about a computer
+    - `devices list` to retrieve info about many devices, including device settings
+    - `devices bulk deactivate` to deactivate a list of devices
+
+# Added
+
+- `code42 departing-employee list` command.
+
+- `code42 high-risk-employee list` command.
+
+### Changed
+
+- The error text when removing an employee from a detection list now references the employee
+  by ID rather the username.
+
+## 1.1.0 - 2020-12-18
+
+### Fixed
+
+- Issue where `code42 profile delete` was allowed without giving a `profile_name` even
+  though deleting the default profile is not allowed.
+
 ### Added
 
 - `code42 audit-logs` commands:
@@ -16,13 +42,9 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
-- The `devices` command is added. Included are:
-    - `devices deactivate` to deactivate a single computer
-    - `devices show` to retrieve detailed information about a computer
-    - `devices bulk list` to retrieve info about many devices, including device settings
-    - `devices bulk deactivate` to deactivate a list of devices
-
 ### Changed
+
+- `profile_name` argument is now required for `code42 profile delete`, as it was meant to be.
 
 - The `--advanced-query` option on `alerts search` and `security-data (search|send-to)` commands has been updated:
     - It can now accept the query as a JSON string or as the path to a file containing the JSON query.

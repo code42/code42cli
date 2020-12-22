@@ -12,7 +12,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v1
       with:
-        python-version: '3.x'
+        python-version: '3.8'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -24,12 +24,12 @@ jobs:
       run: |
           src_file=( ./dist/*.tar.gz )
           wheel_file=( ./dist/*.whl )
-          echo "::set-env name=RELEASE_ID::$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)"
-          echo "::set-env name=SOURCE_DIST_FILE::$(basename $src_file)"
-          echo "::set-env name=WHEEL_FILE::$(basename $wheel_file)"
+          echo "RELEASE_ID=$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)" >> $GITHUB_ENV
+          echo "SOURCE_DIST_FILE=$(basename $src_file)" >> $GITHUB_ENV
+          echo "WHEEL_FILE=$(basename $wheel_file)" >> $GITHUB_ENV
     - name: Set Upload Url
       run: |
-          echo "::set-env name=UPLOAD_URL::https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets{?name,label}"
+          echo "UPLOAD_URL=https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets{?name,label}" >> $GITHUB_ENV
     - name: Output Variables For Uploading
       id: get_upload_vars
       run: |

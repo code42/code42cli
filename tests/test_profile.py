@@ -5,6 +5,7 @@ from .conftest import create_mock_profile
 from .conftest import MockSection
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.search.cursor_store import AlertCursorStore
+from code42cli.cmds.search.cursor_store import AuditLogCursorStore
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.config import ConfigAccessor
 from code42cli.config import NoConfigProfileError
@@ -201,6 +202,24 @@ def test_set_password_uses_expected_password(config_accessor, password_setter):
     assert password_setter.call_args[0][1] == "newpassword"
 
 
+def test_delete_profile_deletes_profile(config_accessor, mocker):
+    name = "deleteme"
+    profile = create_mock_profile(name)
+    mock_get_profile = mocker.patch("code42cli.profile._get_profile")
+    mock_get_profile.return_value = profile
+    cliprofile.delete_profile(name)
+    config_accessor.delete_profile.assert_called_once_with(name)
+
+
+def test_delete_profile_deletes_profile_from_object_name(config_accessor, mocker):
+    expected = "deleteme - different name than the arg"
+    profile = create_mock_profile(expected)
+    mock_get_profile = mocker.patch("code42cli.profile._get_profile")
+    mock_get_profile.return_value = profile
+    cliprofile.delete_profile("deleteme")
+    config_accessor.delete_profile.assert_called_once_with(expected)
+
+
 def test_delete_profile_deletes_password_if_exists(
     config_accessor, mocker, password_getter, password_deleter
 ):
@@ -218,10 +237,12 @@ def test_delete_profile_clears_checkpoints(config_accessor, mocker):
     mock_get_profile.return_value = profile
     event_store = mocker.MagicMock(spec=FileEventCursorStore)
     alert_store = mocker.MagicMock(spec=AlertCursorStore)
+    auditlog_store = mocker.MagicMock(spec=AuditLogCursorStore)
     mock_get_cursor_store = mocker.patch(
         "code42cli.profile.get_all_cursor_stores_for_profile"
     )
-    mock_get_cursor_store.return_value = [event_store, alert_store]
+    mock_get_cursor_store.return_value = [event_store, alert_store, auditlog_store]
     cliprofile.delete_profile("deleteme")
     assert event_store.clean.call_count == 1
     assert alert_store.clean.call_count == 1
+    assert auditlog_store.clean.call_count == 1
