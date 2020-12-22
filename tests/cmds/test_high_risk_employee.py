@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from py42.services.detectionlists.high_risk_employee import HighRiskEmployeeFilters
 from tests.cmds.conftest import get_generator_for_get_all
@@ -51,7 +53,7 @@ def test_list_high_risk_employees_lists_expected_properties(runner, mock_get_all
     assert "test.testerson@example.com" in res.output
 
 
-def test_list_departing_employees_converts_all_to_open(runner, mock_get_all_state):
+def test_list_high_risk_employees_converts_all_to_open(runner, mock_get_all_state):
     runner.invoke(
         cli, ["high-risk-employee", "list", "--filter", "ALL"], obj=mock_get_all_state
     )
@@ -113,6 +115,20 @@ def test_list_high_risk_employees_when_table_format_and_notes_contains_newlines_
     )
     res = runner.invoke(cli, ["high-risk-employee", "list"], obj=cli_state_with_user)
     assert "Line1\\nLine2" in res.output
+
+
+def test_list_high_risk_employees_handles_employees_with_no_notes(
+    runner, mocker, cli_state_with_user
+):
+    hr_json = json.loads(HIGH_RISK_EMPLOYEE_ITEM)
+    hr_json["notes"] = None
+    new_text = json.dumps(hr_json)
+    generator = get_generator_for_get_all(mocker, new_text)
+    cli_state_with_user.sdk.detectionlists.high_risk_employee.get_all.side_effect = (
+        generator
+    )
+    res = runner.invoke(cli, ["high-risk-employee", "list"], obj=cli_state_with_user)
+    assert "None" in res.output
 
 
 def test_add_high_risk_employee_adds(runner, cli_state_with_user):
