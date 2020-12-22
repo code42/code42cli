@@ -75,7 +75,7 @@ class ExceptionHandlingGroup(click.Group):
         except OSError:
             raise
 
-        except Exception as err:
+        except Exception:
             self.logger.log_verbose_error()
             raise LoggedCLIError("Unknown problem occurred.")
 

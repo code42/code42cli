@@ -1,5 +1,6 @@
-import pytest
 import json
+
+import pytest
 from py42.services.detectionlists.high_risk_employee import HighRiskEmployeeFilters
 from tests.cmds.conftest import get_generator_for_get_all
 from tests.cmds.conftest import get_user_not_on_list_side_effect
