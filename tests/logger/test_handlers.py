@@ -1,5 +1,4 @@
 import ssl
-from socket import AddressFamily
 from socket import IPPROTO_TCP
 from socket import IPPROTO_UDP
 from socket import SOCK_DGRAM
@@ -97,9 +96,10 @@ class TestNoPrioritySysLogHandler:
             _TEST_HOST, _TEST_PORT, ServerProtocol.UDP, None
         )
         _ = handler.socket
-        socket_initializer.assert_called_once_with(
-            socket, AddressFamily.AF_INET6, SOCK_DGRAM, IPPROTO_UDP
-        )
+        call_args = socket_initializer.call_args[0]
+        assert call_args[0] == socket
+        assert call_args[2] == SOCK_DGRAM
+        assert call_args[3] == IPPROTO_UDP
 
     def test_socket_when_tcp_initializes_with_expected_properties(
         self, socket_initializer
@@ -108,9 +108,10 @@ class TestNoPrioritySysLogHandler:
             _TEST_HOST, _TEST_PORT, ServerProtocol.TCP, None
         )
         _ = handler.socket
-        socket_initializer.assert_called_once_with(
-            socket, AddressFamily.AF_INET6, SOCK_STREAM, IPPROTO_TCP
-        )
+        call_args = socket_initializer.call_args[0]
+        assert call_args[0] == socket
+        assert call_args[2] == SOCK_STREAM
+        assert call_args[3] == IPPROTO_TCP
         assert socket_initializer.return_value.connect.call_count == 1
 
     def test_socket_when_tcp_connects_only_once(self, socket_initializer):
@@ -128,9 +129,11 @@ class TestNoPrioritySysLogHandler:
             _TEST_HOST, _TEST_PORT, ServerProtocol.TLS, None
         )
         _ = handler.socket
-        socket_initializer.assert_called_once_with(
-            socket, AddressFamily.AF_INET6, SOCK_STREAM, IPPROTO_TCP
-        )
+        call_args = socket_initializer.call_args[0]
+        assert call_args[0] == socket
+        assert call_args[2] == SOCK_STREAM
+        assert call_args[3] == IPPROTO_TCP
+        assert socket_initializer.return_value.connect.call_count == 1
 
     def test_socket_when_tls_and_given_certs_wraps_socket_with_certs(
         self, socket_initializer, socket_ssl_wrapper
