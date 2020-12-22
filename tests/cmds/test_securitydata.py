@@ -13,6 +13,7 @@ from tests.conftest import get_test_date_str
 from code42cli import errors
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
+from code42cli.cmds.search.enums import ServerProtocol
 from code42cli.main import cli
 
 BEGIN_TIMESTAMP = 1577858400.0
@@ -831,6 +832,35 @@ def test_saved_search_calls_extractor_extract_and_saved_search_execute(
     assert file_event_extractor.extract.call_count == 1
     assert str(file_event_extractor.extract.call_args[0][0]) in str(query)
     assert str(file_event_extractor.extract.call_args[0][1]) in str(query)
+
+
+@pytest.mark.parametrize(
+    "protocol", (ServerProtocol.TLS, ServerProtocol.TLS, ServerProtocol.UDP)
+)
+def test_send_to_allows_protocol_arg(cli_state, runner, protocol):
+    res = runner.invoke(
+        cli,
+        [
+            "security-data",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            protocol,
+        ],
+        obj=cli_state,
+    )
+    assert res.exit_code == 0
+
+
+def test_send_to_fails_when_given_unknown_protocol(cli_state, runner):
+    res = runner.invoke(
+        cli,
+        ["security-data", "send-to", "0.0.0.0", "--begin", "1d", "--protocol", "ATM"],
+        obj=cli_state,
+    )
+    assert res.exit_code
 
 
 def test_saved_search_list_calls_get_method(runner, cli_state):

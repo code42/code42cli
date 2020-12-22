@@ -10,6 +10,7 @@ from tests.cmds.conftest import get_mark_for_search_and_send_to
 
 from code42cli.cmds.auditlogs import _parse_audit_log_timestamp_string_to_timestamp
 from code42cli.cmds.search.cursor_store import AuditLogCursorStore
+from code42cli.cmds.search.enums import ServerProtocol
 from code42cli.date_helper import parse_max_timestamp
 from code42cli.date_helper import parse_min_timestamp
 from code42cli.main import cli
@@ -321,6 +322,27 @@ def test_search_and_send_to_without_existing_checkpoint_writes_both_event_hashes
         hash_event(TEST_EVENTS_WITH_SAME_TIMESTAMP[0]),
         hash_event(TEST_EVENTS_WITH_SAME_TIMESTAMP[1]),
     ]
+
+
+@pytest.mark.parametrize(
+    "protocol", (ServerProtocol.TLS, ServerProtocol.TLS, ServerProtocol.UDP)
+)
+def test_send_to_allows_protocol_arg(cli_state, runner, protocol):
+    res = runner.invoke(
+        cli,
+        ["audit-logs", "send-to", "0.0.0.0", "--begin", "1d", "--protocol", protocol],
+        obj=cli_state,
+    )
+    assert res.exit_code == 0
+
+
+def test_send_to_fails_when_given_unknown_protocol(cli_state, runner):
+    res = runner.invoke(
+        cli,
+        ["audit-logs", "send-to", "0.0.0.0", "--begin", "1d", "--protocol", "ATM"],
+        obj=cli_state,
+    )
+    assert res.exit_code
 
 
 def test_audit_log_parse_timestamp_handles_possible_strings():

@@ -11,6 +11,7 @@ from tests.conftest import get_test_date_str
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.search import extraction
 from code42cli.cmds.search.cursor_store import AlertCursorStore
+from code42cli.cmds.search.enums import ServerProtocol
 from code42cli.main import cli
 
 
@@ -699,6 +700,27 @@ def test_search_and_send_to_with_or_query_flag_produces_expected_query(
     }
     actual_query = json.loads(str(cli_state.sdk.alerts.search.call_args[0][0]))
     assert actual_query == expected_query
+
+
+@pytest.mark.parametrize(
+    "protocol", (ServerProtocol.TLS, ServerProtocol.TLS, ServerProtocol.UDP)
+)
+def test_send_to_allows_protocol_arg(cli_state, runner, protocol):
+    res = runner.invoke(
+        cli,
+        ["alerts", "send-to", "0.0.0.0", "--begin", "1d", "--protocol", protocol],
+        obj=cli_state,
+    )
+    assert res.exit_code == 0
+
+
+def test_send_to_fails_when_given_unknown_protocol(cli_state, runner):
+    res = runner.invoke(
+        cli,
+        ["alerts", "send-to", "0.0.0.0", "--begin", "1d", "--protocol", "ATM"],
+        obj=cli_state,
+    )
+    assert res.exit_code
 
 
 def test_get_alert_details_batches_results_according_to_batch_size(sdk):
