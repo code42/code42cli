@@ -8,7 +8,6 @@ from click import echo
 from py42.sdk.queries.fileevents.filters.exposure_filter import ExposureType
 from py42.sdk.queries.fileevents.filters.file_filter import FileCategory
 
-import code42cli.cmds.search.enums as enum
 import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
@@ -21,6 +20,7 @@ from code42cli.cmds.search.options import server_options
 from code42cli.logger import get_logger_for_server
 from code42cli.options import format_option
 from code42cli.options import sdk_options
+from code42cli.output_formats import FileEventsOutputFormat
 from code42cli.output_formats import FileEventsOutputFormatter
 from code42cli.output_formats import OutputFormatter
 
@@ -49,9 +49,9 @@ def _create_search_header_map():
 file_events_format_option = click.option(
     "-f",
     "--format",
-    type=click.Choice(enum.FileEventsOutputFormat(), case_sensitive=False),
+    type=click.Choice(FileEventsOutputFormat(), case_sensitive=False),
     help="The output format of the result. Defaults to table format.",
-    default=enum.FileEventsOutputFormat.TABLE,
+    default=FileEventsOutputFormat.TABLE,
 )
 
 

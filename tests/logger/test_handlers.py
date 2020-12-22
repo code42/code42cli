@@ -9,8 +9,8 @@ from socket import SocketKind
 
 import pytest
 
-from code42cli.cmds.search.enums import ServerProtocol
 from code42cli.logger import FileEventDictToRawJSONFormatter
+from code42cli.logger.enums import ServerProtocol
 from code42cli.logger.handlers import NoPrioritySysLogHandler
 
 _TEST_HOST = "example.com"

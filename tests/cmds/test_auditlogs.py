@@ -10,9 +10,9 @@ from tests.cmds.conftest import get_mark_for_search_and_send_to
 
 from code42cli.cmds.auditlogs import _parse_audit_log_timestamp_string_to_timestamp
 from code42cli.cmds.search.cursor_store import AuditLogCursorStore
-from code42cli.cmds.search.enums import ServerProtocol
 from code42cli.date_helper import parse_max_timestamp
 from code42cli.date_helper import parse_min_timestamp
+from code42cli.logger.handlers import ServerProtocol
 from code42cli.main import cli
 from code42cli.util import hash_event
 

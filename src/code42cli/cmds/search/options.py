@@ -7,10 +7,10 @@ from py42.sdk.queries.query_filter import FilterGroup
 
 from code42cli.click_ext.options import incompatible_with
 from code42cli.click_ext.types import FileOrString
-from code42cli.cmds.search.enums import ServerProtocol
 from code42cli.date_helper import parse_max_timestamp
 from code42cli.date_helper import parse_min_timestamp
 from code42cli.logger import get_main_cli_logger
+from code42cli.logger.enums import ServerProtocol
 from code42cli.options import begin_option
 from code42cli.options import end_option
 from code42cli.output_formats import SendToFileEventsOutputFormat

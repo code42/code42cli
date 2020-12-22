@@ -3,7 +3,7 @@ import socket
 import ssl
 from logging.handlers import SysLogHandler
 
-from code42cli.cmds.search.enums import ServerProtocol
+from code42cli.logger.enums import ServerProtocol
 
 
 class NoPrioritySysLogHandler(SysLogHandler):

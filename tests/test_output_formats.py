@@ -5,7 +5,7 @@ import pytest
 from c42eventextractor.maps import FILE_EVENT_TO_SIGNATURE_ID_MAP
 
 import code42cli.output_formats as output_formats_module
-from code42cli.cmds.search.enums import FileEventsOutputFormat
+from code42cli.output_formats import FileEventsOutputFormat
 from code42cli.output_formats import FileEventsOutputFormatter
 from code42cli.output_formats import to_cef
 
@@ -759,3 +759,10 @@ def event_name_assigned_correct_signature_id(event_name, signature_id, cef_out):
         return cef_parts[4] == signature_id and cef_parts[5] == event_name
 
     return False
+
+
+def test_security_data_output_format_has_expected_options():
+    options = FileEventsOutputFormat()
+    actual = list(options)
+    expected = ["CEF", "CSV", "RAW-JSON", "JSON", "TABLE"]
+    assert set(actual) == set(expected)

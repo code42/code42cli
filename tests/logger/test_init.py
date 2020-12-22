@@ -5,12 +5,12 @@ from logging.handlers import RotatingFileHandler
 import pytest
 from requests import Request
 
-from code42cli.cmds.search.enums import ServerProtocol
 from code42cli.logger import add_handler_to_logger
 from code42cli.logger import CliLogger
 from code42cli.logger import get_logger_for_server
 from code42cli.logger import get_view_error_details_message
 from code42cli.logger import logger_has_handlers
+from code42cli.logger.enums import ServerProtocol
 from code42cli.logger.formatters import FileEventDictToCEFFormatter
 from code42cli.logger.formatters import FileEventDictToJSONFormatter
 from code42cli.logger.formatters import FileEventDictToRawJSONFormatter

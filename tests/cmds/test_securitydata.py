@@ -13,7 +13,7 @@ from tests.conftest import get_test_date_str
 from code42cli import errors
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
-from code42cli.cmds.search.enums import ServerProtocol
+from code42cli.logger.enums import ServerProtocol
 from code42cli.main import cli
 
 BEGIN_TIMESTAMP = 1577858400.0

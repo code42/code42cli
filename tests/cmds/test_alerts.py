@@ -11,7 +11,7 @@ from tests.conftest import get_test_date_str
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.search import extraction
 from code42cli.cmds.search.cursor_store import AlertCursorStore
-from code42cli.cmds.search.enums import ServerProtocol
+from code42cli.logger.enums import ServerProtocol
 from code42cli.main import cli
 
 

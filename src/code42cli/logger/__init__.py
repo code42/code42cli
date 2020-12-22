@@ -7,11 +7,11 @@ from threading import Lock
 
 from click.exceptions import ClickException
 
-from code42cli.cmds.search.enums import FileEventsOutputFormat
 from code42cli.logger.formatters import FileEventDictToCEFFormatter
 from code42cli.logger.formatters import FileEventDictToJSONFormatter
 from code42cli.logger.formatters import FileEventDictToRawJSONFormatter
 from code42cli.logger.handlers import NoPrioritySysLogHandler
+from code42cli.output_formats import FileEventsOutputFormat
 from code42cli.util import get_url_parts
 from code42cli.util import get_user_project_path
 

@@ -4,7 +4,6 @@ import json
 
 import click
 
-import code42cli.cmds.search.enums as enum
 from code42cli.logger.formatters import CEF_TEMPLATE
 from code42cli.logger.formatters import map_event_to_cef
 from code42cli.util import find_format_width
@@ -111,15 +110,20 @@ def to_formatted_json(output):
     return json_str
 
 
+class FileEventsOutputFormat(OutputFormat):
+    CEF = "CEF"
+
+    def __iter__(self):
+        return iter([self.TABLE, self.CSV, self.JSON, self.RAW, self.CEF])
+
+
 class FileEventsOutputFormatter(OutputFormatter):
     def __init__(self, output_format, header=None):
         output_format = (
-            output_format.upper()
-            if output_format
-            else enum.FileEventsOutputFormat.TABLE
+            output_format.upper() if output_format else FileEventsOutputFormat.TABLE
         )
         super().__init__(output_format, header)
-        if output_format == enum.FileEventsOutputFormat.CEF:
+        if output_format == FileEventsOutputFormat.CEF:
             self._format_func = to_cef
 
 
