@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from py42.services.detectionlists.departing_employee import DepartingEmployeeFilters
 from tests.cmds.conftest import get_generator_for_get_all
@@ -114,6 +116,20 @@ def test_list_departing_employees_uses_filter_option(runner, mock_get_all_state)
     mock_get_all_state.sdk.detectionlists.departing_employee.get_all.assert_called_once_with(
         DepartingEmployeeFilters.EXFILTRATION_30_DAYS
     )
+
+
+def test_list_departing_employees_handles_employees_with_no_notes(
+    runner, mocker, cli_state_with_user
+):
+    hr_json = json.loads(DEPARTING_EMPLOYEE_ITEM)
+    hr_json["notes"] = None
+    new_text = json.dumps(hr_json)
+    generator = get_generator_for_get_all(mocker, new_text)
+    cli_state_with_user.sdk.detectionlists.departing_employee.get_all.side_effect = (
+        generator
+    )
+    res = runner.invoke(cli, ["departing-employee", "list"], obj=cli_state_with_user)
+    assert "None" in res.output
 
 
 def test_add_departing_employee_when_given_cloud_alias_adds_alias(
