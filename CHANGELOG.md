@@ -17,7 +17,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `code42 alerts send-to`
     - `code42 audit-logs send-to`
     for more securely transporting data.
-      
+
 - `--certs` option for `send-to` commands when using `--protocol TLS`.
 
 - `code42 departing-employee list` command.
