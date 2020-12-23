@@ -15,23 +15,34 @@ from code42cli.logger.handlers import NoPrioritySysLogHandler
 _TEST_HOST = "example.com"
 _TEST_PORT = 5000
 _TEST_CERTS = "path/to/cert.crt"
+tls_and_tcp_test = pytest.mark.parametrize(
+    "protocol", (ServerProtocol.TLS, ServerProtocol.TCP)
+)
+tcp_and_udp_test = pytest.mark.parametrize(
+    "protocol", (ServerProtocol.TCP, ServerProtocol.UDP)
+)
 
 
-@pytest.fixture()
-def socket_initializer(mocker):
+class SocketMocks:
+    mock_socket = None
+    socket_initializer = None
+    ssl_wrap_socket_mock = None
+
+
+@pytest.fixture(autouse=True)
+def socket_mocks(mocker):
+    mocks = SocketMocks()
     new_socket = mocker.MagicMock(spec=socket)
     new_socket_magic_method = mocker.patch(
         "code42cli.logger.handlers.socket.socket.__new__"
     )
     new_socket_magic_method.return_value = new_socket
-    return new_socket_magic_method
-
-
-@pytest.fixture()
-def socket_ssl_wrapper(mocker, socket_initializer):
-    patch = mocker.patch("code42cli.logger.handlers.ssl.wrap_socket")
-    patch.return_value = socket_initializer.return_value
-    return patch
+    wrap_socket_magic_method = mocker.patch("code42cli.logger.handlers.ssl.wrap_socket")
+    wrap_socket_magic_method.return_value = new_socket
+    mocks.mock_socket = new_socket
+    mocks.socket_initializer = new_socket_magic_method
+    mocks.ssl_wrap_socket_mock = wrap_socket_magic_method
+    return mocks
 
 
 class TestNoPrioritySysLogHandler:
@@ -41,17 +52,9 @@ class TestNoPrioritySysLogHandler:
         )
         assert handler.address == (_TEST_HOST, _TEST_PORT)
 
-    def test_init_when_tcp_sets_expected_sock_type(self):
-        handler = NoPrioritySysLogHandler(
-            _TEST_HOST, _TEST_PORT, ServerProtocol.TCP, None
-        )
-        actual = handler.socktype
-        assert actual == SocketKind.SOCK_STREAM
-
-    def test_init_when_tls_sets_expected_sock_type(self):
-        handler = NoPrioritySysLogHandler(
-            _TEST_HOST, _TEST_PORT, ServerProtocol.TLS, None
-        )
+    @tls_and_tcp_test
+    def test_init_when_stream_based_sets_expected_sock_type(self, protocol):
+        handler = NoPrioritySysLogHandler(_TEST_HOST, _TEST_PORT, protocol, None)
         actual = handler.socktype
         assert actual == SocketKind.SOCK_STREAM
 
@@ -68,10 +71,9 @@ class TestNoPrioritySysLogHandler:
         )
         assert handler._socket is None
 
-    def test_init_when_not_tls_sets_insecure_to_true(self):
-        handler = NoPrioritySysLogHandler(
-            _TEST_HOST, _TEST_PORT, ServerProtocol.UDP, None
-        )
+    @tcp_and_udp_test
+    def test_init_when_not_tls_sets_insecure_to_true(self, protocol):
+        handler = NoPrioritySysLogHandler(_TEST_HOST, _TEST_PORT, protocol, None)
         assert handler._use_insecure
 
     def test_init_when_using_tls_sets_insecure_to_false(self):
@@ -81,106 +83,78 @@ class TestNoPrioritySysLogHandler:
         assert not handler._use_insecure
         assert handler._certs == _TEST_CERTS
 
-    def test_socket_only_initializes_once(self, socket_initializer):
+    def test_socket_only_initializes_once(self, socket_mocks):
         handler = NoPrioritySysLogHandler(
             _TEST_HOST, _TEST_PORT, ServerProtocol.UDP, None
         )
         _ = handler.socket
         _ = handler.socket
-        assert socket_initializer.call_count == 1
+        assert socket_mocks.socket_initializer.call_count == 1
 
-    def test_socket_when_udp_initializes_with_expected_properties(
-        self, socket_initializer
-    ):
+    def test_socket_when_udp_initializes_with_expected_properties(self, socket_mocks):
         handler = NoPrioritySysLogHandler(
             _TEST_HOST, _TEST_PORT, ServerProtocol.UDP, None
         )
         _ = handler.socket
-        call_args = socket_initializer.call_args[0]
+        call_args = socket_mocks.socket_initializer.call_args[0]
         assert call_args[0] == socket
         assert call_args[2] == SOCK_DGRAM
         assert call_args[3] == IPPROTO_UDP
 
-    def test_socket_when_tcp_initializes_with_expected_properties(
-        self, socket_initializer
+    @tls_and_tcp_test
+    def test_socket_when_tcp_or_tls_initializes_with_expected_properties(
+        self, socket_mocks, protocol
     ):
-        handler = NoPrioritySysLogHandler(
-            _TEST_HOST, _TEST_PORT, ServerProtocol.TCP, None
-        )
+        handler = NoPrioritySysLogHandler(_TEST_HOST, _TEST_PORT, protocol, None)
         _ = handler.socket
-        call_args = socket_initializer.call_args[0]
+        call_args = socket_mocks.socket_initializer.call_args[0]
         assert call_args[0] == socket
         assert call_args[2] == SOCK_STREAM
         assert call_args[3] == IPPROTO_TCP
-        assert socket_initializer.return_value.connect.call_count == 1
+        assert socket_mocks.mock_socket.connect.call_count == 1
 
-    def test_socket_when_tcp_connects_only_once(self, socket_initializer):
-        handler = NoPrioritySysLogHandler(
-            _TEST_HOST, _TEST_PORT, ServerProtocol.TCP, None
-        )
+    @tls_and_tcp_test
+    def test_socket_when_tcp_or_tls_connects_only_once(self, socket_mocks, protocol):
+        handler = NoPrioritySysLogHandler(_TEST_HOST, _TEST_PORT, protocol, None)
         _ = handler.socket
         _ = handler.socket
-        assert socket_initializer.return_value.connect.call_count == 1
+        assert socket_mocks.mock_socket.connect.call_count == 1
 
+    @tls_and_tcp_test
     def test_socket_when_tcp_sets_timeout_for_connection_and_resets(
-        self, socket_initializer
+        self, socket_mocks, protocol
     ):
-        handler = NoPrioritySysLogHandler(
-            _TEST_HOST, _TEST_PORT, ServerProtocol.TCP, None
-        )
+        handler = NoPrioritySysLogHandler(_TEST_HOST, _TEST_PORT, protocol, None)
         _ = handler.socket
-        call_args = socket_initializer.return_value.settimeout.call_args_list
+        call_args = socket_mocks.mock_socket.settimeout.call_args_list
         assert len(call_args) == 2
         assert call_args[0][0][0] == 10
         assert call_args[1][0][0] is None
 
-    def test_socket_when_tls_initializes_with_expected_properties(
-        self, socket_initializer, socket_ssl_wrapper
-    ):
-        handler = NoPrioritySysLogHandler(
-            _TEST_HOST, _TEST_PORT, ServerProtocol.TLS, None
-        )
-        _ = handler.socket
-        call_args = socket_initializer.call_args[0]
-        assert call_args[0] == socket
-        assert call_args[2] == SOCK_STREAM
-        assert call_args[3] == IPPROTO_TCP
-        assert socket_initializer.return_value.connect.call_count == 1
-
     def test_socket_when_tls_and_given_certs_wraps_socket_with_certs(
-        self, socket_initializer, socket_ssl_wrapper
+        self, socket_mocks
     ):
         handler = NoPrioritySysLogHandler(
             _TEST_HOST, _TEST_PORT, ServerProtocol.TLS, _TEST_CERTS
         )
         _ = handler.socket
-        socket_ssl_wrapper.assert_called_once_with(
-            socket_initializer.return_value,
-            ca_certs=_TEST_CERTS,
-            cert_reqs=ssl.CERT_REQUIRED,
+        socket_mocks.ssl_wrap_socket_mock.assert_called_once_with(
+            socket_mocks.mock_socket, ca_certs=_TEST_CERTS, cert_reqs=ssl.CERT_REQUIRED,
         )
 
-    def test_socket_when_tls_and_not_given_certs_wraps_socket_with_certs(
-        self, socket_initializer, socket_ssl_wrapper
+    def test_socket_when_tls_and_not_given_certs_wraps_socket_with_cert_none(
+        self, socket_mocks
     ):
         handler = NoPrioritySysLogHandler(
             _TEST_HOST, _TEST_PORT, ServerProtocol.TLS, None
         )
         _ = handler.socket
-        socket_ssl_wrapper.assert_called_once_with(
-            socket_initializer.return_value, ca_certs=None, cert_reqs=ssl.CERT_NONE
+        socket_mocks.ssl_wrap_socket_mock.assert_called_once_with(
+            socket_mocks.mock_socket, ca_certs=None, cert_reqs=ssl.CERT_NONE
         )
-
-    def test_socket_when_tls_connect_only_once(self, socket_ssl_wrapper):
-        handler = NoPrioritySysLogHandler(
-            _TEST_HOST, _TEST_PORT, ServerProtocol.TLS, None
-        )
-        _ = handler.socket
-        _ = handler.socket
-        assert socket_ssl_wrapper.return_value.connect.call_count == 1
 
     def test_emit_when_tcp_calls_socket_sendall_with_expected_message(
-        self, socket_initializer, mock_file_event_log_record
+        self, mock_file_event_log_record
     ):
         handler = NoPrioritySysLogHandler(
             _TEST_HOST, _TEST_PORT, ServerProtocol.TCP, None
@@ -194,7 +168,7 @@ class TestNoPrioritySysLogHandler:
         handler.socket.sendall.assert_called_once_with(expected_message)
 
     def test_emit_when_tls_calls_socket_sendall_with_expected_message(
-        self, socket_initializer, socket_ssl_wrapper, mock_file_event_log_record
+        self, mock_file_event_log_record
     ):
         handler = NoPrioritySysLogHandler(
             _TEST_HOST, _TEST_PORT, ServerProtocol.TLS, None
@@ -208,7 +182,7 @@ class TestNoPrioritySysLogHandler:
         handler.socket.sendall.assert_called_once_with(expected_message)
 
     def test_emit_when_udp_calls_socket_sendto_with_expected_message_and_address(
-        self, socket_initializer, socket_ssl_wrapper, mock_file_event_log_record
+        self, mock_file_event_log_record
     ):
         handler = NoPrioritySysLogHandler(
             _TEST_HOST, _TEST_PORT, ServerProtocol.UDP, None
