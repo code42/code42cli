@@ -106,29 +106,36 @@ def _change_device_name(sdk, guid, name):
 @sdk_options()
 def show(state, device_guid, format=None):
     """Print device info. Requires device GUID."""
-    _DEVICE_INFO_KEYS_MAP = dict()
-    _DEVICE_INFO_KEYS_MAP["name"] = "Name"
-    _DEVICE_INFO_KEYS_MAP["osHostname"] = "Hostname"
-    _DEVICE_INFO_KEYS_MAP["guid"] = "GUID"
-    _DEVICE_INFO_KEYS_MAP["status"] = "Status"
-    _DEVICE_INFO_KEYS_MAP["lastConnected"] = "Last Connected Date"
-    _DEVICE_INFO_KEYS_MAP["productVersion"] = "Code42 Version"
-    _DEVICE_INFO_KEYS_MAP["osName"] = "Operating System"
-    _DEVICE_INFO_KEYS_MAP["osVersion"] = "Operating System Version"
 
-    _BACKUP_SET_KEYS_MAP = dict()
-    _BACKUP_SET_KEYS_MAP["targetComputerName"] = "Destination"
-    _BACKUP_SET_KEYS_MAP["lastBackup"] = "Last Backup Activity"
-    _BACKUP_SET_KEYS_MAP["lastCompleted"] = "Last Completed Backup"
-    _BACKUP_SET_KEYS_MAP["archiveBytes"] = "Archive Size in Bytes"
-    _BACKUP_SET_KEYS_MAP["archiveGuid"] = "Archive GUID"
-
-    formatter = OutputFormatter(format, _DEVICE_INFO_KEYS_MAP)
-    backup_set_formatter = OutputFormatter(format, _BACKUP_SET_KEYS_MAP)
+    formatter = OutputFormatter(format, _device_info_keys_map())
+    backup_set_formatter = OutputFormatter(format, _backup_set_keys_map())
     device_info = _get_device_info(state.sdk, device_guid)
     formatter.echo_formatted_list([device_info])
     click.echo()
     backup_set_formatter.echo_formatted_list(device_info["backupUsage"])
+
+
+def _device_info_keys_map():
+    return {
+        "name": "Name",
+        "osHostname": "Hostname",
+        "guid": "GUID",
+        "status": "Status",
+        "lastConnected": "Last Connected Date",
+        "productVersion": "Code42 Version",
+        "osName": "Operating System",
+        "osVersion": "Operating System Version",
+    }
+
+
+def _backup_set_keys_map():
+    return {
+        "targetComputerName": "Destination",
+        "lastBackup": "Last Backup Activity",
+        "lastCompleted": "Last Completed Backup",
+        "archiveBytes": "Archive Size in Bytes",
+        "archiveGuid": "Archive GUID",
+    }
 
 
 def _get_device_info(sdk, device_guid):
