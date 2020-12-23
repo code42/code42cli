@@ -532,7 +532,6 @@ def test_add_backup_set_settings_to_dataframe_returns_one_line_per_backup_set(
     cli_state.sdk.devices.get_settings.return_value = mock_device_settings
     testdf = DataFrame.from_records([{"guid": "1234"}])
     result = _add_backup_set_settings_to_dataframe(cli_state.sdk, testdf)
-
     assert len(result) == 2
 
 

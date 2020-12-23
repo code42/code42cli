@@ -275,25 +275,8 @@ def _add_settings_to_dataframe(sdk, device_dataframe):
     macos_guids = device_dataframe.loc[
         device_dataframe["osName"] == "mac", "guid"
     ].values
-    rows = [
-        {"guid": guid, "macos_guid": guid in macos_guids}
-        for guid in device_dataframe["guid"].values
-    ]
 
     def handle_row(guid, macos_guid):
-        try:
-            current_device_settings = sdk.devices.get_settings(guid)
-        except Exception as e:
-            return DataFrame.from_records(
-                [
-                    {
-                        "guid": guid,
-                        "ERROR": "Unable to retrieve device settings for {}: {}".format(
-                            guid, e
-                        ),
-                    }
-                ]
-            )
         if macos_guid:
             try:
                 full_disk_access_status = sdk.devices.get_agent_full_disk_access_state(
@@ -306,12 +289,14 @@ def _add_settings_to_dataframe(sdk, device_dataframe):
         else:
             full_disk_access_status = ""
         return {
-            "guid": current_device_settings.guid,
+            "guid": guid,
             "full disk access status": full_disk_access_status,
         }
 
     result_list = DataFrame.from_records(
-        run_bulk_process(handle_row, rows, progress_label="Getting device settings")
+        run_bulk_process(
+            handle_row, macos_guids, progress_label="Getting device settings"
+        )
     )
     try:
         return device_dataframe.merge(result_list, on="guid")
@@ -383,7 +368,6 @@ def list_backup_sets(
 
 def _add_backup_set_settings_to_dataframe(sdk, devices_dataframe):
     rows = [{"guid": guid} for guid in devices_dataframe["guid"].values]
-    click.echo(rows)
 
     def handle_row(guid):
         try:
@@ -399,8 +383,6 @@ def _add_backup_set_settings_to_dataframe(sdk, devices_dataframe):
                     }
                 ]
             )
-        click.echo(guid)
-        click.echo(current_device_settings)
         current_result_dataframe = DataFrame.from_records(
             [
                 {
@@ -419,12 +401,11 @@ def _add_backup_set_settings_to_dataframe(sdk, devices_dataframe):
         )
         return current_result_dataframe
 
-    result_list = concat(
-        run_bulk_process(handle_row, rows, progress_label="Getting device settings")
+    result_list = run_bulk_process(
+        handle_row, rows, progress_label="Getting device settings"
     )
-    click.echo(result_list)
     try:
-        return devices_dataframe.merge(result_list, how="left", on="guid")
+        return devices_dataframe.merge(concat(result_list), how="left", on="guid")
     except KeyError:
         return devices_dataframe
 
