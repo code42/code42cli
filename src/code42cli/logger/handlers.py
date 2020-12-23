@@ -34,10 +34,13 @@ class NoPrioritySysLogHandler(SysLogHandler):
     @property
     def socket(self):
         if self._socket is None:
-            self._socket = self._create_socket(
-                self._hostname, self._port, self._use_insecure, self._certs
-            )
+            self.init_socket()
         return self._socket
+
+    def init_socket(self):
+        self._socket = self._create_socket(
+            self._hostname, self._port, self._use_insecure, self._certs
+        )
 
     def _create_socket(self, hostname, port, use_insecure, certs):
         socket_info = self._get_socket_address_info(hostname, port)
@@ -81,6 +84,7 @@ def _try_create_socket_from_address_info(info, use_insecure, certs):
         if sock is not None:
             sock.close()
         raise exc
+
     return sock
 
 

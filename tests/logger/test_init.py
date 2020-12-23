@@ -21,11 +21,17 @@ from code42cli.util import get_user_project_path
 
 
 @pytest.fixture(autouse=True)
-def fresh_syslog_handler():
+def init_socket_mock(mocker):
+    return mocker.patch("code42cli.logger.NoPrioritySysLogHandler.init_socket")
+
+
+@pytest.fixture(autouse=True)
+def fresh_syslog_handler(init_socket_mock):
     # Set handlers to empty list so it gets initialized each test
     get_logger_for_server(
-        "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None
+        "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None,
     ).handlers = []
+    init_socket_mock.call_count = 0
 
 
 def test_add_handler_to_logger_does_as_expected():
@@ -57,23 +63,21 @@ def test_get_view_exceptions_location_message_returns_expected_message():
     assert actual == expected
 
 
-def test_get_logger_for_server_has_info_level(fresh_syslog_handler):
+def test_get_logger_for_server_has_info_level():
     logger = get_logger_for_server(
         "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None
     )
     assert logger.level == logging.INFO
 
 
-def test_get_logger_for_server_when_given_cef_format_uses_cef_formatter(mocker):
+def test_get_logger_for_server_when_given_cef_format_uses_cef_formatter():
     logger = get_logger_for_server(
         "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None
     )
     assert type(logger.handlers[0].formatter) == FileEventDictToCEFFormatter
 
 
-def test_get_logger_for_server_when_given_json_format_uses_json_formatter(
-    fresh_syslog_handler,
-):
+def test_get_logger_for_server_when_given_json_format_uses_json_formatter():
     logger = get_logger_for_server(
         "example.com", ServerProtocol.TCP, OutputFormat.JSON, None
     )
@@ -81,9 +85,7 @@ def test_get_logger_for_server_when_given_json_format_uses_json_formatter(
     assert actual == FileEventDictToJSONFormatter
 
 
-def test_get_logger_for_server_when_given_raw_json_format_uses_raw_json_formatter(
-    fresh_syslog_handler,
-):
+def test_get_logger_for_server_when_given_raw_json_format_uses_raw_json_formatter():
     logger = get_logger_for_server(
         "example.com", ServerProtocol.TCP, OutputFormat.RAW, None
     )
@@ -91,9 +93,7 @@ def test_get_logger_for_server_when_given_raw_json_format_uses_raw_json_formatte
     assert actual == FileEventDictToRawJSONFormatter
 
 
-def test_get_logger_for_server_when_called_twice_only_has_one_handler(
-    fresh_syslog_handler,
-):
+def test_get_logger_for_server_when_called_twice_only_has_one_handler():
     get_logger_for_server("example.com", ServerProtocol.TCP, OutputFormat.JSON, None)
     logger = get_logger_for_server(
         "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None
@@ -101,7 +101,7 @@ def test_get_logger_for_server_when_called_twice_only_has_one_handler(
     assert len(logger.handlers) == 1
 
 
-def test_get_logger_for_server_uses_no_priority_syslog_handler(fresh_syslog_handler,):
+def test_get_logger_for_server_uses_no_priority_syslog_handler():
     logger = get_logger_for_server(
         "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None
     )
@@ -109,7 +109,7 @@ def test_get_logger_for_server_uses_no_priority_syslog_handler(fresh_syslog_hand
 
 
 def test_get_logger_for_server_constructs_handler_with_expected_args(
-    mocker, fresh_syslog_handler, monkeypatch
+    mocker, monkeypatch
 ):
     no_priority_syslog_handler = mocker.patch(
         "code42cli.logger.handlers.NoPrioritySysLogHandler.__init__"
@@ -124,7 +124,7 @@ def test_get_logger_for_server_constructs_handler_with_expected_args(
 
 
 def test_get_logger_for_server_when_hostname_includes_port_constructs_handler_with_expected_args(
-    mocker, fresh_syslog_handler
+    mocker,
 ):
     no_priority_syslog_handler = mocker.patch(
         "code42cli.logger.handlers.NoPrioritySysLogHandler.__init__"
@@ -136,6 +136,13 @@ def test_get_logger_for_server_when_hostname_includes_port_constructs_handler_wi
     no_priority_syslog_handler.assert_called_once_with(
         "example.com", 999, ServerProtocol.TCP, None,
     )
+
+
+def test_get_logger_for_server_inits_socket(init_socket_mock):
+    get_logger_for_server(
+        "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None
+    )
+    assert init_socket_mock.call_count == 1
 
 
 class TestCliLogger:
