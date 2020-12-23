@@ -19,7 +19,7 @@ _TEST_CERTS = "path/to/cert.crt"
 
 @pytest.fixture()
 def socket_initializer(mocker):
-    new_socket = mocker.MagicMock()
+    new_socket = mocker.MagicMock(spec=socket)
     new_socket_magic_method = mocker.patch(
         "code42cli.logger.handlers.socket.socket.__new__"
     )
@@ -121,6 +121,18 @@ class TestNoPrioritySysLogHandler:
         _ = handler.socket
         _ = handler.socket
         assert socket_initializer.return_value.connect.call_count == 1
+
+    def test_socket_when_tcp_sets_timeout_for_connection_and_resets(
+        self, socket_initializer
+    ):
+        handler = NoPrioritySysLogHandler(
+            _TEST_HOST, _TEST_PORT, ServerProtocol.TCP, None
+        )
+        _ = handler.socket
+        call_args = socket_initializer.return_value.settimeout.call_args_list
+        assert len(call_args) == 2
+        assert call_args[0][0][0] == 10
+        assert call_args[1][0][0] is None
 
     def test_socket_when_tls_initializes_with_expected_properties(
         self, socket_initializer, socket_ssl_wrapper

@@ -77,7 +77,7 @@ def _try_create_socket_from_address_info(info, use_insecure, certs):
         sock = _create_socket_from_uncoupled_address_info(
             address_family, sock_type, proto, use_insecure, certs, sa
         )
-    except OSError as exc:
+    except Exception as exc:
         if sock is not None:
             sock.close()
         raise exc
@@ -91,7 +91,7 @@ def _create_socket_from_uncoupled_address_info(
     if not use_insecure:
         sock = _wrap_socket_for_ssl(sock, certs)
     if sock_type == socket.SOCK_STREAM:
-        sock.connect(sa)
+        sock = _connect_socket(sock, sa)
     return sock
 
 
@@ -99,6 +99,14 @@ def _wrap_socket_for_ssl(sock, certs):
     certs = certs or None
     cert_reqs = ssl.CERT_REQUIRED if certs else ssl.CERT_NONE
     return ssl.wrap_socket(sock, ca_certs=certs, cert_reqs=cert_reqs)
+
+
+def _connect_socket(sock, sa):
+    sock.settimeout(10)
+    sock.connect(sa)
+    # Set timeout back to None for 'blocking' mode, required for `sendall()`.
+    sock.settimeout(None)
+    return sock
 
 
 def _try_get_socket_type_from_protocol(protocol):
