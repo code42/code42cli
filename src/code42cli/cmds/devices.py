@@ -73,7 +73,10 @@ def _deactivate_device(sdk, device_guid, change_device_name, purge_date):
         _change_device_name(
             sdk,
             device_guid,
-            "deactivated_" + date.today().strftime("%Y-%m-%d") + "_" + device.data["name"],
+            "deactivated_"
+            + date.today().strftime("%Y-%m-%d")
+            + "_"
+            + device.data["name"],
         )
 
 
@@ -82,10 +85,13 @@ def _update_cold_storage_purge_date(sdk, guid, purge_date):
     archive_guid_list = [
         archive["archiveGuid"]
         for page in archives_response
-        for archive in page["archives"] if archive["format"] != "ARCHIVE_V2"
+        for archive in page["archives"]
+        if archive["format"] != "ARCHIVE_V2"
     ]
     for archive_guid in archive_guid_list:
-        sdk.archive.update_cold_storage_purge_date(archive_guid, purge_date.strftime('%Y-%m-%d'))
+        sdk.archive.update_cold_storage_purge_date(
+            archive_guid, purge_date.strftime("%Y-%m-%d")
+        )
 
 
 def _change_device_name(sdk, guid, name):

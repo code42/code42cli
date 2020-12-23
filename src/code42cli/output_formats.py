@@ -82,7 +82,7 @@ class DataFrameOutputFormatter:
         output_format = output_format.upper() if output_format else OutputFormat.TABLE
         self.output_format = output_format
         self._format_func = DataFrame.to_string
-        self._output_args = {"index":False}
+        self._output_args = {"index": False}
 
         if output_format == OutputFormat.CSV:
             self._format_func = DataFrame.to_csv
