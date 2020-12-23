@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from datetime import date
 from datetime import datetime
 
@@ -37,10 +36,11 @@ change_device_name_option = click.option(
     deactivated devices.""",
 )
 
+DATE_FORMAT = "%Y-%m-%d"
 purge_date_option = click.option(
     "--purge-date",
     required=False,
-    type=str,
+    type=click.DateTime(formats=[DATE_FORMAT]),
     default=None,
     help="""The date on which the archive should be purged from cold storage in yyyy-MM-dd format.
     If not provided, the date will be set according to the appropriate org settings.""",
@@ -67,16 +67,13 @@ def _deactivate_device(sdk, device_guid, change_device_name, purge_date):
         raise Code42CLIError("The device {} was not found.".format(device_guid))
     except exceptions.Py42ForbiddenError:
         raise Code42CLIError("Unable to deactivate {}.".format(device_guid))
-    if purge_date or change_device_name:
-        guid = device_guid
-        name = device.data["name"]
     if purge_date:
-        _update_cold_storage_purge_date(sdk, guid, purge_date)
-    if change_device_name and not name.startswith("deactivated_"):
+        _update_cold_storage_purge_date(sdk, device_guid, purge_date)
+    if change_device_name and not device.data["name"].startswith("deactivated_"):
         _change_device_name(
             sdk,
             device_guid,
-            "deactivated_" + date.today().strftime("%Y-%m-%d") + "_" + name,
+            "deactivated_" + date.today().strftime("%Y-%m-%d") + "_" + device.data["name"],
         )
 
 
@@ -85,10 +82,10 @@ def _update_cold_storage_purge_date(sdk, guid, purge_date):
     archive_guid_list = [
         archive["archiveGuid"]
         for page in archives_response
-        for archive in page["archives"]
+        for archive in page["archives"] if archive["format"] != "ARCHIVE_V2"
     ]
     for archive_guid in archive_guid_list:
-        sdk.archive.update_cold_storage_purge_date(archive_guid, purge_date)
+        sdk.archive.update_cold_storage_purge_date(archive_guid, purge_date.strftime('%Y-%m-%d'))
 
 
 def _change_device_name(sdk, guid, name):
@@ -103,7 +100,7 @@ def _change_device_name(sdk, guid, name):
 @sdk_options()
 def show(state, device_guid, format=None):
     """Print device info. Requires device GUID."""
-    _DEVICE_INFO_KEYS_MAP = OrderedDict()
+    _DEVICE_INFO_KEYS_MAP = dict()
     _DEVICE_INFO_KEYS_MAP["name"] = "Name"
     _DEVICE_INFO_KEYS_MAP["osHostname"] = "Hostname"
     _DEVICE_INFO_KEYS_MAP["guid"] = "GUID"
@@ -113,7 +110,7 @@ def show(state, device_guid, format=None):
     _DEVICE_INFO_KEYS_MAP["osName"] = "Operating System"
     _DEVICE_INFO_KEYS_MAP["osVersion"] = "Operating System Version"
 
-    _BACKUP_SET_KEYS_MAP = OrderedDict()
+    _BACKUP_SET_KEYS_MAP = dict()
     _BACKUP_SET_KEYS_MAP["targetComputerName"] = "Destination"
     _BACKUP_SET_KEYS_MAP["lastBackup"] = "Last Backup Activity"
     _BACKUP_SET_KEYS_MAP["lastCompleted"] = "Last Completed Backup"

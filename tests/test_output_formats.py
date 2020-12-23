@@ -202,7 +202,7 @@ class TestDataFrameOutputFormatter:
         formatter = output_formats_module.DataFrameOutputFormatter(output_format)
         formatter.echo_formatted_dataframe(TEST_DATAFRAME)
         mock_dataframe_to_json.assert_called_once_with(
-            TEST_DATAFRAME, orient="records", lines=False
+            TEST_DATAFRAME, orient="records", lines=False, index=False
         )
 
     def test_init_sets_format_func_to_json_function_when_raw_json_format_option_is_passed(
@@ -212,7 +212,7 @@ class TestDataFrameOutputFormatter:
         formatter = output_formats_module.DataFrameOutputFormatter(output_format)
         formatter.echo_formatted_dataframe(TEST_DATAFRAME)
         mock_dataframe_to_json.assert_called_once_with(
-            TEST_DATAFRAME, orient="records", lines=True
+            TEST_DATAFRAME, orient="records", lines=True, index=False
         )
 
     def test_init_sets_format_func_to_table_function_when_table_format_option_is_passed(
@@ -221,7 +221,7 @@ class TestDataFrameOutputFormatter:
         output_format = output_formats_module.OutputFormat.TABLE
         formatter = output_formats_module.DataFrameOutputFormatter(output_format)
         formatter.echo_formatted_dataframe(TEST_DATAFRAME)
-        mock_dataframe_to_string.assert_called_once_with(TEST_DATAFRAME)
+        mock_dataframe_to_string.assert_called_once_with(TEST_DATAFRAME, index=False)
 
     def test_init_sets_format_func_to_csv_function_when_csv_format_option_is_passed(
         self, mock_dataframe_to_csv
@@ -229,11 +229,11 @@ class TestDataFrameOutputFormatter:
         output_format = output_formats_module.OutputFormat.CSV
         formatter = output_formats_module.DataFrameOutputFormatter(output_format)
         formatter.echo_formatted_dataframe(TEST_DATAFRAME)
-        mock_dataframe_to_csv.assert_called_once_with(TEST_DATAFRAME)
+        mock_dataframe_to_csv.assert_called_once_with(TEST_DATAFRAME, index=False)
 
     def test_init_sets_format_func_to_table_function_when_no_format_option_is_passed(
         self, mock_dataframe_to_string
     ):
         formatter = output_formats_module.DataFrameOutputFormatter(None)
         formatter.echo_formatted_dataframe(TEST_DATAFRAME)
-        mock_dataframe_to_string.assert_called_once_with(TEST_DATAFRAME)
+        mock_dataframe_to_string.assert_called_once_with(TEST_DATAFRAME, index=False)

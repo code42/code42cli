@@ -82,16 +82,16 @@ class DataFrameOutputFormatter:
         output_format = output_format.upper() if output_format else OutputFormat.TABLE
         self.output_format = output_format
         self._format_func = DataFrame.to_string
-        self._output_args = {}
+        self._output_args = {"index":False}
 
         if output_format == OutputFormat.CSV:
             self._format_func = DataFrame.to_csv
         elif output_format == OutputFormat.RAW:
             self._format_func = DataFrame.to_json
-            self._output_args = {"orient": "records", "lines": False}
+            self._output_args.update({"orient": "records", "lines": False})
         elif output_format == OutputFormat.JSON:
             self._format_func = DataFrame.to_json
-            self._output_args = {"orient": "records", "lines": True}
+            self._output_args.update({"orient": "records", "lines": True})
 
     def _format_output(self, output, *args, **kwargs):
         self._output_args.update(kwargs)
