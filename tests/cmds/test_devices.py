@@ -11,6 +11,7 @@ from requests import HTTPError
 from requests import Response
 
 from code42cli import PRODUCT_NAME
+from code42cli.cmds.devices import _add_backup_set_settings_to_dataframe
 from code42cli.cmds.devices import _add_usernames_to_device_dataframe
 from code42cli.cmds.devices import (
     _drop_devices_which_have_not_connected_in_some_number_of_days,
@@ -236,10 +237,24 @@ def _create_py42_response(mocker, text):
 
 
 @pytest.fixture
-def mock_device_settings(mocker):
+def mock_device_settings(mocker, mock_backup_set):
     device_settings = mocker.MagicMock()
     device_settings.name = "testname"
+    device_settings.guid = "1234"
+    device_settings.backup_sets = [mock_backup_set, mock_backup_set]
     return device_settings
+
+
+@pytest.fixture
+def mock_backup_set(mocker):
+    backup_set = mocker.MagicMock()
+    backup_set["name"] = "test_name"
+    backup_set.destinations = {"destination_guid": "destination_name"}
+    backup_set.excluded_files = ["/excluded/path"]
+    backup_set.included_files = ["/included/path"]
+    backup_set.filename_exclusions = [".*\\.excluded_filetype"]
+    backup_set.locked = True
+    return backup_set
 
 
 @pytest.fixture
@@ -441,7 +456,19 @@ def test_show_prints_backup_set_info(runner, cli_state, backupusage_success):
 def test_get_device_dataframe_returns_correct_columns(
     cli_state, get_all_devices_success
 ):
-    result = _get_device_dataframe(cli_state.sdk)
+    columns = [
+        "computerId",
+        "guid",
+        "name",
+        "osHostname",
+        "status",
+        "lastConnected",
+        "productVersion",
+        "osName",
+        "osVersion",
+        "userUid",
+    ]
+    result = _get_device_dataframe(cli_state.sdk, columns)
     assert "computerId" in result.columns
     assert "guid" in result.columns
     assert "name" in result.columns
@@ -456,12 +483,12 @@ def test_get_device_dataframe_returns_correct_columns(
     assert "address" not in result.columns
     assert "buildVersion" not in result.columns
 
+
 def test_device_dataframe_return_includes_backupusage_when_flag_passed(
     cli_state, get_all_devices_success
 ):
-    result = _get_device_dataframe(cli_state.sdk, include_backup_usage=True)
+    result = _get_device_dataframe(cli_state.sdk, columns=[], include_backup_usage=True)
     assert "backupUsage" in result.columns
-
 
 
 def test_drop_n_devices_per_user_drops_correct_devices():
@@ -497,6 +524,16 @@ def test_drop_devices_which_have_not_connected_in_some_number_of_days_drops_appr
     result = _drop_devices_which_have_not_connected_in_some_number_of_days(testdf, 30)
     assert "2019-01-09T17:09:26.432Z" in result.values
     assert date.today().isoformat() + "T17:09:26.432Z" not in result.values
+
+
+def test_add_backup_set_settings_to_dataframe_returns_one_line_per_backup_set(
+    cli_state, mock_device_settings
+):
+    cli_state.sdk.devices.get_settings.return_value = mock_device_settings
+    testdf = DataFrame.from_records([{"guid": "1234"}])
+    result = _add_backup_set_settings_to_dataframe(cli_state.sdk, testdf)
+
+    assert len(result) == 2
 
 
 def test_bulk_deactivate_uses_expected_arguments(runner, mocker, cli_state):

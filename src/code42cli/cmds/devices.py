@@ -147,8 +147,7 @@ def _get_key_from_list_of_dicts(key, list_of_dicts):
     return [item[key] for item in list_of_dicts]
 
 
-@devices.command(name="list", help="Get information about many devices")
-@click.option(
+active_option = click.option(
     "--active",
     required=False,
     type=bool,
@@ -156,13 +155,8 @@ def _get_key_from_list_of_dicts(key, list_of_dicts):
     default=None,
     help="Get only active or deactivated devices. Defaults to getting all devices.",
 )
-@click.option(
-    "--days-since-last-connected",
-    required=False,
-    type=int,
-    help="Return only devices that have not connected in the number of days specified.",
-)
-@click.option(
+
+org_uid_option = click.option(
     "--org-uid",
     required=False,
     type=str,
@@ -170,6 +164,26 @@ def _get_key_from_list_of_dicts(key, list_of_dicts):
     help="""Limit devices to only the ones in the org you specify.
     Note that child orgs will be included.""",
 )
+
+include_usernames_option = click.option(
+    "--include-usernames",
+    required=False,
+    type=bool,
+    default=False,
+    is_flag=True,
+    help="Add the username associated with a device to the output.",
+)
+
+
+@devices.command(name="list", help="Get information about many devices")
+@active_option
+@click.option(
+    "--days-since-last-connected",
+    required=False,
+    type=int,
+    help="Return only devices that have not connected in the number of days specified.",
+)
+@org_uid_option
 @click.option(
     "--drop-most-recent",
     required=False,
@@ -187,23 +201,14 @@ def _get_key_from_list_of_dicts(key, list_of_dicts):
     help="""Return backup usage information for each device
     (may significantly lengthen the size of the return).""",
 )
-@click.option(
-    "--include-usernames",
-    required=False,
-    type=bool,
-    default=False,
-    is_flag=True,
-    help="Add the username associated with a device to the output.",
-)
+@include_usernames_option
 @click.option(
     "--include-settings",
     required=False,
     type=bool,
     default=False,
     is_flag=True,
-    help="""Include devoice and backup set settings in output.
-        Will result in one line per backup set,
-        not one line per device.""",
+    help="""Include device settings in output.""",
 )
 @format_option
 @sdk_options()
@@ -219,8 +224,20 @@ def list(
     format,
 ):
     """Outputs a list of all devices."""
+    columns = [
+        "computerId",
+        "guid",
+        "name",
+        "osHostname",
+        "status",
+        "lastConnected",
+        "productVersion",
+        "osName",
+        "osVersion",
+        "userUid",
+    ]
     devices_dataframe = _get_device_dataframe(
-        state.sdk, active, org_uid, include_backup_usage
+        state.sdk, columns, active, org_uid, include_backup_usage
     )
     if drop_most_recent:
         devices_dataframe = _drop_n_devices_per_user(
@@ -240,31 +257,18 @@ def list(
     formatter.echo_formatted_dataframe(devices_dataframe)
 
 
-def _get_device_dataframe(sdk, active=None, org_uid=None, include_backup_usage=False):
+def _get_device_dataframe(
+    sdk, columns, active=None, org_uid=None, include_backup_usage=False
+):
     devices_generator = sdk.devices.get_all(
         active=active, include_backup_usage=include_backup_usage, org_uid=org_uid
     )
     devices_list = []
-    columns=[
-            "computerId",
-            "guid",
-            "name",
-            "osHostname",
-            "status",
-            "lastConnected",
-            "productVersion",
-            "osName",
-            "osVersion",
-            "userUid",
-        ]
     if include_backup_usage:
         columns.append("backupUsage")
     for page in devices_generator:
         devices_list.extend(page["computers"])
-    return DataFrame.from_records(
-        devices_list,
-        columns=columns
-    )
+    return DataFrame.from_records(devices_list, columns=columns)
 
 
 def _add_settings_to_dataframe(sdk, device_dataframe):
@@ -301,23 +305,12 @@ def _add_settings_to_dataframe(sdk, device_dataframe):
                 full_disk_access_status = False
         else:
             full_disk_access_status = ""
-        current_result_dataframe = DataFrame.from_records(
-            [
-                {
-                    "guid": current_device_settings.guid,
-                    "destinations": [destination for destination in backup_set.destinations.values()],
-                    "excluded files": backup_set.excluded_files,
-                    "included files": backup_set.included_files,
-                    "filename exclusions": backup_set.filename_exclusions,
-                    "locked": backup_set.locked,
-                    "full disk access status": full_disk_access_status,
-                }
-                for backup_set in current_device_settings.backup_sets
-            ]
-        )
-        return current_result_dataframe
+        return {
+            "guid": current_device_settings.guid,
+            "full disk access status": full_disk_access_status,
+        }
 
-    result_list = concat(
+    result_list = DataFrame.from_records(
         run_bulk_process(handle_row, rows, progress_label="Getting device settings")
     )
     try:
@@ -360,6 +353,80 @@ def _add_usernames_to_device_dataframe(sdk, device_dataframe):
         users_list, columns=["username", "userUid"]
     )
     return device_dataframe.merge(users_dataframe, how="left", on="userUid")
+
+
+@devices.command(
+    name="list-backup-sets",
+    help="Get information about many devices and their backup sets",
+)
+@active_option
+@org_uid_option
+@include_usernames_option
+@format_option
+@sdk_options()
+def list_backup_sets(
+    state, active, org_uid, include_usernames, format,
+):
+    """Outputs a list of all devices."""
+    columns = ["guid", "userUid"]
+    devices_dataframe = _get_device_dataframe(state.sdk, columns, active, org_uid)
+    if include_usernames:
+        devices_dataframe = _add_usernames_to_device_dataframe(
+            state.sdk, devices_dataframe
+        )
+    devices_dataframe = _add_backup_set_settings_to_dataframe(
+        state.sdk, devices_dataframe
+    )
+    formatter = DataFrameOutputFormatter(format)
+    formatter.echo_formatted_dataframe(devices_dataframe)
+
+
+def _add_backup_set_settings_to_dataframe(sdk, devices_dataframe):
+    rows = [{"guid": guid} for guid in devices_dataframe["guid"].values]
+    click.echo(rows)
+
+    def handle_row(guid):
+        try:
+            current_device_settings = sdk.devices.get_settings(guid)
+        except Exception as e:
+            return DataFrame.from_records(
+                [
+                    {
+                        "guid": guid,
+                        "ERROR": "Unable to retrieve device settings for {}: {}".format(
+                            guid, e
+                        ),
+                    }
+                ]
+            )
+        click.echo(guid)
+        click.echo(current_device_settings)
+        current_result_dataframe = DataFrame.from_records(
+            [
+                {
+                    "guid": current_device_settings.guid,
+                    "backup set name": backup_set["name"],
+                    "destinations": [
+                        destination for destination in backup_set.destinations.values()
+                    ],
+                    "included files": backup_set.included_files,
+                    "excluded files": backup_set.excluded_files,
+                    "filename exclusions": backup_set.filename_exclusions,
+                    "locked": backup_set.locked,
+                }
+                for backup_set in current_device_settings.backup_sets
+            ]
+        )
+        return current_result_dataframe
+
+    result_list = concat(
+        run_bulk_process(handle_row, rows, progress_label="Getting device settings")
+    )
+    click.echo(result_list)
+    try:
+        return devices_dataframe.merge(result_list, how="left", on="guid")
+    except KeyError:
+        return devices_dataframe
 
 
 @devices.group(cls=OrderedGroup)
