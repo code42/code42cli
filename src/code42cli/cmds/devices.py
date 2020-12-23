@@ -2,6 +2,7 @@ from datetime import date
 from datetime import datetime
 
 import click
+from pandas import concat
 from pandas import DataFrame
 from pandas import to_datetime
 from pandas import to_timedelta
@@ -200,7 +201,9 @@ def _get_key_from_list_of_dicts(key, list_of_dicts):
     type=bool,
     default=False,
     is_flag=True,
-    help="Include device settings in output.",
+    help="""Include devoice and backup set settings in output.
+        Will result in one line per backup set,
+        not one line per device.""",
 )
 @format_option
 @sdk_options()
@@ -242,23 +245,25 @@ def _get_device_dataframe(sdk, active=None, org_uid=None, include_backup_usage=F
         active=active, include_backup_usage=include_backup_usage, org_uid=org_uid
     )
     devices_list = []
-    for page in devices_generator:
-        devices_list.extend(page["computers"])
-    return DataFrame.from_records(
-        devices_list,
-        columns=[
+    columns=[
             "computerId",
             "guid",
             "name",
             "osHostname",
             "status",
             "lastConnected",
-            "backupUsage",
             "productVersion",
             "osName",
             "osVersion",
             "userUid",
-        ],
+        ]
+    if include_backup_usage:
+        columns.append("backupUsage")
+    for page in devices_generator:
+        devices_list.extend(page["computers"])
+    return DataFrame.from_records(
+        devices_list,
+        columns=columns
     )
 
 
@@ -275,23 +280,16 @@ def _add_settings_to_dataframe(sdk, device_dataframe):
         try:
             current_device_settings = sdk.devices.get_settings(guid)
         except Exception as e:
-            return {
-                "guid": guid,
-                "ERROR": "Unable to retrieve device settings for {}: {}".format(
-                    guid, e
-                ),
-            }
-        current_result_dict = {
-            "guid": current_device_settings.guid,
-            "included_files": [
-                backup_set.included_files
-                for backup_set in current_device_settings.backup_sets
-            ],
-            "excluded_files": [
-                backup_set.excluded_files
-                for backup_set in current_device_settings.backup_sets
-            ],
-        }
+            return DataFrame.from_records(
+                [
+                    {
+                        "guid": guid,
+                        "ERROR": "Unable to retrieve device settings for {}: {}".format(
+                            guid, e
+                        ),
+                    }
+                ]
+            )
         if macos_guid:
             try:
                 full_disk_access_status = sdk.devices.get_agent_full_disk_access_state(
@@ -303,14 +301,27 @@ def _add_settings_to_dataframe(sdk, device_dataframe):
                 full_disk_access_status = False
         else:
             full_disk_access_status = ""
-        current_result_dict["full_disk_access"] = full_disk_access_status
-        return current_result_dict
+        current_result_dataframe = DataFrame.from_records(
+            [
+                {
+                    "guid": current_device_settings.guid,
+                    "destinations": [destination for destination in backup_set.destinations.values()],
+                    "excluded files": backup_set.excluded_files,
+                    "included files": backup_set.included_files,
+                    "filename exclusions": backup_set.filename_exclusions,
+                    "locked": backup_set.locked,
+                    "full disk access status": full_disk_access_status,
+                }
+                for backup_set in current_device_settings.backup_sets
+            ]
+        )
+        return current_result_dataframe
 
-    result_list = run_bulk_process(
-        handle_row, rows, progress_label="Getting device settings"
+    result_list = concat(
+        run_bulk_process(handle_row, rows, progress_label="Getting device settings")
     )
     try:
-        return device_dataframe.merge(DataFrame.from_records(result_list), on="guid")
+        return device_dataframe.merge(result_list, on="guid")
     except KeyError:
         return device_dataframe
 

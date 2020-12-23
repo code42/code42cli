@@ -449,13 +449,19 @@ def test_get_device_dataframe_returns_correct_columns(
     assert "guid" in result.columns
     assert "status" in result.columns
     assert "lastConnected" in result.columns
-    assert "backupUsage" in result.columns
     assert "productVersion" in result.columns
     assert "osName" in result.columns
     assert "osVersion" in result.columns
     assert "modelInfo" not in result.columns
     assert "address" not in result.columns
     assert "buildVersion" not in result.columns
+
+def test_device_dataframe_return_includes_backupusage_when_flag_passed(
+    cli_state, get_all_devices_success
+):
+    result = _get_device_dataframe(cli_state.sdk, include_backup_usage=True)
+    assert "backupUsage" in result.columns
+
 
 
 def test_drop_n_devices_per_user_drops_correct_devices():
