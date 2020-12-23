@@ -149,11 +149,7 @@ def create_send_to_handlers(
         handlers.TOTAL_EVENTS += total_events
 
         for event in events:
-            # catches errors that arise from socket connection when using tcp
-            try:
-                logger.info(event)
-            except Exception as ex:
-                handlers.handle_error(ex)
+            logger.info(event)
 
         # To make sure the extractor records correct timestamp event when `CTRL-C` is pressed.
         if total_events:
