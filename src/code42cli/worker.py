@@ -62,6 +62,10 @@ class WorkerStats:
         with self.__results_lock:
             self._results.append(result)
 
+    def reset_results(self):
+        with self.__results_lock:
+            self._results = []
+
 
 class Worker:
     def __init__(self, thread_count, expected_total, bar=None):

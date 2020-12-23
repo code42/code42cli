@@ -110,6 +110,7 @@ class BulkProcessor:
 
     def run(self):
         """Processes the csv rows specified in the ctor, calling `self.row_handler` on each row."""
+        self._stats.reset_results()
         for row in self._rows:
             self._process_row(row)
         self.__worker.wait()
