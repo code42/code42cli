@@ -4,6 +4,7 @@ from integration import run_command
 LEGAL_HOLD_COMMAND = "code42 legal-hold"
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "command",
     [

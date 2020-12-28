@@ -4,6 +4,7 @@ from integration import run_command
 ALERT_RULES_COMMAND = "code42 alert-rules"
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "command",
     [

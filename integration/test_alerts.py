@@ -21,6 +21,7 @@ ALERT_ADVANCED_QUERY_COMMAND = "code42 alerts search --advanced-query '{}'".form
 )
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "command",
     [

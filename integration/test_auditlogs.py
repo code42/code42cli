@@ -12,6 +12,7 @@ end_date = datetime.utcnow() - timedelta(days=10)
 end_date_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "command",
     [
