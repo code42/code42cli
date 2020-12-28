@@ -35,8 +35,9 @@ setup(
         "colorama>=0.4.3",
         "c42eventextractor==0.4.0",
         "keyring==18.0.1",
+        "pandas>=1.1.3",
         "keyrings.alt==3.2.0",
-        "py42>=1.9",
+        "py42>=1.10",
     ],
     extras_require={
         "dev": [

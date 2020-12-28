@@ -1,11 +1,17 @@
 import pytest
+from pandas import DataFrame
+from pandas import testing
 from py42.exceptions import Py42BadRequestError
 from py42.response import Py42Response
 from requests import HTTPError
 from requests import Response
 
 from code42cli import PRODUCT_NAME
+from code42cli.cmds.legal_hold import _build_user_dataframe
 from code42cli.cmds.legal_hold import _check_matter_is_accessible
+from code42cli.cmds.legal_hold import _get_total_archive_bytes_per_device
+from code42cli.cmds.legal_hold import _merge_matter_members_with_devices
+from code42cli.cmds.legal_hold import _print_storage_by_org
 from code42cli.main import cli
 
 
@@ -19,6 +25,8 @@ INACTIVE_TEST_USERNAME = "inactive@example.com"
 INACTIVE_TEST_USER_ID = "54321"
 TEST_POLICY_UID = "66666"
 TEST_PRESERVATION_POLICY_UID = "1010101010"
+ACTIVE_TEST_DEVICE_GUID = "853543498784654695"
+INACTIVE_TEST_DEVICE_GUID = "987879465123464477"
 MATTER_RESPONSE = """
 {
     "legalHoldUid": "88888",
@@ -38,6 +46,266 @@ MATTER_RESPONSE = """
     "holdPolicyUid": "66666"
 }
 """
+TEST_DEVICE_PAGE = {
+    "computers": [
+        {
+            "computerId": 1111111,
+            "name": "shouldprint",
+            "osHostname": "UNKNOWN",
+            "guid": "853543498784654695",
+            "type": "COMPUTER",
+            "status": "Active, Deauthorized",
+            "active": "True",
+            "blocked": "False",
+            "alertState": 2,
+            "alertStates": ["CriticalConnectionAlert"],
+            "userId": "12345",
+            "userUid": "12345",
+            "orgId": 521084,
+            "orgUid": "926779929022980902",
+            "computerExtRef": None,
+            "notes": None,
+            "parentComputerId": None,
+            "parentComputerGuid": None,
+            "lastConnected": "2020-03-16T17:06:50.774Z",
+            "osName": "linux",
+            "osVersion": "4.15.0-45-generic",
+            "osArch": "amd64",
+            "address": "xxx.xxx.x.xx:4242",
+            "remoteAddress": "xxx.xx.xxx.xxx",
+            "javaVersion": "1.8.0_144",
+            "modelInfo": None,
+            "timeZone": "America/Los_Angeles",
+            "version": 1525200006700,
+            "productVersion": "7.0.0",
+            "buildVersion": 586,
+            "creationDate": "2020-03-16T16:20:00.871Z",
+            "modificationDate": "2020-09-03T13:32:02.383Z",
+            "loginDate": "2020-03-16T16:52:18.900Z",
+            "service": "CrashPlan",
+            "backupUsage": [
+                {
+                    "targetComputerParentId": "null",
+                    "targetComputerParentGuid": "null",
+                    "targetComputerGuid": "632540230984925185",
+                    "targetComputerName": "PROe Cloud, US - West",
+                    "targetComputerOsName": "null",
+                    "targetComputerType": "SERVER",
+                    "selectedFiles": 0,
+                    "selectedBytes": 0,
+                    "todoFiles": 0,
+                    "todoBytes": 0,
+                    "archiveBytes": 99056,
+                    "billableBytes": 99056,
+                    "sendRateAverage": 0,
+                    "completionRateAverage": 0,
+                    "lastBackup": "null",
+                    "lastCompletedBackup": "null",
+                    "lastConnected": "null",
+                    "lastMaintenanceDate": "2020-12-08T14:38:56.565-06:00",
+                    "lastCompactDate": "2020-12-08T14:38:56.549-06:00",
+                    "modificationDate": "2020-12-23T10:02:53.738-06:00",
+                    "creationDate": "2020-04-06T16:50:44.353-05:00",
+                    "using": "true",
+                    "alertState": 16,
+                    "alertStates": ["CriticalBackupAlert"],
+                    "percentComplete": 0.0,
+                    "storePointId": 12537,
+                    "storePointName": "erf-sea-3",
+                    "serverId": 160025225,
+                    "serverGuid": "946058956729596234",
+                    "serverName": "erf-sea",
+                    "serverHostName": "https://web-erf-sea.crashplan.com",
+                    "isProvider": "false",
+                    "archiveGuid": "948688240625098914",
+                    "archiveFormat": "ARCHIVE_V1",
+                    "activity": {
+                        "connected": "false",
+                        "backingUp": "false",
+                        "restoring": "false",
+                        "timeRemainingInMs": 0,
+                        "remainingFiles": 0,
+                        "remainingBytes": 0,
+                    },
+                },
+                {
+                    "targetComputerParentId": "null",
+                    "targetComputerParentGuid": "null",
+                    "targetComputerGuid": "43",
+                    "targetComputerName": "PROe Cloud, US",
+                    "targetComputerOsName": "null",
+                    "targetComputerType": "SERVER",
+                    "selectedFiles": 63775,
+                    "selectedBytes": 2434109067,
+                    "todoFiles": 0,
+                    "todoBytes": 0,
+                    "archiveBytes": 1199319510,
+                    "billableBytes": 2434109067,
+                    "sendRateAverage": 10528400,
+                    "completionRateAverage": 265154800,
+                    "lastBackup": "2019-12-16T17:01:31.749-06:00",
+                    "lastCompletedBackup": "2019-12-16T17:01:31.749-06:00",
+                    "lastConnected": "2019-12-16T17:04:12.818-06:00",
+                    "lastMaintenanceDate": "2020-11-19T20:02:02.054-06:00",
+                    "lastCompactDate": "2020-11-19T20:02:02.051-06:00",
+                    "modificationDate": "2020-12-23T06:58:08.684-06:00",
+                    "creationDate": "2019-11-25T16:16:38.692-06:00",
+                    "using": "true",
+                    "alertState": 16,
+                    "alertStates": ["CriticalBackupAlert"],
+                    "percentComplete": 100.0,
+                    "storePointId": 9788,
+                    "storePointName": "eda-iad-1",
+                    "serverId": 160023585,
+                    "serverGuid": "829383329462096515",
+                    "serverName": "eda-iad",
+                    "serverHostName": "https://web-eda-iad.crashplan.com",
+                    "isProvider": "false",
+                    "archiveGuid": "929857309487839252",
+                    "archiveFormat": "ARCHIVE_V1",
+                    "activity": {
+                        "connected": "false",
+                        "backingUp": "false",
+                        "restoring": "false",
+                        "timeRemainingInMs": 0,
+                        "remainingFiles": 0,
+                        "remainingBytes": 0,
+                    },
+                },
+            ],
+        },
+        {
+            "computerId": 2222222,
+            "name": "shouldNotPrint",
+            "osHostname": "UNKNOWN",
+            "guid": "987879465123464477",
+            "type": "COMPUTER",
+            "status": "Active",
+            "active": "True",
+            "blocked": "False",
+            "alertState": 0,
+            "alertStates": ["OK"],
+            "userId": "02345",
+            "userUid": "02345",
+            "orgId": 521084,
+            "orgUid": "926779929022980902",
+            "computerExtRef": None,
+            "notes": None,
+            "parentComputerId": None,
+            "parentComputerGuid": None,
+            "lastConnected": "2018-03-19T20:04:02.999Z",
+            "osName": "win",
+            "osVersion": "10.0.18362",
+            "osArch": "amd64",
+            "address": "xxx.x.xx.xxx:4242",
+            "remoteAddress": "xx.xx.xxx.xxx",
+            "javaVersion": "11.04",
+            "modelInfo": None,
+            "timeZone": "America/Chicago",
+            "version": 1525200006770,
+            "productVersion": "7.7.0",
+            "buildVersion": 833,
+            "creationDate": "2020-03-19T19:43:16.918Z",
+            "modificationDate": "2020-09-08T15:43:45.875Z",
+            "loginDate": "2020-03-19T20:03:45.360Z",
+            "service": "CrashPlan",
+            "backupUsage": [
+                {
+                    "targetComputerParentId": "null",
+                    "targetComputerParentGuid": "null",
+                    "targetComputerGuid": "632540230984925185",
+                    "targetComputerName": "PROe Cloud, US - West",
+                    "targetComputerOsName": "null",
+                    "targetComputerType": "SERVER",
+                    "selectedFiles": 0,
+                    "selectedBytes": 0,
+                    "todoFiles": 0,
+                    "todoBytes": 0,
+                    "archiveBytes": 99056,
+                    "billableBytes": 99056,
+                    "sendRateAverage": 0,
+                    "completionRateAverage": 0,
+                    "lastBackup": "null",
+                    "lastCompletedBackup": "null",
+                    "lastConnected": "null",
+                    "lastMaintenanceDate": "2020-12-08T14:38:56.565-06:00",
+                    "lastCompactDate": "2020-12-08T14:38:56.549-06:00",
+                    "modificationDate": "2020-12-23T10:02:53.738-06:00",
+                    "creationDate": "2020-04-06T16:50:44.353-05:00",
+                    "using": "true",
+                    "alertState": 16,
+                    "alertStates": ["CriticalBackupAlert"],
+                    "percentComplete": 0.0,
+                    "storePointId": 12537,
+                    "storePointName": "erf-sea-3",
+                    "serverId": 160025225,
+                    "serverGuid": "946058956729596234",
+                    "serverName": "erf-sea",
+                    "serverHostName": "https://web-erf-sea.crashplan.com",
+                    "isProvider": "false",
+                    "archiveGuid": "948688240625098914",
+                    "archiveFormat": "ARCHIVE_V1",
+                    "activity": {
+                        "connected": "false",
+                        "backingUp": "false",
+                        "restoring": "false",
+                        "timeRemainingInMs": 0,
+                        "remainingFiles": 0,
+                        "remainingBytes": 0,
+                    },
+                },
+                {
+                    "targetComputerParentId": "null",
+                    "targetComputerParentGuid": "null",
+                    "targetComputerGuid": "43",
+                    "targetComputerName": "PROe Cloud, US",
+                    "targetComputerOsName": "null",
+                    "targetComputerType": "SERVER",
+                    "selectedFiles": 63775,
+                    "selectedBytes": 2434109067,
+                    "todoFiles": 0,
+                    "todoBytes": 0,
+                    "archiveBytes": 1199319510,
+                    "billableBytes": 2434109067,
+                    "sendRateAverage": 10528400,
+                    "completionRateAverage": 265154800,
+                    "lastBackup": "2019-12-16T17:01:31.749-06:00",
+                    "lastCompletedBackup": "2019-12-16T17:01:31.749-06:00",
+                    "lastConnected": "2019-12-16T17:04:12.818-06:00",
+                    "lastMaintenanceDate": "2020-11-19T20:02:02.054-06:00",
+                    "lastCompactDate": "2020-11-19T20:02:02.051-06:00",
+                    "modificationDate": "2020-12-23T06:58:08.684-06:00",
+                    "creationDate": "2019-11-25T16:16:38.692-06:00",
+                    "using": "true",
+                    "alertState": 16,
+                    "alertStates": ["CriticalBackupAlert"],
+                    "percentComplete": 100.0,
+                    "storePointId": 9788,
+                    "storePointName": "eda-iad-1",
+                    "serverId": 160023585,
+                    "serverGuid": "829383329462096515",
+                    "serverName": "eda-iad",
+                    "serverHostName": "https://web-eda-iad.crashplan.com",
+                    "isProvider": "false",
+                    "archiveGuid": "929857309487839252",
+                    "archiveFormat": "ARCHIVE_V1",
+                    "activity": {
+                        "connected": "false",
+                        "backingUp": "false",
+                        "restoring": "false",
+                        "timeRemainingInMs": 0,
+                        "remainingFiles": 0,
+                        "remainingBytes": 0,
+                    },
+                },
+            ],
+        },
+    ]
+}
+USERS_LIST = [
+    [True, "12345", "user@example.com"],
+    [False, "02345", "inactive@example.com"],
+]
 POLICY_RESPONSE = """
 {
     "legalHoldPolicyUid": "1010101010",
@@ -192,6 +460,11 @@ def preservation_policy_response(mocker):
 
 
 @pytest.fixture
+def devices_list_generator(mocker):
+    return [TEST_DEVICE_PAGE]
+
+
+@pytest.fixture
 def empty_legal_hold_memberships_response(mocker):
     return [_create_py42_response(mocker, EMPTY_CUSTODIANS_RESPONSE)]
 
@@ -236,6 +509,11 @@ def get_user_id_failure(cli_state):
 @pytest.fixture
 def check_matter_accessible_success(cli_state, matter_response):
     cli_state.sdk.legalhold.get_matter_by_uid.return_value = matter_response
+
+
+@pytest.fixture
+def get_all_devices_success(cli_state, devices_list_generator):
+    cli_state.sdk.devices.get_all.return_value = devices_list_generator
 
 
 @pytest.fixture
@@ -498,6 +776,127 @@ def test_show_matter_prints_no_active_members_when_no_active_membership_and_inac
     assert ACTIVE_TEST_USERNAME not in result.output
     assert INACTIVE_TEST_USERNAME in result.output
     assert "No active matter members." in result.output
+
+
+def test_show_matter_prints_devices_when_active_user_has_devices_if_device_flag_is_set(
+    runner,
+    cli_state,
+    active_legal_hold_memberships_response,
+    check_matter_accessible_success,
+    get_all_devices_success,
+):
+
+    cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
+        active_legal_hold_memberships_response
+    )
+    result = runner.invoke(
+        cli, ["legal-hold", "show", TEST_MATTER_ID, "--include-devices"], obj=cli_state
+    )
+
+    assert ACTIVE_TEST_DEVICE_GUID in result.output
+    assert INACTIVE_TEST_DEVICE_GUID not in result.output
+
+
+def test_show_matter_prints_devices_when_inactive_user_has_devices_if_device_and_inactive_flag_is_set(
+    runner,
+    cli_state,
+    active_and_inactive_legal_hold_memberships_response,
+    check_matter_accessible_success,
+    get_all_devices_success,
+):
+    cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
+        active_and_inactive_legal_hold_memberships_response
+    )
+    result = runner.invoke(
+        cli,
+        [
+            "legal-hold",
+            "show",
+            TEST_MATTER_ID,
+            "--include-devices",
+            "--include-inactive",
+        ],
+        obj=cli_state,
+    )
+
+    assert ACTIVE_TEST_DEVICE_GUID in result.output
+    assert INACTIVE_TEST_DEVICE_GUID in result.output
+
+
+def test_show_matter_prints_no_device_table_if_no_devices_found_when_include_devices_flag_set(
+    runner,
+    cli_state,
+    active_and_inactive_legal_hold_memberships_response,
+    check_matter_accessible_success,
+):
+    cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
+        active_and_inactive_legal_hold_memberships_response
+    )
+    cli_state.sdk.devices.get_all.return_value = {}
+    result = runner.invoke(
+        cli,
+        [
+            "legal-hold",
+            "show",
+            TEST_MATTER_ID,
+            "--include-devices",
+            "--include-inactive",
+        ],
+        obj=cli_state,
+    )
+
+    assert "No devices associated with matter." in result.output
+    assert "Matter Members and Devices:" not in result.output
+    assert "Legal Hold Storage by Org" not in result.output
+    assert "osHostname" not in result.output
+    assert "alertStates" not in result.output
+
+
+def test_show_matter_device_dataframe_returns_correct_columns(cli_state):
+    user_dataframe = _build_user_dataframe(USERS_LIST)
+    result = _merge_matter_members_with_devices(cli_state.sdk, user_dataframe)
+    assert "userUid" in result.columns
+    assert "username" in result.columns
+    assert "activeMembership" in result.columns
+    assert "guid" in result.columns
+    assert "lastConnected" in result.columns
+    assert "archiveBytes" in result.columns
+    assert "backupUsage" not in result.columns
+
+
+def test_show_matter_user_dataframe_returns_correct_columns_and_values():
+    result = _build_user_dataframe(USERS_LIST)
+    assert "userUid" in result.columns
+    assert "username" in result.columns
+    assert "activeMembership" in result.columns
+    assert "guid" not in result.columns
+    assert "12345" in result.values
+    assert "user@example.com" in result.values
+
+
+def test_show_matter_org_storage_dataframe_returns_correct_group_values():
+    test_devices_dataframe = DataFrame(
+        data={
+            "orgId": [521084, 521084],
+            "guid": ["853543498784654695", "926779929022980902"],
+            "version": [1525200006770, 1525200006770],
+            "archiveBytes": [1199418566, 1199418566],
+        }
+    )
+    expected_return = DataFrame.from_records(
+        [{"orgId": 521084, "archiveBytes": 2398837132}], index="orgId"
+    )
+    test_return = _print_storage_by_org(test_devices_dataframe)
+    testing.assert_frame_equal(expected_return, test_return)
+
+
+def test_show_matter_device_total_archive_bytes_are_calculated(devices_list_generator):
+    result = _get_total_archive_bytes_per_device(devices_list_generator)
+    assert "archiveBytes" in result[0].keys()
+    assert result[0]["archiveBytes"] == (
+        result[0]["backupUsage"][0]["archiveBytes"]
+        + result[0]["backupUsage"][1]["archiveBytes"]
+    )
 
 
 def test_show_matter_prints_preservation_policy_when_include_policy_flag_set(

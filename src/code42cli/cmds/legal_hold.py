@@ -5,6 +5,7 @@ from pprint import pformat
 
 import click
 from click import echo
+from pandas import DataFrame
 
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
@@ -92,8 +93,19 @@ def _list(state, format=None):
     is_flag=True,
     help="View details of the preservation policy associated with the legal hold matter.",
 )
+@click.option(
+    "--include-devices",
+    is_flag=True,
+    help="View devices and storage associated with legal hold custodians.",
+)
 @sdk_options()
-def show(state, matter_id, include_inactive=False, include_policy=False):
+def show(
+    state,
+    matter_id,
+    include_inactive=False,
+    include_policy=False,
+    include_devices=False,
+):
     """Display details of a given legal hold matter."""
     matter = _check_matter_is_accessible(state.sdk, matter_id)
     matter["creator_username"] = matter["creator"]["username"]
@@ -105,19 +117,32 @@ def show(state, matter_id, include_inactive=False, include_policy=False):
     memberships = _get_legal_hold_memberships_for_matter(
         state.sdk, matter_id, active=active
     )
-    active_usernames = [
-        member["user"]["username"] for member in memberships if member["active"]
-    ]
-    inactive_usernames = [
-        member["user"]["username"] for member in memberships if not member["active"]
-    ]
 
     formatter = OutputFormatter(OutputFormat.TABLE, _MATTER_KEYS_MAP)
     formatter.echo_formatted_list([matter])
-    _print_matter_members(active_usernames, member_type="active")
 
+    users = [
+        [member["active"], member["user"]["userUid"], member["user"]["username"]]
+        for member in memberships
+    ]
+
+    usernames = [user[2] for user in users if user[0] is True]
+    _print_matter_members(usernames, member_type="active")
     if include_inactive:
-        _print_matter_members(inactive_usernames, member_type="inactive")
+        usernames = [user[2] for user in users if user[0] is not True]
+        _print_matter_members(usernames, member_type="inactive")
+
+    if include_devices:
+        user_dataframe = _build_user_dataframe(users)
+        devices_dataframe = _merge_matter_members_with_devices(
+            state.sdk, user_dataframe
+        )
+        if len(devices_dataframe.index) > 0:
+            echo("\nMatter Members and Devices:\n")
+            click.echo(devices_dataframe.to_csv())
+            echo(_print_storage_by_org(devices_dataframe))
+        else:
+            echo("\nNo devices associated with matter.\n")
 
     if include_policy:
         _get_and_print_preservation_policy(state.sdk, matter["holdPolicyUid"])
@@ -236,6 +261,50 @@ def _print_matter_members(username_list, member_type="active"):
         format_string_list_to_columns(username_list)
     else:
         echo("No {} matter members.\n".format(member_type))
+
+
+def _merge_matter_members_with_devices(sdk, user_dataframe):
+    devices_generator = sdk.devices.get_all(active="true", include_backup_usage=True)
+    device_list = _get_total_archive_bytes_per_device(devices_generator)
+    devices_dataframe = DataFrame.from_records(
+        device_list,
+        columns=[
+            "userUid",
+            "guid",
+            "name",
+            "osHostname",
+            "status",
+            "alertStates",
+            "orgId",
+            "lastConnected",
+            "version",
+            "archiveBytes",
+        ],
+    )
+    return user_dataframe.merge(
+        devices_dataframe, how="inner", on="userUid"
+    ).reset_index(drop=True)
+
+
+def _build_user_dataframe(users):
+    user_dataframe = DataFrame.from_records(
+        users, columns=["activeMembership", "userUid", "username"]
+    )
+    return user_dataframe
+
+
+def _get_total_archive_bytes_per_device(devices_generator):
+    device_list = [device for page in devices_generator for device in page["computers"]]
+    for i in device_list:
+        archive_bytes = [archive["archiveBytes"] for archive in i["backupUsage"]]
+        i["archiveBytes"] = sum(archive_bytes)
+    return device_list
+
+
+def _print_storage_by_org(devices_dataframe):
+    echo("\nLegal Hold Storage by Org\n")
+    devices_dataframe = devices_dataframe.filter(["orgId", "archiveBytes"])
+    return devices_dataframe.groupby("orgId").sum()
 
 
 @lru_cache(maxsize=None)
