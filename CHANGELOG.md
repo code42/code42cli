@@ -22,7 +22,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `send-to` to send audit-logs to server.
 
 - `code42 legal-hold show` option:
-    - `--include-devices` to print list of devices associated with legal hold storage along with storage by organization.
+    - `--include-devices` to print list of devices associated with legal hold along with total storage by organization.
 
 ### Changed
 
