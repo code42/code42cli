@@ -276,18 +276,15 @@ def _add_settings_to_dataframe(sdk, device_dataframe):
         device_dataframe["osName"] == "mac", "guid"
     ].values
 
-    def handle_row(guid, macos_guid):
-        if macos_guid:
-            try:
-                full_disk_access_status = sdk.devices.get_agent_full_disk_access_state(
-                    guid
-                ).data[
-                    "value"
-                ]  # returns 404 error if device isn't a Mac or doesn't have full disk access
-            except Py42NotFoundError:
-                full_disk_access_status = False
-        else:
-            full_disk_access_status = ""
+    def handle_row(guid):
+        try:
+            full_disk_access_status = sdk.devices.get_agent_full_disk_access_state(
+                guid
+            ).data[
+                "value"
+            ]  # returns 404 error if device isn't a Mac or doesn't have full disk access
+        except Py42NotFoundError:
+            full_disk_access_status = False
         return {
             "guid": guid,
             "full disk access status": full_disk_access_status,
@@ -299,7 +296,7 @@ def _add_settings_to_dataframe(sdk, device_dataframe):
         )
     )
     try:
-        return device_dataframe.merge(result_list, on="guid")
+        return device_dataframe.merge(result_list, how="left", on="guid")
     except KeyError:
         return device_dataframe
 
