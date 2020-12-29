@@ -143,10 +143,6 @@ def _get_device_info(sdk, device_guid):
     return sdk.devices.get_by_guid(device_guid, include_backup_usage=True).data
 
 
-def _get_key_from_list_of_dicts(key, list_of_dicts):
-    return [item[key] for item in list_of_dicts]
-
-
 active_option = click.option(
     "--active",
     required=False,
@@ -212,7 +208,7 @@ include_usernames_option = click.option(
 )
 @format_option
 @sdk_options()
-def list(
+def list_devices(
     state,
     active,
     days_since_last_connected,
