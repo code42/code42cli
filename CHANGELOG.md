@@ -8,7 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-## Unreleased
+# Unreleased
+
+# Added
+
+- `code42 departing-employee list` command.
+
+- `code42 high-risk-employee list` command.
+
+### Changed
+
+- The error text when removing an employee from a detection list now references the employee
+  by ID rather the username.
+
+## 1.1.0 - 2020-12-18
 
 ### Fixed
 

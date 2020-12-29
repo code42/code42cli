@@ -3,8 +3,11 @@ import threading
 
 import pytest
 from py42.exceptions import Py42UserAlreadyAddedError
+from py42.exceptions import Py42UserNotOnListError
+from py42.response import Py42Response
 from py42.sdk import SDKClient
 from requests import HTTPError
+from requests import Request
 from requests import Response
 from tests.conftest import convert_str_to_date
 from tests.conftest import TEST_ID
@@ -13,6 +16,18 @@ from code42cli.logger import CliLogger
 
 
 TEST_EMPLOYEE = "risky employee"
+
+
+def get_user_not_on_list_side_effect(mocker, list_name):
+    def side_effect(*args, **kwargs):
+        err = mocker.MagicMock(spec=HTTPError)
+        resp = mocker.MagicMock(spec=Response)
+        resp.text = "TEST_ERR"
+        err.response = resp
+        err.response.request = mocker.MagicMock(spec=Request)
+        raise Py42UserNotOnListError(err, TEST_ID, list_name)
+
+    return side_effect
 
 
 @pytest.fixture
@@ -93,3 +108,14 @@ def thread_safe_side_effect():
     f.call_count = 0
     f.call_args_list = []
     return f
+
+
+def get_generator_for_get_all(mocker, mock_return_items):
+    mock_return_items = mock_return_items or ""
+
+    def gen(*args, **kwargs):
+        response = mocker.MagicMock(spec=Request)
+        response.text = """{{"items": [{0}]}}""".format(mock_return_items)
+        yield Py42Response(response)
+
+    return gen
