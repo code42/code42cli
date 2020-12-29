@@ -539,7 +539,7 @@ def test_bulk_deactivate_uses_expected_arguments(runner, mocker, cli_state):
     bulk_processor = mocker.patch("{}.run_bulk_process".format(_NAMESPACE))
     with runner.isolated_filesystem():
         with open("test_bulk_deactivate.csv", "w") as csv:
-            csv.writelines(["deviceId,username\n", "test,value\n"])
+            csv.writelines(["guid,username\n", "test,value\n"])
         runner.invoke(
             cli,
             ["devices", "bulk", "deactivate", "test_bulk_deactivate.csv"],
@@ -547,7 +547,7 @@ def test_bulk_deactivate_uses_expected_arguments(runner, mocker, cli_state):
         )
     assert bulk_processor.call_args[0][1] == [
         {
-            "deviceId": "test",
+            "guid": "test",
             "deactivated": False,
             "change_device_name": False,
             "purge_date": None,

@@ -417,10 +417,9 @@ def bulk(state):
 @bulk.command(
     name="deactivate",
     help="""Deactivate all devices on the given list.
-            Takes as input a CSV with a deviceId column.
-            The deviceId column must have the legacy deviceId value, not GUID.""",
+            Takes as input a CSV with a 'guid' column.""",
 )
-@read_csv_arg(headers=["deviceId"])
+@read_csv_arg(headers=["guid"])
 @change_device_name_option
 @purge_date_option
 @format_option
@@ -436,7 +435,7 @@ def bulk_deactivate(state, csv_rows, change_device_name, purge_date, format):
     def handle_row(**row):
         try:
             _deactivate_device(
-                sdk, row["deviceId"], row["change_device_name"], row["purge_date"]
+                sdk, row["guid"], row["change_device_name"], row["purge_date"]
             )
             row["deactivated"] = "True"
         except Exception as e:
