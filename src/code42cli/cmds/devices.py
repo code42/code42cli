@@ -300,11 +300,13 @@ def _add_settings_to_dataframe(sdk, device_dataframe):
 def _drop_devices_which_have_not_connected_in_some_number_of_days(
     devices_dataframe, days_since_last_connected
 ):
+    utc_now = to_datetime(datetime.utcnow(), utc=True)
+    devices_last_connected_dates = to_datetime(devices_dataframe["lastConnected"])
+    days_since_last_connected_delta = to_timedelta(
+        days_since_last_connected, unit="days"
+    )
     return devices_dataframe.loc[
-        to_datetime(datetime.now(), utc=True)
-        - to_datetime(devices_dataframe["lastConnected"], utc=True)
-        > to_timedelta(days_since_last_connected, unit="days"),
-        :,
+        utc_now - devices_last_connected_dates > days_since_last_connected_delta, :,
     ]
 
 
