@@ -301,7 +301,9 @@ def _drop_devices_which_have_not_connected_in_some_number_of_days(
     devices_dataframe, days_since_last_connected
 ):
     utc_now = to_datetime(datetime.utcnow(), utc=True)
-    devices_last_connected_dates = to_datetime(devices_dataframe["lastConnected"])
+    devices_last_connected_dates = to_datetime(
+        devices_dataframe["lastConnected"], utc=True
+    )
     days_since_last_connected_delta = to_timedelta(
         days_since_last_connected, unit="days"
     )
