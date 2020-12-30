@@ -25,29 +25,27 @@ TEST_DEVICE_GUID = "954143368874689941"
 TEST_DEVICE_ID = 139527
 TEST_ARCHIVE_GUID = "954143426849296547"
 TEST_PURGE_DATE = "2020-10-12"
-TEST_ARCHIVES_RESPONSE = [
-    {
-        "archives": [
-            {
-                "archiveGuid": "954143426849296547",
-                "userId": None,
-                "userUid": None,
-                "archiveBytes": 1745757673,
-                "targetGuid": "632540230984925185",
-                "lastCompletedBackup": "2020-10-12T20:17:52.084Z",
-                "isColdStorage": False,
-                "lastMaintained": "2020-10-10T19:31:05.811Z",
-                "maintenanceDuration": 455,
-                "compactBytesRemoved": 0,
-                "storePointId": 1000,
-                "selectedBytes": 1658317953,
-                "selectedFiles": 596,
-                "todoBytes": 0,
-                "format": "ARCHIVE_V1",
-            }
-        ]
-    }
-]
+TEST_ARCHIVES_RESPONSE = {
+    "archives": [
+        {
+            "archiveGuid": "954143426849296547",
+            "userId": None,
+            "userUid": None,
+            "archiveBytes": 1745757673,
+            "targetGuid": "632540230984925185",
+            "lastCompletedBackup": "2020-10-12T20:17:52.084Z",
+            "isColdStorage": False,
+            "lastMaintained": "2020-10-10T19:31:05.811Z",
+            "maintenanceDuration": 455,
+            "compactBytesRemoved": 0,
+            "storePointId": 1000,
+            "selectedBytes": 1658317953,
+            "selectedFiles": 596,
+            "todoBytes": 0,
+            "format": "ARCHIVE_V1",
+        }
+    ]
+}
 TEST_DEVICE_RESPONSE = """{"data":{"computerId":139527,"name":"testname","osHostname":
 "testhostname","guid":"954143368874689941","type":"COMPUTER","status":"Active","active":true,
 "blocked":false,"alertState":0,"alertStates":["OK"],"userId":203988,"userUid":"938960273869958201",
@@ -267,19 +265,16 @@ def device_info_response(mocker):
     return _create_py42_response(mocker, TEST_DEVICE_RESPONSE)
 
 
-@pytest.fixture
-def archives_list_generator(mocker):
+def archives_list_generator():
     yield TEST_ARCHIVES_RESPONSE
 
 
-@pytest.fixture
-def devices_list_generator(mocker):
-    return [TEST_COMPUTER_PAGE]
+def devices_list_generator():
+    yield TEST_COMPUTER_PAGE
 
 
-@pytest.fixture
-def users_list_generator(mocker):
-    return [TEST_USERS_LIST_PAGE]
+def users_list_generator():
+    yield TEST_USERS_LIST_PAGE
 
 
 @pytest.fixture
@@ -303,8 +298,10 @@ def get_device_by_guid_success(cli_state, device_info_response):
 
 
 @pytest.fixture
-def archives_list_success(cli_state, archives_list_generator):
-    cli_state.sdk.archive.get_all_by_device_guid.return_value = archives_list_generator
+def archives_list_success(cli_state):
+    cli_state.sdk.archive.get_all_by_device_guid.return_value = (
+        archives_list_generator()
+    )
 
 
 @pytest.fixture
@@ -338,13 +335,13 @@ def empty_backupusage_success(cli_state, empty_backupusage_response):
 
 
 @pytest.fixture
-def get_all_devices_success(cli_state, devices_list_generator):
-    cli_state.sdk.devices.get_all.return_value = devices_list_generator
+def get_all_devices_success(cli_state):
+    cli_state.sdk.devices.get_all.return_value = devices_list_generator()
 
 
 @pytest.fixture
-def get_all_users_success(cli_state, users_list_generator):
-    cli_state.sdk.users.get_all.return_value = users_list_generator
+def get_all_users_success(cli_state):
+    cli_state.sdk.users.get_all.return_value = users_list_generator()
 
 
 def test_deactivate_deactivates_device(
@@ -402,7 +399,7 @@ def test_deactivate_does_not_change_device_name_when_not_given_flag(
 ):
     cli_state.sdk.devices.get_settings.return_value = mock_device_settings
     runner.invoke(
-        cli, ["devices", "deactivate", TEST_DEVICE_ID], obj=cli_state,
+        cli, ["devices", "deactivate", TEST_DEVICE_GUID], obj=cli_state,
     )
     assert mock_device_settings.name == "testname"
     cli_state.sdk.devices.update_settings.assert_not_called()
@@ -412,30 +409,30 @@ def test_deactivate_fails_if_device_does_not_exist(
     runner, cli_state, deactivate_device_not_found_failure
 ):
     result = runner.invoke(
-        cli, ["devices", "deactivate", TEST_DEVICE_ID], obj=cli_state
+        cli, ["devices", "deactivate", TEST_DEVICE_GUID], obj=cli_state
     )
     assert result.exit_code == 1
-    assert "The device {} was not found.".format(TEST_DEVICE_ID)
+    assert "The device {} was not found.".format(TEST_DEVICE_GUID) in result.output
 
 
 def test_deactivate_fails_if_device_is_on_legal_hold(
     runner, cli_state, deactivate_device_in_legal_hold_failure
 ):
     result = runner.invoke(
-        cli, ["devices", "deactivate", TEST_DEVICE_ID], obj=cli_state
+        cli, ["devices", "deactivate", TEST_DEVICE_GUID], obj=cli_state
     )
     assert result.exit_code == 1
-    assert "The device {} is in legal hold.".format(TEST_DEVICE_ID)
+    assert "The device {} is in legal hold.".format(TEST_DEVICE_GUID) in result.output
 
 
 def test_deactivate_fails_if_device_deactivation_forbidden(
     runner, cli_state, deactivate_device_not_allowed_failure
 ):
     result = runner.invoke(
-        cli, ["devices", "deactivate", TEST_DEVICE_ID], obj=cli_state
+        cli, ["devices", "deactivate", TEST_DEVICE_GUID], obj=cli_state
     )
     assert result.exit_code == 1
-    assert "Unable to deactivate {}.".format(TEST_DEVICE_ID)
+    assert "Unable to deactivate {}.".format(TEST_DEVICE_GUID) in result.output
 
 
 def test_show_prints_device_info(runner, cli_state, backupusage_success):
