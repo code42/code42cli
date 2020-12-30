@@ -265,3 +265,18 @@ def mock_to_json(mocker):
 @pytest.fixture
 def mock_to_formatted_json(mocker):
     return mocker.patch("code42cli.output_formats.to_formatted_json")
+
+
+@pytest.fixture
+def mock_dataframe_to_json(mocker):
+    return mocker.patch("pandas.DataFrame.to_json")
+
+
+@pytest.fixture
+def mock_dataframe_to_csv(mocker):
+    return mocker.patch("pandas.DataFrame.to_csv")
+
+
+@pytest.fixture
+def mock_dataframe_to_string(mocker):
+    return mocker.patch("pandas.DataFrame.to_string")

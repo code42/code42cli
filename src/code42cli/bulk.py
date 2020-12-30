@@ -76,7 +76,7 @@ def run_bulk_process(row_handler, rows, progress_label=None):
         rows (iterable): the rows to process.
     """
     processor = _create_bulk_processor(row_handler, rows, progress_label)
-    processor.run()
+    return processor.run()
 
 
 def _create_bulk_processor(row_handler, rows, progress_label):
@@ -110,10 +110,12 @@ class BulkProcessor:
 
     def run(self):
         """Processes the csv rows specified in the ctor, calling `self.row_handler` on each row."""
+        self._stats.reset_results()
         for row in self._rows:
             self._process_row(row)
         self.__worker.wait()
         self._print_results()
+        return self._stats._results
 
     def _process_row(self, row):
         if isinstance(row, dict):
@@ -138,7 +140,7 @@ class BulkProcessor:
             )
 
     def _handle_row(self, *args, **kwargs):
-        self._row_handler(*args, **kwargs)
+        return self._row_handler(*args, **kwargs)
 
     def _show_stats(self, _):
         return str(self._stats)
