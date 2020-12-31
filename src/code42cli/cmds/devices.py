@@ -11,6 +11,7 @@ from py42.exceptions import Py42NotFoundError
 
 from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
+from code42cli.click_ext.options import incompatible_with
 from code42cli.errors import Code42CLIError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
@@ -157,13 +158,16 @@ def _get_device_info(sdk, device_guid):
 
 active_option = click.option(
     "--active",
-    required=False,
-    type=bool,
     is_flag=True,
+    help="Limits results to only active devices.",
     default=None,
-    help="Get only active or deactivated devices. Defaults to getting all devices.",
 )
-
+inactive_option = click.option(
+    "--inactive",
+    is_flag=True,
+    help="Limits results to only deactivated devices.",
+    cls=incompatible_with("active"),
+)
 org_uid_option = click.option(
     "--org-uid",
     required=False,
@@ -185,6 +189,7 @@ include_usernames_option = click.option(
 
 @devices.command(name="list", help="Get information about many devices")
 @active_option
+@inactive_option
 @click.option(
     "--days-since-last-connected",
     required=False,
@@ -224,6 +229,7 @@ include_usernames_option = click.option(
 def list_devices(
     state,
     active,
+    inactive,
     days_since_last_connected,
     drop_most_recent,
     org_uid,
@@ -233,6 +239,8 @@ def list_devices(
     format,
 ):
     """Outputs a list of all devices."""
+    if inactive:
+        active = False
     columns = [
         "computerId",
         "guid",
@@ -355,14 +363,17 @@ def _add_usernames_to_device_dataframe(sdk, device_dataframe):
     help="Get information about many devices and their backup sets",
 )
 @active_option
+@inactive_option
 @org_uid_option
 @include_usernames_option
 @format_option
 @sdk_options()
 def list_backup_sets(
-    state, active, org_uid, include_usernames, format,
+    state, active, inactive, org_uid, include_usernames, format,
 ):
     """Outputs a list of all devices."""
+    if inactive:
+        active = False
     columns = ["guid", "userUid"]
     devices_dataframe = _get_device_dataframe(state.sdk, columns, active, org_uid)
     if include_usernames:
