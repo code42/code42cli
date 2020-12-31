@@ -17,6 +17,7 @@ from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.output_formats import DataFrameOutputFormatter
 from code42cli.output_formats import OutputFormatter
+from code42cli.output_formats import OutputFormat
 
 
 @click.group(cls=OrderedGroup)
@@ -112,8 +113,11 @@ def show(state, device_guid, format=None):
     backup_set_formatter = OutputFormatter(format, _backup_set_keys_map())
     device_info = _get_device_info(state.sdk, device_guid)
     formatter.echo_formatted_list([device_info])
-    click.echo()
-    backup_set_formatter.echo_formatted_list(device_info["backupUsage"])
+
+    # backupUsage is already part of device_info, no need to print it again separately
+    if format not in (OutputFormat.JSON, OutputFormat.RAW):
+        click.echo()
+        backup_set_formatter.echo_formatted_list(device_info["backupUsage"])
 
 
 def _device_info_keys_map():
