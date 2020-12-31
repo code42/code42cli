@@ -104,7 +104,15 @@ def _change_device_name(sdk, guid, name):
 
 @devices.command()
 @device_guid_argument
-@format_option
+@click.option(
+    "-f",
+    "--format",
+    type=click.Choice(
+        [OutputFormat.TABLE, OutputFormat.JSON, OutputFormat.RAW], case_sensitive=False
+    ),
+    help="The output format of the result. Defaults to table format.",
+    default=OutputFormat.TABLE,
+)
 @sdk_options()
 def show(state, device_guid, format=None):
     """Print device info. Requires device GUID."""
