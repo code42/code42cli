@@ -189,7 +189,8 @@ include_usernames_option = click.option(
     "--days-since-last-connected",
     required=False,
     type=int,
-    help="Return only devices that have not connected in the number of days specified.",
+    help="Return only devices that have been offline for more than the number of days specified "
+    "(useful for reporting on problem devices).",
 )
 @org_uid_option
 @click.option(
