@@ -59,18 +59,18 @@ def find_format_width(record, header, include_header=True):
         if not header:
             header = _get_default_header(record)
         rows.append(header)
-    max_width_item = dict(header.items())  # Copy
+    widths = dict(header.items())  # Copy
     for record_row in record:
         row = OrderedDict()
         for header_key in header.keys():
             item = record_row.get(header_key)
             row[header_key] = item
-            max_width_item[header_key] = max(
-                max_width_item[header_key], str(item), key=len
+            widths[header_key] = max(
+                widths[header_key], str(item), key=len
             )
         rows.append(row)
-    column_size = {key: len(value) for key, value in max_width_item.items()}
-    return rows, column_size
+    column_sizes = {key: len(value) for key, value in widths.items()}
+    return rows, column_sizes
 
 
 def format_to_table(rows, column_size):
