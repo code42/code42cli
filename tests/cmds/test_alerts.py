@@ -498,7 +498,7 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_with_stored_c
         cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
     )
     assert result.exit_code == 0
-    alert_extractor.extract.assert_called_with()
+    assert alert_extractor.extract.call_count == 1
     assert (
         "checkpoint of {} exists".format(
             alert_cursor_with_checkpoint.expected_timestamp

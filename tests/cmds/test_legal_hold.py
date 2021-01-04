@@ -391,7 +391,7 @@ def test_remove_user_removes_user_if_user_in_matter(
         ],
         obj=cli_state,
     )
-    cli_state.sdk.legalhold.remove_from_matter.assert_called_with(membership_uid)
+    cli_state.sdk.legalhold.remove_from_matter.assert_called_once_with(membership_uid)
 
 
 def test_matter_accessible_check_only_makes_one_http_call_when_called_multiple_times_with_same_matter_id(
