@@ -65,9 +65,7 @@ def find_format_width(record, header, include_header=True):
         for header_key in header.keys():
             item = record_row.get(header_key)
             row[header_key] = item
-            widths[header_key] = max(
-                widths[header_key], str(item), key=len
-            )
+            widths[header_key] = max(widths[header_key], str(item), key=len)
         rows.append(row)
     column_sizes = {key: len(value) for key, value in widths.items()}
     return rows, column_sizes
