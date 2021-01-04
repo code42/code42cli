@@ -10,6 +10,12 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 # Unreleased
 
+- The `devices` command is added. Included are:
+    - `devices deactivate` to deactivate a single computer
+    - `devices show` to retrieve detailed information about a computer
+    - `devices list` to retrieve info about many devices, including device settings
+    - `devices bulk deactivate` to deactivate a list of devices
+
 # Added
 
 - New choice `TLS` for `--protocol` option used by `send-to` commands:
@@ -41,6 +47,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - `code42 audit-logs` commands:
     - `search` to search for audit-logs.
     - `send-to` to send audit-logs to server.
+
+## Unreleased
 
 ### Changed
 

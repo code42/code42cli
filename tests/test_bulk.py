@@ -153,3 +153,14 @@ class TestBulkProcessor:
         processor.run()
         assert (None, "foo") in processed_rows
         assert ("bar", None) in processed_rows
+
+    def test_processor_stores_results_in_stats(self,):
+        def func_for_bulk(test):
+            return test
+
+        rows = ["row1", "row2", "row3"]
+        processor = BulkProcessor(func_for_bulk, rows)
+        processor.run()
+        assert "row1" in processor._stats.results
+        assert "row2" in processor._stats.results
+        assert "row3" in processor._stats.results
