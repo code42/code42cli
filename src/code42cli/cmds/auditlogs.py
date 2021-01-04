@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from datetime import datetime
 from datetime import timezone
 
@@ -24,13 +23,16 @@ EVENT_KEY = "events"
 AUDIT_LOGS_KEYWORD = "audit-logs"
 AUDIT_LOG_TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
 
-AUDIT_LOGS_DEFAULT_HEADER = OrderedDict()
-AUDIT_LOGS_DEFAULT_HEADER["timestamp"] = "Timestamp"
-AUDIT_LOGS_DEFAULT_HEADER["type$"] = "Type"
-AUDIT_LOGS_DEFAULT_HEADER["actorName"] = "ActorName"
-AUDIT_LOGS_DEFAULT_HEADER["actorIpAddress"] = "ActorIpAddress"
-AUDIT_LOGS_DEFAULT_HEADER["userName"] = "AffectedUser"
-AUDIT_LOGS_DEFAULT_HEADER["userId"] = "AffectedUserUID"
+
+def _get_audit_logs_default_header():
+    return {
+        "timestamp": "Timestamp",
+        "type$": "Type",
+        "actorName": "ActorName",
+        "actorIpAddress": "ActorIpAddress",
+        "userName": "AffectedUser",
+        "userId": "AffectedUserUID",
+    }
 
 
 filter_option_usernames = click.option(
@@ -134,7 +136,7 @@ def search(
     use_checkpoint,
 ):
     """Search audit logs."""
-    formatter = OutputFormatter(format, AUDIT_LOGS_DEFAULT_HEADER)
+    formatter = OutputFormatter(format, _get_audit_logs_default_header())
     cursor = _get_audit_log_cursor_store(state.profile.name)
     if use_checkpoint:
         checkpoint_name = use_checkpoint

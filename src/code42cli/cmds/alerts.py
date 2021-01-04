@@ -1,5 +1,3 @@
-from _collections import OrderedDict
-
 import click
 import py42.sdk.queries.alerts.filters as f
 from c42eventextractor.extractors import AlertExtractor
@@ -21,13 +19,15 @@ from code42cli.output_formats import JsonOutputFormat
 from code42cli.output_formats import OutputFormatter
 
 
-SEARCH_DEFAULT_HEADER = OrderedDict()
-SEARCH_DEFAULT_HEADER["name"] = "RuleName"
-SEARCH_DEFAULT_HEADER["actor"] = "Username"
-SEARCH_DEFAULT_HEADER["createdAt"] = "ObservedDate"
-SEARCH_DEFAULT_HEADER["state"] = "Status"
-SEARCH_DEFAULT_HEADER["severity"] = "Severity"
-SEARCH_DEFAULT_HEADER["description"] = "Description"
+def _get_search_default_header():
+    return {
+        "name": "RuleName",
+        "actor": "Username",
+        "createdAt": "ObservedDate",
+        "state": "Status",
+        "severity": "Severity",
+        "description": "Description",
+    }
 
 
 search_options = searchopt.create_search_options("alerts")
@@ -213,7 +213,7 @@ def search(
 ):
     """Search for alerts."""
     output_header = ext.try_get_default_header(
-        include_all, SEARCH_DEFAULT_HEADER, format
+        include_all, _get_search_default_header(), format
     )
     formatter = OutputFormatter(format, output_header)
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None

@@ -1,4 +1,3 @@
-from _collections import OrderedDict
 from pprint import pformat
 
 import click
@@ -26,24 +25,21 @@ from code42cli.output_formats import OutputFormatter
 
 
 def _create_header_keys_map():
-    header_map = OrderedDict()
-    header_map["name"] = "Name"
-    header_map["id"] = "Id"
-    return header_map
+    return {"name": "Name", "id": "Id"}
 
 
 def _create_search_header_map():
-    search_default_header = OrderedDict()
-    search_default_header["fileName"] = "FileName"
-    search_default_header["filePath"] = "FilePath"
-    search_default_header["eventType"] = "Type"
-    search_default_header["eventTimestamp"] = "EventTimestamp"
-    search_default_header["fileCategory"] = "FileCategory"
-    search_default_header["fileSize"] = "FileSize"
-    search_default_header["fileOwner"] = "FileOwner"
-    search_default_header["md5Checksum"] = "MD5Checksum"
-    search_default_header["sha256Checksum"] = "SHA256Checksum"
-    return search_default_header
+    return {
+        "fileName": "FileName",
+        "filePath": "FilePath",
+        "eventType": "Type",
+        "eventTimestamp": "EventTimestamp",
+        "fileCategory": "FileCategory",
+        "fileSize": "FileSize",
+        "fileOwner": "FileOwner",
+        "md5Checksum": "MD5Checksum",
+        "sha256Checksum": "SHA256Checksum",
+    }
 
 
 file_events_format_option = click.option(
