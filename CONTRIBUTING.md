@@ -42,7 +42,7 @@ eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 ```
 
-Then, create your virtual environment. While code42cli runs on python 3.5+, a 3.6+ version is required for development in order to run all of the unit tests and style checks.
+Then, create your virtual environment.
 
 ```bash
 pyenv install 3.6.10
@@ -84,7 +84,7 @@ point to your virtual environment, and you should be ready to go!
 
 ## Run a full build
 
-We use [tox](https://tox.readthedocs.io/en/latest/#) to run our build against Python 3.5, 3.6, 3.7, and 3.8. When run locally, `tox` will run only against the version of python that your virtual envrionment is running, but all versions will be validated against when you [open a PR](#opening-a-pr).
+We use [tox](https://tox.readthedocs.io/en/latest/#) to run our build against Python 3.6, 3.7, and 3.8. When run locally, `tox` will run only against the version of python that your virtual envrionment is running, but all versions will be validated against when you [open a PR](#opening-a-pr).
 
 To run all the unit tests, do a test build of the documentation, and check that the code meets all style requirements, simply run:
 
@@ -95,7 +95,7 @@ If the full process runs without any errors, your environment is set up correctl
 
 ## Coding Style
 
-Use syntax and built-in modules that are compatible with Python 3.5+.
+Use syntax and built-in modules that are compatible with Python 3.6+.
 
 ### Style linter
 
