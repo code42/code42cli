@@ -137,7 +137,7 @@ def show(
         devices_dataframe = _merge_matter_members_with_devices(
             state.sdk, user_dataframe
         )
-        if len(devices_dataframe.index) > 0:
+        if len(devices_dataframe.index):
             echo("\nMatter Members and Devices:\n")
             click.echo(devices_dataframe.to_csv())
             echo(_print_storage_by_org(devices_dataframe))
@@ -264,7 +264,7 @@ def _print_matter_members(username_list, member_type="active"):
 
 
 def _merge_matter_members_with_devices(sdk, user_dataframe):
-    devices_generator = sdk.devices.get_all(active="true", include_backup_usage=True)
+    devices_generator = sdk.devices.get_all(active=True, include_backup_usage=True)
     device_list = _get_total_archive_bytes_per_device(devices_generator)
     devices_dataframe = DataFrame.from_records(
         device_list,
@@ -295,13 +295,13 @@ def _build_user_dataframe(users):
 
 def _get_total_archive_bytes_per_device(devices_generator):
     device_list = [device for page in devices_generator for device in page["computers"]]
-    for i in device_list:
-        archive_bytes = [archive["archiveBytes"] for archive in i["backupUsage"]]
-        i["archiveBytes"] = sum(archive_bytes)
+    for device in device_list:
+        archive_bytes = [archive["archiveBytes"] for archive in device["backupUsage"]]
+        device["archiveBytes"] = sum(archive_bytes)
     return device_list
 
 
-def _print_storage_by_org(devices_dataframe):
+def _get_storage_by_org(devices_dataframe):
     echo("\nLegal Hold Storage by Org\n")
     devices_dataframe = devices_dataframe.filter(["orgId", "archiveBytes"])
     return devices_dataframe.groupby("orgId").sum()
