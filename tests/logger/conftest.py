@@ -46,7 +46,7 @@ AED_EVENT_DICT = json.loads(
     "sha256Checksum": "2e0677355c37fa18fd20d372c7420b8b34de150c5801910c3bbb1e8e04c727ef",
     "createTimestamp": "2012-07-22T02:19:29Z",
     "modifyTimestamp": "2012-12-19T03:00:08Z",
-    "deviceUserName": "test.testerson+testair@code42.com",
+    "deviceUserName": "test.testerson+testair@example.com",
     "osHostName": "Test's MacBook Air",
     "domainName": "192.168.0.3",
     "publicIpAddress": "71.34.4.22",

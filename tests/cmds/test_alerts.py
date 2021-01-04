@@ -622,7 +622,7 @@ def test_search_and_send_to_when_given_multiple_search_args_uses_expected_filter
     cli_state, alert_extractor, runner, command
 ):
     actor = "test.testerson@example.com"
-    exclude_actor = "flag.flagerson@code42.com"
+    exclude_actor = "flag.flagerson@example.com"
     rule_name = "departing employee"
 
     runner.invoke(

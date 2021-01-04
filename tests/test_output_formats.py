@@ -14,7 +14,7 @@ from code42cli.output_formats import to_cef
 TEST_DATA = [
     {
         "type$": "RULE_METADATA",
-        "modifiedBy": "test.user+partners@code42.com",
+        "modifiedBy": "test.user+partners@example.com",
         "modifiedAt": "2020-06-22T16:26:16.3875180Z",
         "name": "outside td",
         "description": "",
@@ -26,12 +26,12 @@ TEST_DATA = [
         "observerRuleId": "d12d54f0-5160-47a8-a48f-7d5fa5b051c5",
         "type": "FED_CLOUD_SHARE_PERMISSIONS",
         "id": "5157f1df-cb3e-4755-92a2-0f42c7841020",
-        "createdBy": "test.user+partners@code42.com",
+        "createdBy": "test.user+partners@example.com",
         "createdAt": "2020-06-22T16:26:16.3875180Z",
     },
     {
         "type$": "RULE_METADATA",
-        "modifiedBy": "testuser@code42.com",
+        "modifiedBy": "testuser@example.com",
         "modifiedAt": "2020-07-16T08:09:44.4345110Z",
         "name": "Test different filters",
         "description": "Test different filters",
@@ -43,12 +43,12 @@ TEST_DATA = [
         "observerRuleId": "8b393324-c34c-44ac-9f79-4313601dd859",
         "type": "FED_ENDPOINT_EXFILTRATION",
         "id": "88354829-0958-4d60-a20d-69a53cf603b6",
-        "createdBy": "test.user+partners@code42.com",
+        "createdBy": "test.user+partners@example.com",
         "createdAt": "2020-05-20T11:56:41.2324240Z",
     },
     {
         "type$": "RULE_METADATA",
-        "modifiedBy": "testuser@code42.com",
+        "modifiedBy": "testuser@example.com",
         "modifiedAt": "2020-05-28T16:19:19.5250970Z",
         "name": "Test Alerts using CLI",
         "description": "user",
@@ -60,7 +60,7 @@ TEST_DATA = [
         "observerRuleId": "5eabed1d-a406-4dfc-af81-f7485ee09b19",
         "type": "FED_ENDPOINT_EXFILTRATION",
         "id": "b2cb33e6-6683-4822-be1d-8de5ef87728e",
-        "createdBy": "testuser@code42.com",
+        "createdBy": "testuser@example.com",
         "createdAt": "2020-05-18T11:47:16.6109560Z",
     },
 ]
@@ -87,9 +87,9 @@ TABLE_OUTPUT = "\n".join(
 
 
 CSV_OUTPUT = """type$,modifiedBy,modifiedAt,name,description,severity,isSystem,isEnabled,ruleSource,tenantId,observerRuleId,type,id,createdBy,createdAt\r
-RULE_METADATA,test.user+partners@code42.com,2020-06-22T16:26:16.3875180Z,outside td,,HIGH,False,True,Alerting,1d71796f-af5b-4231-9d8e-df6434da4663,d12d54f0-5160-47a8-a48f-7d5fa5b051c5,FED_CLOUD_SHARE_PERMISSIONS,5157f1df-cb3e-4755-92a2-0f42c7841020,test.user+partners@code42.com,2020-06-22T16:26:16.3875180Z\r
-RULE_METADATA,testuser@code42.com,2020-07-16T08:09:44.4345110Z,Test different filters,Test different filters,MEDIUM,False,True,Alerting,1d71796f-af5b-4231-9d8e-df6434da4663,8b393324-c34c-44ac-9f79-4313601dd859,FED_ENDPOINT_EXFILTRATION,88354829-0958-4d60-a20d-69a53cf603b6,test.user+partners@code42.com,2020-05-20T11:56:41.2324240Z\r
-RULE_METADATA,testuser@code42.com,2020-05-28T16:19:19.5250970Z,Test Alerts using CLI,user,HIGH,False,True,Alerting,1d71796f-af5b-4231-9d8e-df6434da4663,5eabed1d-a406-4dfc-af81-f7485ee09b19,FED_ENDPOINT_EXFILTRATION,b2cb33e6-6683-4822-be1d-8de5ef87728e,testuser@code42.com,2020-05-18T11:47:16.6109560Z\r
+RULE_METADATA,test.user+partners@example.com,2020-06-22T16:26:16.3875180Z,outside td,,HIGH,False,True,Alerting,1d71796f-af5b-4231-9d8e-df6434da4663,d12d54f0-5160-47a8-a48f-7d5fa5b051c5,FED_CLOUD_SHARE_PERMISSIONS,5157f1df-cb3e-4755-92a2-0f42c7841020,test.user+partners@example.com,2020-06-22T16:26:16.3875180Z\r
+RULE_METADATA,testuser@example.com,2020-07-16T08:09:44.4345110Z,Test different filters,Test different filters,MEDIUM,False,True,Alerting,1d71796f-af5b-4231-9d8e-df6434da4663,8b393324-c34c-44ac-9f79-4313601dd859,FED_ENDPOINT_EXFILTRATION,88354829-0958-4d60-a20d-69a53cf603b6,test.user+partners@example.com,2020-05-20T11:56:41.2324240Z\r
+RULE_METADATA,testuser@example.com,2020-05-28T16:19:19.5250970Z,Test Alerts using CLI,user,HIGH,False,True,Alerting,1d71796f-af5b-4231-9d8e-df6434da4663,5eabed1d-a406-4dfc-af81-f7485ee09b19,FED_ENDPOINT_EXFILTRATION,b2cb33e6-6683-4822-be1d-8de5ef87728e,testuser@example.com,2020-05-18T11:47:16.6109560Z\r
 """
 
 
@@ -155,7 +155,7 @@ AED_EVENT_DICT = json.loads(
     "sha256Checksum": "2e0677355c37fa18fd20d372c7420b8b34de150c5801910c3bbb1e8e04c727ef",
     "createTimestamp": "2012-07-22T02:19:29Z",
     "modifyTimestamp": "2012-12-19T03:00:08Z",
-    "deviceUserName": "test.testerson+testair@code42.com",
+    "deviceUserName": "test.testerson+testair@example.com",
     "osHostName": "Test's MacBook Air",
     "domainName": "192.168.0.3",
     "publicIpAddress": "71.34.4.22",
@@ -256,7 +256,7 @@ def test_to_table_formats_when_given_no_output_returns_none():
 def test_to_table_when_not_given_header_creates_header_dynamically():
     formatted_output = output_formats_module.to_table(TEST_DATA, None)
     assert len(formatted_output) > len(TABLE_OUTPUT)
-    assert "test.user+partners@code42.com" in formatted_output
+    assert "test.user+partners@example.com" in formatted_output
 
 
 def test_to_json():
@@ -433,7 +433,7 @@ def test_to_cef_includes_user_uid_if_present(mock_file_event):
 
 def test_to_cef_includes_device_username_if_present(mock_file_event):
     expected_field_name = "suser"
-    expected_value = "test.testerson+testair@code42.com"
+    expected_value = "test.testerson+testair@example.com"
     cef_out = to_cef(mock_file_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 

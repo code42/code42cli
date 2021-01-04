@@ -95,7 +95,7 @@ advanced_query_incompat_test_params = pytest.mark.parametrize(
     [
         ("--begin", "1d"),
         ("--end", "1d"),
-        ("--c42-username", "test@code42.com"),
+        ("--c42-username", "test@example.com"),
         ("--actor", "test.testerson"),
         ("--md5", "abcd1234"),
         ("--sha256", "abcdefg12345678"),
@@ -114,7 +114,7 @@ saved_search_incompat_test_params = pytest.mark.parametrize(
     [
         ("--begin", "1d"),
         ("--end", "1d"),
-        ("--c42-username", "test@code42.com"),
+        ("--c42-username", "test@example.com"),
         ("--actor", "test.testerson"),
         ("--md5", "abcd1234"),
         ("--sha256", "abcdefg12345678"),
@@ -512,7 +512,7 @@ def test_search_and_send_to_when_given_invalid_exposure_type_causes_exit(
 def test_search_and_send_to_when_given_username_uses_username_filter(
     runner, cli_state, file_event_extractor, command
 ):
-    c42_username = "test@code42.com"
+    c42_username = "test@example.com"
     command = [*command, "--begin", "1h", "--c42-username", c42_username]
     runner.invoke(
         cli, [*command], obj=cli_state,
@@ -674,7 +674,7 @@ def test_search_and_send_to_when_given_multiple_search_args_uses_expected_filter
     runner, cli_state, file_event_extractor, command
 ):
     process_owner = "root"
-    c42_username = "test@code42.com"
+    c42_username = "test@example.com"
     filename = "test.txt"
     runner.invoke(
         cli,

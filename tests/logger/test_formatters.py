@@ -93,7 +93,7 @@ class TestFileEventDictToCEFFormatter:
         self, mock_file_event_log_record
     ):
         expected_field_name = "suser"
-        expected_value = "test.testerson+testair@code42.com"
+        expected_value = "test.testerson+testair@example.com"
         cef_out = FileEventDictToCEFFormatter().format(mock_file_event_log_record)
         assert key_value_pair_in_cef_extension(
             expected_field_name, expected_value, cef_out

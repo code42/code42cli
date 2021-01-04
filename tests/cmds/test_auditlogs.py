@@ -26,7 +26,7 @@ TEST_EVENTS_WITH_SAME_TIMESTAMP = [
     {
         "type$": "audit_log::logged_in/1",
         "actorId": "42",
-        "actorName": "42@code42.com",
+        "actorName": "42@example.com",
         "actorAgent": "py42 python code42cli",
         "actorIpAddress": "200.100.300.42",
         "timestamp": TEST_AUDIT_LOG_TIMESTAMP_1,
@@ -34,7 +34,7 @@ TEST_EVENTS_WITH_SAME_TIMESTAMP = [
     {
         "type$": "audit_log::logged_in/1",
         "actorId": "43",
-        "actorName": "43@code42.com",
+        "actorName": "43@example.com",
         "actorAgent": "py42 python code42cli",
         "actorIpAddress": "200.100.300.42",
         "timestamp": TEST_AUDIT_LOG_TIMESTAMP_1,
@@ -45,7 +45,7 @@ TEST_EVENTS_WITH_DIFFERENT_TIMESTAMPS = [
     {
         "type$": "audit_log::logged_in/1",
         "actorId": "44",
-        "actorName": "44@code42.com",
+        "actorName": "44@example.com",
         "actorAgent": "py42 python code42cli",
         "actorIpAddress": "200.100.300.42",
         "timestamp": TEST_AUDIT_LOG_TIMESTAMP_2,
@@ -53,7 +53,7 @@ TEST_EVENTS_WITH_DIFFERENT_TIMESTAMPS = [
     {
         "type$": "audit_log::logged_in/1",
         "actorId": "45",
-        "actorName": "45@code42.com",
+        "actorName": "45@example.com",
         "actorAgent": "py42 python code42cli",
         "actorIpAddress": "200.100.300.42",
         "timestamp": TEST_AUDIT_LOG_TIMESTAMP_3,
@@ -299,8 +299,8 @@ def test_search_with_existing_checkpoint_events_skips_duplicate_events(
         ["audit-logs", "search", "--begin", "1d", "--use-checkpoint", "test"],
         obj=cli_state,
     )
-    assert "42@code42.com" not in result.stdout
-    assert "43@code42.com" in result.stdout
+    assert "42@example.com" not in result.stdout
+    assert "43@example.com" in result.stdout
 
 
 @search_and_send_to_test
