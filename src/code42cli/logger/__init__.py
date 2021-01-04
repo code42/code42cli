@@ -55,7 +55,6 @@ def get_logger_for_server(hostname, protocol, output_format, certs):
         protocol: The transfer protocol for sending logs.
         output_format: CEF, JSON, or RAW_JSON. Each type results in a different logger instance.
         certs: Use for passing SSL/TLS certificates when connecting to the server.
-        connect_socket: Useful for delaying connections for testing purposes.
     """
     logger = logging.getLogger("code42_syslog_{}".format(output_format.lower()))
     if logger_has_handlers(logger):
