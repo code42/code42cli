@@ -2,16 +2,17 @@ import json
 from collections import OrderedDict
 
 import pytest
-from c42eventextractor.maps import FILE_EVENT_TO_SIGNATURE_ID_MAP
 from pandas import DataFrame
 
 import code42cli.output_formats as output_formats_module
+from code42cli.maps import FILE_EVENT_TO_SIGNATURE_ID_MAP
 from code42cli.output_formats import FileEventsOutputFormat
 from code42cli.output_formats import FileEventsOutputFormatter
 from code42cli.output_formats import to_cef
 
 
 TEST_DATA = [
+    {
     {
         "type$": "RULE_METADATA",
         "modifiedBy": "test.user+partners@code42.com",

@@ -2,9 +2,9 @@ import json
 from datetime import datetime
 from logging import Formatter
 
-from code42cli.logger.maps import CEF_CUSTOM_FIELD_NAME_MAP
-from code42cli.logger.maps import FILE_EVENT_TO_SIGNATURE_ID_MAP
-from code42cli.logger.maps import JSON_TO_CEF_MAP
+from code42cli.maps import CEF_CUSTOM_FIELD_NAME_MAP
+from code42cli.maps import FILE_EVENT_TO_SIGNATURE_ID_MAP
+from code42cli.maps import JSON_TO_CEF_MAP
 
 CEF_TEMPLATE = (
     "CEF:0|Code42|{productName}|1|{signatureID}|{eventName}|{severity}|{extension}"

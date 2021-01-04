@@ -3,7 +3,7 @@ import json
 from code42cli.logger.formatters import FileEventDictToCEFFormatter
 from code42cli.logger.formatters import FileEventDictToJSONFormatter
 from code42cli.logger.formatters import FileEventDictToRawJSONFormatter
-from code42cli.logger.maps import FILE_EVENT_TO_SIGNATURE_ID_MAP
+from code42cli.maps import FILE_EVENT_TO_SIGNATURE_ID_MAP
 
 
 class TestFileEventDictToCEFFormatter:
