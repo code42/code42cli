@@ -124,6 +124,12 @@ This will also test that the documentation build passes and run the style checks
 $ tox -e py
 ```
 
+If you want to run the integration tests in your current python environment, you can do:
+
+```bash
+pytest -m "integration"
+```
+
 ### Writing tests
 
 Put actual before expected values in assert statements. Pytest assumes this order.
