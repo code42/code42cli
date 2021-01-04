@@ -13,7 +13,6 @@ from code42cli.output_formats import to_cef
 
 TEST_DATA = [
     {
-    {
         "type$": "RULE_METADATA",
         "modifiedBy": "test.user+partners@code42.com",
         "modifiedAt": "2020-06-22T16:26:16.3875180Z",
