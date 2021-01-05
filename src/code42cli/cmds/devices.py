@@ -224,6 +224,22 @@ include_usernames_option = click.option(
     is_flag=True,
     help="""Include device settings in output.""",
 )
+@click.option(
+    "--last-connected-lt",
+    help="Include devices only when the 'lastConnected' field is less than provided value.",
+)
+@click.option(
+    "--last-connected-gt",
+    help="Include devices only when 'lastConnected' field is greater than provided value.",
+)
+@click.option(
+    "--creation-date-lt",
+    help="Include devices only when 'creationDate' field is less than provided value.",
+)
+@click.option(
+    "--creation-date-gt",
+    help="Include devices only when 'creationDate' field is greater than provided value.",
+)
 @format_option
 @sdk_options()
 def list_devices(
@@ -236,6 +252,10 @@ def list_devices(
     include_backup_usage,
     include_usernames,
     include_settings,
+    last_connected_gt,
+    last_connected_lt,
+    creation_date_gt,
+    creation_date_lt,
     format,
 ):
     """Outputs a list of all devices."""
