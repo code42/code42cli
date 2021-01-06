@@ -206,6 +206,6 @@ send_to_format_options = click.option(
     "-f",
     "--format",
     type=click.Choice(SendToFileEventsOutputFormat(), case_sensitive=False),
-    help="The output format of the result. Defaults to JSON format.",
+    help="The output format of the result. Defaults to RAW-JSON format.",
     default=SendToFileEventsOutputFormat.RAW,
 )
