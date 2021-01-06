@@ -151,9 +151,9 @@ def test_search_and_send_to_handles_filter_parameters(
         [
             *command,
             "--actor-username",
-            "test@test.com",
+            "test@example.com",
             "--actor-username",
-            "test2@test.test",
+            "test2@test.example.com",
             "--begin",
             date_str,
         ],
@@ -161,7 +161,7 @@ def test_search_and_send_to_handles_filter_parameters(
     )
     assert cli_state.sdk.auditlogs.get_all.call_count == 1
     cli_state.sdk.auditlogs.get_all.assert_called_once_with(
-        usernames=("test@test.com", "test2@test.test"),
+        usernames=("test@example.com", "test2@test.example.com"),
         affected_user_ids=(),
         affected_usernames=(),
         begin_time=parse_min_timestamp(date_str),
@@ -182,15 +182,15 @@ def test_search_and_send_to_handles_all_filter_parameters(
         [
             *command,
             "--actor-username",
-            "test@test.com",
+            "test@example.com",
             "--actor-username",
-            "test2@test.test",
+            "test2@test.example.com",
             "--event-type",
             "saved-search",
             "--actor-ip",
             "0.0.0.0",
             "--affected-username",
-            "test@test.test",
+            "test@test.example.com",
             "--affected-user-id",
             "123",
             "--affected-user-id",
@@ -206,9 +206,9 @@ def test_search_and_send_to_handles_all_filter_parameters(
     )
     assert cli_state.sdk.auditlogs.get_all.call_count == 1
     cli_state.sdk.auditlogs.get_all.assert_called_once_with(
-        usernames=("test@test.com", "test2@test.test"),
+        usernames=("test@example.com", "test2@test.example.com"),
         affected_user_ids=("123", "456"),
-        affected_usernames=("test@test.test",),
+        affected_usernames=("test@test.example.com",),
         begin_time=parse_min_timestamp(date_str),
         end_time=parse_max_timestamp(end_time),
         event_types=("saved-search",),
