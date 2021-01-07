@@ -1,7 +1,6 @@
 from collections import OrderedDict
 
 import click
-from py42.clients.cases import CaseStatus
 from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42NotFoundError
 
