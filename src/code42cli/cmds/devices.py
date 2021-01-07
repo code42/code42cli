@@ -238,12 +238,12 @@ include_usernames_option = click.option(
     help=f"Include devices only when 'lastConnected' field is after provided value. {MagicDate.HELP_TEXT}",
 )
 @click.option(
-    "--creation-date-before",
+    "--created-before",
     type=MagicDate(rounding_func=round_datetime_to_day_start),
     help=f"Include devices only when 'creationDate' field is less than provided value. {MagicDate.HELP_TEXT}",
 )
 @click.option(
-    "--creation-date-after",
+    "--created-after",
     type=MagicDate(rounding_func=round_datetime_to_day_end),
     help=f"Include devices only when 'creationDate' field is greater than provided value. {MagicDate.HELP_TEXT}",
 )
