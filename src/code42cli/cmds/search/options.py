@@ -7,14 +7,6 @@ from py42.sdk.queries.query_filter import FilterGroup
 
 from code42cli.click_ext.options import incompatible_with
 from code42cli.click_ext.types import FileOrString
-from code42cli.date_helper import parse_max_timestamp
-from code42cli.date_helper import parse_min_timestamp
-from code42cli.logger import get_main_cli_logger
-from code42cli.options import begin_option
-from code42cli.options import end_option
-
-
-logger = get_main_cli_logger()
 
 
 def is_in_filter(filter_cls):
@@ -135,49 +127,16 @@ def _parse_query_from_json(ctx, param, arg):
         )
 
 
-def search_interval_options(f, search_term):
-    f = begin_option(
-        f,
-        search_term,
-        cls=BeginOption,
-        callback=lambda ctx, param, arg: parse_min_timestamp(arg),
-    )
-    f = end_option(
-        f,
-        search_term,
-        cls=AdvancedQueryAndSavedSearchIncompatible,
-        callback=lambda ctx, param, arg: parse_max_timestamp(arg),
-    )
-    return f
-
-
-def create_search_options(search_term):
-
-    advanced_query_option = click.option(
-        "--advanced-query",
-        help="A raw JSON {} query. "
+def advanced_query_option(term, **kwargs):
+    defaults = dict(
+        help=f"A raw JSON {term} query. "
         "Useful for when the provided query parameters do not satisfy your requirements. "
         "Argument can be passed as a string, read from stdin by passing '-', or from a filename if "
         "prefixed with '@', e.g. '--advanced-query @query.json'. "
-        "WARNING: Using advanced queries is incompatible with other query-building arguments.".format(
-            search_term
-        ),
+        "WARNING: Using advanced queries is incompatible with other query-building arguments.",
         metavar="QUERY_JSON",
         type=FileOrString(),
         callback=_parse_query_from_json,
     )
-    checkpoint_option = click.option(
-        "-c",
-        "--use-checkpoint",
-        help="Only get {} that were not previously retrieved.".format(search_term),
-        cls=incompatible_with("saved_search"),
-    )
-
-    def search_options(f):
-
-        f = search_interval_options(f, search_term)
-        f = checkpoint_option(f)
-        f = advanced_query_option(f)
-        return f
-
-    return search_options
+    defaults.update(kwargs)
+    return click.option("--advanced-query", **defaults)
