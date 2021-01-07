@@ -215,7 +215,7 @@ def alert_cursor_without_checkpoint(mocker):
 @pytest.fixture
 def begin_option(mocker):
     mock = mocker.patch(
-        "{}.cmds.search.options.parse_min_timestamp".format(PRODUCT_NAME)
+        "{}.cmds.alerts.convert_datetime_to_timestamp".format(PRODUCT_NAME)
     )
     mock.return_value = BEGIN_TIMESTAMP
     mock.expected_timestamp = "2020-01-01T06:00:00.000Z"
@@ -451,9 +451,7 @@ def test_get_alert_details_sorts_results_by_date(sdk):
 def test_search_with_only_begin_calls_extract_with_expected_filters(
     cli_state, alert_extractor, begin_option, runner
 ):
-    result = runner.invoke(
-        cli, ["alerts", "search", "--begin", "<overridden by fixture>"], obj=cli_state
-    )
+    result = runner.invoke(cli, ["alerts", "search", "--begin", "1d"], obj=cli_state)
     assert result.exit_code == 0
     assert str(
         alert_extractor.extract.call_args[0][0]
@@ -480,14 +478,7 @@ def test_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_extract
 ):
     result = runner.invoke(
         cli,
-        [
-            "alerts",
-            "search",
-            "--use-checkpoint",
-            "test",
-            "--begin",
-            "<overridden by fixture>",
-        ],
+        ["alerts", "search", "--use-checkpoint", "test", "--begin", "1d"],
         obj=cli_state,
     )
     assert result.exit_code == 0
@@ -929,9 +920,7 @@ def test_send_to_with_only_begin_calls_extract_with_expected_filters(
     cli_state, alert_extractor, begin_option, runner
 ):
     result = runner.invoke(
-        cli,
-        ["alerts", "send-to", "0.0.0.0", "--begin", "<overridden by fixture>"],
-        obj=cli_state,
+        cli, ["alerts", "send-to", "0.0.0.0", "--begin", "1d"], obj=cli_state,
     )
     assert result.exit_code == 0
     assert str(
@@ -959,14 +948,7 @@ def test_send_to_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls
 ):
     result = runner.invoke(
         cli,
-        [
-            "alerts",
-            "search",
-            "--use-checkpoint",
-            "test",
-            "--begin",
-            "<overridden by fixture>",
-        ],
+        ["alerts", "search", "--use-checkpoint", "test", "--begin", "1d"],
         obj=cli_state,
     )
     assert result.exit_code == 0
