@@ -170,10 +170,10 @@ advanced_query_option = searchopt.advanced_query_option(SECURITY_DATA_KEYWORD)
 
 
 def search_options(f):
-    f = begin_option(f)
-    f = end_option(f)
     f = checkpoint_option(f)
     f = advanced_query_option(f)
+    f = end_option(f)
+    f = begin_option(f)
     return f
 
 

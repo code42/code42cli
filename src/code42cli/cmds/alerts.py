@@ -44,10 +44,10 @@ advanced_query = searchopt.advanced_query_option(ALERTS_KEYWORD)
 
 
 def search_options(f):
-    f = begin(f)
-    f = end(f)
     f = checkpoint(f)
     f = advanced_query(f)
+    f = end(f)
+    f = begin(f)
     return f
 
 
