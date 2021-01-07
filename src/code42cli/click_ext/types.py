@@ -87,6 +87,7 @@ class MagicDate(click.ParamType):
     @staticmethod
     def _get_dt_from_magic_time_pair(num, period):
         num = int(num)
+        period = period.lower()
         if period == "d":
             delta = timedelta(days=num)
         elif period == "h":
