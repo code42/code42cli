@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 from datetime import timedelta
+from datetime import timezone
 
 import click.exceptions
 
@@ -49,7 +50,7 @@ class MagicDate(click.ParamType):
         "(UTC+24-hr time) format where the 'time' portion of the string "
         "can be partial (e.g. '2020-01-01 12' or '2020-01-01 01:15') or "
         "a 'short time' value representing days (30d), hours (24h) or "
-        "minutes (15m) from current time."
+        "minutes (15m) from the current time."
     )
 
     name = "magicdate"
@@ -82,7 +83,7 @@ class MagicDate(click.ParamType):
         else:
             self.fail(self.HELP_TEXT, param=param)
 
-        return dt
+        return dt.astimezone(timezone.utc)
 
     @staticmethod
     def _get_dt_from_magic_time_pair(num, period):
