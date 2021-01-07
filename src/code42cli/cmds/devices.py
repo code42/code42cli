@@ -12,6 +12,9 @@ from py42.exceptions import Py42NotFoundError
 from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
+from code42cli.click_ext.types import MagicDate
+from code42cli.date_helper import round_datetime_to_day_start
+from code42cli.date_helper import round_datetime_to_day_end
 from code42cli.errors import Code42CLIError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
@@ -225,20 +228,24 @@ include_usernames_option = click.option(
     help="""Include device settings in output.""",
 )
 @click.option(
-    "--last-connected-lt",
-    help="Include devices only when the 'lastConnected' field is less than provided value.",
+    "--last-connected-before",
+    type=MagicDate(rounding_func=round_datetime_to_day_start),
+    help=f"Include devices only when the 'lastConnected' field is after provided value. {MagicDate.HELP_TEXT}",
 )
 @click.option(
-    "--last-connected-gt",
-    help="Include devices only when 'lastConnected' field is greater than provided value.",
+    "--last-connected-after",
+    type=MagicDate(rounding_func=round_datetime_to_day_end),
+    help=f"Include devices only when 'lastConnected' field is after provided value. {MagicDate.HELP_TEXT}",
 )
 @click.option(
-    "--creation-date-lt",
-    help="Include devices only when 'creationDate' field is less than provided value.",
+    "--creation-date-before",
+    type=MagicDate(rounding_func=round_datetime_to_day_start),
+    help=f"Include devices only when 'creationDate' field is less than provided value. {MagicDate.HELP_TEXT}",
 )
 @click.option(
-    "--creation-date-gt",
-    help="Include devices only when 'creationDate' field is greater than provided value.",
+    "--creation-date-after",
+    type=MagicDate(rounding_func=round_datetime_to_day_end),
+    help=f"Include devices only when 'creationDate' field is greater than provided value. {MagicDate.HELP_TEXT}",
 )
 @format_option
 @sdk_options()
@@ -252,10 +259,10 @@ def list_devices(
     include_backup_usage,
     include_usernames,
     include_settings,
-    last_connected_gt,
-    last_connected_lt,
-    creation_date_gt,
-    creation_date_lt,
+    last_connected_after,
+    last_connected_before,
+    creation_date_after,
+    creation_date_before,
     format,
 ):
     """Outputs a list of all devices."""
