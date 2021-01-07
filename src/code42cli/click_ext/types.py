@@ -83,7 +83,7 @@ class MagicDate(click.ParamType):
         else:
             self.fail(self.HELP_TEXT, param=param)
 
-        return dt.astimezone(timezone.utc)
+        return dt.replace(tzinfo=timezone.utc)
 
     @staticmethod
     def _get_dt_from_magic_time_pair(num, period):

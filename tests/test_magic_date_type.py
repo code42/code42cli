@@ -15,7 +15,7 @@ one_ms = timedelta(milliseconds=1)
 
 
 def utc(dt):
-    return dt.astimezone(timezone.utc)
+    return dt.replace(tzinfo=timezone.utc)
 
 
 class TestMagicDateNoRounding:
