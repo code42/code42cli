@@ -43,7 +43,7 @@ class MagicDate(click.ParamType):
     """
 
     TIMESTAMP_REGEX = re.compile(r"(\d{4}-\d{2}-\d{2})\s*(.*)?")
-    MAGIC_TIME_REGEX = re.compile(r"(\d+)([dhm])$")
+    MAGIC_TIME_REGEX = re.compile(r"(\d+)([dhmDHM])$")
     HELP_TEXT = (
         "Accepts a date/time in yyyy-MM-dd (UTC) or yyyy-MM-dd HH:MM:SS "
         "(UTC+24-hr time) format where the 'time' portion of the string "
