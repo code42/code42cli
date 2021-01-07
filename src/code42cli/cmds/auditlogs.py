@@ -77,14 +77,14 @@ filter_option_event_types = click.option(
 
 
 def filter_options(f):
-    f = begin_option(f)
-    f = end_option(f)
     f = filter_option_event_types(f)
     f = filter_option_usernames(f)
     f = filter_option_user_ids(f)
     f = filter_option_user_ip_addresses(f)
     f = filter_option_affected_user_ids(f)
     f = filter_option_affected_usernames(f)
+    f = end_option(f)
+    f = begin_option(f)
     return f
 
 
