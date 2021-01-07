@@ -297,10 +297,6 @@ def _add_settings_to_dataframe(sdk, device_dataframe):
         return device_dataframe
 
 
-def _filter_dataframe_by_date_column(df, column, start, end):
-    pass
-
-
 def _drop_devices_which_have_not_connected_in_some_number_of_days(
     devices_dataframe, days_since_last_connected
 ):
