@@ -11,7 +11,6 @@ import code42cli.click_ext.groups
 import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
-import code42cli.options
 import code42cli.options as opt
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
