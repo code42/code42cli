@@ -29,18 +29,14 @@ class NoPrioritySysLogHandler(SysLogHandler):
         logging.Handler.__init__(self)
         self._use_insecure = protocol != ServerProtocol.TLS_TCP
         self.socktype = _try_get_socket_type_from_protocol(protocol)
-        self._socket = None
+        self.socket = None
 
-    @property
-    def socket(self):
-        if self._socket is None:
-            self.init_socket()
-        return self._socket
-
-    def init_socket(self):
-        self._socket = self._create_socket(
-            self._hostname, self._port, self._use_insecure, self._certs
-        )
+    def connect_socket(self):
+        """Call to initialize the socket. If using TCP/TLS, it will also establish the connection."""
+        if not self.socket:
+            self.socket = self._create_socket(
+                self._hostname, self._port, self._use_insecure, self._certs
+            )
 
     def _create_socket(self, hostname, port, use_insecure, certs):
         socket_info = self._get_socket_address_info(hostname, port)

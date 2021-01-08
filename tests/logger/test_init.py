@@ -22,7 +22,7 @@ from code42cli.util import get_user_project_path
 
 @pytest.fixture(autouse=True)
 def init_socket_mock(mocker):
-    return mocker.patch("code42cli.logger.NoPrioritySysLogHandler.init_socket")
+    return mocker.patch("code42cli.logger.NoPrioritySysLogHandler.connect_socket")
 
 
 @pytest.fixture(autouse=True)
