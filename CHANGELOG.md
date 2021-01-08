@@ -10,13 +10,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 # Unreleased
 
-- The `devices` command is added. Included are:
-    - `devices deactivate` to deactivate a single computer
-    - `devices show` to retrieve detailed information about a computer
-    - `devices list` to retrieve info about many devices, including device settings
-    - `devices bulk deactivate` to deactivate a list of devices
-
 # Added
+
 
 - New choice `TLS` for `--protocol` option used by `send-to` commands:
     - `code42 security-data send-to`
@@ -25,6 +20,12 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     for more securely transporting data.
 
 - `--certs` option for `send-to` commands when using `--protocol TLS`.
+
+- The `devices` command is added. Included are:
+    - `devices deactivate` to deactivate a single computer.
+    - `devices show` to retrieve detailed information about a computer.
+    - `devices list` to retrieve info about many devices, including device settings.
+    - `devices bulk deactivate` to deactivate a list of devices.
 
 - `code42 departing-employee list` command.
 
