@@ -18,7 +18,7 @@ _HEADER_KEYS_MAP["createdAt"] = "Creation Time"
 _HEADER_KEYS_MAP["findings"] = "Notes"
 
 name_option = click.option(
-    "--name", required=False, help="Name of a case.", default=None
+    "--name", required=False, help="Name of the case.", default=None
 )
 assignee_option = click.option(
     "--assignee", required=False, help="User UID of the assignee.", default=None
@@ -30,7 +30,7 @@ notes_option = click.option(
     "--notes", required=False, help="Notes on the case.", default=None
 )
 subject_option = click.option(
-    "--subject", required=False, help="User UID of a subject of a case.", default=None
+    "--subject", required=False, help="User UID of a subject of the case.", default=None
 )
 status_option = click.option(
     "--status",
@@ -112,26 +112,26 @@ def _parse_cases(pages):
 )
 @click.option("--assignee", required=False, help="Filter by user UID of assignee.")
 @click.option(
-    "--created-at-begin-time",
+    "--min-create-time",
     required=False,
-    help="Fetch cases created after given date.",
+    help="Fetch cases created after given date time.",
 )
 @click.option(
-    "--created-at-end-time",
+    "--max-create-time",
     required=False,
-    help="Fetch cases created before given date.",
+    help="Fetch cases created before given date time.",
 )
 @click.option(
-    "--updated-at-begin-time",
+    "--min-update-time",
     required=False,
-    help="Fetch cases last updated after given date.",
+    help="Fetch cases last updated after given date time.",
 )
 @click.option(
-    "--updated-at-end-time",
+    "--max-update-time",
     required=False,
-    help="Fetch cases last updated before given date.",
+    help="Fetch cases last updated before given date time.",
 )
-@click.option("--status", required=False, help="Filter cases by cast status.")
+@click.option("--status", required=False, help="Filter cases by case status.")
 @format_option
 @sdk_options()
 def _list(
