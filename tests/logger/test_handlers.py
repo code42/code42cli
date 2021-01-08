@@ -91,7 +91,9 @@ class TestNoPrioritySysLogHandler:
         handler.connect_socket()
         assert socket_mocks.socket_initializer.call_count == 1
 
-    def test_connect_socket_when_udp_initializes_with_expected_properties(self, socket_mocks):
+    def test_connect_socket_when_udp_initializes_with_expected_properties(
+        self, socket_mocks
+    ):
         handler = NoPrioritySysLogHandler(
             _TEST_HOST, _TEST_PORT, ServerProtocol.UDP, None
         )
@@ -150,9 +152,7 @@ class TestNoPrioritySysLogHandler:
     def test_emit_when_tcp_calls_socket_sendall_with_expected_message(
         self, mock_file_event_log_record, protocol
     ):
-        handler = NoPrioritySysLogHandler(
-            _TEST_HOST, _TEST_PORT, protocol, None
-        )
+        handler = NoPrioritySysLogHandler(_TEST_HOST, _TEST_PORT, protocol, None)
         handler.connect_socket()
         formatter = FileEventDictToRawJSONFormatter()
         handler.setFormatter(formatter)
