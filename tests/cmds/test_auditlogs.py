@@ -256,6 +256,7 @@ def test_send_to_emits_events_in_chronological_order(
 def test_search_and_send_to_with_checkpoint_saves_expected_cursor_timestamp(
     cli_state,
     runner,
+    send_to_logger,
     test_audit_log_response,
     audit_log_cursor_with_checkpoint,
     command,
@@ -275,6 +276,7 @@ def test_search_and_send_to_with_checkpoint_saves_expected_cursor_timestamp(
 def test_search_and_send_to_with_existing_checkpoint_replaces_begin_arg_if_passed(
     cli_state,
     runner,
+    send_to_logger,
     test_audit_log_response,
     audit_log_cursor_with_checkpoint,
     command,
@@ -307,6 +309,7 @@ def test_search_with_existing_checkpoint_events_skips_duplicate_events(
 def test_search_and_send_to_without_existing_checkpoint_writes_both_event_hashes_with_same_timestamp(
     cli_state,
     runner,
+    send_to_logger,
     test_audit_log_response_with_only_same_timestamps,
     audit_log_cursor_with_checkpoint,
     command,
