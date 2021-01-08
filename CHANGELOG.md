@@ -12,7 +12,6 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 # Added
 
-
 - New choice `TLS` for `--protocol` option used by `send-to` commands:
     - `code42 security-data send-to`
     - `code42 alerts send-to`
