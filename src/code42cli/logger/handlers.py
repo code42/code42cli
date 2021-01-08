@@ -27,7 +27,7 @@ class NoPrioritySysLogHandler(SysLogHandler):
         self._certs = certs
         self.address = (hostname, port)
         logging.Handler.__init__(self)
-        self._use_insecure = protocol != ServerProtocol.TLS
+        self._use_insecure = protocol != ServerProtocol.TLS_TCP
         self.socktype = _try_get_socket_type_from_protocol(protocol)
         self._socket = None
 
@@ -121,7 +121,7 @@ def _try_get_socket_type_from_protocol(protocol):
 
 
 def _get_socket_type_from_protocol(protocol):
-    if protocol in [ServerProtocol.TCP, ServerProtocol.TLS]:
+    if protocol in [ServerProtocol.TCP, ServerProtocol.TLS_TCP]:
         return socket.SOCK_STREAM
     elif protocol == ServerProtocol.UDP:
         return socket.SOCK_DGRAM

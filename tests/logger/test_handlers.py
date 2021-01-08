@@ -16,7 +16,7 @@ _TEST_HOST = "example.com"
 _TEST_PORT = 5000
 _TEST_CERTS = "path/to/cert.crt"
 tls_and_tcp_test = pytest.mark.parametrize(
-    "protocol", (ServerProtocol.TLS, ServerProtocol.TCP)
+    "protocol", (ServerProtocol.TLS_TCP, ServerProtocol.TCP)
 )
 tcp_and_udp_test = pytest.mark.parametrize(
     "protocol", (ServerProtocol.TCP, ServerProtocol.UDP)
@@ -78,7 +78,7 @@ class TestNoPrioritySysLogHandler:
 
     def test_init_when_using_tls_sets_insecure_to_false(self):
         handler = NoPrioritySysLogHandler(
-            _TEST_HOST, _TEST_PORT, ServerProtocol.TLS, _TEST_CERTS
+            _TEST_HOST, _TEST_PORT, ServerProtocol.TLS_TCP, _TEST_CERTS
         )
         assert not handler._use_insecure
         assert handler._certs == _TEST_CERTS
@@ -135,7 +135,7 @@ class TestNoPrioritySysLogHandler:
         self, socket_mocks
     ):
         handler = NoPrioritySysLogHandler(
-            _TEST_HOST, _TEST_PORT, ServerProtocol.TLS, _TEST_CERTS
+            _TEST_HOST, _TEST_PORT, ServerProtocol.TLS_TCP, _TEST_CERTS
         )
         _ = handler.socket
         socket_mocks.ssl_wrap_socket_mock.assert_called_once_with(
@@ -146,7 +146,7 @@ class TestNoPrioritySysLogHandler:
         self, socket_mocks
     ):
         handler = NoPrioritySysLogHandler(
-            _TEST_HOST, _TEST_PORT, ServerProtocol.TLS, None
+            _TEST_HOST, _TEST_PORT, ServerProtocol.TLS_TCP, None
         )
         _ = handler.socket
         socket_mocks.ssl_wrap_socket_mock.assert_called_once_with(
@@ -171,7 +171,7 @@ class TestNoPrioritySysLogHandler:
         self, mock_file_event_log_record
     ):
         handler = NoPrioritySysLogHandler(
-            _TEST_HOST, _TEST_PORT, ServerProtocol.TLS, None
+            _TEST_HOST, _TEST_PORT, ServerProtocol.TLS_TCP, None
         )
         formatter = FileEventDictToRawJSONFormatter()
         handler.setFormatter(formatter)

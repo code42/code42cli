@@ -325,7 +325,7 @@ def test_search_and_send_to_without_existing_checkpoint_writes_both_event_hashes
 
 
 @pytest.mark.parametrize(
-    "protocol", (ServerProtocol.TLS, ServerProtocol.TLS, ServerProtocol.UDP)
+    "protocol", (ServerProtocol.TLS_TCP, ServerProtocol.TLS_TCP, ServerProtocol.UDP)
 )
 def test_send_to_allows_protocol_arg(cli_state, runner, protocol):
     res = runner.invoke(

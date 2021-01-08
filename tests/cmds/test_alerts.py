@@ -703,7 +703,7 @@ def test_search_and_send_to_with_or_query_flag_produces_expected_query(
 
 
 @pytest.mark.parametrize(
-    "protocol", (ServerProtocol.TLS, ServerProtocol.TLS, ServerProtocol.UDP)
+    "protocol", (ServerProtocol.TLS_TCP, ServerProtocol.TLS_TCP, ServerProtocol.UDP)
 )
 def test_send_to_allows_protocol_arg(cli_state, runner, protocol):
     res = runner.invoke(

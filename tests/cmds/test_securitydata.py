@@ -835,7 +835,7 @@ def test_saved_search_calls_extractor_extract_and_saved_search_execute(
 
 
 @pytest.mark.parametrize(
-    "protocol", (ServerProtocol.TLS, ServerProtocol.TLS, ServerProtocol.UDP)
+    "protocol", (ServerProtocol.TLS_TCP, ServerProtocol.TLS_TCP, ServerProtocol.UDP)
 )
 def test_send_to_allows_protocol_arg(cli_state, runner, protocol):
     res = runner.invoke(
