@@ -171,6 +171,7 @@ ALL_ACTIVE_AND_INACTIVE_CUSTODIANS_RESPONSE = """
 """
 EMPTY_MATTERS_RESPONSE = """{"legalHolds": []}"""
 ALL_MATTERS_RESPONSE = """{{"legalHolds": [{}]}}""".format(MATTER_RESPONSE)
+LEGAL_HOLD_COMMAND = "legal-hold"
 
 
 def _create_py42_response(mocker, text):
@@ -572,3 +573,41 @@ def test_list_with_csv_format_returns_no_response_when_response_is_empty(
     cli_state.sdk.legalhold.get_all_matters.return_value = empty_matters_response
     result = runner.invoke(cli, ["legal-hold", "list", "-f", "csv"], obj=cli_state)
     assert "Matter ID,Name,Description,Creator,Creation Date" not in result.output
+
+
+@pytest.mark.parametrize(
+    "command, error_msg",
+    [
+        (
+            "{} add-user --matter-id test-matter-id".format(LEGAL_HOLD_COMMAND),
+            "Missing option '-u' / '--username'.",
+        ),
+        (
+            "{} remove-user --matter-id test-matter-id".format(LEGAL_HOLD_COMMAND),
+            "Missing option '-u' / '--username'.",
+        ),
+        (
+            "{} add-user".format(LEGAL_HOLD_COMMAND),
+            "Missing option '-m' / '--matter-id'.",
+        ),
+        (
+            "{} remove-user".format(LEGAL_HOLD_COMMAND),
+            "Missing option '-m' / '--matter-id'.",
+        ),
+        ("{} show".format(LEGAL_HOLD_COMMAND), "Missing argument 'MATTER_ID'."),
+        (
+            "{} bulk add".format(LEGAL_HOLD_COMMAND),
+            "Error: Missing argument 'CSV_FILE'.",
+        ),
+        (
+            "{} bulk remove".format(LEGAL_HOLD_COMMAND),
+            "Error: Missing argument 'CSV_FILE'.",
+        ),
+    ],
+)
+def test_alert_rules_command_returns_error_exit_status_when_missing_required_parameters(
+    command, error_msg, runner, cli_state
+):
+    result = runner.invoke(cli, command.split(" "), obj=cli_state)
+    assert result.exit_code == 2
+    assert error_msg in "".join(result.output)

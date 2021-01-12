@@ -24,6 +24,7 @@ DEPARTING_EMPLOYEE_ITEM = """{
     "departureDate": "2020-07-07"
 }
 """
+DEPARTING_EMPLOYEE_COMMAND = "departing-employee"
 
 
 @pytest.fixture()
@@ -337,3 +338,29 @@ def test_remove_departing_employee_when_user_not_on_list_prints_expected_error(
         )
         in result.output
     )
+
+
+@pytest.mark.parametrize(
+    "command, error_msg",
+    [
+        ("{} add".format(DEPARTING_EMPLOYEE_COMMAND), "Missing argument 'USERNAME'."),
+        (
+            "{} remove".format(DEPARTING_EMPLOYEE_COMMAND),
+            "Missing argument 'USERNAME'.",
+        ),
+        (
+            "{} bulk add".format(DEPARTING_EMPLOYEE_COMMAND),
+            "Missing argument 'CSV_FILE'.",
+        ),
+        (
+            "{} bulk remove".format(DEPARTING_EMPLOYEE_COMMAND),
+            "Missing argument 'FILE'.",
+        ),
+    ],
+)
+def test_departing_employee_command_returns_error_exit_status_when_missing_required_parameters(
+    command, error_msg, cli_state, runner
+):
+    result = runner.invoke(cli, command.split(" "), obj=cli_state)
+    assert result.exit_code == 2
+    assert error_msg in "".join(result.output)
