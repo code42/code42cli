@@ -101,7 +101,7 @@ checkpoint_option = click.option(
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def audit_logs(state):
-    """Retrieve audit logs."""
+    """Tools for getting audit-log data."""
     # store cursor getter on the group state so shared --begin option can use it in validation
     state.cursor_getter = _get_audit_log_cursor_store
 
