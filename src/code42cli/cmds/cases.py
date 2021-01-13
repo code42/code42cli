@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 import click
 from py42.clients.cases import CaseStatus
 from py42.exceptions import Py42BadRequestError
@@ -35,6 +33,16 @@ def _get_cases_header():
         "status": "Status",
         "createdAt": "Creation Time",
         "findings": "Notes",
+    }
+
+
+def _get_events_header():
+    return {
+        "eventId": "Event Id",
+        "eventTimestatmp": "Timestamp",
+        "filePath": "Path",
+        "fileName": "File",
+        "exposure": "Exposure",
     }
 
 
@@ -175,8 +183,10 @@ def file_events(state):
 @file_events.command("list")
 @case_number_arg
 @sdk_options()
-def file_events_list(state, case_number):
+@format_option
+def file_events_list(state, case_number, format):
     """List all the events associated with the case."""
+    formatter = OutputFormatter(format, _get_events_header())
     try:
         response = state.sdk.cases.file_events.get_all(case_number)
     except Py42NotFoundError as err:
@@ -185,17 +195,21 @@ def file_events_list(state, case_number):
     if not response["events"]:
         click.echo("No events found.")
     for event in response["events"]:
-        click.echo(event)
+        events = [event for event in response["events"]]
+        formatter.echo_formatted_list(events)
 
 
 @file_events.command("show")
 @case_number_arg
 @file_event_id_option
 @sdk_options()
-def _show(state, case_number, event_id):
+@format_option
+def _show(state, case_number, event_id, format):
     """Show event details for the given event id associated with the case."""
+    formatter = OutputFormatter(format, _get_events_header())
     try:
-        click.echo(state.sdk.cases.file_events.get(case_number, event_id))
+        response = state.sdk.cases.file_events.get(case_number, event_id)
+        formatter.echo_formatted_list([response.data])
     except Py42NotFoundError as err:
         click.echo("Invalid case-number or event-id.")
         raise err
