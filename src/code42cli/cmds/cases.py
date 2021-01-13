@@ -1,6 +1,7 @@
 from collections import OrderedDict
 
 import click
+from py42.clients.cases import CaseStatus
 from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42NotFoundError
 
@@ -10,39 +11,31 @@ from code42cli.options import sdk_options
 from code42cli.output_formats import OutputFormatter
 
 
-_HEADER_KEYS_MAP = OrderedDict()
-_HEADER_KEYS_MAP["name"] = "Name"
-_HEADER_KEYS_MAP["assignee"] = "Assignee"
-_HEADER_KEYS_MAP["status"] = "Status"
-_HEADER_KEYS_MAP["createdAt"] = "Creation Time"
-_HEADER_KEYS_MAP["findings"] = "Notes"
-
-name_option = click.option(
-    "--name", required=False, help="Name of the case.", default=None
-)
-assignee_option = click.option(
-    "--assignee", required=False, help="User UID of the assignee.", default=None
-)
-description_option = click.option(
-    "--description", required=False, help="Description of the case.", default=None
-)
-notes_option = click.option(
-    "--notes", required=False, help="Notes on the case.", default=None
-)
-subject_option = click.option(
-    "--subject", required=False, help="User UID of a subject of the case.", default=None
-)
+case_number_arg = click.argument("case-number", type=int)
+name_option = click.option("--name", help="Name of the case.",)
+assignee_option = click.option("--assignee", help="User UID of the assignee.")
+description_option = click.option("--description", help="Description of the case.")
+notes_option = click.option("--notes", help="Notes on the case.")
+subject_option = click.option("--subject", help="User UID of a subject of the case.")
 status_option = click.option(
     "--status",
-    required=False,
     help="Status of the case. `OPEN` or `CLOSED`",
-    default=None,
+    type=click.Choice(CaseStatus.choices()),
 )
-
-case_number_arg = click.argument("case-number", type=int)
 file_event_id_option = click.option(
     "--event-id", required=True, help="File event id associated to the case."
 )
+
+
+def _get_cases_header():
+    return {
+        "number": "number",
+        "name": "Name",
+        "assignee": "Assignee",
+        "status": "Status",
+        "createdAt": "Creation Time",
+        "findings": "Notes",
+    }
 
 
 @click.group(cls=OrderedGroup)
@@ -53,7 +46,7 @@ def cases(state):
 
 
 @cases.command()
-@click.argument("name", type=str)
+@click.argument("name")
 @assignee_option
 @description_option
 @notes_option
@@ -61,14 +54,13 @@ def cases(state):
 @sdk_options()
 def create(state, name, subject, assignee, description, notes):
     """Create a new case."""
-    response = state.sdk.cases.create(
+    state.sdk.cases.create(
         name,
         subject=subject,
         assignee=assignee,
         description=description,
         findings=notes,
     )
-    return response
 
 
 @cases.command()
@@ -93,45 +85,26 @@ def update(state, case_number, name, subject, assignee, description, notes, stat
     )
 
 
-def _parse_cases(pages):
-    cases = [case for page in pages for case in page["cases"]]
-    if not cases:
-        click.echo("No cases found.")
-    return cases
-
-
 @cases.command("list")
 @click.option(
-    "--name",
-    required=False,
-    help="Filter by name of a case, supports partial name matches.",
+    "--name", help="Filter by name of a case, supports partial name matches.",
 )
 @click.option("--assignee", required=False, help="Filter by user UID of assignee.")
+@click.option("--subject", help="Filter by user UID of the subject of a case.")
+@click.option("--assignee", help="Filter by user UID of assignee.")
 @click.option(
-    "--subject", required=False, help="Filter by user UID of the subject of a case."
-)
-@click.option("--assignee", required=False, help="Filter by user UID of assignee.")
-@click.option(
-    "--min-create-time",
-    required=False,
-    help="Fetch cases created after given date time.",
+    "--begin-create-time", help="Fetch cases created after given date time.",
 )
 @click.option(
-    "--max-create-time",
-    required=False,
-    help="Fetch cases created before given date time.",
+    "--end-create-time", help="Fetch cases created before given date time.",
 )
 @click.option(
-    "--min-update-time",
-    required=False,
-    help="Fetch cases last updated after given date time.",
+    "--begin-update-time", help="Fetch cases last updated after given date time.",
 )
 @click.option(
-    "--max-update-time",
-    required=False,
-    help="Fetch cases last updated before given date time.",
+    "--end-update-time", help="Fetch cases last updated before given date time.",
 )
-@click.option("--status", required=False, help="Filter cases by case status.")
+@click.option("--status", help="Filter cases by case status.")
 @format_option
 @sdk_options()
 def _list(
@@ -139,10 +112,10 @@ def _list(
     name,
     assignee,
     subject,
-    min_create_time,
-    max_create_time,
-    min_update_time,
-    max_update_time,
+    begin_create_time,
+    end_create_time,
+    begin_update_time,
+    end_update_time,
     status,
     format,
 ):
@@ -151,24 +124,32 @@ def _list(
         name=name,
         assignee=assignee,
         subject=subject,
-        min_create_time=min_create_time,
-        max_create_time=max_create_time,
-        min_update_time=min_update_time,
-        max_update_time=max_update_time,
+        min_create_time=begin_create_time,
+        max_create_time=end_create_time,
+        min_update_time=begin_update_time,
+        max_update_time=end_update_time,
         status=status,
     )
-    formatter = OutputFormatter(format, _HEADER_KEYS_MAP)
-    cases = _parse_cases(pages)
+    formatter = OutputFormatter(format, _get_cases_header())
+    cases = [case for page in pages for case in page["cases"]]
     if cases:
         formatter.echo_formatted_list(cases)
+    else:
+        click.echo("No cases found.")
 
 
 @cases.command()
 @case_number_arg
 @sdk_options()
-def show(state, case_number):
+@format_option
+def show(state, case_number, format):
     """Show case details."""
-    click.echo(state.sdk.cases.get_case(case_number))
+    formatter = OutputFormatter(format, _get_cases_header())
+    try:
+        response = state.sdk.cases.get(case_number)
+        formatter.echo_formatted_list([response.data])
+    except Py42NotFoundError:
+        click.echo("Invalid case-number {}.".format(case_number))
 
 
 @cases.command()
@@ -214,7 +195,7 @@ def file_events_list(state, case_number):
 def _show(state, case_number, event_id):
     """Show event details for the given event id associated with the case."""
     try:
-        click.echo(state.sdk.cases.file_events.get_event(case_number, event_id))
+        click.echo(state.sdk.cases.file_events.get(case_number, event_id))
     except Py42NotFoundError as err:
         click.echo("Invalid case-number or event-id.")
         raise err
@@ -225,9 +206,9 @@ def _show(state, case_number, event_id):
 @file_event_id_option
 @sdk_options()
 def add(state, case_number, event_id):
-    """Associate an event id to the case."""
+    """Associate an event id to a case."""
     try:
-        state.sdk.cases.file_events.add_event(case_number, event_id)
+        state.sdk.cases.file_events.add(case_number, event_id)
     except Py42BadRequestError as err:
         click.echo("Invalid case-number or event-id.")
         raise err
@@ -240,7 +221,7 @@ def add(state, case_number, event_id):
 def remove(state, case_number, event_id):
     """Remove the associated event id from the case."""
     try:
-        state.sdk.cases.file_events.delete_event(case_number, event_id)
+        state.sdk.cases.file_events.delete(case_number, event_id)
     except Py42NotFoundError as err:
         click.echo("Invalid case-number or event-id.")
         raise err
