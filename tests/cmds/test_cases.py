@@ -1,11 +1,32 @@
+import json
 from unittest import mock
 from unittest.mock import mock_open
 
 import pytest
 from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42NotFoundError
+from requests import Request
+from tests.cmds.conftest import get_generator_for_get_all
 
 from code42cli.main import cli
+
+
+EVENT_DETAILS = """{'eventId': '0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_9864725277
+98692818_971', 'eventTimestamp': '2020-12-23T12:41:38.592Z', 'exposure': [], 'fileName': 'lyn
+cimmres.dll', 'filePath': 'C:/Windows/servicing/LCU/Package_for_RollupFix~31bf3856ad364e35~am
+d64~~19041.685.1.6/amd64_ppi-ppiskype-c-pt-pt_31bf3856ad364e35_10.0.19041.662_none_d1d9fdbb96
+1ced68/f/'}
+"""
+
+ALL_EVENTS = """{'events': [{'eventId': '0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_9864725277
+98692818_971', 'eventTimestamp': '2020-12-23T12:41:38.592Z', 'exposure': [], 'fileName': 'lyn
+cimmres.dll', 'filePath': 'C:/Windows/servicing/LCU/Package_for_RollupFix~31bf3856ad364e35~am
+d64~~19041.685.1.6/amd64_ppi-ppiskype-c-pt-pt_31bf3856ad364e35_10.0.19041.662_none_d1d9fdbb96
+1ced68/f/'}]}"""
+
+ALL_CASES = """{"cases": [{"number": 3,"name": "test@test.test"}], "totalCount": 31}"""
+
+CASE_DETAILS = """{"number": 3, "name": "test@test.test"}"""
 
 
 @pytest.fixture
@@ -13,6 +34,11 @@ def error(mocker):
     error = mocker.Mock(spec=Exception)
     error.response = "error"
     return error
+
+
+@pytest.fixture
+def py42_response(mocker):
+    return mocker.MagicMock(spec=Request)
 
 
 def test_create_calls_create_with_expected_params(runner, cli_state):
@@ -181,3 +207,21 @@ def test_file_events_remove_returns_error_message_when_py42_raises_exception(
     )
     cli_state.sdk.cases.file_events.delete.assert_called_once_with(1, "1")
     assert "Invalid case-number or event-id." in result.output
+
+
+def test_show_returns_expected_data(runner, cli_state, py42_response):
+    py42_response.data = json.loads(CASE_DETAILS)
+    cli_state.sdk.cases.get.return_value = py42_response
+    result = runner.invoke(cli, ["cases", "show", "1"], obj=cli_state,)
+    assert "test@test.test" in result.output
+
+
+def test_list_returns_expected_data(runner, cli_state, py42_response, mocker):
+    py42_response.data = json.loads(ALL_CASES)
+
+    def gen():
+        yield py42_response.data
+
+    cli_state.sdk.cases.get_all.return_value = gen()
+    result = runner.invoke(cli, ["cases", "list"], obj=cli_state,)
+    assert "test@test.test" in result.output
