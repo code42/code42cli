@@ -1,6 +1,7 @@
 from collections import OrderedDict
 
 import click
+from py42.clients.cases import CaseStatus
 from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42NotFoundError
 
@@ -35,6 +36,7 @@ subject_option = click.option(
 status_option = click.option(
     "--status",
     required=False,
+    type=click.Choice(CaseStatus.choices()),
     help="Status of the case. `OPEN` or `CLOSED`",
     default=None,
 )
@@ -168,7 +170,7 @@ def _list(
 @sdk_options()
 def show(state, case_number):
     """Show case details."""
-    click.echo(state.sdk.cases.get_case(case_number))
+    click.echo(state.sdk.cases.get(case_number))
 
 
 @cases.command()
