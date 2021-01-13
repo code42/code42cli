@@ -1,5 +1,5 @@
 import pytest
-from integration import run_command
+from tests.integration import run_command
 
 LEGAL_HOLD_COMMAND = "code42 legal-hold"
 

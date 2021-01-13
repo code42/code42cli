@@ -1,5 +1,5 @@
 import pytest
-from integration import run_command
+from tests.integration import run_command
 
 ALERT_RULES_COMMAND = "code42 alert-rules"
 

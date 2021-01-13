@@ -2,7 +2,7 @@ from datetime import datetime
 from datetime import timedelta
 
 import pytest
-from integration import run_command
+from tests.integration import run_command
 
 SEARCH_COMMAND = "code42 audit-logs search"
 BASE_COMMAND = "{} -b".format(SEARCH_COMMAND)
