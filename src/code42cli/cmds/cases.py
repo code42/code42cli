@@ -40,7 +40,6 @@ status_option = click.option(
     help="Status of the case. `OPEN` or `CLOSED`",
     default=None,
 )
-
 case_number_arg = click.argument("case-number", type=int)
 file_event_id_option = click.option(
     "--event-id", required=True, help="File event id associated to the case."
