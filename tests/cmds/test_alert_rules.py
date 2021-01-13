@@ -371,7 +371,7 @@ def test_remove_when_user_not_on_rule_raises_expected_error(runner, cli_state, m
         ),
     ],
 )
-def test_alert_rules_command_returns_error_exit_status_when_missing_required_parameters(
+def test_alert_rules_command_when_missing_required_parameters_errors(
     command, error_msg, runner, cli_state
 ):
     result = runner.invoke(cli, command.split(" "), obj=cli_state)

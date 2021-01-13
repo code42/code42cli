@@ -358,7 +358,7 @@ def test_remove_departing_employee_when_user_not_on_list_prints_expected_error(
         ),
     ],
 )
-def test_departing_employee_command_returns_error_exit_status_when_missing_required_parameters(
+def test_departing_employee_command_when_missing_required_parameters_returns_error(
     command, error_msg, cli_state, runner
 ):
     result = runner.invoke(cli, command.split(" "), obj=cli_state)

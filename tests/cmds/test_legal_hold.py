@@ -605,7 +605,7 @@ def test_list_with_csv_format_returns_no_response_when_response_is_empty(
         ),
     ],
 )
-def test_alert_rules_command_returns_error_exit_status_when_missing_required_parameters(
+def test_alert_rules_command_when_missing_required_parameters_returns_error(
     command, error_msg, runner, cli_state
 ):
     result = runner.invoke(cli, command.split(" "), obj=cli_state)
