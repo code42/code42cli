@@ -17,7 +17,7 @@ notes_option = click.option("--notes", help="Notes on the case.")
 subject_option = click.option("--subject", help="User UID of a subject of the case.")
 status_option = click.option(
     "--status",
-    help="Status of the case. `OPEN` or `CLOSED`",
+    help="Status of the case. `OPEN` or `CLOSED`.",
     type=click.Choice(CaseStatus.choices()),
 )
 file_event_id_option = click.option(
@@ -97,7 +97,7 @@ def update(state, case_number, name, subject, assignee, description, notes, stat
 @click.option(
     "--name", help="Filter by name of a case, supports partial name matches.",
 )
-@click.option("--assignee", required=False, help="Filter by user UID of assignee.")
+@click.option("--assignee", help="Filter by user UID of assignee.")
 @click.option("--subject", help="Filter by user UID of the subject of a case.")
 @click.option("--assignee", help="Filter by user UID of assignee.")
 @click.option(
