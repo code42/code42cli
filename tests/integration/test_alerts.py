@@ -2,7 +2,7 @@ from datetime import datetime
 from datetime import timedelta
 
 import pytest
-from integration import run_command
+from tests.integration import run_command
 
 
 begin_date = datetime.utcnow() - timedelta(days=20)
