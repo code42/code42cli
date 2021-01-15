@@ -6,7 +6,6 @@ import pytest
 from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42NotFoundError
 from requests import Request
-from tests.cmds.conftest import get_generator_for_get_all
 
 from code42cli.main import cli
 
@@ -19,6 +18,15 @@ ALL_EVENTS = """{"events": [{"eventId": "0_1d71796f-af5b-4231-9d8e-df6434da4663_
 ALL_CASES = """{"cases": [{"number": 3,"name": "test@test.test"}], "totalCount": 31}"""
 
 CASE_DETAILS = """{"number": 3, "name": "test@test.test"}"""
+
+CASES_COMMAND = "cases"
+CASES_FILE_EVENTS_COMMAND = "cases file-events"
+
+MISSING_ARGUMENT_ERROR = "Missing argument '{}'."
+MISSING_NAME = MISSING_ARGUMENT_ERROR.format("NAME")
+MISSING_CASE_NUMBER = MISSING_ARGUMENT_ERROR.format("CASE_NUMBER")
+MISSING_OPTION_ERROR = "Missing option '--{}'."
+MISSING_EVENT_ID = MISSING_OPTION_ERROR.format("event-id")
 
 
 @pytest.fixture
@@ -168,7 +176,7 @@ def test_file_events_show_calls_get_event_with_expected_params(runner, cli_state
     cli_state.sdk.cases.file_events.get.assert_called_once_with(1, "1")
 
 
-def test_file_events_show_returns_error_message_when_py42_raises_exception(
+def test_file_events_show_when_py42_raises_exception_returns_error_message(
     runner, cli_state, error
 ):
     cli_state.sdk.cases.file_events.get.side_effect = Py42NotFoundError(error)
@@ -179,7 +187,7 @@ def test_file_events_show_returns_error_message_when_py42_raises_exception(
     assert "Invalid case-number or event-id." in result.output
 
 
-def test_file_events_add_returns_error_message_when_py42_raises_exception(
+def test_file_events_add_when_py42_raises_exception_returns_error_message(
     runner, cli_state, error
 ):
     cli_state.sdk.cases.file_events.add.side_effect = Py42BadRequestError(error)
@@ -190,7 +198,7 @@ def test_file_events_add_returns_error_message_when_py42_raises_exception(
     assert "Invalid case-number or event-id." in result.output
 
 
-def test_file_events_remove_returns_error_message_when_py42_raises_exception(
+def test_file_events_remove_when_py42_raises_exception_returns_error_message(
     runner, cli_state, error
 ):
     cli_state.sdk.cases.file_events.delete.side_effect = Py42NotFoundError(error)
@@ -222,11 +230,49 @@ def test_list_returns_expected_data(runner, cli_state, py42_response, mocker):
 def test_events_show_returns_expected_data(runner, cli_state, py42_response):
     py42_response.data = json.loads(EVENT_DETAILS)
     cli_state.sdk.cases.file_events.get.return_value = py42_response
-    result = runner.invoke(cli, ["cases", "file-events", "show", "1", "--event-id", "e"], obj=cli_state,)
-    assert "0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_986472527798692818_971" in result.output
+    result = runner.invoke(
+        cli, ["cases", "file-events", "show", "1", "--event-id", "e"], obj=cli_state,
+    )
+    assert (
+        "0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_986472527798692818_971"
+        in result.output
+    )
 
 
 def test_events_list_returns_expected_data(runner, cli_state):
     cli_state.sdk.cases.file_events.get_all.return_value = json.loads(ALL_EVENTS)
     result = runner.invoke(cli, ["cases", "file-events", "list", "1"], obj=cli_state,)
-    assert "0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_986472527798692818_971" in result.output
+    assert (
+        "0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_986472527798692818_971"
+        in result.output
+    )
+
+
+@pytest.mark.parametrize(
+    "command, error_msg",
+    [
+        ("{} create --description d".format(CASES_COMMAND), MISSING_NAME),
+        ("{} update --description d".format(CASES_COMMAND), MISSING_CASE_NUMBER),
+        ("{} show".format(CASES_COMMAND), MISSING_CASE_NUMBER),
+        ("{} export".format(CASES_COMMAND), MISSING_CASE_NUMBER),
+        # ("{} add ".format(CASES_FILE_EVENTS_COMMAND), MISSING_CASE_NUMBER),
+        ("{} add --event-id 3".format(CASES_FILE_EVENTS_COMMAND), MISSING_CASE_NUMBER),
+        ("{} add 3".format(CASES_FILE_EVENTS_COMMAND), MISSING_EVENT_ID),
+        ("{} remove 3".format(CASES_FILE_EVENTS_COMMAND), MISSING_EVENT_ID),
+        # ("{} remove ".format(CASES_FILE_EVENTS_COMMAND), MISSING_CASE_NUMBER),
+        (
+            "{} remove --event-id 3".format(CASES_FILE_EVENTS_COMMAND),
+            MISSING_CASE_NUMBER,
+        ),
+        # ("{} list ".format(CASES_FILE_EVENTS_COMMAND), MISSING_CASE_NUMBER),
+        # ("{} show ".format(CASES_FILE_EVENTS_COMMAND), MISSING_CASE_NUMBER),
+        # ("{} show --event-id 3 ".format(CASES_FILE_EVENTS_COMMAND), MISSING_CASE_NUMBER),
+        ("{} show 3".format(CASES_FILE_EVENTS_COMMAND), MISSING_EVENT_ID),
+    ],
+)
+def test_cases_command_when_missing_required_parameters_errors(
+    command, error_msg, runner, cli_state
+):
+    result = runner.invoke(cli, command.split(" "), obj=cli_state)
+    assert result.exit_code == 2
+    assert error_msg in "".join(result.output)
