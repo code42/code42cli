@@ -102,19 +102,23 @@ def update(state, case_number, name, subject, assignee, description, notes, stat
 @click.option("--subject", help="Filter by user UID of the subject of a case.")
 @click.option("--assignee", help="Filter by user UID of assignee.")
 @click.option(
-    "--begin-create-time", help="Fetch cases created after given date time.",
+    "--begin-create-time",
+    help="Fetch cases created after given date time.",
     type=click.DateTime(formats=[DATE_FORMAT]),
 )
 @click.option(
-    "--end-create-time", help="Fetch cases created before given date time.",
+    "--end-create-time",
+    help="Fetch cases created before given date time.",
     type=click.DateTime(formats=[DATE_FORMAT]),
 )
 @click.option(
-    "--begin-update-time", help="Fetch cases last updated after given date time.",
+    "--begin-update-time",
+    help="Fetch cases last updated after given date time.",
     type=click.DateTime(formats=[DATE_FORMAT]),
 )
 @click.option(
-    "--end-update-time", help="Fetch cases last updated before given date time.",
+    "--end-update-time",
+    help="Fetch cases last updated before given date time.",
     type=click.DateTime(formats=[DATE_FORMAT]),
 )
 @click.option("--status", help="Filter cases by case status.")
