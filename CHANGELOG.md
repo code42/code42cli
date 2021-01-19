@@ -29,6 +29,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     
 - Improved help text for date option arguments.
 
+- Improved help text for date option arguments.
+
 ## 1.1.0 - 2020-12-18
 
 ### Fixed
