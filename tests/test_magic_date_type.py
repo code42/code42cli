@@ -2,7 +2,11 @@ from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
 
+import pytest
+from click.exceptions import BadParameter
+
 from .conftest import begin_date_str
+from .conftest import begin_date_str_with_t_time
 from .conftest import begin_date_str_with_time
 from .conftest import end_date_str
 from .conftest import end_date_str_with_time
@@ -29,25 +33,46 @@ class TestMagicDateNoRounding:
         expected = utc(datetime.strptime(begin_date_str, "%Y-%m-%d"))
         assert actual == expected
 
-    def test_when_given_date_str_with_time_parses_successfully(self,):
-        actual = self.convert(begin_date_str_with_time)
+    @pytest.mark.parametrize(
+        "param", [begin_date_str_with_time, begin_date_str_with_t_time],
+    )
+    def test_when_given_date_str_with_time_parses_successfully(self, param):
+        actual = self.convert(param)
         expected = utc(datetime.strptime(begin_date_str_with_time, "%Y-%m-%d %H:%M:%S"))
         assert actual == expected
 
-    def test_when_given_magic_days_parses_successfully(self):
-        actual_date = self.convert("20d")
+    @pytest.mark.parametrize("param", ["20d", "20D"])
+    def test_when_given_magic_days_parses_successfully(self, param):
+        actual_date = self.convert(param)
         expected_date = utc(get_test_date(days_ago=20))
         assert actual_date - expected_date < one_ms
 
-    def test_when_given_magic_hours_parses_successfully(self):
-        actual = self.convert("20h")
+    @pytest.mark.parametrize("param", ["20h", "20H"])
+    def test_when_given_magic_hours_parses_successfully(self, param):
+        actual = self.convert(param)
         expected = utc(get_test_date(hours_ago=20))
         assert expected - actual < one_ms
 
-    def test_when_given_magic_minutes_parses_successfully(self):
-        actual = self.convert("20m")
+    @pytest.mark.parametrize("param", ["20m", "20M"])
+    def test_when_given_magic_minutes_parses_successfully(self, param):
+        actual = self.convert(param)
         expected = utc(get_test_date(minutes_ago=20))
         assert expected - actual < one_ms
+
+    @pytest.mark.parametrize(
+        "badparam",
+        [
+            "20days",
+            "20S",
+            "d20",
+            "01-01-2020",
+            "2020-01-0110:10:10",
+            "2020-01-01 30:30:30",
+        ],
+    )
+    def test_when_given_bad_values_raises_exception(self, badparam):
+        with pytest.raises(BadParameter):
+            self.convert(badparam)
 
 
 class TestMagicDateRoundingToStart:

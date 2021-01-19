@@ -3,7 +3,8 @@ from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
 
-import click.exceptions
+import click
+from click.exceptions import BadParameter
 
 
 class FileOrString(click.File):
@@ -43,7 +44,7 @@ class MagicDate(click.ParamType):
     and converts them to datetime objects.
     """
 
-    TIMESTAMP_REGEX = re.compile(r"(\d{4}-\d{2}-\d{2})\s*(.*)?")
+    TIMESTAMP_REGEX = re.compile(r"(\d{4}-\d{2}-\d{2})(?:$|T|\s+)([0-9:]+)?")
     MAGIC_TIME_REGEX = re.compile(r"(\d+)([dhmDHM])$")
     HELP_TEXT = (
         "Accepts a date/time in yyyy-MM-dd (UTC) or yyyy-MM-dd HH:MM:SS "
@@ -96,7 +97,7 @@ class MagicDate(click.ParamType):
         elif period == "m":
             delta = timedelta(minutes=num)
         else:
-            raise click.ClickException(
+            raise BadParameter(
                 "Couldn't parse magic time string: {}{}".format(num, period)
             )
         return datetime.utcnow() - delta
@@ -112,8 +113,6 @@ class MagicDate(click.ParamType):
         try:
             dt = datetime.strptime(date_string, date_format)
         except ValueError:
-            raise click.ClickException(
-                "Unable to parse date string: {}.".format(date_string)
-            )
+            raise BadParameter("Unable to parse date string: {}.".format(date_string))
         else:
             return dt
