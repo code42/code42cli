@@ -1,11 +1,9 @@
 from datetime import date
-from datetime import datetime
 
 import click
 from pandas import concat
 from pandas import DataFrame
 from pandas import to_datetime
-from pandas import to_timedelta
 from py42 import exceptions
 from py42.exceptions import Py42NotFoundError
 
