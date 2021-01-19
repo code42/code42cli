@@ -13,15 +13,15 @@ from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
 from code42cli.click_ext.types import MagicDate
-from code42cli.date_helper import round_datetime_to_day_start
 from code42cli.date_helper import round_datetime_to_day_end
+from code42cli.date_helper import round_datetime_to_day_start
 from code42cli.errors import Code42CLIError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.output_formats import DataFrameOutputFormatter
-from code42cli.output_formats import OutputFormatter
 from code42cli.output_formats import OutputFormat
+from code42cli.output_formats import OutputFormatter
 
 
 @click.group(cls=OrderedGroup)
