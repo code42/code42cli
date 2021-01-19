@@ -10,13 +10,13 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 # Unreleased
 
-- The `devices` command is added. Included are:
-    - `devices deactivate` to deactivate a single computer
-    - `devices show` to retrieve detailed information about a computer
-    - `devices list` to retrieve info about many devices, including device settings
-    - `devices bulk deactivate` to deactivate a list of devices
-
 # Added
+
+- The `devices` command is added. Included are:
+    - `devices deactivate` to deactivate a single computer.
+    - `devices show` to retrieve detailed information about a computer.
+    - `devices list` to retrieve info about many devices, including device settings.
+    - `devices bulk deactivate` to deactivate a list of devices.
 
 - `code42 departing-employee list` command.
 
@@ -26,6 +26,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - The error text when removing an employee from a detection list now references the employee
   by ID rather the username.
+    
+- Improved help text for date option arguments.
 
 ## 1.1.0 - 2020-12-18
 

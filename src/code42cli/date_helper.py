@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 from datetime import timedelta
+from datetime import timezone
 
 import click
 
@@ -17,7 +18,7 @@ _FORMAT_VALUE_ERROR_MESSAGE = (
 def convert_datetime_to_timestamp(dt):
     if dt is None:
         return
-    return (dt - datetime.utcfromtimestamp(0)).total_seconds()
+    return dt.replace(tzinfo=timezone.utc).timestamp()
 
 
 def verify_timestamp_order(
@@ -34,7 +35,8 @@ def verify_timestamp_order(
 def limit_date_range(dt, max_days_back=90, param=None):
     if dt is None:
         return
-    if datetime.utcnow() - dt > timedelta(days=max_days_back):
+    now = datetime.utcnow().replace(tzinfo=timezone.utc)
+    if now - dt > timedelta(days=max_days_back):
         raise click.BadParameter(
             message="must be within {} days.".format(max_days_back), param=param
         )

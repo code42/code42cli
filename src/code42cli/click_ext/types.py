@@ -1,8 +1,10 @@
 import re
 from datetime import datetime
 from datetime import timedelta
+from datetime import timezone
 
-import click.exceptions
+import click
+from click.exceptions import BadParameter
 
 
 class FileOrString(click.File):
@@ -42,14 +44,14 @@ class MagicDate(click.ParamType):
     and converts them to datetime objects.
     """
 
-    TIMESTAMP_REGEX = re.compile(r"(\d{4}-\d{2}-\d{2})\s*(.*)?")
-    MAGIC_TIME_REGEX = re.compile(r"(\d+)([dhm])$")
+    TIMESTAMP_REGEX = re.compile(r"(\d{4}-\d{2}-\d{2})(?:$|T|\s+)([0-9:]+)?")
+    MAGIC_TIME_REGEX = re.compile(r"(\d+)([dhmDHM])$")
     HELP_TEXT = (
         "Accepts a date/time in yyyy-MM-dd (UTC) or yyyy-MM-dd HH:MM:SS "
         "(UTC+24-hr time) format where the 'time' portion of the string "
         "can be partial (e.g. '2020-01-01 12' or '2020-01-01 01:15') or "
         "a 'short time' value representing days (30d), hours (24h) or "
-        "minutes (15m) from current time."
+        "minutes (15m) from the current time."
     )
 
     name = "magicdate"
@@ -82,11 +84,12 @@ class MagicDate(click.ParamType):
         else:
             self.fail(self.HELP_TEXT, param=param)
 
-        return dt
+        return dt.replace(tzinfo=timezone.utc)
 
     @staticmethod
     def _get_dt_from_magic_time_pair(num, period):
         num = int(num)
+        period = period.lower()
         if period == "d":
             delta = timedelta(days=num)
         elif period == "h":
@@ -94,7 +97,7 @@ class MagicDate(click.ParamType):
         elif period == "m":
             delta = timedelta(minutes=num)
         else:
-            raise click.ClickException(
+            raise BadParameter(
                 "Couldn't parse magic time string: {}{}".format(num, period)
             )
         return datetime.utcnow() - delta
@@ -110,8 +113,6 @@ class MagicDate(click.ParamType):
         try:
             dt = datetime.strptime(date_string, date_format)
         except ValueError:
-            raise click.ClickException(
-                "Unable to parse date string: {}.".format(date_string)
-            )
+            raise BadParameter("Unable to parse date string: {}.".format(date_string))
         else:
             return dt
