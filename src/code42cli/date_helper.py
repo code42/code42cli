@@ -18,8 +18,7 @@ _FORMAT_VALUE_ERROR_MESSAGE = (
 def convert_datetime_to_timestamp(dt):
     if dt is None:
         return
-    utc_epoch = datetime.utcfromtimestamp(0).replace(tzinfo=timezone.utc)
-    return (dt - utc_epoch).total_seconds()
+    return dt.replace(tzinfo=timezone.utc).timestamp()
 
 
 def verify_timestamp_order(
