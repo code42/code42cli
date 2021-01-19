@@ -19,6 +19,8 @@ TEST_SOURCE = "rule source"
 
 TEST_EMPTY_RULE_RESPONSE = {"ruleMetadata": []}
 
+ALERT_RULES_COMMAND = "alert-rules"
+
 TEST_RULE_RESPONSE = {
     "ruleMetadata": [
         {
@@ -343,3 +345,35 @@ def test_remove_when_user_not_on_rule_raises_expected_error(runner, cli_state, m
         )
         in result.output
     )
+
+
+@pytest.mark.parametrize(
+    "command, error_msg",
+    [
+        (
+            "{} add-user --rule-id test-rule-id".format(ALERT_RULES_COMMAND),
+            "Missing option '-u' / '--username'.",
+        ),
+        (
+            "{} remove-user --rule-id test-rule-id".format(ALERT_RULES_COMMAND),
+            "Missing option '-u' / '--username'.",
+        ),
+        ("{} add-user".format(ALERT_RULES_COMMAND), "Missing option '--rule-id'."),
+        ("{} remove-user".format(ALERT_RULES_COMMAND), "Missing option '--rule-id'."),
+        ("{} show".format(ALERT_RULES_COMMAND), "Missing argument 'RULE_ID'."),
+        (
+            "{} bulk add".format(ALERT_RULES_COMMAND),
+            "Error: Missing argument 'CSV_FILE'.",
+        ),
+        (
+            "{} bulk remove".format(ALERT_RULES_COMMAND),
+            "Error: Missing argument 'CSV_FILE'.",
+        ),
+    ],
+)
+def test_alert_rules_command_when_missing_required_parameters_errors(
+    command, error_msg, runner, cli_state
+):
+    result = runner.invoke(cli, command.split(" "), obj=cli_state)
+    assert result.exit_code == 2
+    assert error_msg in "".join(result.output)

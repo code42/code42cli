@@ -2,7 +2,7 @@ from datetime import datetime
 from datetime import timedelta
 
 import pytest
-from integration import run_command
+from tests.integration import run_command
 
 
 begin_date = datetime.utcnow() - timedelta(days=20)
@@ -47,12 +47,3 @@ ALERT_ADVANCED_QUERY_COMMAND = "code42 alerts search --advanced-query '{}'".form
 def test_alert_command_returns_success_return_code(command):
     return_code, response = run_command(command)
     assert return_code == 0
-
-
-@pytest.mark.parametrize(
-    "command", ["{} --advanced-query '{}'".format(ALERT_COMMAND, ADVANCED_QUERY)]
-)
-def test_begin_cant_be_used_with_advanced_query(command):
-    return_code, response = run_command(command)
-    assert return_code == 2
-    assert "--begin can't be used with: --advanced-query" in response[0]
