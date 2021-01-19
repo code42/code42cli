@@ -119,7 +119,7 @@ def _change_device_name(sdk, guid, name):
 )
 @sdk_options()
 def show(state, device_guid, format=None):
-    """Print device info. Requires device GUID."""
+    """Print individual device info. Requires device GUID."""
 
     formatter = OutputFormatter(format, _device_info_keys_map())
     backup_set_formatter = OutputFormatter(format, _backup_set_keys_map())
@@ -190,25 +190,10 @@ include_usernames_option = click.option(
 )
 
 
-@devices.command(name="list", help="Get information about many devices")
+@devices.command(name="list")
 @active_option
 @inactive_option
-@click.option(
-    "--days-since-last-connected",
-    required=False,
-    type=int,
-    help="Return only devices that have been offline for more than the number of days specified "
-    "(useful for reporting on problem devices).",
-)
 @org_uid_option
-@click.option(
-    "--drop-most-recent",
-    required=False,
-    type=int,
-    help="""Will drop the X most recently connected devices for each user from the
-    result list where X is the number you provide as this argument. Can be used to
-    avoid passing the most recently connected device for a user to the deactivate command.""",
-)
 @click.option(
     "--include-backup-usage",
     required=False,
@@ -253,19 +238,17 @@ def list_devices(
     state,
     active,
     inactive,
-    days_since_last_connected,
-    drop_most_recent,
     org_uid,
     include_backup_usage,
     include_usernames,
     include_settings,
     last_connected_after,
     last_connected_before,
-    creation_date_after,
-    creation_date_before,
+    created_after,
+    created_before,
     format,
 ):
-    """Outputs a list of all devices."""
+    """Get information about many devices."""
     if inactive:
         active = False
     columns = [
@@ -275,30 +258,32 @@ def list_devices(
         "osHostname",
         "status",
         "lastConnected",
+        "creationDate",
         "productVersion",
         "osName",
         "osVersion",
         "userUid",
     ]
-    devices_dataframe = _get_device_dataframe(
+    df = _get_device_dataframe(
         state.sdk, columns, active, org_uid, include_backup_usage
     )
-    if drop_most_recent:
-        devices_dataframe = _drop_n_devices_per_user(
-            devices_dataframe, drop_most_recent
-        )
-    if days_since_last_connected:
-        devices_dataframe = _drop_devices_which_have_not_connected_in_some_number_of_days(
-            devices_dataframe, days_since_last_connected
-        )
+    if last_connected_after:
+        df = df.loc[to_datetime(df.lastConnected) > last_connected_after]
+    if last_connected_before:
+        df = df.loc[to_datetime(df.lastConnected) < last_connected_before]
+    if created_after:
+        df = df.loc[to_datetime(df.creationDate) > created_after]
+    if created_before:
+        df = df.loc[to_datetime(df.creationDate) < created_before]
     if include_settings:
-        devices_dataframe = _add_settings_to_dataframe(state.sdk, devices_dataframe)
+        df = _add_settings_to_dataframe(state.sdk, df)
     if include_usernames:
-        devices_dataframe = _add_usernames_to_device_dataframe(
-            state.sdk, devices_dataframe
-        )
-    formatter = DataFrameOutputFormatter(format)
-    formatter.echo_formatted_dataframe(devices_dataframe)
+        df = _add_usernames_to_device_dataframe(state.sdk, df)
+    if df.empty:
+        click.echo("No results found.")
+    else:
+        formatter = DataFrameOutputFormatter(format)
+        formatter.echo_formatted_dataframe(df)
 
 
 def _get_device_dataframe(
@@ -345,35 +330,6 @@ def _add_settings_to_dataframe(sdk, device_dataframe):
         return device_dataframe
 
 
-def _drop_devices_which_have_not_connected_in_some_number_of_days(
-    devices_dataframe, days_since_last_connected
-):
-    utc_now = to_datetime(datetime.utcnow(), utc=True)
-    devices_last_connected_dates = to_datetime(
-        devices_dataframe["lastConnected"], utc=True
-    )
-    days_since_last_connected_delta = to_timedelta(
-        days_since_last_connected, unit="days"
-    )
-    return devices_dataframe.loc[
-        utc_now - devices_last_connected_dates > days_since_last_connected_delta, :,
-    ]
-
-
-def _drop_n_devices_per_user(
-    device_dataframe,
-    number_to_drop,
-    sort_field="lastConnected",
-    sort_ascending=False,
-    group_field="userUid",
-):
-    return (
-        device_dataframe.sort_values(by=sort_field, ascending=sort_ascending)
-        .drop(device_dataframe.groupby(group_field).head(number_to_drop).index)
-        .reset_index(drop=True)
-    )
-
-
 def _add_usernames_to_device_dataframe(sdk, device_dataframe):
     users_generator = sdk.users.get_all()
     users_list = []
@@ -385,10 +341,7 @@ def _add_usernames_to_device_dataframe(sdk, device_dataframe):
     return device_dataframe.merge(users_dataframe, how="left", on="userUid")
 
 
-@devices.command(
-    name="list-backup-sets",
-    help="Get information about many devices and their backup sets",
-)
+@devices.command()
 @active_option
 @inactive_option
 @org_uid_option
@@ -398,20 +351,19 @@ def _add_usernames_to_device_dataframe(sdk, device_dataframe):
 def list_backup_sets(
     state, active, inactive, org_uid, include_usernames, format,
 ):
-    """Outputs a list of all devices."""
+    """Get information about many devices and their backup sets."""
     if inactive:
         active = False
     columns = ["guid", "userUid"]
-    devices_dataframe = _get_device_dataframe(state.sdk, columns, active, org_uid)
+    df = _get_device_dataframe(state.sdk, columns, active, org_uid)
     if include_usernames:
-        devices_dataframe = _add_usernames_to_device_dataframe(
-            state.sdk, devices_dataframe
-        )
-    devices_dataframe = _add_backup_set_settings_to_dataframe(
-        state.sdk, devices_dataframe
-    )
-    formatter = DataFrameOutputFormatter(format)
-    formatter.echo_formatted_dataframe(devices_dataframe)
+        df = _add_usernames_to_device_dataframe(state.sdk, df)
+    df = _add_backup_set_settings_to_dataframe(state.sdk, df)
+    if df.empty:
+        click.echo("No results found.")
+    else:
+        formatter = DataFrameOutputFormatter(format)
+        formatter.echo_formatted_dataframe(df)
 
 
 def _add_backup_set_settings_to_dataframe(sdk, devices_dataframe):
@@ -465,17 +417,14 @@ def bulk(state):
     pass
 
 
-@bulk.command(
-    name="deactivate",
-    help="""Deactivate all devices on the given list.
-            Takes as input a CSV with a 'guid' column.""",
-)
+@bulk.command(name="deactivate")
 @read_csv_arg(headers=["guid"])
 @change_device_name_option
 @purge_date_option
 @format_option
 @sdk_options()
 def bulk_deactivate(state, csv_rows, change_device_name, purge_date, format):
+    """Deactivate all devices from the provided CSV containing a 'guid' column."""
     sdk = state.sdk
     csv_rows[0]["deactivated"] = False
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
