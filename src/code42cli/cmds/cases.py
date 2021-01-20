@@ -37,7 +37,7 @@ END_DATE_DICT = set_end_default_dict(CASES_KEYWORD)
 
 def _get_cases_header():
     return {
-        "number": "number",
+        "number": "Number",
         "name": "Name",
         "assignee": "Assignee",
         "status": "Status",
