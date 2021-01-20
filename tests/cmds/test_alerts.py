@@ -445,9 +445,7 @@ def test_search_and_send_to_when_end_date_is_before_begin_date_causes_exit(
 def test_search_and_send_to_with_only_begin_calls_extract_with_expected_filters(
     cli_state, alert_extractor, begin_option, runner, command
 ):
-    res = runner.invoke(
-        cli, [*command, "--begin", "1d"], obj=cli_state
-    )
+    res = runner.invoke(cli, [*command, "--begin", "1d"], obj=cli_state)
     assert res.exit_code == 0
     assert str(
         alert_extractor.extract.call_args[0][0]
@@ -478,9 +476,7 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_without_check
     command,
 ):
     res = runner.invoke(
-        cli,
-        [*command, "--use-checkpoint", "test", "--begin", "1d"],
-        obj=cli_state,
+        cli, [*command, "--use-checkpoint", "test", "--begin", "1d"], obj=cli_state,
     )
     assert res.exit_code == 0
     assert len(alert_extractor.extract.call_args[0]) == 1

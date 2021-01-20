@@ -32,6 +32,7 @@ def _get_audit_logs_default_header():
         "userId": "AffectedUserUID",
     }
 
+
 begin_option = opt.begin_option(
     AUDIT_LOGS_KEYWORD,
     callback=lambda ctx, param, arg: convert_datetime_to_timestamp(arg),
