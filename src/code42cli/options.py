@@ -14,17 +14,6 @@ from code42cli.profile import get_profile
 from code42cli.sdk_client import create_sdk
 
 
-BEGIN_OPTION_HELP_MESSAGE = (
-    "The beginning of the date range in which to look for {}, can be a date/time in "
-    "yyyy-MM-dd (UTC) or yyyy-MM-dd HH:MM:SS (UTC+24-hr time) format where the 'time' "
-    "portion of the string can be partial (e.g. '2020-01-01 12' or '2020-01-01 01:15') "
-    "or a short value representing days (30d), hours (24h) or minutes (15m) from current "
-    "time."
-)
-END_OPTION_HELP_MESSAGE = (
-    "The end of the date range in which to look for {}, argument format options are "
-    "the same as `--begin`."
-)
 yes_option = click.option(
     "-y",
     "--assume-yes",
