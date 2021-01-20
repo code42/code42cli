@@ -34,7 +34,7 @@ def read_csv(file, headers):
         csv_rows = []
         for row in csv.DictReader(lines[1:], fieldnames=first_line):
             # remove any extra columns that aren't in our expected headers
-            for key in row.keys():
+            for key in list(row.keys()):
                 if key not in headers:
                     row.pop(key)
             csv_rows.append(row)
