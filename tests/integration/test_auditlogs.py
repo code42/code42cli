@@ -2,6 +2,13 @@ from datetime import datetime
 from datetime import timedelta
 
 import pytest
+<<<<<<< HEAD
+=======
+from tests.integration import run_command
+from tests.integration.util import DockerDaemon
+from tests.integration.util import SyslogServer
+
+>>>>>>> intermittent commit
 
 SEARCH_COMMAND = "code42 audit-logs search"
 BASE_COMMAND = "{} -b".format(SEARCH_COMMAND)
@@ -9,6 +16,37 @@ begin_date = datetime.utcnow() - timedelta(days=-10)
 begin_date_str = begin_date.strftime("%Y-%m-%d %H:%M:%S")
 end_date = datetime.utcnow() - timedelta(days=10)
 end_date_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
+
+
+begin_date = datetime.utcnow() - timedelta(days=-10)
+begin_date_str = begin_date.strftime("%Y-%m-%d %H:%M:%S")
+
+
+@pytest.fixture
+def data_transfer():
+    with DockerDaemon():
+        print("docker daemon started")
+        with SyslogServer():
+            print("syslog server started")
+            yield run_command
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    "command",
+    [
+        (
+            "code42 audit-logs send-to localhost -p TCP -b '{}'".format(
+                begin_date_str
+            )
+        )
+    ],
+)
+def test_auditlogs_send_to(data_transfer, command):
+    exit_status, response = data_transfer(command)
+    print(exit_status)
+    print(response)
+    assert exit_status == 0
 
 
 @pytest.mark.integration
@@ -44,3 +82,6 @@ end_date_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
 def test_auditlogs_search_command_returns_success_return_code(command, command_runner):
     return_code, response = command_runner(command)
     assert return_code == 0
+
+
+
