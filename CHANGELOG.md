@@ -24,6 +24,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Changed
 
+- `code42 profile update` command now uses the default profile when `-n` is not provided.
+
 - The error text when removing an employee from a detection list now references the employee
   by ID rather the username.
 
