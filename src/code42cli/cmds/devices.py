@@ -62,8 +62,12 @@ def deactivate(state, device_guid, change_device_name, purge_date):
 
 
 def _deactivate_device(sdk, device_guid, change_device_name, purge_date):
-    device = sdk.devices.get_by_guid(device_guid)
     try:
+        int(device_guid)
+    except ValueError:
+        raise Code42CLIError("Not a valid guid.")
+    try:
+        device = sdk.devices.get_by_guid(device_guid)
         sdk.devices.deactivate(device.data["computerId"])
     except exceptions.Py42BadRequestError:
         raise Code42CLIError("The device {} is in legal hold.".format(device_guid))
@@ -106,15 +110,6 @@ def _change_device_name(sdk, guid, name):
 
 @devices.command()
 @device_guid_argument
-@click.option(
-    "-f",
-    "--format",
-    type=click.Choice(
-        [OutputFormat.TABLE, OutputFormat.JSON, OutputFormat.RAW], case_sensitive=False
-    ),
-    help="The output format of the result. Defaults to table format.",
-    default=OutputFormat.TABLE,
-)
 @sdk_options()
 def show(state, device_guid, format=None):
     """Print individual device info. Requires device GUID."""
@@ -123,11 +118,8 @@ def show(state, device_guid, format=None):
     backup_set_formatter = OutputFormatter(format, _backup_set_keys_map())
     device_info = _get_device_info(state.sdk, device_guid)
     formatter.echo_formatted_list([device_info])
-
-    # backupUsage is already part of device_info, no need to print it again separately
-    if format not in (OutputFormat.JSON, OutputFormat.RAW):
-        click.echo()
-        backup_set_formatter.echo_formatted_list(device_info["backupUsage"])
+    click.echo()
+    backup_set_formatter.echo_formatted_list(device_info["backupUsage"])
 
 
 def _device_info_keys_map():
