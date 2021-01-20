@@ -7,6 +7,7 @@ from py42.sdk.queries.query_filter import FilterGroup
 
 from code42cli.click_ext.options import incompatible_with
 from code42cli.click_ext.types import FileOrString
+<<<<<<< HEAD
 from code42cli.date_helper import parse_max_timestamp
 from code42cli.date_helper import parse_min_timestamp
 from code42cli.logger import get_main_cli_logger
@@ -17,6 +18,8 @@ from code42cli.output_formats import SendToFileEventsOutputFormat
 
 
 logger = get_main_cli_logger()
+=======
+>>>>>>> master
 
 
 def is_in_filter(filter_cls):
@@ -137,6 +140,7 @@ def _parse_query_from_json(ctx, param, arg):
         )
 
 
+<<<<<<< HEAD
 def search_interval_options(f, search_term):
     f = begin_option(
         f,
@@ -157,16 +161,20 @@ def create_search_options(search_term):
     advanced_query_option = click.option(
         "--advanced-query",
         help="A raw JSON {} query. "
+=======
+def advanced_query_option(term, **kwargs):
+    defaults = dict(
+        help=f"A raw JSON {term} query. "
+>>>>>>> master
         "Useful for when the provided query parameters do not satisfy your requirements. "
         "Argument can be passed as a string, read from stdin by passing '-', or from a filename if "
         "prefixed with '@', e.g. '--advanced-query @query.json'. "
-        "WARNING: Using advanced queries is incompatible with other query-building arguments.".format(
-            search_term
-        ),
+        "WARNING: Using advanced queries is incompatible with other query-building arguments.",
         metavar="QUERY_JSON",
         type=FileOrString(),
         callback=_parse_query_from_json,
     )
+<<<<<<< HEAD
     checkpoint_option = click.option(
         "-c",
         "--use-checkpoint",
@@ -209,3 +217,7 @@ send_to_format_options = click.option(
     help="The output format of the result. Defaults to RAW-JSON format.",
     default=SendToFileEventsOutputFormat.RAW,
 )
+=======
+    defaults.update(kwargs)
+    return click.option("--advanced-query", **defaults)
+>>>>>>> master

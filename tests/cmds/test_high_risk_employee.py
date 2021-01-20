@@ -26,6 +26,7 @@ HIGH_RISK_EMPLOYEE_ITEM = """{
     "riskFactors": ["PERFORMANCE_CONCERNS"]
 }
 """
+HR_EMPLOYEE_COMMAND = "high-risk-employee"
 
 
 @pytest.fixture()
@@ -351,3 +352,28 @@ def test_remove_high_risk_employee_when_user_not_on_list_prints_expected_error(
         )
         in result.output
     )
+
+
+@pytest.mark.parametrize(
+    "command, error_msg",
+    [
+        ("{} add".format(HR_EMPLOYEE_COMMAND), "Missing argument 'USERNAME'."),
+        ("{} remove".format(HR_EMPLOYEE_COMMAND), "Missing argument 'USERNAME'."),
+        ("{} bulk add".format(HR_EMPLOYEE_COMMAND), "Missing argument 'CSV_FILE'."),
+        ("{} bulk remove".format(HR_EMPLOYEE_COMMAND), "Missing argument 'FILE'."),
+        (
+            "{} bulk add-risk-tags".format(HR_EMPLOYEE_COMMAND),
+            "Missing argument 'CSV_FILE'.",
+        ),
+        (
+            "{} bulk remove-risk-tags".format(HR_EMPLOYEE_COMMAND),
+            "Missing argument 'CSV_FILE'.",
+        ),
+    ],
+)
+def test_hr_employee_command_when_missing_required_parameters_returns_error(
+    command, error_msg, runner, cli_state
+):
+    result = runner.invoke(cli, command.split(" "), obj=cli_state)
+    assert result.exit_code == 2
+    assert error_msg in "".join(result.output)

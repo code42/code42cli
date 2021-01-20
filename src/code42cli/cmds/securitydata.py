@@ -10,12 +10,15 @@ from py42.sdk.queries.fileevents.filters.file_filter import FileCategory
 import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
+import code42cli.options as opt
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.cmds.search.options import send_to_format_options
 from code42cli.cmds.search.options import server_options
+from code42cli.date_helper import convert_datetime_to_timestamp
+from code42cli.date_helper import limit_date_range
 from code42cli.logger import get_logger_for_server
 from code42cli.options import format_option
 from code42cli.options import sdk_options
@@ -24,24 +27,7 @@ from code42cli.output_formats import FileEventsOutputFormatter
 from code42cli.output_formats import OutputFormatter
 
 
-def _create_header_keys_map():
-    return {"name": "Name", "id": "Id"}
-
-
-def _create_search_header_map():
-    return {
-        "fileName": "FileName",
-        "filePath": "FilePath",
-        "eventType": "Type",
-        "eventTimestamp": "EventTimestamp",
-        "fileCategory": "FileCategory",
-        "fileSize": "FileSize",
-        "fileOwner": "FileOwner",
-        "md5Checksum": "MD5Checksum",
-        "sha256Checksum": "SHA256Checksum",
-    }
-
-
+SECURITY_DATA_KEYWORD = "file events"
 file_events_format_option = click.option(
     "-f",
     "--format",
@@ -49,11 +35,6 @@ file_events_format_option = click.option(
     help="The output format of the result. Defaults to table format.",
     default=FileEventsOutputFormat.TABLE,
 )
-
-
-search_options = searchopt.create_search_options("file events")
-
-
 exposure_type_option = click.option(
     "-t",
     "--type",
@@ -143,21 +124,58 @@ include_non_exposure_option = click.option(
     cls=incompatible_with(["advanced_query", "type", "saved_search"]),
     help="Get all events including non-exposure events.",
 )
-
-
-def _get_saved_search_query(ctx, param, arg):
-    if arg is None:
-        return
-    query = ctx.obj.sdk.securitydata.savedsearches.get_query(arg)
-    return query
-
-
-saved_search_option = click.option(
-    "--saved-search",
-    help="Get events from a saved search filter with the given ID.",
-    callback=_get_saved_search_query,
-    cls=incompatible_with("advanced_query"),
+begin_option = opt.begin_option(
+    SECURITY_DATA_KEYWORD,
+    callback=lambda ctx, param, arg: convert_datetime_to_timestamp(
+        limit_date_range(arg, max_days_back=90)
+    ),
 )
+end_option = opt.end_option(SECURITY_DATA_KEYWORD)
+checkpoint_option = opt.checkpoint_option(
+    SECURITY_DATA_KEYWORD, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
+)
+advanced_query_option = searchopt.advanced_query_option(SECURITY_DATA_KEYWORD)
+
+
+def _get_saved_search_option():
+    def _get_saved_search_query(ctx, param, arg):
+        if arg is None:
+            return
+        query = ctx.obj.sdk.securitydata.savedsearches.get_query(arg)
+        return query
+
+    return click.option(
+        "--saved-search",
+        help="Get events from a saved search filter with the given ID.",
+        callback=_get_saved_search_query,
+        cls=incompatible_with("advanced_query"),
+    )
+
+
+def _create_header_keys_map():
+    return {"name": "Name", "id": "Id"}
+
+
+def _create_search_header_map():
+    return {
+        "fileName": "FileName",
+        "filePath": "FilePath",
+        "eventType": "Type",
+        "eventTimestamp": "EventTimestamp",
+        "fileCategory": "FileCategory",
+        "fileSize": "FileSize",
+        "fileOwner": "FileOwner",
+        "md5Checksum": "MD5Checksum",
+        "sha256Checksum": "SHA256Checksum",
+    }
+
+
+def search_options(f):
+    f = checkpoint_option(f)
+    f = advanced_query_option(f)
+    f = end_option(f)
+    f = begin_option(f)
+    return f
 
 
 def file_event_options(f):
@@ -173,7 +191,7 @@ def file_event_options(f):
     f = process_owner_option(f)
     f = tab_url_option(f)
     f = include_non_exposure_option(f)
-    f = saved_search_option(f)
+    f = _get_saved_search_option()(f)
     return f
 
 
@@ -217,7 +235,7 @@ def search(
     saved_search,
     or_query,
     include_all,
-    **kwargs
+    **kwargs,
 ):
     """Search for file events."""
     output_header = ext.try_get_default_header(
@@ -296,7 +314,7 @@ def send_to(
     saved_search,
     or_query,
     certs,
-    **kwargs
+    **kwargs,
 ):
     """Send events to the given server address."""
     logger = get_logger_for_server(hostname, protocol, format, certs)

@@ -8,11 +8,13 @@ from py42.response import Py42Response
 from requests import Response
 from tests.cmds.conftest import get_mark_for_search_and_send_to
 
+from code42cli.click_ext.types import MagicDate
 from code42cli.cmds.auditlogs import _parse_audit_log_timestamp_string_to_timestamp
 from code42cli.cmds.search.cursor_store import AuditLogCursorStore
-from code42cli.date_helper import parse_max_timestamp
-from code42cli.date_helper import parse_min_timestamp
 from code42cli.logger.handlers import ServerProtocol
+from code42cli.date_helper import convert_datetime_to_timestamp
+from code42cli.date_helper import round_datetime_to_day_end
+from code42cli.date_helper import round_datetime_to_day_start
 from code42cli.main import cli
 from code42cli.util import hash_event
 
@@ -146,6 +148,11 @@ def test_search_and_send_to_handles_json_format(runner, cli_state, date_str, com
 def test_search_and_send_to_handles_filter_parameters(
     runner, cli_state, date_str, command
 ):
+    expected_begin_timestamp = convert_datetime_to_timestamp(
+        MagicDate(rounding_func=round_datetime_to_day_start).convert(
+            date_str, None, None
+        )
+    )
     runner.invoke(
         cli,
         [
@@ -164,7 +171,7 @@ def test_search_and_send_to_handles_filter_parameters(
         usernames=("test@example.com", "test2@test.example.com"),
         affected_user_ids=(),
         affected_usernames=(),
-        begin_time=parse_min_timestamp(date_str),
+        begin_time=expected_begin_timestamp,
         end_time=None,
         event_types=(),
         user_ids=(),
@@ -177,6 +184,14 @@ def test_search_and_send_to_handles_all_filter_parameters(
     runner, cli_state, date_str, command
 ):
     end_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    expected_begin_timestamp = convert_datetime_to_timestamp(
+        MagicDate(rounding_func=round_datetime_to_day_start).convert(
+            date_str, None, None
+        )
+    )
+    expected_end_timestamp = convert_datetime_to_timestamp(
+        MagicDate(rounding_func=round_datetime_to_day_end).convert(end_time, None, None)
+    )
     runner.invoke(
         cli,
         [
@@ -208,9 +223,9 @@ def test_search_and_send_to_handles_all_filter_parameters(
     cli_state.sdk.auditlogs.get_all.assert_called_once_with(
         usernames=("test@example.com", "test2@test.example.com"),
         affected_user_ids=("123", "456"),
-        affected_usernames=("test@test.example.com",),
-        begin_time=parse_min_timestamp(date_str),
-        end_time=parse_max_timestamp(end_time),
+        begin_time=expected_begin_timestamp,
+        end_time=expected_end_timestamp,
+        affected_usernames=("test@test.test",),
         event_types=("saved-search",),
         user_ids=("userid",),
         user_ip_addresses=("0.0.0.0",),

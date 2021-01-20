@@ -13,26 +13,24 @@ import code42cli.options as opt
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.cmds.search.options import server_options
+from code42cli.date_helper import convert_datetime_to_timestamp
+from code42cli.date_helper import limit_date_range
 from code42cli.logger import get_logger_for_server
 from code42cli.options import format_option
 from code42cli.output_formats import JsonOutputFormat
 from code42cli.output_formats import OutputFormatter
 
 
-def _get_search_default_header():
-    return {
-        "name": "RuleName",
-        "actor": "Username",
-        "createdAt": "ObservedDate",
-        "state": "Status",
-        "severity": "Severity",
-        "description": "Description",
-    }
-
-
-search_options = searchopt.create_search_options("alerts")
-
-
+ALERTS_KEYWORD = "alerts"
+begin = opt.begin_option(
+    ALERTS_KEYWORD,
+    callback=lambda ctx, param, arg: convert_datetime_to_timestamp(
+        limit_date_range(arg, max_days_back=90)
+    ),
+)
+end = opt.end_option(ALERTS_KEYWORD)
+checkpoint = opt.checkpoint_option(ALERTS_KEYWORD)
+advanced_query = searchopt.advanced_query_option(ALERTS_KEYWORD)
 severity_option = click.option(
     "--severity",
     multiple=True,
@@ -137,6 +135,25 @@ send_to_format_options = click.option(
     help="The output format of the result. Defaults to json format.",
     default=JsonOutputFormat.JSON,
 )
+
+
+def _get_search_default_header():
+    return {
+        "name": "RuleName",
+        "actor": "Username",
+        "createdAt": "ObservedDate",
+        "state": "Status",
+        "severity": "Severity",
+        "description": "Description",
+    }
+
+
+def search_options(f):
+    f = checkpoint(f)
+    f = advanced_query(f)
+    f = end(f)
+    f = begin(f)
+    return f
 
 
 def alert_options(f):
