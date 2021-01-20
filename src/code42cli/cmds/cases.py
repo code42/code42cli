@@ -1,12 +1,11 @@
-import click
-import os
 import json
+import os
 from pprint import pformat
 
+import click
 from py42.clients.cases import CaseStatus
 from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42NotFoundError
-
 
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.options import format_option
@@ -110,21 +109,10 @@ def update(state, case_number, name, subject, assignee, description, notes, stat
 )
 @click.option("--subject", help="Filter by user UID of the subject of a case.")
 @click.option("--assignee", help="Filter by user UID of assignee.")
-@click.option(
-    "--begin-create-time", **BEGIN_DATE_DICT,
-)
-@click.option(
-    "--end-create-time",
-    **END_DATE_DICT,
-)
-@click.option(
-    "--begin-update-time",
-    **BEGIN_DATE_DICT,
-)
-@click.option(
-    "--end-update-time",
-    **END_DATE_DICT,
-)
+@click.option("--begin-create-time", **BEGIN_DATE_DICT)
+@click.option("--end-create-time", **END_DATE_DICT)
+@click.option("--begin-update-time", **BEGIN_DATE_DICT)
+@click.option("--end-update-time", **END_DATE_DICT)
 @click.option("--status", help="Filter cases by case status.")
 @format_option
 @sdk_options()
@@ -159,18 +147,19 @@ def _list(
         click.echo("No cases found.")
 
 
-def _display_file_events(state, case_number):
+def _display_file_events(sdk, case_number):
     click.echo("\nFile Events:\n")
-    response = state.sdk.cases.file_events.get_all(case_number)
+    response = sdk.cases.file_events.get_all(case_number)
     if not response["events"]:
         click.echo("No events found.")
-    for event in response["events"]:
-        click.echo(pformat(json.loads(response.text)))
+    click.echo(pformat(json.loads(response.text)))
 
 
 @cases.command()
 @case_number_arg
-@click.option("--include-file-events", is_flag=True, help="View events associated to the case.")
+@click.option(
+    "--include-file-events", is_flag=True, help="View events associated to the case."
+)
 @sdk_options()
 @format_option
 def show(state, case_number, format, include_file_events):
@@ -206,21 +195,23 @@ def file_events(state):
     pass
 
 
-
-@file_events.command("show")
+@file_events.command("list")
 @case_number_arg
-@file_event_id_option
 @sdk_options()
 @format_option
-def _show(state, case_number, event_id, format):
-    """Show event details for the given event id associated with the case."""
+def file_events_list(state, case_number, format):
+    """List all the events associated with the case."""
     formatter = OutputFormatter(format, _get_events_header())
     try:
-        response = state.sdk.cases.file_events.get(case_number, event_id)
-        formatter.echo_formatted_list([response.data])
+        response = state.sdk.cases.file_events.get_all(case_number)
     except Py42NotFoundError as err:
-        click.echo("Invalid case-number or event-id.")
+        click.echo("Invalid case-number.")
         raise err
+    if not response["events"]:
+        click.echo("No events found.")
+    for event in response["events"]:
+        events = [event for event in response["events"]]
+        formatter.echo_formatted_list(events)
 
 
 @file_events.command()
