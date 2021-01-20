@@ -5,7 +5,7 @@ from unittest.mock import mock_open
 import pytest
 from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42NotFoundError
-from requests import Request
+from py42.response import Py42Response
 
 from code42cli.main import cli
 
@@ -38,7 +38,7 @@ def error(mocker):
 
 @pytest.fixture
 def py42_response(mocker):
-    return mocker.MagicMock(spec=Request)
+    return mocker.MagicMock(spec=Py42Response)
 
 
 def test_create_calls_create_with_expected_params(runner, cli_state):
@@ -139,6 +139,15 @@ def test_show_calls_get_case_with_expected_params(runner, cli_state):
     cli_state.sdk.cases.get.assert_called_once_with(1)
 
 
+def test_show_with_include_file_events_calls_file_events_get_all_with_expected_params(
+    runner, cli_state
+):
+    runner.invoke(
+        cli, ["cases", "show", "1", "--include-file-events"], obj=cli_state,
+    )
+    cli_state.sdk.cases.file_events.get_all.assert_called_once_with(1)
+
+
 def test_export_calls_export_summary_with_expected_params(runner, cli_state, mocker):
     with mock.patch("builtins.open", mock_open()) as mf:
         runner.invoke(
@@ -169,22 +178,15 @@ def test_file_events_list_calls_get_all_with_expected_params(runner, cli_state):
     cli_state.sdk.cases.file_events.get_all.assert_called_once_with(1)
 
 
-def test_file_events_show_calls_get_event_with_expected_params(runner, cli_state):
-    runner.invoke(
-        cli, ["cases", "file-events", "show", "1", "--event-id", "1"], obj=cli_state,
-    )
-    cli_state.sdk.cases.file_events.get.assert_called_once_with(1, "1")
-
-
-def test_file_events_show_when_py42_raises_exception_returns_error_message(
+def test_show_when_py42_raises_exception_returns_error_message(
     runner, cli_state, error
 ):
-    cli_state.sdk.cases.file_events.get.side_effect = Py42NotFoundError(error)
+    cli_state.sdk.cases.file_events.get_all.side_effect = Py42NotFoundError(error)
     result = runner.invoke(
-        cli, ["cases", "file-events", "show", "1", "--event-id", "1"], obj=cli_state,
+        cli, ["cases", "show", "1", "--include-file-events"], obj=cli_state,
     )
-    cli_state.sdk.cases.file_events.get.assert_called_once_with(1, "1")
-    assert "Invalid case-number or event-id." in result.output
+    cli_state.sdk.cases.file_events.get_all.assert_called_once_with(1)
+    assert "Invalid case-number 1." in result.output
 
 
 def test_file_events_add_when_py42_raises_exception_returns_error_message(
@@ -227,11 +229,13 @@ def test_list_returns_expected_data(runner, cli_state, py42_response, mocker):
     assert "test@test.test" in result.output
 
 
-def test_events_show_returns_expected_data(runner, cli_state, py42_response):
-    py42_response.data = json.loads(EVENT_DETAILS)
-    cli_state.sdk.cases.file_events.get.return_value = py42_response
+def test_show_returns_expected_data_with_include_file_events_option(
+    runner, cli_state, py42_response
+):
+    py42_response.text = ALL_EVENTS
+    cli_state.sdk.cases.file_events.get_all.return_value = py42_response
     result = runner.invoke(
-        cli, ["cases", "file-events", "show", "1", "--event-id", "e"], obj=cli_state,
+        cli, ["cases", "show", "1", "--include-file-events"], obj=cli_state,
     )
     assert (
         "0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_986472527798692818_971"
@@ -265,9 +269,6 @@ def test_events_list_returns_expected_data(runner, cli_state):
             MISSING_CASE_NUMBER,
         ),
         # ("{} list ".format(CASES_FILE_EVENTS_COMMAND), MISSING_CASE_NUMBER),
-        # ("{} show ".format(CASES_FILE_EVENTS_COMMAND), MISSING_CASE_NUMBER),
-        # ("{} show --event-id 3 ".format(CASES_FILE_EVENTS_COMMAND), MISSING_CASE_NUMBER),
-        ("{} show 3".format(CASES_FILE_EVENTS_COMMAND), MISSING_EVENT_ID),
     ],
 )
 def test_cases_command_when_missing_required_parameters_errors(

@@ -168,10 +168,10 @@ def show(state, case_number, format, include_file_events):
     try:
         response = state.sdk.cases.get(case_number)
         formatter.echo_formatted_list([response.data])
+        if include_file_events:
+            _display_file_events(state.sdk, case_number)
     except Py42NotFoundError:
         click.echo("Invalid case-number {}.".format(case_number))
-    if include_file_events:
-        _display_file_events(state, case_number)
 
 
 @cases.command()
