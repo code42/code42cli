@@ -7,6 +7,8 @@ from py42.exceptions import Py42NotFoundError
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.options import format_option
 from code42cli.options import sdk_options
+from code42cli.options import set_begin_default_dict
+from code42cli.options import set_end_default_dict
 from code42cli.output_formats import OutputFormatter
 
 
@@ -26,6 +28,9 @@ file_event_id_option = click.option(
 )
 
 DATE_FORMAT = "%Y-%m-%d"
+CASES_KEYWORD = "cases"
+BEGIN_DATE_DICT = set_begin_default_dict(CASES_KEYWORD)
+END_DATE_DICT = set_end_default_dict(CASES_KEYWORD)
 
 
 def _get_cases_header():
@@ -103,24 +108,19 @@ def update(state, case_number, name, subject, assignee, description, notes, stat
 @click.option("--subject", help="Filter by user UID of the subject of a case.")
 @click.option("--assignee", help="Filter by user UID of assignee.")
 @click.option(
-    "--begin-create-time",
-    help="Fetch cases created after given date time.",
-    type=click.DateTime(formats=[DATE_FORMAT]),
+    "--begin-create-time", **BEGIN_DATE_DICT,
 )
 @click.option(
     "--end-create-time",
-    help="Fetch cases created before given date time.",
-    type=click.DateTime(formats=[DATE_FORMAT]),
+    **END_DATE_DICT,
 )
 @click.option(
     "--begin-update-time",
-    help="Fetch cases last updated after given date time.",
-    type=click.DateTime(formats=[DATE_FORMAT]),
+    **BEGIN_DATE_DICT,
 )
 @click.option(
     "--end-update-time",
-    help="Fetch cases last updated before given date time.",
-    type=click.DateTime(formats=[DATE_FORMAT]),
+    **END_DATE_DICT,
 )
 @click.option("--status", help="Filter cases by case status.")
 @format_option
