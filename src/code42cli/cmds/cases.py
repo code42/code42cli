@@ -1,8 +1,12 @@
 import click
 import os
+import json
+from pprint import pformat
+
 from py42.clients.cases import CaseStatus
 from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42NotFoundError
+
 
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.options import format_option
@@ -27,7 +31,6 @@ file_event_id_option = click.option(
     "--event-id", required=True, help="File event id associated to the case."
 )
 
-DATE_FORMAT = "%Y-%m-%d"
 CASES_KEYWORD = "cases"
 BEGIN_DATE_DICT = set_begin_default_dict(CASES_KEYWORD)
 END_DATE_DICT = set_end_default_dict(CASES_KEYWORD)
@@ -156,11 +159,21 @@ def _list(
         click.echo("No cases found.")
 
 
+def _display_file_events(state, case_number):
+    click.echo("\nFile Events:\n")
+    response = state.sdk.cases.file_events.get_all(case_number)
+    if not response["events"]:
+        click.echo("No events found.")
+    for event in response["events"]:
+        click.echo(pformat(json.loads(response.text)))
+
+
 @cases.command()
 @case_number_arg
+@click.option("--include-file-events", is_flag=True, help="View events associated to the case.")
 @sdk_options()
 @format_option
-def show(state, case_number, format):
+def show(state, case_number, format, include_file_events):
     """Show case details."""
     formatter = OutputFormatter(format, _get_cases_header())
     try:
@@ -168,6 +181,8 @@ def show(state, case_number, format):
         formatter.echo_formatted_list([response.data])
     except Py42NotFoundError:
         click.echo("Invalid case-number {}.".format(case_number))
+    if include_file_events:
+        _display_file_events(state, case_number)
 
 
 @cases.command()
@@ -190,24 +205,6 @@ def file_events(state):
     """Fetch file events associated with the case."""
     pass
 
-
-@file_events.command("list")
-@case_number_arg
-@sdk_options()
-@format_option
-def file_events_list(state, case_number, format):
-    """List all the events associated with the case."""
-    formatter = OutputFormatter(format, _get_events_header())
-    try:
-        response = state.sdk.cases.file_events.get_all(case_number)
-    except Py42NotFoundError as err:
-        click.echo("Invalid case-number.")
-        raise err
-    if not response["events"]:
-        click.echo("No events found.")
-    for event in response["events"]:
-        events = [event for event in response["events"]]
-        formatter.echo_formatted_list(events)
 
 
 @file_events.command("show")
