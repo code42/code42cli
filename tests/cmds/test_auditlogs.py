@@ -167,7 +167,7 @@ def test_search_and_send_to_handles_filter_parameters(
         obj=cli_state,
     )
     cli_state.sdk.auditlogs.get_all.assert_called_once_with(
-        usernames=("test@test.com", "test2@test.test"),
+        usernames=("test@example.com", "test2@test.example.com"),
         affected_user_ids=(),
         affected_usernames=(),
         begin_time=expected_begin_timestamp,
@@ -219,9 +219,9 @@ def test_search_and_send_to_handles_all_filter_parameters(
         obj=cli_state,
     )
     cli_state.sdk.auditlogs.get_all.assert_called_once_with(
-        usernames=("test@test.com", "test2@test.test"),
+        usernames=("test@example.com", "test2@test.example.com"),
         affected_user_ids=("123", "456"),
-        affected_usernames=("test@test.test",),
+        affected_usernames=("test@test.example.com",),
         begin_time=expected_begin_timestamp,
         end_time=expected_end_timestamp,
         event_types=("saved-search",),
