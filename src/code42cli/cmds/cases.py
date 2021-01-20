@@ -1,4 +1,5 @@
 import click
+import os
 from py42.clients.cases import CaseStatus
 from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42NotFoundError
@@ -178,7 +179,8 @@ def show(state, case_number, format):
 def export(state, case_number, path):
     """Download case detail summary in a pdf file at the given path with name <case_number>_case_summary.pdf."""
     response = state.sdk.cases.export_summary(case_number)
-    with open("{}/{}_case_summary.pdf".format(path, case_number), "wb") as f:
+    file = os.path.join(path, "{}_case_summary.pdf".format(case_number))
+    with open(file, "wb") as f:
         f.write(response.content)
 
 
