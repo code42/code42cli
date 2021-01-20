@@ -8,6 +8,7 @@ from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42NotFoundError
 
 from code42cli.click_ext.groups import OrderedGroup
+from code42cli.errors import Code42CLIError
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.options import set_begin_default_dict
@@ -147,12 +148,19 @@ def _list(
         click.echo("No cases found.")
 
 
-def _display_file_events(sdk, case_number):
-    click.echo("\nFile Events:\n")
+def _get_file_events(sdk, case_number):
     response = sdk.cases.file_events.get_all(case_number)
     if not response["events"]:
+        return None
+    return json.loads(response.text)
+
+
+def _display_file_events(events):
+    if events:
+        click.echo("\nFile Events:\n")
+        click.echo(pformat(events))
+    else:
         click.echo("No events found.")
-    click.echo(pformat(json.loads(response.text)))
 
 
 @cases.command()
@@ -169,9 +177,10 @@ def show(state, case_number, format, include_file_events):
         response = state.sdk.cases.get(case_number)
         formatter.echo_formatted_list([response.data])
         if include_file_events:
-            _display_file_events(state.sdk, case_number)
+            events = _get_file_events(state.sdk, case_number)
+            _display_file_events(events)
     except Py42NotFoundError:
-        click.echo("Invalid case-number {}.".format(case_number))
+        Code42CLIError("Invalid case-number {}.".format(case_number))
 
 
 @cases.command()
@@ -204,9 +213,9 @@ def file_events_list(state, case_number, format):
     formatter = OutputFormatter(format, _get_events_header())
     try:
         response = state.sdk.cases.file_events.get_all(case_number)
-    except Py42NotFoundError as err:
-        click.echo("Invalid case-number.")
-        raise err
+    except Py42NotFoundError:
+        raise Code42CLIError("Invalid case-number.")
+
     if not response["events"]:
         click.echo("No events found.")
     for event in response["events"]:
@@ -222,9 +231,8 @@ def add(state, case_number, event_id):
     """Associate an event id to a case."""
     try:
         state.sdk.cases.file_events.add(case_number, event_id)
-    except Py42BadRequestError as err:
-        click.echo("Invalid case-number or event-id.")
-        raise err
+    except Py42BadRequestError:
+        raise Code42CLIError("Invalid case-number or event-id.")
 
 
 @file_events.command()
@@ -235,6 +243,5 @@ def remove(state, case_number, event_id):
     """Remove the associated event id from the case."""
     try:
         state.sdk.cases.file_events.delete(case_number, event_id)
-    except Py42NotFoundError as err:
-        click.echo("Invalid case-number or event-id.")
-        raise err
+    except Py42NotFoundError:
+        Code42CLIError("Invalid case-number or event-id.")
