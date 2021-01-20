@@ -180,17 +180,17 @@ def show(state, case_number, format, include_file_events):
             events = _get_file_events(state.sdk, case_number)
             _display_file_events(events)
     except Py42NotFoundError:
-        Code42CLIError("Invalid case-number {}.".format(case_number))
+        raise Code42CLIError("Invalid case-number {}.".format(case_number))
 
 
 @cases.command()
 @case_number_arg
 @click.option(
-    "--path", type=str, help="File path. Defaults to current directory.", default="."
+    "--path", help="File path. Defaults to the current directory.", default="."
 )
 @sdk_options()
 def export(state, case_number, path):
-    """Download case detail summary in a pdf file at the given path with name <case_number>_case_summary.pdf."""
+    """Download a case detail summary as a pdf file at the given path with name <case_number>_case_summary.pdf."""
     response = state.sdk.cases.export_summary(case_number)
     file = os.path.join(path, "{}_case_summary.pdf".format(case_number))
     with open(file, "wb") as f:
@@ -218,7 +218,7 @@ def file_events_list(state, case_number, format):
 
     if not response["events"]:
         click.echo("No events found.")
-    for event in response["events"]:
+    else:
         events = [event for event in response["events"]]
         formatter.echo_formatted_list(events)
 
@@ -244,4 +244,4 @@ def remove(state, case_number, event_id):
     try:
         state.sdk.cases.file_events.delete(case_number, event_id)
     except Py42NotFoundError:
-        Code42CLIError("Invalid case-number or event-id.")
+        raise Code42CLIError("Invalid case-number or event-id.")
