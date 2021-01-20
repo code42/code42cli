@@ -13,7 +13,6 @@ def encode_response(line, encoding_type=ENCODING_TYPE):
 
 
 def run_command(command):
-
     process = pexpect.spawn(command)
     response = []
     try:
