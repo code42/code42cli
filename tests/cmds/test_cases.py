@@ -218,7 +218,7 @@ def test_show_returns_expected_data(runner, cli_state, py42_response):
     assert "test@test.test" in result.output
 
 
-def test_list_returns_expected_data(runner, cli_state, py42_response, mocker):
+def test_list_returns_expected_data(runner, cli_state, py42_response):
     py42_response.data = json.loads(ALL_CASES)
 
     def gen():
@@ -259,16 +259,16 @@ def test_events_list_returns_expected_data(runner, cli_state):
         ("{} update --description d".format(CASES_COMMAND), MISSING_CASE_NUMBER),
         ("{} show".format(CASES_COMMAND), MISSING_CASE_NUMBER),
         ("{} export".format(CASES_COMMAND), MISSING_CASE_NUMBER),
-        # ("{} add ".format(CASES_FILE_EVENTS_COMMAND), MISSING_CASE_NUMBER),
+        ("{} add".format(CASES_FILE_EVENTS_COMMAND), MISSING_CASE_NUMBER),
         ("{} add --event-id 3".format(CASES_FILE_EVENTS_COMMAND), MISSING_CASE_NUMBER),
         ("{} add 3".format(CASES_FILE_EVENTS_COMMAND), MISSING_EVENT_ID),
         ("{} remove 3".format(CASES_FILE_EVENTS_COMMAND), MISSING_EVENT_ID),
-        # ("{} remove ".format(CASES_FILE_EVENTS_COMMAND), MISSING_CASE_NUMBER),
+        ("{} remove".format(CASES_FILE_EVENTS_COMMAND), MISSING_CASE_NUMBER),
         (
             "{} remove --event-id 3".format(CASES_FILE_EVENTS_COMMAND),
             MISSING_CASE_NUMBER,
         ),
-        # ("{} list ".format(CASES_FILE_EVENTS_COMMAND), MISSING_CASE_NUMBER),
+        ("{} list".format(CASES_FILE_EVENTS_COMMAND), MISSING_CASE_NUMBER),
     ],
 )
 def test_cases_command_when_missing_required_parameters_errors(
