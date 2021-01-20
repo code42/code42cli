@@ -1,7 +1,7 @@
 import os
 import time
 
-from integration import run_command
+from tests.integration import run_command
 
 
 class cleanup:
@@ -36,6 +36,7 @@ def cleanup_after_validation(filename):
 
 
 class DockerDaemon:
+
     def __init__(self):
         self.process_name = None
 
@@ -85,14 +86,20 @@ class DockerDaemon:
 
 
 class SyslogServer:
+
+    SCRIPT_NAME = "start-syslog-server.sh"
+    PATH_ENV = "DOCKER_SCRIPT_PATH"
+
     def __enter__(self):
         # TODO change hard-coded path
+        if not os.environ[SyslogServer.PATH_ENV]:
+            raise Exception("Set environment variable: {}".format(SyslogServer.PATH_ENV))
         command = "/bin/bash -c 'docker ps | grep test-server_centossyslog_1'"
         exit_status, response = run_command(command)
         print(f"docker ps command response: {response}")
         if exit_status != 0:
             command = (
-                "sh /Users/kchaudhary/workspace/test-server/start-syslog-server.sh"
+                "{0}{1}".format(os.environ[SyslogServer.PATH_ENV], SyslogServer.SCRIPT_NAME)
             )
             exit_status, response = run_command(command)
             print(f"shell script response: {response}")
@@ -101,5 +108,5 @@ class SyslogServer:
                 pass
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        command = "docker stop test-server_centossyslog_1"
+        command = "docker-compose down"
         exit_status, response = run_command(command)
