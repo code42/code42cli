@@ -9,3 +9,4 @@
 * [Devices](commands/devices.rst)
 * [High Risk Employee](commands/highriskemployee.rst)
 * [Legal Hold](commands/legalhold.rst)
+* [Cases](commands/cases.rst)

@@ -11,6 +11,7 @@ from code42cli.click_ext.groups import ExceptionHandlingGroup
 from code42cli.cmds.alert_rules import alert_rules
 from code42cli.cmds.alerts import alerts
 from code42cli.cmds.auditlogs import audit_logs
+from code42cli.cmds.cases import cases
 from code42cli.cmds.departing_employee import departing_employee
 from code42cli.cmds.devices import devices
 from code42cli.cmds.high_risk_employee import high_risk_employee
@@ -64,3 +65,4 @@ cli.add_command(legal_hold)
 cli.add_command(profile)
 cli.add_command(devices)
 cli.add_command(audit_logs)
+cli.add_command(cases)
