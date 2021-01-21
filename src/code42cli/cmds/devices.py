@@ -201,6 +201,14 @@ include_usernames_option = click.option(
     help="""Include device settings in output.""",
 )
 @click.option(
+    "--exclude-most-recently-connected",
+    type=int,
+    help="Filter out the N most recently connected devices per user. "
+    "Useful for identifying duplicate and/or replaced devices that are no longer needed across "
+    "an environment. If a user has 2 devices and N=1, the one device with the most recent "
+    "'lastConnected' date will not show up in the result list.",
+)
+@click.option(
     "--last-connected-before",
     type=MagicDate(rounding_func=round_datetime_to_day_start),
     help=f"Include devices only when the 'lastConnected' field is after the provided value. {MagicDate.HELP_TEXT}",
@@ -208,17 +216,17 @@ include_usernames_option = click.option(
 @click.option(
     "--last-connected-after",
     type=MagicDate(rounding_func=round_datetime_to_day_end),
-    help=f"Include devices only when 'lastConnected' field is after the provided value. {MagicDate.HELP_TEXT}",
+    help="Include devices only when 'lastConnected' field is after the provided value. Argument format options are the same as --last-connected-before.",
 )
 @click.option(
     "--created-before",
     type=MagicDate(rounding_func=round_datetime_to_day_start),
-    help=f"Include devices only when 'creationDate' field is less than the provided value. {MagicDate.HELP_TEXT}",
+    help="Include devices only when 'creationDate' field is less than the provided value. Argument format options are the same as --last-connected-before.",
 )
 @click.option(
     "--created-after",
     type=MagicDate(rounding_func=round_datetime_to_day_end),
-    help=f"Include devices only when 'creationDate' field is greater than the provided value. {MagicDate.HELP_TEXT}",
+    help="Include devices only when 'creationDate' field is greater than the provided value. Argument format options are the same as --last-connected-before.",
 )
 @format_option
 @sdk_options()
@@ -230,6 +238,7 @@ def list_devices(
     include_backup_usage,
     include_usernames,
     include_settings,
+    exclude_most_recently_connected,
     last_connected_after,
     last_connected_before,
     created_after,
@@ -263,6 +272,13 @@ def list_devices(
         df = df.loc[to_datetime(df.creationDate) > created_after]
     if created_before:
         df = df.loc[to_datetime(df.creationDate) < created_before]
+    if exclude_most_recently_connected:
+        most_recent = (
+            df.sort_values(["userUid", "lastConnected"], ascending=False)
+            .groupby("userUid")
+            .head(exclude_most_recently_connected)
+        )
+        df = df.drop(most_recent.index)
     if include_settings:
         df = _add_settings_to_dataframe(state.sdk, df)
     if include_usernames:

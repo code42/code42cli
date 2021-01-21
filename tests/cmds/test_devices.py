@@ -102,8 +102,8 @@ TEST_COMPUTER_PAGE = {
             "blocked": False,
             "alertState": 2,
             "alertStates": ["CriticalConnectionAlert"],
-            "userId": 1014,
-            "userUid": "836473273124890369",
+            "userId": 1320,
+            "userUid": "840103986007089121",
             "orgId": 1017,
             "orgUid": "836473214639515393",
             "computerExtRef": None,
@@ -540,6 +540,28 @@ def test_created_before_filters_appropriate_results(
     )
     assert TEST_DATE_NEWER not in result.output
     assert TEST_DATE_OLDER in result.output
+
+
+def test_exclude_most_recent_connected_filters_appropriate_results(
+    cli_state, runner, get_all_devices_success
+):
+    older_connection_guid = TEST_COMPUTER_PAGE["computers"][0]["guid"]
+    newer_connection_guid = TEST_COMPUTER_PAGE["computers"][1]["guid"]
+    result_1 = runner.invoke(
+        cli,
+        ["devices", "list", "--exclude-most-recently-connected", "1"],
+        obj=cli_state,
+    )
+    assert older_connection_guid in result_1.output
+    assert newer_connection_guid not in result_1.output
+
+    result_2 = runner.invoke(
+        cli,
+        ["devices", "list", "--exclude-most-recently-connected", "2"],
+        obj=cli_state,
+    )
+    assert older_connection_guid not in result_2.output
+    assert newer_connection_guid not in result_2.output
 
 
 def test_add_backup_set_settings_to_dataframe_returns_one_line_per_backup_set(
