@@ -1,8 +1,11 @@
 import os
-
+from contextlib import contextmanager
 import pexpect
 
+from code42cli.errors import Code42CLIError
 from code42cli.profile import create_profile
+from code42cli.profile import switch_default_profile
+from code42cli.profile import get_profile
 from code42cli.profile import delete_profile
 
 TEST_PROFILE_NAME = "TEMP-INTEGRATION-TEST"
@@ -11,67 +14,50 @@ _PASSWORD_PROMPT = b"Password: "
 _ENCODING_TYPE = "utf-8"
 
 
-def run_command(command):
-    command = _attach_profile_arg(command)
-    with use_temp_profile() as temp_password:
-        return _run_command_as_process(command, temp_password)
-
-
-class use_temp_profile:
+@contextmanager
+def use_temp_profile():
     """Creates a temporary profile to use for executing integration tests."""
+    host = os.environ.get("C42_HOST") or "http://127.0.0.1:4200"
+    username = os.environ.get("C42_USER") or "test_username@example.com"
+    password = os.environ.get("C42_PW") or "test_password"
+    current_profile_name = _get_current_profile_name()
+    create_profile(TEST_PROFILE_NAME, host, username, True)
+    switch_default_profile(TEST_PROFILE_NAME)
+    yield password
+    delete_profile(TEST_PROFILE_NAME)
+    
+    # Switch back to the original profile if there was one
+    if current_profile_name:
+        switch_default_profile(current_profile_name)
+    
 
-    def __init__(self):
-        self._host = os.environ.get("C42_HOST") or "http://127.0.0.1:4200"
-        self._username = os.environ.get("C42_USER") or "test_username@example.com"
-        self._password = os.environ.get("C42_PW") or "test_password"
-
-    def __enter__(self):
-        create_profile(TEST_PROFILE_NAME, self._host, self._username, True)
-        return self._password
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        delete_profile(TEST_PROFILE_NAME)
-        return False
-
-
-def _run_command_as_process(command, temp_password):
-    process = None
-    response = []
+def _get_current_profile_name():
     try:
-        process = pexpect.spawn(command, timeout=5)
-        response = _get_response(process, temp_password)
-        return process.exitstatus, response
-    except Exception:
-        if process:
-            return process.exitstatus, response
-    finally:
-        if process:
+        profile = get_profile()
+        return profile.name
+    except Code42CLIError:
+        return None
+
+
+def run_command(command):
+    with use_temp_profile() as pw:
+        process = pexpect.spawn(command)
+        response = []
+        try:
+            expected = process.expect([_PASSWORD_PROMPT, pexpect.EOF])
+            if expected == 0:
+                process.sendline(pw)
+                process.expect(_LINE_FEED)
+                output = process.readlines()
+                response = [_encode_response(line) for line in output]
+            else:
+                output = process.before
+                response = _encode_response(output).splitlines()
+        except pexpect.TIMEOUT:
             process.close()
-
-
-def _attach_profile_arg(command):
-    return "{} --profile {}".format(command, TEST_PROFILE_NAME)
-
-
-def _get_response(process, password):
-    expected = process.expect([_PASSWORD_PROMPT, pexpect.EOF])
-    if expected == 0:
-        _set_password(process, password)
-        return _get_response_from_multiline_output(process)
-    else:
-        output = process.before
-        return _encode_response(output).splitlines()
-
-
-def _set_password(process, password):
-    process.sendline(password)
-    process.expect(_LINE_FEED)
-
-
-def _get_response_from_multiline_output(process):
-    output = process.readlines()
-    return [_encode_response(line) for line in output]
-
+            return process.exitstatus, response
+        process.close()
+        return process.exitstatus, response
 
 def _encode_response(line, encoding_type=_ENCODING_TYPE):
     return line.decode(encoding_type)

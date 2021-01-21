@@ -28,24 +28,24 @@ ALERT_ADVANCED_QUERY_COMMAND = "code42 alerts search --advanced-query '{}'".form
     "command",
     [
         ALERT_SEARCH_COMMAND,
-        # "{} --state OPEN".format(ALERT_SEARCH_COMMAND),
-        # "{} --state RESOLVED".format(ALERT_SEARCH_COMMAND),
-        # "{} --actor user@code42.com".format(ALERT_SEARCH_COMMAND),
-        # "{} --rule-name 'File Upload Alert'".format(ALERT_SEARCH_COMMAND),
-        # "{} --rule-id 962a6a1c-54f6-4477-90bd-a08cc74cbf71".format(
-        #     ALERT_SEARCH_COMMAND
-        # ),
-        # "{} --rule-type FedEndpointExfiltration".format(ALERT_SEARCH_COMMAND),
-        # "{} --description 'Alert on any file upload'".format(ALERT_SEARCH_COMMAND),
-        # "{} --exclude-rule-type 'FedEndpointExfiltration'".format(ALERT_SEARCH_COMMAND),
-        # "{} --exclude-rule-id '962a6a1c-54f6-4477-90bd-a08cc74cbf71'".format(
-        #     ALERT_SEARCH_COMMAND
-        # ),
-        # "{} --exclude-rule-name 'File Upload Alert'".format(ALERT_SEARCH_COMMAND),
-        # "{} --exclude-actor-contains 'user@code42.com'".format(ALERT_SEARCH_COMMAND),
-        # "{} --exclude-actor 'user@code42.com'".format(ALERT_SEARCH_COMMAND),
-        # "{} --actor-contains 'user@code42.com'".format(ALERT_SEARCH_COMMAND),
-        # ALERT_ADVANCED_QUERY_COMMAND,
+        "{} --state OPEN".format(ALERT_SEARCH_COMMAND),
+        "{} --state RESOLVED".format(ALERT_SEARCH_COMMAND),
+        "{} --actor user@code42.com".format(ALERT_SEARCH_COMMAND),
+        "{} --rule-name 'File Upload Alert'".format(ALERT_SEARCH_COMMAND),
+        "{} --rule-id 962a6a1c-54f6-4477-90bd-a08cc74cbf71".format(
+            ALERT_SEARCH_COMMAND
+        ),
+        "{} --rule-type FedEndpointExfiltration".format(ALERT_SEARCH_COMMAND),
+        "{} --description 'Alert on any file upload'".format(ALERT_SEARCH_COMMAND),
+        "{} --exclude-rule-type 'FedEndpointExfiltration'".format(ALERT_SEARCH_COMMAND),
+        "{} --exclude-rule-id '962a6a1c-54f6-4477-90bd-a08cc74cbf71'".format(
+            ALERT_SEARCH_COMMAND
+        ),
+        "{} --exclude-rule-name 'File Upload Alert'".format(ALERT_SEARCH_COMMAND),
+        "{} --exclude-actor-contains 'user@code42.com'".format(ALERT_SEARCH_COMMAND),
+        "{} --exclude-actor 'user@code42.com'".format(ALERT_SEARCH_COMMAND),
+        "{} --actor-contains 'user@code42.com'".format(ALERT_SEARCH_COMMAND),
+        ALERT_ADVANCED_QUERY_COMMAND,
     ],
 )
 def test_alert_command_returns_success_return_code(command):
