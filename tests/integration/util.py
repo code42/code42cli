@@ -35,6 +35,12 @@ def cleanup_after_validation(filename):
     return wrap
 
 
+START_DOCKER_DAEMON_COMMAND = "open --background -a Docker"
+DOCKER_INFO_COMMAND = "docker info"
+GET_DOCKER_PROCESS_NAME_COMMAND = '/bin/bash -c "launchctl list | grep docker | cut -f3 | grep -v helper"'
+STOP_DOCKER_DAEMON_COMMAND = "launchctl stop {}"
+
+
 class DockerDaemon:
 
     def __init__(self):
@@ -43,17 +49,15 @@ class DockerDaemon:
     def __enter__(self):
         # Need to change to Unix
         if not self._check_docker_state():
-            mac_command = "open --background -a Docker"
-            exit_status, _ = run_command(mac_command)
+            exit_status, _ = run_command(START_DOCKER_DAEMON_COMMAND)
             if exit_status == 0:
                 self._wait_for_docker_daemon_to_be_up()
             else:
-                # Fail here, raise exception
-                pass
+                raise Exception("Failed to start docker daemon.")
         self._set_docker_process_name()
 
     def _check_docker_state(self):
-        exit_status, _ = run_command("docker info")
+        exit_status, _ = run_command(DOCKER_INFO_COMMAND)
         if exit_status == 0:
             return True
         return False
@@ -66,47 +70,32 @@ class DockerDaemon:
 
     def _set_docker_process_name(self):
         # Need to change to Unix
-        mac_command = (
-            '/bin/bash -c "launchctl list | grep docker | cut -f3 | grep -v helper"'
-        )
-        exit_status, response = run_command(mac_command)
-        print(f"process name is {response[0]}")
+        exit_status, response = run_command(GET_DOCKER_PROCESS_NAME_COMMAND)
         if exit_status == 0:
             self.process_name = response[0]
+        else:
+            raise Exception("Could not find docker daemon.")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         # Need to change to Unix
         if self.process_name is not None:
-            stop_command = f"launchctl stop {self.process_name}"
-            exit_status, response = run_command(stop_command)
-            if (
-                exit_status != 0
-            ):  # being explicit here, if exit_status too should be ok.
-                print(f"Failed to stop the docker daemon, error {response}")
+            exit_status, response = run_command(STOP_DOCKER_DAEMON_COMMAND.format(self.process_name))
+            if exit_status != 0:  
+                print("Failed to stop the docker daemon, error {}".format(response))
 
 
 class SyslogServer:
 
-    SCRIPT_NAME = "start-syslog-server.sh"
-    PATH_ENV = "DOCKER_SCRIPT_PATH"
+    PATH_ENV = "COMPOSE_FILE"
 
     def __enter__(self):
-        # TODO change hard-coded path
         if not os.environ[SyslogServer.PATH_ENV]:
             raise Exception("Set environment variable: {}".format(SyslogServer.PATH_ENV))
-        command = "/bin/bash -c 'docker ps | grep test-server_centossyslog_1'"
-        exit_status, response = run_command(command)
-        print(f"docker ps command response: {response}")
+        exit_status, response = run_command("docker-compose up")
         if exit_status != 0:
-            command = (
-                "{0}{1}".format(os.environ[SyslogServer.PATH_ENV], SyslogServer.SCRIPT_NAME)
-            )
-            exit_status, response = run_command(command)
-            print(f"shell script response: {response}")
-            if exit_status != 0:
-                # Fail here, raise exception
-                pass
-
+            raise Exception("Could not start syslog server.")
+        
     def __exit__(self, exc_type, exc_val, exc_tb):
-        command = "docker-compose down"
-        exit_status, response = run_command(command)
+        exit_status, response = run_command("docker-compose down")
+        if exit_status !=0:
+            print("Failed to stop syslog server.")
