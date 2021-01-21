@@ -35,8 +35,7 @@ change_device_name_option = click.option(
     required=False,
     is_flag=True,
     default=False,
-    help="""Prepend "deactivated_" and today's date to the name of any
-    deactivated devices.""",
+    help="""Prepend 'deactivated_<current_date>' to the name of any deactivated devices.""",
 )
 
 DATE_FORMAT = "%Y-%m-%d"

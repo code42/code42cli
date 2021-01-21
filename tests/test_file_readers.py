@@ -22,7 +22,7 @@ def test_read_csv_handles_headerless_columns_in_proper_number_and_order(runner):
         assert result_list[1]["header3"] == "col3_val2"
 
 
-def test_read_scv_handles_headered_columns_in_arbitrary_number_and_order(runner):
+def test_read_csv_handles_headered_columns_in_arbitrary_number_and_order(runner):
     with runner.isolated_filesystem():
         with open("test_csv.csv", "w") as csv:
             csv.writelines(HEADERED_CSV)
