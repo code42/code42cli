@@ -9,22 +9,16 @@ from tests.integration.util import SyslogServer
 
 SEARCH_COMMAND = "code42 audit-logs search"
 BASE_COMMAND = "{} -b".format(SEARCH_COMMAND)
-begin_date = datetime.utcnow() - timedelta(days=-10)
+begin_date = datetime.utcnow() - timedelta(days=2)
 begin_date_str = begin_date.strftime("%Y-%m-%d %H:%M:%S")
-end_date = datetime.utcnow() - timedelta(days=10)
+end_date = datetime.utcnow() - timedelta(days=0)
 end_date_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
 
 
-begin_date = datetime.utcnow() - timedelta(days=-10)
-begin_date_str = begin_date.strftime("%Y-%m-%d %H:%M:%S")
-
-
-@pytest.fixture
+@pytest.fixture(scope='session')
 def data_transfer():
     with DockerDaemon():
-        print("docker daemon started")
         with SyslogServer():
-            print("syslog server started")
             yield run_command
 
 
@@ -41,12 +35,9 @@ def data_transfer():
 )
 def test_auditlogs_send_to(data_transfer, command):
     exit_status, response = data_transfer(command)
-    print(exit_status)
-    print(response)
     assert exit_status == 0
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "command",
     [
