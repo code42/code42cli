@@ -160,7 +160,7 @@ def _display_file_events(events):
         click.echo("\nFile Events:\n")
         click.echo(pformat(events))
     else:
-        click.echo("No events found.")
+        click.echo("\nNo events found.")
 
 
 @cases.command()
