@@ -15,7 +15,7 @@ end_date = datetime.utcnow() - timedelta(days=0)
 end_date_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def data_transfer():
     with DockerDaemon():
         with SyslogServer():
@@ -25,13 +25,7 @@ def data_transfer():
 @pytest.mark.integration
 @pytest.mark.parametrize(
     "command",
-    [
-        (
-            "code42 audit-logs send-to localhost -p TCP -b '{}'".format(
-                begin_date_str
-            )
-        )
-    ],
+    [("code42 audit-logs send-to localhost -p TCP -b '{}'".format(begin_date_str))],
 )
 def test_auditlogs_send_to(data_transfer, command):
     exit_status, response = data_transfer(command)
@@ -70,6 +64,3 @@ def test_auditlogs_send_to(data_transfer, command):
 def test_auditlogs_search_command_returns_success_return_code(command):
     return_code, response = run_command(command)
     assert return_code == 0
-
-
-

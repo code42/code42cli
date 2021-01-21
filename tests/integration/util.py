@@ -37,12 +37,13 @@ def cleanup_after_validation(filename):
 
 START_DOCKER_DAEMON_COMMAND = "open --background -a Docker"
 DOCKER_INFO_COMMAND = "docker info"
-GET_DOCKER_PROCESS_NAME_COMMAND = '/bin/bash -c "launchctl list | grep docker | cut -f3 | grep -v helper"'
+GET_DOCKER_PROCESS_NAME_COMMAND = (
+    '/bin/bash -c "launchctl list | grep docker | cut -f3 | grep -v helper"'
+)
 STOP_DOCKER_DAEMON_COMMAND = "launchctl stop {}"
 
 
 class DockerDaemon:
-
     def __init__(self):
         self.process_name = None
 
@@ -79,8 +80,10 @@ class DockerDaemon:
     def __exit__(self, exc_type, exc_val, exc_tb):
         # Need to change to Unix
         if self.process_name is not None:
-            exit_status, response = run_command(STOP_DOCKER_DAEMON_COMMAND.format(self.process_name))
-            if exit_status != 0:  
+            exit_status, response = run_command(
+                STOP_DOCKER_DAEMON_COMMAND.format(self.process_name)
+            )
+            if exit_status != 0:
                 print("Failed to stop the docker daemon, error {}".format(response))
 
 
@@ -90,12 +93,14 @@ class SyslogServer:
 
     def __enter__(self):
         if not os.environ[SyslogServer.PATH_ENV]:
-            raise Exception("Set environment variable: {}".format(SyslogServer.PATH_ENV))
+            raise Exception(
+                "Set environment variable: {}".format(SyslogServer.PATH_ENV)
+            )
         exit_status, response = run_command("docker-compose up")
         if exit_status != 0:
             raise Exception("Could not start syslog server.")
-        
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         exit_status, response = run_command("docker-compose down")
-        if exit_status !=0:
+        if exit_status != 0:
             print("Failed to stop syslog server.")
