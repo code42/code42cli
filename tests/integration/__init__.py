@@ -1,12 +1,13 @@
 import os
 from contextlib import contextmanager
+
 import pexpect
 
 from code42cli.errors import Code42CLIError
 from code42cli.profile import create_profile
-from code42cli.profile import switch_default_profile
-from code42cli.profile import get_profile
 from code42cli.profile import delete_profile
+from code42cli.profile import get_profile
+from code42cli.profile import switch_default_profile
 
 TEST_PROFILE_NAME = "TEMP-INTEGRATION-TEST"
 _LINE_FEED = b"\r\n"
@@ -25,11 +26,11 @@ def use_temp_profile():
     switch_default_profile(TEST_PROFILE_NAME)
     yield password
     delete_profile(TEST_PROFILE_NAME)
-    
+
     # Switch back to the original profile if there was one
     if current_profile_name:
         switch_default_profile(current_profile_name)
-    
+
 
 def _get_current_profile_name():
     try:
@@ -58,6 +59,7 @@ def run_command(command):
             return process.exitstatus, response
         process.close()
         return process.exitstatus, response
+
 
 def _encode_response(line, encoding_type=_ENCODING_TYPE):
     return line.decode(encoding_type)
