@@ -35,7 +35,7 @@ change_device_name_option = click.option(
     required=False,
     is_flag=True,
     default=False,
-    help="""Prepend 'deactivated_<current_date>' to the name of any deactivated devices.""",
+    help="Prepend 'deactivated_<current_date>' to the name of any deactivated devices.",
 )
 
 DATE_FORMAT = "%Y-%m-%d"
@@ -44,8 +44,8 @@ purge_date_option = click.option(
     required=False,
     type=click.DateTime(formats=[DATE_FORMAT]),
     default=None,
-    help="""The date on which the archive should be purged from cold storage in yyyy-MM-dd format.
-    If not provided, the date will be set according to the appropriate org settings.""",
+    help="The date on which the archive should be purged from cold storage in yyyy-MM-dd format. "
+    "If not provided, the date will be set according to the appropriate org settings.",
 )
 
 
@@ -164,8 +164,8 @@ org_uid_option = click.option(
     required=False,
     type=str,
     default=None,
-    help="""Limit devices to only the ones in the org you specify.
-    Note that child orgs will be included.""",
+    help="Limit devices to only the ones in the org you specify. "
+    "Note that child orgs will be included.",
 )
 
 include_usernames_option = click.option(
@@ -188,8 +188,8 @@ include_usernames_option = click.option(
     type=bool,
     default=False,
     is_flag=True,
-    help="""Return backup usage information for each device
-    (may significantly lengthen the size of the return).""",
+    help="Return backup usage information for each device (may significantly lengthen the size "
+    "of the return).",
 )
 @include_usernames_option
 @click.option(
@@ -198,7 +198,7 @@ include_usernames_option = click.option(
     type=bool,
     default=False,
     is_flag=True,
-    help="""Include device settings in output.""",
+    help="Include device settings in output.",
 )
 @click.option(
     "--exclude-most-recently-connected",
