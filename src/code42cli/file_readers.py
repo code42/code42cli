@@ -38,7 +38,7 @@ def read_csv(file, headers):
         return csv_rows
 
     # handle when first row has no expected headers
-    if all(field not in first_line for field in headers):
+    elif all(field not in first_line for field in headers):
         #  only process header-less CSVs if we get exact expected column count
         if len(first_line) == len(headers):
             return list(csv.DictReader(lines, fieldnames=headers))
