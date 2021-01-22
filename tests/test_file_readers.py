@@ -41,7 +41,7 @@ def test_read_csv_raises_when_no_header_detected_and_column_count_doesnt_match_e
     with runner.isolated_filesystem():
         with open("test_csv.csv", "w") as csv:
             csv.writelines(HEADERLESS_CSV)
-        with open("test_csv.csv", "r") as csv:
+        with open("test_csv.csv") as csv:
             with pytest.raises(Code42CLIError):
                 read_csv(csv, ["column1", "column2"])
 
