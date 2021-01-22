@@ -469,23 +469,17 @@ def bulk_deactivate(state, csv_rows, change_device_name, purge_date, format):
         row["change_device_name"] = change_device_name
         row["purge_date"] = purge_date
 
-    def _deactivate(row):
-        _deactivate_device(
-            sdk, row["guid"], row["change_device_name"], row["purge_date"]
-        )
-
-    _bulk_handle_device_activation_update(
-        sdk, format, csv_rows, _deactivate, "deactivate", "Deactivating"
-    )
-
-
-def _bulk_handle_device_activation_update(
-    sdk, format, csv_rows, cmd, cmd_str, progress_label_prefix
-):
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
-    row_handler = _get_bulk_activation_row_handler(sdk, csv_rows, cmd_str, cmd)
+    row_handler = _get_bulk_activation_row_handler(
+        sdk,
+        csv_rows,
+        "deactivate",
+        lambda r: _deactivate_device(
+            sdk, r["guid"], r["change_device_name"], r["purge_date"]
+        ),
+    )
     result_rows = run_bulk_process(
-        row_handler, csv_rows, progress_label=f"{progress_label_prefix} devices:"
+        row_handler, csv_rows, progress_label="Deactivating devices:"
     )
     formatter.echo_formatted_list(result_rows)
 
@@ -497,13 +491,14 @@ def _bulk_handle_device_activation_update(
 def bulk_reactivate(state, csv_rows, format):
     """Reactivate all devices from the provided CSV containing a 'guid' column."""
     sdk = state.sdk
-
-    def _reactivate(row):
-        _reactivate_device(sdk, row["guid"])
-
-    _bulk_handle_device_activation_update(
-        sdk, format, csv_rows, _reactivate, "reactivate", "Reactivating"
+    formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+    row_handler = _get_bulk_activation_row_handler(
+        sdk, csv_rows, "reactivate", lambda r: _reactivate_device(sdk, r["guid"])
     )
+    result_rows = run_bulk_process(
+        row_handler, csv_rows, progress_label="Reactivating devices:"
+    )
+    formatter.echo_formatted_list(result_rows)
 
 
 def _get_bulk_activation_row_handler(sdk, csv_rows, cmd_str, cmd):
