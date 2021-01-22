@@ -1,5 +1,4 @@
 import pytest
-from tests.integration import run_command
 
 LEGAL_HOLD_COMMAND = "code42 legal-hold"
 
@@ -20,6 +19,6 @@ LEGAL_HOLD_COMMAND = "code42 legal-hold"
         "{} list --format RAW-JSON".format(LEGAL_HOLD_COMMAND),
     ],
 )
-def test_alert_rules_command_returns_success_return_code(command):
-    return_code, response = run_command(command)
+def test_alert_rules_command_returns_success_return_code(command, command_runner):
+    return_code, response = command_runner(command)
     assert return_code == 0

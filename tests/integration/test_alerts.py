@@ -2,7 +2,6 @@ from datetime import datetime
 from datetime import timedelta
 
 import pytest
-from tests.integration import run_command
 
 
 begin_date = datetime.utcnow() - timedelta(days=20)
@@ -48,6 +47,6 @@ ALERT_ADVANCED_QUERY_COMMAND = "code42 alerts search --advanced-query '{}'".form
         ALERT_ADVANCED_QUERY_COMMAND,
     ],
 )
-def test_alert_command_returns_success_return_code(command):
-    return_code, response = run_command(command)
+def test_alert_command_returns_success_return_code(command, command_runner):
+    return_code, response = command_runner(command)
     assert return_code == 0
