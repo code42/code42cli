@@ -19,6 +19,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `devices list` to retrieve info about many devices, including device settings.
     - `devices list-backup-sets` to retrieve detailed info about device backup sets.
     - `devices bulk deactivate` to deactivate a list of devices.
+    - `devices bulk reactivate` to reactivate a list of devices.
 
 - `code42 departing-employee list` command.
 
