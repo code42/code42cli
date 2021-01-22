@@ -116,8 +116,10 @@ def show(state, device_guid, format=None):
     backup_set_formatter = OutputFormatter(format, _backup_set_keys_map())
     device_info = _get_device_info(state.sdk, device_guid)
     formatter.echo_formatted_list([device_info])
-    click.echo()
-    backup_set_formatter.echo_formatted_list(device_info["backupUsage"])
+    backup_usage = device_info.get("backupUsage")
+    if backup_usage:
+        click.echo()
+        backup_set_formatter.echo_formatted_list(backup_usage)
 
 
 def _device_info_keys_map():
