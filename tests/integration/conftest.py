@@ -1,8 +1,8 @@
 import os
 from contextlib import contextmanager
-import pytest
 
 import pexpect
+import pytest
 
 from code42cli.errors import Code42CLIError
 from code42cli.profile import create_profile
