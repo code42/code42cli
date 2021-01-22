@@ -113,7 +113,7 @@ class DataFrameOutputFormatter:
 
     def echo_formatted_dataframe(self, output, *args, **kwargs):
         str_output = self._format_output(output, *args, **kwargs)
-        if len(output) < 10:
+        if len(output) <= 10:
             click.echo(str_output)
         else:
             click.echo_via_pager(str_output)
