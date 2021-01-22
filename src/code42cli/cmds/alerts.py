@@ -274,7 +274,10 @@ def send_to(
     or_query,
     **kwargs
 ):
-    """Send alerts to the given server address."""
+    """Send alerts to the given server address.
+
+    HOSTNAME format: address:port where port is optional and defaults to 514.
+    """
     logger = get_logger_for_server(hostname, protocol, format)
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
     handlers = ext.create_send_to_handlers(
