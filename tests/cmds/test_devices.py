@@ -640,3 +640,16 @@ def test_bulk_deactivate_uses_expected_arguments(runner, mocker, cli_state):
             "purge_date": None,
         }
     ]
+
+
+def test_bulk_reactivate_uses_expected_arguments(runner, mocker, cli_state):
+    bulk_processor = mocker.patch("{}.run_bulk_process".format(_NAMESPACE))
+    with runner.isolated_filesystem():
+        with open("test_bulk_reactivate.csv", "w") as csv:
+            csv.writelines(["guid,username\n", "test,value\n"])
+        runner.invoke(
+            cli,
+            ["devices", "bulk", "reactivate", "test_bulk_reactivate.csv"],
+            obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [{"guid": "test", "reactivated": False}]

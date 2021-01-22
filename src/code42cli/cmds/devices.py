@@ -63,12 +63,10 @@ def deactivate(state, device_guid, change_device_name, purge_date):
 
 @devices.command()
 @device_guid_argument
-@change_device_name_option
-@purge_date_option
 @sdk_options()
-def reactivate(state, device_guid, change_device_name, purge_date):
+def reactivate(state, device_guid):
     """Reactivate a device within Code42. Requires the device GUID to reactivate."""
-    _change_device_activation(state.sdk, device_guid, "reactivate")
+    _reactivate_device(state.sdk, device_guid)
 
 
 def _deactivate_device(sdk, device_guid, change_device_name, purge_date):
@@ -87,6 +85,10 @@ def _deactivate_device(sdk, device_guid, change_device_name, purge_date):
             + "_"
             + device.data["name"],
         )
+
+
+def _reactivate_device(sdk, device_guid):
+    _change_device_activation(sdk, device_guid, "reactivate")
 
 
 def _change_device_activation(sdk, device_guid, cmd_str):
@@ -460,23 +462,57 @@ def bulk(state):
 def bulk_deactivate(state, csv_rows, change_device_name, purge_date, format):
     """Deactivate all devices from the provided CSV containing a 'guid' column."""
     sdk = state.sdk
-    csv_rows[0]["deactivated"] = False
-    formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
     for row in csv_rows:
         row["change_device_name"] = change_device_name
         row["purge_date"] = purge_date
 
-    def handle_row(**row):
-        try:
-            _deactivate_device(
-                sdk, row["guid"], row["change_device_name"], row["purge_date"]
-            )
-            row["deactivated"] = "True"
-        except Exception as e:
-            row["deactivated"] = "False: {}".format(e)
-        return row
+    def _deactivate(row):
+        _deactivate_device(
+            sdk, row["guid"], row["change_device_name"], row["purge_date"]
+        )
 
+    _bulk_handle_device_activation_update(
+        sdk, format, csv_rows, _deactivate, "deactivate", "Deactivating"
+    )
+
+
+def _bulk_handle_device_activation_update(
+    sdk, format, csv_rows, cmd, cmd_str, progress_label_prefix
+):
+    formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+
+    row_handler = _get_bulk_activation_row_handler(sdk, csv_rows, cmd_str, cmd)
     result_rows = run_bulk_process(
-        handle_row, csv_rows, progress_label="Deactivating devices:"
+        row_handler, csv_rows, progress_label=f"{progress_label_prefix} devices:"
     )
     formatter.echo_formatted_list(result_rows)
+
+
+@bulk.command(name="reactivate")
+@read_csv_arg(headers=["guid"])
+@format_option
+@sdk_options()
+def bulk_reactivate(state, csv_rows, format):
+    """Deactivate all devices from the provided CSV containing a 'guid' column."""
+    sdk = state.sdk
+
+    def _reactivate(row):
+        _reactivate_device(sdk, row["guid"])
+
+    _bulk_handle_device_activation_update(
+        sdk, format, csv_rows, _reactivate, "reactivate", "Reactivating"
+    )
+
+
+def _get_bulk_activation_row_handler(sdk, csv_rows, cmd_str, cmd):
+    csv_rows[0][f"{cmd_str}d"] = False
+
+    def handle_row(**row):
+        try:
+            cmd(sdk, row)
+            row[f"{cmd_str}d"] = "True"
+        except Exception as e:
+            row[f"{cmd_str}d"] = "False: {}".format(e)
+        return row
+
+    return handle_row
