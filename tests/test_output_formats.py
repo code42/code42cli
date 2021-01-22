@@ -202,7 +202,11 @@ class TestDataFrameOutputFormatter:
         formatter = output_formats_module.DataFrameOutputFormatter(output_format)
         formatter.echo_formatted_dataframe(TEST_DATAFRAME)
         mock_dataframe_to_json.assert_called_once_with(
-            TEST_DATAFRAME, orient="records", lines=False, index=False
+            TEST_DATAFRAME,
+            orient="records",
+            lines=False,
+            index=True,
+            default_handler=str,
         )
 
     def test_init_sets_format_func_to_json_function_when_raw_json_format_option_is_passed(
@@ -212,7 +216,11 @@ class TestDataFrameOutputFormatter:
         formatter = output_formats_module.DataFrameOutputFormatter(output_format)
         formatter.echo_formatted_dataframe(TEST_DATAFRAME)
         mock_dataframe_to_json.assert_called_once_with(
-            TEST_DATAFRAME, orient="records", lines=True, index=False
+            TEST_DATAFRAME,
+            orient="records",
+            lines=True,
+            index=True,
+            default_handler=str,
         )
 
     def test_init_sets_format_func_to_table_function_when_table_format_option_is_passed(

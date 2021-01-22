@@ -2,7 +2,6 @@ from datetime import date
 
 import pytest
 from pandas import DataFrame
-from pandas import testing
 from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42ForbiddenError
 from py42.exceptions import Py42NotFoundError
@@ -13,14 +12,13 @@ from requests import Response
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.devices import _add_backup_set_settings_to_dataframe
 from code42cli.cmds.devices import _add_usernames_to_device_dataframe
-from code42cli.cmds.devices import (
-    _drop_devices_which_have_not_connected_in_some_number_of_days,
-)
-from code42cli.cmds.devices import _drop_n_devices_per_user
 from code42cli.cmds.devices import _get_device_dataframe
 from code42cli.main import cli
 
 _NAMESPACE = "{}.cmds.devices".format(PRODUCT_NAME)
+TEST_DATE_OLDER = "2020-01-01T12:00:00.774Z"
+TEST_DATE_NEWER = "2021-01-01T12:00:00.774Z"
+TEST_DATE_MIDDLE = "2020-06-01T12:00:00"
 TEST_DEVICE_GUID = "954143368874689941"
 TEST_DEVICE_ID = 139527
 TEST_ARCHIVE_GUID = "954143426849296547"
@@ -104,15 +102,15 @@ TEST_COMPUTER_PAGE = {
             "blocked": False,
             "alertState": 2,
             "alertStates": ["CriticalConnectionAlert"],
-            "userId": 1014,
-            "userUid": "836473273124890369",
+            "userId": 1320,
+            "userUid": "840103986007089121",
             "orgId": 1017,
             "orgUid": "836473214639515393",
             "computerExtRef": None,
             "notes": None,
             "parentComputerId": None,
             "parentComputerGuid": None,
-            "lastConnected": "2018-03-16T17:06:50.774Z",
+            "lastConnected": TEST_DATE_OLDER,
             "osName": "linux",
             "osVersion": "4.4.0-96-generic",
             "osArch": "amd64",
@@ -124,7 +122,7 @@ TEST_COMPUTER_PAGE = {
             "version": 1512021600671,
             "productVersion": "6.7.1",
             "buildVersion": 4589,
-            "creationDate": "2018-03-16T16:20:00.871Z",
+            "creationDate": TEST_DATE_OLDER,
             "modificationDate": "2020-09-03T13:32:02.383Z",
             "loginDate": "2018-03-16T16:52:18.900Z",
             "service": "CrashPlan",
@@ -148,7 +146,7 @@ TEST_COMPUTER_PAGE = {
             "notes": None,
             "parentComputerId": None,
             "parentComputerGuid": None,
-            "lastConnected": "2018-03-19T20:04:02.999Z",
+            "lastConnected": TEST_DATE_NEWER,
             "osName": "win",
             "osVersion": "6.1",
             "osArch": "amd64",
@@ -160,7 +158,7 @@ TEST_COMPUTER_PAGE = {
             "version": 1508734800652,
             "productVersion": "6.5.2",
             "buildVersion": 32,
-            "creationDate": "2018-03-19T19:43:16.918Z",
+            "creationDate": TEST_DATE_NEWER,
             "modificationDate": "2020-09-08T15:43:45.875Z",
             "loginDate": "2018-03-19T20:03:45.360Z",
             "service": "CrashPlan",
@@ -351,6 +349,13 @@ def test_deactivate_deactivates_device(
     cli_state.sdk.devices.deactivate.assert_called_once_with(TEST_DEVICE_ID)
 
 
+def test_deactivate_when_given_non_guid_raises_before_making_request(runner, cli_state):
+    result = runner.invoke(cli, ["devices", "deactivate", "not_a_guid"], obj=cli_state)
+    assert result.exit_code == 1
+    assert "Not a valid guid." in result.output
+    assert cli_state.sdk.devices.deactivate.call_count == 0
+
+
 def test_deactivate_when_given_flag_updates_purge_date(
     runner,
     cli_state,
@@ -460,6 +465,7 @@ def test_get_device_dataframe_returns_correct_columns(
         "osHostname",
         "status",
         "lastConnected",
+        "creationDate",
         "productVersion",
         "osName",
         "osVersion",
@@ -473,6 +479,7 @@ def test_get_device_dataframe_returns_correct_columns(
     assert "guid" in result.columns
     assert "status" in result.columns
     assert "lastConnected" in result.columns
+    assert "creationDate" in result.columns
     assert "productVersion" in result.columns
     assert "osName" in result.columns
     assert "osVersion" in result.columns
@@ -488,19 +495,6 @@ def test_device_dataframe_return_includes_backupusage_when_flag_passed(
     assert "backupUsage" in result.columns
 
 
-def test_drop_n_devices_per_user_drops_correct_devices():
-    testdf = DataFrame.from_records(
-        [
-            {"userUid": 0, "lastConnected": 0},
-            {"userUid": 0, "lastConnected": 1},
-            {"userUid": 1, "lastConnected": 0},
-        ]
-    )
-    expected_return = DataFrame.from_records([{"userUid": 0, "lastConnected": 1}])
-    returndf = _drop_n_devices_per_user(testdf, 1)
-    testing.assert_frame_equal(expected_return, returndf)
-
-
 def test_add_usernames_to_device_dataframe_adds_usernames_to_dataframe(
     cli_state, get_all_users_success
 ):
@@ -511,16 +505,70 @@ def test_add_usernames_to_device_dataframe_adds_usernames_to_dataframe(
     assert "username" in result.columns
 
 
-def test_drop_devices_which_have_not_connected_in_some_number_of_days_drops_appropriate_devices():
-    testdf = DataFrame.from_records(
-        [
-            {"lastConnected": "2019-01-09T17:09:26.432Z"},
-            {"lastConnected": date.today().isoformat() + "T17:09:26.432Z"},
-        ]
+def test_last_connected_after_filters_appropriate_results(
+    cli_state, runner, get_all_devices_success
+):
+    result = runner.invoke(
+        cli,
+        ["devices", "list", "--last-connected-after", TEST_DATE_MIDDLE],
+        obj=cli_state,
     )
-    result = _drop_devices_which_have_not_connected_in_some_number_of_days(testdf, 30)
-    assert "2019-01-09T17:09:26.432Z" in result.values
-    assert date.today().isoformat() + "T17:09:26.432Z" not in result.values
+    assert TEST_DATE_NEWER in result.output
+    assert TEST_DATE_OLDER not in result.output
+
+
+def test_last_connected_before_filters_appropriate_results(
+    cli_state, runner, get_all_devices_success
+):
+    result = runner.invoke(
+        cli,
+        ["devices", "list", "--last-connected-before", TEST_DATE_MIDDLE],
+        obj=cli_state,
+    )
+    assert TEST_DATE_NEWER not in result.output
+    assert TEST_DATE_OLDER in result.output
+
+
+def test_created_after_filters_appropriate_results(
+    cli_state, runner, get_all_devices_success
+):
+    result = runner.invoke(
+        cli, ["devices", "list", "--created-after", TEST_DATE_MIDDLE], obj=cli_state,
+    )
+    assert TEST_DATE_NEWER in result.output
+    assert TEST_DATE_OLDER not in result.output
+
+
+def test_created_before_filters_appropriate_results(
+    cli_state, runner, get_all_devices_success
+):
+    result = runner.invoke(
+        cli, ["devices", "list", "--created-before", TEST_DATE_MIDDLE], obj=cli_state,
+    )
+    assert TEST_DATE_NEWER not in result.output
+    assert TEST_DATE_OLDER in result.output
+
+
+def test_exclude_most_recent_connected_filters_appropriate_results(
+    cli_state, runner, get_all_devices_success
+):
+    older_connection_guid = TEST_COMPUTER_PAGE["computers"][0]["guid"]
+    newer_connection_guid = TEST_COMPUTER_PAGE["computers"][1]["guid"]
+    result_1 = runner.invoke(
+        cli,
+        ["devices", "list", "--exclude-most-recently-connected", "1"],
+        obj=cli_state,
+    )
+    assert older_connection_guid in result_1.output
+    assert newer_connection_guid not in result_1.output
+
+    result_2 = runner.invoke(
+        cli,
+        ["devices", "list", "--exclude-most-recently-connected", "2"],
+        obj=cli_state,
+    )
+    assert older_connection_guid not in result_2.output
+    assert newer_connection_guid not in result_2.output
 
 
 def test_add_backup_set_settings_to_dataframe_returns_one_line_per_backup_set(

@@ -1,3 +1,6 @@
+import pytest
+
+from code42cli.errors import Code42CLIError
 from code42cli.file_readers import read_csv
 
 HEADERLESS_CSV = [
@@ -22,7 +25,7 @@ def test_read_csv_handles_headerless_columns_in_proper_number_and_order(runner):
         assert result_list[1]["header3"] == "col3_val2"
 
 
-def test_read_scv_handles_headered_columns_in_arbitrary_number_and_order(runner):
+def test_read_csv_handles_headered_columns_in_arbitrary_number_and_order(runner):
     with runner.isolated_filesystem():
         with open("test_csv.csv", "w") as csv:
             csv.writelines(HEADERED_CSV)
@@ -30,3 +33,32 @@ def test_read_scv_handles_headered_columns_in_arbitrary_number_and_order(runner)
             result_list = read_csv(file=csv, headers=HEADERS)
         assert result_list[0]["header1"] == "col1_val1"
         assert result_list[1]["header3"] == "col3_val2"
+
+
+def test_read_csv_raises_when_no_header_detected_and_column_count_doesnt_match_expected_header(
+    runner,
+):
+    with runner.isolated_filesystem():
+        with open("test_csv.csv", "w") as csv:
+            csv.writelines(HEADERLESS_CSV)
+        with open("test_csv.csv") as csv:
+            with pytest.raises(Code42CLIError):
+                read_csv(csv, ["column1", "column2"])
+
+
+def test_read_csv_when_all_expected_headers_present_filters_out_extra_columns(runner):
+    with runner.isolated_filesystem():
+        with open("test_csv.csv", "w") as csv:
+            csv.writelines(HEADERED_CSV)
+        with open("test_csv.csv") as csv:
+            result_list = read_csv(file=csv, headers=HEADERS)
+            assert "extra_column" not in result_list[0]
+
+
+def test_read_csv_when_some_but_not_all_required_headers_present_raises(runner):
+    with runner.isolated_filesystem():
+        with open("test_csv.csv", "w") as csv:
+            csv.writelines(HEADERED_CSV)
+        with open("test_csv.csv") as csv:
+            with pytest.raises(Code42CLIError):
+                read_csv(file=csv, headers=HEADERS + ["extra_header"])
