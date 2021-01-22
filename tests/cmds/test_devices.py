@@ -254,7 +254,7 @@ def mock_backup_set(mocker):
 
 
 @pytest.fixture
-def deactivate_response(mocker):
+def empty_successful_response(mocker):
     return _create_py42_response(mocker, "")
 
 
@@ -303,13 +303,23 @@ def archives_list_success(cli_state):
 
 
 @pytest.fixture
-def deactivate_device_success(cli_state, deactivate_response):
-    cli_state.sdk.devices.deactivate.return_value = deactivate_response
+def deactivate_device_success(cli_state, empty_successful_response):
+    cli_state.sdk.devices.deactivate.return_value = empty_successful_response
+
+
+@pytest.fixture
+def reactivate_device_success(cli_state, empty_successful_response):
+    cli_state.sdk.devices.reactivate.return_value = empty_successful_response
 
 
 @pytest.fixture
 def deactivate_device_not_found_failure(cli_state):
     cli_state.sdk.devices.deactivate.side_effect = Py42NotFoundError(HTTPError())
+
+
+@pytest.fixture
+def reactivate_device_not_found_failure(cli_state):
+    cli_state.sdk.devices.reactivate.side_effect = Py42NotFoundError(HTTPError())
 
 
 @pytest.fixture
@@ -320,6 +330,11 @@ def deactivate_device_in_legal_hold_failure(cli_state):
 @pytest.fixture
 def deactivate_device_not_allowed_failure(cli_state):
     cli_state.sdk.devices.deactivate.side_effect = Py42ForbiddenError(HTTPError())
+
+
+@pytest.fixture
+def reactivate_device_not_allowed_failure(cli_state):
+    cli_state.sdk.devices.reactivate.side_effect = Py42ForbiddenError(HTTPError())
 
 
 @pytest.fixture
@@ -438,6 +453,33 @@ def test_deactivate_fails_if_device_deactivation_forbidden(
     )
     assert result.exit_code == 1
     assert "Unable to deactivate {}.".format(TEST_DEVICE_GUID) in result.output
+
+
+def test_reactivate_reactivates_device(
+    runner, cli_state, deactivate_device_success, get_device_by_guid_success
+):
+    runner.invoke(cli, ["devices", "reactivate", TEST_DEVICE_GUID], obj=cli_state)
+    cli_state.sdk.devices.reactivate.assert_called_once_with(TEST_DEVICE_ID)
+
+
+def test_reactivate_fails_if_device_does_not_exist(
+    runner, cli_state, reactivate_device_not_found_failure
+):
+    result = runner.invoke(
+        cli, ["devices", "reactivate", TEST_DEVICE_GUID], obj=cli_state
+    )
+    assert result.exit_code == 1
+    assert "The device {} was not found.".format(TEST_DEVICE_GUID) in result.output
+
+
+def test_reactivate_fails_if_device_reactivation_forbidden(
+    runner, cli_state, reactivate_device_not_allowed_failure
+):
+    result = runner.invoke(
+        cli, ["devices", "reactivate", TEST_DEVICE_GUID], obj=cli_state
+    )
+    assert result.exit_code == 1
+    assert "Unable to reactivate {}.".format(TEST_DEVICE_GUID) in result.output
 
 
 def test_show_prints_device_info(runner, cli_state, backupusage_success):
