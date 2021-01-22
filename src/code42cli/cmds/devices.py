@@ -66,12 +66,10 @@ def deactivate(state, device_guid, change_device_name, purge_date):
 @sdk_options()
 def reactivate(state, device_guid, change_device_name, purge_date):
     """Reactivate a device within Code42. Requires the device GUID to reactivate."""
-    _verify_guid_type(device_guid)
     _change_device_activation(state.sdk, device_guid, "reactivate")
 
 
 def _deactivate_device(sdk, device_guid, change_device_name, purge_date):
-    _verify_guid_type(device_guid)
     try:
         device = _change_device_activation(sdk, device_guid, "deactivate")
     except exceptions.Py42BadRequestError:
