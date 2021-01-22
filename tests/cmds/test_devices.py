@@ -349,6 +349,13 @@ def test_deactivate_deactivates_device(
     cli_state.sdk.devices.deactivate.assert_called_once_with(TEST_DEVICE_ID)
 
 
+def test_deactivate_when_given_non_guid_raises_before_making_request(runner, cli_state):
+    result = runner.invoke(cli, ["devices", "deactivate", "not_a_guid"], obj=cli_state)
+    assert result.exit_code == 1
+    assert "Not a valid guid." in result.output
+    assert cli_state.sdk.devices.deactivate.call_count == 0
+
+
 def test_deactivate_when_given_flag_updates_purge_date(
     runner,
     cli_state,
