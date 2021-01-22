@@ -31,13 +31,8 @@ def read_csv(file, headers):
 
     # handle when first row has all of our expected headers
     if all(field in first_line for field in headers):
-        csv_rows = []
-        for row in csv.DictReader(lines[1:], fieldnames=first_line):
-            # remove any extra columns that aren't in our expected headers
-            for key in list(row.keys()):
-                if key not in headers:
-                    row.pop(key)
-            csv_rows.append(row)
+        reader = csv.DictReader(lines[1:], fieldnames=first_line)
+        csv_rows = [{key: row[key] for key in headers} for row in reader]
         if not csv_rows:
             raise Code42CLIError("CSV contains no data rows.")
         return csv_rows
@@ -49,9 +44,8 @@ def read_csv(file, headers):
             return list(csv.DictReader(lines, fieldnames=headers))
         else:
             raise Code42CLIError(
-                "CSV data is ambiguous. Column count must match expected columns "
-                "exactly when no header row is present. "
-                f"Expected columns: {headers}"
+                "CSV data is ambiguous. Column count must match expected columns exactly when no "
+                f"header row is present. Expected columns: {headers}"
             )
     # handle when first row has some expected headers but not all
     else:
