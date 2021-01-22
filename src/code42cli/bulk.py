@@ -74,6 +74,7 @@ def run_bulk_process(row_handler, rows, progress_label=None):
         row_handler (callable): A callable that you define to process values from the row as
             either *args or **kwargs.
         rows (iterable): the rows to process.
+        progress_label: a label that prints with the progress bar.
     """
     processor = _create_bulk_processor(row_handler, rows, progress_label)
     return processor.run()
@@ -93,7 +94,6 @@ class BulkProcessor:
             and first row `1,test`, then `row_handler` should receive kwargs
             `prop_a: '1', prop_b: 'test'` when processing the first row. If it's a flat file, then
             `row_handler` only needs to take an extra arg.
-        reader (CSVReader or FlatFileReader): A generator that reads rows and yields data into `row_handler`.
     """
 
     def __init__(self, row_handler, rows, worker=None, progress_label=None):
