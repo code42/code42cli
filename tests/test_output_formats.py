@@ -245,3 +245,5 @@ class TestDataFrameOutputFormatter:
         formatter = output_formats_module.DataFrameOutputFormatter(None)
         formatter.echo_formatted_dataframe(TEST_DATAFRAME)
         mock_dataframe_to_string.assert_called_once_with(TEST_DATAFRAME, index=False)
+
+    def test_echo_formatted_dataframe_when_output_has_less_than_1

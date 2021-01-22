@@ -116,7 +116,7 @@ class DataFrameOutputFormatter:
         if len(output) < 10:
             click.echo(str_output)
         else:
-            click.echo_via_pager(output)
+            click.echo_via_pager(str_output)
 
 
 def to_csv(output):
