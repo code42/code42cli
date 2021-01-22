@@ -495,7 +495,7 @@ def _bulk_handle_device_activation_update(
 @format_option
 @sdk_options()
 def bulk_reactivate(state, csv_rows, format):
-    """Deactivate all devices from the provided CSV containing a 'guid' column."""
+    """Reactivate all devices from the provided CSV containing a 'guid' column."""
     sdk = state.sdk
 
     def _reactivate(row):
