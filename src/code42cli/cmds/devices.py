@@ -87,7 +87,7 @@ def _deactivate_device(sdk, device_guid, change_device_name, purge_date):
             + "_"
             + device.data["name"],
         )
-    
+
 
 def _change_device_activation(sdk, device_guid, cmd_str):
     _verify_guid_type(device_guid)
