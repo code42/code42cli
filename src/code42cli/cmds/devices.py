@@ -28,7 +28,9 @@ def devices(state):
     pass
 
 
-device_guid_argument = click.argument("device-guid", type=str)
+device_guid_argument = click.argument(
+    "device-guid", type=str, callback=lambda ctx, param, arg: _verify_guid_type(arg),
+)
 
 change_device_name_option = click.option(
     "--change-device-name",
@@ -88,7 +90,6 @@ def _deactivate_device(sdk, device_guid, change_device_name, purge_date):
 
 
 def _change_device_activation(sdk, device_guid, cmd_str):
-    _verify_guid_type(device_guid)
     try:
         device = sdk.devices.get_by_guid(device_guid)
         device_id = device.data["computerId"]
@@ -105,7 +106,7 @@ def _change_device_activation(sdk, device_guid, cmd_str):
 
 def _verify_guid_type(device_guid):
     try:
-        int(device_guid)
+        return int(device_guid)
     except ValueError:
         raise Code42CLIError("Not a valid guid.")
 

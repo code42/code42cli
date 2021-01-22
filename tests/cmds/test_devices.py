@@ -479,7 +479,7 @@ def test_reactivate_fails_if_device_reactivation_forbidden(
         cli, ["devices", "reactivate", TEST_DEVICE_GUID], obj=cli_state
     )
     assert result.exit_code == 1
-    assert "Unable to reactivate {}.".format(TEST_DEVICE_GUID) in result.output
+    assert f"Unable to reactivate {TEST_DEVICE_GUID}." in result.output
 
 
 def test_show_prints_device_info(runner, cli_state, backupusage_success):
