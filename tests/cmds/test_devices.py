@@ -469,7 +469,7 @@ def test_reactivate_fails_if_device_does_not_exist(
         cli, ["devices", "reactivate", TEST_DEVICE_GUID], obj=cli_state
     )
     assert result.exit_code == 1
-    assert "The device {} was not found.".format(TEST_DEVICE_GUID) in result.output
+    assert f"The device {TEST_DEVICE_GUID} was not found." in result.output
 
 
 def test_reactivate_fails_if_device_reactivation_forbidden(
@@ -623,7 +623,7 @@ def test_add_backup_set_settings_to_dataframe_returns_one_line_per_backup_set(
 
 
 def test_bulk_deactivate_uses_expected_arguments(runner, mocker, cli_state):
-    bulk_processor = mocker.patch("{}.run_bulk_process".format(_NAMESPACE))
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_bulk_deactivate.csv", "w") as csv:
             csv.writelines(["guid,username\n", "test,value\n"])
@@ -643,7 +643,7 @@ def test_bulk_deactivate_uses_expected_arguments(runner, mocker, cli_state):
 
 
 def test_bulk_reactivate_uses_expected_arguments(runner, mocker, cli_state):
-    bulk_processor = mocker.patch("{}.run_bulk_process".format(_NAMESPACE))
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_bulk_reactivate.csv", "w") as csv:
             csv.writelines(["guid,username\n", "test,value\n"])
