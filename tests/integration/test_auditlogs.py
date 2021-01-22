@@ -2,7 +2,6 @@ from datetime import datetime
 from datetime import timedelta
 
 import pytest
-from tests.integration import run_command
 
 SEARCH_COMMAND = "code42 audit-logs search"
 BASE_COMMAND = "{} -b".format(SEARCH_COMMAND)
@@ -42,6 +41,6 @@ end_date_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
         ("{} '{}' --debug".format(BASE_COMMAND, begin_date_str)),
     ],
 )
-def test_auditlogs_search_command_returns_success_return_code(command):
-    return_code, response = run_command(command)
+def test_auditlogs_search_command_returns_success_return_code(command, command_runner):
+    return_code, response = command_runner(command)
     assert return_code == 0
