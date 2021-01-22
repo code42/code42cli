@@ -28,7 +28,9 @@ def devices(state):
     pass
 
 
-device_guid_argument = click.argument("device-guid", type=str)
+device_guid_argument = click.argument(
+    "device-guid", type=str, callback=lambda ctx, param, arg: _verify_guid_type(arg),
+)
 
 change_device_name_option = click.option(
     "--change-device-name",
@@ -59,20 +61,19 @@ def deactivate(state, device_guid, change_device_name, purge_date):
     _deactivate_device(state.sdk, device_guid, change_device_name, purge_date)
 
 
+@devices.command()
+@device_guid_argument
+@sdk_options()
+def reactivate(state, device_guid):
+    """Reactivate a device within Code42. Requires the device GUID to reactivate."""
+    _reactivate_device(state.sdk, device_guid)
+
+
 def _deactivate_device(sdk, device_guid, change_device_name, purge_date):
     try:
-        int(device_guid)
-    except ValueError:
-        raise Code42CLIError("Not a valid guid.")
-    try:
-        device = sdk.devices.get_by_guid(device_guid)
-        sdk.devices.deactivate(device.data["computerId"])
+        device = _change_device_activation(sdk, device_guid, "deactivate")
     except exceptions.Py42BadRequestError:
         raise Code42CLIError("The device {} is in legal hold.".format(device_guid))
-    except exceptions.Py42NotFoundError:
-        raise Code42CLIError("The device {} was not found.".format(device_guid))
-    except exceptions.Py42ForbiddenError:
-        raise Code42CLIError("Unable to deactivate {}.".format(device_guid))
     if purge_date:
         _update_cold_storage_purge_date(sdk, device_guid, purge_date)
     if change_device_name and not device.data["name"].startswith("deactivated_"):
@@ -84,6 +85,35 @@ def _deactivate_device(sdk, device_guid, change_device_name, purge_date):
             + "_"
             + device.data["name"],
         )
+
+
+def _reactivate_device(sdk, device_guid):
+    _change_device_activation(sdk, device_guid, "reactivate")
+
+
+def _change_device_activation(sdk, device_guid, cmd_str):
+    try:
+        device = sdk.devices.get_by_guid(device_guid)
+        device_id = device.data["computerId"]
+        if cmd_str == "reactivate":
+            sdk.devices.reactivate(device_id)
+        elif cmd_str == "deactivate":
+            sdk.devices.deactivate(device_id)
+        return device
+    except exceptions.Py42NotFoundError:
+        raise Code42CLIError("The device {} was not found.".format(device_guid))
+    except exceptions.Py42ForbiddenError:
+        raise Code42CLIError("Unable to {} {}.".format(cmd_str, device_guid))
+
+
+def _verify_guid_type(device_guid):
+    if device_guid is None:
+        return
+    try:
+        int(device_guid)
+        return device_guid
+    except ValueError:
+        raise Code42CLIError("Not a valid guid.")
 
 
 def _update_cold_storage_purge_date(sdk, guid, purge_date):
@@ -453,5 +483,29 @@ def bulk_deactivate(state, csv_rows, change_device_name, purge_date, format):
 
     result_rows = run_bulk_process(
         handle_row, csv_rows, progress_label="Deactivating devices:"
+    )
+    formatter.echo_formatted_list(result_rows)
+
+
+@bulk.command(name="reactivate")
+@read_csv_arg(headers=["guid"])
+@format_option
+@sdk_options()
+def bulk_reactivate(state, csv_rows, format):
+    """Reactivate all devices from the provided CSV containing a 'guid' column."""
+    sdk = state.sdk
+    csv_rows[0]["reactivated"] = False
+    formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+
+    def handle_row(**row):
+        try:
+            _reactivate_device(sdk, row["guid"])
+            row["reactivated"] = "True"
+        except Exception as e:
+            row["reactivated"] = "False: {}".format(e)
+        return row
+
+    result_rows = run_bulk_process(
+        handle_row, csv_rows, progress_label="Reactivating devices:"
     )
     formatter.echo_formatted_list(result_rows)
