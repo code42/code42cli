@@ -107,8 +107,11 @@ def _change_device_activation(sdk, device_guid, cmd_str):
 
 
 def _verify_guid_type(device_guid):
+    if device_guid is None:
+        return
     try:
-        return int(device_guid)
+        int(device_guid)
+        return device_guid
     except ValueError:
         raise Code42CLIError("Not a valid guid.")
 
