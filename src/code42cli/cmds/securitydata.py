@@ -337,7 +337,10 @@ def send_to(
     or_query,
     **kwargs,
 ):
-    """Send events to the given server address."""
+    """Send events to the given server address.
+
+    HOSTNAME format: address:port where port is optional and defaults to 514.
+    """
     logger = get_logger_for_server(hostname, protocol, format)
     cursor = (
         _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
