@@ -1,5 +1,4 @@
 import pytest
-from tests.integration import run_command
 
 ALERT_RULES_COMMAND = "code42 alert-rules"
 
@@ -20,6 +19,6 @@ ALERT_RULES_COMMAND = "code42 alert-rules"
         "{} list --format RAW-JSON".format(ALERT_RULES_COMMAND),
     ],
 )
-def test_alert_rules_command_returns_success_return_code(command):
-    return_code, response = run_command(command)
+def test_alert_rules_command_returns_success_return_code(command, command_runner):
+    return_code, response = command_runner(command)
     assert return_code == 0
