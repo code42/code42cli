@@ -483,7 +483,6 @@ def _bulk_handle_device_activation_update(
     sdk, format, csv_rows, cmd, cmd_str, progress_label_prefix
 ):
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
-
     row_handler = _get_bulk_activation_row_handler(sdk, csv_rows, cmd_str, cmd)
     result_rows = run_bulk_process(
         row_handler, csv_rows, progress_label=f"{progress_label_prefix} devices:"
