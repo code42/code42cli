@@ -1,7 +1,5 @@
 import os
-import time
-
-from tests.integration import run_command
+import subprocess
 
 
 class cleanup:
@@ -33,3 +31,21 @@ def cleanup_after_validation(filename):
         return wrapper
 
     return wrap
+
+
+class DataServer(object):
+    TCP_SERVER_COMMAND = 'ncat -l 5140'
+    UDP_SERVER_COMMAND = 'ncat -ul 5140'
+
+    def __init__(self, protocol='TCP'):
+        if protocol.upper() == 'UDP':
+            self.command = DataServer.UDP_SERVER_COMMAND
+        else:
+            self.command = DataServer.TCP_SERVER_COMMAND
+        self.process = None
+
+    def __enter__(self):
+        self.process = subprocess.Popen(self.command.split(" "))
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.process.kill()
