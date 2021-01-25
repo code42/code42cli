@@ -7,6 +7,7 @@ from pandas import to_datetime
 from py42 import exceptions
 from py42.exceptions import Py42NotFoundError
 
+from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
@@ -73,7 +74,9 @@ def _deactivate_device(sdk, device_guid, change_device_name, purge_date):
     try:
         device = _change_device_activation(sdk, device_guid, "deactivate")
     except exceptions.Py42BadRequestError:
-        raise Code42CLIError("The device {} is in legal hold.".format(device_guid))
+        raise Code42CLIError(
+            "The device with GUID '{}' is in legal hold.".format(device_guid)
+        )
     if purge_date:
         _update_cold_storage_purge_date(sdk, device_guid, purge_date)
     if change_device_name and not device.data["name"].startswith("deactivated_"):
@@ -101,9 +104,13 @@ def _change_device_activation(sdk, device_guid, cmd_str):
             sdk.devices.deactivate(device_id)
         return device
     except exceptions.Py42NotFoundError:
-        raise Code42CLIError("The device {} was not found.".format(device_guid))
+        raise Code42CLIError(
+            "The device with GUID '{}' was not found.".format(device_guid)
+        )
     except exceptions.Py42ForbiddenError:
-        raise Code42CLIError("Unable to {} {}.".format(cmd_str, device_guid))
+        raise Code42CLIError(
+            "Unable to {} the device with GUID '{}'.".format(cmd_str, device_guid)
+        )
 
 
 def _verify_guid_type(device_guid):
@@ -456,8 +463,22 @@ def bulk(state):
     pass
 
 
+_bulk_device_activation_headers = ["guid"]
+
+
+devices_generate_template = generate_template_cmd_factory(
+    group_name="devices",
+    commands_dict={
+        "reactivate": _bulk_device_activation_headers,
+        "deactivate": _bulk_device_activation_headers,
+    },
+    help_message="Generate the CSV template needed for bulk device commands.",
+)
+bulk.add_command(devices_generate_template)
+
+
 @bulk.command(name="deactivate")
-@read_csv_arg(headers=["guid"])
+@read_csv_arg(headers=_bulk_device_activation_headers)
 @change_device_name_option
 @purge_date_option
 @format_option
@@ -488,7 +509,7 @@ def bulk_deactivate(state, csv_rows, change_device_name, purge_date, format):
 
 
 @bulk.command(name="reactivate")
-@read_csv_arg(headers=["guid"])
+@read_csv_arg(headers=_bulk_device_activation_headers)
 @format_option
 @sdk_options()
 def bulk_reactivate(state, csv_rows, format):
