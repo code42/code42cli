@@ -22,11 +22,13 @@ end_date_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
     "command,protocol",
     [
         (
-            "code42 audit-logs send-to localhost:5140 -b '{}'".format(begin_date_str), "TCP"
+            "code42 audit-logs send-to localhost:5140 -b '{}'".format(begin_date_str),
+            "TCP",
         ),
         (
-            "code42 audit-logs send-to localhost:5140 -b '{}'".format(begin_date_str), "UDP"
-        )
+            "code42 audit-logs send-to localhost:5140 -b '{}'".format(begin_date_str),
+            "UDP",
+        ),
     ],
 )
 def test_auditlogs_send_to(command, protocol):
