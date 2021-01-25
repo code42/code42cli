@@ -4,11 +4,8 @@ from unittest.mock import mock_open
 
 import pytest
 from py42.exceptions import Py42BadRequestError
-from py42.exceptions import Py42CaseNameExistsError
 from py42.exceptions import Py42NotFoundError
 from py42.response import Py42Response
-from requests import HTTPError
-from requests import Response
 
 from code42cli.main import cli
 
