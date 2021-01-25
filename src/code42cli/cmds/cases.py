@@ -20,10 +20,14 @@ case_number_option = click.option(
     "--case-number", type=int, help="The number assigned to the case.", required=True
 )
 name_option = click.option("--name", help="The name of the case.",)
-assignee_option = click.option("--assignee", help="The UID of the user assigned to the case.")
+assignee_option = click.option(
+    "--assignee", help="The UID of the user to assign to the case."
+)
 description_option = click.option("--description", help="The description of the case.")
 findings_option = click.option("--findings", help="Any findings for the case.")
-subject_option = click.option("--subject", help="The user UID of the subject of the case.")
+subject_option = click.option(
+    "--subject", help="The user UID of the subject of the case."
+)
 status_option = click.option(
     "--status",
     help="Status of the case. `OPEN` or `CLOSED`.",
@@ -32,7 +36,6 @@ status_option = click.option(
 file_event_id_option = click.option(
     "--event-id", required=True, help="The file event ID associated to the case."
 )
-
 CASES_KEYWORD = "cases"
 BEGIN_DATE_DICT = set_begin_default_dict(CASES_KEYWORD)
 END_DATE_DICT = set_end_default_dict(CASES_KEYWORD)
