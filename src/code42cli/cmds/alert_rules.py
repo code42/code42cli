@@ -117,7 +117,7 @@ bulk.add_command(alert_rules_generate_template)
 
 
 @bulk.command(
-    help="Bulk add users to alert rules from a csv file. CSV file format: {}".format(
+    help="Bulk add users to alert rules from a CSV file. CSV file format: {}".format(
         ",".join(ALERT_RULES_CSV_HEADERS)
     )
 )

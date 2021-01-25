@@ -7,6 +7,7 @@ from pandas import to_datetime
 from py42 import exceptions
 from py42.exceptions import Py42NotFoundError
 
+from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
@@ -456,8 +457,22 @@ def bulk(state):
     pass
 
 
+_bulk_device_activation_headers = ["guid"]
+
+
+devices_generate_template = generate_template_cmd_factory(
+    group_name="devices",
+    commands_dict={
+        "reactivate": _bulk_device_activation_headers,
+        "deactivate": _bulk_device_activation_headers,
+    },
+    help_message="Generate the CSV template needed for bulk device commands.",
+)
+bulk.add_command(devices_generate_template)
+
+
 @bulk.command(name="deactivate")
-@read_csv_arg(headers=["guid"])
+@read_csv_arg(headers=_bulk_device_activation_headers)
 @change_device_name_option
 @purge_date_option
 @format_option
@@ -488,7 +503,7 @@ def bulk_deactivate(state, csv_rows, change_device_name, purge_date, format):
 
 
 @bulk.command(name="reactivate")
-@read_csv_arg(headers=["guid"])
+@read_csv_arg(headers=_bulk_device_activation_headers)
 @format_option
 @sdk_options()
 def bulk_reactivate(state, csv_rows, format):
