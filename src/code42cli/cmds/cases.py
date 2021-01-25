@@ -34,7 +34,7 @@ status_option = click.option(
     type=click.Choice(CaseStatus.choices()),
 )
 file_event_id_option = click.option(
-    "--event-id", required=True, help="The file event ID associated to the case."
+    "--event-id", required=True, help="The file event ID associated with the case."
 )
 CASES_KEYWORD = "cases"
 BEGIN_DATE_DICT = set_begin_default_dict(CASES_KEYWORD)
