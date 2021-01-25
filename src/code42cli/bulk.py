@@ -42,7 +42,11 @@ def generate_template_cmd_factory(group_name, commands_dict, help_message=None):
             If a cmd takes a flat file, value should be a string indicating what item the flat file
             rows should contain.
     """
-    help_message = help_message or "Generate the CSV template needed for bulk adding/removing users."
+    help_message = (
+        help_message
+        or "Generate the CSV template needed for bulk adding/removing users."
+    )
+
     @click.command(help=help_message)
     @click.argument("cmd", type=click.Choice(list(commands_dict)))
     @click.option(

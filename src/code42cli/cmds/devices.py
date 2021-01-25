@@ -466,7 +466,7 @@ devices_generate_template = generate_template_cmd_factory(
         "reactivate": _bulk_device_activation_headers,
         "deactivate": _bulk_device_activation_headers,
     },
-    help_message="Generate the CSV template needed for bulk device commands."
+    help_message="Generate the CSV template needed for bulk device commands.",
 )
 bulk.add_command(devices_generate_template)
 
