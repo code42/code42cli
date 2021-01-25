@@ -189,7 +189,9 @@ def show(state, case_number, format, include_file_events):
 @cases.command()
 @case_number_arg
 @click.option(
-    "--path", help="File path. Defaults to the current directory.", default="."
+    "--path",
+    help="The file path where to save the PDF. Defaults to the current directory.",
+    default=".",
 )
 @sdk_options()
 def export(state, case_number, path):
