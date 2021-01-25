@@ -17,6 +17,9 @@ from code42cli.output_formats import OutputFormatter
 
 
 case_number_arg = click.argument("case-number", type=int)
+case_number_option = click.option(
+    "--case-number", type=int, help="The number assigned to the case.", required=True
+)
 name_option = click.option("--name", help="Name of the case.",)
 assignee_option = click.option("--assignee", help="User UID of the assignee.")
 description_option = click.option("--description", help="Description of the case.")
@@ -225,7 +228,7 @@ def file_events_list(state, case_number, format):
 
 
 @file_events.command()
-@case_number_arg
+@case_number_option
 @file_event_id_option
 @sdk_options()
 def add(state, case_number, event_id):
@@ -237,7 +240,7 @@ def add(state, case_number, event_id):
 
 
 @file_events.command()
-@case_number_arg
+@case_number_option
 @file_event_id_option
 @sdk_options()
 def remove(state, case_number, event_id):
