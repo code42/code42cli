@@ -1,6 +1,5 @@
 import json
 import os
-from pprint import pformat
 
 import click
 from py42.clients.cases import CaseStatus
@@ -162,7 +161,7 @@ def _get_file_events(sdk, case_number):
 def _display_file_events(events):
     if events:
         click.echo("\nFile Events:\n")
-        click.echo(pformat(events))
+        click.echo(json.dumps(events, indent=4))
     else:
         click.echo("\nNo events found.")
 
