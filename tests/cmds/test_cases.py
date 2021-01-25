@@ -10,18 +10,28 @@ from py42.response import Py42Response
 from code42cli.main import cli
 
 
-EVENT_DETAILS = """{"eventId": "0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_986472527798692818_971"}
-"""
-
-ALL_EVENTS = """{"events": [{"eventId": "0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_986472527798692818_971"}]}"""
-
-ALL_CASES = """{"cases": [{"number": 3,"name": "test@test.test"}], "totalCount": 31}"""
-
-CASE_DETAILS = """{"number": 3, "name": "test@test.test"}"""
-
+ALL_EVENTS = """{
+  "events": [
+    {
+      "eventId": "0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_986472527798692818_971",
+      "eventTimestamp": "2020-12-23T12:41:38.592Z"
+    }
+  ]
+}"""
+ALL_CASES = """{
+  "cases": [
+    {
+      "number": 3,
+      "name": "test@test.test",
+      "updatedAt": "2021-01-24T11:00:04.217878Z",
+      "subject": "942897"
+    }
+  ],
+  "totalCount": 31
+}"""
+CASE_DETAILS = '{"number": 3, "name": "test@test.test"}'
 CASES_COMMAND = "cases"
 CASES_FILE_EVENTS_COMMAND = "cases file-events"
-
 MISSING_ARGUMENT_ERROR = "Missing argument '{}'."
 MISSING_NAME = MISSING_ARGUMENT_ERROR.format("NAME")
 MISSING_CASE_NUMBER = MISSING_ARGUMENT_ERROR.format("CASE_NUMBER")
@@ -63,7 +73,7 @@ def test_create_with_optional_fields_calls_create_with_expected_params(
             "a",
             "--description",
             "d",
-            "--notes",
+            "--findings",
             "n",
             "--subject",
             "s",
@@ -90,7 +100,7 @@ def test_update_with_optional_fields_calls_update_with_expected_params(
             "a",
             "--description",
             "d",
-            "--notes",
+            "--findings",
             "n",
             "--subject",
             "s",
@@ -227,6 +237,8 @@ def test_list_returns_expected_data(runner, cli_state, py42_response):
     cli_state.sdk.cases.get_all.return_value = gen()
     result = runner.invoke(cli, ["cases", "list"], obj=cli_state,)
     assert "test@test.test" in result.output
+    assert "2021-01-24T11:00:04.217878Z" in result.output
+    assert "942897" in result.output
 
 
 def test_show_returns_expected_data_with_include_file_events_option(
@@ -250,6 +262,7 @@ def test_events_list_returns_expected_data(runner, cli_state):
         "0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_986472527798692818_971"
         in result.output
     )
+    assert "2020-12-23T12:41:38.592Z" in result.output
 
 
 @pytest.mark.parametrize(

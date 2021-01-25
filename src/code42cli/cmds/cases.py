@@ -20,7 +20,7 @@ case_number_arg = click.argument("case-number", type=int)
 name_option = click.option("--name", help="Name of the case.",)
 assignee_option = click.option("--assignee", help="User UID of the assignee.")
 description_option = click.option("--description", help="Description of the case.")
-notes_option = click.option("--notes", help="Notes on the case.")
+findings_option = click.option("--findings", help="Findings on the case.")
 subject_option = click.option("--subject", help="User UID of a subject of the case.")
 status_option = click.option(
     "--status",
@@ -42,15 +42,16 @@ def _get_cases_header():
         "name": "Name",
         "assignee": "Assignee",
         "status": "Status",
+        "subject": "Subject",
         "createdAt": "Creation Time",
-        "findings": "Notes",
+        "updatedAt": "Last Update Time",
     }
 
 
 def _get_events_header():
     return {
         "eventId": "Event Id",
-        "eventTimestatmp": "Timestamp",
+        "eventTimestamp": "Timestamp",
         "filePath": "Path",
         "fileName": "File",
         "exposure": "Exposure",
@@ -68,17 +69,17 @@ def cases(state):
 @click.argument("name")
 @assignee_option
 @description_option
-@notes_option
+@findings_option
 @subject_option
 @sdk_options()
-def create(state, name, subject, assignee, description, notes):
+def create(state, name, subject, assignee, description, findings):
     """Create a new case."""
     state.sdk.cases.create(
         name,
         subject=subject,
         assignee=assignee,
         description=description,
-        findings=notes,
+        findings=findings,
     )
 
 
@@ -87,11 +88,11 @@ def create(state, name, subject, assignee, description, notes):
 @name_option
 @assignee_option
 @description_option
-@notes_option
+@findings_option
 @subject_option
 @status_option
 @sdk_options()
-def update(state, case_number, name, subject, assignee, description, notes, status):
+def update(state, case_number, name, subject, assignee, description, findings, status):
     """Update case details for the given case."""
     state.sdk.cases.update(
         case_number,
@@ -99,7 +100,7 @@ def update(state, case_number, name, subject, assignee, description, notes, stat
         subject=subject,
         assignee=assignee,
         description=description,
-        findings=notes,
+        findings=findings,
         status=status,
     )
 
@@ -172,7 +173,7 @@ def _display_file_events(events):
 @format_option
 def show(state, case_number, format, include_file_events):
     """Show case details."""
-    formatter = OutputFormatter(format, _get_cases_header())
+    formatter = OutputFormatter(format)
     try:
         response = state.sdk.cases.get(case_number)
         formatter.echo_formatted_list([response.data])
