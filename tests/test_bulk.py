@@ -1,11 +1,12 @@
-from click import Choice
 from collections import OrderedDict
 
 import pytest
+from click import Choice
 
 from code42cli import errors
 from code42cli import PRODUCT_NAME
-from code42cli.bulk import BulkProcessor, generate_template_cmd_factory
+from code42cli.bulk import BulkProcessor
+from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
 from code42cli.logger import get_view_error_details_message
 
@@ -39,7 +40,7 @@ def test_generate_template_cmd_factory_returns_expected_command():
     template = generate_template_cmd_factory(
         group_name="cmd-group",
         commands_dict={"add": add_headers, "remove": remove_headers},
-        help_message=help_message
+        help_message=help_message,
     )
     assert template.help == help_message
     assert template.name == "generate-template"
@@ -56,7 +57,10 @@ def test_generate_template_cmd_factory_when_using_defaults_returns_expected_comm
         group_name="cmd-group",
         commands_dict={"add": add_headers, "remove": remove_headers},
     )
-    assert template.help == "Generate the CSV template needed for bulk adding/removing users."
+    assert (
+        template.help
+        == "Generate the CSV template needed for bulk adding/removing users."
+    )
     assert template.name == "generate-template"
     assert len(template.params) == 2
     assert template.params[0].name == "cmd"
