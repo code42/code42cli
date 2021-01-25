@@ -50,3 +50,19 @@ ALERT_ADVANCED_QUERY_COMMAND = "code42 alerts search --advanced-query '{}'".form
 def test_alert_command_returns_success_return_code(command, command_runner):
     return_code, response = command_runner(command)
     assert return_code == 0
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    "command",
+    [
+        (
+            "code42 alerts send-to localhost:5140 -p TCP -b '{}'".format(
+                begin_date_str
+            )
+        )
+    ],
+)
+def test_alerts_send_to(command):
+    exit_status, response = run_command(command)
+    assert exit_status == 0

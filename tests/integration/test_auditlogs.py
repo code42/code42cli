@@ -5,8 +5,6 @@ import pytest
 <<<<<<< HEAD
 =======
 from tests.integration import run_command
-from tests.integration.util import DockerDaemon
-from tests.integration.util import SyslogServer
 
 >>>>>>> intermittent commit
 
@@ -18,26 +16,20 @@ end_date = datetime.utcnow() - timedelta(days=0)
 end_date_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
 
 
-@pytest.fixture(scope='session')
-def data_transfer():
-    with DockerDaemon():
-        with SyslogServer():
-            yield run_command
-
-
 @pytest.mark.integration
 @pytest.mark.parametrize(
     "command",
     [
         (
-            "code42 audit-logs send-to localhost -p TCP -b '{}'".format(
+            "code42 audit-logs send-to localhost:5140 -p TCP -b '{}'".format(
                 begin_date_str
             )
         )
     ],
 )
-def test_auditlogs_send_to(data_transfer, command):
-    exit_status, response = data_transfer(command)
+def test_auditlogs_send_to(command):
+    
+    exit_status, response = run_command(command)
     assert exit_status == 0
 
 
@@ -73,6 +65,3 @@ def test_auditlogs_send_to(data_transfer, command):
 def test_auditlogs_search_command_returns_success_return_code(command, command_runner):
     return_code, response = command_runner(command)
     assert return_code == 0
-
-
-
