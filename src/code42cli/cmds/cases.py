@@ -191,7 +191,7 @@ def show(state, case_number, format, include_file_events):
 @click.option(
     "--path",
     help="The file path where to save the PDF. Defaults to the current directory.",
-    default=".",
+    default=os.getcwd(),
 )
 @sdk_options()
 def export(state, case_number, path):
