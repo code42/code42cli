@@ -1,4 +1,5 @@
 import json
+import os
 from unittest import mock
 from unittest.mock import mock_open
 
@@ -227,7 +228,8 @@ def test_export_calls_export_summary_with_expected_params(runner, cli_state, moc
             cli, ["cases", "export", "1"], obj=cli_state,
         )
         cli_state.sdk.cases.export_summary.assert_called_once_with(1)
-        mf.assert_called_once_with("./1_case_summary.pdf", "wb")
+        expected = os.path.join(os.getcwd(), "1_case_summary.pdf")
+        mf.assert_called_once_with(expected, "wb")
 
 
 def test_export_when_missing_case_number_prints_error(runner, cli_state):
