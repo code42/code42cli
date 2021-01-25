@@ -3,10 +3,12 @@ from unittest import mock
 from unittest.mock import mock_open
 
 import pytest
-from py42.exceptions import Py42BadRequestError, Py42CaseNameExistsError
+from py42.exceptions import Py42BadRequestError
+from py42.exceptions import Py42CaseNameExistsError
 from py42.exceptions import Py42NotFoundError
 from py42.response import Py42Response
-from requests import HTTPError, Response
+from requests import HTTPError
+from requests import Response
 
 from code42cli.main import cli
 
@@ -86,7 +88,9 @@ def test_create_with_optional_fields_calls_create_with_expected_params(
     )
 
 
-def test_create_when_case_name_already_exists_echo_expected_message(mocker, runner, cli_state):
+def test_create_when_case_name_already_exists_echo_expected_message(
+    mocker, runner, cli_state
+):
     def side_effect(*args, **kwargs):
         err = mocker.MagicMock(spec=HTTPError)
         resp = mocker.MagicMock(spec=Response)
@@ -94,9 +98,7 @@ def test_create_when_case_name_already_exists_echo_expected_message(mocker, runn
         raise Py42CaseNameExistsError(err, "CASE")
 
     cli_state.sdk.cases.create.side_effect = side_effect
-    res = runner.invoke(
-        cli, ["cases", "create", "TEST_CASE"], obj=cli_state,
-    )
+    res = runner.invoke(cli, ["cases", "create", "TEST_CASE"], obj=cli_state,)
     assert "Case name 'CASE' already exists, please set another name" in res.output
 
 
