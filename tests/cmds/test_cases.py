@@ -88,20 +88,6 @@ def test_create_with_optional_fields_calls_create_with_expected_params(
     )
 
 
-def test_create_when_case_name_already_exists_echos_expected_message(
-    mocker, runner, cli_state
-):
-    def side_effect(*args, **kwargs):
-        err = mocker.MagicMock(spec=HTTPError)
-        resp = mocker.MagicMock(spec=Response)
-        err.response = resp
-        raise Py42CaseNameExistsError(err, "CASE")
-
-    cli_state.sdk.cases.create.side_effect = side_effect
-    res = runner.invoke(cli, ["cases", "create", "TEST_CASE"], obj=cli_state,)
-    assert "Case name 'CASE' already exists, please set another name" in res.output
-
-
 def test_update_with_optional_fields_calls_update_with_expected_params(
     runner, cli_state
 ):
