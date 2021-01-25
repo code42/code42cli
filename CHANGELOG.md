@@ -29,14 +29,14 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - `code42 cases` commands:
     - `create` to create a new case.
     - `update` to update case details.
-    - `export` to download case summary in a pdf file.
-    - `list` to view all the cases.
-    - `show` to view details of a particular case.
+    - `export` to download a case summary as a PDF file.
+    - `list` to view all cases.
+    - `show` to view the details of a particular case.
 
 - `code42 cases file-events` commands:
     - `add` to add an event to a case.
     - `remove` to remove an event from the case.
-    - `list` to view all events associated to the case.
+    - `list` to view all events associated with a case.
 
 ### Changed
 
