@@ -29,7 +29,7 @@ def write_template_file(path, columns=None, flat_item=None):
             )
 
 
-def generate_template_cmd_factory(group_name, commands_dict):
+def generate_template_cmd_factory(group_name, commands_dict, help_message=None):
     """Helper function that creates a `generate-template` click command that can be added to `bulk`
     sub-command groups.
 
@@ -42,8 +42,8 @@ def generate_template_cmd_factory(group_name, commands_dict):
             If a cmd takes a flat file, value should be a string indicating what item the flat file
             rows should contain.
     """
-
-    @click.command()
+    help_message = help_message or "Generate the CSV template needed for bulk adding/removing users."
+    @click.command(help=help_message)
     @click.argument("cmd", type=click.Choice(list(commands_dict)))
     @click.option(
         "--path",
@@ -52,9 +52,6 @@ def generate_template_cmd_factory(group_name, commands_dict):
         help="Write template file to specific file path/name.",
     )
     def generate_template(cmd, path):
-        """\b
-        Generate the CSV template needed for bulk adding/removing users.
-        """
         columns = commands_dict[cmd]
         if not path:
             filename = "{}_bulk_{}.csv".format(group_name, cmd.replace("-", "_"))
