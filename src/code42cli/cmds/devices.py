@@ -33,13 +33,15 @@ device_guid_argument = click.argument(
     "device-guid", type=str, callback=lambda ctx, param, arg: _verify_guid_type(arg),
 )
 
-change_device_name_option = click.option(
-    "--change-device-name",
-    required=False,
-    is_flag=True,
-    default=False,
-    help="Prepend 'deactivated_<current_date>' to the name of any deactivated devices.",
-)
+
+def change_device_name_option(help_msg):
+    return click.option(
+        "--change-device-name",
+        required=False,
+        is_flag=True,
+        default=False,
+        help=help_msg,
+    )
 
 DATE_FORMAT = "%Y-%m-%d"
 purge_date_option = click.option(
@@ -54,7 +56,7 @@ purge_date_option = click.option(
 
 @devices.command()
 @device_guid_argument
-@change_device_name_option
+@change_device_name_option("Prepend 'deactivated_<current_date>' to the name of the deactivated device.")
 @purge_date_option
 @sdk_options()
 def deactivate(state, device_guid, change_device_name, purge_date):
@@ -479,7 +481,7 @@ bulk.add_command(devices_generate_template)
 
 @bulk.command(name="deactivate")
 @read_csv_arg(headers=_bulk_device_activation_headers)
-@change_device_name_option
+@change_device_name_option("Prepend 'deactivated_<current_date>' to the name of any deactivated devices.")
 @purge_date_option
 @format_option
 @sdk_options()

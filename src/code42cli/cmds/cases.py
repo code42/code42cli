@@ -112,10 +112,10 @@ def update(state, case_number, name, subject, assignee, description, findings, s
 
 @cases.command("list")
 @click.option(
-    "--name", help="Filter by name of a case, supports partial name matches.",
+    "--name", help="Filter by name of a case. Supports partial name matches.",
 )
-@click.option("--subject", help="Filter by user UID of the subject of a case.")
-@click.option("--assignee", help="Filter by user UID of assignee.")
+@click.option("--subject", help="Filter by the user UID of the subject of a case.")
+@click.option("--assignee", help="Filter by the user UID of an assignee.")
 @click.option("--begin-create-time", **BEGIN_DATE_DICT)
 @click.option("--end-create-time", **END_DATE_DICT)
 @click.option("--begin-update-time", **BEGIN_DATE_DICT)
