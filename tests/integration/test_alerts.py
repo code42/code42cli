@@ -61,12 +61,8 @@ def test_alert_command_returns_success_return_code(command, command_runner):
 @pytest.mark.parametrize(
     "command,protocol",
     [
-        (
-            "code42 alerts send-to localhost:5140 -b '{}'".format(begin_date_str), "TCP"
-        ),
-        (
-            "code42 alerts send-to localhost:5140 -b '{}'".format(begin_date_str), "UDP"
-        )
+        ("code42 alerts send-to localhost:5140 -b '{}'".format(begin_date_str), "TCP"),
+        ("code42 alerts send-to localhost:5140 -b '{}'".format(begin_date_str), "UDP"),
     ],
 )
 def test_alerts_send_to(command, protocol):

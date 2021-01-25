@@ -1,6 +1,7 @@
-import pytest
 from datetime import datetime
 from datetime import timedelta
+
+import pytest
 from tests.integration import run_command
 from tests.integration.util import DataServer
 
@@ -14,11 +15,17 @@ begin_date_str = begin_date.strftime("%Y-%m-%d")
     "command,protocol",
     [
         (
-            "code42 security-data send-to localhost:5140 -b '{}'".format(begin_date_str), "TCP"
+            "code42 security-data send-to localhost:5140 -b '{}'".format(
+                begin_date_str
+            ),
+            "TCP",
         ),
         (
-            "code42 security-data send-to localhost:5140 -b '{}'".format(begin_date_str), "UDP"
-        )
+            "code42 security-data send-to localhost:5140 -b '{}'".format(
+                begin_date_str
+            ),
+            "UDP",
+        ),
     ],
 )
 def test_security_data_send_to(command, protocol):

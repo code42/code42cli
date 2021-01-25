@@ -33,12 +33,12 @@ def cleanup_after_validation(filename):
     return wrap
 
 
-class DataServer(object):
-    TCP_SERVER_COMMAND = 'ncat -l 5140'
-    UDP_SERVER_COMMAND = 'ncat -ul 5140'
+class DataServer:
+    TCP_SERVER_COMMAND = "ncat -l 5140"
+    UDP_SERVER_COMMAND = "ncat -ul 5140"
 
-    def __init__(self, protocol='TCP'):
-        if protocol.upper() == 'UDP':
+    def __init__(self, protocol="TCP"):
+        if protocol.upper() == "UDP":
             self.command = DataServer.UDP_SERVER_COMMAND
         else:
             self.command = DataServer.TCP_SERVER_COMMAND
