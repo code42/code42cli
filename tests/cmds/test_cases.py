@@ -88,7 +88,7 @@ def test_create_with_optional_fields_calls_create_with_expected_params(
     )
 
 
-def test_create_when_case_name_already_exists_echo_expected_message(
+def test_create_when_case_name_already_exists_echos_expected_message(
     mocker, runner, cli_state
 ):
     def side_effect(*args, **kwargs):
