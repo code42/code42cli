@@ -2,11 +2,8 @@ from datetime import datetime
 from datetime import timedelta
 
 import pytest
-<<<<<<< HEAD
-=======
 from tests.integration import run_command
 from tests.integration.util import DataServer
->>>>>>> use ncat command to create server
 
 
 begin_date = datetime.utcnow() - timedelta(days=20)
