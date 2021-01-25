@@ -58,7 +58,7 @@ purge_date_option = click.option(
 @devices.command()
 @device_guid_argument
 @change_device_name_option(
-    "Prepend 'deactivated_<current_date>' to the device if deactivation is successful."
+    "Prepend 'deactivated_<current_date>' to the name of the device if deactivation is successful."
 )
 @purge_date_option
 @sdk_options()
