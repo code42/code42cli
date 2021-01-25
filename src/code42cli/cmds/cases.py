@@ -44,7 +44,8 @@ def _get_cases_header():
         "status": "Status",
         "subject": "Subject",
         "createdAt": "Creation Time",
-        "updatedAt": "Last Updation Time",
+        "updatedAt": "Last Update Time",
+        "findings": "Findings"
     }
 
 
