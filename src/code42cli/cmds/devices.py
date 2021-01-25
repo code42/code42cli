@@ -485,7 +485,7 @@ bulk.add_command(devices_generate_template)
 @bulk.command(name="deactivate")
 @read_csv_arg(headers=_bulk_device_activation_headers)
 @change_device_name_option(
-    "Prepend 'deactivated_<current_date>' to the name of any deactivated devices."
+    "Prepend 'deactivated_<current_date>' to the name of any successfully deactivated devices."
 )
 @purge_date_option
 @format_option
