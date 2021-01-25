@@ -20,7 +20,7 @@ case_number_arg = click.argument("case-number", type=int)
 name_option = click.option("--name", help="Name of the case.",)
 assignee_option = click.option("--assignee", help="User UID of the assignee.")
 description_option = click.option("--description", help="Description of the case.")
-notes_option = click.option("--notes", help="Notes on the case.")
+findings_option = click.option("--findings", help="Findings on the case.")
 subject_option = click.option("--subject", help="User UID of a subject of the case.")
 status_option = click.option(
     "--status",
@@ -69,17 +69,17 @@ def cases(state):
 @click.argument("name")
 @assignee_option
 @description_option
-@notes_option
+@findings_option
 @subject_option
 @sdk_options()
-def create(state, name, subject, assignee, description, notes):
+def create(state, name, subject, assignee, description, findings):
     """Create a new case."""
     state.sdk.cases.create(
         name,
         subject=subject,
         assignee=assignee,
         description=description,
-        findings=notes,
+        findings=findings,
     )
 
 
@@ -88,11 +88,11 @@ def create(state, name, subject, assignee, description, notes):
 @name_option
 @assignee_option
 @description_option
-@notes_option
+@findings_option
 @subject_option
 @status_option
 @sdk_options()
-def update(state, case_number, name, subject, assignee, description, notes, status):
+def update(state, case_number, name, subject, assignee, description, findings, status):
     """Update case details for the given case."""
     state.sdk.cases.update(
         case_number,
@@ -100,7 +100,7 @@ def update(state, case_number, name, subject, assignee, description, notes, stat
         subject=subject,
         assignee=assignee,
         description=description,
-        findings=notes,
+        findings=findings,
         status=status,
     )
 
