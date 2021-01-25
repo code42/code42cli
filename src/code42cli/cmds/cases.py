@@ -19,18 +19,18 @@ case_number_arg = click.argument("case-number", type=int)
 case_number_option = click.option(
     "--case-number", type=int, help="The number assigned to the case.", required=True
 )
-name_option = click.option("--name", help="Name of the case.",)
-assignee_option = click.option("--assignee", help="User UID of the assignee.")
-description_option = click.option("--description", help="Description of the case.")
-findings_option = click.option("--findings", help="Findings on the case.")
-subject_option = click.option("--subject", help="User UID of a subject of the case.")
+name_option = click.option("--name", help="The name of the case.",)
+assignee_option = click.option("--assignee", help="The UID of the user assigned to the case.")
+description_option = click.option("--description", help="The description of the case.")
+findings_option = click.option("--findings", help="Any findings for the case.")
+subject_option = click.option("--subject", help="The user UID of the subject of the case.")
 status_option = click.option(
     "--status",
     help="Status of the case. `OPEN` or `CLOSED`.",
     type=click.Choice(CaseStatus.choices()),
 )
 file_event_id_option = click.option(
-    "--event-id", required=True, help="File event id associated to the case."
+    "--event-id", required=True, help="The file event ID associated to the case."
 )
 
 CASES_KEYWORD = "cases"
