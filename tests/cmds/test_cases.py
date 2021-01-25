@@ -10,15 +10,28 @@ from py42.response import Py42Response
 from code42cli.main import cli
 
 
-ALL_EVENTS = """{"events": [{"eventId": "0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_986472527798692818_971", "eventTimestamp": "2020-12-23T12:41:38.592Z"}]}"""
-
-ALL_CASES = """{"cases": [{"number": 3,"name": "test@test.test", "updatedAt": "2021-01-24T11:00:04.217878Z", "subject": "942897"}], "totalCount": 31}"""
-
-CASE_DETAILS = """{"number": 3, "name": "test@test.test"}"""
-
+ALL_EVENTS = """{
+  "events": [
+    {
+      "eventId": "0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_986472527798692818_971",
+      "eventTimestamp": "2020-12-23T12:41:38.592Z"
+    }
+  ]
+}"""
+ALL_CASES = """{
+  "cases": [
+    {
+      "number": 3,
+      "name": "test@test.test",
+      "updatedAt": "2021-01-24T11:00:04.217878Z",
+      "subject": "942897"
+    }
+  ],
+  "totalCount": 31
+}"""
+CASE_DETAILS = '{"number": 3, "name": "test@test.test"}'
 CASES_COMMAND = "cases"
 CASES_FILE_EVENTS_COMMAND = "cases file-events"
-
 MISSING_ARGUMENT_ERROR = "Missing argument '{}'."
 MISSING_NAME = MISSING_ARGUMENT_ERROR.format("NAME")
 MISSING_CASE_NUMBER = MISSING_ARGUMENT_ERROR.format("CASE_NUMBER")

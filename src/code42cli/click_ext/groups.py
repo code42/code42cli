@@ -3,6 +3,7 @@ import re
 from collections import OrderedDict
 
 import click
+from py42.exceptions import Py42CaseNameExistsError
 from py42.exceptions import Py42ForbiddenError
 from py42.exceptions import Py42HTTPError
 from py42.exceptions import Py42InvalidRuleOperationError
@@ -57,6 +58,7 @@ class ExceptionHandlingGroup(click.Group):
             Py42UserNotOnListError,
             Py42InvalidRuleOperationError,
             Py42LegalHoldNotFoundOrPermissionDeniedError,
+            Py42CaseNameExistsError,
         ) as err:
             self.logger.log_error(err)
             raise Code42CLIError(str(err))
