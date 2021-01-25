@@ -432,7 +432,10 @@ def test_deactivate_fails_if_device_does_not_exist(
         cli, ["devices", "deactivate", TEST_DEVICE_GUID], obj=cli_state
     )
     assert result.exit_code == 1
-    assert "The device with GUID '{}' was not found.".format(TEST_DEVICE_GUID) in result.output
+    assert (
+        "The device with GUID '{}' was not found.".format(TEST_DEVICE_GUID)
+        in result.output
+    )
 
 
 def test_deactivate_fails_if_device_is_on_legal_hold(
@@ -442,7 +445,10 @@ def test_deactivate_fails_if_device_is_on_legal_hold(
         cli, ["devices", "deactivate", TEST_DEVICE_GUID], obj=cli_state
     )
     assert result.exit_code == 1
-    assert "The device with GUID '{}' is in legal hold.".format(TEST_DEVICE_GUID) in result.output
+    assert (
+        "The device with GUID '{}' is in legal hold.".format(TEST_DEVICE_GUID)
+        in result.output
+    )
 
 
 def test_deactivate_fails_if_device_deactivation_forbidden(
@@ -452,7 +458,10 @@ def test_deactivate_fails_if_device_deactivation_forbidden(
         cli, ["devices", "deactivate", TEST_DEVICE_GUID], obj=cli_state
     )
     assert result.exit_code == 1
-    assert "Unable to deactivate the device with GUID '{}'.".format(TEST_DEVICE_GUID) in result.output
+    assert (
+        "Unable to deactivate the device with GUID '{}'.".format(TEST_DEVICE_GUID)
+        in result.output
+    )
 
 
 def test_reactivate_reactivates_device(
@@ -479,7 +488,10 @@ def test_reactivate_fails_if_device_reactivation_forbidden(
         cli, ["devices", "reactivate", TEST_DEVICE_GUID], obj=cli_state
     )
     assert result.exit_code == 1
-    assert f"Unable to reactivate the device with GUID '{TEST_DEVICE_GUID}'." in result.output
+    assert (
+        f"Unable to reactivate the device with GUID '{TEST_DEVICE_GUID}'."
+        in result.output
+    )
 
 
 def test_show_prints_device_info(runner, cli_state, backupusage_success):

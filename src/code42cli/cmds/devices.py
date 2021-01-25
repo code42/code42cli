@@ -74,7 +74,9 @@ def _deactivate_device(sdk, device_guid, change_device_name, purge_date):
     try:
         device = _change_device_activation(sdk, device_guid, "deactivate")
     except exceptions.Py42BadRequestError:
-        raise Code42CLIError("The device with GUID '{}' is in legal hold.".format(device_guid))
+        raise Code42CLIError(
+            "The device with GUID '{}' is in legal hold.".format(device_guid)
+        )
     if purge_date:
         _update_cold_storage_purge_date(sdk, device_guid, purge_date)
     if change_device_name and not device.data["name"].startswith("deactivated_"):
@@ -102,9 +104,13 @@ def _change_device_activation(sdk, device_guid, cmd_str):
             sdk.devices.deactivate(device_id)
         return device
     except exceptions.Py42NotFoundError:
-        raise Code42CLIError("The device with GUID '{}' was not found.".format(device_guid))
+        raise Code42CLIError(
+            "The device with GUID '{}' was not found.".format(device_guid)
+        )
     except exceptions.Py42ForbiddenError:
-        raise Code42CLIError("Unable to {} the device with GUID '{}'.".format(cmd_str, device_guid))
+        raise Code42CLIError(
+            "Unable to {} the device with GUID '{}'.".format(cmd_str, device_guid)
+        )
 
 
 def _verify_guid_type(device_guid):
