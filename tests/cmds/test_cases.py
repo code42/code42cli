@@ -10,10 +10,7 @@ from py42.response import Py42Response
 from code42cli.main import cli
 
 
-EVENT_DETAILS = """{"eventId": "0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_986472527798692818_971"}
-"""
-
-ALL_EVENTS = """{"events": [{"eventId": "0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_986472527798692818_971"}]}"""
+ALL_EVENTS = """{"events": [{"eventId": "0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_986472527798692818_971", "eventTimestamp": "2020-12-23T12:41:38.592Z"}]}"""
 
 ALL_CASES = """{"cases": [{"number": 3,"name": "test@test.test"}], "totalCount": 31}"""
 
@@ -250,6 +247,7 @@ def test_events_list_returns_expected_data(runner, cli_state):
         "0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_986472527798692818_971"
         in result.output
     )
+    assert "2020-12-23T12:41:38.592Z" in result.output
 
 
 @pytest.mark.parametrize(
