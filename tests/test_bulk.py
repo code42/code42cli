@@ -1,7 +1,6 @@
 from collections import OrderedDict
 
 import pytest
-from click import Choice
 
 from code42cli import errors
 from code42cli import PRODUCT_NAME
