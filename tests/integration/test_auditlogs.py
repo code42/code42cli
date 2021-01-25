@@ -5,6 +5,7 @@ import pytest
 <<<<<<< HEAD
 =======
 from tests.integration import run_command
+from tests.integration.util import DataServer
 
 >>>>>>> intermittent commit
 
@@ -18,18 +19,20 @@ end_date_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "command",
+    "command,protocol",
     [
         (
-            "code42 audit-logs send-to localhost:5140 -p TCP -b '{}'".format(
-                begin_date_str
-            )
+            "code42 audit-logs send-to localhost:5140 -b '{}'".format(begin_date_str), "TCP"
+        ),
+        (
+            "code42 audit-logs send-to localhost:5140 -b '{}'".format(begin_date_str), "UDP"
         )
     ],
 )
-def test_auditlogs_send_to(command):
-    
-    exit_status, response = run_command(command)
+def test_auditlogs_send_to(command, protocol):
+    with DataServer(protocol=protocol):
+        exit_status, response = run_command(command + " -p {}".format(protocol))
+
     assert exit_status == 0
 
 
