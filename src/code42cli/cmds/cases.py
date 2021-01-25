@@ -42,7 +42,9 @@ def _get_cases_header():
         "name": "Name",
         "assignee": "Assignee",
         "status": "Status",
+        "subject": "Subject",
         "createdAt": "Creation Time",
+        "updatedAt": "Last Updation Time",
     }
 
 
