@@ -43,14 +43,13 @@ def _get_cases_header():
         "assignee": "Assignee",
         "status": "Status",
         "createdAt": "Creation Time",
-        "findings": "Notes",
     }
 
 
 def _get_events_header():
     return {
         "eventId": "Event Id",
-        "eventTimestatmp": "Timestamp",
+        "eventTimestamp": "Timestamp",
         "filePath": "Path",
         "fileName": "File",
         "exposure": "Exposure",
@@ -172,7 +171,7 @@ def _display_file_events(events):
 @format_option
 def show(state, case_number, format, include_file_events):
     """Show case details."""
-    formatter = OutputFormatter(format, _get_cases_header())
+    formatter = OutputFormatter(format)
     try:
         response = state.sdk.cases.get(case_number)
         formatter.echo_formatted_list([response.data])
