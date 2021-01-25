@@ -35,7 +35,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - `code42 cases file-events` commands:
     - `add` to add an event to a case.
-    - `remove` to remove an event from the case.
+    - `remove` to remove an event from a case.
     - `list` to view all events associated with a case.
 
 ### Changed
