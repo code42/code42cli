@@ -20,6 +20,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `devices list-backup-sets` to retrieve detailed info about device backup sets.
     - `devices bulk deactivate` to deactivate a list of devices.
     - `devices bulk reactivate` to reactivate a list of devices.
+    - `devices bulk generate-template` to create a blank CSV file for bulk commands.
 
 - `code42 departing-employee list` command.
 
