@@ -35,7 +35,7 @@ def sdk(mocker):
     return mocker.MagicMock(spec=SDKClient)
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_42(mocker):
     return mocker.patch("py42.sdk.from_local_account")
 

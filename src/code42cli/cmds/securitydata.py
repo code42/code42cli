@@ -316,7 +316,10 @@ def send_to(
     certs,
     **kwargs,
 ):
-    """Send events to the given server address."""
+    """Send events to the given server address.
+
+    HOSTNAME format: address:port where port is optional and defaults to 514.
+    """
     logger = get_logger_for_server(hostname, protocol, format, certs)
     cursor = _get_cursor(state, use_checkpoint)
     handlers = ext.create_send_to_handlers(

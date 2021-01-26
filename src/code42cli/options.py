@@ -164,3 +164,20 @@ def checkpoint_option(term, **kwargs):
     defaults = dict(help=f"Only get {term} that were not previously retrieved.")
     defaults.update(kwargs)
     return click.option("-c", "--use-checkpoint", **defaults)
+
+
+def set_begin_default_dict(term):
+    return dict(
+        type=MagicDate(rounding_func=round_datetime_to_day_start),
+        help=f"The beginning of the date range in which to look for {term}. {MagicDate.HELP_TEXT}",
+        callback=lambda ctx, param, arg: convert_datetime_to_timestamp(arg),
+    )
+
+
+def set_end_default_dict(term):
+    return dict(
+        type=MagicDate(rounding_func=round_datetime_to_day_end),
+        help=f"The end of the date range in which to look for {term}, argument format options are "
+        "the same as `--begin`.",
+        callback=lambda ctx, param, arg: convert_datetime_to_timestamp(arg),
+    )

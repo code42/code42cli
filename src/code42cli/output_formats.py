@@ -90,17 +90,35 @@ class DataFrameOutputFormatter:
             self._format_func = DataFrame.to_csv
         elif output_format == OutputFormat.RAW:
             self._format_func = DataFrame.to_json
-            self._output_args.update({"orient": "records", "lines": False})
+            self._output_args.update(
+                {
+                    "orient": "records",
+                    "lines": False,
+                    "index": True,
+                    "default_handler": str,
+                }
+            )
         elif output_format == OutputFormat.JSON:
             self._format_func = DataFrame.to_json
-            self._output_args.update({"orient": "records", "lines": True})
+            self._output_args.update(
+                {
+                    "orient": "records",
+                    "lines": True,
+                    "index": True,
+                    "default_handler": str,
+                }
+            )
 
     def _format_output(self, output, *args, **kwargs):
         self._output_args.update(kwargs)
         return self._format_func(output, *args, **self._output_args)
 
     def echo_formatted_dataframe(self, output, *args, **kwargs):
-        click.echo_via_pager(self._format_output(output, *args, **kwargs))
+        str_output = self._format_output(output, *args, **kwargs)
+        if len(output) <= 10:
+            click.echo(str_output)
+        else:
+            click.echo_via_pager(str_output)
 
 
 def to_csv(output):
