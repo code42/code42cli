@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-## 1.2.0 - 2021-01-25
+## Unreleased
 
 ### Added
 
@@ -19,6 +19,10 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     for more securely transporting data.
 
 - `--certs` option for `send-to` commands when using `--protocol TLS`.
+
+## 1.2.0 - 2021-01-25
+
+### Added
 
 - The `devices` command is added. Included are:
     - `devices deactivate` to deactivate a single device.
