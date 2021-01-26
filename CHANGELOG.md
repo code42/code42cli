@@ -12,13 +12,13 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
-- New choice `TLS` for `--protocol` option used by `send-to` commands:
+- New choice `TLS-TCP` for `--protocol` option used by `send-to` commands:
     - `code42 security-data send-to`
     - `code42 alerts send-to`
     - `code42 audit-logs send-to`
     for more securely transporting data.
 
-- `--certs` option for `send-to` commands when using `--protocol TLS`.
+- `--certs` option for `send-to` commands when using `--protocol TLS-TCP`.
 
 ## 1.2.0 - 2021-01-25
 
