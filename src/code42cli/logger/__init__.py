@@ -65,15 +65,8 @@ def get_logger_for_server(hostname, protocol, output_format, certs):
         hostname = url_parts[0]
         port = url_parts[1] or 514
         if not logger_has_handlers(logger):
-            try:
-                handler = NoPrioritySysLogHandler(hostname, port, protocol, certs)
-                handler.connect_socket()
-            except Exception as e:
-                raise Exception(
-                    "Unable to connect to {}. Failed with error: {}.".format(
-                        hostname, str(e)
-                    )
-                )
+            handler = NoPrioritySysLogHandler(hostname, port, protocol, certs)
+            handler.connect_socket()
             return _init_logger(logger, handler, output_format)
     return logger
 

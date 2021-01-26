@@ -5,10 +5,10 @@ import click
 
 import code42cli.options as opt
 from code42cli.click_ext.groups import OrderedGroup
+from code42cli.cmds.search import try_get_logger_for_server
 from code42cli.cmds.search.cursor_store import AuditLogCursorStore
 from code42cli.cmds.search.options import server_options
 from code42cli.date_helper import convert_datetime_to_timestamp
-from code42cli.logger import get_logger_for_server
 from code42cli.options import checkpoint_option
 from code42cli.options import format_option
 from code42cli.options import sdk_options
@@ -186,7 +186,7 @@ def send_to(
 
     HOSTNAME format: address:port where port is optional and defaults to 514.
     """
-    logger = get_logger_for_server(hostname, protocol, OutputFormat.RAW, certs)
+    logger = try_get_logger_for_server(hostname, protocol, OutputFormat.RAW, certs)
     cursor = _get_audit_log_cursor_store(state.profile.name)
     if use_checkpoint:
         checkpoint_name = use_checkpoint

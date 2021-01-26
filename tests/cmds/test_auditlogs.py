@@ -100,7 +100,7 @@ def date_str():
 def send_to_logger(mocker):
     mock_logger = mocker.MagicMock(spec=Logger)
     mocker.patch(
-        "code42cli.cmds.auditlogs.get_logger_for_server", return_value=mock_logger
+        "code42cli.cmds.auditlogs.try_get_logger_for_server", return_value=mock_logger
     )
     return mock_logger
 

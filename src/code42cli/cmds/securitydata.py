@@ -13,13 +13,13 @@ import code42cli.errors as errors
 import code42cli.options as opt
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
+from code42cli.cmds.search import try_get_logger_for_server
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.cmds.search.options import send_to_format_options
 from code42cli.cmds.search.options import server_options
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import limit_date_range
-from code42cli.logger import get_logger_for_server
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.output_formats import FileEventsOutputFormat
@@ -320,7 +320,7 @@ def send_to(
 
     HOSTNAME format: address:port where port is optional and defaults to 514.
     """
-    logger = get_logger_for_server(hostname, protocol, format, certs)
+    logger = try_get_logger_for_server(hostname, protocol, format, certs)
     cursor = _get_cursor(state, use_checkpoint)
     handlers = ext.create_send_to_handlers(
         state.sdk, FileEventExtractor, cursor, use_checkpoint, logger

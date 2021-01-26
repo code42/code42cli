@@ -10,12 +10,12 @@ import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 import code42cli.options as opt
+from code42cli.cmds.search import try_get_logger_for_server
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.cmds.search.options import server_options
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import limit_date_range
-from code42cli.logger import get_logger_for_server
 from code42cli.options import format_option
 from code42cli.output_formats import JsonOutputFormat
 from code42cli.output_formats import OutputFormatter
@@ -278,7 +278,7 @@ def send_to(
 
     HOSTNAME format: address:port where port is optional and defaults to 514.
     """
-    logger = get_logger_for_server(hostname, protocol, format, certs)
+    logger = try_get_logger_for_server(hostname, protocol, format, certs)
     cursor = _get_cursor(cli_state, use_checkpoint)
     handlers = ext.create_send_to_handlers(
         cli_state.sdk, AlertExtractor, cursor, use_checkpoint, logger,
