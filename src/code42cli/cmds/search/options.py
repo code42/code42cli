@@ -157,9 +157,16 @@ def server_options(f):
     certs_option = click.option(
         "--certs", type=str, help="A CA certificates-chain file for the TLS protocol."
     )
+    ignore_cert_validation = click.option(
+        "--ignore-cert-validation",
+        help="Set to skip CA certificate validation.",
+        is_flag=True,
+        cls=incompatible_with(["certs"]),
+    )
     f = hostname_arg(f)
     f = protocol_option(f)
     f = certs_option(f)
+    f = ignore_cert_validation(f)
     return f
 
 

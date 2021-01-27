@@ -19,35 +19,50 @@ class NoPrioritySysLogHandler(SysLogHandler):
         hostname: The hostname of the syslog server to send log messages to.
         port: The port of the syslog server to send log messages to.
         protocol: The protocol over which to submit syslog messages. Accepts TCP, UDP, or TLS.
+        certs: Certs to specify when using TLS-TCP for the `protocol` argument.
     """
 
     def __init__(self, hostname, port, protocol, certs):
         self._hostname = hostname
         self._port = port
+        self._protocol = protocol
         self._certs = certs
         self.address = (hostname, port)
         logging.Handler.__init__(self)
-        self._use_insecure = protocol != ServerProtocol.TLS_TCP
         self.socktype = _try_get_socket_type_from_protocol(protocol)
         self.socket = None
 
-    def connect_socket(self):
-        """Call to initialize the socket. If using TCP/TLS, it will also establish the connection."""
-        if not self.socket:
-            self.socket = self._create_socket(
-                self._hostname, self._port, self._use_insecure, self._certs
-            )
+    @property
+    def _wrap_socket(self):
+        return self._protocol == ServerProtocol.TLS_TCP
 
-    def _create_socket(self, hostname, port, use_insecure, certs):
+    def connect_socket(self):
+        """Call to initialize the socket. If using TCP/TLS, it will also establish the connection.
+        """
+        if not self.socket:
+            self.socket = self._create_socket(self._hostname, self._port, self._certs)
+
+    def _create_socket(self, hostname, port, certs):
         socket_info = self._get_socket_address_info(hostname, port)
-        sock = _try_create_socket_from_address_info(socket_info[0], use_insecure, certs)
-        return sock
+        address_family, sock_type, proto, _, sa = socket_info
+        sock = None
+        try:
+            sock = socket.socket(address_family, sock_type, proto)
+            if self._wrap_socket:
+                sock = _wrap_socket_for_ssl(sock, certs, hostname)
+            if sock_type == socket.SOCK_STREAM:
+                sock = _connect_socket(sock, sa)
+            return sock
+        except Exception as exc:
+            if sock is not None:
+                sock.close()
+            raise exc
 
     def _get_socket_address_info(self, hostname, port):
         info = socket.getaddrinfo(hostname, port, 0, self.socktype)
         if not info:
             raise OSError("getaddrinfo() returns an empty list")
-        return info
+        return info[0]
 
     def emit(self, record):
         try:
@@ -65,42 +80,17 @@ class NoPrioritySysLogHandler(SysLogHandler):
             self.socket.sendall(msg)
 
     def close(self):
-        if not self._use_insecure:
+        if self._wrap_socket:
             self.socket.unwrap()
         self.socket.close()
         logging.Handler.close(self)
 
 
-def _try_create_socket_from_address_info(info, use_insecure, certs):
-    address_family, sock_type, proto, _, sa = info
-    sock = None
-    try:
-        sock = _create_socket_from_uncoupled_address_info(
-            address_family, sock_type, proto, use_insecure, certs, sa
-        )
-    except Exception as exc:
-        if sock is not None:
-            sock.close()
-        raise exc
-
-    return sock
-
-
-def _create_socket_from_uncoupled_address_info(
-    address_family, sock_type, proto, use_insecure, certs, sa
-):
-    sock = socket.socket(address_family, sock_type, proto)
-    if not use_insecure:
-        sock = _wrap_socket_for_ssl(sock, certs)
-    if sock_type == socket.SOCK_STREAM:
-        sock = _connect_socket(sock, sa)
-    return sock
-
-
-def _wrap_socket_for_ssl(sock, certs):
-    certs = certs or None
-    cert_reqs = ssl.CERT_REQUIRED if certs else ssl.CERT_NONE
-    return ssl.wrap_socket(sock, ca_certs=certs, cert_reqs=cert_reqs)
+def _wrap_socket_for_ssl(sock, certs, hostname):
+    context = ssl.create_default_context(cafile=certs)
+    if certs and certs.lower() == "ignore":
+        context.verify_mode = ssl.CERT_NONE
+    return context.wrap_socket(sock, server_hostname=hostname)
 
 
 def _connect_socket(sock, sa):
@@ -126,7 +116,7 @@ def _get_socket_type_from_protocol(protocol):
 
 
 def _raise_socket_type_error(protocol):
-    msg = "Could not determine socket type. Expected one of {}, but got {}".format(
+    msg = "Could not determine socket type. Expected one of {}, but got {}.".format(
         list(ServerProtocol()), protocol
     )
     raise ValueError(msg)

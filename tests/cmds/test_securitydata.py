@@ -174,6 +174,11 @@ def begin_option(mocker):
     return mock
 
 
+@pytest.fixture
+def send_to_logger_factory(mocker):
+    return mocker.patch("code42cli.cmds.securitydata.try_get_logger_for_server")
+
+
 @search_and_send_to_test
 def test_search_and_send_to_when_advanced_query_passed_as_json_string_builds_expected_query(
     runner, cli_state, file_event_extractor, command
@@ -861,6 +866,71 @@ def test_send_to_fails_when_given_unknown_protocol(cli_state, runner):
         obj=cli_state,
     )
     assert res.exit_code
+
+
+def test_send_to_certs_and_ignore_cert_validation_args_are_incompatible(
+    cli_state, runner
+):
+    res = runner.invoke(
+        cli,
+        [
+            "security-data",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            "TLS-TCP",
+            "--certs",
+            "certs/file",
+            "--ignore-cert-validation",
+        ],
+        obj=cli_state,
+    )
+    assert "Error: --ignore-cert-validation can't be used with: --certs" in res.output
+
+
+def test_send_to_creates_expected_logger(cli_state, runner, send_to_logger_factory):
+    runner.invoke(
+        cli,
+        [
+            "security-data",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            "TLS-TCP",
+            "--certs",
+            "certs/file",
+        ],
+        obj=cli_state,
+    )
+    send_to_logger_factory.assert_called_once_with(
+        "0.0.0.0", "TLS-TCP", "RAW-JSON", "certs/file"
+    )
+
+
+def test_send_to_when_given_ignore_cert_validation_uses_certs_equal_to_ignore_str(
+    cli_state, runner, send_to_logger_factory
+):
+    runner.invoke(
+        cli,
+        [
+            "security-data",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            "TLS-TCP",
+            "--ignore-cert-validation",
+        ],
+        obj=cli_state,
+    )
+    send_to_logger_factory.assert_called_once_with(
+        "0.0.0.0", "TLS-TCP", "RAW-JSON", "ignore"
+    )
 
 
 def test_saved_search_list_calls_get_method(runner, cli_state):

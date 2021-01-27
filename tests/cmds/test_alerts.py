@@ -245,6 +245,11 @@ def alert_extract_func(mocker):
     return mocker.patch("{}.cmds.alerts._extract".format(PRODUCT_NAME))
 
 
+@pytest.fixture
+def send_to_logger_factory(mocker):
+    return mocker.patch("code42cli.cmds.alerts.try_get_logger_for_server")
+
+
 @search_and_send_to_test
 def test_search_and_send_to_when_advanced_query_passed_as_json_string_builds_expected_query(
     cli_state, alert_extractor, runner, command
@@ -710,13 +715,78 @@ def test_send_to_allows_protocol_arg(cli_state, runner, protocol):
     assert res.exit_code == 0
 
 
-def test_send_to_fails_when_given_unknown_protocol(cli_state, runner):
+def test_send_to_when_given_unknown_protocol_fails(cli_state, runner):
     res = runner.invoke(
         cli,
         ["alerts", "send-to", "0.0.0.0", "--begin", "1d", "--protocol", "ATM"],
         obj=cli_state,
     )
     assert res.exit_code
+
+
+def test_send_to_certs_and_ignore_cert_validation_args_are_incompatible(
+    cli_state, runner
+):
+    res = runner.invoke(
+        cli,
+        [
+            "alerts",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            "TLS-TCP",
+            "--certs",
+            "certs/file",
+            "--ignore-cert-validation",
+        ],
+        obj=cli_state,
+    )
+    assert "Error: --ignore-cert-validation can't be used with: --certs" in res.output
+
+
+def test_send_to_creates_expected_logger(cli_state, runner, send_to_logger_factory):
+    runner.invoke(
+        cli,
+        [
+            "alerts",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            "TLS-TCP",
+            "--certs",
+            "certs/file",
+        ],
+        obj=cli_state,
+    )
+    send_to_logger_factory.assert_called_once_with(
+        "0.0.0.0", "TLS-TCP", "JSON", "certs/file"
+    )
+
+
+def test_send_to_when_given_ignore_cert_validation_uses_certs_equal_to_ignore_str(
+    cli_state, runner, send_to_logger_factory
+):
+    runner.invoke(
+        cli,
+        [
+            "alerts",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            "TLS-TCP",
+            "--ignore-cert-validation",
+        ],
+        obj=cli_state,
+    )
+    send_to_logger_factory.assert_called_once_with(
+        "0.0.0.0", "TLS-TCP", "JSON", "ignore"
+    )
 
 
 def test_get_alert_details_batches_results_according_to_batch_size(sdk):

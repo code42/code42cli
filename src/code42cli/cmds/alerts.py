@@ -272,12 +272,15 @@ def send_to(
     use_checkpoint,
     or_query,
     certs,
+    ignore_cert_validation,
     **kwargs
 ):
     """Send alerts to the given server address.
 
     HOSTNAME format: address:port where port is optional and defaults to 514.
     """
+    if ignore_cert_validation:
+        certs = "ignore"
     logger = try_get_logger_for_server(hostname, protocol, format, certs)
     cursor = _get_cursor(cli_state, use_checkpoint)
     handlers = ext.create_send_to_handlers(

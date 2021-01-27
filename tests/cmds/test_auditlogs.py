@@ -97,11 +97,14 @@ def date_str():
 
 
 @pytest.fixture
-def send_to_logger(mocker):
+def send_to_logger_factory(mocker):
+    return mocker.patch("code42cli.cmds.auditlogs.try_get_logger_for_server")
+
+
+@pytest.fixture
+def send_to_logger(mocker, send_to_logger_factory):
     mock_logger = mocker.MagicMock(spec=Logger)
-    mocker.patch(
-        "code42cli.cmds.auditlogs.try_get_logger_for_server", return_value=mock_logger
-    )
+    send_to_logger_factory.return_value = mock_logger
     return mock_logger
 
 
@@ -240,6 +243,49 @@ def test_send_to_makes_expected_call_count_to_the_logger_method(
     assert send_to_logger.info.call_count == 4
 
 
+def test_send_to_creates_expected_logger(cli_state, runner, send_to_logger_factory):
+    runner.invoke(
+        cli,
+        [
+            "audit-logs",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            "TLS-TCP",
+            "--certs",
+            "certs/file",
+        ],
+        obj=cli_state,
+    )
+    send_to_logger_factory.assert_called_once_with(
+        "0.0.0.0", "TLS-TCP", "RAW-JSON", "certs/file"
+    )
+
+
+def test_send_to_when_given_ignore_cert_validation_uses_certs_equal_to_ignore_str(
+    cli_state, runner, send_to_logger_factory
+):
+    runner.invoke(
+        cli,
+        [
+            "audit-logs",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            "TLS-TCP",
+            "--ignore-cert-validation",
+        ],
+        obj=cli_state,
+    )
+    send_to_logger_factory.assert_called_once_with(
+        "0.0.0.0", "TLS-TCP", "RAW-JSON", "ignore"
+    )
+
+
 def test_send_to_emits_events_in_chronological_order(
     cli_state, runner, send_to_logger, test_audit_log_response
 ):
@@ -352,13 +398,35 @@ def test_send_to_allows_protocol_arg(cli_state, runner, protocol):
     assert res.exit_code == 0
 
 
-def test_send_to_fails_when_given_unknown_protocol(cli_state, runner):
+def test_send_when_given_unknown_protocol_fails(cli_state, runner):
     res = runner.invoke(
         cli,
         ["audit-logs", "send-to", "0.0.0.0", "--begin", "1d", "--protocol", "ATM"],
         obj=cli_state,
     )
     assert res.exit_code
+
+
+def test_send_to_certs_and_ignore_cert_validation_args_are_incompatible(
+    cli_state, runner
+):
+    res = runner.invoke(
+        cli,
+        [
+            "audit-logs",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            "TLS-TCP",
+            "--certs",
+            "certs/file",
+            "--ignore-cert-validation",
+        ],
+        obj=cli_state,
+    )
+    assert "Error: --ignore-cert-validation can't be used with: --certs" in res.output
 
 
 def test_audit_log_parse_timestamp_handles_possible_strings():

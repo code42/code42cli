@@ -181,11 +181,14 @@ def send_to(
     affected_username,
     use_checkpoint,
     certs,
+    ignore_cert_validation,
 ):
     """Send audit logs to the given server address in JSON format.
 
     HOSTNAME format: address:port where port is optional and defaults to 514.
     """
+    if ignore_cert_validation:
+        certs = "ignore"
     logger = try_get_logger_for_server(hostname, protocol, OutputFormat.RAW, certs)
     cursor = _get_audit_log_cursor_store(state.profile.name)
     if use_checkpoint:
