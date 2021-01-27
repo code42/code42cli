@@ -1,11 +1,15 @@
 from datetime import datetime
 from datetime import timedelta
+from shlex import split as split_command
 
 import pytest
-from tests.integration import run_command
+from tests.integration.util import assert_test
 from tests.integration.util import DataServer
 
-SEARCH_COMMAND = "code42 audit-logs search"
+from code42cli.main import cli
+
+
+SEARCH_COMMAND = "audit-logs search"
 BASE_COMMAND = "{} -b".format(SEARCH_COMMAND)
 begin_date = datetime.utcnow() - timedelta(days=2)
 begin_date_str = begin_date.strftime("%Y-%m-%d %H:%M:%S")
@@ -18,22 +22,24 @@ end_date_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
     "command,protocol",
     [
         (
-            "code42 audit-logs send-to localhost:5140 -b '{}'".format(begin_date_str),
+            "audit-logs send-to localhost:5140 -p TCP -b '{}'".format(begin_date_str),
             "TCP",
         ),
         (
-            "code42 audit-logs send-to localhost:5140 -b '{}'".format(begin_date_str),
+            "audit-logs send-to localhost:5140 -p UDP -b '{}'".format(begin_date_str),
             "UDP",
         ),
     ],
 )
-def test_auditlogs_send_to(command, protocol):
+def test_auditlogs_send_to(runner, integration_test_profile, command, protocol):
     with DataServer(protocol=protocol):
-        exit_status, response = run_command(command + " -p {}".format(protocol))
+        result = runner.invoke(
+            cli, split_command(command), obj=integration_test_profile
+        )
+    assert result.exit_code == 0
 
-    assert exit_status == 0
 
-
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "command",
     [
@@ -41,9 +47,7 @@ def test_auditlogs_send_to(command, protocol):
         ("{} '{}' -e '{}'".format(BASE_COMMAND, begin_date_str, end_date_str)),
         ("{} '{}' --end '{}'".format(BASE_COMMAND, begin_date_str, end_date_str)),
         ("{} '{}' --event-type '{}'".format(BASE_COMMAND, begin_date_str, "test")),
-        ("{} '{}' --username '{}'".format(BASE_COMMAND, begin_date_str, "test")),
-        ("{} '{}' --user-id '{}'".format(BASE_COMMAND, begin_date_str, "123")),
-        ("{} '{}' --user-ip '{}'".format(BASE_COMMAND, begin_date_str, "0.0.0.0")),
+        ("{} '{}' --actor-ip '{}'".format(BASE_COMMAND, begin_date_str, "0.0.0.0")),
         ("{} '{}' --affected-user-id '{}'".format(BASE_COMMAND, begin_date_str, "123")),
         (
             "{} '{}' --affected-username '{}'".format(
@@ -63,6 +67,7 @@ def test_auditlogs_send_to(command, protocol):
         ("{} '{}' --debug".format(BASE_COMMAND, begin_date_str)),
     ],
 )
-def test_auditlogs_search_command_returns_success_return_code(command, command_runner):
-    return_code, response = command_runner(command)
-    assert return_code == 0
+def test_auditlogs_search_command_returns_success_return_code(
+    runner, integration_test_profile, command, command_runner
+):
+    assert_test(runner, integration_test_profile, command)

@@ -1,6 +1,7 @@
 import pytest
+from tests.integration.util import assert_test
 
-LEGAL_HOLD_COMMAND = "code42 legal-hold"
+LEGAL_HOLD_COMMAND = "legal-hold"
 
 
 @pytest.mark.integration
@@ -19,6 +20,5 @@ LEGAL_HOLD_COMMAND = "code42 legal-hold"
         "{} list --format RAW-JSON".format(LEGAL_HOLD_COMMAND),
     ],
 )
-def test_alert_rules_command_returns_success_return_code(command, command_runner):
-    return_code, response = command_runner(command)
-    assert return_code == 0
+def test_alert_rules_command_returns_success_return_code(runner, integration_test_profile, command):
+    assert_test(runner, integration_test_profile, command)

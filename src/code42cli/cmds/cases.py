@@ -1,6 +1,5 @@
 import json
 import os
-from pprint import pformat
 
 import click
 from py42.clients.cases import CaseStatus
@@ -17,20 +16,26 @@ from code42cli.output_formats import OutputFormatter
 
 
 case_number_arg = click.argument("case-number", type=int)
-name_option = click.option("--name", help="Name of the case.",)
-assignee_option = click.option("--assignee", help="User UID of the assignee.")
-description_option = click.option("--description", help="Description of the case.")
-notes_option = click.option("--notes", help="Notes on the case.")
-subject_option = click.option("--subject", help="User UID of a subject of the case.")
+case_number_option = click.option(
+    "--case-number", type=int, help="The number assigned to the case.", required=True
+)
+name_option = click.option("--name", help="The name of the case.",)
+assignee_option = click.option(
+    "--assignee", help="The UID of the user to assign to the case."
+)
+description_option = click.option("--description", help="The description of the case.")
+findings_option = click.option("--findings", help="Any findings for the case.")
+subject_option = click.option(
+    "--subject", help="The user UID of the subject of the case."
+)
 status_option = click.option(
     "--status",
     help="Status of the case. `OPEN` or `CLOSED`.",
     type=click.Choice(CaseStatus.choices()),
 )
 file_event_id_option = click.option(
-    "--event-id", required=True, help="File event id associated to the case."
+    "--event-id", required=True, help="The file event ID associated with the case."
 )
-
 CASES_KEYWORD = "cases"
 BEGIN_DATE_DICT = set_begin_default_dict(CASES_KEYWORD)
 END_DATE_DICT = set_end_default_dict(CASES_KEYWORD)
@@ -42,15 +47,16 @@ def _get_cases_header():
         "name": "Name",
         "assignee": "Assignee",
         "status": "Status",
+        "subject": "Subject",
         "createdAt": "Creation Time",
-        "findings": "Notes",
+        "updatedAt": "Last Update Time",
     }
 
 
 def _get_events_header():
     return {
         "eventId": "Event Id",
-        "eventTimestatmp": "Timestamp",
+        "eventTimestamp": "Timestamp",
         "filePath": "Path",
         "fileName": "File",
         "exposure": "Exposure",
@@ -68,17 +74,17 @@ def cases(state):
 @click.argument("name")
 @assignee_option
 @description_option
-@notes_option
+@findings_option
 @subject_option
 @sdk_options()
-def create(state, name, subject, assignee, description, notes):
+def create(state, name, subject, assignee, description, findings):
     """Create a new case."""
     state.sdk.cases.create(
         name,
         subject=subject,
         assignee=assignee,
         description=description,
-        findings=notes,
+        findings=findings,
     )
 
 
@@ -87,11 +93,11 @@ def create(state, name, subject, assignee, description, notes):
 @name_option
 @assignee_option
 @description_option
-@notes_option
+@findings_option
 @subject_option
 @status_option
 @sdk_options()
-def update(state, case_number, name, subject, assignee, description, notes, status):
+def update(state, case_number, name, subject, assignee, description, findings, status):
     """Update case details for the given case."""
     state.sdk.cases.update(
         case_number,
@@ -99,17 +105,17 @@ def update(state, case_number, name, subject, assignee, description, notes, stat
         subject=subject,
         assignee=assignee,
         description=description,
-        findings=notes,
+        findings=findings,
         status=status,
     )
 
 
 @cases.command("list")
 @click.option(
-    "--name", help="Filter by name of a case, supports partial name matches.",
+    "--name", help="Filter by name of a case. Supports partial name matches.",
 )
-@click.option("--subject", help="Filter by user UID of the subject of a case.")
-@click.option("--assignee", help="Filter by user UID of assignee.")
+@click.option("--subject", help="Filter by the user UID of the subject of a case.")
+@click.option("--assignee", help="Filter by the user UID of an assignee.")
 @click.option("--begin-create-time", **BEGIN_DATE_DICT)
 @click.option("--end-create-time", **END_DATE_DICT)
 @click.option("--begin-update-time", **BEGIN_DATE_DICT)
@@ -158,7 +164,7 @@ def _get_file_events(sdk, case_number):
 def _display_file_events(events):
     if events:
         click.echo("\nFile Events:\n")
-        click.echo(pformat(events))
+        click.echo(json.dumps(events, indent=4))
     else:
         click.echo("\nNo events found.")
 
@@ -172,7 +178,7 @@ def _display_file_events(events):
 @format_option
 def show(state, case_number, format, include_file_events):
     """Show case details."""
-    formatter = OutputFormatter(format, _get_cases_header())
+    formatter = OutputFormatter(format)
     try:
         response = state.sdk.cases.get(case_number)
         formatter.echo_formatted_list([response.data])
@@ -186,7 +192,9 @@ def show(state, case_number, format, include_file_events):
 @cases.command()
 @case_number_arg
 @click.option(
-    "--path", help="File path. Defaults to the current directory.", default="."
+    "--path",
+    help="The file path where to save the PDF. Defaults to the current directory.",
+    default=os.getcwd(),
 )
 @sdk_options()
 def export(state, case_number, path):
@@ -224,7 +232,7 @@ def file_events_list(state, case_number, format):
 
 
 @file_events.command()
-@case_number_arg
+@case_number_option
 @file_event_id_option
 @sdk_options()
 def add(state, case_number, event_id):
@@ -236,7 +244,7 @@ def add(state, case_number, event_id):
 
 
 @file_events.command()
-@case_number_arg
+@case_number_option
 @file_event_id_option
 @sdk_options()
 def remove(state, case_number, event_id):

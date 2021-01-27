@@ -8,9 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-# Unreleased
+## 1.2.0 - 2021-01-25
 
-# Added
+### Added
 
 - The `devices` command is added. Included are:
     - `devices deactivate` to deactivate a single device.
@@ -20,6 +20,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `devices list-backup-sets` to retrieve detailed info about device backup sets.
     - `devices bulk deactivate` to deactivate a list of devices.
     - `devices bulk reactivate` to reactivate a list of devices.
+    - `devices bulk generate-template` to create a blank CSV file for bulk commands.
 
 - `code42 departing-employee list` command.
 
@@ -28,19 +29,19 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - `code42 cases` commands:
     - `create` to create a new case.
     - `update` to update case details.
-    - `export` to download case summary in a pdf file.
-    - `list` to view all the cases.
-    - `show` to view details of a particular case.
+    - `export` to download a case summary as a PDF file.
+    - `list` to view all cases.
+    - `show` to view the details of a particular case.
 
 - `code42 cases file-events` commands:
     - `add` to add an event to a case.
-    - `remove` to remove an event from the case.
-    - `list` to view all events associated to the case.
+    - `remove` to remove an event from a case.
+    - `list` to view all events associated with a case.
 
 ### Changed
 
 - The error text when removing an employee from a detection list now references the employee
-  by ID rather the username.
+  by ID rather than the username.
 
 - Improved help text for date option arguments.
 

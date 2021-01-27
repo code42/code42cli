@@ -1,7 +1,7 @@
 import pytest
-from tests.integration import run_command
+from tests.integration.util import assert_test
 
-CASES_COMMAND = "code42 cases"
+CASES_COMMAND = "cases"
 
 
 @pytest.mark.integration
@@ -26,6 +26,7 @@ CASES_COMMAND = "code42 cases"
         "{} list --name test".format(CASES_COMMAND),
     ],
 )
-def test_alert_rules_command_returns_success_return_code(command):
-    return_code, response = run_command(command)
-    assert return_code == 0
+def test_alert_rules_command_returns_success_return_code(
+    runner, integration_test_profile, command
+):
+    assert_test(runner, integration_test_profile, command)
