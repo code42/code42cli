@@ -47,7 +47,7 @@ def test_auditlogs_send_to(runner, integration_test_profile, command, protocol):
         ("{} '{}' -e '{}'".format(BASE_COMMAND, begin_date_str, end_date_str)),
         ("{} '{}' --end '{}'".format(BASE_COMMAND, begin_date_str, end_date_str)),
         ("{} '{}' --event-type '{}'".format(BASE_COMMAND, begin_date_str, "test")),
-        ("{} '{}' --user-ip '{}'".format(BASE_COMMAND, begin_date_str, "0.0.0.0")),
+        ("{} '{}' --actor-ip '{}'".format(BASE_COMMAND, begin_date_str, "0.0.0.0")),
         ("{} '{}' --affected-user-id '{}'".format(BASE_COMMAND, begin_date_str, "123")),
         (
             "{} '{}' --affected-username '{}'".format(
