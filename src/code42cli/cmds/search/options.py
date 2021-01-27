@@ -159,7 +159,8 @@ def server_options(f):
     )
     ignore_cert_validation = click.option(
         "--ignore-cert-validation",
-        help="Set to skip CA certificate validation.",
+        help="Set to skip CA certificate validation. "
+        "Incompatible with the 'certs' option.",
         is_flag=True,
         cls=incompatible_with(["certs"]),
     )

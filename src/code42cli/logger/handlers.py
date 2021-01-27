@@ -19,7 +19,8 @@ class NoPrioritySysLogHandler(SysLogHandler):
         hostname: The hostname of the syslog server to send log messages to.
         port: The port of the syslog server to send log messages to.
         protocol: The protocol over which to submit syslog messages. Accepts TCP, UDP, or TLS.
-        certs: Certs to specify when using TLS-TCP for the `protocol` argument.
+        certs: Certs to specify when using TLS-TCP for the `protocol` argument. Use "ignore" for
+            ssl.CERT_NONE (ignoring certificate validation).
     """
 
     def __init__(self, hostname, port, protocol, certs):
