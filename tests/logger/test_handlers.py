@@ -193,3 +193,12 @@ class TestNoPrioritySysLogHandler:
         handler.connect_socket()
         handler.close()
         assert not handler.socket.unwrap.call_count
+
+    def test_close_globally_closes(self, mocker):
+        global_close = mocker.patch("code42cli.logger.handlers.logging.Handler.close")
+        handler = NoPrioritySysLogHandler(
+            _TEST_HOST, _TEST_PORT, ServerProtocol.UDP, None
+        )
+        handler.connect_socket()
+        handler.close()
+        assert global_close.call_count == 1
