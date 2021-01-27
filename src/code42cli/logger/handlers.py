@@ -88,8 +88,12 @@ class NoPrioritySysLogHandler(SysLogHandler):
 
 
 def _wrap_socket_for_ssl(sock, certs, hostname):
+    do_ignore_certs = certs and certs.lower() == "ignore"
+    if do_ignore_certs:
+        certs = None
     context = ssl.create_default_context(cafile=certs)
-    if certs and certs.lower() == "ignore":
+    if do_ignore_certs:
+        context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
     return context.wrap_socket(sock, server_hostname=hostname)
 
