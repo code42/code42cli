@@ -1,7 +1,8 @@
 import os
 import subprocess
-from code42cli.main import cli
 from shlex import split as split_command
+
+from code42cli.main import cli
 
 
 class cleanup:

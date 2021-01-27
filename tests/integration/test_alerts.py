@@ -1,9 +1,11 @@
 from datetime import datetime
 from datetime import timedelta
+from shlex import split as split_command
 
 import pytest
-from tests.integration.util import DataServer
 from tests.integration.util import assert_test
+from tests.integration.util import DataServer
+
 from code42cli.main import cli
 
 begin_date = datetime.utcnow() - timedelta(days=20)
@@ -11,9 +13,7 @@ end_date = datetime.utcnow() - timedelta(days=10)
 begin_date_str = begin_date.strftime("%Y-%m-%d")
 end_date_str = end_date.strftime("%Y-%m-%d")
 
-ALERT_SEARCH_COMMAND = "alerts search -b {} -e {}".format(
-    begin_date_str, end_date_str
-)
+ALERT_SEARCH_COMMAND = "alerts search -b {} -e {}".format(begin_date_str, end_date_str)
 ADVANCED_QUERY = """{"groupClause":"AND", "groups":[{"filterClause":"AND",
 "filters":[{"operator":"ON_OR_AFTER", "term":"eventTimestamp", "value":"2020-09-13T00:00:00.000Z"},
 {"operator":"ON_OR_BEFORE", "term":"eventTimestamp", "value":"2020-12-07T13:20:15.195Z"}]}],
@@ -49,7 +49,9 @@ ALERT_ADVANCED_QUERY_COMMAND = "alerts search --advanced-query '{}'".format(
         ALERT_ADVANCED_QUERY_COMMAND,
     ],
 )
-def test_alert_command_returns_success_return_code(runner, integration_test_profile, command):
+def test_alert_command_returns_success_return_code(
+    runner, integration_test_profile, command
+):
     assert_test(runner, integration_test_profile, command)
 
 
@@ -64,7 +66,6 @@ def test_alert_command_returns_success_return_code(runner, integration_test_prof
 def test_alerts_send_to(runner, integration_test_profile, command, protocol):
     with DataServer(protocol=protocol):
         result = runner.invoke(
-            cli, command.split(" "),
-            obj=integration_test_profile,
+            cli, split_command(command), obj=integration_test_profile
         )
     assert result.exit_code == 0

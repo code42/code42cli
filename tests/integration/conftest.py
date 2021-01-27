@@ -4,13 +4,13 @@ from contextlib import contextmanager
 import pexpect
 import pytest
 
-from code42cli.options import CLIState
 from code42cli.errors import Code42CLIError
+from code42cli.options import CLIState
 from code42cli.profile import create_profile
 from code42cli.profile import delete_profile
 from code42cli.profile import get_profile
-from code42cli.profile import switch_default_profile
 from code42cli.profile import set_password
+from code42cli.profile import switch_default_profile
 
 
 TEST_PROFILE_NAME = "TEMP-INTEGRATION-TEST"
@@ -88,6 +88,3 @@ def command_runner():
 
 def _encode_response(line, encoding_type=_ENCODING_TYPE):
     return line.decode(encoding_type)
-
-
-
