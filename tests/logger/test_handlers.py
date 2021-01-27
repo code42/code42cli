@@ -116,7 +116,7 @@ class TestNoPrioritySysLogHandler:
         assert socket_mocks.mock_socket.connect.call_count == 1
 
     @tls_and_tcp_test
-    def test_conect_socket_when_tcp_or_tls_sets_timeout_for_connection_and_resets(
+    def test_connect_socket_when_tcp_or_tls_sets_timeout_for_connection_and_resets(
         self, socket_mocks, protocol
     ):
         handler = NoPrioritySysLogHandler(_TEST_HOST, _TEST_PORT, protocol, None)
