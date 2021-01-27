@@ -32,7 +32,7 @@ class SocketMocks:
 @pytest.fixture(autouse=True)
 def socket_mocks(mocker):
     mocks = SocketMocks()
-    new_socket = mocker.MagicMock(spec=socket)
+    new_socket = mocker.MagicMock(spec=ssl.SSLSocket)
     new_socket_magic_method = mocker.patch(
         "code42cli.logger.handlers.socket.socket.__new__"
     )
@@ -178,3 +178,18 @@ class TestNoPrioritySysLogHandler:
         handler.socket.sendto.assert_called_once_with(
             expected_message, (_TEST_HOST, _TEST_PORT)
         )
+
+    def test_close_when_using_tls_unwraps_socket(self, mocker):
+        handler = NoPrioritySysLogHandler(
+            _TEST_HOST, _TEST_PORT, ServerProtocol.TLS_TCP, None
+        )
+        handler.connect_socket()
+        handler.close()
+        assert handler.socket.unwrap.call_count == 1
+
+    @tcp_and_udp_test
+    def test_close_when_not_using_tls_does_not_unwrap_socket(self, protocol):
+        handler = NoPrioritySysLogHandler(_TEST_HOST, _TEST_PORT, protocol, None)
+        handler.connect_socket()
+        handler.close()
+        assert not handler.socket.unwrap.call_count
