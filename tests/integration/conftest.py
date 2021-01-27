@@ -4,11 +4,14 @@ from contextlib import contextmanager
 import pexpect
 import pytest
 
+from code42cli.options import CLIState
 from code42cli.errors import Code42CLIError
 from code42cli.profile import create_profile
 from code42cli.profile import delete_profile
 from code42cli.profile import get_profile
 from code42cli.profile import switch_default_profile
+from code42cli.profile import set_password
+
 
 TEST_PROFILE_NAME = "TEMP-INTEGRATION-TEST"
 _LINE_FEED = b"\r\n"
@@ -29,6 +32,23 @@ def use_temp_profile():
     delete_profile(TEST_PROFILE_NAME)
 
     # Switch back to the original profile if there was one
+    if current_profile_name:
+        switch_default_profile(current_profile_name)
+
+
+@pytest.fixture(scope="session")
+def integration_test_profile():
+    """Creates a temporary profile to use for executing integration tests."""
+    host = os.environ.get("C42_HOST") or "http://127.0.0.1:4200"
+    username = os.environ.get("C42_USER") or "test_username@example.com"
+    password = os.environ.get("C42_PW") or "test_password"
+    current_profile_name = _get_current_profile_name()
+    create_profile(TEST_PROFILE_NAME, host, username, True)
+    set_password(password, TEST_PROFILE_NAME)
+    switch_default_profile(TEST_PROFILE_NAME)
+    state = CLIState()
+    yield state
+    delete_profile(TEST_PROFILE_NAME)
     if current_profile_name:
         switch_default_profile(current_profile_name)
 
@@ -68,3 +88,6 @@ def command_runner():
 
 def _encode_response(line, encoding_type=_ENCODING_TYPE):
     return line.decode(encoding_type)
+
+
+

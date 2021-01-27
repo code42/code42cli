@@ -1,5 +1,7 @@
 import os
 import subprocess
+from code42cli.main import cli
+from shlex import split as split_command
 
 
 class cleanup:
@@ -49,3 +51,8 @@ class DataServer:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.process.kill()
+
+
+def assert_test(runner, integration_test_profile, command):
+    result = runner.invoke(cli, split_command(command), obj=integration_test_profile)
+    assert result.exit_code == 0
