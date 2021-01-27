@@ -65,6 +65,8 @@ class NoPrioritySysLogHandler(SysLogHandler):
             self.socket.sendall(msg)
 
     def close(self):
+        if not self._use_insecure:
+            self.socket.unwrap()
         self.socket.close()
         logging.Handler.close(self)
 
