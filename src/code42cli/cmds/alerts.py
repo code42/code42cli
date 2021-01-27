@@ -127,7 +127,6 @@ description_option = click.option(
     callback=searchopt.contains_filter(f.Description),
     help="Filter alerts by description. Does fuzzy search by default.",
 )
-
 send_to_format_options = click.option(
     "-f",
     "--format",
