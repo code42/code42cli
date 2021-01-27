@@ -179,7 +179,7 @@ class TestNoPrioritySysLogHandler:
             expected_message, (_TEST_HOST, _TEST_PORT)
         )
 
-    def test_close_when_using_tls_unwraps_socket(self, mocker):
+    def test_close_when_using_tls_unwraps_socket(self):
         handler = NoPrioritySysLogHandler(
             _TEST_HOST, _TEST_PORT, ServerProtocol.TLS_TCP, None
         )
