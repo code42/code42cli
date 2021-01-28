@@ -22,7 +22,7 @@ class SendToCommand(click.Command):
         output_format = ctx.params.get("format", OutputFormat.RAW)
         ignore_cert_validation = ctx.params.get("ignore_cert_validation")
         if ignore_cert_validation:
-            ctx.params["certs"] = "ignore"
+            certs = "ignore"
 
         ctx.obj.logger = _try_get_logger_for_server(
             hostname, protocol, output_format, certs

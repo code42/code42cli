@@ -1,6 +1,6 @@
 import pytest
 
-from code42cli.cmds.search import try_get_logger_for_server
+from code42cli.cmds.search import _try_get_logger_for_server
 from code42cli.errors import Code42CLIError
 from code42cli.logger.enums import ServerProtocol
 from code42cli.output_formats import SendToFileEventsOutputFormat
@@ -24,7 +24,7 @@ def errored_logger(patched_get_logger_method):
 def test_try_get_logger_for_server_calls_get_logger_for_server(
     patched_get_logger_method,
 ):
-    try_get_logger_for_server(
+    _try_get_logger_for_server(
         _TEST_HOST,
         ServerProtocol.TLS_TCP,
         SendToFileEventsOutputFormat.CEF,
@@ -42,7 +42,7 @@ def test_try_get_logger_for_server_when_exception_raised_raises_code42_cli_error
     errored_logger,
 ):
     with pytest.raises(Code42CLIError) as err:
-        try_get_logger_for_server(
+        _try_get_logger_for_server(
             _TEST_HOST,
             ServerProtocol.TCP,
             SendToFileEventsOutputFormat.RAW,

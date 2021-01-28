@@ -176,7 +176,7 @@ def begin_option(mocker):
 
 @pytest.fixture
 def send_to_logger_factory(mocker):
-    return mocker.patch("code42cli.cmds.securitydata.try_get_logger_for_server")
+    return mocker.patch("code42cli.cmds.search._try_get_logger_for_server")
 
 
 @search_and_send_to_test

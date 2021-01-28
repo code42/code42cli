@@ -98,7 +98,7 @@ def date_str():
 
 @pytest.fixture
 def send_to_logger_factory(mocker):
-    return mocker.patch("code42cli.cmds.auditlogs.try_get_logger_for_server")
+    return mocker.patch("code42cli.cmds.search._try_get_logger_for_server")
 
 
 @pytest.fixture
