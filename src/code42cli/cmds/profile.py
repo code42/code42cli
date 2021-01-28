@@ -70,6 +70,7 @@ def show(profile_name):
 @server_option
 @username_option
 @password_option
+@yes_option(hidden=True)
 @disable_ssl_option
 def create(name, server, username, password, disable_ssl_errors):
     """Create profile settings. The first profile created will be the default."""
@@ -128,7 +129,7 @@ def use(profile_name):
 
 
 @profile.command()
-@yes_option
+@yes_option()
 @profile_name_arg(required=True)
 def delete(profile_name):
     """Deletes a profile and its stored password (if any)."""
@@ -143,7 +144,7 @@ def delete(profile_name):
 
 
 @profile.command()
-@yes_option
+@yes_option()
 def delete_all():
     """Deletes all profiles and saved passwords (if any)."""
     existing_profiles = cliprofile.get_all_profiles()

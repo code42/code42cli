@@ -14,14 +14,18 @@ from code42cli.profile import get_profile
 from code42cli.sdk_client import create_sdk
 
 
-yes_option = click.option(
-    "-y",
-    "--assume-yes",
-    is_flag=True,
-    expose_value=False,
-    callback=lambda ctx, param, value: ctx.obj.set_assume_yes(value),
-    help='Assume "yes" as the answer to all prompts and run non-interactively.',
-)
+def yes_option(hidden=False):
+    return click.option(
+        "-y",
+        "--assume-yes",
+        is_flag=True,
+        expose_value=False,
+        callback=lambda ctx, param, value: ctx.obj.set_assume_yes(value),
+        help='Assume "yes" as the answer to all prompts and run non-interactively.',
+        hidden=hidden,
+    )
+
+
 format_option = click.option(
     "-f",
     "--format",
