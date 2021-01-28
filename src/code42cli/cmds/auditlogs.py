@@ -12,7 +12,6 @@ from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.options import checkpoint_option
 from code42cli.options import format_option
 from code42cli.options import sdk_options
-from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
 from code42cli.util import hash_event
 from code42cli.util import warn_interrupt
