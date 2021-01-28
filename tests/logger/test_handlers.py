@@ -134,7 +134,7 @@ class TestNoPrioritySysLogHandler:
         assert call_args[1]["cafile"] == "certs"
 
     @pytest.mark.parametrize("ignore", ("ignore", "IGNORE"))
-    def test_connect_when_tls_and_told_to_ignore_certs_sets_verify_to_none(
+    def test_connect_when_tls_and_told_to_ignore_certs_sets_expected_context_properties(
         self, socket_mocks, ignore
     ):
         handler = NoPrioritySysLogHandler(
@@ -142,6 +142,17 @@ class TestNoPrioritySysLogHandler:
         )
         handler.connect_socket()
         assert socket_mocks.SSLMocks.mock_ssl_context.verify_mode == ssl.CERT_NONE
+        assert not socket_mocks.SSLMocks.mock_ssl_context.check_hostname
+
+    @pytest.mark.parametrize("ignore", ("ignore", "IGNORE"))
+    def test_connect_when_tls_and_told_to_ignore_certs_creates_context_with_none_certs(
+        self, socket_mocks, ignore
+    ):
+        handler = NoPrioritySysLogHandler(
+            _TEST_HOST, _TEST_PORT, ServerProtocol.TLS_TCP, ignore
+        )
+        handler.connect_socket()
+        socket_mocks.SSLMocks.context_creator.assert_called_once_with(cafile=None)
 
     @tls_and_tcp_test
     def test_connect_socket_when_tcp_or_tls_sets_timeout_for_connection_and_resets(
