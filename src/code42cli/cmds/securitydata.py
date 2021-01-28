@@ -13,7 +13,7 @@ import code42cli.errors as errors
 import code42cli.options as opt
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
-from code42cli.cmds.search import try_get_logger_for_server
+from code42cli.cmds.search import SendToCommand
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.cmds.search.options import send_to_format_options
@@ -284,7 +284,7 @@ def show(state, search_id):
     echo(pformat(response["searches"]))
 
 
-@security_data.command()
+@security_data.command(cls=SendToCommand)
 @file_event_options
 @search_options
 @click.option(
@@ -321,12 +321,9 @@ def send_to(
 
     HOSTNAME format: address:port where port is optional and defaults to 514.
     """
-    if ignore_cert_validation:
-        certs = "ignore"
-    logger = try_get_logger_for_server(hostname, protocol, format, certs)
     cursor = _get_cursor(state, use_checkpoint)
     handlers = ext.create_send_to_handlers(
-        state.sdk, FileEventExtractor, cursor, use_checkpoint, logger
+        state.sdk, FileEventExtractor, cursor, use_checkpoint, state.logger
     )
     _extract(
         state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs

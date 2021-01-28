@@ -10,7 +10,7 @@ import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 import code42cli.options as opt
-from code42cli.cmds.search import try_get_logger_for_server
+from code42cli.cmds.search import SendToCommand
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.cmds.search.options import server_options
@@ -245,7 +245,7 @@ def search(
     handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
 
 
-@alerts.command()
+@alerts.command(cls=SendToCommand)
 @alert_options
 @search_options
 @click.option(
@@ -278,12 +278,9 @@ def send_to(
 
     HOSTNAME format: address:port where port is optional and defaults to 514.
     """
-    if ignore_cert_validation:
-        certs = "ignore"
-    logger = try_get_logger_for_server(hostname, protocol, format, certs)
     cursor = _get_cursor(cli_state, use_checkpoint)
     handlers = ext.create_send_to_handlers(
-        cli_state.sdk, AlertExtractor, cursor, use_checkpoint, logger,
+        cli_state.sdk, AlertExtractor, cursor, use_checkpoint, cli_state.logger,
     )
     _call_extractor(cli_state, handlers, begin, end, or_query, advanced_query, **kwargs)
     handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)

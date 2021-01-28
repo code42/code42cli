@@ -5,7 +5,7 @@ import click
 
 import code42cli.options as opt
 from code42cli.click_ext.groups import OrderedGroup
-from code42cli.cmds.search import try_get_logger_for_server
+from code42cli.cmds.search import SendToCommand
 from code42cli.cmds.search.cursor_store import AuditLogCursorStore
 from code42cli.cmds.search.options import server_options
 from code42cli.date_helper import convert_datetime_to_timestamp
@@ -162,7 +162,7 @@ def search(
         formatter.echo_formatted_list(events)
 
 
-@audit_logs.command()
+@audit_logs.command(cls=SendToCommand)
 @filter_options
 @checkpoint_option(AUDIT_LOGS_KEYWORD)
 @server_options
@@ -187,9 +187,6 @@ def send_to(
 
     HOSTNAME format: address:port where port is optional and defaults to 514.
     """
-    if ignore_cert_validation:
-        certs = "ignore"
-    logger = try_get_logger_for_server(hostname, protocol, OutputFormat.RAW, certs)
     cursor = _get_audit_log_cursor_store(state.profile.name)
     if use_checkpoint:
         checkpoint_name = use_checkpoint
@@ -218,7 +215,7 @@ def send_to(
     with warn_interrupt():
         event = None
         for event in events:
-            logger.info(event)
+            state.logger.info(event)
         if event is None:  # generator was empty
             click.echo("No results found.")
 
