@@ -15,7 +15,7 @@ _ENCODING_TYPE = "utf-8"
 
 
 @pytest.fixture(scope="session")
-def integration_test_profile(runner,):
+def integration_test_profile(runner):
     """Creates a temporary profile to use for executing integration tests."""
     host = os.environ.get("C42_HOST") or "http://127.0.0.1:4200"
     username = os.environ.get("C42_USER") or "test_username@example.com"
