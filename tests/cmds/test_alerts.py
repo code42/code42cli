@@ -763,7 +763,7 @@ def test_send_to_creates_expected_logger(cli_state, runner, send_to_logger_facto
         obj=cli_state,
     )
     send_to_logger_factory.assert_called_once_with(
-        "0.0.0.0", "TLS-TCP", "JSON", "certs/file"
+        "0.0.0.0", "TLS-TCP", "RAW-JSON", "certs/file"
     )
 
 
@@ -785,7 +785,7 @@ def test_send_to_when_given_ignore_cert_validation_uses_certs_equal_to_ignore_st
         obj=cli_state,
     )
     send_to_logger_factory.assert_called_once_with(
-        "0.0.0.0", "TLS-TCP", "JSON", "ignore"
+        "0.0.0.0", "TLS-TCP", "RAW-JSON", "ignore"
     )
 
 
