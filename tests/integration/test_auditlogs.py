@@ -5,7 +5,7 @@ from shlex import split as split_command
 import pytest
 from tests.integration.util import assert_test_is_successful
 from tests.integration.util import DataServer
-
+from tests.integration.conftest import append_profile
 from code42cli.main import cli
 
 
@@ -34,7 +34,7 @@ end_date_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
 def test_auditlogs_send_to(runner, integration_test_profile, command, protocol):
     with DataServer(protocol=protocol):
         result = runner.invoke(
-            cli, split_command(command), obj=integration_test_profile
+            cli, split_command(append_profile(command)), obj=integration_test_profile
         )
     assert result.exit_code == 0
 
@@ -70,4 +70,4 @@ def test_auditlogs_send_to(runner, integration_test_profile, command, protocol):
 def test_auditlogs_search_command_returns_success_return_code(
     runner, integration_test_profile, command
 ):
-    assert_test_is_successful(runner, integration_test_profile, command)
+    assert_test_is_successful(runner, integration_test_profile, append_profile(command))

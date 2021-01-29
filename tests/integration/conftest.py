@@ -44,3 +44,7 @@ def _get_current_profile_name():
 
 def _encode_response(line, encoding_type=_ENCODING_TYPE):
     return line.decode(encoding_type)
+
+
+def append_profile(command):
+    return "{} --profile {}".format(command, TEST_PROFILE_NAME)
