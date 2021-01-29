@@ -4,14 +4,12 @@ from datetime import timezone
 
 import click
 
+import code42cli.options as opt
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.cmds.search.cursor_store import AuditLogCursorStore
-from code42cli.cmds.search.options import BeginOption
-from code42cli.date_helper import parse_max_timestamp
-from code42cli.date_helper import parse_min_timestamp
+from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.logger import get_logger_for_server
-from code42cli.options import begin_option
-from code42cli.options import end_option
+from code42cli.options import checkpoint_option
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.options import server_options
@@ -31,7 +29,14 @@ AUDIT_LOGS_DEFAULT_HEADER["actorIpAddress"] = "ActorIpAddress"
 AUDIT_LOGS_DEFAULT_HEADER["userName"] = "AffectedUser"
 AUDIT_LOGS_DEFAULT_HEADER["userId"] = "AffectedUserUID"
 
-
+begin_option = opt.begin_option(
+    AUDIT_LOGS_KEYWORD,
+    callback=lambda ctx, param, arg: convert_datetime_to_timestamp(arg),
+)
+end_option = opt.end_option(
+    AUDIT_LOGS_KEYWORD,
+    callback=lambda ctx, param, arg: convert_datetime_to_timestamp(arg),
+)
 filter_option_usernames = click.option(
     "--actor-username",
     required=False,
@@ -72,36 +77,21 @@ filter_option_event_types = click.option(
 
 
 def filter_options(f):
-    f = begin_option(
-        f,
-        AUDIT_LOGS_KEYWORD,
-        callback=lambda ctx, param, arg: parse_min_timestamp(arg),
-        cls=BeginOption,
-    )
-    f = end_option(
-        f, AUDIT_LOGS_KEYWORD, callback=lambda ctx, param, arg: parse_max_timestamp(arg)
-    )
     f = filter_option_event_types(f)
     f = filter_option_usernames(f)
     f = filter_option_user_ids(f)
     f = filter_option_user_ip_addresses(f)
     f = filter_option_affected_user_ids(f)
     f = filter_option_affected_usernames(f)
+    f = end_option(f)
+    f = begin_option(f)
     return f
-
-
-checkpoint_option = click.option(
-    "-c",
-    "--use-checkpoint",
-    metavar="checkpoint",
-    help="Only get audit-log events that were not previously retrieved.",
-)
 
 
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def audit_logs(state):
-    """Retrieve audit logs."""
+    """Tools for getting audit-log data."""
     # store cursor getter on the group state so shared --begin option can use it in validation
     state.cursor_getter = _get_audit_log_cursor_store
 
@@ -117,7 +107,7 @@ def clear_checkpoint(state, checkpoint_name):
 @audit_logs.command()
 @filter_options
 @format_option
-@checkpoint_option
+@checkpoint_option(AUDIT_LOGS_KEYWORD)
 @sdk_options()
 def search(
     state,
@@ -170,7 +160,7 @@ def search(
 
 @audit_logs.command()
 @filter_options
-@checkpoint_option
+@checkpoint_option(AUDIT_LOGS_KEYWORD)
 @server_options
 @sdk_options()
 def send_to(
@@ -187,7 +177,10 @@ def send_to(
     affected_username,
     use_checkpoint,
 ):
-    """Send audit logs to the given server address in JSON format."""
+    """Send audit logs to the given server address in JSON format.
+
+    HOSTNAME format: address:port where port is optional and defaults to 514.
+    """
     logger = get_logger_for_server(hostname, protocol, "RAW-JSON")
     cursor = _get_audit_log_cursor_store(state.profile.name)
     if use_checkpoint:

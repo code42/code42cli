@@ -1,3 +1,3 @@
 .. click:: code42cli.cmds.auditlogs:audit_logs
-  :prog: auditlogs
+  :prog: audit-logs
   :show-nested:

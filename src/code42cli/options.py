@@ -1,33 +1,30 @@
 import click
 
+from code42cli.click_ext.types import MagicDate
 from code42cli.cmds.search.enums import ServerProtocol
+from code42cli.cmds.search.options import AdvancedQueryAndSavedSearchIncompatible
+from code42cli.cmds.search.options import BeginOption
+from code42cli.date_helper import convert_datetime_to_timestamp
+from code42cli.date_helper import round_datetime_to_day_end
+from code42cli.date_helper import round_datetime_to_day_start
 from code42cli.errors import Code42CLIError
 from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import SendToFileEventsOutputFormat
 from code42cli.profile import get_profile
 from code42cli.sdk_client import create_sdk
 
-BEGIN_OPTION_HELP_MESSAGE = (
-    "The beginning of the date range in which to look for {}, can be a date/time in "
-    "yyyy-MM-dd (UTC) or yyyy-MM-dd HH:MM:SS (UTC+24-hr time) format where the 'time' "
-    "portion of the string can be partial (e.g. '2020-01-01 12' or '2020-01-01 01:15') "
-    "or a short value representing days (30d), hours (24h) or minutes (15m) from current "
-    "time."
-)
 
-END_OPTION_HELP_MESSAGE = (
-    "The end of the date range in which to look for {}, argument format options are "
-    "the same as `--begin`."
-)
+def yes_option(hidden=False):
+    return click.option(
+        "-y",
+        "--assume-yes",
+        is_flag=True,
+        expose_value=False,
+        callback=lambda ctx, param, value: ctx.obj.set_assume_yes(value),
+        help='Assume "yes" as the answer to all prompts and run non-interactively.',
+        hidden=hidden,
+    )
 
-yes_option = click.option(
-    "-y",
-    "--assume-yes",
-    is_flag=True,
-    expose_value=False,
-    callback=lambda ctx, param, value: ctx.obj.set_assume_yes(value),
-    help='Assume "yes" as the answer to all prompts and run non-interactively.',
-)
 
 format_option = click.option(
     "-f",
@@ -36,23 +33,6 @@ format_option = click.option(
     help="The output format of the result. Defaults to table format.",
     default=OutputFormat.TABLE,
 )
-
-
-def begin_option(f, search_term, **kwargs):
-    start_time = click.option(
-        "-b", "--begin", help=BEGIN_OPTION_HELP_MESSAGE.format(search_term), **kwargs
-    )
-
-    f = start_time(f)
-    return f
-
-
-def end_option(f, search_term, **kwargs):
-    end_time = click.option(
-        "-e", "--end", help=END_OPTION_HELP_MESSAGE.format(search_term), **kwargs
-    )
-    f = end_time(f)
-    return f
 
 
 class CLIState:
@@ -159,3 +139,49 @@ send_to_format_options = click.option(
     help="The output format of the result. Defaults to json format.",
     default=SendToFileEventsOutputFormat.RAW,
 )
+
+
+def begin_option(term, **kwargs):
+    defaults = dict(
+        type=MagicDate(rounding_func=round_datetime_to_day_start),
+        help=f"The beginning of the date range in which to look for {term}. {MagicDate.HELP_TEXT}",
+        cls=BeginOption,
+        callback=lambda ctx, param, arg: convert_datetime_to_timestamp(arg),
+    )
+    defaults.update(kwargs)
+    return click.option("-b", "--begin", **defaults)
+
+
+def end_option(term, **kwargs):
+    defaults = dict(
+        type=MagicDate(rounding_func=round_datetime_to_day_end),
+        cls=AdvancedQueryAndSavedSearchIncompatible,
+        help=f"The end of the date range in which to look for {term}, argument format options are "
+        "the same as `--begin`.",
+        callback=lambda ctx, param, arg: convert_datetime_to_timestamp(arg),
+    )
+    defaults.update(kwargs)
+    return click.option("-e", "--end", **defaults)
+
+
+def checkpoint_option(term, **kwargs):
+    defaults = dict(help=f"Only get {term} that were not previously retrieved.")
+    defaults.update(kwargs)
+    return click.option("-c", "--use-checkpoint", **defaults)
+
+
+def set_begin_default_dict(term):
+    return dict(
+        type=MagicDate(rounding_func=round_datetime_to_day_start),
+        help=f"The beginning of the date range in which to look for {term}. {MagicDate.HELP_TEXT}",
+        callback=lambda ctx, param, arg: convert_datetime_to_timestamp(arg),
+    )
+
+
+def set_end_default_dict(term):
+    return dict(
+        type=MagicDate(rounding_func=round_datetime_to_day_end),
+        help=f"The end of the date range in which to look for {term}, argument format options are "
+        "the same as `--begin`.",
+        callback=lambda ctx, param, arg: convert_datetime_to_timestamp(arg),
+    )

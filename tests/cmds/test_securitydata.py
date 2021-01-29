@@ -129,7 +129,7 @@ def file_event_cursor_without_checkpoint(mocker):
 @pytest.fixture
 def begin_option(mocker):
     mock = mocker.patch(
-        "{}.cmds.search.options.parse_min_timestamp".format(PRODUCT_NAME)
+        "{}.cmds.securitydata.convert_datetime_to_timestamp".format(PRODUCT_NAME)
     )
     mock.return_value = BEGIN_TIMESTAMP
     mock.expected_timestamp = "2020-01-01T06:00:00.000Z"

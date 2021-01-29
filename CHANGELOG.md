@@ -8,18 +8,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-# Unreleased
+## 1.2.0 - 2021-01-25
 
-# Added
+### Added
+
+- The `devices` command is added. Included are:
+    - `devices deactivate` to deactivate a single device.
+    - `devices reactivate` to reactivate a single device.
+    - `devices show` to retrieve detailed information about a device.
+    - `devices list` to retrieve info about many devices, including device settings.
+    - `devices list-backup-sets` to retrieve detailed info about device backup sets.
+    - `devices bulk deactivate` to deactivate a list of devices.
+    - `devices bulk reactivate` to reactivate a list of devices.
+    - `devices bulk generate-template` to create a blank CSV file for bulk commands.
 
 - `code42 departing-employee list` command.
 
 - `code42 high-risk-employee list` command.
 
+- `code42 cases` commands:
+    - `create` to create a new case.
+    - `update` to update case details.
+    - `export` to download a case summary as a PDF file.
+    - `list` to view all cases.
+    - `show` to view the details of a particular case.
+
+- `code42 cases file-events` commands:
+    - `add` to add an event to a case.
+    - `remove` to remove an event from a case.
+    - `list` to view all events associated with a case.
+
 ### Changed
 
 - The error text when removing an employee from a detection list now references the employee
-  by ID rather the username.
+  by ID rather than the username.
+
+- Improved help text for date option arguments.
 
 ## 1.1.0 - 2020-12-18
 
@@ -34,8 +58,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `search` to search for audit-logs.
     - `send-to` to send audit-logs to server.
 
-- `code42 legal-hold show` option:
-    - `--include-devices` to print list of devices associated with legal hold along with total storage by organization.
+
+## Unreleased
 
 ### Changed
 
@@ -47,6 +71,11 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Now, when adding a cloud alias to a detection list user, such as during `departing-employee add`, it will remove the existing cloud alias if one exists.
     - Before, it would error and the cloud alias would not get added.
+    
+### Added
+
+- `code42 devices list` option:
+    - `--include-legal-hold-membership` to add legal hold columns to the result output, including legal hold matter name, UID, and whether the membership is active.
 
 ## 1.0.0 - 2020-08-31
 

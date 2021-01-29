@@ -29,7 +29,7 @@ def write_template_file(path, columns=None, flat_item=None):
             )
 
 
-def generate_template_cmd_factory(group_name, commands_dict):
+def generate_template_cmd_factory(group_name, commands_dict, help_message=None):
     """Helper function that creates a `generate-template` click command that can be added to `bulk`
     sub-command groups.
 
@@ -42,8 +42,12 @@ def generate_template_cmd_factory(group_name, commands_dict):
             If a cmd takes a flat file, value should be a string indicating what item the flat file
             rows should contain.
     """
+    help_message = (
+        help_message
+        or "Generate the CSV template needed for bulk adding/removing users."
+    )
 
-    @click.command()
+    @click.command(help=help_message)
     @click.argument("cmd", type=click.Choice(list(commands_dict)))
     @click.option(
         "--path",
@@ -52,9 +56,6 @@ def generate_template_cmd_factory(group_name, commands_dict):
         help="Write template file to specific file path/name.",
     )
     def generate_template(cmd, path):
-        """\b
-        Generate the CSV template needed for bulk adding/removing users.
-        """
         columns = commands_dict[cmd]
         if not path:
             filename = "{}_bulk_{}.csv".format(group_name, cmd.replace("-", "_"))
@@ -74,9 +75,10 @@ def run_bulk_process(row_handler, rows, progress_label=None):
         row_handler (callable): A callable that you define to process values from the row as
             either *args or **kwargs.
         rows (iterable): the rows to process.
+        progress_label: a label that prints with the progress bar.
     """
     processor = _create_bulk_processor(row_handler, rows, progress_label)
-    processor.run()
+    return processor.run()
 
 
 def _create_bulk_processor(row_handler, rows, progress_label):
@@ -93,7 +95,6 @@ class BulkProcessor:
             and first row `1,test`, then `row_handler` should receive kwargs
             `prop_a: '1', prop_b: 'test'` when processing the first row. If it's a flat file, then
             `row_handler` only needs to take an extra arg.
-        reader (CSVReader or FlatFileReader): A generator that reads rows and yields data into `row_handler`.
     """
 
     def __init__(self, row_handler, rows, worker=None, progress_label=None):
@@ -110,10 +111,12 @@ class BulkProcessor:
 
     def run(self):
         """Processes the csv rows specified in the ctor, calling `self.row_handler` on each row."""
+        self._stats.reset_results()
         for row in self._rows:
             self._process_row(row)
         self.__worker.wait()
         self._print_results()
+        return self._stats._results
 
     def _process_row(self, row):
         if isinstance(row, dict):
@@ -138,7 +141,7 @@ class BulkProcessor:
             )
 
     def _handle_row(self, *args, **kwargs):
-        self._row_handler(*args, **kwargs)
+        return self._row_handler(*args, **kwargs)
 
     def _show_stats(self, _):
         return str(self._stats)

@@ -93,8 +93,4 @@ To view all custodians (including inactive) for a legal hold matter, enter
 
 `code42 legal-hold show <matterID> --include-inactive`
 
-To view all devices associated with selected custodians for a legal hold matter, enter
-
-`code42 legal-hold show <matterID> --include-devices`
-
 Learn more about the [Legal Hold](../commands/legalhold.md) commands.

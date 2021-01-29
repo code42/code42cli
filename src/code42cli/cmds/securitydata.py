@@ -12,21 +12,22 @@ import code42cli.cmds.search.enums as enum
 import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
+import code42cli.options as opt
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.cmds.securitydata_output_formats import FileEventsOutputFormatter
+from code42cli.date_helper import convert_datetime_to_timestamp
+from code42cli.date_helper import limit_date_range
 from code42cli.logger import get_logger_for_server
-from code42cli.logger import get_main_cli_logger
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.options import send_to_format_options
 from code42cli.options import server_options
 from code42cli.output_formats import OutputFormatter
 
-logger = get_main_cli_logger()
-
+SECURITY_DATA_KEYWORD = "file events"
 _HEADER_KEYS_MAP = OrderedDict()
 _HEADER_KEYS_MAP["name"] = "Name"
 _HEADER_KEYS_MAP["id"] = "Id"
@@ -50,11 +51,6 @@ file_events_format_option = click.option(
     help="The output format of the result. Defaults to table format.",
     default=enum.FileEventsOutputFormat.TABLE,
 )
-
-
-search_options = searchopt.create_search_options("file events")
-
-
 exposure_type_option = click.option(
     "-t",
     "--type",
@@ -160,6 +156,26 @@ saved_search_option = click.option(
     cls=incompatible_with("advanced_query"),
 )
 
+begin_option = opt.begin_option(
+    SECURITY_DATA_KEYWORD,
+    callback=lambda ctx, param, arg: convert_datetime_to_timestamp(
+        limit_date_range(arg, max_days_back=90)
+    ),
+)
+end_option = opt.end_option(SECURITY_DATA_KEYWORD)
+checkpoint_option = opt.checkpoint_option(
+    SECURITY_DATA_KEYWORD, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
+)
+advanced_query_option = searchopt.advanced_query_option(SECURITY_DATA_KEYWORD)
+
+
+def search_options(f):
+    f = checkpoint_option(f)
+    f = advanced_query_option(f)
+    f = end_option(f)
+    f = begin_option(f)
+    return f
+
 
 def file_event_options(f):
     f = exposure_type_option(f)
@@ -236,7 +252,7 @@ def search(
     saved_search,
     or_query,
     include_all,
-    **kwargs
+    **kwargs,
 ):
     """Search for file events."""
     output_header = ext.try_get_default_header(
@@ -319,9 +335,12 @@ def send_to(
     use_checkpoint,
     saved_search,
     or_query,
-    **kwargs
+    **kwargs,
 ):
-    """Send events to the given server address."""
+    """Send events to the given server address.
+
+    HOSTNAME format: address:port where port is optional and defaults to 514.
+    """
     logger = get_logger_for_server(hostname, protocol, format)
     cursor = (
         _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None

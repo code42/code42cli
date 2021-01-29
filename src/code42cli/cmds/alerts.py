@@ -14,13 +14,15 @@ import code42cli.errors as errors
 import code42cli.options as opt
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
+from code42cli.date_helper import convert_datetime_to_timestamp
+from code42cli.date_helper import limit_date_range
 from code42cli.logger import get_logger_for_server
 from code42cli.options import format_option
 from code42cli.options import server_options
 from code42cli.output_formats import JsonOutputFormat
 from code42cli.output_formats import OutputFormatter
 
-
+ALERTS_KEYWORD = "alerts"
 SEARCH_DEFAULT_HEADER = OrderedDict()
 SEARCH_DEFAULT_HEADER["name"] = "RuleName"
 SEARCH_DEFAULT_HEADER["actor"] = "Username"
@@ -30,7 +32,23 @@ SEARCH_DEFAULT_HEADER["severity"] = "Severity"
 SEARCH_DEFAULT_HEADER["description"] = "Description"
 
 
-search_options = searchopt.create_search_options("alerts")
+begin = opt.begin_option(
+    ALERTS_KEYWORD,
+    callback=lambda ctx, param, arg: convert_datetime_to_timestamp(
+        limit_date_range(arg, max_days_back=90)
+    ),
+)
+end = opt.end_option(ALERTS_KEYWORD)
+checkpoint = opt.checkpoint_option(ALERTS_KEYWORD)
+advanced_query = searchopt.advanced_query_option(ALERTS_KEYWORD)
+
+
+def search_options(f):
+    f = checkpoint(f)
+    f = advanced_query(f)
+    f = end(f)
+    f = begin(f)
+    return f
 
 
 severity_option = click.option(
@@ -256,7 +274,10 @@ def send_to(
     or_query,
     **kwargs
 ):
-    """Send alerts to the given server address."""
+    """Send alerts to the given server address.
+
+    HOSTNAME format: address:port where port is optional and defaults to 514.
+    """
     logger = get_logger_for_server(hostname, protocol, format)
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
     handlers = ext.create_send_to_handlers(

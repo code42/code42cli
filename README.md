@@ -16,7 +16,7 @@ Use the `code42` command to interact with your Code42 environment.
 
 ## Requirements
 
-- Python 3.5.0+
+- Python 3.6.0+
 - Code42 Server 6.8.x+
 
 ## Installation
