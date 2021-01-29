@@ -130,6 +130,8 @@ If you want to run the integration tests in your current python environment, you
 pytest -m "integration"
 ```
 
+Integration tests have a dependency on `nmap` module to test `send-to` commands.
+
 ### Writing tests
 
 Put actual before expected values in assert statements. Pytest assumes this order.
