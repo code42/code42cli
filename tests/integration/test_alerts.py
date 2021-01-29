@@ -3,7 +3,7 @@ from datetime import timedelta
 from shlex import split as split_command
 
 import pytest
-from tests.integration.util import assert_test
+from tests.integration.util import assert_test_is_successful
 from tests.integration.util import DataServer
 
 from code42cli.main import cli
@@ -52,7 +52,7 @@ ALERT_ADVANCED_QUERY_COMMAND = "alerts search --advanced-query '{}'".format(
 def test_alert_command_returns_success_return_code(
     runner, integration_test_profile, command
 ):
-    assert_test(runner, integration_test_profile, command)
+    assert_test_is_successful(runner, integration_test_profile, command)
 
 
 @pytest.mark.integration
