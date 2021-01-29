@@ -68,6 +68,6 @@ def test_auditlogs_send_to(runner, integration_test_profile, command, protocol):
     ],
 )
 def test_auditlogs_search_command_returns_success_return_code(
-    runner, integration_test_profile, command, command_runner
+    runner, integration_test_profile, command
 ):
     assert_test(runner, integration_test_profile, command)
