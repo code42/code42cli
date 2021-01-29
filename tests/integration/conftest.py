@@ -5,7 +5,6 @@ import pytest
 
 from code42cli.errors import Code42CLIError
 from code42cli.main import cli
-from code42cli.options import CLIState
 from code42cli.profile import get_profile
 
 
