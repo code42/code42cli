@@ -172,7 +172,9 @@ def _display_file_events(events):
 @cases.command()
 @case_number_arg
 @click.option(
-    "--include-file-events", is_flag=True, help="View file events associated to the case."
+    "--include-file-events",
+    is_flag=True,
+    help="View file events associated to the case.",
 )
 @sdk_options()
 @format_option
