@@ -3,7 +3,6 @@ import subprocess
 from shlex import split as split_command
 
 from code42cli.main import cli
-from tests.integration.conftest import TEST_PROFILE_NAME
 
 
 class cleanup:

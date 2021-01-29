@@ -3,9 +3,10 @@ from datetime import timedelta
 from shlex import split as split_command
 
 import pytest
+from tests.integration.conftest import append_profile
 from tests.integration.util import assert_test_is_successful
 from tests.integration.util import DataServer
-from tests.integration.conftest import append_profile
+
 from code42cli.main import cli
 
 begin_date = datetime.utcnow() - timedelta(days=20)
@@ -66,6 +67,8 @@ def test_alert_command_returns_success_return_code(
 def test_alerts_send_to(runner, integration_test_profile, command, protocol):
     with DataServer(protocol=protocol):
         result = runner.invoke(
-            cli, split_command(append_profile(append_profile(command))), obj=integration_test_profile
+            cli,
+            split_command(append_profile(append_profile(command))),
+            obj=integration_test_profile,
         )
     assert result.exit_code == 0

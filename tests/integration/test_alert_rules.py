@@ -1,6 +1,6 @@
 import pytest
-from tests.integration.util import assert_test_is_successful
 from tests.integration.conftest import append_profile
+from tests.integration.util import assert_test_is_successful
 
 ALERT_RULES_COMMAND = "alert-rules"
 

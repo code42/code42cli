@@ -3,8 +3,9 @@ from datetime import timedelta
 from shlex import split as split_command
 
 import pytest
-from tests.integration.util import DataServer
 from tests.integration.conftest import append_profile
+from tests.integration.util import DataServer
+
 from code42cli.main import cli
 
 
