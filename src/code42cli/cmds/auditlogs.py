@@ -168,8 +168,6 @@ def search(
 @sdk_options()
 def send_to(
     state,
-    hostname,
-    protocol,
     begin,
     end,
     event_type,
@@ -179,8 +177,7 @@ def send_to(
     affected_user_id,
     affected_username,
     use_checkpoint,
-    certs,
-    ignore_cert_validation,
+    **kwargs,
 ):
     """Send audit logs to the given server address in JSON format.
 

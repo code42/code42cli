@@ -303,19 +303,7 @@ def show(state, search_id):
 )
 @send_to_format_options
 def send_to(
-    state,
-    format,
-    hostname,
-    protocol,
-    begin,
-    end,
-    advanced_query,
-    use_checkpoint,
-    saved_search,
-    or_query,
-    certs,
-    ignore_cert_validation,
-    **kwargs,
+    state, begin, end, advanced_query, use_checkpoint, saved_search, or_query, **kwargs,
 ):
     """Send events to the given server address.
 

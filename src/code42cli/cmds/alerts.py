@@ -260,20 +260,7 @@ def search(
     help="Display simple properties of the primary level of the nested response.",
 )
 @send_to_format_options
-def send_to(
-    cli_state,
-    format,
-    hostname,
-    protocol,
-    begin,
-    end,
-    advanced_query,
-    use_checkpoint,
-    or_query,
-    certs,
-    ignore_cert_validation,
-    **kwargs
-):
+def send_to(cli_state, begin, end, advanced_query, use_checkpoint, or_query, **kwargs):
     """Send alerts to the given server address.
 
     HOSTNAME format: address:port where port is optional and defaults to 514.
