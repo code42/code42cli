@@ -13,7 +13,7 @@ from code42cli.profile import Code42Profile
 TEST_ID = "TEST_ID"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def runner():
     return CliRunner()
 

@@ -1,6 +1,8 @@
 import pytest
+from tests.integration.conftest import append_profile
+from tests.integration.util import assert_test_is_successful
 
-ALERT_RULES_COMMAND = "code42 alert-rules"
+ALERT_RULES_COMMAND = "alert-rules"
 
 
 @pytest.mark.integration
@@ -19,6 +21,7 @@ ALERT_RULES_COMMAND = "code42 alert-rules"
         "{} list --format RAW-JSON".format(ALERT_RULES_COMMAND),
     ],
 )
-def test_alert_rules_command_returns_success_return_code(command, command_runner):
-    return_code, response = command_runner(command)
-    assert return_code == 0
+def test_alert_rules_command_returns_success_return_code(
+    runner, integration_test_profile, command
+):
+    assert_test_is_successful(runner, integration_test_profile, append_profile(command))
