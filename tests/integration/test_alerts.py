@@ -53,7 +53,7 @@ ALERT_ADVANCED_QUERY_COMMAND = "alerts search --advanced-query '{}'".format(
 def test_alert_command_returns_success_return_code(
     runner, integration_test_profile, command
 ):
-    assert_test_is_successful(runner, integration_test_profile, append_profile(command))
+    assert_test_is_successful(runner, append_profile(command))
 
 
 @pytest.mark.integration
