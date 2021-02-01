@@ -54,6 +54,6 @@ class DataServer:
         self.process.kill()
 
 
-def assert_test_is_successful(runner, integration_test_profile, command):
-    result = runner.invoke(cli, split_command(command), obj=integration_test_profile)
+def assert_test_is_successful(runner, command):
+    result = runner.invoke(cli, split_command(command))
     assert result.exit_code == 0

@@ -5,7 +5,6 @@ import pytest
 
 from code42cli.errors import Code42CLIError
 from code42cli.main import cli
-from code42cli.options import CLIState
 from code42cli.profile import get_profile
 
 
@@ -16,22 +15,21 @@ _ENCODING_TYPE = "utf-8"
 
 
 @pytest.fixture(scope="session")
-def integration_test_profile(runner,):
+def integration_test_profile(runner):
     """Creates a temporary profile to use for executing integration tests."""
     host = os.environ.get("C42_HOST") or "http://127.0.0.1:4200"
     username = os.environ.get("C42_USER") or "test_username@example.com"
     password = os.environ.get("C42_PW") or "test_password"
-    create_profile_command = "profile create -n {} -u {} -s {} --password {} -y"
-    runner.invoke(
-        cli,
-        split_command(
-            create_profile_command.format(TEST_PROFILE_NAME, username, host, password)
-        ),
+    delete_test_profile = split_command(f"profile delete {TEST_PROFILE_NAME} -y")
+    create_test_profile = split_command(
+        f"profile create -n {TEST_PROFILE_NAME} -u {username} -s {host} --password {password} -y"
     )
-    runner.invoke(cli, split_command("profile use {}".format(TEST_PROFILE_NAME)))
-    state = CLIState()
-    yield state
-    runner.invoke(cli, "profile delete {} -y".format(TEST_PROFILE_NAME))
+    runner.invoke(cli, delete_test_profile)
+    result = runner.invoke(cli, create_test_profile)
+    if result.exit_code != 0:
+        pytest.exit(result.output)
+    yield
+    runner.invoke(cli, delete_test_profile)
 
 
 def _get_current_profile_name():

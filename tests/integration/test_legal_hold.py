@@ -23,11 +23,11 @@ LEGAL_HOLD_COMMAND = "legal-hold"
 def test_legal_hold_command_returns_success_return_code(
     runner, integration_test_profile, command
 ):
-    assert_test_is_successful(runner, integration_test_profile, append_profile(command))
+    assert_test_is_successful(runner, append_profile(command))
 
 
 def test_legal_hold_show_command_returns_success_return_code(
     runner, integration_test_profile
 ):
     command = ("{} show 984140047896012577".format(LEGAL_HOLD_COMMAND),)
-    assert_test_is_successful(runner, integration_test_profile, append_profile(command))
+    assert_test_is_successful(runner, append_profile(command))

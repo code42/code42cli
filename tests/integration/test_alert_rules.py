@@ -23,7 +23,7 @@ ALERT_RULES_COMMAND = "alert-rules"
 def test_alert_rules_list_command_returns_success_return_code(
     runner, integration_test_profile, command
 ):
-    assert_test_is_successful(runner, integration_test_profile, append_profile(command))
+    assert_test_is_successful(runner, append_profile(command))
 
 
 @pytest.mark.integration
@@ -31,4 +31,4 @@ def test_alert_rules_show_command_returns_success_return_code(
     runner, integration_test_profile
 ):
     command = ("{} show test-rule-id".format(ALERT_RULES_COMMAND),)
-    assert_test_is_successful(runner, integration_test_profile, append_profile(command))
+    assert_test_is_successful(runner, append_profile(command))

@@ -31,7 +31,5 @@ def test_security_data_send_to_return_success_return_code(
     runner, integration_test_profile, command, protocol
 ):
     with DataServer(protocol=protocol):
-        result = runner.invoke(
-            cli, split_command(append_profile(command)), obj=integration_test_profile
-        )
+        result = runner.invoke(cli, split_command(append_profile(command)))
     assert result.exit_code == 0

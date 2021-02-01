@@ -53,7 +53,7 @@ ALERT_ADVANCED_QUERY_COMMAND = "alerts search --advanced-query '{}'".format(
 def test_alerts_search_command_returns_success_return_code(
     runner, integration_test_profile, command
 ):
-    assert_test_is_successful(runner, integration_test_profile, append_profile(command))
+    assert_test_is_successful(runner, append_profile(command))
 
 
 @pytest.mark.integration
@@ -68,9 +68,5 @@ def test_alerts_send_to_returns_success_return_code(
     runner, integration_test_profile, command, protocol
 ):
     with DataServer(protocol=protocol):
-        result = runner.invoke(
-            cli,
-            split_command(append_profile(append_profile(command))),
-            obj=integration_test_profile,
-        )
+        result = runner.invoke(cli, split_command(append_profile(command)))
     assert result.exit_code == 0
