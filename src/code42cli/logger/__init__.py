@@ -1,11 +1,8 @@
 import logging
 import os
-import sys
 import traceback
 from logging.handlers import RotatingFileHandler
 from threading import Lock
-
-from click.exceptions import ClickException
 
 from code42cli.logger.formatters import FileEventDictToCEFFormatter
 from code42cli.logger.formatters import FileEventDictToJSONFormatter

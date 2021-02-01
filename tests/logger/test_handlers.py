@@ -10,7 +10,8 @@ import pytest
 
 from code42cli.logger import FileEventDictToRawJSONFormatter
 from code42cli.logger.enums import ServerProtocol
-from code42cli.logger.handlers import NoPrioritySysLogHandler, SyslogServerNetworkConnectionError
+from code42cli.logger.handlers import NoPrioritySysLogHandler
+from code42cli.logger.handlers import SyslogServerNetworkConnectionError
 
 _TEST_HOST = "example.com"
 _TEST_PORT = 5000
@@ -202,7 +203,7 @@ class TestNoPrioritySysLogHandler:
         handler.socket.sendto.assert_called_once_with(
             expected_message, (_TEST_HOST, _TEST_PORT)
         )
-    
+
     def test_handle_error_raises_expected_error(
         self, mock_file_event_log_record, broken_pipe_error
     ):

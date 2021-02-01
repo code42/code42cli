@@ -9,7 +9,7 @@ from code42cli.logger.enums import ServerProtocol
 
 class SyslogServerNetworkConnectionError(Exception):
     """An error raised when the connection is disrupted during logging."""
-    
+
     def __init__(self):
         super().__init__("Network connection broken while sending results.")
 
