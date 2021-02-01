@@ -10,7 +10,7 @@ import pytest
 
 from code42cli.logger import FileEventDictToRawJSONFormatter
 from code42cli.logger.enums import ServerProtocol
-from code42cli.logger.handlers import NoPrioritySysLogHandler
+from code42cli.logger.handlers import NoPrioritySysLogHandler, SyslogServerNetworkConnectionError
 
 _TEST_HOST = "example.com"
 _TEST_PORT = 5000
@@ -45,6 +45,13 @@ def socket_mocks(mocker):
     )
     mocks.SSLMocks.context_creator.return_value = mocks.SSLMocks.mock_ssl_context
     return mocks
+
+
+@pytest.fixture()
+def broken_pipe_error(mocker):
+    mock_exc_info = mocker.patch("code42cli.logger.handlers.sys.exc_info")
+    mock_exc_info.return_value = (BrokenPipeError, None, None)
+    return mock_exc_info
 
 
 def _get_normal_socket_initializer_mocks(mocker, new_socket):
@@ -195,6 +202,15 @@ class TestNoPrioritySysLogHandler:
         handler.socket.sendto.assert_called_once_with(
             expected_message, (_TEST_HOST, _TEST_PORT)
         )
+    
+    def test_handle_error_raises_expected_error(
+        self, mock_file_event_log_record, broken_pipe_error
+    ):
+        handler = NoPrioritySysLogHandler(
+            _TEST_HOST, _TEST_PORT, ServerProtocol.UDP, None
+        )
+        with pytest.raises(SyslogServerNetworkConnectionError):
+            handler.handleError(mock_file_event_log_record)
 
     def test_close_when_using_tls_unwraps_socket(self):
         handler = NoPrioritySysLogHandler(

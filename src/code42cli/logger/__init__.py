@@ -37,16 +37,6 @@ def _init_logger(logger, handler, output_format):
     return add_handler_to_logger(logger, handler, formatter)
 
 
-def handleError(record):
-    """Override logger's `handleError` method to exit if an exception is raised while trying to
-    log, otherwise it would continue to gather and process events if the connection breaks but send
-    them nowhere.
-    """
-    t, v, tb = sys.exc_info()
-    if t == BrokenPipeError:
-        raise ClickException("Network connection broken while sending results.")
-
-
 def get_logger_for_server(hostname, protocol, output_format, certs):
     """Gets the logger that sends logs to a server for the given format.
 

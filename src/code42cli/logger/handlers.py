@@ -1,9 +1,17 @@
 import logging
 import socket
 import ssl
+import sys
 from logging.handlers import SysLogHandler
 
 from code42cli.logger.enums import ServerProtocol
+
+
+class SyslogServerNetworkConnectionError(Exception):
+    """An error raised when the connection is disrupted during logging."""
+    
+    def __init__(self):
+        super().__init__("Network connection broken while sending results.")
 
 
 class NoPrioritySysLogHandler(SysLogHandler):
@@ -70,6 +78,16 @@ class NoPrioritySysLogHandler(SysLogHandler):
             self._send_record(record)
         except Exception:
             self.handleError(record)
+
+    def handleError(self, record):
+        """Override logger's `handleError` method to exit if an exception is raised while trying to
+        log, otherwise it would continue to gather and process events if the connection breaks but send
+        them nowhere.
+        """
+        t, _, _ = sys.exc_info()
+        if t == BrokenPipeError:
+            raise SyslogServerNetworkConnectionError()
+        super().handleError(record)
 
     def _send_record(self, record):
         formatted_record = self.format(record)

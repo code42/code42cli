@@ -14,6 +14,7 @@ from code42cli.errors import Code42CLIError
 from code42cli.errors import LoggedCLIError
 from code42cli.errors import UserDoesNotExistError
 from code42cli.logger import get_main_cli_logger
+from code42cli.logger.handlers import SyslogServerNetworkConnectionError
 
 _DIFFLIB_CUT_OFF = 0.6
 
@@ -57,6 +58,7 @@ class ExceptionHandlingGroup(click.Group):
             Py42UserNotOnListError,
             Py42InvalidRuleOperationError,
             Py42LegalHoldNotFoundOrPermissionDeniedError,
+            SyslogServerNetworkConnectionError,
         ) as err:
             self.logger.log_error(err)
             raise Code42CLIError(str(err))
