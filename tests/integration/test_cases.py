@@ -27,7 +27,7 @@ CASES_COMMAND = "cases"
         "{} list --name test".format(CASES_COMMAND),
     ],
 )
-def test_alert_rules_command_returns_success_return_code(
+def test_cases_list_command_returns_success_return_code(
     runner, integration_test_profile, command
 ):
     assert_test_is_successful(runner, integration_test_profile, append_profile(command))

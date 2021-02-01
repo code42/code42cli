@@ -10,7 +10,6 @@ LEGAL_HOLD_COMMAND = "legal-hold"
     "command",
     [
         "{} list".format(LEGAL_HOLD_COMMAND),
-        "{} show 984140047896012577".format(LEGAL_HOLD_COMMAND),
         "{} list -f CSV".format(LEGAL_HOLD_COMMAND),
         "{} list -f TABLE".format(LEGAL_HOLD_COMMAND),
         "{} list -f RAW-JSON".format(LEGAL_HOLD_COMMAND),
@@ -21,7 +20,14 @@ LEGAL_HOLD_COMMAND = "legal-hold"
         "{} list --format RAW-JSON".format(LEGAL_HOLD_COMMAND),
     ],
 )
-def test_alert_rules_command_returns_success_return_code(
+def test_legal_hold_command_returns_success_return_code(
     runner, integration_test_profile, command
 ):
+    assert_test_is_successful(runner, integration_test_profile, append_profile(command))
+
+
+def test_legal_hold_show_command_returns_success_return_code(
+    runner, integration_test_profile
+):
+    command = ("{} show 984140047896012577".format(LEGAL_HOLD_COMMAND),)
     assert_test_is_successful(runner, integration_test_profile, append_profile(command))

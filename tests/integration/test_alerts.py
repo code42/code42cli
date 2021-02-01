@@ -50,7 +50,7 @@ ALERT_ADVANCED_QUERY_COMMAND = "alerts search --advanced-query '{}'".format(
         ALERT_ADVANCED_QUERY_COMMAND,
     ],
 )
-def test_alert_command_returns_success_return_code(
+def test_alerts_search_command_returns_success_return_code(
     runner, integration_test_profile, command
 ):
     assert_test_is_successful(runner, integration_test_profile, append_profile(command))
@@ -64,7 +64,9 @@ def test_alert_command_returns_success_return_code(
         ("alerts send-to localhost:5140 -p UDP -b {}".format(begin_date_str), "UDP"),
     ],
 )
-def test_alerts_send_to(runner, integration_test_profile, command, protocol):
+def test_alerts_send_to_returns_success_return_code(
+    runner, integration_test_profile, command, protocol
+):
     with DataServer(protocol=protocol):
         result = runner.invoke(
             cli,

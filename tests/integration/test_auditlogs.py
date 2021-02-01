@@ -32,7 +32,9 @@ end_date_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
         ),
     ],
 )
-def test_auditlogs_send_to(runner, integration_test_profile, command, protocol):
+def test_auditlogs_send_to_command_returns_success_return_code(
+    runner, integration_test_profile, command, protocol
+):
     with DataServer(protocol=protocol):
         result = runner.invoke(
             cli, split_command(append_profile(command)), obj=integration_test_profile
