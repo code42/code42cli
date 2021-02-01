@@ -172,7 +172,9 @@ def _display_file_events(events):
 @cases.command()
 @case_number_arg
 @click.option(
-    "--include-file-events", is_flag=True, help="View events associated to the case."
+    "--include-file-events",
+    is_flag=True,
+    help="View file events associated to the case.",
 )
 @sdk_options()
 @format_option
@@ -198,7 +200,7 @@ def show(state, case_number, format, include_file_events):
 )
 @sdk_options()
 def export(state, case_number, path):
-    """Download a case detail summary as a pdf file at the given path with name <case_number>_case_summary.pdf."""
+    """Download a case detail summary as a PDF file at the given path with name <case_number>_case_summary.pdf."""
     response = state.sdk.cases.export_summary(case_number)
     file = os.path.join(path, "{}_case_summary.pdf".format(case_number))
     with open(file, "wb") as f:
@@ -217,7 +219,7 @@ def file_events(state):
 @sdk_options()
 @format_option
 def file_events_list(state, case_number, format):
-    """List all the events associated with the case."""
+    """List all the file events associated with the case."""
     formatter = OutputFormatter(format, _get_events_header())
     try:
         response = state.sdk.cases.file_events.get_all(case_number)
@@ -236,7 +238,7 @@ def file_events_list(state, case_number, format):
 @file_event_id_option
 @sdk_options()
 def add(state, case_number, event_id):
-    """Associate an event id to a case."""
+    """Associate a file event to a case, by event ID."""
     try:
         state.sdk.cases.file_events.add(case_number, event_id)
     except Py42BadRequestError:
@@ -248,7 +250,7 @@ def add(state, case_number, event_id):
 @file_event_id_option
 @sdk_options()
 def remove(state, case_number, event_id):
-    """Remove the associated event id from the case."""
+    """Remove the associated file event from the case, by event ID."""
     try:
         state.sdk.cases.file_events.delete(case_number, event_id)
     except Py42NotFoundError:
