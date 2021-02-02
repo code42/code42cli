@@ -2,32 +2,30 @@ import pytest
 from tests.integration.conftest import append_profile
 from tests.integration.util import assert_test_is_successful
 
-CASES_COMMAND = "cases"
-
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "command",
+    "command_option",
     [
-        "{} list".format(CASES_COMMAND),
-        "{} list -f TABLE".format(CASES_COMMAND),
-        "{} list -f RAW-JSON".format(CASES_COMMAND),
-        "{} list -f JSON".format(CASES_COMMAND),
-        "{} list --format CSV".format(CASES_COMMAND),
-        "{} list --format TABLE".format(CASES_COMMAND),
-        "{} list --format JSON".format(CASES_COMMAND),
-        "{} list --format RAW-JSON".format(CASES_COMMAND),
-        "{} list --assignee 123".format(CASES_COMMAND),
-        "{} list --status OPEN".format(CASES_COMMAND),
-        "{} list --subject 123".format(CASES_COMMAND),
-        "{} list --begin-create-time 2021-01-01".format(CASES_COMMAND),
-        "{} list --end-create-time 2021-01-01".format(CASES_COMMAND),
-        "{} list --begin-update-time 2021-01-01".format(CASES_COMMAND),
-        "{} list --end-update-time 2021-01-01".format(CASES_COMMAND),
-        "{} list --name test".format(CASES_COMMAND),
+        "-f TABLE",
+        "-f RAW-JSON",
+        "-f JSON",
+        "--format CSV",
+        "--format TABLE",
+        "--format JSON",
+        "--format RAW-JSON",
+        "--assignee 123",
+        "--status OPEN",
+        "--subject 123",
+        "--begin-create-time 2021-01-01",
+        "--end-create-time 2021-01-01",
+        "--begin-update-time 2021-01-01",
+        "--end-update-time 2021-01-01",
+        "--name test",
     ],
 )
 def test_cases_list_command_returns_success_return_code(
-    runner, integration_test_profile, command
+    runner, integration_test_profile, command_option
 ):
+    command = "cases list {}".format(command_option)
     assert_test_is_successful(runner, append_profile(command))

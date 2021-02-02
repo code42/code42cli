@@ -14,59 +14,57 @@ end_date = datetime.utcnow() - timedelta(days=10)
 begin_date_str = begin_date.strftime("%Y-%m-%d")
 end_date_str = end_date.strftime("%Y-%m-%d")
 
-ALERT_SEARCH_COMMAND = "alerts search -b {} -e {}".format(begin_date_str, end_date_str)
-ADVANCED_QUERY = """{"groupClause":"AND", "groups":[{"filterClause":"AND",
-"filters":[{"operator":"ON_OR_AFTER", "term":"eventTimestamp", "value":"2020-09-13T00:00:00.000Z"},
-{"operator":"ON_OR_BEFORE", "term":"eventTimestamp", "value":"2020-12-07T13:20:15.195Z"}]}],
-"srtDir":"asc", "srtKey":"eventId", "pgNum":1, "pgSize":10000}
-"""
-ALERT_ADVANCED_QUERY_COMMAND = "alerts search --advanced-query '{}'".format(
-    ADVANCED_QUERY
-)
-
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "command",
+    "command_option",
     [
-        ALERT_SEARCH_COMMAND,
-        "{} --state OPEN".format(ALERT_SEARCH_COMMAND),
-        "{} --state RESOLVED".format(ALERT_SEARCH_COMMAND),
-        "{} --actor user@code42.com".format(ALERT_SEARCH_COMMAND),
-        "{} --rule-name 'File Upload Alert'".format(ALERT_SEARCH_COMMAND),
-        "{} --rule-id 962a6a1c-54f6-4477-90bd-a08cc74cbf71".format(
-            ALERT_SEARCH_COMMAND
-        ),
-        "{} --rule-type FedEndpointExfiltration".format(ALERT_SEARCH_COMMAND),
-        "{} --description 'Alert on any file upload'".format(ALERT_SEARCH_COMMAND),
-        "{} --exclude-rule-type 'FedEndpointExfiltration'".format(ALERT_SEARCH_COMMAND),
-        "{} --exclude-rule-id '962a6a1c-54f6-4477-90bd-a08cc74cbf71'".format(
-            ALERT_SEARCH_COMMAND
-        ),
-        "{} --exclude-rule-name 'File Upload Alert'".format(ALERT_SEARCH_COMMAND),
-        "{} --exclude-actor-contains 'user@code42.com'".format(ALERT_SEARCH_COMMAND),
-        "{} --exclude-actor 'user@code42.com'".format(ALERT_SEARCH_COMMAND),
-        "{} --actor-contains 'user@code42.com'".format(ALERT_SEARCH_COMMAND),
-        ALERT_ADVANCED_QUERY_COMMAND,
+        "--state OPEN",
+        "--state RESOLVED",
+        "--actor user@code42.com",
+        "--rule-name 'File Upload Alert'",
+        "--rule-id 962a6a1c-54f6-4477-90bd-a08cc74cbf71",
+        "--rule-type FedEndpointExfiltration",
+        "--description 'Alert on any file upload'",
+        "--exclude-rule-type 'FedEndpointExfiltration'",
+        "--exclude-rule-id '962a6a1c-54f6-4477-90bd-a08cc74cbf71'",
+        "--exclude-rule-name 'File Upload Alert'",
+        "--exclude-actor-contains 'user@code42.com'",
+        "--exclude-actor 'user@code42.com'",
+        "--actor-contains 'user@code42.com'",
     ],
 )
 def test_alerts_search_command_returns_success_return_code(
-    runner, integration_test_profile, command
+    runner, integration_test_profile, command_option
 ):
+    command = "alerts search -b {} -e {} {}".format(
+        begin_date_str, end_date_str, command_option
+    )
     assert_test_is_successful(runner, append_profile(command))
 
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "command,protocol",
-    [
-        ("alerts send-to localhost:5140 -p TCP -b {}".format(begin_date_str), "TCP"),
-        ("alerts send-to localhost:5140 -p UDP -b {}".format(begin_date_str), "UDP"),
-    ],
+    "protocol", ["TCP", "UDP"],
 )
 def test_alerts_send_to_returns_success_return_code(
-    runner, integration_test_profile, command, protocol
+    runner, integration_test_profile, protocol
 ):
+    command = "alerts send-to localhost:5140 -p {} -b {}".format(
+        protocol, begin_date_str
+    )
     with DataServer(protocol=protocol):
         result = runner.invoke(cli, split_command(append_profile(command)))
     assert result.exit_code == 0
+
+
+def test_alerts_advanced_query_returns_success_return_code(
+    runner, integration_test_profile
+):
+    ADVANCED_QUERY = """{"groupClause":"AND", "groups":[{"filterClause":"AND",
+    "filters":[{"operator":"ON_OR_AFTER", "term":"eventTimestamp", "value":"2020-09-13T00:00:00.000Z"},
+    {"operator":"ON_OR_BEFORE", "term":"eventTimestamp", "value":"2020-12-07T13:20:15.195Z"}]}],
+    "srtDir":"asc", "srtKey":"eventId", "pgNum":1, "pgSize":10000}
+    """
+    command = "alerts search --advanced-query '{}'".format(ADVANCED_QUERY)
+    assert_test_is_successful(runner, append_profile(command))

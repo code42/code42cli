@@ -10,8 +10,6 @@ from tests.integration.util import DataServer
 from code42cli.main import cli
 
 
-SEARCH_COMMAND = "audit-logs search"
-BASE_COMMAND = "{} -b".format(SEARCH_COMMAND)
 begin_date = datetime.utcnow() - timedelta(days=2)
 begin_date_str = begin_date.strftime("%Y-%m-%d %H:%M:%S")
 end_date = datetime.utcnow() - timedelta(days=0)
@@ -20,21 +18,14 @@ end_date_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "command,protocol",
-    [
-        (
-            "audit-logs send-to localhost:5140 -p TCP -b '{}'".format(begin_date_str),
-            "TCP",
-        ),
-        (
-            "audit-logs send-to localhost:5140 -p UDP -b '{}'".format(begin_date_str),
-            "UDP",
-        ),
-    ],
+    "protocol", ["TCP", "UDP"],
 )
 def test_auditlogs_send_to_command_returns_success_return_code(
-    runner, integration_test_profile, command, protocol
+    runner, integration_test_profile, protocol
 ):
+    command = "audit-logs send-to localhost:5140 -p {} -b '{}'".format(
+        protocol, begin_date_str
+    )
     with DataServer(protocol=protocol):
         result = runner.invoke(cli, split_command(append_profile(command)))
     assert result.exit_code == 0
@@ -42,33 +33,35 @@ def test_auditlogs_send_to_command_returns_success_return_code(
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "command",
+    "command_option",
     [
-        ("{} '{}'".format(BASE_COMMAND, begin_date_str)),
-        ("{} '{}' -e '{}'".format(BASE_COMMAND, begin_date_str, end_date_str)),
-        ("{} '{}' --end '{}'".format(BASE_COMMAND, begin_date_str, end_date_str)),
-        ("{} '{}' --event-type '{}'".format(BASE_COMMAND, begin_date_str, "test")),
-        ("{} '{}' --actor-ip '{}'".format(BASE_COMMAND, begin_date_str, "0.0.0.0")),
-        ("{} '{}' --affected-user-id '{}'".format(BASE_COMMAND, begin_date_str, "123")),
-        (
-            "{} '{}' --affected-username '{}'".format(
-                BASE_COMMAND, begin_date_str, "test"
-            )
-        ),
-        ("{} '{}' -f {}".format(BASE_COMMAND, begin_date_str, "CSV")),
-        ("{} '{}' -f '{}'".format(BASE_COMMAND, begin_date_str, "TABLE")),
-        ("{} '{}' -f '{}'".format(BASE_COMMAND, begin_date_str, "JSON")),
-        ("{} '{}' -f '{}'".format(BASE_COMMAND, begin_date_str, "RAW-JSON")),
-        ("{} '{}' --format {}".format(BASE_COMMAND, begin_date_str, "CSV")),
-        ("{} '{}' --format '{}'".format(BASE_COMMAND, begin_date_str, "TABLE")),
-        ("{} '{}' --format '{}'".format(BASE_COMMAND, begin_date_str, "JSON")),
-        ("{} '{}' --format '{}'".format(BASE_COMMAND, begin_date_str, "RAW-JSON")),
-        ("{} --begin '{}'".format(SEARCH_COMMAND, begin_date_str)),
-        ("{} '{}' -d".format(BASE_COMMAND, begin_date_str)),
-        ("{} '{}' --debug".format(BASE_COMMAND, begin_date_str)),
+        "-e '{}'".format(end_date_str),
+        "--end '{}'".format(end_date_str),
+        "--event-type test",
+        "--actor-ip '0.0.0.0'",
+        "--affected-user-id 123",
+        "--affected-username test",
+        "-f CSV",
+        "-f TABLE",
+        "-f JSON",
+        "-f RAW-JSON",
+        "--format CSV",
+        "--format TABLE",
+        "--format JSON",
+        "--format RAW-JSON",
+        "-d",
+        "--debug",
     ],
 )
-def test_auditlogs_search_command_returns_success_return_code(
-    runner, integration_test_profile, command
+def test_auditlogs_search_command_with_short_hand_begin_returns_success_return_code(
+    runner, integration_test_profile, command_option
 ):
+    command = "audit-logs search -b '{}' {}".format(begin_date_str, command_option)
+    assert_test_is_successful(runner, append_profile(command))
+
+
+def test_auditlogs_search_command_with_full_begin_returns_success_return_code(
+    runner, integration_test_profile,
+):
+    command = "audit-logs search --begin '{}'".format(begin_date_str)
     assert_test_is_successful(runner, append_profile(command))
