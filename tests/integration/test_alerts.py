@@ -16,30 +16,10 @@ end_date_str = end_date.strftime("%Y-%m-%d")
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize(
-    "command_option",
-    [
-        "--state OPEN",
-        "--state RESOLVED",
-        "--actor user@code42.com",
-        "--rule-name 'File Upload Alert'",
-        "--rule-id 962a6a1c-54f6-4477-90bd-a08cc74cbf71",
-        "--rule-type FedEndpointExfiltration",
-        "--description 'Alert on any file upload'",
-        "--exclude-rule-type 'FedEndpointExfiltration'",
-        "--exclude-rule-id '962a6a1c-54f6-4477-90bd-a08cc74cbf71'",
-        "--exclude-rule-name 'File Upload Alert'",
-        "--exclude-actor-contains 'user@code42.com'",
-        "--exclude-actor 'user@code42.com'",
-        "--actor-contains 'user@code42.com'",
-    ],
-)
 def test_alerts_search_command_returns_success_return_code(
-    runner, integration_test_profile, command_option
+    runner, integration_test_profile
 ):
-    command = "alerts search -b {} -e {} {}".format(
-        begin_date_str, end_date_str, command_option
-    )
+    command = "alerts search -b {} -e {}".format(begin_date_str, end_date_str)
     assert_test_is_successful(runner, append_profile(command))
 
 

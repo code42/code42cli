@@ -4,23 +4,10 @@ from tests.integration.util import assert_test_is_successful
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize(
-    "command_option",
-    [
-        "-f CSV",
-        "-f TABLE",
-        "-f RAW-JSON",
-        "-f JSON",
-        "--format CSV",
-        "--format TABLE",
-        "--format JSON",
-        "--format RAW-JSON",
-    ],
-)
 def test_legal_hold_list_command_returns_success_return_code(
-    runner, integration_test_profile, command_option
+    runner, integration_test_profile
 ):
-    command = "legal-hold list {}".format(command_option)
+    command = "legal-hold list"
     assert_test_is_successful(runner, append_profile(command))
 
 

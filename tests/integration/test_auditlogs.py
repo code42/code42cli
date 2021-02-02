@@ -32,31 +32,10 @@ def test_auditlogs_send_to_command_returns_success_return_code(
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize(
-    "command_option",
-    [
-        "-e '{}'".format(end_date_str),
-        "--end '{}'".format(end_date_str),
-        "--event-type test",
-        "--actor-ip '0.0.0.0'",
-        "--affected-user-id 123",
-        "--affected-username test",
-        "-f CSV",
-        "-f TABLE",
-        "-f JSON",
-        "-f RAW-JSON",
-        "--format CSV",
-        "--format TABLE",
-        "--format JSON",
-        "--format RAW-JSON",
-        "-d",
-        "--debug",
-    ],
-)
 def test_auditlogs_search_command_with_short_hand_begin_returns_success_return_code(
-    runner, integration_test_profile, command_option
+    runner, integration_test_profile
 ):
-    command = "audit-logs search -b '{}' {}".format(begin_date_str, command_option)
+    command = "audit-logs search -b '{}'".format(begin_date_str)
     assert_test_is_successful(runner, append_profile(command))
 
 
