@@ -1,7 +1,7 @@
 from datetime import date
 
-import pytest
 import numpy as np
+import pytest
 from pandas import DataFrame
 from pandas._testing import assert_frame_equal
 from py42.exceptions import Py42BadRequestError
@@ -295,6 +295,7 @@ ALL_CUSTODIANS_RESPONSE = {
     ]
 }
 
+
 def _create_py42_response(mocker, text):
     response = mocker.MagicMock(spec=Response)
     response.text = text
@@ -446,6 +447,7 @@ def get_all_custodian_success(cli_state):
     cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
         custodian_list_generator()
     )
+
 
 def test_deactivate_deactivates_device(
     runner, cli_state, deactivate_device_success, get_device_by_guid_success

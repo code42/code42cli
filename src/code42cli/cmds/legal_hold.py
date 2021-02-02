@@ -111,11 +111,11 @@ def show(state, matter_id, include_inactive=False, include_policy=False):
     inactive_usernames = [
         member["user"]["username"] for member in memberships if not member["active"]
     ]
-    
+
     formatter = OutputFormatter(OutputFormat.TABLE, _MATTER_KEYS_MAP)
     formatter.echo_formatted_list([matter])
     _print_matter_members(active_usernames, member_type="active")
-    
+
     if include_inactive:
         _print_matter_members(inactive_usernames, member_type="inactive")
 
