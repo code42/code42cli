@@ -1,5 +1,3 @@
-from _collections import OrderedDict
-
 import click
 import py42.sdk.queries.alerts.filters as f
 from c42eventextractor.extractors import AlertExtractor
@@ -12,26 +10,18 @@ import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 import code42cli.options as opt
+from code42cli.cmds.search import SendToCommand
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
+from code42cli.cmds.search.options import server_options
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import limit_date_range
-from code42cli.logger import get_logger_for_server
 from code42cli.options import format_option
-from code42cli.options import server_options
 from code42cli.output_formats import JsonOutputFormat
 from code42cli.output_formats import OutputFormatter
 
+
 ALERTS_KEYWORD = "alerts"
-SEARCH_DEFAULT_HEADER = OrderedDict()
-SEARCH_DEFAULT_HEADER["name"] = "RuleName"
-SEARCH_DEFAULT_HEADER["actor"] = "Username"
-SEARCH_DEFAULT_HEADER["createdAt"] = "ObservedDate"
-SEARCH_DEFAULT_HEADER["state"] = "Status"
-SEARCH_DEFAULT_HEADER["severity"] = "Severity"
-SEARCH_DEFAULT_HEADER["description"] = "Description"
-
-
 begin = opt.begin_option(
     ALERTS_KEYWORD,
     callback=lambda ctx, param, arg: convert_datetime_to_timestamp(
@@ -41,16 +31,6 @@ begin = opt.begin_option(
 end = opt.end_option(ALERTS_KEYWORD)
 checkpoint = opt.checkpoint_option(ALERTS_KEYWORD)
 advanced_query = searchopt.advanced_query_option(ALERTS_KEYWORD)
-
-
-def search_options(f):
-    f = checkpoint(f)
-    f = advanced_query(f)
-    f = end(f)
-    f = begin(f)
-    return f
-
-
 severity_option = click.option(
     "--severity",
     multiple=True,
@@ -147,14 +127,32 @@ description_option = click.option(
     callback=searchopt.contains_filter(f.Description),
     help="Filter alerts by description. Does fuzzy search by default.",
 )
-
 send_to_format_options = click.option(
     "-f",
     "--format",
     type=click.Choice(JsonOutputFormat(), case_sensitive=False),
     help="The output format of the result. Defaults to json format.",
-    default=JsonOutputFormat.JSON,
+    default=JsonOutputFormat.RAW,
 )
+
+
+def _get_search_default_header():
+    return {
+        "name": "RuleName",
+        "actor": "Username",
+        "createdAt": "ObservedDate",
+        "state": "Status",
+        "severity": "Severity",
+        "description": "Description",
+    }
+
+
+def search_options(f):
+    f = checkpoint(f)
+    f = advanced_query(f)
+    f = end(f)
+    f = begin(f)
+    return f
 
 
 def alert_options(f):
@@ -231,7 +229,7 @@ def search(
 ):
     """Search for alerts."""
     output_header = ext.try_get_default_header(
-        include_all, SEARCH_DEFAULT_HEADER, format
+        include_all, _get_search_default_header(), format
     )
     formatter = OutputFormatter(format, output_header)
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
@@ -247,7 +245,7 @@ def search(
     handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
 
 
-@alerts.command()
+@alerts.command(cls=SendToCommand)
 @alert_options
 @search_options
 @click.option(
@@ -262,29 +260,21 @@ def search(
     help="Display simple properties of the primary level of the nested response.",
 )
 @send_to_format_options
-def send_to(
-    cli_state,
-    format,
-    hostname,
-    protocol,
-    begin,
-    end,
-    advanced_query,
-    use_checkpoint,
-    or_query,
-    **kwargs
-):
+def send_to(cli_state, begin, end, advanced_query, use_checkpoint, or_query, **kwargs):
     """Send alerts to the given server address.
 
     HOSTNAME format: address:port where port is optional and defaults to 514.
     """
-    logger = get_logger_for_server(hostname, protocol, format)
-    cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
+    cursor = _get_cursor(cli_state, use_checkpoint)
     handlers = ext.create_send_to_handlers(
-        cli_state.sdk, AlertExtractor, cursor, use_checkpoint, logger,
+        cli_state.sdk, AlertExtractor, cursor, use_checkpoint, cli_state.logger,
     )
     _call_extractor(cli_state, handlers, begin, end, or_query, advanced_query, **kwargs)
     handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
+
+
+def _get_cursor(state, use_checkpoint):
+    return _get_alert_cursor_store(state.profile.name) if use_checkpoint else None
 
 
 def _get_alert_extractor(sdk, handlers):

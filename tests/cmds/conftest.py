@@ -54,9 +54,7 @@ def cli_logger(mocker):
 
 @pytest.fixture
 def event_extractor_logger(mocker):
-    mock = mocker.patch(
-        "c42eventextractor.logging.handlers.NoPrioritySysLogHandlerWrapper"
-    )
+    mock = mocker.patch("code42cli.logger.handlers.NoPrioritySysLogHandler")
     mock.emit.return_value = mocker.MagicMock()
     return mock
 
@@ -119,3 +117,9 @@ def get_generator_for_get_all(mocker, mock_return_items):
         yield Py42Response(response)
 
     return gen
+
+
+def get_mark_for_search_and_send_to(command_group):
+    search_cmd = [command_group, "search"]
+    send_to_cmd = [command_group, "send-to", "0.0.0.0"]
+    return pytest.mark.parametrize("command", (search_cmd, send_to_cmd))

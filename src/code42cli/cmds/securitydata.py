@@ -1,4 +1,3 @@
-from _collections import OrderedDict
 from pprint import pformat
 
 import click
@@ -8,48 +7,33 @@ from click import echo
 from py42.sdk.queries.fileevents.filters.exposure_filter import ExposureType
 from py42.sdk.queries.fileevents.filters.file_filter import FileCategory
 
-import code42cli.cmds.search.enums as enum
 import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 import code42cli.options as opt
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
+from code42cli.cmds.search import SendToCommand
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
-from code42cli.cmds.securitydata_output_formats import FileEventsOutputFormatter
+from code42cli.cmds.search.options import send_to_format_options
+from code42cli.cmds.search.options import server_options
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import limit_date_range
-from code42cli.logger import get_logger_for_server
 from code42cli.options import format_option
 from code42cli.options import sdk_options
-from code42cli.options import send_to_format_options
-from code42cli.options import server_options
+from code42cli.output_formats import FileEventsOutputFormat
+from code42cli.output_formats import FileEventsOutputFormatter
 from code42cli.output_formats import OutputFormatter
 
+
 SECURITY_DATA_KEYWORD = "file events"
-_HEADER_KEYS_MAP = OrderedDict()
-_HEADER_KEYS_MAP["name"] = "Name"
-_HEADER_KEYS_MAP["id"] = "Id"
-
-SEARCH_DEFAULT_HEADER = OrderedDict()
-SEARCH_DEFAULT_HEADER["fileName"] = "FileName"
-SEARCH_DEFAULT_HEADER["filePath"] = "FilePath"
-SEARCH_DEFAULT_HEADER["eventType"] = "Type"
-SEARCH_DEFAULT_HEADER["eventTimestamp"] = "EventTimestamp"
-SEARCH_DEFAULT_HEADER["fileCategory"] = "FileCategory"
-SEARCH_DEFAULT_HEADER["fileSize"] = "FileSize"
-SEARCH_DEFAULT_HEADER["fileOwner"] = "FileOwner"
-SEARCH_DEFAULT_HEADER["md5Checksum"] = "MD5Checksum"
-SEARCH_DEFAULT_HEADER["sha256Checksum"] = "SHA256Checksum"
-
-
 file_events_format_option = click.option(
     "-f",
     "--format",
-    type=click.Choice(enum.FileEventsOutputFormat(), case_sensitive=False),
+    type=click.Choice(FileEventsOutputFormat(), case_sensitive=False),
     help="The output format of the result. Defaults to table format.",
-    default=enum.FileEventsOutputFormat.TABLE,
+    default=FileEventsOutputFormat.TABLE,
 )
 exposure_type_option = click.option(
     "-t",
@@ -140,22 +124,6 @@ include_non_exposure_option = click.option(
     cls=incompatible_with(["advanced_query", "type", "saved_search"]),
     help="Get all events including non-exposure events.",
 )
-
-
-def _get_saved_search_query(ctx, param, arg):
-    if arg is None:
-        return
-    query = ctx.obj.sdk.securitydata.savedsearches.get_query(arg)
-    return query
-
-
-saved_search_option = click.option(
-    "--saved-search",
-    help="Get events from a saved search filter with the given ID.",
-    callback=_get_saved_search_query,
-    cls=incompatible_with("advanced_query"),
-)
-
 begin_option = opt.begin_option(
     SECURITY_DATA_KEYWORD,
     callback=lambda ctx, param, arg: convert_datetime_to_timestamp(
@@ -167,6 +135,39 @@ checkpoint_option = opt.checkpoint_option(
     SECURITY_DATA_KEYWORD, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
 )
 advanced_query_option = searchopt.advanced_query_option(SECURITY_DATA_KEYWORD)
+
+
+def _get_saved_search_option():
+    def _get_saved_search_query(ctx, param, arg):
+        if arg is None:
+            return
+        query = ctx.obj.sdk.securitydata.savedsearches.get_query(arg)
+        return query
+
+    return click.option(
+        "--saved-search",
+        help="Get events from a saved search filter with the given ID.",
+        callback=_get_saved_search_query,
+        cls=incompatible_with("advanced_query"),
+    )
+
+
+def _create_header_keys_map():
+    return {"name": "Name", "id": "Id"}
+
+
+def _create_search_header_map():
+    return {
+        "fileName": "FileName",
+        "filePath": "FilePath",
+        "eventType": "Type",
+        "eventTimestamp": "EventTimestamp",
+        "fileCategory": "FileCategory",
+        "fileSize": "FileSize",
+        "fileOwner": "FileOwner",
+        "md5Checksum": "MD5Checksum",
+        "sha256Checksum": "SHA256Checksum",
+    }
 
 
 def search_options(f):
@@ -190,7 +191,7 @@ def file_event_options(f):
     f = process_owner_option(f)
     f = tab_url_option(f)
     f = include_non_exposure_option(f)
-    f = saved_search_option(f)
+    f = _get_saved_search_option()(f)
     return f
 
 
@@ -208,24 +209,6 @@ def security_data(state):
 def clear_checkpoint(state, checkpoint_name):
     """Remove the saved file event checkpoint from `--use-checkpoint/-c` mode."""
     _get_file_event_cursor_store(state.profile.name).delete(checkpoint_name)
-
-
-def _call_extractor(
-    state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
-):
-    if advanced_query:
-        state.search_filters = advanced_query
-    extractor = _get_file_event_extractor(state.sdk, handlers)
-    extractor.use_or_query = or_query
-    extractor.or_query_exempt_filters.append(f.ExposureType.exists())
-    if saved_search:
-        extractor.extract(*saved_search._filter_group_list)
-    else:
-        if begin or end:
-            state.search_filters.append(
-                ext.create_time_range_filter(f.EventTimestamp, begin, end)
-            )
-        extractor.extract(*state.search_filters)
 
 
 @security_data.command()
@@ -256,13 +239,10 @@ def search(
 ):
     """Search for file events."""
     output_header = ext.try_get_default_header(
-        include_all, SEARCH_DEFAULT_HEADER, format
+        include_all, _create_search_header_map(), format
     )
-
     formatter = FileEventsOutputFormatter(format, output_header)
-    cursor = (
-        _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
-    )
+    cursor = _get_cursor(state, use_checkpoint)
     handlers = ext.create_handlers(
         state.sdk,
         FileEventExtractor,
@@ -271,11 +251,9 @@ def search(
         formatter=formatter,
         force_pager=include_all,
     )
-    _call_extractor(
+    _extract(
         state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
     )
-
-    handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
 
 
 @security_data.group(cls=OrderedGroup)
@@ -290,7 +268,7 @@ def saved_search(state):
 @sdk_options()
 def _list(state, format=None):
     """List available saved searches."""
-    formatter = OutputFormatter(format, _HEADER_KEYS_MAP)
+    formatter = OutputFormatter(format, _create_header_keys_map())
     response = state.sdk.securitydata.savedsearches.get()
     saved_searches = response["searches"]
     if saved_searches:
@@ -306,7 +284,7 @@ def show(state, search_id):
     echo(pformat(response["searches"]))
 
 
-@security_data.command()
+@security_data.command(cls=SendToCommand)
 @file_event_options
 @search_options
 @click.option(
@@ -325,38 +303,55 @@ def show(state, search_id):
 )
 @send_to_format_options
 def send_to(
-    state,
-    format,
-    hostname,
-    protocol,
-    begin,
-    end,
-    advanced_query,
-    use_checkpoint,
-    saved_search,
-    or_query,
-    **kwargs,
+    state, begin, end, advanced_query, use_checkpoint, saved_search, or_query, **kwargs,
 ):
     """Send events to the given server address.
 
     HOSTNAME format: address:port where port is optional and defaults to 514.
     """
-    logger = get_logger_for_server(hostname, protocol, format)
-    cursor = (
-        _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
-    )
+    cursor = _get_cursor(state, use_checkpoint)
     handlers = ext.create_send_to_handlers(
-        state.sdk, FileEventExtractor, cursor, use_checkpoint, logger
+        state.sdk, FileEventExtractor, cursor, use_checkpoint, state.logger
     )
-    _call_extractor(
+    _extract(
         state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
     )
-    handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
 
 
 def _get_file_event_extractor(sdk, handlers):
     return FileEventExtractor(sdk, handlers)
 
 
+def _get_cursor(state, use_checkpoint):
+    return _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
+
+
 def _get_file_event_cursor_store(profile_name):
     return FileEventCursorStore(profile_name)
+
+
+def _extract(
+    state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
+):
+    _call_extractor(
+        state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
+    )
+    handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
+
+
+def _call_extractor(
+    state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
+):
+    if advanced_query:
+        state.search_filters = advanced_query
+    extractor = _get_file_event_extractor(state.sdk, handlers)
+    extractor.use_or_query = or_query
+    extractor.or_query_exempt_filters.append(f.ExposureType.exists())
+    if saved_search:
+        extractor.extract(*saved_search._filter_group_list)
+    else:
+        if begin or end:
+            state.search_filters.append(
+                ext.create_time_range_filter(f.EventTimestamp, begin, end)
+            )
+        extractor.extract(*state.search_filters)

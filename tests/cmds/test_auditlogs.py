@@ -6,6 +6,7 @@ from logging import Logger
 import pytest
 from py42.response import Py42Response
 from requests import Response
+from tests.cmds.conftest import get_mark_for_search_and_send_to
 
 from code42cli.click_ext.types import MagicDate
 from code42cli.cmds.auditlogs import _parse_audit_log_timestamp_string_to_timestamp
@@ -13,6 +14,7 @@ from code42cli.cmds.search.cursor_store import AuditLogCursorStore
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import round_datetime_to_day_end
 from code42cli.date_helper import round_datetime_to_day_start
+from code42cli.logger.handlers import ServerProtocol
 from code42cli.main import cli
 from code42cli.util import hash_event
 
@@ -26,7 +28,7 @@ TEST_EVENTS_WITH_SAME_TIMESTAMP = [
     {
         "type$": "audit_log::logged_in/1",
         "actorId": "42",
-        "actorName": "42@code42.com",
+        "actorName": "42@example.com",
         "actorAgent": "py42 python code42cli",
         "actorIpAddress": "200.100.300.42",
         "timestamp": TEST_AUDIT_LOG_TIMESTAMP_1,
@@ -34,7 +36,7 @@ TEST_EVENTS_WITH_SAME_TIMESTAMP = [
     {
         "type$": "audit_log::logged_in/1",
         "actorId": "43",
-        "actorName": "43@code42.com",
+        "actorName": "43@example.com",
         "actorAgent": "py42 python code42cli",
         "actorIpAddress": "200.100.300.42",
         "timestamp": TEST_AUDIT_LOG_TIMESTAMP_1,
@@ -45,7 +47,7 @@ TEST_EVENTS_WITH_DIFFERENT_TIMESTAMPS = [
     {
         "type$": "audit_log::logged_in/1",
         "actorId": "44",
-        "actorName": "44@code42.com",
+        "actorName": "44@example.com",
         "actorAgent": "py42 python code42cli",
         "actorIpAddress": "200.100.300.42",
         "timestamp": TEST_AUDIT_LOG_TIMESTAMP_2,
@@ -53,7 +55,7 @@ TEST_EVENTS_WITH_DIFFERENT_TIMESTAMPS = [
     {
         "type$": "audit_log::logged_in/1",
         "actorId": "45",
-        "actorName": "45@code42.com",
+        "actorName": "45@example.com",
         "actorAgent": "py42 python code42cli",
         "actorIpAddress": "200.100.300.42",
         "timestamp": TEST_AUDIT_LOG_TIMESTAMP_3,
@@ -62,6 +64,7 @@ TEST_EVENTS_WITH_DIFFERENT_TIMESTAMPS = [
 TEST_CHECKPOINT_EVENT_HASHLIST = [
     hash_event(event) for event in TEST_EVENTS_WITH_SAME_TIMESTAMP
 ]
+search_and_send_to_test = get_mark_for_search_and_send_to("audit-logs")
 
 
 @pytest.fixture
@@ -94,11 +97,14 @@ def date_str():
 
 
 @pytest.fixture
-def send_to_logger(mocker):
+def send_to_logger_factory(mocker):
+    return mocker.patch("code42cli.cmds.search._try_get_logger_for_server")
+
+
+@pytest.fixture
+def send_to_logger(mocker, send_to_logger_factory):
     mock_logger = mocker.MagicMock(spec=Logger)
-    mocker.patch(
-        "code42cli.cmds.auditlogs.get_logger_for_server", return_value=mock_logger
-    )
+    send_to_logger_factory.return_value = mock_logger
     return mock_logger
 
 
@@ -135,12 +141,16 @@ def test_audit_log_response_with_only_same_timestamps(mocker):
     return response_gen()
 
 
-def test_search_audit_logs_json_format(runner, cli_state, date_str):
-    runner.invoke(cli, ["audit-logs", "search", "-b", date_str], obj=cli_state)
+@search_and_send_to_test
+def test_search_and_send_to_handles_json_format(runner, cli_state, date_str, command):
+    runner.invoke(cli, [*command, "-b", date_str], obj=cli_state)
     assert cli_state.sdk.auditlogs.get_all.call_count == 1
 
 
-def test_search_audit_logs_with_filter_parameters(runner, cli_state, date_str):
+@search_and_send_to_test
+def test_search_and_send_to_handles_filter_parameters(
+    runner, cli_state, date_str, command
+):
     expected_begin_timestamp = convert_datetime_to_timestamp(
         MagicDate(rounding_func=round_datetime_to_day_start).convert(
             date_str, None, None
@@ -149,20 +159,18 @@ def test_search_audit_logs_with_filter_parameters(runner, cli_state, date_str):
     runner.invoke(
         cli,
         [
-            "audit-logs",
-            "search",
+            *command,
             "--actor-username",
-            "test@test.com",
+            "test@example.com",
             "--actor-username",
-            "test2@test.test",
+            "test2@test.example.com",
             "--begin",
             date_str,
         ],
         obj=cli_state,
     )
-    assert cli_state.sdk.auditlogs.get_all.call_count == 1
     cli_state.sdk.auditlogs.get_all.assert_called_once_with(
-        usernames=("test@test.com", "test2@test.test"),
+        usernames=("test@example.com", "test2@test.example.com"),
         affected_user_ids=(),
         affected_usernames=(),
         begin_time=expected_begin_timestamp,
@@ -173,7 +181,10 @@ def test_search_audit_logs_with_filter_parameters(runner, cli_state, date_str):
     )
 
 
-def test_search_audit_logs_with_all_filter_parameters(runner, cli_state, date_str):
+@search_and_send_to_test
+def test_search_and_send_to_handles_all_filter_parameters(
+    runner, cli_state, date_str, command
+):
     end_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     expected_begin_timestamp = convert_datetime_to_timestamp(
         MagicDate(rounding_func=round_datetime_to_day_start).convert(
@@ -186,18 +197,17 @@ def test_search_audit_logs_with_all_filter_parameters(runner, cli_state, date_st
     runner.invoke(
         cli,
         [
-            "audit-logs",
-            "search",
+            *command,
             "--actor-username",
-            "test@test.com",
+            "test@example.com",
             "--actor-username",
-            "test2@test.test",
+            "test2@test.example.com",
             "--event-type",
             "saved-search",
             "--actor-ip",
             "0.0.0.0",
             "--affected-username",
-            "test@test.test",
+            "test@test.example.com",
             "--affected-user-id",
             "123",
             "--affected-user-id",
@@ -211,11 +221,10 @@ def test_search_audit_logs_with_all_filter_parameters(runner, cli_state, date_st
         ],
         obj=cli_state,
     )
-    assert cli_state.sdk.auditlogs.get_all.call_count == 1
     cli_state.sdk.auditlogs.get_all.assert_called_once_with(
-        usernames=("test@test.com", "test2@test.test"),
+        usernames=("test@example.com", "test2@test.example.com"),
         affected_user_ids=("123", "456"),
-        affected_usernames=("test@test.test",),
+        affected_usernames=("test@test.example.com",),
         begin_time=expected_begin_timestamp,
         end_time=expected_end_timestamp,
         event_types=("saved-search",),
@@ -232,6 +241,49 @@ def test_send_to_makes_expected_call_count_to_the_logger_method(
         cli, ["audit-logs", "send-to", "localhost", "--begin", "1d"], obj=cli_state
     )
     assert send_to_logger.info.call_count == 4
+
+
+def test_send_to_creates_expected_logger(cli_state, runner, send_to_logger_factory):
+    runner.invoke(
+        cli,
+        [
+            "audit-logs",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            "TLS-TCP",
+            "--certs",
+            "certs/file",
+        ],
+        obj=cli_state,
+    )
+    send_to_logger_factory.assert_called_once_with(
+        "0.0.0.0", "TLS-TCP", "RAW-JSON", "certs/file"
+    )
+
+
+def test_send_to_when_given_ignore_cert_validation_uses_certs_equal_to_ignore_str(
+    cli_state, runner, send_to_logger_factory
+):
+    runner.invoke(
+        cli,
+        [
+            "audit-logs",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            "TLS-TCP",
+            "--ignore-cert-validation",
+        ],
+        obj=cli_state,
+    )
+    send_to_logger_factory.assert_called_once_with(
+        "0.0.0.0", "TLS-TCP", "RAW-JSON", "ignore"
+    )
 
 
 def test_send_to_emits_events_in_chronological_order(
@@ -259,42 +311,18 @@ def test_send_to_emits_events_in_chronological_order(
     )
 
 
-def test_search_with_checkpoint_saves_expected_cursor_timestamp(
-    cli_state, runner, test_audit_log_response, audit_log_cursor_with_checkpoint
-):
-    cli_state.sdk.auditlogs.get_all.return_value = test_audit_log_response
-    runner.invoke(
-        cli,
-        ["audit-logs", "search", "--begin", "1d", "--use-checkpoint", "test"],
-        obj=cli_state,
-    )
-    assert audit_log_cursor_with_checkpoint.replace.call_count == 4
-    assert audit_log_cursor_with_checkpoint.replace.call_args_list[3][0] == (
-        "test",
-        CURSOR_TIMESTAMP,
-    )
-
-
-def test_send_to_with_checkpoint_saves_expected_cursor_timestamp(
+@search_and_send_to_test
+def test_search_and_send_to_with_checkpoint_saves_expected_cursor_timestamp(
     cli_state,
     runner,
+    send_to_logger,
     test_audit_log_response,
     audit_log_cursor_with_checkpoint,
-    send_to_logger,
+    command,
 ):
     cli_state.sdk.auditlogs.get_all.return_value = test_audit_log_response
     runner.invoke(
-        cli,
-        [
-            "audit-logs",
-            "send-to",
-            "localhost",
-            "--begin",
-            "1d",
-            "--use-checkpoint",
-            "test",
-        ],
-        obj=cli_state,
+        cli, [*command, "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state,
     )
     assert audit_log_cursor_with_checkpoint.replace.call_count == 4
     assert audit_log_cursor_with_checkpoint.replace.call_args_list[3][0] == (
@@ -303,34 +331,17 @@ def test_send_to_with_checkpoint_saves_expected_cursor_timestamp(
     )
 
 
-def test_search_with_existing_checkpoint_replaces_begin_arg_if_passed(
-    cli_state, runner, test_audit_log_response, audit_log_cursor_with_checkpoint
+@search_and_send_to_test
+def test_search_and_send_to_with_existing_checkpoint_replaces_begin_arg_if_passed(
+    cli_state,
+    runner,
+    send_to_logger,
+    test_audit_log_response,
+    audit_log_cursor_with_checkpoint,
+    command,
 ):
     runner.invoke(
-        cli,
-        ["audit-logs", "search", "--begin", "1d", "--use-checkpoint", "test"],
-        obj=cli_state,
-    )
-    assert (
-        cli_state.sdk.auditlogs.get_all.call_args[1]["begin_time"] == CURSOR_TIMESTAMP
-    )
-
-
-def test_send_to_with_existing_checkpoint_replaces_begin_arg_if_passed(
-    cli_state, runner, test_audit_log_response, audit_log_cursor_with_checkpoint
-):
-    runner.invoke(
-        cli,
-        [
-            "audit-logs",
-            "send-to",
-            "localhost",
-            "--begin",
-            "1d",
-            "--use-checkpoint",
-            "test",
-        ],
-        obj=cli_state,
+        cli, [*command, "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state,
     )
     assert (
         cli_state.sdk.auditlogs.get_all.call_args[1]["begin_time"] == CURSOR_TIMESTAMP
@@ -349,48 +360,24 @@ def test_search_with_existing_checkpoint_events_skips_duplicate_events(
         ["audit-logs", "search", "--begin", "1d", "--use-checkpoint", "test"],
         obj=cli_state,
     )
-    assert "42@code42.com" not in result.stdout
-    assert "43@code42.com" in result.stdout
+    assert "42@example.com" not in result.stdout
+    assert "43@example.com" in result.stdout
 
 
-def test_send_to_with_existing_checkpoint_events_skips_duplicate_events(
+@search_and_send_to_test
+def test_search_and_send_to_without_existing_checkpoint_writes_both_event_hashes_with_same_timestamp(
     cli_state,
     runner,
-    test_audit_log_response,
-    audit_log_cursor_with_checkpoint_and_events,
     send_to_logger,
-):
-    cli_state.sdk.auditlogs.get_all.return_value = test_audit_log_response
-    runner.invoke(
-        cli,
-        [
-            "audit-logs",
-            "send-to",
-            "localhost",
-            "--begin",
-            "1d",
-            "--use-checkpoint",
-            "test",
-        ],
-        obj=cli_state,
-    )
-    assert send_to_logger.info.call_count == 3
-    assert send_to_logger.info.call_args_list[0][0][0]["actorName"] != "42@code42.com"
-
-
-def test_search_without_existing_checkpoint_writes_both_event_hashes_with_same_timestamp(
-    cli_state,
-    runner,
     test_audit_log_response_with_only_same_timestamps,
     audit_log_cursor_with_checkpoint,
+    command,
 ):
     cli_state.sdk.auditlogs.get_all.return_value = (
         test_audit_log_response_with_only_same_timestamps
     )
     runner.invoke(
-        cli,
-        ["audit-logs", "search", "--begin", "1d", "--use-checkpoint", "test"],
-        obj=cli_state,
+        cli, [*command, "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state,
     )
     assert audit_log_cursor_with_checkpoint.replace_events.call_count == 2
     assert audit_log_cursor_with_checkpoint.replace_events.call_args_list[1][0][1] == [
@@ -399,34 +386,47 @@ def test_search_without_existing_checkpoint_writes_both_event_hashes_with_same_t
     ]
 
 
-def test_send_to_without_existing_checkpoint_writes_both_event_hashes_with_same_timestamp(
-    cli_state,
-    runner,
-    test_audit_log_response_with_only_same_timestamps,
-    audit_log_cursor_with_checkpoint,
-    send_to_logger,
-):
-    cli_state.sdk.auditlogs.get_all.return_value = (
-        test_audit_log_response_with_only_same_timestamps
+@pytest.mark.parametrize(
+    "protocol", (ServerProtocol.TLS_TCP, ServerProtocol.TLS_TCP, ServerProtocol.UDP)
+)
+def test_send_to_allows_protocol_arg(cli_state, runner, protocol):
+    res = runner.invoke(
+        cli,
+        ["audit-logs", "send-to", "0.0.0.0", "--begin", "1d", "--protocol", protocol],
+        obj=cli_state,
     )
-    runner.invoke(
+    assert res.exit_code == 0
+
+
+def test_send_when_given_unknown_protocol_fails(cli_state, runner):
+    res = runner.invoke(
+        cli,
+        ["audit-logs", "send-to", "0.0.0.0", "--begin", "1d", "--protocol", "ATM"],
+        obj=cli_state,
+    )
+    assert res.exit_code
+
+
+def test_send_to_certs_and_ignore_cert_validation_args_are_incompatible(
+    cli_state, runner
+):
+    res = runner.invoke(
         cli,
         [
             "audit-logs",
             "send-to",
-            "localhost",
+            "0.0.0.0",
             "--begin",
             "1d",
-            "--use-checkpoint",
-            "test",
+            "--protocol",
+            "TLS-TCP",
+            "--certs",
+            "certs/file",
+            "--ignore-cert-validation",
         ],
         obj=cli_state,
     )
-    assert audit_log_cursor_with_checkpoint.replace_events.call_count == 2
-    assert audit_log_cursor_with_checkpoint.replace_events.call_args_list[1][0][1] == [
-        hash_event(TEST_EVENTS_WITH_SAME_TIMESTAMP[0]),
-        hash_event(TEST_EVENTS_WITH_SAME_TIMESTAMP[1]),
-    ]
+    assert "Error: --ignore-cert-validation can't be used with: --certs" in res.output
 
 
 def test_audit_log_parse_timestamp_handles_possible_strings():

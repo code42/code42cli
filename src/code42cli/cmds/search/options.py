@@ -7,6 +7,8 @@ from py42.sdk.queries.query_filter import FilterGroup
 
 from code42cli.click_ext.options import incompatible_with
 from code42cli.click_ext.types import FileOrString
+from code42cli.logger.enums import ServerProtocol
+from code42cli.output_formats import SendToFileEventsOutputFormat
 
 
 def is_in_filter(filter_cls):
@@ -140,3 +142,39 @@ def advanced_query_option(term, **kwargs):
     )
     defaults.update(kwargs)
     return click.option("--advanced-query", **defaults)
+
+
+def server_options(f):
+    hostname_arg = click.argument("hostname")
+    protocol_option = click.option(
+        "-p",
+        "--protocol",
+        type=click.Choice(ServerProtocol(), case_sensitive=False),
+        default=ServerProtocol.UDP,
+        help="Protocol used to send logs to server. "
+        "Use TLS for additional security. Defaults to UDP.",
+    )
+    certs_option = click.option(
+        "--certs", type=str, help="A CA certificates-chain file for the TLS protocol."
+    )
+    ignore_cert_validation = click.option(
+        "--ignore-cert-validation",
+        help="Set to skip CA certificate validation. "
+        "Incompatible with the 'certs' option.",
+        is_flag=True,
+        cls=incompatible_with(["certs"]),
+    )
+    f = hostname_arg(f)
+    f = protocol_option(f)
+    f = certs_option(f)
+    f = ignore_cert_validation(f)
+    return f
+
+
+send_to_format_options = click.option(
+    "-f",
+    "--format",
+    type=click.Choice(SendToFileEventsOutputFormat(), case_sensitive=False),
+    help="The output format of the result. Defaults to RAW-JSON format.",
+    default=SendToFileEventsOutputFormat.RAW,
+)

@@ -14,7 +14,7 @@ from code42cli.main import cli
 
 TEST_RULE_ID = "rule-id"
 TEST_USER_ID = "test-user-id"
-TEST_USERNAME = "test@code42.com"
+TEST_USERNAME = "test@example.com"
 TEST_SOURCE = "rule source"
 
 TEST_EMPTY_RULE_RESPONSE = {"ruleMetadata": []}

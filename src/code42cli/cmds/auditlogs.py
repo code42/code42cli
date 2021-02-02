@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from datetime import datetime
 from datetime import timezone
 
@@ -6,13 +5,13 @@ import click
 
 import code42cli.options as opt
 from code42cli.click_ext.groups import OrderedGroup
+from code42cli.cmds.search import SendToCommand
 from code42cli.cmds.search.cursor_store import AuditLogCursorStore
+from code42cli.cmds.search.options import server_options
 from code42cli.date_helper import convert_datetime_to_timestamp
-from code42cli.logger import get_logger_for_server
 from code42cli.options import checkpoint_option
 from code42cli.options import format_option
 from code42cli.options import sdk_options
-from code42cli.options import server_options
 from code42cli.output_formats import OutputFormatter
 from code42cli.util import hash_event
 from code42cli.util import warn_interrupt
@@ -21,13 +20,17 @@ EVENT_KEY = "events"
 AUDIT_LOGS_KEYWORD = "audit-logs"
 AUDIT_LOG_TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
 
-AUDIT_LOGS_DEFAULT_HEADER = OrderedDict()
-AUDIT_LOGS_DEFAULT_HEADER["timestamp"] = "Timestamp"
-AUDIT_LOGS_DEFAULT_HEADER["type$"] = "Type"
-AUDIT_LOGS_DEFAULT_HEADER["actorName"] = "ActorName"
-AUDIT_LOGS_DEFAULT_HEADER["actorIpAddress"] = "ActorIpAddress"
-AUDIT_LOGS_DEFAULT_HEADER["userName"] = "AffectedUser"
-AUDIT_LOGS_DEFAULT_HEADER["userId"] = "AffectedUserUID"
+
+def _get_audit_logs_default_header():
+    return {
+        "timestamp": "Timestamp",
+        "type$": "Type",
+        "actorName": "ActorName",
+        "actorIpAddress": "ActorIpAddress",
+        "userName": "AffectedUser",
+        "userId": "AffectedUserUID",
+    }
+
 
 begin_option = opt.begin_option(
     AUDIT_LOGS_KEYWORD,
@@ -123,7 +126,7 @@ def search(
     use_checkpoint,
 ):
     """Search audit logs."""
-    formatter = OutputFormatter(format, AUDIT_LOGS_DEFAULT_HEADER)
+    formatter = OutputFormatter(format, _get_audit_logs_default_header())
     cursor = _get_audit_log_cursor_store(state.profile.name)
     if use_checkpoint:
         checkpoint_name = use_checkpoint
@@ -158,15 +161,13 @@ def search(
         formatter.echo_formatted_list(events)
 
 
-@audit_logs.command()
+@audit_logs.command(cls=SendToCommand)
 @filter_options
 @checkpoint_option(AUDIT_LOGS_KEYWORD)
 @server_options
 @sdk_options()
 def send_to(
     state,
-    hostname,
-    protocol,
     begin,
     end,
     event_type,
@@ -176,12 +177,12 @@ def send_to(
     affected_user_id,
     affected_username,
     use_checkpoint,
+    **kwargs,
 ):
     """Send audit logs to the given server address in JSON format.
 
     HOSTNAME format: address:port where port is optional and defaults to 514.
     """
-    logger = get_logger_for_server(hostname, protocol, "RAW-JSON")
     cursor = _get_audit_log_cursor_store(state.profile.name)
     if use_checkpoint:
         checkpoint_name = use_checkpoint
@@ -210,7 +211,7 @@ def send_to(
     with warn_interrupt():
         event = None
         for event in events:
-            logger.info(event)
+            state.logger.info(event)
         if event is None:  # generator was empty
             click.echo("No results found.")
 

@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## Unreleased
+
+### Added
+
+- New choice `TLS-TCP` for `--protocol` option used by `send-to` commands:
+    - `code42 security-data send-to`
+    - `code42 alerts send-to`
+    - `code42 audit-logs send-to`
+    for more securely transporting data.
+
+- `--certs` option for `send-to` commands when using `--protocol TLS-TCP`.
+
 ## 1.2.0 - 2021-01-25
 
 ### Added

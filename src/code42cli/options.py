@@ -1,13 +1,13 @@
 import click
 
 from code42cli.click_ext.types import MagicDate
-from code42cli.cmds.search.enums import ServerProtocol
 from code42cli.cmds.search.options import AdvancedQueryAndSavedSearchIncompatible
 from code42cli.cmds.search.options import BeginOption
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import round_datetime_to_day_end
 from code42cli.date_helper import round_datetime_to_day_start
 from code42cli.errors import Code42CLIError
+from code42cli.logger.enums import ServerProtocol
 from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import SendToFileEventsOutputFormat
 from code42cli.profile import get_profile

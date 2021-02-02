@@ -48,10 +48,10 @@ def update_user(sdk, username, cloud_alias=None, risk_tag=None, notes=None):
 
     Args:
         sdk (py42.sdk.SDKClient): py42 sdk.
-        username (str or unicode): The username of the user to update.
-        cloud_alias (str or unicode): A cloud alias to add to the user.
-        risk_tag (iter[str or unicode]): A list of risk tags associated with user.
-        notes (str or unicode): Notes about the user.
+        username (str): The username of the user to update.
+        cloud_alias (str): A cloud alias to add to the user.
+        risk_tag (iter[str]): A list of risk tags associated with user.
+        notes (str): Notes about the user.
     """
     user_id = get_user_id(sdk, username)
     _update_cloud_alias(sdk, user_id, cloud_alias)
