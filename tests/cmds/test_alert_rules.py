@@ -169,7 +169,7 @@ def test_add_user_when_rule_not_found_prints_expected_output(mocker, runner, cli
         ["alert-rules", "add-user", "--rule-id", TEST_RULE_ID, "-u", TEST_USERNAME],
         obj=cli_state,
     )
-    assert "No alert rules with RuleId rule-id found." in result.output
+    assert "Error: No alert rules with RuleId rule-id found." in result.output
 
 
 def test_remove_user_removes_user_list_from_alert_rules(runner, cli_state):

@@ -183,7 +183,7 @@ def _handle_rules_results(rules, rule_id=None):
     if not rules:
         id_msg = "with RuleId {} ".format(rule_id) if rule_id else ""
         msg = "No alert rules {}found.".format(id_msg)
-        echo(msg)
+        raise Code42CLIError(msg)
     return rules
 
 
