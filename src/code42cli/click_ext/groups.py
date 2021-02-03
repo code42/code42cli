@@ -145,7 +145,7 @@ class ExtensionGroup(ExceptionHandlingGroup):
     def parse_args(self, ctx, args):
         if len(self.commands) == 1:
             if args and args[0] not in self.commands:
-                cmd_name = list(self.commands.keys())[0]
+                cmd_name = next(iter(self.commands))
                 args.insert(0, cmd_name)
         super().parse_args(ctx, args)
 
