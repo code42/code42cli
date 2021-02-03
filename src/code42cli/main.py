@@ -7,7 +7,7 @@ from py42.settings import set_user_agent_suffix
 
 from code42cli import PRODUCT_NAME
 from code42cli.__version__ import __version__ as cliversion
-from code42cli.click_ext.groups import ExceptionHandlingGroup
+from code42cli.click_ext.groups import CLIGroup
 from code42cli.cmds.alert_rules import alert_rules
 from code42cli.cmds.alerts import alerts
 from code42cli.cmds.auditlogs import audit_logs
@@ -50,7 +50,9 @@ CONTEXT_SETTINGS = {
 }
 
 
-@click.group(cls=ExceptionHandlingGroup, context_settings=CONTEXT_SETTINGS, help=BANNER)
+@click.group(
+    cls=CLIGroup, context_settings=CONTEXT_SETTINGS, help=BANNER,
+)
 @sdk_options(hidden=True)
 def cli(state):
     pass

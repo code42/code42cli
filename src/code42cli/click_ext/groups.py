@@ -1,5 +1,8 @@
 import difflib
 import re
+import os
+import sys
+import shlex
 from collections import OrderedDict
 
 import click
@@ -17,6 +20,18 @@ from code42cli.logger import get_main_cli_logger
 from code42cli.logger.handlers import SyslogServerNetworkConnectionError
 
 _DIFFLIB_CUT_OFF = 0.6
+
+
+class InterpreterGroup(click.Group):
+    def parse_args(self, ctx, args):
+        if "--python" in args:
+            args.remove("--python")
+            args.insert(0, sys.executable)
+            cmd = shlex.join(args)
+            os.system(cmd)
+            sys.exit(0)
+        else:
+            super().parse_args(ctx, args)
 
 
 class ExceptionHandlingGroup(click.Group):
@@ -112,3 +127,24 @@ class OrderedGroup(click.Group):
 
     def list_commands(self, ctx):
         return self.commands
+
+
+class ExtensionGroup(ExceptionHandlingGroup):
+    """A helper click.Group for extension scripts. If only a single command is added to this group, 
+    that command will be the "default" and won't need to be explicitly passed as the first argument 
+    to the extension script.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def parse_args(self, ctx, args):
+        if len(self.commands) == 1:
+            if args and args[0] not in self.commands:
+                cmd_name = list(self.commands.keys())[0]
+                args.insert(0, cmd_name)
+        super().parse_args(ctx, args)
+
+
+class CLIGroup(ExceptionHandlingGroup, InterpreterGroup):
+    pass
