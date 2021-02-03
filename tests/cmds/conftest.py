@@ -72,12 +72,17 @@ def cli_state_without_user(sdk_without_user, cli_state):
 
 
 @pytest.fixture
-def user_already_added_error(mocker):
+def custom_error(mocker):
     err = mocker.MagicMock(spec=HTTPError)
     resp = mocker.MagicMock(spec=Response)
     resp.text = "TEST_ERR"
     err.response = resp
-    return Py42UserAlreadyAddedError(err, TEST_ID, "detection list")
+    return err
+
+
+@pytest.fixture
+def user_already_added_error(custom_error):
+    return Py42UserAlreadyAddedError(custom_error, TEST_ID, "detection list")
 
 
 def get_filter_value_from_json(json, filter_index):
