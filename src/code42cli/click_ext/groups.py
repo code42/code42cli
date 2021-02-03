@@ -1,6 +1,7 @@
 import difflib
 import re
 import os
+import platform
 import sys
 import shlex
 from collections import OrderedDict
@@ -27,9 +28,12 @@ class InterpreterGroup(click.Group):
         if "--python" in args:
             args.remove("--python")
             args.insert(0, sys.executable)
-            cmd = shlex.join(args)
-            os.system(cmd)
-            sys.exit(0)
+            if platform.system() == "Windows":
+                cmd = " ".join(args)
+            else:
+                cmd = shlex.join(args)
+            status = os.system(cmd)
+            sys.exit(status)
         else:
             super().parse_args(ctx, args)
 
