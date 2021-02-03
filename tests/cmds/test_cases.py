@@ -5,7 +5,11 @@ from unittest.mock import mock_open
 
 import pytest
 from py42.exceptions import Py42BadRequestError
+from py42.exceptions import Py42CaseAlreadyHasEventError
+from py42.exceptions import Py42CaseNameExistsError
+from py42.exceptions import Py42DescriptionLimitExceededError
 from py42.exceptions import Py42NotFoundError
+from py42.exceptions import Py42UpdateClosedCaseError
 from py42.response import Py42Response
 
 from code42cli.main import cli
@@ -49,6 +53,26 @@ def error(mocker):
 @pytest.fixture
 def py42_response(mocker):
     return mocker.MagicMock(spec=Py42Response)
+
+
+@pytest.fixture
+def case_already_exists_error(custom_error):
+    return Py42CaseNameExistsError(custom_error, "test case")
+
+
+@pytest.fixture
+def case_description_limit_exceeded_error(custom_error):
+    return Py42DescriptionLimitExceededError(custom_error)
+
+
+@pytest.fixture
+def case_already_has_event_error(custom_error):
+    return Py42CaseAlreadyHasEventError(custom_error)
+
+
+@pytest.fixture
+def update_on_a_closed_case_error(custom_error):
+    return Py42UpdateClosedCaseError(custom_error)
 
 
 def test_create_calls_create_with_expected_params(runner, cli_state):
@@ -333,3 +357,74 @@ def test_file_events_list_when_missing_case_number_prints_error(runner, cli_stat
     result = runner.invoke(cli, command, obj=cli_state)
     assert result.exit_code == 2
     assert MISSING_CASE_NUMBER_ARG in result.output
+
+
+def test_cases_create_when_case_name_already_exists_raises_exception_prints_error_message(
+    runner, cli_state, case_already_exists_error
+):
+    cli_state.sdk.cases.create.side_effect = case_already_exists_error
+    result = runner.invoke(cli, ["cases", "create", "test case"], obj=cli_state,)
+    assert (
+        "Case name 'test case' already exists, please set another name" in result.output
+    )
+
+
+def test_cases_create_when_description_length_limit_exceeds_raises_exception_prints_error_message(
+    runner, cli_state, case_description_limit_exceeded_error
+):
+    cli_state.sdk.cases.create.side_effect = case_description_limit_exceeded_error
+    result = runner.invoke(
+        cli,
+        ["cases", "create", "test case", "--description", "too long"],
+        obj=cli_state,
+    )
+    assert "Description limit exceeded, max 250 characters allowed." in result.output
+
+
+def test_cases_udpate_when_description_length_limit_exceeds_raises_exception_prints_error_message(
+    runner, cli_state, case_description_limit_exceeded_error
+):
+    cli_state.sdk.cases.update.side_effect = case_description_limit_exceeded_error
+    result = runner.invoke(
+        cli, ["cases", "update", "1", "--description", "too long"], obj=cli_state,
+    )
+    assert "Description limit exceeded, max 250 characters allowed." in result.output
+
+
+def test_fileevents_add_on_closed_case_when_py42_raises_exception_prints_error_message(
+    runner, cli_state, update_on_a_closed_case_error
+):
+    cli_state.sdk.cases.file_events.add.side_effect = update_on_a_closed_case_error
+    result = runner.invoke(
+        cli,
+        ["cases", "file-events", "add", "--case-number", "1", "--event-id", "1"],
+        obj=cli_state,
+    )
+    cli_state.sdk.cases.file_events.add.assert_called_once_with(1, "1")
+    assert "Cannot update a closed case." in result.output
+
+
+def test_fileevents_remove_on_closed_case_when_py42_raises_exception_prints_error_message(
+    runner, cli_state, update_on_a_closed_case_error
+):
+    cli_state.sdk.cases.file_events.delete.side_effect = update_on_a_closed_case_error
+    result = runner.invoke(
+        cli,
+        ["cases", "file-events", "remove", "--case-number", "1", "--event-id", "1"],
+        obj=cli_state,
+    )
+    cli_state.sdk.cases.file_events.delete.assert_called_once_with(1, "1")
+    assert "Cannot update a closed case." in result.output
+
+
+def test_fileevents_when_event_id_is_already_associated_with_case_py42_raises_exception_prints_error_message(
+    runner, cli_state, case_already_has_event_error
+):
+    cli_state.sdk.cases.file_events.add.side_effect = case_already_has_event_error
+    result = runner.invoke(
+        cli,
+        ["cases", "file-events", "add", "--case-number", "1", "--event-id", "1"],
+        obj=cli_state,
+    )
+    cli_state.sdk.cases.file_events.add.assert_called_once_with(1, "1")
+    assert "Event is already associated to the case." in result.output

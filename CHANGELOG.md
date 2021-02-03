@@ -10,6 +10,16 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
+### Changed
+
+- The error text in cases command when:
+    - `cases create` sets a name that already exists in the system.
+    - `cases create` sets a description that has more than 250 characters.
+    - `cases update` sets a description that has more than 250 characters.
+    - `cases file-events add` is performed on an already closed case.
+    - `cases file-events add` sets an event id that is already added to the case.
+    - `cases file-events remove` is performed on an already closed case.
+
 ### Added
 
 - New choice `TLS-TCP` for `--protocol` option used by `send-to` commands:

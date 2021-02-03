@@ -3,10 +3,14 @@ import re
 from collections import OrderedDict
 
 import click
+from py42.exceptions import Py42CaseAlreadyHasEventError
+from py42.exceptions import Py42CaseNameExistsError
+from py42.exceptions import Py42DescriptionLimitExceededError
 from py42.exceptions import Py42ForbiddenError
 from py42.exceptions import Py42HTTPError
 from py42.exceptions import Py42InvalidRuleOperationError
 from py42.exceptions import Py42LegalHoldNotFoundOrPermissionDeniedError
+from py42.exceptions import Py42UpdateClosedCaseError
 from py42.exceptions import Py42UserAlreadyAddedError
 from py42.exceptions import Py42UserNotOnListError
 
@@ -59,6 +63,10 @@ class ExceptionHandlingGroup(click.Group):
             Py42InvalidRuleOperationError,
             Py42LegalHoldNotFoundOrPermissionDeniedError,
             SyslogServerNetworkConnectionError,
+            Py42CaseNameExistsError,
+            Py42DescriptionLimitExceededError,
+            Py42CaseAlreadyHasEventError,
+            Py42UpdateClosedCaseError,
         ) as err:
             self.logger.log_error(err)
             raise Code42CLIError(str(err))
