@@ -20,6 +20,10 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `cases file-events add` sets an event id that is already added to the case.
     - `cases file-events remove` is performed on an already closed case.
 
+### Fixed
+
+- Issue where `code42 alert-rules bulk add` would show as successful when adding users to a non-existent alert rule.
+
 ### Added
 
 - New choice `TLS-TCP` for `--protocol` option used by `send-to` commands:
