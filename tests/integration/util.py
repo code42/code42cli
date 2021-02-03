@@ -1,4 +1,8 @@
 import os
+import subprocess
+from shlex import split as split_command
+
+from code42cli.main import cli
 
 
 class cleanup:
@@ -17,7 +21,7 @@ def cleanup_after_validation(filename):
     execution.
 
     The decorated function should return validation function that takes the content of the file
-    as input. e.g `test_alerts.py::test_alert_writes_to_file_and_filters_result_by_severity`
+    as input. e.g
     """
 
     def wrap(test_function):
@@ -30,3 +34,26 @@ def cleanup_after_validation(filename):
         return wrapper
 
     return wrap
+
+
+class DataServer:
+    TCP_SERVER_COMMAND = "ncat -l 5140"
+    UDP_SERVER_COMMAND = "ncat -ul 5140"
+
+    def __init__(self, protocol="TCP"):
+        if protocol.upper() == "UDP":
+            self.command = DataServer.UDP_SERVER_COMMAND
+        else:
+            self.command = DataServer.TCP_SERVER_COMMAND
+        self.process = None
+
+    def __enter__(self):
+        self.process = subprocess.Popen(self.command.split(" "))
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.process.kill()
+
+
+def assert_test_is_successful(runner, command):
+    result = runner.invoke(cli, split_command(command))
+    assert result.exit_code == 0
