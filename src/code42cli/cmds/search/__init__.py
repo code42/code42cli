@@ -34,14 +34,17 @@ class SendToCommand(click.Command):
 
 
 def _handle_incompatible_args(protocol, ignore_cert_validation, certs):
-    if protocol != ServerProtocol.TLS_TCP:
-        arg = None
-        if ignore_cert_validation is not None:
-            arg = "--ignore-cert-validation"
-        elif certs is not None:
-            arg = "--certs"
+    if protocol == ServerProtocol.TLS_TCP:
+        return
 
-        if arg is not None:
-            raise Code42CLIError(
-                f"'{arg}' must be used with '--protocol {ServerProtocol.TLS_TCP}'."
-            )
+    arg = (
+        "--ignore-cert-validation"
+        if ignore_cert_validation is not None
+        else "--certs"
+        if certs is not None
+        else None
+    )
+    if arg is not None:
+        raise Code42CLIError(
+            f"'{arg}' must be used with '--protocol {ServerProtocol.TLS_TCP}'."
+        )
