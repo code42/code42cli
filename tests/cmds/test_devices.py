@@ -6,7 +6,6 @@ from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42ForbiddenError
 from py42.exceptions import Py42NotFoundError
 from py42.response import Py42Response
-from requests import HTTPError
 from requests import Response
 
 from code42cli import PRODUCT_NAME
