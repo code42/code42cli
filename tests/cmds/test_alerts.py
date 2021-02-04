@@ -789,6 +789,52 @@ def test_send_to_when_given_ignore_cert_validation_uses_certs_equal_to_ignore_st
     )
 
 
+@pytest.mark.parametrize("protocol", (ServerProtocol.UDP, ServerProtocol.TCP))
+def test_send_to_when_given_ignore_cert_validation_with_non_tls_protocol_fails_expectedly(
+    cli_state, runner, protocol
+):
+    res = runner.invoke(
+        cli,
+        [
+            "alerts",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            protocol,
+            "--ignore-cert-validation",
+        ],
+        obj=cli_state,
+    )
+    assert (
+        "'--ignore-cert-validation' can only be used with '--protocol TLS-TCP'"
+        in res.output
+    )
+
+
+@pytest.mark.parametrize("protocol", (ServerProtocol.UDP, ServerProtocol.TCP))
+def test_send_to_when_given_certs_with_non_tls_protocol_fails_expectedly(
+    cli_state, runner, protocol
+):
+    res = runner.invoke(
+        cli,
+        [
+            "alerts",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            protocol,
+            "--certs",
+            "certs.pem",
+        ],
+        obj=cli_state,
+    )
+    assert "'--certs' can only be used with '--protocol TLS-TCP'" in res.output
+
+
 def test_get_alert_details_batches_results_according_to_batch_size(sdk):
     extraction._ALERT_DETAIL_BATCH_SIZE = 2
     sdk.alerts.get_details.side_effect = ALERT_DETAIL_RESULT

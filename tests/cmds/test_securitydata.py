@@ -298,6 +298,52 @@ def test_send_to_with_saved_search_and_incompatible_argument_errors(
     assert "{} can't be used with: --saved-search".format(arg[0]) in result.output
 
 
+@pytest.mark.parametrize("protocol", (ServerProtocol.UDP, ServerProtocol.TCP))
+def test_send_to_when_given_ignore_cert_validation_with_non_tls_protocol_fails_expectedly(
+    cli_state, runner, protocol
+):
+    res = runner.invoke(
+        cli,
+        [
+            "security-data",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            protocol,
+            "--ignore-cert-validation",
+        ],
+        obj=cli_state,
+    )
+    assert (
+        "'--ignore-cert-validation' can only be used with '--protocol TLS-TCP'"
+        in res.output
+    )
+
+
+@pytest.mark.parametrize("protocol", (ServerProtocol.UDP, ServerProtocol.TCP))
+def test_send_to_when_given_certs_with_non_tls_protocol_fails_expectedly(
+    cli_state, runner, protocol
+):
+    res = runner.invoke(
+        cli,
+        [
+            "security-data",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            protocol,
+            "--certs",
+            "certs.pem",
+        ],
+        obj=cli_state,
+    )
+    assert "'--certs' can only be used with '--protocol TLS-TCP'" in res.output
+
+
 @search_and_send_to_test
 def test_search_and_send_to_when_given_begin_and_end_dates_uses_expected_query(
     runner, cli_state, file_event_extractor, command
