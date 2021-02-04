@@ -43,12 +43,6 @@ MISSING_EVENT_ID = MISSING_OPTION_ERROR.format("event-id")
 MISSING_CASE_NUMBER_OPTION = MISSING_OPTION_ERROR.format("case-number")
 
 
-@pytest.fixture
-def error(mocker):
-    error = mocker.Mock(spec=Exception)
-    error.response = "error"
-    return error
-
 
 @pytest.fixture
 def py42_response(mocker):
@@ -209,8 +203,8 @@ def test_show_with_include_file_events_calls_file_events_get_all_with_expected_p
     cli_state.sdk.cases.file_events.get_all.assert_called_once_with(1)
 
 
-def test_show_when_py42_raises_exception_prints_error_message(runner, cli_state, error):
-    cli_state.sdk.cases.file_events.get_all.side_effect = Py42NotFoundError(error)
+def test_show_when_py42_raises_exception_prints_error_message(runner, cli_state, custom_error):
+    cli_state.sdk.cases.file_events.get_all.side_effect = Py42NotFoundError(custom_error)
     result = runner.invoke(
         cli, ["cases", "show", "1", "--include-file-events"], obj=cli_state,
     )
@@ -273,9 +267,9 @@ def test_file_events_add_calls_add_event_with_expected_params(runner, cli_state)
 
 
 def test_file_events_add_when_py42_raises_exception_prints_error_message(
-    runner, cli_state, error
+    runner, cli_state, custom_error
 ):
-    cli_state.sdk.cases.file_events.add.side_effect = Py42BadRequestError(error)
+    cli_state.sdk.cases.file_events.add.side_effect = Py42BadRequestError(custom_error)
     result = runner.invoke(
         cli,
         ["cases", "file-events", "add", "--case-number", "1", "--event-id", "1"],
@@ -309,9 +303,9 @@ def test_file_events_remove_calls_delete_event_with_expected_params(runner, cli_
 
 
 def test_file_events_remove_when_py42_raises_exception_prints_error_message(
-    runner, cli_state, error
+    runner, cli_state, custom_error
 ):
-    cli_state.sdk.cases.file_events.delete.side_effect = Py42NotFoundError(error)
+    cli_state.sdk.cases.file_events.delete.side_effect = Py42NotFoundError(custom_error)
     result = runner.invoke(
         cli,
         ["cases", "file-events", "remove", "--case-number", "1", "--event-id", "1"],
