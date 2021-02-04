@@ -43,7 +43,6 @@ MISSING_EVENT_ID = MISSING_OPTION_ERROR.format("event-id")
 MISSING_CASE_NUMBER_OPTION = MISSING_OPTION_ERROR.format("case-number")
 
 
-
 @pytest.fixture
 def py42_response(mocker):
     return mocker.MagicMock(spec=Py42Response)
@@ -203,8 +202,12 @@ def test_show_with_include_file_events_calls_file_events_get_all_with_expected_p
     cli_state.sdk.cases.file_events.get_all.assert_called_once_with(1)
 
 
-def test_show_when_py42_raises_exception_prints_error_message(runner, cli_state, custom_error):
-    cli_state.sdk.cases.file_events.get_all.side_effect = Py42NotFoundError(custom_error)
+def test_show_when_py42_raises_exception_prints_error_message(
+    runner, cli_state, custom_error
+):
+    cli_state.sdk.cases.file_events.get_all.side_effect = Py42NotFoundError(
+        custom_error
+    )
     result = runner.invoke(
         cli, ["cases", "show", "1", "--include-file-events"], obj=cli_state,
     )
