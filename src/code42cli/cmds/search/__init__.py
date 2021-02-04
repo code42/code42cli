@@ -37,13 +37,11 @@ def _handle_incompatible_args(protocol, ignore_cert_validation, certs):
     if protocol == ServerProtocol.TLS_TCP:
         return
 
-    arg = (
-        "--ignore-cert-validation"
-        if ignore_cert_validation is not None
-        else "--certs"
-        if certs is not None
-        else None
-    )
+    arg = None
+    if ignore_cert_validation is not None:
+        arg = "--ignore-cert-validation"
+    elif certs is not None:
+        arg = "--certs"
     if arg is not None:
         raise Code42CLIError(
             f"'{arg}' can only be used with '--protocol {ServerProtocol.TLS_TCP}'."
