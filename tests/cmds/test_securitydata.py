@@ -317,7 +317,7 @@ def test_send_to_when_given_ignore_cert_validation_with_non_tls_protocol_fails_e
         obj=cli_state,
     )
     assert (
-        "'--ignore-cert-validation' must be used with '--protocol TLS-TCP'"
+        "'--ignore-cert-validation' can only be used with '--protocol TLS-TCP'"
         in res.output
     )
 
@@ -341,7 +341,7 @@ def test_send_to_when_given_certs_with_non_tls_protocol_fails_expectedly(
         ],
         obj=cli_state,
     )
-    assert "'--certs' must be used with '--protocol TLS-TCP'" in res.output
+    assert "'--certs' can only be used with '--protocol TLS-TCP'" in res.output
 
 
 @search_and_send_to_test

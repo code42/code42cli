@@ -46,5 +46,5 @@ def _handle_incompatible_args(protocol, ignore_cert_validation, certs):
     )
     if arg is not None:
         raise Code42CLIError(
-            f"'{arg}' must be used with '--protocol {ServerProtocol.TLS_TCP}'."
+            f"'{arg}' can only be used with '--protocol {ServerProtocol.TLS_TCP}'."
         )
