@@ -25,7 +25,7 @@ _DIFFLIB_CUT_OFF = 0.6
 
 class InterpreterGroup(click.Group):
     def parse_args(self, ctx, args):
-        if "--python" in args:
+        if args[0] == "--python":
             args.remove("--python")
             args.insert(0, sys.executable)
             if platform.system() == "Windows":
