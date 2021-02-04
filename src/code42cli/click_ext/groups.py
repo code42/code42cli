@@ -1,9 +1,9 @@
 import difflib
-import re
 import os
 import platform
-import sys
+import re
 import shlex
+import sys
 from collections import OrderedDict
 
 import click
@@ -27,7 +27,7 @@ class InterpreterGroup(click.Group):
     """A `click.Group` subclass that captures the `--script` option and short-circuits
     the normal CLI parsing, passing all subsequent args to the python interpreter that
     the CLI is installed into, allows for reliably executing custom scripts that import
-    code42cli. 
+    code42cli.
     """
 
     def parse_args(self, ctx, args):
@@ -139,8 +139,8 @@ class OrderedGroup(click.Group):
 
 
 class ExtensionGroup(ExceptionHandlingGroup):
-    """A helper click.Group for extension scripts. If only a single command is added to this group, 
-    that command will be the "default" and won't need to be explicitly passed as the first argument 
+    """A helper click.Group for extension scripts. If only a single command is added to this group,
+    that command will be the "default" and won't need to be explicitly passed as the first argument
     to the extension script.
     """
 
