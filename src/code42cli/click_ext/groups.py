@@ -24,8 +24,14 @@ _DIFFLIB_CUT_OFF = 0.6
 
 
 class InterpreterGroup(click.Group):
+    """A `click.Group` subclass that captures the `--script` option and short-circuits
+    the normal CLI parsing, passing all subsequent args to the python interpreter that
+    the CLI is installed into, allows for reliably executing custom scripts that import
+    code42cli. 
+    """
+
     def parse_args(self, ctx, args):
-        if args[0] == "--python":
+        if len(args) > 1 and args[0] == "--script":
             args[0] = sys.executable
             if platform.system() == "Windows":
                 cmd = " ".join(args)

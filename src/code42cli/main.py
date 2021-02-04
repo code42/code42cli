@@ -53,8 +53,11 @@ CONTEXT_SETTINGS = {
 @click.group(
     cls=CLIGroup, context_settings=CONTEXT_SETTINGS, help=BANNER,
 )
+@click.option(
+    "--script", type=click.File(), help="Run a code42cli powered custom script."
+)
 @sdk_options(hidden=True)
-def cli(state):
+def cli(state, script):
     pass
 
 
