@@ -43,6 +43,6 @@ def _handle_incompatible_args(protocol, ignore_cert_validation, certs):
     elif certs is not None:
         arg = "--certs"
     if arg is not None:
-        raise Code42CLIError(
-            f"'{arg}' can only be used with '--protocol {ServerProtocol.TLS_TCP}'."
+        raise click.BadOptionUsage(
+            arg, f"'{arg}' can only be used with '--protocol {ServerProtocol.TLS_TCP}'."
         )
