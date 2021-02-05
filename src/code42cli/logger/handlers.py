@@ -14,7 +14,7 @@ class SyslogServerNetworkConnectionError(Exception):
         super().__init__(
             "The network connection broke while sending results. "
             "This might happen if your connection requires TLS and you are attempting "
-            "unencrypted TCP communication"
+            "unencrypted TCP communication."
         )
 
 
