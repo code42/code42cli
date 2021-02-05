@@ -85,7 +85,7 @@ class NoPrioritySysLogHandler(SysLogHandler):
         them nowhere.
         """
         t, _, _ = sys.exc_info()
-        if t == BrokenPipeError:
+        if ConnectionError in t.__bases__:
             raise SyslogServerNetworkConnectionError()
         super().handleError(record)
 
