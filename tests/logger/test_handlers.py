@@ -48,6 +48,7 @@ def socket_mocks(mocker):
     return mocks
 
 
+@pytest.fixture()
 def system_exception_info(mocker):
     return mocker.patch("code42cli.logger.handlers.sys.exc_info")
 
