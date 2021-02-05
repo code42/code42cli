@@ -11,7 +11,11 @@ class SyslogServerNetworkConnectionError(Exception):
     """An error raised when the connection is disrupted during logging."""
 
     def __init__(self):
-        super().__init__("Network connection broken while sending results.")
+        super().__init__(
+            "The network connection broke while sending results. "
+            "This might happen if your connection requires TLS and you are attempting "
+            "unencrypted TCP communication"
+        )
 
 
 class NoPrioritySysLogHandler(SysLogHandler):
