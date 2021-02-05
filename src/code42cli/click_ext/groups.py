@@ -1,9 +1,5 @@
 import difflib
-import os
-import platform
 import re
-import shlex
-import sys
 from collections import OrderedDict
 
 import click
