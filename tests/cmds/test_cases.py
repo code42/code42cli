@@ -229,6 +229,7 @@ def test_show_with_include_file_events_calls_file_events_get_all_with_expected_p
     runner.invoke(
         cli, ["cases", "show", "1", "--include-file-events"], obj=cli_state,
     )
+    cli_state.sdk.cases.get.assert_called_once_with(1)
     cli_state.sdk.cases.file_events.get_all.assert_called_once_with(1)
 
 
@@ -255,9 +256,12 @@ def test_show_prints_expected_data(runner, cli_state, py42_response):
 
 
 def test_show_prints_expected_data_with_include_file_events_option(
-    runner, cli_state, py42_response
+    runner, cli_state, py42_response, mocker
 ):
     py42_response.text = ALL_EVENTS
+    get_case_response = mocker.MagicMock(spec=Py42Response)
+    get_case_response.data = json.loads(CASE_DETAILS)
+    cli_state.sdk.cases.get.return_value = get_case_response
     cli_state.sdk.cases.file_events.get_all.return_value = py42_response
     result = runner.invoke(
         cli, ["cases", "show", "1", "--include-file-events"], obj=cli_state,
@@ -266,6 +270,9 @@ def test_show_prints_expected_data_with_include_file_events_option(
         "0_147e9445-2f30-4a91-8b2a-9455332e880a_973435567569502913_986467523038446097_163"
         in result.output
     )
+    assert "test-single@example.com" in result.output
+    assert "2021-01-24T11:00:04.217878Z" in result.output
+    assert "123456" in result.output
 
 
 def test_show_case_when_missing_case_number_prints_error(runner, cli_state):
