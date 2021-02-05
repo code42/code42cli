@@ -85,7 +85,7 @@ class NoPrioritySysLogHandler(SysLogHandler):
         them nowhere.
         """
         t, _, _ = sys.exc_info()
-        if ConnectionError in t.__bases__:
+        if issubclass(t, ConnectionError):
             raise SyslogServerNetworkConnectionError()
         super().handleError(record)
 
