@@ -49,10 +49,20 @@ def socket_mocks(mocker):
 
 
 @pytest.fixture()
-def broken_pipe_error(mocker):
-    mock_exc_info = mocker.patch("code42cli.logger.handlers.sys.exc_info")
-    mock_exc_info.return_value = (BrokenPipeError, None, None)
-    return mock_exc_info
+def system_exception_info(mocker):
+    return mocker.patch("code42cli.logger.handlers.sys.exc_info")
+
+
+@pytest.fixture()
+def broken_pipe_error(system_exception_info):
+    system_exception_info.return_value = (BrokenPipeError, None, None)
+    return system_exception_info
+
+
+@pytest.fixture()
+def connection_reset_error(system_exception_info):
+    system_exception_info.return_value = (ConnectionResetError, None, None)
+    return system_exception_info
 
 
 def _get_normal_socket_initializer_mocks(mocker, new_socket):
@@ -204,8 +214,17 @@ class TestNoPrioritySysLogHandler:
             expected_message, (_TEST_HOST, _TEST_PORT)
         )
 
-    def test_handle_error_raises_expected_error(
+    def test_handle_error_when_broken_pipe_error_occurs_raises_expected_error(
         self, mock_file_event_log_record, broken_pipe_error
+    ):
+        handler = NoPrioritySysLogHandler(
+            _TEST_HOST, _TEST_PORT, ServerProtocol.UDP, None
+        )
+        with pytest.raises(SyslogServerNetworkConnectionError):
+            handler.handleError(mock_file_event_log_record)
+
+    def test_handle_error_when_connection_reset_error_occurs_raises_expected_error(
+        self, mock_file_event_log_record, connection_reset_error
     ):
         handler = NoPrioritySysLogHandler(
             _TEST_HOST, _TEST_PORT, ServerProtocol.UDP, None
