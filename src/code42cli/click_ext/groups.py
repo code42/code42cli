@@ -23,26 +23,6 @@ from code42cli.logger.handlers import SyslogServerNetworkConnectionError
 _DIFFLIB_CUT_OFF = 0.6
 
 
-class InterpreterGroup(click.Group):
-    """A `click.Group` subclass that captures the `--script` option and short-circuits
-    the normal CLI parsing, passing all subsequent args to the python interpreter that
-    the CLI is installed into, allows for reliably executing custom scripts that import
-    code42cli.
-    """
-
-    def parse_args(self, ctx, args):
-        if len(args) > 1 and args[0] == "--script":
-            args[0] = sys.executable
-            if platform.system() == "Windows":
-                cmd = " ".join(args)
-            else:
-                cmd = shlex.join(args)
-            status = os.system(cmd)
-            sys.exit(status)
-        else:
-            super().parse_args(ctx, args)
-
-
 class ExceptionHandlingGroup(click.Group):
     """A `click.Group` subclass to add custom exception handling."""
 
@@ -154,7 +134,3 @@ class ExtensionGroup(ExceptionHandlingGroup):
                 self.commands = {"": cmd}
                 args.insert(0, "")
         super().parse_args(ctx, args)
-
-
-class CLIGroup(ExceptionHandlingGroup, InterpreterGroup):
-    pass

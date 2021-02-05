@@ -7,7 +7,7 @@ from py42.settings import set_user_agent_suffix
 
 from code42cli import PRODUCT_NAME
 from code42cli.__version__ import __version__ as cliversion
-from code42cli.click_ext.groups import CLIGroup
+from code42cli.click_ext.groups import ExceptionHandlingGroup
 from code42cli.cmds.alert_rules import alert_rules
 from code42cli.cmds.alerts import alerts
 from code42cli.cmds.auditlogs import audit_logs
@@ -51,14 +51,21 @@ CONTEXT_SETTINGS = {
 
 
 @click.group(
-    cls=CLIGroup, context_settings=CONTEXT_SETTINGS, help=BANNER,
+    cls=ExceptionHandlingGroup,
+    context_settings=CONTEXT_SETTINGS,
+    help=BANNER,
+    invoke_without_command=True,
+    no_args_is_help=True,
 )
 @click.option(
-    "--script", type=click.File(), help="Run a code42cli powered custom script."
+    "--python",
+    is_flag=True,
+    help="Print path to the python interpreter env that `code42` is installed in.",
 )
 @sdk_options(hidden=True)
-def cli(state, script):
-    pass
+def cli(state, python):
+    if python:
+        click.echo(sys.executable)
 
 
 cli.add_command(alerts)
