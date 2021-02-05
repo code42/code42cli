@@ -240,9 +240,9 @@ def check_matter_accessible_success(cli_state, matter_response):
 
 
 @pytest.fixture
-def check_matter_accessible_failure(cli_state):
+def check_matter_accessible_failure(cli_state, custom_error):
     cli_state.sdk.legalhold.get_matter_by_uid.side_effect = Py42BadRequestError(
-        HTTPError()
+        custom_error
     )
 
 

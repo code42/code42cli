@@ -18,36 +18,60 @@ from code42cli.main import cli
 ALL_EVENTS = """{
   "events": [
     {
-      "eventId": "0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_986472527798692818_971",
-      "eventTimestamp": "2020-12-23T12:41:38.592Z"
+      "eventId": "0_147e9445-2f30-4a91-8b2a-9455332e880a_973435567569502913_986467523038446097_163",
+      "eventTimestamp": "2020-12-23T14:24:44.593Z",
+      "exposure": [
+        "OutsideTrustedDomains",
+        "IsPublic"
+      ],
+      "fileName": "example.docx",
+      "filePath": "/Users/casey/Documents/"
     }
-  ]
+  ],
+  "totalCount": 42
 }"""
 ALL_CASES = """{
   "cases": [
     {
-      "number": 3,
-      "name": "test@test.test",
-      "updatedAt": "2021-01-24T11:00:04.217878Z",
-      "subject": "942897"
+      "assignee": 273411254592236320,
+      "assigneeUsername": "test@example.com",
+      "createdAt": "2020-10-27T15:16:05.369203Z",
+      "createdByUserUid": 806150685834341100,
+      "createdByUsername": "adrian@example.com",
+      "lastModifiedByUserUid": 806150685834341100,
+      "lastModifiedByUsername": "adrian@example.com",
+      "name": "Sample case name",
+      "number": 942897,
+      "status": "OPEN",
+      "subject": 421380797518239200,
+      "subjectUsername": "casey@example.com",
+      "updatedAt": "2021-01-24T11:00:04.217878Z"
     }
   ],
-  "totalCount": 31
+  "totalCount": 42
 }"""
-CASE_DETAILS = '{"number": 3, "name": "test@test.test"}'
+CASE_DETAILS = """{
+    "assignee": 273411254592236320,
+    "assigneeUsername": "test-single@example.com",
+    "createdAt": "2020-10-27T15:16:05.369203Z",
+    "createdByUserUid": 806150685834341100,
+    "createdByUsername": "adrian@example.com",
+    "lastModifiedByUserUid": 806150685834341100,
+    "lastModifiedByUsername": "adrian@example.com",
+    "name": "Sample case name",
+    "number": 123456,
+    "status": "OPEN",
+    "subject": 421380797518239200,
+    "subjectUsername": "casey@example.com",
+    "updatedAt": "2021-01-24T11:00:04.217878Z"
+}
+"""
 MISSING_ARGUMENT_ERROR = "Missing argument '{}'."
 MISSING_NAME = MISSING_ARGUMENT_ERROR.format("NAME")
 MISSING_CASE_NUMBER_ARG = MISSING_ARGUMENT_ERROR.format("CASE_NUMBER")
 MISSING_OPTION_ERROR = "Missing option '--{}'."
 MISSING_EVENT_ID = MISSING_OPTION_ERROR.format("event-id")
 MISSING_CASE_NUMBER_OPTION = MISSING_OPTION_ERROR.format("case-number")
-
-
-@pytest.fixture
-def error(mocker):
-    error = mocker.Mock(spec=Exception)
-    error.response = "error"
-    return error
 
 
 @pytest.fixture
@@ -188,7 +212,6 @@ def test_list_prints_expected_data(runner, cli_state, py42_response):
 
     cli_state.sdk.cases.get_all.return_value = gen()
     result = runner.invoke(cli, ["cases", "list"], obj=cli_state,)
-    assert "test@test.test" in result.output
     assert "2021-01-24T11:00:04.217878Z" in result.output
     assert "942897" in result.output
 
@@ -206,11 +229,16 @@ def test_show_with_include_file_events_calls_file_events_get_all_with_expected_p
     runner.invoke(
         cli, ["cases", "show", "1", "--include-file-events"], obj=cli_state,
     )
+    cli_state.sdk.cases.get.assert_called_once_with(1)
     cli_state.sdk.cases.file_events.get_all.assert_called_once_with(1)
 
 
-def test_show_when_py42_raises_exception_prints_error_message(runner, cli_state, error):
-    cli_state.sdk.cases.file_events.get_all.side_effect = Py42NotFoundError(error)
+def test_show_when_py42_raises_exception_prints_error_message(
+    runner, cli_state, custom_error
+):
+    cli_state.sdk.cases.file_events.get_all.side_effect = Py42NotFoundError(
+        custom_error
+    )
     result = runner.invoke(
         cli, ["cases", "show", "1", "--include-file-events"], obj=cli_state,
     )
@@ -222,21 +250,29 @@ def test_show_prints_expected_data(runner, cli_state, py42_response):
     py42_response.data = json.loads(CASE_DETAILS)
     cli_state.sdk.cases.get.return_value = py42_response
     result = runner.invoke(cli, ["cases", "show", "1"], obj=cli_state,)
-    assert "test@test.test" in result.output
+    assert "test-single@example.com" in result.output
+    assert "2021-01-24T11:00:04.217878Z" in result.output
+    assert "123456" in result.output
 
 
 def test_show_prints_expected_data_with_include_file_events_option(
-    runner, cli_state, py42_response
+    runner, cli_state, py42_response, mocker
 ):
     py42_response.text = ALL_EVENTS
+    get_case_response = mocker.MagicMock(spec=Py42Response)
+    get_case_response.data = json.loads(CASE_DETAILS)
+    cli_state.sdk.cases.get.return_value = get_case_response
     cli_state.sdk.cases.file_events.get_all.return_value = py42_response
     result = runner.invoke(
         cli, ["cases", "show", "1", "--include-file-events"], obj=cli_state,
     )
     assert (
-        "0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_986472527798692818_971"
+        "0_147e9445-2f30-4a91-8b2a-9455332e880a_973435567569502913_986467523038446097_163"
         in result.output
     )
+    assert "test-single@example.com" in result.output
+    assert "2021-01-24T11:00:04.217878Z" in result.output
+    assert "123456" in result.output
 
 
 def test_show_case_when_missing_case_number_prints_error(runner, cli_state):
@@ -273,9 +309,9 @@ def test_file_events_add_calls_add_event_with_expected_params(runner, cli_state)
 
 
 def test_file_events_add_when_py42_raises_exception_prints_error_message(
-    runner, cli_state, error
+    runner, cli_state, custom_error
 ):
-    cli_state.sdk.cases.file_events.add.side_effect = Py42BadRequestError(error)
+    cli_state.sdk.cases.file_events.add.side_effect = Py42BadRequestError(custom_error)
     result = runner.invoke(
         cli,
         ["cases", "file-events", "add", "--case-number", "1", "--event-id", "1"],
@@ -309,9 +345,9 @@ def test_file_events_remove_calls_delete_event_with_expected_params(runner, cli_
 
 
 def test_file_events_remove_when_py42_raises_exception_prints_error_message(
-    runner, cli_state, error
+    runner, cli_state, custom_error
 ):
-    cli_state.sdk.cases.file_events.delete.side_effect = Py42NotFoundError(error)
+    cli_state.sdk.cases.file_events.delete.side_effect = Py42NotFoundError(custom_error)
     result = runner.invoke(
         cli,
         ["cases", "file-events", "remove", "--case-number", "1", "--event-id", "1"],
@@ -346,10 +382,10 @@ def test_file_events_list_prints_expected_data(runner, cli_state):
     cli_state.sdk.cases.file_events.get_all.return_value = json.loads(ALL_EVENTS)
     result = runner.invoke(cli, ["cases", "file-events", "list", "1"], obj=cli_state,)
     assert (
-        "0_1d71796f-af5b-4231-9d8e-df6434da4663_984418168383179707_986472527798692818_971"
+        "0_147e9445-2f30-4a91-8b2a-9455332e880a_973435567569502913_986467523038446097_163"
         in result.output
     )
-    assert "2020-12-23T12:41:38.592Z" in result.output
+    assert "2020-12-23T14:24:44.593Z" in result.output
 
 
 def test_file_events_list_when_missing_case_number_prints_error(runner, cli_state):

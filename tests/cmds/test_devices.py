@@ -6,7 +6,6 @@ from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42ForbiddenError
 from py42.exceptions import Py42NotFoundError
 from py42.response import Py42Response
-from requests import HTTPError
 from requests import Response
 
 from code42cli import PRODUCT_NAME
@@ -313,28 +312,28 @@ def reactivate_device_success(cli_state, empty_successful_response):
 
 
 @pytest.fixture
-def deactivate_device_not_found_failure(cli_state):
-    cli_state.sdk.devices.deactivate.side_effect = Py42NotFoundError(HTTPError())
+def deactivate_device_not_found_failure(cli_state, custom_error):
+    cli_state.sdk.devices.deactivate.side_effect = Py42NotFoundError(custom_error)
 
 
 @pytest.fixture
-def reactivate_device_not_found_failure(cli_state):
-    cli_state.sdk.devices.reactivate.side_effect = Py42NotFoundError(HTTPError())
+def reactivate_device_not_found_failure(cli_state, custom_error):
+    cli_state.sdk.devices.reactivate.side_effect = Py42NotFoundError(custom_error)
 
 
 @pytest.fixture
-def deactivate_device_in_legal_hold_failure(cli_state):
-    cli_state.sdk.devices.deactivate.side_effect = Py42BadRequestError(HTTPError())
+def deactivate_device_in_legal_hold_failure(cli_state, custom_error):
+    cli_state.sdk.devices.deactivate.side_effect = Py42BadRequestError(custom_error)
 
 
 @pytest.fixture
-def deactivate_device_not_allowed_failure(cli_state):
-    cli_state.sdk.devices.deactivate.side_effect = Py42ForbiddenError(HTTPError())
+def deactivate_device_not_allowed_failure(cli_state, custom_error):
+    cli_state.sdk.devices.deactivate.side_effect = Py42ForbiddenError(custom_error)
 
 
 @pytest.fixture
-def reactivate_device_not_allowed_failure(cli_state):
-    cli_state.sdk.devices.reactivate.side_effect = Py42ForbiddenError(HTTPError())
+def reactivate_device_not_allowed_failure(cli_state, custom_error):
+    cli_state.sdk.devices.reactivate.side_effect = Py42ForbiddenError(custom_error)
 
 
 @pytest.fixture
