@@ -38,6 +38,7 @@ def test_alerts_send_to_returns_success_return_code(
     assert result.exit_code == 0
 
 
+@pytest.mark.integration
 def test_alerts_advanced_query_returns_success_return_code(
     runner, integration_test_profile
 ):
