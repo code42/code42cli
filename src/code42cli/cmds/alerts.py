@@ -175,7 +175,7 @@ def alert_options(f):
 @click.group(cls=code42cli.click_ext.groups.OrderedGroup)
 @opt.sdk_options(hidden=True)
 def alerts(state):
-    """Tools for getting alert data."""
+    """Get and send alert data."""
     # store cursor getter on the group state so shared --begin option can use it in validation
     state.cursor_getter = _get_alert_cursor_store
 
