@@ -14,7 +14,7 @@ from code42cli.util import does_user_agree
 
 @click.group()
 def profile():
-    """For managing Code42 connection settings."""
+    """Manage Code42 connection settings."""
     pass
 
 
