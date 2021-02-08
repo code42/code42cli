@@ -30,7 +30,7 @@ _MATTER_KEYS_MAP["creationDate"] = "Creation Date"
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def legal_hold(state):
-    """For adding and removing custodians from legal hold matters."""
+    """Add and remove custodians from legal hold matters."""
     pass
 
 
