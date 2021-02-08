@@ -198,7 +198,7 @@ def file_event_options(f):
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def security_data(state):
-    """Tools for getting file event data."""
+    """Get and send file event data."""
     # store cursor getter on the group state so shared --begin option can use it in validation
     state.cursor_getter = _get_file_event_cursor_store
 
