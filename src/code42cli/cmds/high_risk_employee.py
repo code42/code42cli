@@ -49,7 +49,7 @@ risk_tag_option = click.option(
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def high_risk_employee(state):
-    """For adding and removing employees from the high risk employees detection list."""
+    """Add and remove employees from the High Risk Employees detection list."""
     pass
 
 
