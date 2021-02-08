@@ -25,7 +25,7 @@ from code42cli.output_formats import OutputFormatter
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def devices(state):
-    """For managing devices within your Code42 environment."""
+    """Manage devices within your Code42 environment."""
     pass
 
 
