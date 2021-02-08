@@ -61,9 +61,6 @@ TEST_EVENTS_WITH_DIFFERENT_TIMESTAMPS = [
         "timestamp": TEST_AUDIT_LOG_TIMESTAMP_3,
     },
 ]
-TEST_CHECKPOINT_EVENT_HASHLIST = [
-    hash_event(event) for event in TEST_EVENTS_WITH_SAME_TIMESTAMP
-]
 search_and_send_to_test = get_mark_for_search_and_send_to("audit-logs")
 
 

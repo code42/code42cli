@@ -773,13 +773,10 @@ def test_search_and_send_to_when_extraction_handles_error_expected_message_logge
 ):
     errors.ERRORED = False
     exception_msg = "Test Exception"
-
-    def file_search_error(x):
-        raise Exception(exception_msg)
-
-    cli_state.sdk.securitydata.search_file_events.side_effect = file_search_error
+    cli_state.sdk.securitydata.search_file_events.side_effect = Exception(exception_msg)
     with caplog.at_level(logging.ERROR):
         result = runner.invoke(cli, [*command, "--begin", "1d"], obj=cli_state)
+        assert "Error:" in result.output
         assert exception_msg in result.output
         assert exception_msg in caplog.text
         assert errors.ERRORED

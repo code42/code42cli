@@ -1,4 +1,5 @@
 import json
+import logging
 
 import py42.sdk.queries.alerts.filters as f
 import pytest
@@ -8,6 +9,7 @@ from tests.cmds.conftest import get_filter_value_from_json
 from tests.cmds.conftest import get_mark_for_search_and_send_to
 from tests.conftest import get_test_date_str
 
+from code42cli import errors
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.search import extraction
 from code42cli.cmds.search.cursor_store import AlertCursorStore
@@ -701,6 +703,21 @@ def test_search_and_send_to_with_or_query_flag_produces_expected_query(
     }
     actual_query = json.loads(str(cli_state.sdk.alerts.search.call_args[0][0]))
     assert actual_query == expected_query
+
+
+@search_and_send_to_test
+def test_search_and_send_to_when_extraction_handles_error_expected_message_logged_and_printed_and_global_errored_flag_set(
+    runner, cli_state, caplog, command
+):
+    errors.ERRORED = False
+    exception_msg = "Test Exception"
+    cli_state.sdk.alerts.search.side_effect = Exception(exception_msg)
+    with caplog.at_level(logging.ERROR):
+        result = runner.invoke(cli, [*command, "--begin", "1d"], obj=cli_state)
+        assert "Error:" in result.output
+        assert exception_msg in result.output
+        assert exception_msg in caplog.text
+        assert errors.ERRORED
 
 
 @pytest.mark.parametrize(
