@@ -38,7 +38,7 @@ filter_option = click.option(
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def departing_employee(state):
-    """For adding and removing employees from the Departing Employees detection list."""
+    """Add and remove employees from the Departing Employees detection list."""
     pass
 
 
