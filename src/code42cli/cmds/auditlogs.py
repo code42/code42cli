@@ -94,7 +94,7 @@ def filter_options(f):
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def audit_logs(state):
-    """Tools for getting audit log event data."""
+    """Get and send audit log event data."""
     # store cursor getter on the group state so shared --begin option can use it in validation
     state.cursor_getter = _get_audit_log_cursor_store
 
