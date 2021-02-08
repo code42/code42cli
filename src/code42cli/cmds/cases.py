@@ -68,7 +68,7 @@ def _get_events_header():
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def cases(state):
-    """For managing cases and events associated with cases."""
+    """Manage cases and events associated with cases."""
     pass
 
 
