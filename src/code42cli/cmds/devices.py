@@ -4,6 +4,7 @@ import click
 import numpy as np
 from pandas import concat
 from pandas import DataFrame
+from pandas import json_normalize
 from pandas import to_datetime
 from py42 import exceptions
 from py42.exceptions import Py42NotFoundError
@@ -13,8 +14,6 @@ from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
 from code42cli.click_ext.types import MagicDate
-from code42cli.cmds.legal_hold import _get_all_active_matters
-from code42cli.cmds.legal_hold import _get_legal_hold_memberships_for_matter
 from code42cli.date_helper import round_datetime_to_day_end
 from code42cli.date_helper import round_datetime_to_day_start
 from code42cli.errors import Code42CLIError
@@ -352,49 +351,34 @@ def list_devices(
 
 
 def _add_legal_hold_membership_to_device_dataframe(sdk, df):
-    matters = _get_all_active_matters(sdk)
-    matters = [matter["legalHoldUid"] for matter in matters]
-
-    legal_hold_members = []
-
-    for matter in matters:
-        memberships = _get_legal_hold_memberships_for_matter(
-            sdk, matter_id=matter, active=None
-        )
-
-        legal_hold_members.extend(
-            [
-                [
-                    str(member["active"]),
-                    member["user"]["userUid"],
-                    member["legalHold"]["legalHoldUid"],
-                    member["legalHold"]["name"],
-                ]
-                for member in memberships
-            ]
-        )
+    columns = ["legalHold.legalHoldUid", "legalHold.name", "user.userUid"]
 
     legal_hold_member_dataframe = (
-        DataFrame.from_records(
-            legal_hold_members,
-            columns=[
-                "legalHoldMemberActive",
-                "userUid",
-                "legalHoldUid",
-                "legalHoldName",
-            ],
-        )
-        .groupby(["userUid"])
-        .agg(lambda col: ",".join(col))
+        json_normalize(list(_get_all_active_hold_memberships(sdk)))[columns]
+        .groupby(["user.userUid"])
+        .agg(",".join)
     )
-    df = df.merge(legal_hold_member_dataframe, how="left", on="userUid")
+    df = df.merge(
+        legal_hold_member_dataframe,
+        how="left",
+        left_on="userUid",
+        right_on="user.userUid",
+    ).fillna(value='')
 
     df.loc[
-        df["status"] == "Deactivated",
-        ["legalHoldMemberActive", "legalHoldUid", "legalHoldName"],
-    ] = np.nan
+        df["status"] == "Deactivated", ["legalHold.legalHoldUid", "legalHold.name"],
+    ] = ""
 
     return df
+
+
+def _get_all_active_hold_memberships(sdk):
+    for page in sdk.legalhold.get_all_matters(active=True):
+        for matter in page["legalHolds"]:
+            for _page in sdk.legalhold.get_all_matter_custodians(
+                legal_hold_uid=matter["legalHoldUid"], active=True
+            ):
+                yield from _page["legalHoldMemberships"]
 
 
 def _get_device_dataframe(

@@ -661,9 +661,8 @@ def test_add_legal_hold_membership_to_device_dataframe_adds_legal_hold_columns_t
         ]
     )
     result = _add_legal_hold_membership_to_device_dataframe(cli_state.sdk, testdf)
-    assert "legalHoldUid" in result.columns
-    assert "legalHoldMemberActive" in result.columns
-    assert "legalHoldName" in result.columns
+    assert "legalHold.legalHoldUid" in result.columns
+    assert "legalHold.name" in result.columns
 
 
 def test_list_include_legal_hold_membership_pops_legal_hold_if_device_deactivated(
@@ -681,20 +680,19 @@ def test_list_include_legal_hold_membership_pops_legal_hold_if_device_deactivate
             {
                 "userUid": "840103986007089121",
                 "status": "Deactivated",
-                "legalHoldMemberActive": np.nan,
-                "legalHoldUid": np.nan,
-                "legalHoldName": np.nan,
+                "legalHold.legalHoldUid": "",
+                "legalHold.name": "",
             },
             {
                 "userUid": "840103986007089121",
                 "status": "Active",
-                "legalHoldMemberActive": "True,True",
-                "legalHoldUid": "123456789,987654321",
-                "legalHoldName": "Test legal hold matter,Another Matter",
+                "legalHold.legalHoldUid": "123456789,987654321",
+                "legalHold.name": "Test legal hold matter,Another Matter",
             },
         ]
     )
     result = _add_legal_hold_membership_to_device_dataframe(cli_state.sdk, testdf)
+
     assert_frame_equal(result, testdf_result)
 
 
