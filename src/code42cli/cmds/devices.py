@@ -363,7 +363,7 @@ def _add_legal_hold_membership_to_device_dataframe(sdk, df):
         how="left",
         left_on="userUid",
         right_on="user.userUid",
-    ).fillna(value='')
+    ).fillna(value="")
 
     df.loc[
         df["status"] == "Deactivated", ["legalHold.legalHoldUid", "legalHold.name"],
