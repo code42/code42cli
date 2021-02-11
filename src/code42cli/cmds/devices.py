@@ -1,7 +1,6 @@
 from datetime import date
 
 import click
-import numpy as np
 from pandas import concat
 from pandas import DataFrame
 from pandas import json_normalize

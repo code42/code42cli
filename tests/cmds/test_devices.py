@@ -1,6 +1,5 @@
 from datetime import date
 
-import numpy as np
 import pytest
 from pandas import DataFrame
 from pandas._testing import assert_frame_equal
