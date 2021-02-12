@@ -70,7 +70,7 @@ def test_generate_template_cmd_factory_when_using_defaults_returns_expected_comm
 def test_run_bulk_process_calls_run(bulk_processor, bulk_processor_factory):
     errors.ERRORED = False
     run_bulk_process(func_with_one_arg, None)
-    assert bulk_processor.run.call_count
+    assert bulk_processor.run.call_count == 5
 
 
 def test_run_bulk_process_creates_processor(bulk_processor_factory):
