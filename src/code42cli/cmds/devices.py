@@ -1,6 +1,7 @@
 from datetime import date
 
 import click
+import numpy as np
 from pandas import concat
 from pandas import DataFrame
 from pandas import json_normalize
@@ -362,11 +363,11 @@ def _add_legal_hold_membership_to_device_dataframe(sdk, df):
         how="left",
         left_on="userUid",
         right_on="user.userUid",
-    ).fillna(value="")
+    )
 
     df.loc[
         df["status"] == "Deactivated", ["legalHold.legalHoldUid", "legalHold.name"],
-    ] = ""
+    ] = np.nan
 
     return df
 

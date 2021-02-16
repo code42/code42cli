@@ -1,5 +1,6 @@
 from datetime import date
 
+import numpy as np
 import pytest
 from pandas import DataFrame
 from pandas._testing import assert_frame_equal
@@ -679,8 +680,8 @@ def test_list_include_legal_hold_membership_pops_legal_hold_if_device_deactivate
             {
                 "userUid": "840103986007089121",
                 "status": "Deactivated",
-                "legalHold.legalHoldUid": "",
-                "legalHold.name": "",
+                "legalHold.legalHoldUid": np.nan,
+                "legalHold.name": np.nan,
             },
             {
                 "userUid": "840103986007089121",
