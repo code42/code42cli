@@ -69,6 +69,7 @@ CONTEXT_SETTINGS = {
 def cli(state, python):
     if python:
         click.echo(sys.executable)
+        sys.exit(0)
 
 
 cli.add_command(alerts)
