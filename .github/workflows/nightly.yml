@@ -33,35 +33,11 @@ jobs:
         env:
             SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: tox -e nightly  # Run tox using latest master branch from py42/c42eventextractor
-      # - name: Notify Slack Action
-      #   uses: ravsamhq/notify-slack-action@v1.1
-      #   if: always()
-      #   with:
-      #     status: ${{ job.status }}
-      #     notify_when: 'failure'
-      #   env:
-      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      #
-      # - name: Notify Slack Action (v2)
-      #   uses: rtCamp/action-slack-notify@v2
-      #   env:
-      #     SLACK_CHANNEL: ls-cloudwatch-alerts
-      #     SLACK_TITLE: This is the post title :)
-      #     SLACK_MESSAGE: this is a message hello
-      # - name: Slack for Github actions
-      #   uses: Ilshidur/action-slack@2.0.2
-      #   env:
-      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-      #     SLACK_CHANNEL: ls-cloudwatch-alerts
-      #     SLACK_AVATAR: repository
-      #   if: failure()
-      #   with:
-      #     args: 'Action called: {{ GITHUB_ACTION }}'
-      - name: ACTION-SLACK
+      - name: Notify Slack Action
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
-          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+          fields: repo,message,commit,author,action,workflow
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         if: always()
