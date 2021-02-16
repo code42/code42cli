@@ -41,19 +41,29 @@ jobs:
       #     notify_when: 'failure'
       #   env:
       #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      #
       # - name: Notify Slack Action (v2)
       #   uses: rtCamp/action-slack-notify@v2
       #   env:
       #     SLACK_CHANNEL: ls-cloudwatch-alerts
       #     SLACK_TITLE: This is the post title :)
       #     SLACK_MESSAGE: this is a message hello
-      - name: Slack for Github actions
-        uses: Ilshidur/action-slack@2.0.2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_CHANNEL: ls-cloudwatch-alerts
-          SLACK_AVATAR: repository
+      # - name: Slack for Github actions
+      #   uses: Ilshidur/action-slack@2.0.2
+      #   env:
+      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+      #     SLACK_CHANNEL: ls-cloudwatch-alerts
+      #     SLACK_AVATAR: repository
+      #   if: failure()
+      #   with:
+      #     args: 'Action called: {{ GITHUB_ACTION }}'
+      - name: ACTION-SLACK
+        uses: 8398a7/action-slack@v3
         with:
-          args: 'Action called: {{ GITHUB_ACTION }}'
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always()
 
 
