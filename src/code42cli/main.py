@@ -3,7 +3,7 @@ import sys
 
 import click
 from click_plugins import with_plugins
-
+from pkg_resources import iter_entry_points
 from py42.__version__ import __version__ as py42version
 from py42.settings import set_user_agent_suffix
 
