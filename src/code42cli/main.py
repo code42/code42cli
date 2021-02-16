@@ -1,6 +1,5 @@
 import signal
 import sys
-from pkg_resources import iter_entry_points
 
 import click
 from click_plugins import with_plugins
