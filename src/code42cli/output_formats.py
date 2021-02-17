@@ -118,7 +118,7 @@ class DataFrameOutputFormatter:
             return df.to_string(**defaults)
 
         else:
-            raise Exception(
+            raise ValueError(
                 f"DataFrameOutputFormatter received an invalid format: {self.output_format}"
             )
 
