@@ -785,7 +785,7 @@ class TestDataFrameOutputFormatter:
         assert formatter.output_format == OutputFormat.TABLE
 
     def test_format_when_unknown_format_raises_cli_exception(self):
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             formatter = DataFrameOutputFormatter("NOT_A_FORMAT")
             formatter.get_formatted_output(self.test_df)
 
