@@ -25,15 +25,15 @@ def profile_name_arg(required=False):
 name_option = click.option(
     "-n",
     "--name",
-    required=True,
+    required=False,
     help="The name of the Code42 CLI profile to use when executing this command.",
 )
 server_option = click.option(
-    "-s", "--server", required=True, help="The URL you use to sign into Code42.",
+    "-s", "--server", required=False, help="The URL you use to sign into Code42.",
 )
 
 username_option = click.option(
-    "-u", "--username", required=True, help="The username of the Code42 API user.",
+    "-u", "--username", required=False, help="The username of the Code42 API user.",
 )
 
 password_option = click.option(
