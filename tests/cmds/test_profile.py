@@ -254,6 +254,34 @@ def test_update_profile_updates_existing_profile(
     )
 
 
+def test_update_profile_updates_default_profile(
+    runner, mock_cliprofile_namespace, user_agreement, valid_connection, profile
+):
+    name = "foo"
+    profile.name = name
+    mock_cliprofile_namespace.get_profile.return_value = profile
+    runner.invoke(
+        cli, ["profile", "update", "-s", "bar", "-u", "baz", "--disable-ssl-errors",],
+    )
+    mock_cliprofile_namespace.update_profile.assert_called_once_with(
+        name, "bar", "baz", True
+    )
+
+
+def test_update_profile_updates_name_alone(
+    runner, mock_cliprofile_namespace, user_agreement, valid_connection, profile
+):
+    name = "foo"
+    profile.name = name
+    mock_cliprofile_namespace.get_profile.return_value = profile
+    runner.invoke(
+        cli, ["profile", "update", "-u", "baz", "--disable-ssl-errors",],
+    )
+    mock_cliprofile_namespace.update_profile.assert_called_once_with(
+        name, None, "baz", True
+    )
+
+
 def test_update_profile_if_user_does_not_agree_does_not_save_password(
     runner, mock_cliprofile_namespace, user_disagreement, invalid_connection, profile
 ):
