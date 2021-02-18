@@ -22,19 +22,32 @@ def profile_name_arg(required=False):
     return click.argument("profile_name", required=required)
 
 
-name_option = click.option(
-    "-n",
-    "--name",
-    required=True,
-    help="The name of the Code42 CLI profile to use when executing this command.",
-)
-server_option = click.option(
-    "-s", "--server", required=True, help="The URL you use to sign into Code42.",
-)
+def name_option(required=False):
+    return click.option(
+        "-n",
+        "--name",
+        required=required,
+        help="The name of the Code42 CLI profile to use when executing this command.",
+    )
 
-username_option = click.option(
-    "-u", "--username", required=True, help="The username of the Code42 API user.",
-)
+
+def server_option(required=False):
+    return click.option(
+        "-s",
+        "--server",
+        required=required,
+        help="The URL you use to sign into Code42.",
+    )
+
+
+def username_option(required=False):
+    return click.option(
+        "-u",
+        "--username",
+        required=required,
+        help="The username of the Code42 API user.",
+    )
+
 
 password_option = click.option(
     "--password",
@@ -66,9 +79,9 @@ def show(profile_name):
 
 
 @profile.command()
-@name_option
-@server_option
-@username_option
+@name_option(required=True)
+@server_option(required=True)
+@username_option(required=True)
 @password_option
 @yes_option(hidden=True)
 @disable_ssl_option
@@ -83,9 +96,9 @@ def create(name, server, username, password, disable_ssl_errors):
 
 
 @profile.command()
-@name_option
-@server_option
-@username_option
+@name_option()
+@server_option()
+@username_option()
 @password_option
 @disable_ssl_option
 def update(name, server, username, password, disable_ssl_errors):

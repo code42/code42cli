@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## Unreleased
+
+### Changed
+
+- Command options for `profile update`:
+    - `-n` `--name` is not required, and if omitted with use default profile.
+    - `-s` `--server` and `-u` `--username` are not required and can be updated independently now.
+    - Example: `code42 profile update -s 1.2.3.4:1234`
+
 ## 1.3.0 - 2021-02-11
 
 ### Fixed
