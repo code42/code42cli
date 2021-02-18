@@ -114,6 +114,7 @@ file_category_option = click.option(
             "VIRTUAL_DISK_IMAGE": "VirtualDiskImage",
             "ARCHIVE": "Archive",
             "ZIP": "Archive",
+            "Zip": "Archive",
         },
     ),
     callback=searchopt.is_in_filter(f.FileCategory),

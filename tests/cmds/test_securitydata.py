@@ -675,6 +675,7 @@ def test_search_and_send_to_when_given_file_category_uses_file_category_filter(
         ("VIRTUAL_DISK_IMAGE", "VirtualDiskImage"),
         ("ARCHIVE", "Archive"),
         ("ZIP", "Archive"),
+        ("Zip", "Archive"),
     ],
 )
 def test_all_caps_file_category_choices_convert_to_camel_case(
