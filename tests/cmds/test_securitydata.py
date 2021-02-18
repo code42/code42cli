@@ -650,13 +650,50 @@ def test_search_and_send_to_when_given_file_path_uses_file_path_filter(
 def test_search_and_send_to_when_given_file_category_uses_file_category_filter(
     runner, cli_state, file_event_extractor, command
 ):
-    file_category = "IMAGE"
+    file_category = "Image"
     command = [*command, "--begin", "1h", "--file-category", file_category]
     runner.invoke(
         cli, command, obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
     assert str(f.FileCategory.is_in([file_category])) in filter_strings
+
+
+@pytest.mark.parametrize(
+    "category_choice",
+    [
+        ("AUDIO", "Audio"),
+        ("DOCUMENT", "Document"),
+        ("EXECUTABLE", "Executable"),
+        ("IMAGE", "Image"),
+        ("PDF", "Pdf"),
+        ("PRESENTATION", "Presentation"),
+        ("SCRIPT", "Script"),
+        ("SOURCE_CODE", "SourceCode"),
+        ("SPREADSHEET", "Spreadsheet"),
+        ("VIDEO", "Video"),
+        ("VIRTUAL_DISK_IMAGE", "VirtualDiskImage"),
+        ("ARCHIVE", "Archive"),
+        ("ZIP", "Archive"),
+    ],
+)
+def test_all_caps_file_category_choices_convert_to_camel_case(
+    runner, cli_state, file_event_extractor, category_choice
+):
+    ALL_CAPS_VALUE, camelCaseValue = category_choice
+    command = [
+        "security-data",
+        "search",
+        "--begin",
+        "1h",
+        "--file-category",
+        ALL_CAPS_VALUE,
+    ]
+    runner.invoke(
+        cli, command, obj=cli_state,
+    )
+    filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
+    assert str(f.FileCategory.is_in([camelCaseValue])) in filter_strings
 
 
 @search_and_send_to_test

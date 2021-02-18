@@ -13,6 +13,7 @@ import code42cli.errors as errors
 import code42cli.options as opt
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
+from code42cli.click_ext.types import MapChoice
 from code42cli.cmds.search import SendToCommand
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
@@ -97,7 +98,24 @@ file_path_option = click.option(
 file_category_option = click.option(
     "--file-category",
     multiple=True,
-    type=click.Choice(list(FileCategory.choices())),
+    type=MapChoice(
+        choices=list(FileCategory.choices()),
+        extras_map={
+            "AUDIO": "Audio",
+            "DOCUMENT": "Document",
+            "EXECUTABLE": "Executable",
+            "IMAGE": "Image",
+            "PDF": "Pdf",
+            "PRESENTATION": "Presentation",
+            "SCRIPT": "Script",
+            "SOURCE_CODE": "SourceCode",
+            "SPREADSHEET": "Spreadsheet",
+            "VIDEO": "Video",
+            "VIRTUAL_DISK_IMAGE": "VirtualDiskImage",
+            "ARCHIVE": "Archive",
+            "ZIP": "Archive",
+        },
+    ),
     callback=searchopt.is_in_filter(f.FileCategory),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to file events where the file can be classified by one of these categories.",
