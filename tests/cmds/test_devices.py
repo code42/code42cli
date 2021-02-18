@@ -1,9 +1,12 @@
+import json
 from datetime import date
 
 import numpy as np
 import pytest
 from pandas import DataFrame
+from pandas import Series
 from pandas._testing import assert_frame_equal
+from pandas._testing import assert_series_equal
 from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42ForbiddenError
 from py42.exceptions import Py42NotFoundError
@@ -15,6 +18,7 @@ from code42cli import PRODUCT_NAME
 from code42cli.cmds.devices import _add_backup_set_settings_to_dataframe
 from code42cli.cmds.devices import _add_legal_hold_membership_to_device_dataframe
 from code42cli.cmds.devices import _add_usernames_to_device_dataframe
+from code42cli.cmds.devices import _break_backup_usage_into_total_storage
 from code42cli.cmds.devices import _get_device_dataframe
 from code42cli.main import cli
 
@@ -80,7 +84,19 @@ TEST_BACKUPUSAGE_RESPONSE = """{"metadata":{"timestamp":"2020-10-13T12:51:28.410
 "836476656572622471","serverName":"cif-sea","serverHostName":"https://cif-sea.crashplan.com",
 "isProvider":false,"archiveGuid":"843293524842941560","archiveFormat":"ARCHIVE_V1","activity":
 {"connected":false,"backingUp":false,"restoring":false,"timeRemainingInMs":0,
-"remainingFiles":0,"remainingBytes":0}}]}}"""
+"remainingFiles":0,"remainingBytes":0}},{"targetComputerParentId":null,"targetComputerParentGuid":
+null,"targetComputerGuid":"43","targetComputerName":"PROe Cloud, US","targetComputerOsName":null,
+"targetComputerType":"SERVER","selectedFiles":1599,"selectedBytes":1529420143,"todoFiles":0,
+"todoBytes":0,"archiveBytes":56848550,"billableBytes":1529420143,"sendRateAverage":0,
+"completionRateAverage":0,"lastBackup":"2019-12-02T09:34:28.364-06:00","lastCompletedBackup":
+"2019-12-02T09:34:28.364-06:00","lastConnected":"2019-12-02T11:02:36.108-06:00","lastMaintenanceDate":
+"2021-02-16T07:01:11.697-06:00","lastCompactDate":"2021-02-16T07:01:11.694-06:00","modificationDate":
+"2021-02-17T04:57:27.222-06:00","creationDate":"2019-09-26T15:27:38.806-05:00","using":true,
+"alertState":16,"alertStates":["CriticalBackupAlert"],"percentComplete":100.0,"storePointId":10989,
+"storePointName":"fsa-iad-2","serverId":160024121,"serverGuid":"883282371081742804","serverName":
+"fsa-iad","serverHostName":"https://web-fsa-iad.crashplan.com","isProvider":false,"archiveGuid":
+"92077743916530001","archiveFormat":"ARCHIVE_V1","activity":{"connected":false,"backingUp":false,
+"restoring":false,"timeRemainingInMs":0,"remainingFiles":0,"remainingBytes":0}}]}}"""
 TEST_EMPTY_BACKUPUSAGE_RESPONSE = """{"metadata":{"timestamp":"2020-10-13T12:51:28.410Z","params":
 {"incBackupUsage":"True","idType":"guid"}},"data":{"computerId":1767,"name":"SNWINTEST1",
 "osHostname":"UNKNOWN","guid":"843290890230648046","type":"COMPUTER","status":"Active",
@@ -709,6 +725,19 @@ def test_list_include_legal_hold_membership_merges_in_and_concats_legal_hold_inf
 
     assert "Test legal hold matter,Another Matter" in result.output
     assert "123456789,987654321" in result.output
+
+
+def test_break_backup_usage_into_total_storage_correctly_calculates_values():
+    test_backupusage_cell = json.loads(TEST_BACKUPUSAGE_RESPONSE)["data"]["backupUsage"]
+    result = _break_backup_usage_into_total_storage(test_backupusage_cell)
+
+    test_empty_backupusage_cell = json.loads(TEST_EMPTY_BACKUPUSAGE_RESPONSE)["data"][
+        "backupUsage"
+    ]
+    empty_result = _break_backup_usage_into_total_storage(test_empty_backupusage_cell)
+
+    assert_series_equal(result, Series([2, 56968051]))
+    assert_series_equal(empty_result, Series([0, 0]))
 
 
 def test_last_connected_after_filters_appropriate_results(

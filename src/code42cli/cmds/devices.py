@@ -5,6 +5,7 @@ import numpy as np
 from pandas import concat
 from pandas import DataFrame
 from pandas import json_normalize
+from pandas import Series
 from pandas import to_datetime
 from py42 import exceptions
 from py42.exceptions import Py42NotFoundError
@@ -255,6 +256,14 @@ include_usernames_option = click.option(
     help="Include legal hold membership in output.",
 )
 @click.option(
+    "--include-total-storage",
+    required=False,
+    type=bool,
+    default=False,
+    is_flag=True,
+    help="Include archive count and total storage in output.",
+)
+@click.option(
     "--exclude-most-recently-connected",
     type=int,
     help="Filter out the N most recently connected devices per user. "
@@ -296,6 +305,7 @@ def list_devices(
     include_usernames,
     include_settings,
     include_legal_hold_membership,
+    include_total_storage,
     exclude_most_recently_connected,
     last_connected_after,
     last_connected_before,
@@ -320,7 +330,11 @@ def list_devices(
         "userUid",
     ]
     df = _get_device_dataframe(
-        state.sdk, columns, active, org_uid, include_backup_usage
+        state.sdk,
+        columns,
+        active,
+        org_uid,
+        (include_backup_usage or include_total_storage),
     )
     if last_connected_after:
         df = df.loc[to_datetime(df.lastConnected) > last_connected_after]
@@ -337,6 +351,8 @@ def list_devices(
             .head(exclude_most_recently_connected)
         )
         df = df.drop(most_recent.index)
+    if include_total_storage:
+        df = _add_storage_totals_to_dataframe(df, include_backup_usage)
     if include_settings:
         df = _add_settings_to_dataframe(state.sdk, df)
     if include_usernames:
@@ -434,6 +450,25 @@ def _add_usernames_to_device_dataframe(sdk, device_dataframe):
         users_list, columns=["username", "userUid"]
     )
     return device_dataframe.merge(users_dataframe, how="left", on="userUid")
+
+
+def _add_storage_totals_to_dataframe(df, include_backup_usage):
+    df[["archiveCount", "totalStorageBytes"]] = df["backupUsage"].apply(
+        _break_backup_usage_into_total_storage
+    )
+
+    if not include_backup_usage:
+        df = df.drop("backupUsage", axis=1)
+    return df
+
+
+def _break_backup_usage_into_total_storage(backup_usage):
+    total_storage = 0
+    archive_count = 0
+    for archive in backup_usage:
+        archive_count += 1
+        total_storage += archive["archiveBytes"]
+    return Series([archive_count, total_storage])
 
 
 @devices.command()
