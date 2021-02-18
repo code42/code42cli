@@ -102,8 +102,6 @@ def switch_default_profile(profile_name):
 def create_profile(name, server, username, ignore_ssl_errors):
     if profile_exists(name):
         raise Code42CLIError("A profile named '{}' already exists.".format(name))
-    if None in {name, server, username}:
-        raise Code42CLIError("You must provide a profile name, server, and username.")
     config_accessor.create_profile(name, server, username, ignore_ssl_errors)
 
 
