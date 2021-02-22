@@ -261,7 +261,7 @@ include_usernames_option = click.option(
     type=bool,
     default=False,
     is_flag=True,
-    help="Include archive count and total storage in output.",
+    help="Include backup archive count and total storage in output.",
 )
 @click.option(
     "--exclude-most-recently-connected",
@@ -373,6 +373,13 @@ def _add_legal_hold_membership_to_device_dataframe(sdk, df):
         json_normalize(list(_get_all_active_hold_memberships(sdk)))[columns]
         .groupby(["user.userUid"])
         .agg(",".join)
+        .rename(
+            {
+                "legalHold.legalHoldUid": "legalHoldUid",
+                "legalHold.name": "legalHoldName",
+            },
+            axis=1,
+        )
     )
     df = df.merge(
         legal_hold_member_dataframe,
@@ -381,9 +388,7 @@ def _add_legal_hold_membership_to_device_dataframe(sdk, df):
         right_on="user.userUid",
     )
 
-    df.loc[
-        df["status"] == "Deactivated", ["legalHold.legalHoldUid", "legalHold.name"],
-    ] = np.nan
+    df.loc[df["status"] == "Deactivated", ["legalHoldUid", "legalHoldName"]] = np.nan
 
     return df
 
@@ -466,8 +471,9 @@ def _break_backup_usage_into_total_storage(backup_usage):
     total_storage = 0
     archive_count = 0
     for archive in backup_usage:
-        archive_count += 1
-        total_storage += archive["archiveBytes"]
+        if archive["archiveFormat"] == "ARCHIVE_V1":
+            archive_count += 1
+            total_storage += archive["archiveBytes"]
     return Series([archive_count, total_storage])
 
 
