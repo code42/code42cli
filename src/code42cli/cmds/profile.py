@@ -107,7 +107,7 @@ def update(name, server, username, password, disable_ssl_errors):
     cliprofile.update_profile(c42profile.name, server, username, disable_ssl_errors)
     if password:
         _set_pw(name, password)
-    else:
+    elif not c42profile.has_stored_password:
         _prompt_for_allow_password_set(c42profile.name)
     echo("Profile '{}' has been updated.".format(c42profile.name))
 
