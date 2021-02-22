@@ -2,6 +2,7 @@ import json
 import logging
 
 import py42.sdk.queries.fileevents.filters as f
+from py42.sdk.queries.fileevents.filters.file_filter import FileCategory
 import pytest
 from c42eventextractor.extractors import FileEventExtractor
 from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
@@ -650,7 +651,7 @@ def test_search_and_send_to_when_given_file_path_uses_file_path_filter(
 def test_search_and_send_to_when_given_file_category_uses_file_category_filter(
     runner, cli_state, file_event_extractor, command
 ):
-    file_category = "Image"
+    file_category = FileCategory.IMAGE
     command = [*command, "--begin", "1h", "--file-category", file_category]
     runner.invoke(
         cli, command, obj=cli_state,
@@ -662,23 +663,23 @@ def test_search_and_send_to_when_given_file_category_uses_file_category_filter(
 @pytest.mark.parametrize(
     "category_choice",
     [
-        ("AUDIO", "Audio"),
-        ("DOCUMENT", "Document"),
-        ("EXECUTABLE", "Executable"),
-        ("IMAGE", "Image"),
-        ("PDF", "Pdf"),
-        ("PRESENTATION", "Presentation"),
-        ("SCRIPT", "Script"),
-        ("SOURCE_CODE", "SourceCode"),
-        ("SPREADSHEET", "Spreadsheet"),
-        ("VIDEO", "Video"),
-        ("VIRTUAL_DISK_IMAGE", "VirtualDiskImage"),
-        ("ARCHIVE", "Archive"),
-        ("ZIP", "Archive"),
-        ("Zip", "Archive"),
+        ("AUDIO", FileCategory.AUDIO),
+        ("DOCUMENT", FileCategory.DOCUMENT),
+        ("EXECUTABLE", FileCategory.EXECUTABLE),
+        ("IMAGE", FileCategory.IMAGE),
+        ("PDF", FileCategory.PDF),
+        ("PRESENTATION", FileCategory.PRESENTATION),
+        ("SCRIPT", FileCategory.SCRIPT),
+        ("SOURCE_CODE", FileCategory.SOURCE_CODE),
+        ("SPREADSHEET", FileCategory.SPREADSHEET),
+        ("VIDEO", FileCategory.VIDEO),
+        ("VIRTUAL_DISK_IMAGE", FileCategory.VIRTUAL_DISK_IMAGE),
+        ("ARCHIVE", FileCategory.ZIP),
+        ("ZIP", FileCategory.ZIP),
+        ("Zip", FileCategory.ZIP),
     ],
 )
-def test_all_caps_file_category_choices_convert_to_camel_case(
+def test_all_caps_file_category_choices_convert_to_filecategory_constant(
     runner, cli_state, file_event_extractor, category_choice
 ):
     ALL_CAPS_VALUE, camelCaseValue = category_choice
