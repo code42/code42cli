@@ -5,6 +5,7 @@ import py42.sdk.queries.fileevents.filters as f
 import pytest
 from c42eventextractor.extractors import FileEventExtractor
 from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
+from py42.sdk.queries.fileevents.filters.file_filter import FileCategory
 from tests.cmds.conftest import filter_term_is_in_call_args
 from tests.cmds.conftest import get_filter_value_from_json
 from tests.cmds.conftest import get_mark_for_search_and_send_to
@@ -650,13 +651,51 @@ def test_search_and_send_to_when_given_file_path_uses_file_path_filter(
 def test_search_and_send_to_when_given_file_category_uses_file_category_filter(
     runner, cli_state, file_event_extractor, command
 ):
-    file_category = "IMAGE"
+    file_category = FileCategory.IMAGE
     command = [*command, "--begin", "1h", "--file-category", file_category]
     runner.invoke(
         cli, command, obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
     assert str(f.FileCategory.is_in([file_category])) in filter_strings
+
+
+@pytest.mark.parametrize(
+    "category_choice",
+    [
+        ("AUDIO", FileCategory.AUDIO),
+        ("DOCUMENT", FileCategory.DOCUMENT),
+        ("EXECUTABLE", FileCategory.EXECUTABLE),
+        ("IMAGE", FileCategory.IMAGE),
+        ("PDF", FileCategory.PDF),
+        ("PRESENTATION", FileCategory.PRESENTATION),
+        ("SCRIPT", FileCategory.SCRIPT),
+        ("SOURCE_CODE", FileCategory.SOURCE_CODE),
+        ("SPREADSHEET", FileCategory.SPREADSHEET),
+        ("VIDEO", FileCategory.VIDEO),
+        ("VIRTUAL_DISK_IMAGE", FileCategory.VIRTUAL_DISK_IMAGE),
+        ("ARCHIVE", FileCategory.ZIP),
+        ("ZIP", FileCategory.ZIP),
+        ("Zip", FileCategory.ZIP),
+    ],
+)
+def test_all_caps_file_category_choices_convert_to_filecategory_constant(
+    runner, cli_state, file_event_extractor, category_choice
+):
+    ALL_CAPS_VALUE, camelCaseValue = category_choice
+    command = [
+        "security-data",
+        "search",
+        "--begin",
+        "1h",
+        "--file-category",
+        ALL_CAPS_VALUE,
+    ]
+    runner.invoke(
+        cli, command, obj=cli_state,
+    )
+    filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
+    assert str(f.FileCategory.is_in([camelCaseValue])) in filter_strings
 
 
 @search_and_send_to_test
