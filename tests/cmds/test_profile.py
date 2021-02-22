@@ -310,6 +310,7 @@ def test_update_profile_if_credentials_invalid_password_not_saved(
 ):
     name = "foo"
     profile.name = name
+    profile.has_stored_password = False
     mock_cliprofile_namespace.get_profile.return_value = profile
 
     result = runner.invoke(
@@ -335,6 +336,7 @@ def test_update_profile_if_user_agrees_and_valid_connection_sets_password(
 ):
     name = "foo"
     profile.name = name
+    profile.has_stored_password = False
     mock_cliprofile_namespace.get_profile.return_value = profile
     runner.invoke(
         cli,
