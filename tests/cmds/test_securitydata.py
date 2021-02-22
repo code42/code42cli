@@ -2,10 +2,10 @@ import json
 import logging
 
 import py42.sdk.queries.fileevents.filters as f
-from py42.sdk.queries.fileevents.filters.file_filter import FileCategory
 import pytest
 from c42eventextractor.extractors import FileEventExtractor
 from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
+from py42.sdk.queries.fileevents.filters.file_filter import FileCategory
 from tests.cmds.conftest import filter_term_is_in_call_args
 from tests.cmds.conftest import get_filter_value_from_json
 from tests.cmds.conftest import get_mark_for_search_and_send_to
