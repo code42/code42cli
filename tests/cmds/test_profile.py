@@ -366,8 +366,8 @@ def test_update_profile_when_given_zero_args_prints_error_message(
     mock_cliprofile_namespace.get_profile.return_value = profile
     result = runner.invoke(cli, ["profile", "update"])
     expected = (
-        "Must provide either `--username`, `--server`, `--password`, or `--disable-ssl-errors` "
-        "when updating a profile."
+        "Must provide at least one of `--username`, `--server`, `--password`, "
+        "or `--disable-ssl-errors` when updating a profile."
     )
     assert "Profile 'foo' has been updated" not in result.output
     assert expected in result.output

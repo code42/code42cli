@@ -108,8 +108,8 @@ def update(name, server, username, password, disable_ssl_errors):
 
     if not server and not username and not password and disable_ssl_errors is None:
         raise click.UsageError(
-            "Must provide either `--username`, `--server`, `--password`, or `--disable-ssl-errors` "
-            "when updating a profile."
+            "Must provide at least one of `--username`, `--server`, `--password`, or "
+            "`--disable-ssl-errors` when updating a profile."
         )
 
     cliprofile.update_profile(c42profile.name, server, username, disable_ssl_errors)
