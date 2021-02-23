@@ -471,7 +471,7 @@ def _break_backup_usage_into_total_storage(backup_usage):
     total_storage = 0
     archive_count = 0
     for archive in backup_usage:
-        if archive["archiveFormat"] == "ARCHIVE_V1":
+        if archive["archiveFormat"] != "ARCHIVE_V2":
             archive_count += 1
             total_storage += archive["archiveBytes"]
     return Series([archive_count, total_storage])
