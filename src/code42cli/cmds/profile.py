@@ -60,7 +60,7 @@ disable_ssl_option = click.option(
     is_flag=True,
     help="For development purposes, do not validate the SSL certificates of Code42 servers. "
     "This is not recommended, except for specific scenarios like testing.",
-    default=None
+    default=None,
 )
 
 
@@ -106,12 +106,7 @@ def update(name, server, username, password, disable_ssl_errors):
     """Update an existing profile."""
     c42profile = cliprofile.get_profile(name)
 
-    if (
-        not server
-        and not username
-        and not password
-        and disable_ssl_errors is None
-    ):
+    if not server and not username and not password and disable_ssl_errors is None:
         raise click.UsageError(
             "Must provide either `--username`, `--server`, `--password`, or `--disable-ssl-errors` "
             "when updating a profile."
