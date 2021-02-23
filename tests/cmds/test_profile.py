@@ -357,6 +357,22 @@ def test_update_profile_if_user_agrees_and_valid_connection_sets_password(
     )
 
 
+def test_update_profile_when_given_zero_args_prints_error_message(
+    runner, mock_cliprofile_namespace, profile
+):
+    name = "foo"
+    profile.name = name
+    profile.ignore_ssl_errors = False
+    mock_cliprofile_namespace.get_profile.return_value = profile
+    result = runner.invoke(cli, ["profile", "update"])
+    expected = (
+        "Must provide either `--username`, `--server`, `--password`, or `--disable-ssl-errors` "
+        "when updating a profile."
+    )
+    assert "Profile 'foo' has been updated" not in result.output
+    assert expected in result.output
+
+
 def test_delete_profile_warns_if_deleting_default(runner, mock_cliprofile_namespace):
     mock_cliprofile_namespace.is_default_profile.return_value = True
     result = runner.invoke(cli, ["profile", "delete", "mockdefault"])

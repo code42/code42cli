@@ -105,7 +105,7 @@ class ExceptionHandlingGroup(click.Group):
                 usage_err.message = "No such command '{}'. Did you mean {}?".format(
                     bad_arg, " or ".join(suggested_commands)
                 )
-        raise usage_err
+        raise Code42CLIError(str(usage_err))
 
 
 class OrderedGroup(click.Group):
