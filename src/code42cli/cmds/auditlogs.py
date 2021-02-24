@@ -49,20 +49,20 @@ filter_option_usernames = click.option(
 filter_option_user_ids = click.option(
     "--actor-user-id",
     required=False,
-    help="Filter results by actor user ids.",
+    help="Filter results by actor user IDs.",
     multiple=True,
 )
 
 filter_option_user_ip_addresses = click.option(
     "--actor-ip",
     required=False,
-    help="Filter results by user ip addresses.",
+    help="Filter results by user IP addresses.",
     multiple=True,
 )
 filter_option_affected_user_ids = click.option(
     "--affected-user-id",
     required=False,
-    help="Filter results by affected user ids.",
+    help="Filter results by affected user IDs.",
     multiple=True,
 )
 filter_option_affected_usernames = click.option(
@@ -94,7 +94,7 @@ def filter_options(f):
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def audit_logs(state):
-    """Tools for getting audit-log data."""
+    """Get and send audit log event data."""
     # store cursor getter on the group state so shared --begin option can use it in validation
     state.cursor_getter = _get_audit_log_cursor_store
 
@@ -125,7 +125,7 @@ def search(
     format,
     use_checkpoint,
 ):
-    """Search audit logs."""
+    """Search audit log events."""
     formatter = OutputFormatter(format, _get_audit_logs_default_header())
     cursor = _get_audit_log_cursor_store(state.profile.name)
     if use_checkpoint:
@@ -179,7 +179,7 @@ def send_to(
     use_checkpoint,
     **kwargs,
 ):
-    """Send audit logs to the given server address in JSON format.
+    """Send audit log events to the given server address in JSON format.
 
     HOSTNAME format: address:port where port is optional and defaults to 514.
     """

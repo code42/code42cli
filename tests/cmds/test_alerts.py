@@ -1,4 +1,5 @@
 import json
+import logging
 
 import py42.sdk.queries.alerts.filters as f
 import pytest
@@ -8,6 +9,7 @@ from tests.cmds.conftest import get_filter_value_from_json
 from tests.cmds.conftest import get_mark_for_search_and_send_to
 from tests.conftest import get_test_date_str
 
+from code42cli import errors
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.search import extraction
 from code42cli.cmds.search.cursor_store import AlertCursorStore
@@ -703,6 +705,21 @@ def test_search_and_send_to_with_or_query_flag_produces_expected_query(
     assert actual_query == expected_query
 
 
+@search_and_send_to_test
+def test_search_and_send_to_when_extraction_handles_error_expected_message_logged_and_printed_and_global_errored_flag_set(
+    runner, cli_state, caplog, command
+):
+    errors.ERRORED = False
+    exception_msg = "Test Exception"
+    cli_state.sdk.alerts.search.side_effect = Exception(exception_msg)
+    with caplog.at_level(logging.ERROR):
+        result = runner.invoke(cli, [*command, "--begin", "1d"], obj=cli_state)
+        assert "Error:" in result.output
+        assert exception_msg in result.output
+        assert exception_msg in caplog.text
+        assert errors.ERRORED
+
+
 @pytest.mark.parametrize(
     "protocol", (ServerProtocol.TLS_TCP, ServerProtocol.TLS_TCP, ServerProtocol.UDP)
 )
@@ -787,6 +804,52 @@ def test_send_to_when_given_ignore_cert_validation_uses_certs_equal_to_ignore_st
     send_to_logger_factory.assert_called_once_with(
         "0.0.0.0", "TLS-TCP", "RAW-JSON", "ignore"
     )
+
+
+@pytest.mark.parametrize("protocol", (ServerProtocol.UDP, ServerProtocol.TCP))
+def test_send_to_when_given_ignore_cert_validation_with_non_tls_protocol_fails_expectedly(
+    cli_state, runner, protocol
+):
+    res = runner.invoke(
+        cli,
+        [
+            "alerts",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            protocol,
+            "--ignore-cert-validation",
+        ],
+        obj=cli_state,
+    )
+    assert (
+        "'--ignore-cert-validation' can only be used with '--protocol TLS-TCP'"
+        in res.output
+    )
+
+
+@pytest.mark.parametrize("protocol", (ServerProtocol.UDP, ServerProtocol.TCP))
+def test_send_to_when_given_certs_with_non_tls_protocol_fails_expectedly(
+    cli_state, runner, protocol
+):
+    res = runner.invoke(
+        cli,
+        [
+            "alerts",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            protocol,
+            "--certs",
+            "certs.pem",
+        ],
+        obj=cli_state,
+    )
+    assert "'--certs' can only be used with '--protocol TLS-TCP'" in res.output
 
 
 def test_get_alert_details_batches_results_according_to_batch_size(sdk):

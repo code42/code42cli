@@ -3,7 +3,6 @@ import io
 import json
 
 import click
-from pandas import DataFrame
 
 from code42cli.logger.formatters import CEF_TEMPLATE
 from code42cli.logger.formatters import map_event_to_cef
@@ -81,41 +80,51 @@ class OutputFormatter:
 
 class DataFrameOutputFormatter:
     def __init__(self, output_format):
-        output_format = output_format.upper() if output_format else OutputFormat.TABLE
-        self.output_format = output_format
-        self._format_func = DataFrame.to_string
-        self._output_args = {"index": False}
+        self.output_format = (
+            output_format.upper() if output_format else OutputFormat.TABLE
+        )
 
-        if output_format == OutputFormat.CSV:
-            self._format_func = DataFrame.to_csv
-        elif output_format == OutputFormat.RAW:
-            self._format_func = DataFrame.to_json
-            self._output_args.update(
-                {
-                    "orient": "records",
-                    "lines": False,
-                    "index": True,
-                    "default_handler": str,
-                }
+    def get_formatted_output(self, df, **kwargs):
+        if self.output_format == OutputFormat.JSON:
+            defaults = {
+                "orient": "records",
+                "lines": True,
+                "index": True,
+                "default_handler": str,
+            }
+            defaults.update(kwargs)
+            return df.to_json(**defaults)
+
+        elif self.output_format == OutputFormat.RAW:
+            defaults = {
+                "orient": "records",
+                "lines": False,
+                "index": True,
+                "default_handler": str,
+            }
+            defaults.update(kwargs)
+            return df.to_json(**defaults)
+
+        elif self.output_format == OutputFormat.CSV:
+            defaults = {"index": False}
+            defaults.update(kwargs)
+            df = df.fillna("")
+            return df.to_csv(**defaults)
+
+        elif self.output_format == OutputFormat.TABLE:
+            defaults = {"index": False}
+            defaults.update(kwargs)
+            df = df.fillna("")
+            return df.to_string(**defaults)
+
+        else:
+            raise ValueError(
+                f"DataFrameOutputFormatter received an invalid format: {self.output_format}"
             )
-        elif output_format == OutputFormat.JSON:
-            self._format_func = DataFrame.to_json
-            self._output_args.update(
-                {
-                    "orient": "records",
-                    "lines": True,
-                    "index": True,
-                    "default_handler": str,
-                }
-            )
 
-    def _format_output(self, output, *args, **kwargs):
-        self._output_args.update(kwargs)
-        return self._format_func(output, *args, **self._output_args)
-
-    def echo_formatted_dataframe(self, output, *args, **kwargs):
-        str_output = self._format_output(output, *args, **kwargs)
-        if len(output) <= 10:
+    def echo_formatted_dataframe(self, df, **kwargs):
+        str_output = self.get_formatted_output(df, **kwargs)
+        if len(df) <= 10:
             click.echo(str_output)
         else:
             click.echo_via_pager(str_output)

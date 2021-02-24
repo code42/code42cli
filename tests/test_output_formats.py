@@ -2,14 +2,16 @@ import json
 from collections import OrderedDict
 
 import pytest
+from numpy import NaN
 from pandas import DataFrame
 
 import code42cli.output_formats as output_formats_module
 from code42cli.maps import FILE_EVENT_TO_SIGNATURE_ID_MAP
+from code42cli.output_formats import DataFrameOutputFormatter
 from code42cli.output_formats import FileEventsOutputFormat
 from code42cli.output_formats import FileEventsOutputFormatter
+from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import to_cef
-
 
 TEST_DATA = [
     {
@@ -771,53 +773,61 @@ def test_security_data_output_format_has_expected_options():
 
 
 class TestDataFrameOutputFormatter:
-    def test_init_sets_format_func_to_formatted_json_function_when_json_format_option_is_passed(
-        self, mock_dataframe_to_json
-    ):
-        output_format = output_formats_module.OutputFormat.RAW
-        formatter = output_formats_module.DataFrameOutputFormatter(output_format)
-        formatter.echo_formatted_dataframe(TEST_DATAFRAME)
-        mock_dataframe_to_json.assert_called_once_with(
-            TEST_DATAFRAME,
-            orient="records",
-            lines=False,
-            index=True,
-            default_handler=str,
+    test_df = DataFrame(
+        [
+            {"string_column": "string1", "int_column": 42, "null_column": None},
+            {"string_column": "string2", "int_column": 43, "null_column": NaN},
+        ]
+    )
+
+    def test_format_when_none_passed_defaults_to_table(self):
+        formatter = DataFrameOutputFormatter(output_format=None)
+        assert formatter.output_format == OutputFormat.TABLE
+
+    def test_format_when_unknown_format_raises_value_error(self):
+        with pytest.raises(ValueError):
+            formatter = DataFrameOutputFormatter("NOT_A_FORMAT")
+            formatter.get_formatted_output(self.test_df)
+
+    def test_json_formatter_converts_to_expected_string(self):
+        formatter = DataFrameOutputFormatter(OutputFormat.JSON)
+        output = formatter.get_formatted_output(self.test_df)
+        assert (
+            output
+            == '{"string_column":"string1","int_column":42,"null_column":null}\n{"string_column":"string2","int_column":43,"null_column":null}'
         )
 
-    def test_init_sets_format_func_to_json_function_when_raw_json_format_option_is_passed(
-        self, mock_dataframe_to_json
-    ):
-        output_format = output_formats_module.OutputFormat.JSON
-        formatter = output_formats_module.DataFrameOutputFormatter(output_format)
-        formatter.echo_formatted_dataframe(TEST_DATAFRAME)
-        mock_dataframe_to_json.assert_called_once_with(
-            TEST_DATAFRAME,
-            orient="records",
-            lines=True,
-            index=True,
-            default_handler=str,
+    def test_raw_formatter_converts_to_expected_string(self):
+        formatter = DataFrameOutputFormatter(OutputFormat.RAW)
+        output = formatter.get_formatted_output(self.test_df)
+        assert (
+            output
+            == '[{"string_column":"string1","int_column":42,"null_column":null},{"string_column":"string2","int_column":43,"null_column":null}]'
         )
 
-    def test_init_sets_format_func_to_table_function_when_table_format_option_is_passed(
-        self, mock_dataframe_to_string
-    ):
-        output_format = output_formats_module.OutputFormat.TABLE
-        formatter = output_formats_module.DataFrameOutputFormatter(output_format)
-        formatter.echo_formatted_dataframe(TEST_DATAFRAME)
-        mock_dataframe_to_string.assert_called_once_with(TEST_DATAFRAME, index=False)
+    def test_csv_formatter_converts_to_expected_string(self):
+        formatter = DataFrameOutputFormatter(OutputFormat.CSV)
+        output = formatter.get_formatted_output(self.test_df)
+        assert (
+            output == "string_column,int_column,null_column\nstring1,42,\nstring2,43,\n"
+        )
 
-    def test_init_sets_format_func_to_csv_function_when_csv_format_option_is_passed(
-        self, mock_dataframe_to_csv
-    ):
-        output_format = output_formats_module.OutputFormat.CSV
-        formatter = output_formats_module.DataFrameOutputFormatter(output_format)
-        formatter.echo_formatted_dataframe(TEST_DATAFRAME)
-        mock_dataframe_to_csv.assert_called_once_with(TEST_DATAFRAME, index=False)
+    def test_table_formatter_converts_to_expected_string(self):
+        formatter = DataFrameOutputFormatter(OutputFormat.TABLE)
+        output = formatter.get_formatted_output(self.test_df)
+        assert output == (
+            "string_column  int_column null_column\n"
+            "      string1          42            \n"
+            "      string2          43            "
+        )
 
-    def test_init_sets_format_func_to_table_function_when_no_format_option_is_passed(
-        self, mock_dataframe_to_string
-    ):
-        formatter = output_formats_module.DataFrameOutputFormatter(None)
-        formatter.echo_formatted_dataframe(TEST_DATAFRAME)
-        mock_dataframe_to_string.assert_called_once_with(TEST_DATAFRAME, index=False)
+    def test_echo_formatted_dataframe_uses_pager_when_gt_10_rows(self, mocker):
+        mock_echo = mocker.patch("click.echo")
+        mock_pager = mocker.patch("click.echo_via_pager")
+        formatter = DataFrameOutputFormatter(OutputFormat.TABLE)
+        big_df = DataFrame([{"column": val} for val in range(11)])
+        small_df = DataFrame([{"column": val} for val in range(5)])
+        formatter.echo_formatted_dataframe(big_df)
+        formatter.echo_formatted_dataframe(small_df)
+        assert mock_echo.call_count == 1
+        assert mock_pager.call_count == 1

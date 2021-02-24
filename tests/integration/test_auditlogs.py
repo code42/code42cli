@@ -39,6 +39,7 @@ def test_auditlogs_search_command_with_short_hand_begin_returns_success_return_c
     assert_test_is_successful(runner, append_profile(command))
 
 
+@pytest.mark.integration
 def test_auditlogs_search_command_with_full_begin_returns_success_return_code(
     runner, integration_test_profile,
 ):

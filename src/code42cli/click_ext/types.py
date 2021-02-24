@@ -116,3 +116,19 @@ class MagicDate(click.ParamType):
             raise BadParameter("Unable to parse date string: {}.".format(date_string))
         else:
             return dt
+
+
+class MapChoice(click.Choice):
+    """Choice subclass that takes an extra map of additional 'valid' keys to map to correct
+    choices list, allowing backward compatible choice changes. The extra keys don't show up
+    in help text, but work when passed as a choice.
+    """
+
+    def __init__(self, choices, extras_map, **kwargs):
+        self.extras_map = extras_map
+        super().__init__(choices, **kwargs)
+
+    def convert(self, value, param, ctx):
+        if value in self.extras_map:
+            value = self.extras_map[value]
+        return super().convert(value, param, ctx)

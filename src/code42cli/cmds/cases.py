@@ -4,7 +4,9 @@ import os
 import click
 from py42.clients.cases import CaseStatus
 from py42.exceptions import Py42BadRequestError
+from py42.exceptions import Py42CaseAlreadyHasEventError
 from py42.exceptions import Py42NotFoundError
+from py42.exceptions import Py42UpdateClosedCaseError
 
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.errors import Code42CLIError
@@ -66,7 +68,7 @@ def _get_events_header():
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def cases(state):
-    """For managing cases and events associated with cases."""
+    """Manage cases and events associated with cases."""
     pass
 
 
@@ -241,6 +243,10 @@ def add(state, case_number, event_id):
     """Associate a file event to a case, by event ID."""
     try:
         state.sdk.cases.file_events.add(case_number, event_id)
+    except Py42UpdateClosedCaseError:
+        raise
+    except Py42CaseAlreadyHasEventError:
+        raise
     except Py42BadRequestError:
         raise Code42CLIError("Invalid case-number or event-id.")
 

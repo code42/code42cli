@@ -33,3 +33,11 @@ jobs:
         env:
             SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: tox -e nightly  # Run tox using latest master branch from py42/c42eventextractor
+      - name: Notify Slack Action
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: failure()

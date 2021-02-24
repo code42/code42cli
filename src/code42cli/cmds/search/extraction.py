@@ -58,7 +58,12 @@ def _set_handlers(cursor_store, checkpoint_name):
         else:
             message = exception
         logger.log_error(message)
-        secho(str(message), err=True, fg="red")
+
+        message = str(message)
+        if not message.lower().startswith("error:"):
+            message = f"Error: {message}"
+
+        secho(message, err=True, fg="red")
 
     handlers.handle_error = handle_error
     if cursor_store:

@@ -38,7 +38,7 @@ filter_option = click.option(
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def departing_employee(state):
-    """For adding and removing employees from the departing employees detection list."""
+    """Add and remove employees from the Departing Employees detection list."""
     pass
 
 
@@ -47,7 +47,7 @@ def departing_employee(state):
 @format_option
 @filter_option
 def _list(state, format, filter):
-    """Lists the employees on the Departing Employee list."""
+    """Lists the users on the Departing Employees list."""
     employee_generator = _get_departing_employees(state.sdk, filter)
     list_employees(
         employee_generator, format, {"departureDate": "Departure Date"},
@@ -65,7 +65,7 @@ def _list(state, format, filter):
 @notes_option
 @sdk_options()
 def add(state, username, cloud_alias, departure_date, notes):
-    """Add a user to the departing employees detection list."""
+    """Add a user to the Departing Employees detection list."""
     if departure_date:
         departure_date = departure_date.strftime(DATE_FORMAT)
     _add_departing_employee(state.sdk, username, cloud_alias, departure_date, notes)
@@ -75,7 +75,7 @@ def add(state, username, cloud_alias, departure_date, notes):
 @username_arg
 @sdk_options()
 def remove(state, username):
-    """Remove a user from the departing-employee detection list."""
+    """Remove a user from the Departing Employees detection list."""
     _remove_departing_employee(state.sdk, username)
 
 
@@ -97,7 +97,7 @@ bulk.add_command(departing_employee_generate_template)
 
 @bulk.command(
     name="add",
-    help="Bulk add users to the departing employees detection list using a CSV file with "
+    help="Bulk add users to the Departing Employees detection list using a CSV file with "
     "format: {}.".format(",".join(DEPARTING_EMPLOYEE_CSV_HEADERS)),
 )
 @read_csv_arg(headers=DEPARTING_EMPLOYEE_CSV_HEADERS)
@@ -126,13 +126,13 @@ def bulk_add(ctx, state, csv_rows):
     run_bulk_process(
         handle_row,
         csv_rows,
-        progress_label="Adding users to departing employee detection list:",
+        progress_label="Adding users to the Departing Employees detection list:",
     )
 
 
 @bulk.command(
     name="remove",
-    help="Bulk remove users from the departing employees detection list using a line-separated "
+    help="Bulk remove users from the Departing Employees detection list using a line-separated "
     "file of usernames.",
 )
 @read_flat_file_arg
@@ -146,7 +146,7 @@ def bulk_remove(state, file_rows):
     run_bulk_process(
         handle_row,
         file_rows,
-        progress_label="Removing users from departing employee detection list:",
+        progress_label="Removing users from the Departing Employees detection list:",
     )
 
 

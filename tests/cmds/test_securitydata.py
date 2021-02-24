@@ -5,6 +5,7 @@ import py42.sdk.queries.fileevents.filters as f
 import pytest
 from c42eventextractor.extractors import FileEventExtractor
 from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
+from py42.sdk.queries.fileevents.filters.file_filter import FileCategory
 from tests.cmds.conftest import filter_term_is_in_call_args
 from tests.cmds.conftest import get_filter_value_from_json
 from tests.cmds.conftest import get_mark_for_search_and_send_to
@@ -296,6 +297,52 @@ def test_send_to_with_saved_search_and_incompatible_argument_errors(
     )
     assert result.exit_code == 2
     assert "{} can't be used with: --saved-search".format(arg[0]) in result.output
+
+
+@pytest.mark.parametrize("protocol", (ServerProtocol.UDP, ServerProtocol.TCP))
+def test_send_to_when_given_ignore_cert_validation_with_non_tls_protocol_fails_expectedly(
+    cli_state, runner, protocol
+):
+    res = runner.invoke(
+        cli,
+        [
+            "security-data",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            protocol,
+            "--ignore-cert-validation",
+        ],
+        obj=cli_state,
+    )
+    assert (
+        "'--ignore-cert-validation' can only be used with '--protocol TLS-TCP'"
+        in res.output
+    )
+
+
+@pytest.mark.parametrize("protocol", (ServerProtocol.UDP, ServerProtocol.TCP))
+def test_send_to_when_given_certs_with_non_tls_protocol_fails_expectedly(
+    cli_state, runner, protocol
+):
+    res = runner.invoke(
+        cli,
+        [
+            "security-data",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            protocol,
+            "--certs",
+            "certs.pem",
+        ],
+        obj=cli_state,
+    )
+    assert "'--certs' can only be used with '--protocol TLS-TCP'" in res.output
 
 
 @search_and_send_to_test
@@ -604,13 +651,51 @@ def test_search_and_send_to_when_given_file_path_uses_file_path_filter(
 def test_search_and_send_to_when_given_file_category_uses_file_category_filter(
     runner, cli_state, file_event_extractor, command
 ):
-    file_category = "IMAGE"
+    file_category = FileCategory.IMAGE
     command = [*command, "--begin", "1h", "--file-category", file_category]
     runner.invoke(
         cli, command, obj=cli_state,
     )
     filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
     assert str(f.FileCategory.is_in([file_category])) in filter_strings
+
+
+@pytest.mark.parametrize(
+    "category_choice",
+    [
+        ("AUDIO", FileCategory.AUDIO),
+        ("DOCUMENT", FileCategory.DOCUMENT),
+        ("EXECUTABLE", FileCategory.EXECUTABLE),
+        ("IMAGE", FileCategory.IMAGE),
+        ("PDF", FileCategory.PDF),
+        ("PRESENTATION", FileCategory.PRESENTATION),
+        ("SCRIPT", FileCategory.SCRIPT),
+        ("SOURCE_CODE", FileCategory.SOURCE_CODE),
+        ("SPREADSHEET", FileCategory.SPREADSHEET),
+        ("VIDEO", FileCategory.VIDEO),
+        ("VIRTUAL_DISK_IMAGE", FileCategory.VIRTUAL_DISK_IMAGE),
+        ("ARCHIVE", FileCategory.ZIP),
+        ("ZIP", FileCategory.ZIP),
+        ("Zip", FileCategory.ZIP),
+    ],
+)
+def test_all_caps_file_category_choices_convert_to_filecategory_constant(
+    runner, cli_state, file_event_extractor, category_choice
+):
+    ALL_CAPS_VALUE, camelCaseValue = category_choice
+    command = [
+        "security-data",
+        "search",
+        "--begin",
+        "1h",
+        "--file-category",
+        ALL_CAPS_VALUE,
+    ]
+    runner.invoke(
+        cli, command, obj=cli_state,
+    )
+    filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
+    assert str(f.FileCategory.is_in([camelCaseValue])) in filter_strings
 
 
 @search_and_send_to_test
@@ -727,13 +812,10 @@ def test_search_and_send_to_when_extraction_handles_error_expected_message_logge
 ):
     errors.ERRORED = False
     exception_msg = "Test Exception"
-
-    def file_search_error(x):
-        raise Exception(exception_msg)
-
-    cli_state.sdk.securitydata.search_file_events.side_effect = file_search_error
+    cli_state.sdk.securitydata.search_file_events.side_effect = Exception(exception_msg)
     with caplog.at_level(logging.ERROR):
         result = runner.invoke(cli, [*command, "--begin", "1d"], obj=cli_state)
+        assert "Error:" in result.output
         assert exception_msg in result.output
         assert exception_msg in caplog.text
         assert errors.ERRORED

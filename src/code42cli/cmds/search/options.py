@@ -162,6 +162,7 @@ def server_options(f):
         help="Set to skip CA certificate validation. "
         "Incompatible with the 'certs' option.",
         is_flag=True,
+        default=None,
         cls=incompatible_with(["certs"]),
     )
     f = hostname_arg(f)

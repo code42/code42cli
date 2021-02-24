@@ -10,15 +10,38 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
+### Changed
+
+- Command options for `profile update`:
+    - `-n` `--name` is not required, and if omitted with use default profile.
+    - `-s` `--server` and `-u` `--username` are not required and can be updated independently now.
+    - Example: `code42 profile update -s 1.2.3.4:1234`
+
+## 1.3.0 - 2021-02-11
+
+### Fixed
+
+- Issue where `code42 alert-rules bulk add` would show as successful when adding users to a non-existent alert rule.
+
 ### Added
 
 - New choice `TLS-TCP` for `--protocol` option used by `send-to` commands:
     - `code42 security-data send-to`
     - `code42 alerts send-to`
     - `code42 audit-logs send-to`
-    for more securely transporting data.
+  for more securely transporting data. Included are new flags:
+    - `--certs`
+    - `--ignore-cert-validation`
 
-- `--certs` option for `send-to` commands when using `--protocol TLS-TCP`.
+### Changed
+
+- The error text in cases command when:
+    - `cases create` sets a name that already exists in the system.
+    - `cases create` sets a description that has more than 250 characters.
+    - `cases update` sets a description that has more than 250 characters.
+    - `cases file-events add` is performed on an already closed case.
+    - `cases file-events add` sets an event id that is already added to the case.
+    - `cases file-events remove` is performed on an already closed case.
 
 ## 1.2.0 - 2021-01-25
 

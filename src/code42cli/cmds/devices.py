@@ -25,7 +25,7 @@ from code42cli.output_formats import OutputFormatter
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def devices(state):
-    """For managing devices within your Code42 environment."""
+    """Manage devices within your Code42 environment."""
     pass
 
 
@@ -51,7 +51,7 @@ purge_date_option = click.option(
     type=click.DateTime(formats=[DATE_FORMAT]),
     default=None,
     help="The date on which the archive should be purged from cold storage in yyyy-MM-dd format. "
-    "If not provided, the date will be set according to the appropriate org settings.",
+    "If not provided, the date will be set according to the appropriate organization settings.",
 )
 
 
@@ -125,7 +125,7 @@ def _verify_guid_type(device_guid):
         int(device_guid)
         return device_guid
     except ValueError:
-        raise Code42CLIError("Not a valid guid.")
+        raise Code42CLIError("Not a valid GUID.")
 
 
 def _update_cold_storage_purge_date(sdk, guid, purge_date):
@@ -152,7 +152,7 @@ def _change_device_name(sdk, guid, name):
 @device_guid_argument
 @sdk_options()
 def show(state, device_guid, format=None):
-    """Print individual device info. Requires device GUID."""
+    """Print individual device details. Requires device GUID."""
 
     formatter = OutputFormatter(format, _device_info_keys_map())
     backup_set_formatter = OutputFormatter(format, _backup_set_keys_map())
@@ -208,8 +208,8 @@ org_uid_option = click.option(
     required=False,
     type=str,
     default=None,
-    help="Limit devices to only the ones in the org you specify. "
-    "Note that child orgs will be included.",
+    help="Limit devices to only those in the organization you specify. "
+    "Note that child organizations will be included.",
 )
 
 include_usernames_option = click.option(

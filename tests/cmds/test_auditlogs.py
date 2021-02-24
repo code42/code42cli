@@ -61,9 +61,6 @@ TEST_EVENTS_WITH_DIFFERENT_TIMESTAMPS = [
         "timestamp": TEST_AUDIT_LOG_TIMESTAMP_3,
     },
 ]
-TEST_CHECKPOINT_EVENT_HASHLIST = [
-    hash_event(event) for event in TEST_EVENTS_WITH_SAME_TIMESTAMP
-]
 search_and_send_to_test = get_mark_for_search_and_send_to("audit-logs")
 
 
@@ -309,6 +306,52 @@ def test_send_to_emits_events_in_chronological_order(
         send_to_logger.info.call_args_list[3][0][0]["timestamp"]
         == TEST_AUDIT_LOG_TIMESTAMP_3
     )
+
+
+@pytest.mark.parametrize("protocol", (ServerProtocol.UDP, ServerProtocol.TCP))
+def test_send_to_when_given_ignore_cert_validation_with_non_tls_protocol_fails_expectedly(
+    cli_state, runner, protocol
+):
+    res = runner.invoke(
+        cli,
+        [
+            "audit-logs",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            protocol,
+            "--ignore-cert-validation",
+        ],
+        obj=cli_state,
+    )
+    assert (
+        "'--ignore-cert-validation' can only be used with '--protocol TLS-TCP'"
+        in res.output
+    )
+
+
+@pytest.mark.parametrize("protocol", (ServerProtocol.UDP, ServerProtocol.TCP))
+def test_send_to_when_given_certs_with_non_tls_protocol_fails_expectedly(
+    cli_state, runner, protocol
+):
+    res = runner.invoke(
+        cli,
+        [
+            "audit-logs",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--protocol",
+            protocol,
+            "--certs",
+            "certs.pem",
+        ],
+        obj=cli_state,
+    )
+    assert "'--certs' can only be used with '--protocol TLS-TCP'" in res.output
 
 
 @search_and_send_to_test
