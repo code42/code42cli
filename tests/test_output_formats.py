@@ -793,7 +793,7 @@ class TestDataFrameOutputFormatter:
         formatter = DataFrameOutputFormatter(OutputFormat.JSON)
         output = formatter.get_formatted_output(self.test_df)
         assert (
-            output
+            output.strip()
             == '{"string_column":"string1","int_column":42,"null_column":null}\n{"string_column":"string2","int_column":43,"null_column":null}'
         )
 
