@@ -75,7 +75,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Added
 
 - `code42 devices list` option:
-    - `--include-legal-hold-membership` to add legal hold columns to the result output, printing the legal hold matter name and ID for any active device actively on legal hold
+    - `--include-legal-hold-membership` prints the legal hold matter name and ID for any active device on legal hold
     - `--include-total-storage` to add columns with total number of archives and total sum of archive bytes to each device in the result output
 
 ## 1.0.0 - 2020-08-31
