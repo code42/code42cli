@@ -8,6 +8,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## 1.3.1 - 2021-02-25
+
+### Changed
+
+- Command options for `profile update`:
+    - `-n` `--name` is not required, and if omitted will use the default profile.
+    - `-s` `--server` and `-u` `--username` are not required and can be updated independently now.
+    - Example: `code42 profile update -s 1.2.3.4:1234`
+
+## 1.3.0 - 2021-02-11
+
+### Fixed
+
+- Issue where `code42 alert-rules bulk add` would show as successful when adding users to a non-existent alert rule.
+
+### Added
+
+- New choice `TLS-TCP` for `--protocol` option used by `send-to` commands:
+    - `code42 security-data send-to`
+    - `code42 alerts send-to`
+    - `code42 audit-logs send-to`
+  for more securely transporting data. Included are new flags:
+    - `--certs`
+    - `--ignore-cert-validation`
+
+### Changed
+
+- The error text in cases command when:
+    - `cases create` sets a name that already exists in the system.
+    - `cases create` sets a description that has more than 250 characters.
+    - `cases update` sets a description that has more than 250 characters.
+    - `cases file-events add` is performed on an already closed case.
+    - `cases file-events add` sets an event id that is already added to the case.
+    - `cases file-events remove` is performed on an already closed case.
+
 ## 1.2.0 - 2021-01-25
 
 ### Added
@@ -58,6 +93,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `search` to search for audit-logs.
     - `send-to` to send audit-logs to server.
 
+## Unreleased
+
 ### Changed
 
 - `profile_name` argument is now required for `code42 profile delete`, as it was meant to be.
@@ -68,6 +105,12 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Now, when adding a cloud alias to a detection list user, such as during `departing-employee add`, it will remove the existing cloud alias if one exists.
     - Before, it would error and the cloud alias would not get added.
+    
+### Added
+
+- `code42 devices list` option:
+    - `--include-legal-hold-membership` prints the legal hold matter name and ID for any active device on legal hold
+    - `--include-total-storage` prints the backup archive count and total storage 
 
 ## 1.0.0 - 2020-08-31
 
