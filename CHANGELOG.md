@@ -58,9 +58,6 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `search` to search for audit-logs.
     - `send-to` to send audit-logs to server.
 
-
-## Unreleased
-
 ### Changed
 
 - `profile_name` argument is now required for `code42 profile delete`, as it was meant to be.
@@ -71,12 +68,6 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Now, when adding a cloud alias to a detection list user, such as during `departing-employee add`, it will remove the existing cloud alias if one exists.
     - Before, it would error and the cloud alias would not get added.
-
-### Added
-
-- `code42 devices list` option:
-    - `--include-legal-hold-membership` prints the legal hold matter name and ID for any active device on legal hold
-    - `--include-total-storage` to add columns with total number of archives and total sum of archive bytes to each device in the result output
 
 ## 1.0.0 - 2020-08-31
 
