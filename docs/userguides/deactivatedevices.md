@@ -32,7 +32,7 @@ Once you have a list of devices that you wish to remove, you can run the `code42
 
 ```
 code42 devices bulk deactivate list_of_devices.csv
-``` 
+```
 
 The device list must be a file in CSV format containing a `guid` column with the unique identifier of the devices to be deactivated. The deactivate command can also accept some optional parameters:
 
