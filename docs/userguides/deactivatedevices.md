@@ -5,7 +5,7 @@ longer active computers and that have not connected to Code42 in
 quite some time. In order to clean up your environment, you can
 use the CLI to deactivate these devices in bulk.
 
-## Generating a list of devices
+## Generate a list of devices
 
 You can generate a list of devices using `code42 devices list`. By
 default, it will display the list of devices at the command line,
@@ -23,7 +23,7 @@ To save to a file, redirect the output to a file in your shell:
 code42 devices list -f CSV > output.csv
 ```
 
-### Filtering the list
+### Filter the list
 
 You can filter or edit the list of devices in your spreadsheet or
 text editor of choice, but the CLI has some parameters built in
@@ -38,9 +38,9 @@ curating a list of devices to deactivate:
 * `--exclude-most-recently-connected INTEGER` - allows you to exclude the most recently connected device (per user) from the results. This allows you to ensure that every user is left with at least N device(s), regardless of how recently they have connected.
 * `--created-before DATE|TIMESTAMP|SHORT_TIME` - allows you to only see devices created before a particular date.
 
-## Deactivating devices
+## Deactivate devices
 
-Once you have a list of devices that you wish to remove, you can
+Once you have a list of devices that you want to remove, you can
 run the `code42 devices bulk deactivate` command:
 
 ```
@@ -57,10 +57,10 @@ parameters:
 
 To see a full list of available options, run `code42 devices bulk deactivate -h`.
 
-The `code42 devices bulk deactivate` command will output the input
-you gave it, plus a column indicating the success or failure of
-the deactivation. To change the format of this output, use the
-`-f` or `--format` option.
+The `code42 devices bulk deactivate` command will output the guid
+of the device to be deactivated, plus a column indicating the
+success or failure of the deactivation. To change the format of
+this output, use the `-f` or `--format` option.
 
 You can also redirect the output to a file, for example:
 
@@ -73,7 +73,7 @@ have permission to deactivate the device, or if the user owning
 the device is on legal hold.
 
 
-### Generating the list and deactivating in a single command
+### Generate the list and deactivate in a single command
 
 You can also pipe the output of `code42 devices list` directly to
 `code42 devices bulk deactivate`. When using a pipe, make sure to
