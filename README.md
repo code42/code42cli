@@ -273,3 +273,8 @@ eval (env _CODE42_COMPLETE=source_fish code42)
 ```
 
 Open a new shell to enable completion. Or run the eval command directly in your current shell to enable it temporarily.
+
+
+## Writing Extensions
+
+The CLI exposes a few helpers for writing custom extension scripts powered by the CLI. Read the user-guide [here](https://clidocs.code42.com/en/feature-extension_scripts/userguides/extensions.html).
