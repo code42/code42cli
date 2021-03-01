@@ -310,6 +310,7 @@ def test_update_profile_if_credentials_invalid_password_not_saved(
 ):
     name = "foo"
     profile.name = name
+    profile.has_stored_password = False
     mock_cliprofile_namespace.get_profile.return_value = profile
 
     result = runner.invoke(
@@ -335,6 +336,7 @@ def test_update_profile_if_user_agrees_and_valid_connection_sets_password(
 ):
     name = "foo"
     profile.name = name
+    profile.has_stored_password = False
     mock_cliprofile_namespace.get_profile.return_value = profile
     runner.invoke(
         cli,
@@ -353,6 +355,22 @@ def test_update_profile_if_user_agrees_and_valid_connection_sets_password(
     mock_cliprofile_namespace.set_password.assert_called_once_with(
         "newpassword", mocker.ANY
     )
+
+
+def test_update_profile_when_given_zero_args_prints_error_message(
+    runner, mock_cliprofile_namespace, profile
+):
+    name = "foo"
+    profile.name = name
+    profile.ignore_ssl_errors = False
+    mock_cliprofile_namespace.get_profile.return_value = profile
+    result = runner.invoke(cli, ["profile", "update"])
+    expected = (
+        "Must provide at least one of `--username`, `--server`, `--password`, "
+        "or `--disable-ssl-errors` when updating a profile."
+    )
+    assert "Profile 'foo' has been updated" not in result.output
+    assert expected in result.output
 
 
 def test_delete_profile_warns_if_deleting_default(runner, mock_cliprofile_namespace):
