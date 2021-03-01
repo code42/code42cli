@@ -12,7 +12,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
-- `code42cli.extensions` module exposes `sdk_options` decorator and `script` group for writing custom extension scripts 
+- `code42cli.extensions` module exposes `sdk_options` decorator and `script` group for writing custom extension scripts
     using the Code42 CLI.
 
 ## 1.3.1 - 2021-02-25
