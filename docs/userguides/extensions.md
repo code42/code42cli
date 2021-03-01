@@ -45,7 +45,7 @@ The above example works as a standalone script, if it were named `my_script.py` 
 python3 my_script.py
 ```
 
-However, if the Code42 CLI is installed in a different python environment than your `python3` command it might fail to import the extensions.
+However, if the Code42 CLI is installed in a different python environment than your `python3` command, it might fail to import the extensions.
 
 To workaround environment and path issues, the CLI has a `--python` option that prints out the path to the python executable the CLI uses, so you can execute your script with `$(code42 --python) script.py` on Mac/Linux or `&$(code42 --python) script.py` on Windows to ensure it always uses the correct python path for the extension script to work.
 
