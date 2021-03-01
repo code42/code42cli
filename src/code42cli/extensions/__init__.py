@@ -1,8 +1,8 @@
 from code42cli.click_ext.groups import ExtensionGroup
 from code42cli.main import CONTEXT_SETTINGS
-from code42cli.options import profile_option
 from code42cli.options import debug_option
 from code42cli.options import pass_state
+from code42cli.options import profile_option
 
 
 def sdk_options(f):
@@ -27,8 +27,8 @@ def sdk_options(f):
 
 script = ExtensionGroup(context_settings=CONTEXT_SETTINGS)
 """A `click.Group` subclass that enables the Code42 CLI's custom error handling/logging to be used
-in extension scripts. If only a single command is added to the `script` group it also uses that 
-command as the default, so the command name doesn't need to be called explicitly. 
+in extension scripts. If only a single command is added to the `script` group it also uses that
+command as the default, so the command name doesn't need to be called explicitly.
 
 Example:
 
@@ -38,11 +38,11 @@ Example:
     def get_device_info(state, guid)
         device = state.sdk.devices.get_by_guid(guid)
         print(device)
-        
+
     if __name__ == "__main__":
         script.add_command(my_command)
         script()
-        
+
 The script can then be invoked directly without needing to call the `get-device-info` subcommand:
 
     python script.py --profile my_profile <guid>
