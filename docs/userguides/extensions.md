@@ -1,4 +1,4 @@
-# Write custom extension scripts using the code42cli and py42
+# Write custom extension scripts using the Code42 CLI and py42
 
 While the Code42 CLI aims to provide an easy way to automate many common Code42 tasks, there will likely be times when you need to script something the CLI doesn't have out-of-the-box.
 
