@@ -1,7 +1,12 @@
+import json
 from datetime import date
 
+import numpy as np
 import pytest
 from pandas import DataFrame
+from pandas import Series
+from pandas._testing import assert_frame_equal
+from pandas._testing import assert_series_equal
 from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42ForbiddenError
 from py42.exceptions import Py42NotFoundError
@@ -10,7 +15,9 @@ from requests import Response
 
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.devices import _add_backup_set_settings_to_dataframe
+from code42cli.cmds.devices import _add_legal_hold_membership_to_device_dataframe
 from code42cli.cmds.devices import _add_usernames_to_device_dataframe
+from code42cli.cmds.devices import _break_backup_usage_into_total_storage
 from code42cli.cmds.devices import _get_device_dataframe
 from code42cli.main import cli
 
@@ -76,7 +83,19 @@ TEST_BACKUPUSAGE_RESPONSE = """{"metadata":{"timestamp":"2020-10-13T12:51:28.410
 "836476656572622471","serverName":"cif-sea","serverHostName":"https://cif-sea.crashplan.com",
 "isProvider":false,"archiveGuid":"843293524842941560","archiveFormat":"ARCHIVE_V1","activity":
 {"connected":false,"backingUp":false,"restoring":false,"timeRemainingInMs":0,
-"remainingFiles":0,"remainingBytes":0}}]}}"""
+"remainingFiles":0,"remainingBytes":0}},{"targetComputerParentId":null,"targetComputerParentGuid":
+null,"targetComputerGuid":"43","targetComputerName":"PROe Cloud, US","targetComputerOsName":null,
+"targetComputerType":"SERVER","selectedFiles":1599,"selectedBytes":1529420143,"todoFiles":0,
+"todoBytes":0,"archiveBytes":56848550,"billableBytes":1529420143,"sendRateAverage":0,
+"completionRateAverage":0,"lastBackup":"2019-12-02T09:34:28.364-06:00","lastCompletedBackup":
+"2019-12-02T09:34:28.364-06:00","lastConnected":"2019-12-02T11:02:36.108-06:00","lastMaintenanceDate":
+"2021-02-16T07:01:11.697-06:00","lastCompactDate":"2021-02-16T07:01:11.694-06:00","modificationDate":
+"2021-02-17T04:57:27.222-06:00","creationDate":"2019-09-26T15:27:38.806-05:00","using":true,
+"alertState":16,"alertStates":["CriticalBackupAlert"],"percentComplete":100.0,"storePointId":10989,
+"storePointName":"fsa-iad-2","serverId":160024121,"serverGuid":"883282371081742804","serverName":
+"fsa-iad","serverHostName":"https://web-fsa-iad.crashplan.com","isProvider":false,"archiveGuid":
+"92077743916530001","archiveFormat":"ARCHIVE_V1","activity":{"connected":false,"backingUp":false,
+"restoring":false,"timeRemainingInMs":0,"remainingFiles":0,"remainingBytes":0}}]}}"""
 TEST_EMPTY_BACKUPUSAGE_RESPONSE = """{"metadata":{"timestamp":"2020-10-13T12:51:28.410Z","params":
 {"incBackupUsage":"True","idType":"guid"}},"data":{"computerId":1767,"name":"SNWINTEST1",
 "osHostname":"UNKNOWN","guid":"843290890230648046","type":"COMPUTER","status":"Active",
@@ -221,6 +240,75 @@ TEST_USERS_LIST_PAGE = {
         },
     ],
 }
+MATTER_RESPONSE = {
+    "legalHolds": [
+        {
+            "legalHoldUid": "123456789",
+            "name": "Test legal hold matter",
+            "description": "",
+            "notes": None,
+            "holdExtRef": None,
+            "active": True,
+            "creationDate": "2020-08-05T10:49:58.353-05:00",
+            "lastModified": "2020-08-05T10:49:58.358-05:00",
+            "creator": {
+                "userUid": "12345",
+                "username": "user@code42.com",
+                "email": "user@code42.com",
+                "userExtRef": None,
+            },
+            "holdPolicyUid": "966191295667423997",
+        },
+        {
+            "legalHoldUid": "987654321",
+            "name": "Another Matter",
+            "description": "",
+            "notes": None,
+            "holdExtRef": None,
+            "active": True,
+            "creationDate": "2020-05-20T15:58:31.375-05:00",
+            "lastModified": "2020-05-28T13:49:16.098-05:00",
+            "creator": {
+                "userUid": "76543",
+                "username": "user2@code42.com",
+                "email": "user2@code42.com",
+                "userExtRef": None,
+            },
+            "holdPolicyUid": "946178665645035826",
+        },
+    ]
+}
+ALL_CUSTODIANS_RESPONSE = {
+    "legalHoldMemberships": [
+        {
+            "legalHoldMembershipUid": "99999",
+            "active": True,
+            "creationDate": "2020-07-16T08:50:23.405Z",
+            "legalHold": {
+                "legalHoldUid": "123456789",
+                "name": "Test legal hold matter",
+            },
+            "user": {
+                "userUid": "840103986007089121",
+                "username": "ttranda_deactivated@ttrantest.com",
+                "email": "ttranda_deactivated@ttrantest.com",
+                "userExtRef": None,
+            },
+        },
+        {
+            "legalHoldMembershipUid": "88888",
+            "active": True,
+            "creationDate": "2020-07-16T08:50:23.405Z",
+            "legalHold": {"legalHoldUid": "987654321", "name": "Another Matter"},
+            "user": {
+                "userUid": "840103986007089121",
+                "username": "ttranda_deactivated@ttrantest.com",
+                "email": "ttranda_deactivated@ttrantest.com",
+                "userExtRef": None,
+            },
+        },
+    ]
+}
 
 
 def _create_py42_response(mocker, text):
@@ -272,6 +360,14 @@ def devices_list_generator():
 
 def users_list_generator():
     yield TEST_USERS_LIST_PAGE
+
+
+def matter_list_generator():
+    yield MATTER_RESPONSE
+
+
+def custodian_list_generator():
+    yield ALL_CUSTODIANS_RESPONSE
 
 
 @pytest.fixture
@@ -354,6 +450,18 @@ def get_all_devices_success(cli_state):
 @pytest.fixture
 def get_all_users_success(cli_state):
     cli_state.sdk.users.get_all.return_value = users_list_generator()
+
+
+@pytest.fixture
+def get_all_matter_success(cli_state):
+    cli_state.sdk.legalhold.get_all_matters.return_value = matter_list_generator()
+
+
+@pytest.fixture
+def get_all_custodian_success(cli_state):
+    cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
+        custodian_list_generator()
+    )
 
 
 def test_deactivate_deactivates_device(
@@ -556,6 +664,79 @@ def test_add_usernames_to_device_dataframe_adds_usernames_to_dataframe(
     )
     result = _add_usernames_to_device_dataframe(cli_state.sdk, testdf)
     assert "username" in result.columns
+
+
+def test_add_legal_hold_membership_to_device_dataframe_adds_legal_hold_columns_to_dataframe(
+    cli_state, get_all_matter_success, get_all_custodian_success
+):
+    testdf = DataFrame.from_records(
+        [
+            {"userUid": "840103986007089121", "status": "Active"},
+            {"userUid": "836473273124890369", "status": "Active, Deauthorized"},
+        ]
+    )
+    result = _add_legal_hold_membership_to_device_dataframe(cli_state.sdk, testdf)
+    assert "legalHoldUid" in result.columns
+    assert "legalHoldName" in result.columns
+
+
+def test_list_include_legal_hold_membership_pops_legal_hold_if_device_deactivated(
+    cli_state, get_all_matter_success, get_all_custodian_success
+):
+    testdf = DataFrame.from_records(
+        [
+            {"userUid": "840103986007089121", "status": "Deactivated"},
+            {"userUid": "840103986007089121", "status": "Active"},
+        ]
+    )
+
+    testdf_result = DataFrame.from_records(
+        [
+            {
+                "userUid": "840103986007089121",
+                "status": "Deactivated",
+                "legalHoldUid": np.nan,
+                "legalHoldName": np.nan,
+            },
+            {
+                "userUid": "840103986007089121",
+                "status": "Active",
+                "legalHoldUid": "123456789,987654321",
+                "legalHoldName": "Test legal hold matter,Another Matter",
+            },
+        ]
+    )
+    result = _add_legal_hold_membership_to_device_dataframe(cli_state.sdk, testdf)
+
+    assert_frame_equal(result, testdf_result)
+
+
+def test_list_include_legal_hold_membership_merges_in_and_concats_legal_hold_info(
+    runner,
+    cli_state,
+    get_all_devices_success,
+    get_all_custodian_success,
+    get_all_matter_success,
+):
+    result = runner.invoke(
+        cli, ["devices", "list", "--include-legal-hold-membership"], obj=cli_state
+    )
+
+    assert "Test legal hold matter,Another Matter" in result.output
+    assert "123456789,987654321" in result.output
+
+
+def test_break_backup_usage_into_total_storage_correctly_calculates_values():
+    test_backupusage_cell = json.loads(TEST_BACKUPUSAGE_RESPONSE)["data"]["backupUsage"]
+    result = _break_backup_usage_into_total_storage(test_backupusage_cell)
+
+    test_empty_backupusage_cell = json.loads(TEST_EMPTY_BACKUPUSAGE_RESPONSE)["data"][
+        "backupUsage"
+    ]
+    empty_result = _break_backup_usage_into_total_storage(test_empty_backupusage_cell)
+
+    assert_series_equal(result, Series([2, 56968051]))
+    assert_series_equal(empty_result, Series([0, 0]))
 
 
 def test_last_connected_after_filters_appropriate_results(
