@@ -120,3 +120,21 @@ class OrderedGroup(click.Group):
 
     def list_commands(self, ctx):
         return self.commands
+
+
+class ExtensionGroup(ExceptionHandlingGroup):
+    """A helper click.Group for extension scripts. If only a single command is added to this group,
+    that command will be the "default" and won't need to be explicitly passed as the first argument
+    to the extension script.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def parse_args(self, ctx, args):
+        if len(self.commands) == 1:
+            cmd_name, cmd = next(iter(self.commands.items()))
+            if not args or args[0] not in self.commands:
+                self.commands = {"": cmd}
+                args.insert(0, "")
+        super().parse_args(ctx, args)

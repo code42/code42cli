@@ -32,6 +32,7 @@ setup(
     python_requires=">3, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, <4",
     install_requires=[
         "click>=7.1.1",
+        "click_plugins>=1.1.1",
         "colorama>=0.4.3",
         "c42eventextractor==0.4.0",
         "keyring==18.0.1",
