@@ -25,7 +25,7 @@ jobs:
       - name: Install tox
         run: pip install tox==3.17.1
       - name: Run Unit tests
-        run: cd code42cli; tox -e py  # Run tox using the version of Python in `PATH`
+        run: pwd; cd code42cli; tox -e py  # Run tox using the version of Python in `PATH`
       - name: Submit coverage report
         uses: codecov/codecov-action@v1.0.7
         with:
@@ -51,4 +51,4 @@ jobs:
       - name: Start up the mock servers
         run: cd code42-mock-servers; docker-compose up -d --build
       - name: Run the integration tests
-        run: cd py42; tox -e integration
+        run: cd code42cli; tox -e integration
