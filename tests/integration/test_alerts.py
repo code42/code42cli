@@ -5,7 +5,6 @@ from shlex import split as split_command
 import pytest
 from tests.integration.conftest import append_profile
 from tests.integration.util import assert_test_is_successful
-from tests.integration.util import DataServer
 
 from code42cli.main import cli
 
@@ -24,17 +23,24 @@ def test_alerts_search_command_returns_success_return_code(
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize(
-    "protocol", ["TCP", "UDP"],
-)
-def test_alerts_send_to_returns_success_return_code(
-    runner, integration_test_profile, protocol
+def test_alerts_send_to_tcp_returns_success_return_code(
+    runner, integration_test_profile, tcp_dataserver
 ):
-    command = "alerts send-to localhost:5140 -p {} -b {}".format(
-        protocol, begin_date_str
+    command = append_profile(
+        f"alerts send-to localhost:5140 -p TCP -b '{begin_date_str}'"
     )
-    with DataServer(protocol=protocol):
-        result = runner.invoke(cli, split_command(append_profile(command)))
+    result = runner.invoke(cli, split_command(command))
+    assert result.exit_code == 0
+
+
+@pytest.mark.integration
+def test_alerts_send_to_udp_returns_success_return_code(
+    runner, integration_test_profile, udp_dataserver
+):
+    command = append_profile(
+        f"alerts send-to localhost:5141 -p UDP -b '{begin_date_str}'"
+    )
+    result = runner.invoke(cli, split_command(command))
     assert result.exit_code == 0
 
 
