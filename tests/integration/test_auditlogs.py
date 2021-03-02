@@ -17,11 +17,14 @@ end_date_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize(
+    "protocol", ["UDP", "TCP"],
+)
 def test_auditlogs_send_to_command_returns_success_return_code(
-    runner, integration_test_profile
+    runner, integration_test_profile, protocol
 ):
-    command = "audit-logs send-to localhost:5140 -p TCP -b '{}'".format(begin_date_str)
-    with DataServer(protocol="TCP"):
+    command = f"audit-logs send-to localhost:5140 -p {protocol} -b '{begin_date_str}'"
+    with DataServer(protocol=protocol):
         result = runner.invoke(cli, split_command(append_profile(command)))
     assert result.exit_code == 0
 
