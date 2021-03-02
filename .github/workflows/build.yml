@@ -18,6 +18,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          path: code42cli
       - name: Setup Python
         uses: actions/setup-python@v1
         with:
@@ -25,7 +27,7 @@ jobs:
       - name: Install tox
         run: pip install tox==3.17.1
       - name: Run Unit tests
-        run: pwd; cd code42cli; tox -e py  # Run tox using the version of Python in `PATH`
+        run: cd code42cli; tox -e py  # Run tox using the version of Python in `PATH`
       - name: Submit coverage report
         uses: codecov/codecov-action@v1.0.7
         with:
