@@ -52,7 +52,7 @@ jobs:
           127.0.0.1 cases
           EOF
       - name: Install ncat
-        run: sudo apt-get install nmap
+        run: sudo apt-get install nmap; echo $PATH
       - name: Start up the mock servers
         run: cd code42-mock-servers; docker-compose up -d --build
       - name: Run the integration tests
