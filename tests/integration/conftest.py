@@ -2,11 +2,11 @@ import os
 from shlex import split as split_command
 
 import pytest
+from tests.integration.util import DataServer
 
 from code42cli.errors import Code42CLIError
 from code42cli.main import cli
 from code42cli.profile import get_profile
-from tests.integration.util import DataServer
 
 
 TEST_PROFILE_NAME = "TEMP-INTEGRATION-TEST"
