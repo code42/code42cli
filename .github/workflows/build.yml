@@ -25,8 +25,17 @@ jobs:
       - name: Install tox
         run: pip install tox==3.17.1
       - name: Run Unit tests
-        run: tox -e py  # Run tox using the version of Python in `PATH`
+        run: cd py42; tox -e py  # Run tox using the version of Python in `PATH`
       - name: Submit coverage report
         uses: codecov/codecov-action@v1.0.7
         with:
-          file: ./coverage.xml
+          file: py42/coverage.xml
+      - name: Checkout mock servers
+        uses: actions/checkout@v2
+        with:
+          repository: code42/code42-mock-servers
+          path: code42-mock-servers
+      - name: Start up the mock servers
+        run: cd code42-mock-servers; docker-compose up -d --build
+      - name: Run the integration tests
+        run: cd py42; tox -e integration
