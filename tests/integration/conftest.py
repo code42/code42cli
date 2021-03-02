@@ -50,12 +50,12 @@ def append_profile(command):
 
 
 @pytest.fixture(scope="session")
-def udp_dataserver():
-    with DataServer(protocol="UDP"):
+def tcp_dataserver():
+    with DataServer(protocol="TCP"):
         yield
 
 
 @pytest.fixture(scope="session")
-def tcp_dataserver():
-    with DataServer(protocol="TCP"):
+def udp_dataserver():
+    with DataServer(protocol="UDP"):
         yield
