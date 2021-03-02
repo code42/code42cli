@@ -20,9 +20,7 @@ end_date_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
 def test_auditlogs_send_to_command_returns_success_return_code(
     runner, integration_test_profile
 ):
-    command = "audit-logs send-to localhost:5140 -p TCP -b '{}'".format(
-        begin_date_str
-    )
+    command = "audit-logs send-to localhost:5140 -p TCP -b '{}'".format(begin_date_str)
     with DataServer(protocol="TCP"):
         result = runner.invoke(cli, split_command(append_profile(command)))
     assert result.exit_code == 0

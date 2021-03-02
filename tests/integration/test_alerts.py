@@ -24,12 +24,8 @@ def test_alerts_search_command_returns_success_return_code(
 
 
 @pytest.mark.integration
-def test_alerts_send_to_returns_success_return_code(
-    runner, integration_test_profile
-):
-    command = "alerts send-to localhost:5140 -p UDP -b {}".format(
-        begin_date_str
-    )
+def test_alerts_send_to_returns_success_return_code(runner, integration_test_profile):
+    command = "alerts send-to localhost:5140 -p UDP -b {}".format(begin_date_str)
     with DataServer(protocol="UDP"):
         result = runner.invoke(cli, split_command(append_profile(command)))
     assert result.exit_code == 0

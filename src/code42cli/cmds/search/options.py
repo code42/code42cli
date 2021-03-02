@@ -155,7 +155,9 @@ def server_options(f):
         "Use TCP-TLS for additional security. Defaults to UDP.",
     )
     certs_option = click.option(
-        "--certs", type=str, help="A CA certificates-chain file for the TCP-TLS protocol."
+        "--certs",
+        type=str,
+        help="A CA certificates-chain file for the TCP-TLS protocol.",
     )
     ignore_cert_validation = click.option(
         "--ignore-cert-validation",
