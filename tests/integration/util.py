@@ -38,7 +38,7 @@ def cleanup_after_validation(filename):
 
 class DataServer:
     TCP_SERVER_COMMAND = "ncat -l 5140"
-    UDP_SERVER_COMMAND = "ncat -ul 5140"
+    UDP_SERVER_COMMAND = "ncat -ul 5141"
 
     def __init__(self, protocol="TCP"):
         if protocol.upper() == "UDP":
