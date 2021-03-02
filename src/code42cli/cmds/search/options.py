@@ -152,10 +152,10 @@ def server_options(f):
         type=click.Choice(ServerProtocol(), case_sensitive=False),
         default=ServerProtocol.UDP,
         help="Protocol used to send logs to server. "
-        "Use TLS-TCP for additional security. Defaults to UDP.",
+        "Use TCP-TLS for additional security. Defaults to UDP.",
     )
     certs_option = click.option(
-        "--certs", type=str, help="A CA certificates-chain file for the TLS protocol."
+        "--certs", type=str, help="A CA certificates-chain file for the TCP-TLS protocol."
     )
     ignore_cert_validation = click.option(
         "--ignore-cert-validation",
