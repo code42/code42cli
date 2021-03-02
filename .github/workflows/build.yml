@@ -35,6 +35,18 @@ jobs:
         with:
           repository: code42/code42-mock-servers
           path: code42-mock-servers
+      - name: Add mock servers host addresses
+        run: |
+          sudo echo 127.0.0.1 core | sudo tee -a /etc/hosts
+          sudo echo 127.0.0.1 alerts | sudo tee -a /etc/hosts
+          sudo echo 127.0.0.1 alert-rules | sudo tee -a /etc/hosts
+          sudo echo 127.0.0.1 detection-lists | sudo tee -a /etc/hosts
+          sudo echo 127.0.0.1 audit-log | sudo tee -a /etc/hosts
+          sudo echo 127.0.0.1 file-events | sudo tee -a /etc/hosts
+          sudo echo 127.0.0.1 storage | sudo tee -a /etc/hosts
+          sudo echo 127.0.0.1 preservation-data-service | sudo tee -a /etc/hosts
+          sudo echo 127.0.0.1 connected-server | sudo tee -a /etc/hosts
+          sudo echo 127.0.0.1 cases | sudo tee -a /etc/hosts
       - name: Start up the mock servers
         run: cd code42-mock-servers; docker-compose up -d --build
       - name: Run the integration tests
