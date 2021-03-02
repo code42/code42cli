@@ -2,6 +2,7 @@ import os
 from shlex import split as split_command
 
 import pytest
+from tests.integration.util import DataServer
 
 from code42cli.errors import Code42CLIError
 from code42cli.main import cli
@@ -46,3 +47,15 @@ def _encode_response(line, encoding_type=_ENCODING_TYPE):
 
 def append_profile(command):
     return "{} --profile {}".format(command, TEST_PROFILE_NAME)
+
+
+@pytest.yield_fixture(scope="session")
+def udp_dataserver():
+    with DataServer(protocol="UDP"):
+        yield
+
+
+@pytest.yield_fixture(scope="session")
+def tcp_dataserver():
+    with DataServer(protocol="TCP"):
+        yield
