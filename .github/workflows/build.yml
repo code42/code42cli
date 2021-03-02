@@ -33,6 +33,7 @@ jobs:
       - name: Checkout mock servers
         uses: actions/checkout@v2
         with:
+          ref: network
           repository: code42/code42-mock-servers
           path: code42-mock-servers
       - name: Add mock servers host addresses
