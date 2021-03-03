@@ -2,6 +2,8 @@ import signal
 import sys
 
 import click
+from click_plugins import with_plugins
+from pkg_resources import iter_entry_points
 from py42.__version__ import __version__ as py42version
 from py42.settings import set_user_agent_suffix
 
@@ -50,10 +52,24 @@ CONTEXT_SETTINGS = {
 }
 
 
-@click.group(cls=ExceptionHandlingGroup, context_settings=CONTEXT_SETTINGS, help=BANNER)
+@with_plugins(iter_entry_points("code42cli.plugins"))
+@click.group(
+    cls=ExceptionHandlingGroup,
+    context_settings=CONTEXT_SETTINGS,
+    help=BANNER,
+    invoke_without_command=True,
+    no_args_is_help=True,
+)
+@click.option(
+    "--python",
+    is_flag=True,
+    help="Print path to the python interpreter env that `code42` is installed in.",
+)
 @sdk_options(hidden=True)
-def cli(state):
-    pass
+def cli(state, python):
+    if python:
+        click.echo(sys.executable)
+        sys.exit(0)
 
 
 cli.add_command(alerts)

@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## Unreleased
+
+### Added
+
+- `code42cli.extensions` module exposes `sdk_options` decorator and `script` group for writing custom extension scripts
+    using the Code42 CLI.
+
 ## 1.3.1 - 2021-02-25
 
 ### Changed
@@ -105,6 +112,12 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Now, when adding a cloud alias to a detection list user, such as during `departing-employee add`, it will remove the existing cloud alias if one exists.
     - Before, it would error and the cloud alias would not get added.
+
+### Added
+
+- `code42 devices list` option:
+    - `--include-legal-hold-membership` prints the legal hold matter name and ID for any active device on legal hold
+    - `--include-total-storage` prints the backup archive count and total storage
 
 ## 1.0.0 - 2020-08-31
 
