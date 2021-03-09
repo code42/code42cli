@@ -1,5 +1,6 @@
 import os
 import subprocess
+import time
 from shlex import split as split_command
 
 from code42cli.main import cli
@@ -48,7 +49,8 @@ class DataServer:
         self.process = None
 
     def __enter__(self):
-        self.process = subprocess.Popen(self.command.split(" "))
+        self.process = subprocess.Popen(self.command, shell=True)
+        time.sleep(1)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.process.kill()
