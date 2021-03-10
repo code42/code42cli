@@ -49,13 +49,13 @@ def append_profile(command):
     return "{} --profile {}".format(command, TEST_PROFILE_NAME)
 
 
-@pytest.yield_fixture(scope="session")
+@pytest.fixture(scope="session")
 def udp_dataserver():
     with DataServer(protocol="UDP"):
         yield
 
 
-@pytest.yield_fixture(scope="session")
+@pytest.fixture(scope="session")
 def tcp_dataserver():
     with DataServer(protocol="TCP"):
         yield
