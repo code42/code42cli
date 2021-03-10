@@ -5,4 +5,5 @@
 * [Ingest file events or alerts into a SIEM](userguides/siemexample.md)
 * [Manage detection list users](userguides/detectionlists.md)
 * [Manage legal hold users](userguides/legalhold.md)
+* [Clean up your environment by deactivating devices](userguides/deactivatedevices.md)
 * [Write custom extension scripts using the Code42 CLI and py42](userguides/extensions.md)
