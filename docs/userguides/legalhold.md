@@ -56,8 +56,8 @@ To release multiple custodians at once:
 
 1. Enter the matter ID(s) and Code42 usernames to the [CSV file template you generated](#get-csv-template).
 2. Save the file to your current working directory.
-3. Use the `bulk remove-user` command with the file path of the CSV you created. For example:
-    `code42 legal-hold bulk remove-user /Users/admin/remove_users_from_legal_hold.csv`
+3. Use the `bulk remove` command with the file path of the CSV you created. For example:
+    `code42 legal-hold bulk remove /Users/admin/remove_users_from_legal_hold.csv`
 
 ### Release a single custodian
 
