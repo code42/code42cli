@@ -31,9 +31,9 @@ To get the ID for a matter, enter `code42 legal-hold list`.
 You can add one or more custodians to a legal hold matter using the Code42 CLI.
 
 ### Add multiple custodians
-Once you have entered the matter ID and user information in the CSV file, use the `bulk add-user` command with the CSV file path to add multiple custodians at once. For example:
+Once you have entered the matter ID and user information in the CSV file, use the `bulk add` command with the CSV file path to add multiple custodians at once. For example:
 
-`code42 legal-hold bulk add-user /Users/admin/add_users_to_legal_hold.csv`
+`code42 legal-hold bulk add /Users/admin/add_users_to_legal_hold.csv`
 
 ### Add a single custodian
 
