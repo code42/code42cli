@@ -10,17 +10,17 @@ use the CLI to deactivate these devices in bulk.
 You can generate a list of devices using `code42 devices list`. By
 default, it will display the list of devices at the command line,
 but you can also output it in a number of file formats. For
-example, to generate a CSV of devices in your environment, use
+example, to generate a CSV of active devices in your environment, use
 this command:
 
 ```
-code42 devices list -f CSV
+code42 devices list --active -f CSV
 ```
 
 To save to a file, redirect the output to a file in your shell:
 
 ```
-code42 devices list -f CSV > output.csv
+code42 devices list --active -f CSV > output.csv
 ```
 
 ### Filter the list
@@ -83,7 +83,7 @@ to indicate that it should read from standard input.
 Here is an example:
 
 ```
-code42 devices list \
+code42 devices list --active \
 --last-connected-before 365d \
 --exclude-most-recently-connected 1 \
 -f CSV \
