@@ -72,7 +72,9 @@ python3 -m pip install code42cli --upgrade
 .. important:: The Code42 CLI currently only supports token-based authentication.
 ```
 
-To use the CLI, you must provide your credentials (basic authentication). If you choose not to store your password in the CLI, you must enter it for each command that requires a connection.
+Create a user in Code42 to authenticate (basic authentication) and access data via the CLI. The CLI returns data based on the roles assigned to this user. To ensure that the user's rights are not too permissive, create a user with the lowest level of privilege necessary. See our [Role assignment use cases](https://support.code42.com/Administrator/Cloud/Monitoring_and_managing/Role_assignment_use_cases) for information on recommended roles. We recommend you test to confirm that the user can access the right data. 
+
+If you choose not to store your password in the CLI, you must enter it for each command that requires a connection.
 
 The Code42 CLI currently does **not** support SSO login providers or any other identity providers such as Active
 Directory or Okta.
