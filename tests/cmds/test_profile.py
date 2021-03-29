@@ -505,3 +505,27 @@ def test_use_profile(runner, mock_cliprofile_namespace, profile):
     assert (
         "{} has been set as the default profile.".format(profile.name) in result.output
     )
+
+
+def test_select_profile_sets_selected_profile_as_default(
+    mocker, runner, mock_cliprofile_namespace, profile
+):
+    mock_profile_selector = mocker.patch(
+        f"{PRODUCT_NAME}.cmds.profile.get_user_selected_item"
+    )
+    mock_profile_selector.return_value = "test_profile"
+    runner.invoke(cli, ["profile", "select"])
+    mock_cliprofile_namespace.switch_default_profile.assert_called_once_with(
+        "test_profile"
+    )
+
+
+def test_select_profile_outputs_expected_text(
+    mocker, runner, mock_cliprofile_namespace, profile
+):
+    mock_profile_selector = mocker.patch(
+        f"{PRODUCT_NAME}.cmds.profile.get_user_selected_item"
+    )
+    mock_profile_selector.return_value = "test_profile"
+    result = runner.invoke(cli, ["profile", "select"])
+    assert f"test_profile has been set as the default profile." in result.output
