@@ -528,4 +528,4 @@ def test_select_profile_outputs_expected_text(
     )
     mock_profile_selector.return_value = "test_profile"
     result = runner.invoke(cli, ["profile", "select"])
-    assert f"test_profile has been set as the default profile." in result.output
+    assert "test_profile has been set as the default profile." in result.output
