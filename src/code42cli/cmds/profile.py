@@ -10,6 +10,7 @@ from code42cli.options import yes_option
 from code42cli.profile import CREATE_PROFILE_HELP
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree
+from code42cli.util import get_user_selected_item
 
 
 @click.group()
@@ -147,7 +148,7 @@ def _list():
 def use(profile_name):
     """Set a profile as the default."""
     cliprofile.switch_default_profile(profile_name)
-    echo("{} has been set as the default profile.".format(profile_name))
+    _print_default_profile_set(profile_name)
 
 
 @profile.command()
@@ -183,6 +184,17 @@ def delete_all():
         echo("\nNo profiles exist. Nothing to delete.")
 
 
+@profile.command()
+def select():
+    existing_profiles = cliprofile.get_all_profiles()
+    profile_names = [p.name for p in existing_profiles]
+    selected_profile_name = get_user_selected_item(
+        "Please select a profile", profile_names
+    )
+    cliprofile.switch_default_profile(selected_profile_name)
+    _print_default_profile_set(selected_profile_name)
+
+
 def _prompt_for_allow_password_set(profile_name):
     if does_user_agree("Would you like to set a password? (y/n): "):
         password = getpass()
@@ -198,3 +210,7 @@ def _set_pw(profile_name, password):
         raise
     cliprofile.set_password(password, c42profile.name)
     return c42profile.name
+
+
+def _print_default_profile_set(profile_name):
+    echo("{} has been set as the default profile.".format(profile_name))
