@@ -76,9 +76,6 @@ Create a user in Code42 to authenticate (basic authentication) and access data v
 
 If you choose not to store your password in the CLI, you must enter it for each command that requires a connection.
 
-The Code42 CLI currently does **not** support SSO login providers or any other identity providers such as Active
-Directory or Okta.
-
 ### Windows and Mac
 
 For Windows and Mac systems, the CLI uses Keyring when storing passwords.
