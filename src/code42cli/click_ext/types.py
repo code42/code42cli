@@ -3,8 +3,20 @@ from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
 
+import chardet
 import click
 from click.exceptions import BadParameter
+
+
+class AutoDecodedFile(click.File):
+    """Attempts to autodetect file's encoding prior to normal click.File processing."""
+
+    def convert(self, value, param, ctx):
+        try:
+            with open(value, "rb") as file:
+                self.encoding = chardet.detect(file.read())["encoding"]
+        finally:
+            return super().convert(value, param, ctx)
 
 
 class FileOrString(click.File):
