@@ -8,7 +8,6 @@ from code42cli import PRODUCT_NAME
 from code42cli.cmds.legal_hold import _check_matter_is_accessible
 from code42cli.main import cli
 
-
 _NAMESPACE = "{}.cmds.legal_hold".format(PRODUCT_NAME)
 TEST_MATTER_ID = "99999"
 TEST_LEGAL_HOLD_MEMBERSHIP_UID = "88888"
@@ -169,6 +168,41 @@ ALL_ACTIVE_AND_INACTIVE_CUSTODIANS_RESPONSE = """
     ]
 }
 """
+EVENTS_RESPONSE = """
+{
+        "eventUid":"564564654566",
+        "eventType":"HoldCreated",
+        "eventDate":"2015-05-16T15:07:44.820Z",
+        "legalHoldUid":"88888",
+        "actorUserUid":"12345",
+        "actorUsername":"holdcreator@example.com",
+        "actorFirstName":"john",
+        "actorLastName":"doe",
+        "actorUserExtRef":null,
+        "actorEmail":"holdcreatorr@example.com"
+      },
+      {
+        "eventUid":"74533457745",
+        "eventType":"MembershipCreated",
+        "eventDate":"2019-05-17T15:07:44.820Z",
+        "legalHoldUid":"88888",
+        "legalHoldMembershipUid":"645576514441664433",
+        "custodianUserUid":"12345",
+        "custodianUsername":"kim.jones@code42.com",
+        "custodianFirstName":"kim",
+        "custodianLastName":"jones",
+        "custodianUserExtRef":null,
+        "custodianEmail":"user@example.com",
+        "actorUserUid":"1234512345",
+        "actorUsername":"creator@example.com",
+        "actorFirstName":"john",
+        "actorLastName":"doe",
+        "actorUserExtRef":null,
+        "actorEmail":"user@example.com"
+      }
+"""
+EMPTY_EVENTS_RESPONSE = """{"legalHoldEvents": []}"""
+ALL_EVENTS_RESPONSE = """{{"legalHoldEvents": [{}]}}""".format(EVENTS_RESPONSE)
 EMPTY_MATTERS_RESPONSE = """{"legalHolds": []}"""
 ALL_MATTERS_RESPONSE = """{{"legalHolds": [{}]}}""".format(MATTER_RESPONSE)
 LEGAL_HOLD_COMMAND = "legal-hold"
@@ -213,6 +247,21 @@ def active_and_inactive_legal_hold_memberships_response(mocker):
 
 
 @pytest.fixture
+def events_response(mocker):
+    return _create_py42_response(mocker, EVENTS_RESPONSE)
+
+
+@pytest.fixture
+def empty_events_response(mocker):
+    return _create_py42_response(mocker, EMPTY_EVENTS_RESPONSE)
+
+
+@pytest.fixture
+def all_events_response(mocker):
+    return [_create_py42_response(mocker, ALL_EVENTS_RESPONSE)]
+
+
+@pytest.fixture
 def get_user_id_success(cli_state):
     cli_state.sdk.users.get_by_username.return_value = {
         "users": [{"userUid": ACTIVE_TEST_USER_ID}]
@@ -244,6 +293,11 @@ def check_matter_accessible_failure(cli_state, custom_error):
     cli_state.sdk.legalhold.get_matter_by_uid.side_effect = Py42BadRequestError(
         custom_error
     )
+
+
+@pytest.fixture
+def get_all_events_success(cli_state):
+    cli_state.sdk.legalhold.get_all_events.return_value = events_response
 
 
 @pytest.fixture
@@ -572,6 +626,28 @@ def test_list_with_csv_format_returns_no_response_when_response_is_empty(
 ):
     cli_state.sdk.legalhold.get_all_matters.return_value = empty_matters_response
     result = runner.invoke(cli, ["legal-hold", "list", "-f", "csv"], obj=cli_state)
+    assert "Matter ID,Name,Description,Creator,Creation Date" not in result.output
+
+
+def test_events_shows_events_that_respect_type_filters(
+    runner, cli_state, get_all_events_success, all_events_response
+):
+
+    cli_state.sdk.legalhold.get_all_events.return_value = all_events_response
+    result = runner.invoke(
+        cli, ["legal-hold", "events", "--event-type", "HoldCreated"], obj=cli_state
+    )
+
+    assert "564564654566" in result.output
+    assert "74533457745" not in result.output
+
+
+def test_events_with_csv_returns_no_events_when_response_is_empty(
+    runner, cli_state, get_all_events_success, empty_events_response
+):
+    cli_state.sdk.legalhold.get_all_events.return_value = empty_events_response
+    result = runner.invoke(cli, ["legal-hold", "events", "-f", "csv"], obj=cli_state)
+
     assert "Matter ID,Name,Description,Creator,Creation Date" not in result.output
 
 

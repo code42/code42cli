@@ -14,6 +14,8 @@ from code42cli.errors import UserNotInLegalHoldError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.options import sdk_options
+from code42cli.options import set_begin_default_dict
+from code42cli.options import set_end_default_dict
 from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
 from code42cli.util import format_string_list_to_columns
@@ -25,6 +27,18 @@ _MATTER_KEYS_MAP["name"] = "Name"
 _MATTER_KEYS_MAP["description"] = "Description"
 _MATTER_KEYS_MAP["creator_username"] = "Creator"
 _MATTER_KEYS_MAP["creationDate"] = "Creation Date"
+_EVENT_KEYS_MAP = OrderedDict()
+_EVENT_KEYS_MAP["eventUid"] = "Event ID"
+_EVENT_KEYS_MAP["eventType"] = "Event Type"
+_EVENT_KEYS_MAP["eventDate"] = "Event Date"
+_EVENT_KEYS_MAP["legalHoldUid"] = "Legal Hold ID"
+_EVENT_KEYS_MAP["actorUsername"] = "Actor Username"
+_EVENT_KEYS_MAP["custodianUsername"] = "Custodian Username"
+
+
+LEGAL_HOLD_KEYWORD = "legal hold events"
+BEGIN_DATE_DICT = set_begin_default_dict(LEGAL_HOLD_KEYWORD)
+END_DATE_DICT = set_end_default_dict(LEGAL_HOLD_KEYWORD)
 
 
 @click.group(cls=OrderedGroup)
@@ -122,6 +136,37 @@ def show(state, matter_id, include_inactive=False, include_policy=False):
     if include_policy:
         _get_and_print_preservation_policy(state.sdk, matter["holdPolicyUid"])
         echo("")
+
+
+@legal_hold.command()
+@click.option(
+    "--matter-id", type=str, help="Filter results by legal hold UID",
+)
+@click.option(
+    "--event-type",
+    type=click.Choice(
+        [
+            "MembershipCreated",
+            "MembershipReactivated",
+            "MembershipDeactivated",
+            "HoldCreated",
+            "HoldDeactivated",
+            "HoldReactivated",
+            "Restore",
+        ]
+    ),
+    help="Filter results by event types",
+)
+@click.option("--begin", **BEGIN_DATE_DICT)
+@click.option("--end", **END_DATE_DICT)
+@format_option
+@sdk_options()
+def events(state, matter_id, event_type, begin, end, format):
+    """Report on legal hold events"""
+    formatter = OutputFormatter(format, _EVENT_KEYS_MAP)
+    events = _get_all_events(state.sdk, matter_id, begin, end, event_type)
+    if events:
+        formatter.echo_formatted_list(events)
 
 
 @legal_hold.group(cls=OrderedGroup)
@@ -228,6 +273,24 @@ def _get_all_active_matters(sdk):
     for matter in matters:
         matter["creator_username"] = matter["creator"]["username"]
     return matters
+
+
+def _get_all_events(sdk, legal_hold_uid, begin_date, end_date, event_type):
+    events_generator = sdk.legalhold.get_all_events(
+        legal_hold_uid, begin_date, end_date
+    )
+    if event_type:
+        events = [
+            event
+            for page in events_generator
+            for event in page["legalHoldEvents"]
+            if event["eventType"] == event_type
+        ]
+    else:
+        events = [
+            event for page in events_generator for event in page["legalHoldEvents"]
+        ]
+    return events
 
 
 def _print_matter_members(username_list, member_type="active"):
