@@ -222,4 +222,4 @@ def _select_profile():
 
 
 def _print_default_profile_set(profile_name):
-    echo("{} has been set as the default profile.".format(profile_name))
+    echo(f"{profile_name} has been set as the default profile.")
