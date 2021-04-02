@@ -17,7 +17,7 @@ class AutoDecodedFile(click.File):
             with open(value, "rb") as file:
                 self.encoding = chardet.detect(file.read())["encoding"]
             if self.encoding is None:
-                CliLogger.log_error(f"Failed to detect encoding of file: {value}")
+                CliLogger().log_error(f"Failed to detect encoding of file: {value}")
         finally:
             return super().convert(value, param, ctx)
 
