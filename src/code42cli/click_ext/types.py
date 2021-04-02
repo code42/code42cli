@@ -6,6 +6,7 @@ from datetime import timezone
 import chardet
 import click
 from click.exceptions import BadParameter
+from code42cli.logger import CliLogger
 
 
 class AutoDecodedFile(click.File):
@@ -15,6 +16,8 @@ class AutoDecodedFile(click.File):
         try:
             with open(value, "rb") as file:
                 self.encoding = chardet.detect(file.read())["encoding"]
+            if self.encoding is None:
+                CliLogger.log_error(f"Failed to detect encoding of file: {value}")
         finally:
             return super().convert(value, param, ctx)
 
