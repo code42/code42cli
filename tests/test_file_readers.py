@@ -66,7 +66,7 @@ def test_read_csv_when_some_but_not_all_required_headers_present_raises(runner):
 
 
 @pytest.mark.parametrize(
-    "encoding", ["utf8", "utf16", "latin_1"],
+    "encoding", ["ascii", "utf8", "utf16", "latin_1"],
 )
 def test_read_csv_reads_various_encodings_automatically(runner, encoding):
     with runner.isolated_filesystem():
