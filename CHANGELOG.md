@@ -14,6 +14,11 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - `code42 profile select` command that allows you to select a default profile
     from a list of all your profiles.
+  
+### Changed
+
+- `code42 profile use` command now prompts you to select a profile when
+    not given a profile name argument.
 
 ## 1.4.0 - 2021-03-09
 
