@@ -66,7 +66,7 @@ def read_flat_file(file):
 
 read_flat_file_arg = click.argument(
     "file_rows",
-    type=click.File("r"),
+    type=AutoDecodedFile("r"),
     metavar="FILE",
     callback=lambda ctx, param, arg: read_flat_file(arg),
 )
