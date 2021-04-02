@@ -39,7 +39,6 @@ setup(
         "keyrings.alt==3.2.0",
         "pandas>=1.1.3",
         "py42>=1.11.1",
-        "PyInquirer>=1.0.3",
     ],
     extras_require={
         "dev": [

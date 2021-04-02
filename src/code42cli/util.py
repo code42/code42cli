@@ -9,10 +9,12 @@ from signal import getsignal
 from signal import SIGINT
 from signal import signal
 
+import click
 from click import echo
 from click import get_current_context
 from click import style
-from PyInquirer import prompt
+
+from code42cli.click_ext.types import PromptChoices
 
 _PADDING_SIZE = 3
 
@@ -178,10 +180,6 @@ def hash_event(event):
 
 def get_user_selected_item(message, choices):
     """Prompts the user for which item they would like to pick from a list."""
-    question = {
-        "type": "list",
-        "name": "choice",
-        "message": message,
-        "choices": choices,
-    }
-    return prompt(question)["choice"]
+    choices = PromptChoices(choices)
+    choices.print_choices()
+    return click.prompt(message, type=choices)

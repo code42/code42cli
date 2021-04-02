@@ -132,3 +132,19 @@ class MapChoice(click.Choice):
         if value in self.extras_map:
             value = self.extras_map[value]
         return super().convert(value, param, ctx)
+
+
+class PromptChoices(click.ParamType):
+    def __init__(self, choices):
+        self.choices = dict(enumerate(choices, 1))
+
+    def print_choices(self):
+        for num in self.choices:
+            click.echo(f"{num}: {self.choices[num]}")
+        click.echo()
+
+    def convert(self, value, param, ctx):
+        try:
+            return self.choices[int(value)]
+        except Exception:
+            self.fail("Invalid choice", param=param)
