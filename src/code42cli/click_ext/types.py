@@ -6,6 +6,7 @@ from datetime import timezone
 import chardet
 import click
 from click.exceptions import BadParameter
+
 from code42cli.logger import CliLogger
 
 
@@ -18,8 +19,10 @@ class AutoDecodedFile(click.File):
                 self.encoding = chardet.detect(file.read())["encoding"]
             if self.encoding is None:
                 CliLogger().log_error(f"Failed to detect encoding of file: {value}")
-        finally:
-            return super().convert(value, param, ctx)
+        except Exception:
+            pass  # we'll let click.File do it's own exception handling for the filepath
+
+        return super().convert(value, param, ctx)
 
 
 class FileOrString(click.File):
