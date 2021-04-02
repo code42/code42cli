@@ -7,6 +7,9 @@ from code42cli.errors import LoggedCLIError
 from code42cli.main import cli
 
 
+_SELECTED_PROFILE_NAME = "test_profile"
+
+
 @pytest.fixture
 def user_agreement(mocker):
     mock = mocker.patch("{}.cmds.profile.does_user_agree".format(PRODUCT_NAME))
@@ -47,6 +50,13 @@ def valid_connection(mock_verify):
 def invalid_connection(mock_verify):
     mock_verify.side_effect = LoggedCLIError("Problem connecting to server")
     return mock_verify
+
+
+@pytest.fixture
+def profile_name_selector(mocker):
+    mock = mocker.patch(f"{PRODUCT_NAME}.cmds.profile.get_user_selected_item")
+    mock.return_value = _SELECTED_PROFILE_NAME
+    return mock
 
 
 def test_show_profile_outputs_profile_info(runner, mock_cliprofile_namespace, profile):
@@ -502,30 +512,32 @@ def test_use_profile(runner, mock_cliprofile_namespace, profile):
     mock_cliprofile_namespace.switch_default_profile.assert_called_once_with(
         profile.name
     )
-    assert (
-        "{} has been set as the default profile.".format(profile.name) in result.output
+    assert f"{profile.name} has been set as the default profile." in result.output
+
+
+def test_use_profile_when_not_given_profile_name_arg_sets_selected_profile_as_default(
+    runner, mock_cliprofile_namespace, profile, profile_name_selector
+):
+    runner.invoke(cli, ["profile", "use"])
+    mock_cliprofile_namespace.switch_default_profile.assert_called_once_with(
+        _SELECTED_PROFILE_NAME
     )
 
 
 def test_select_profile_sets_selected_profile_as_default(
-    mocker, runner, mock_cliprofile_namespace, profile
+    runner, mock_cliprofile_namespace, profile, profile_name_selector
 ):
-    mock_profile_selector = mocker.patch(
-        f"{PRODUCT_NAME}.cmds.profile.get_user_selected_item"
-    )
-    mock_profile_selector.return_value = "test_profile"
     runner.invoke(cli, ["profile", "select"])
     mock_cliprofile_namespace.switch_default_profile.assert_called_once_with(
-        "test_profile"
+        _SELECTED_PROFILE_NAME
     )
 
 
 def test_select_profile_outputs_expected_text(
-    mocker, runner, mock_cliprofile_namespace, profile
+    runner, mock_cliprofile_namespace, profile, profile_name_selector
 ):
-    mock_profile_selector = mocker.patch(
-        f"{PRODUCT_NAME}.cmds.profile.get_user_selected_item"
-    )
-    mock_profile_selector.return_value = "test_profile"
     result = runner.invoke(cli, ["profile", "select"])
-    assert "test_profile has been set as the default profile." in result.output
+    assert (
+        f"{_SELECTED_PROFILE_NAME} has been set as the default profile."
+        in result.output
+    )
