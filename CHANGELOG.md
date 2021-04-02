@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## Unreleased
+
+### Fixed
+
+- Arguments/options that read data from files now attempt to autodetect file encodings. Resolving a bug where CSVs written 
+  on Windows with Powershell would fail to be read properly. 
+
 ## 1.4.0 - 2021-03-09
 
 ### Added
