@@ -25,7 +25,7 @@ class AutoDecodedFile(click.File):
         return super().convert(value, param, ctx)
 
 
-class FileOrString(click.File):
+class FileOrString(AutoDecodedFile):
     """Declares a parameter to be a file (if the argument begins with `@`), otherwise accepts it as
     a string.
     """
