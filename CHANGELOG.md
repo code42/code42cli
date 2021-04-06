@@ -12,7 +12,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
-- `code42 legal-hold events` command:
+- `code42 legal-hold search-events` command:
     - `--matter-id` filters based on a legal hold uid.
     - `--begin` filters based on a beginning timestamp.
     - `--end` filters based on an end timestamp.

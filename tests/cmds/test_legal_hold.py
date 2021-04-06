@@ -17,6 +17,8 @@ ACTIVE_TEST_USER_ID = "12345"
 INACTIVE_TEST_USERNAME = "inactive@example.com"
 INACTIVE_TEST_USER_ID = "54321"
 TEST_POLICY_UID = "66666"
+OLDER_LEGAL_HOLD_CREATED_EVENT = "564564654566"
+NEWER_LEGAL_HOLD_MEMBERSHIP_EVENT = "74533457745"
 TEST_PRESERVATION_POLICY_UID = "1010101010"
 MATTER_RESPONSE = """
 {
@@ -201,6 +203,41 @@ EVENTS_RESPONSE = """
         "actorEmail":"user@example.com"
       }
 """
+TEST_EVENT_PAGE = {
+    "legalHoldEvents": [
+        {
+            "eventUid": "564564654566",
+            "eventType": "HoldCreated",
+            "eventDate": "2015-05-16T15:07:44.820Z",
+            "legalHoldUid": "88888",
+            "actorUserUid": "12345",
+            "actorUsername": "holdcreator@example.com",
+            "actorFirstName": "john",
+            "actorLastName": "doe",
+            "actorUserExtRef": None,
+            "actorEmail": "holdcreatorr@example.com",
+        },
+        {
+            "eventUid": "74533457745",
+            "eventType": "MembershipCreated",
+            "eventDate": "2019-05-17T15:07:44.820Z",
+            "legalHoldUid": "88888",
+            "legalHoldMembershipUid": "645576514441664433",
+            "custodianUserUid": "12345",
+            "custodianUsername": "kim.jones@code42.com",
+            "custodianFirstName": "kim",
+            "custodianLastName": "jones",
+            "custodianUserExtRef": None,
+            "custodianEmail": "user@example.com",
+            "actorUserUid": "1234512345",
+            "actorUsername": "creator@example.com",
+            "actorFirstName": "john",
+            "actorLastName": "doe",
+            "actorUserExtRef": None,
+            "actorEmail": "user@example.com",
+        },
+    ]
+}
 EMPTY_EVENTS_RESPONSE = """{"legalHoldEvents": []}"""
 ALL_EVENTS_RESPONSE = """{{"legalHoldEvents": [{}]}}""".format(EVENTS_RESPONSE)
 EMPTY_MATTERS_RESPONSE = """{"legalHolds": []}"""
@@ -261,6 +298,10 @@ def all_events_response(mocker):
     return [_create_py42_response(mocker, ALL_EVENTS_RESPONSE)]
 
 
+def events_list_generator():
+    yield TEST_EVENT_PAGE
+
+
 @pytest.fixture
 def get_user_id_success(cli_state):
     cli_state.sdk.users.get_by_username.return_value = {
@@ -297,7 +338,7 @@ def check_matter_accessible_failure(cli_state, custom_error):
 
 @pytest.fixture
 def get_all_events_success(cli_state):
-    cli_state.sdk.legalhold.get_all_events.return_value = events_response
+    cli_state.sdk.legalhold.get_all_events.return_value = events_list_generator()
 
 
 @pytest.fixture
@@ -635,11 +676,13 @@ def test_events_shows_events_that_respect_type_filters(
 
     cli_state.sdk.legalhold.get_all_events.return_value = all_events_response
     result = runner.invoke(
-        cli, ["legal-hold", "events", "--event-type", "HoldCreated"], obj=cli_state
+        cli,
+        ["legal-hold", "search-events", "--event-type", "HoldCreated"],
+        obj=cli_state,
     )
 
-    assert "564564654566" in result.output
-    assert "74533457745" not in result.output
+    assert OLDER_LEGAL_HOLD_CREATED_EVENT in result.output
+    assert NEWER_LEGAL_HOLD_MEMBERSHIP_EVENT not in result.output
 
 
 def test_events_with_csv_returns_no_events_when_response_is_empty(
@@ -648,7 +691,10 @@ def test_events_with_csv_returns_no_events_when_response_is_empty(
     cli_state.sdk.legalhold.get_all_events.return_value = empty_events_response
     result = runner.invoke(cli, ["legal-hold", "events", "-f", "csv"], obj=cli_state)
 
-    assert "Matter ID,Name,Description,Creator,Creation Date" not in result.output
+    assert (
+        "actorEmail,actorUsername,actorLastName,actorUserUid,actorUserExtRef"
+        not in result.output
+    )
 
 
 @pytest.mark.parametrize(

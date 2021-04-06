@@ -97,8 +97,8 @@ To view all custodians (including inactive) for a legal hold matter, enter
 
 To view a list of legal hold administrative events, use the following command:
 
-`code42 legal-hold events`
+`code42 legal-hold search-events`
 
-This command takes the optional filters of a specific matter uid, beginning time stamp, end time stamp, and event type.
+This command takes the optional filters of a specific matter uid, beginning timestamp, end timestamp, and event type.
 
 Learn more about the [Legal Hold](../commands/legalhold.md) commands.

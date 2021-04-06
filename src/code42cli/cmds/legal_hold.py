@@ -1,5 +1,4 @@
 import json
-from collections import OrderedDict
 from functools import lru_cache
 from pprint import pformat
 
@@ -21,22 +20,31 @@ from code42cli.output_formats import OutputFormatter
 from code42cli.util import format_string_list_to_columns
 
 
-_MATTER_KEYS_MAP = OrderedDict()
-_MATTER_KEYS_MAP["legalHoldUid"] = "Matter ID"
-_MATTER_KEYS_MAP["name"] = "Name"
-_MATTER_KEYS_MAP["description"] = "Description"
-_MATTER_KEYS_MAP["creator_username"] = "Creator"
-_MATTER_KEYS_MAP["creationDate"] = "Creation Date"
-_EVENT_KEYS_MAP = OrderedDict()
-_EVENT_KEYS_MAP["eventUid"] = "Event ID"
-_EVENT_KEYS_MAP["eventType"] = "Event Type"
-_EVENT_KEYS_MAP["eventDate"] = "Event Date"
-_EVENT_KEYS_MAP["legalHoldUid"] = "Legal Hold ID"
-_EVENT_KEYS_MAP["actorUsername"] = "Actor Username"
-_EVENT_KEYS_MAP["custodianUsername"] = "Custodian Username"
-
-
+_MATTER_KEYS_MAP = {
+    "legalHoldUid": "Matter ID",
+    "name": "Name",
+    "description": "Description",
+    "creator_username": "Creator",
+    "creationDate": "Creation Date",
+}
+_EVENT_KEYS_MAP = {
+    "eventUid": "Event ID",
+    "eventType": "Event Type",
+    "eventDate": "Event Date",
+    "legalHoldUid": "Legal Hold ID",
+    "actorUsername": "Actor Username",
+    "custodianUsername": "Custodian Username",
+}
 LEGAL_HOLD_KEYWORD = "legal hold events"
+LEGAL_HOLD_EVENT_TYPES = [
+    "MembershipCreated",
+    "MembershipReactivated",
+    "MembershipDeactivated",
+    "HoldCreated",
+    "HoldDeactivated",
+    "HoldReactivated",
+    "Restore",
+]
 BEGIN_DATE_DICT = set_begin_default_dict(LEGAL_HOLD_KEYWORD)
 END_DATE_DICT = set_end_default_dict(LEGAL_HOLD_KEYWORD)
 
@@ -45,16 +53,12 @@ END_DATE_DICT = set_end_default_dict(LEGAL_HOLD_KEYWORD)
 @sdk_options(hidden=True)
 def legal_hold(state):
     """Add and remove custodians from legal hold matters."""
-    pass
 
 
-matter_id_option = click.option(
-    "-m",
-    "--matter-id",
-    required=True,
-    type=str,
-    help="Identification number of the legal hold matter the custodian will be added to.",
-)
+def matter_id_option(required, help):
+    return click.option("-m", "--matter-id", required=required, type=str, help=help)
+
+
 user_id_option = click.option(
     "-u",
     "--username",
@@ -65,7 +69,10 @@ user_id_option = click.option(
 
 
 @legal_hold.command()
-@matter_id_option
+@matter_id_option(
+    True,
+    "Identification number of the legal hold matter the custodian will be added to.",
+)
 @user_id_option
 @sdk_options()
 def add_user(state, matter_id, username):
@@ -74,7 +81,10 @@ def add_user(state, matter_id, username):
 
 
 @legal_hold.command()
-@matter_id_option
+@matter_id_option(
+    True,
+    "Identification number of the legal hold matter the custodian will be removed from.",
+)
 @user_id_option
 @sdk_options()
 def remove_user(state, matter_id, username):
@@ -139,33 +149,26 @@ def show(state, matter_id, include_inactive=False, include_policy=False):
 
 
 @legal_hold.command()
-@click.option(
-    "--matter-id", type=str, help="Filter results by legal hold UID",
-)
+@matter_id_option(False, "Filter results by legal hold UID.")
 @click.option(
     "--event-type",
-    type=click.Choice(
-        [
-            "MembershipCreated",
-            "MembershipReactivated",
-            "MembershipDeactivated",
-            "HoldCreated",
-            "HoldDeactivated",
-            "HoldReactivated",
-            "Restore",
-        ]
-    ),
-    help="Filter results by event types",
+    type=click.Choice(LEGAL_HOLD_EVENT_TYPES),
+    help="Filter results by event types.",
 )
 @click.option("--begin", **BEGIN_DATE_DICT)
 @click.option("--end", **END_DATE_DICT)
 @format_option
 @sdk_options()
-def events(state, matter_id, event_type, begin, end, format):
-    """Report on legal hold events"""
+def search_events(state, matter_id, event_type, begin, end, format):
+    """Report on legal hold events."""
     formatter = OutputFormatter(format, _EVENT_KEYS_MAP)
-    events = _get_all_events(state.sdk, matter_id, begin, end, event_type)
-    if events:
+    events = _get_all_events(state.sdk, matter_id, begin, end)
+    if event_type:
+        events = [event for event in events if event["eventType"] == event_type]
+    if len(events) > 10:
+        output = formatter.get_formatted_output(events)
+        click.echo_via_pager(output)
+    else:
         formatter.echo_formatted_list(events)
 
 
@@ -275,21 +278,11 @@ def _get_all_active_matters(sdk):
     return matters
 
 
-def _get_all_events(sdk, legal_hold_uid, begin_date, end_date, event_type):
+def _get_all_events(sdk, legal_hold_uid, begin_date, end_date):
     events_generator = sdk.legalhold.get_all_events(
         legal_hold_uid, begin_date, end_date
     )
-    if event_type:
-        events = [
-            event
-            for page in events_generator
-            for event in page["legalHoldEvents"]
-            if event["eventType"] == event_type
-        ]
-    else:
-        events = [
-            event for page in events_generator for event in page["legalHoldEvents"]
-        ]
+    events = [event for page in events_generator for event in page["legalHoldEvents"]]
     return events
 
 
