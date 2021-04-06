@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 from py42.exceptions import Py42BadRequestError
 from py42.response import Py42Response
@@ -6,6 +8,7 @@ from requests import Response
 
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.legal_hold import _check_matter_is_accessible
+from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.main import cli
 
 _NAMESPACE = "{}.cmds.legal_hold".format(PRODUCT_NAME)
@@ -239,7 +242,6 @@ TEST_EVENT_PAGE = {
     ]
 }
 EMPTY_EVENTS_RESPONSE = """{"legalHoldEvents": []}"""
-ALL_EVENTS_RESPONSE = """{{"legalHoldEvents": [{}]}}""".format(EVENTS_RESPONSE)
 EMPTY_MATTERS_RESPONSE = """{"legalHolds": []}"""
 ALL_MATTERS_RESPONSE = """{{"legalHolds": [{}]}}""".format(MATTER_RESPONSE)
 LEGAL_HOLD_COMMAND = "legal-hold"
@@ -291,11 +293,6 @@ def events_response(mocker):
 @pytest.fixture
 def empty_events_response(mocker):
     return _create_py42_response(mocker, EMPTY_EVENTS_RESPONSE)
-
-
-@pytest.fixture
-def all_events_response(mocker):
-    return [_create_py42_response(mocker, ALL_EVENTS_RESPONSE)]
 
 
 def events_list_generator():
@@ -670,11 +667,10 @@ def test_list_with_csv_format_returns_no_response_when_response_is_empty(
     assert "Matter ID,Name,Description,Creator,Creation Date" not in result.output
 
 
-def test_events_shows_events_that_respect_type_filters(
-    runner, cli_state, get_all_events_success, all_events_response
+def test_search_events_shows_events_that_respect_type_filters(
+    runner, cli_state, get_all_events_success
 ):
 
-    cli_state.sdk.legalhold.get_all_events.return_value = all_events_response
     result = runner.invoke(
         cli,
         ["legal-hold", "search-events", "--event-type", "HoldCreated"],
@@ -685,7 +681,7 @@ def test_events_shows_events_that_respect_type_filters(
     assert NEWER_LEGAL_HOLD_MEMBERSHIP_EVENT not in result.output
 
 
-def test_events_with_csv_returns_no_events_when_response_is_empty(
+def test_search_events_with_csv_returns_no_events_when_response_is_empty(
     runner, cli_state, get_all_events_success, empty_events_response
 ):
     cli_state.sdk.legalhold.get_all_events.return_value = empty_events_response
@@ -694,6 +690,18 @@ def test_events_with_csv_returns_no_events_when_response_is_empty(
     assert (
         "actorEmail,actorUsername,actorLastName,actorUserUid,actorUserExtRef"
         not in result.output
+    )
+
+
+def test_search_events_is_called_with_expected_begin_timestamp(runner, cli_state):
+    expected_timestamp = convert_datetime_to_timestamp(
+        datetime.datetime.strptime("2017-01-01", "%Y-%m-%d")
+    )
+    command = ["legal-hold", "search-events", "--begin", "2017-01-01T00:00:00"]
+    runner.invoke(cli, command, obj=cli_state)
+
+    cli_state.sdk.legalhold.get_all_events.assert_called_once_with(
+        None, expected_timestamp, None
     )
 
 
