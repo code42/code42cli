@@ -18,6 +18,11 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `--end` filters based on an end timestamp.
     - `--event-type` filters based on a list of event types.
 
+### Fixed
+
+- Arguments/options that read data from files now attempt to autodetect file encodings. Resolving a bug where CSVs written
+  on Windows with Powershell would fail to be read properly.
+
 ## 1.4.0 - 2021-03-09
 
 ### Added
