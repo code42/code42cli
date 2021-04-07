@@ -20,8 +20,8 @@ ACTIVE_TEST_USER_ID = "12345"
 INACTIVE_TEST_USERNAME = "inactive@example.com"
 INACTIVE_TEST_USER_ID = "54321"
 TEST_POLICY_UID = "66666"
-OLDER_LEGAL_HOLD_CREATED_EVENT = "564564654566"
-NEWER_LEGAL_HOLD_MEMBERSHIP_EVENT = "74533457745"
+_CREATE_EVENT_ID = "564564654566"
+_MEMBERSHIP_EVENT_ID = "74533457745"
 TEST_PRESERVATION_POLICY_UID = "1010101010"
 MATTER_RESPONSE = """
 {
@@ -173,39 +173,6 @@ ALL_ACTIVE_AND_INACTIVE_CUSTODIANS_RESPONSE = """
     ]
 }
 """
-EVENTS_RESPONSE = """
-{
-        "eventUid":"564564654566",
-        "eventType":"HoldCreated",
-        "eventDate":"2015-05-16T15:07:44.820Z",
-        "legalHoldUid":"88888",
-        "actorUserUid":"12345",
-        "actorUsername":"holdcreator@example.com",
-        "actorFirstName":"john",
-        "actorLastName":"doe",
-        "actorUserExtRef":null,
-        "actorEmail":"holdcreatorr@example.com"
-      },
-      {
-        "eventUid":"74533457745",
-        "eventType":"MembershipCreated",
-        "eventDate":"2019-05-17T15:07:44.820Z",
-        "legalHoldUid":"88888",
-        "legalHoldMembershipUid":"645576514441664433",
-        "custodianUserUid":"12345",
-        "custodianUsername":"kim.jones@code42.com",
-        "custodianFirstName":"kim",
-        "custodianLastName":"jones",
-        "custodianUserExtRef":null,
-        "custodianEmail":"user@example.com",
-        "actorUserUid":"1234512345",
-        "actorUsername":"creator@example.com",
-        "actorFirstName":"john",
-        "actorLastName":"doe",
-        "actorUserExtRef":null,
-        "actorEmail":"user@example.com"
-      }
-"""
 TEST_EVENT_PAGE = {
     "legalHoldEvents": [
         {
@@ -283,11 +250,6 @@ def inactive_legal_hold_memberships_response(mocker):
 @pytest.fixture
 def active_and_inactive_legal_hold_memberships_response(mocker):
     return [_create_py42_response(mocker, ALL_ACTIVE_AND_INACTIVE_CUSTODIANS_RESPONSE)]
-
-
-@pytest.fixture
-def events_response(mocker):
-    return _create_py42_response(mocker, EVENTS_RESPONSE)
 
 
 @pytest.fixture
@@ -677,8 +639,8 @@ def test_search_events_shows_events_that_respect_type_filters(
         obj=cli_state,
     )
 
-    assert OLDER_LEGAL_HOLD_CREATED_EVENT in result.output
-    assert NEWER_LEGAL_HOLD_MEMBERSHIP_EVENT not in result.output
+    assert _CREATE_EVENT_ID in result.output
+    assert _MEMBERSHIP_EVENT_ID not in result.output
 
 
 def test_search_events_with_csv_returns_no_events_when_response_is_empty(
