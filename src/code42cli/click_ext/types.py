@@ -3,11 +3,29 @@ from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
 
+import chardet
 import click
 from click.exceptions import BadParameter
 
+from code42cli.logger import CliLogger
 
-class FileOrString(click.File):
+
+class AutoDecodedFile(click.File):
+    """Attempts to autodetect file's encoding prior to normal click.File processing."""
+
+    def convert(self, value, param, ctx):
+        try:
+            with open(value, "rb") as file:
+                self.encoding = chardet.detect(file.read())["encoding"]
+            if self.encoding is None:
+                CliLogger().log_error(f"Failed to detect encoding of file: {value}")
+        except Exception:
+            pass  # we'll let click.File do it's own exception handling for the filepath
+
+        return super().convert(value, param, ctx)
+
+
+class FileOrString(AutoDecodedFile):
     """Declares a parameter to be a file (if the argument begins with `@`), otherwise accepts it as
     a string.
     """
