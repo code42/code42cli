@@ -160,7 +160,7 @@ def show(state, matter_id, include_inactive=False, include_policy=False):
 @format_option
 @sdk_options()
 def search_events(state, matter_id, event_type, begin, end, format):
-    """Report on legal hold events."""
+    """Tools for getting legal hold event data."""
     formatter = OutputFormatter(format, _EVENT_KEYS_MAP)
     events = _get_all_events(state.sdk, matter_id, begin, end)
     if event_type:
