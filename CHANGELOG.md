@@ -10,6 +10,16 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## 1.4.1 - 2021-04-15
 
+### Added
+
+- `code42 legal-hold search-events` command:
+    - `--matter-id` filters based on a legal hold uid.
+    - `--begin` filters based on a beginning timestamp.
+    - `--end` filters based on an end timestamp.
+    - `--event-type` filters based on a list of event types.
+
+## 1.4.1 - 2021-04-15
+
 ### Fixed
 
 - Arguments/options that read data from files now attempt to autodetect file encodings.

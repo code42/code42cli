@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 from py42.exceptions import Py42BadRequestError
 from py42.response import Py42Response
@@ -6,8 +8,8 @@ from requests import Response
 
 from code42cli import PRODUCT_NAME
 from code42cli.cmds.legal_hold import _check_matter_is_accessible
+from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.main import cli
-
 
 _NAMESPACE = "{}.cmds.legal_hold".format(PRODUCT_NAME)
 TEST_MATTER_ID = "99999"
@@ -18,6 +20,8 @@ ACTIVE_TEST_USER_ID = "12345"
 INACTIVE_TEST_USERNAME = "inactive@example.com"
 INACTIVE_TEST_USER_ID = "54321"
 TEST_POLICY_UID = "66666"
+_CREATE_EVENT_ID = "564564654566"
+_MEMBERSHIP_EVENT_ID = "74533457745"
 TEST_PRESERVATION_POLICY_UID = "1010101010"
 MATTER_RESPONSE = """
 {
@@ -169,6 +173,42 @@ ALL_ACTIVE_AND_INACTIVE_CUSTODIANS_RESPONSE = """
     ]
 }
 """
+TEST_EVENT_PAGE = {
+    "legalHoldEvents": [
+        {
+            "eventUid": "564564654566",
+            "eventType": "HoldCreated",
+            "eventDate": "2015-05-16T15:07:44.820Z",
+            "legalHoldUid": "88888",
+            "actorUserUid": "12345",
+            "actorUsername": "holdcreator@example.com",
+            "actorFirstName": "john",
+            "actorLastName": "doe",
+            "actorUserExtRef": None,
+            "actorEmail": "holdcreatorr@example.com",
+        },
+        {
+            "eventUid": "74533457745",
+            "eventType": "MembershipCreated",
+            "eventDate": "2019-05-17T15:07:44.820Z",
+            "legalHoldUid": "88888",
+            "legalHoldMembershipUid": "645576514441664433",
+            "custodianUserUid": "12345",
+            "custodianUsername": "kim.jones@code42.com",
+            "custodianFirstName": "kim",
+            "custodianLastName": "jones",
+            "custodianUserExtRef": None,
+            "custodianEmail": "user@example.com",
+            "actorUserUid": "1234512345",
+            "actorUsername": "creator@example.com",
+            "actorFirstName": "john",
+            "actorLastName": "doe",
+            "actorUserExtRef": None,
+            "actorEmail": "user@example.com",
+        },
+    ]
+}
+EMPTY_EVENTS_RESPONSE = """{"legalHoldEvents": []}"""
 EMPTY_MATTERS_RESPONSE = """{"legalHolds": []}"""
 ALL_MATTERS_RESPONSE = """{{"legalHolds": [{}]}}""".format(MATTER_RESPONSE)
 LEGAL_HOLD_COMMAND = "legal-hold"
@@ -213,6 +253,15 @@ def active_and_inactive_legal_hold_memberships_response(mocker):
 
 
 @pytest.fixture
+def empty_events_response(mocker):
+    return _create_py42_response(mocker, EMPTY_EVENTS_RESPONSE)
+
+
+def events_list_generator():
+    yield TEST_EVENT_PAGE
+
+
+@pytest.fixture
 def get_user_id_success(cli_state):
     cli_state.sdk.users.get_by_username.return_value = {
         "users": [{"userUid": ACTIVE_TEST_USER_ID}]
@@ -244,6 +293,11 @@ def check_matter_accessible_failure(cli_state, custom_error):
     cli_state.sdk.legalhold.get_matter_by_uid.side_effect = Py42BadRequestError(
         custom_error
     )
+
+
+@pytest.fixture
+def get_all_events_success(cli_state):
+    cli_state.sdk.legalhold.get_all_events.return_value = events_list_generator()
 
 
 @pytest.fixture
@@ -573,6 +627,44 @@ def test_list_with_csv_format_returns_no_response_when_response_is_empty(
     cli_state.sdk.legalhold.get_all_matters.return_value = empty_matters_response
     result = runner.invoke(cli, ["legal-hold", "list", "-f", "csv"], obj=cli_state)
     assert "Matter ID,Name,Description,Creator,Creation Date" not in result.output
+
+
+def test_search_events_shows_events_that_respect_type_filters(
+    runner, cli_state, get_all_events_success
+):
+
+    result = runner.invoke(
+        cli,
+        ["legal-hold", "search-events", "--event-type", "HoldCreated"],
+        obj=cli_state,
+    )
+
+    assert _CREATE_EVENT_ID in result.output
+    assert _MEMBERSHIP_EVENT_ID not in result.output
+
+
+def test_search_events_with_csv_returns_no_events_when_response_is_empty(
+    runner, cli_state, get_all_events_success, empty_events_response
+):
+    cli_state.sdk.legalhold.get_all_events.return_value = empty_events_response
+    result = runner.invoke(cli, ["legal-hold", "events", "-f", "csv"], obj=cli_state)
+
+    assert (
+        "actorEmail,actorUsername,actorLastName,actorUserUid,actorUserExtRef"
+        not in result.output
+    )
+
+
+def test_search_events_is_called_with_expected_begin_timestamp(runner, cli_state):
+    expected_timestamp = convert_datetime_to_timestamp(
+        datetime.datetime.strptime("2017-01-01", "%Y-%m-%d")
+    )
+    command = ["legal-hold", "search-events", "--begin", "2017-01-01T00:00:00"]
+    runner.invoke(cli, command, obj=cli_state)
+
+    cli_state.sdk.legalhold.get_all_events.assert_called_once_with(
+        None, expected_timestamp, None
+    )
 
 
 @pytest.mark.parametrize(
