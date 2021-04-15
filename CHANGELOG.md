@@ -10,10 +10,12 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
+## 1.4.1 - 2021-04-15
+
 ### Fixed
 
-- Arguments/options that read data from files now attempt to autodetect file encodings. Resolving a bug where CSVs written
-  on Windows with Powershell would fail to be read properly.
+- Arguments/options that read data from files now attempt to autodetect file encodings. 
+  Resolving a bug where CSVs written on Windows with Powershell would fail to be read properly.
 
 ## 1.4.0 - 2021-03-09
 
