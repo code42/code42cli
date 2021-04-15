@@ -10,11 +10,6 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
-### Fixed
-
-- Arguments/options that read data from files now attempt to autodetect file encodings. Resolving a bug where CSVs written
-  on Windows with Powershell would fail to be read properly.
-
 ### Added
 
 - `code42 legal-hold search-events` command:
@@ -22,6 +17,13 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `--begin` filters based on a beginning timestamp.
     - `--end` filters based on an end timestamp.
     - `--event-type` filters based on a list of event types.
+
+## 1.4.1 - 2021-04-15
+
+### Fixed
+
+- Arguments/options that read data from files now attempt to autodetect file encodings.
+  Resolving a bug where CSVs written on Windows with Powershell would fail to be read properly.
 
 ## 1.4.0 - 2021-03-09
 
