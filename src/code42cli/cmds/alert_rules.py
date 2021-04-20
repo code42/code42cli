@@ -80,7 +80,7 @@ def remove_user(state, rule_id, username):
 @alert_rules.command("list")
 @format_option
 @sdk_options()
-def list_alert_rules(state, format=None):
+def list_alert_rules(state, format):
     """Fetch existing alert rules."""
     formatter = OutputFormatter(format, _HEADER_KEYS_MAP)
     selected_rules = _get_all_rules_metadata(state.sdk)
