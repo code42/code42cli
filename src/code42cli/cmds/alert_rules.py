@@ -85,10 +85,11 @@ def list_alert_rules(state, format):
     formatter = OutputFormatter(format, _HEADER_KEYS_MAP)
     selected_rules = _get_all_rules_metadata(state.sdk)
 
-    if len(selected_rules) > 10:
-        click.echo_via_pager(formatter.get_formatted_output(selected_rules))
-    else:
-        formatter.echo_formatted_list(selected_rules)
+    if selected_rules:
+        if len(selected_rules) > 10:
+            click.echo_via_pager(formatter.get_formatted_output(selected_rules))
+        else:
+            formatter.echo_formatted_list(selected_rules)
 
 
 @alert_rules.command()
