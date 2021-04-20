@@ -21,7 +21,8 @@ from code42cli.errors import Code42CLIError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.options import sdk_options
-from code42cli.output_formats import DataFrameOutputFormatter, OutputFormat
+from code42cli.output_formats import DataFrameOutputFormatter
+from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
 
 
