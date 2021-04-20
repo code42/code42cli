@@ -21,7 +21,7 @@ from code42cli.errors import Code42CLIError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.options import sdk_options
-from code42cli.output_formats import DataFrameOutputFormatter
+from code42cli.output_formats import DataFrameOutputFormatter, OutputFormat
 from code42cli.output_formats import OutputFormatter
 
 
@@ -154,11 +154,11 @@ def _change_device_name(sdk, guid, name):
 @devices.command()
 @device_guid_argument
 @sdk_options()
-def show(state, device_guid, format=None):
+def show(state, device_guid):
     """Print individual device details. Requires device GUID."""
 
-    formatter = OutputFormatter(format, _device_info_keys_map())
-    backup_set_formatter = OutputFormatter(format, _backup_set_keys_map())
+    formatter = OutputFormatter(OutputFormat.TABLE, _device_info_keys_map())
+    backup_set_formatter = OutputFormatter(OutputFormat.TABLE, _backup_set_keys_map())
     device_info = _get_device_info(state.sdk, device_guid)
     formatter.echo_formatted_list([device_info])
     backup_usage = device_info.get("backupUsage")
