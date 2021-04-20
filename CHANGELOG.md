@@ -14,6 +14,9 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Bug where some CSV outputs on Windows would have an extra newline between the rows.
 
+- Issue where outputting or sending an alert or file-event with a timestamp without
+  decimals would error.
+
 ### Changed
 
 - `code42 alert-rules list` now outputs via a pager when more than 10 rules.

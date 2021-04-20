@@ -34,7 +34,7 @@ setup(
         "click>=7.1.1",
         "click_plugins>=1.1.1",
         "colorama>=0.4.3",
-        "c42eventextractor==0.4.0",
+        "c42eventextractor==0.4.1",
         "keyring==18.0.1",
         "keyrings.alt==3.2.0",
         "pandas>=1.1.3",
