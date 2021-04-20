@@ -135,7 +135,7 @@ def to_csv(output):
 
     if not output:
         return
-    string_io = io.StringIO(newline="")
+    string_io = io.StringIO(newline=None)
     fieldnames = list({k for d in output for k in d.keys()})
     writer = csv.DictWriter(string_io, fieldnames=fieldnames)
     writer.writeheader()
