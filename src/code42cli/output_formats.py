@@ -12,6 +12,7 @@ from code42cli.util import format_to_table
 
 CEF_DEFAULT_PRODUCT_NAME = "Advanced Exfiltration Detection"
 CEF_DEFAULT_SEVERITY_LEVEL = "5"
+OUTPUT_VIA_PAGER_THRESHOLD = 10
 
 
 class JsonOutputFormat:
@@ -68,7 +69,7 @@ class OutputFormatter:
 
     def echo_formatted_list(self, output_list, force_pager=False):
         formatted_output = self.get_formatted_output(output_list)
-        if len(output_list) > 10 or force_pager:
+        if len(output_list) > OUTPUT_VIA_PAGER_THRESHOLD or force_pager:
             click.echo_via_pager(formatted_output)
         else:
             for output in formatted_output:
@@ -127,7 +128,7 @@ class DataFrameOutputFormatter:
 
     def echo_formatted_dataframe(self, df, **kwargs):
         str_output = self.get_formatted_output(df, **kwargs)
-        if len(df) <= 10:
+        if len(df) <= OUTPUT_VIA_PAGER_THRESHOLD:
             click.echo(str_output)
         else:
             click.echo_via_pager(str_output)

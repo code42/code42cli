@@ -821,11 +821,14 @@ class TestDataFrameOutputFormatter:
             "      string2          43            "
         )
 
-    def test_echo_formatted_dataframe_uses_pager_when_gt_10_rows(self, mocker):
+    def test_echo_formatted_dataframe_uses_pager_when_len_rows_gt_threshold_const(
+        self, mocker
+    ):
         mock_echo = mocker.patch("click.echo")
         mock_pager = mocker.patch("click.echo_via_pager")
         formatter = DataFrameOutputFormatter(OutputFormat.TABLE)
-        big_df = DataFrame([{"column": val} for val in range(11)])
+        rows_len = output_formats_module.OUTPUT_VIA_PAGER_THRESHOLD + 1
+        big_df = DataFrame([{"column": val} for val in range(rows_len)])
         small_df = DataFrame([{"column": val} for val in range(5)])
         formatter.echo_formatted_dataframe(big_df)
         formatter.echo_formatted_dataframe(small_df)
