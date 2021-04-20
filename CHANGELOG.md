@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## Unreleased
+
+### Fixed
+
+- Bug where some CSV outputs on Windows would have an extra newline between the rows.
+
+- Issue where outputting or sending an alert or file-event with a timestamp without
+  decimals would error.
+
+### Changed
+
+- `code42 alert-rules list` now outputs via a pager when results contain more than 10 rules.
+
+- `code42 cases list` now outputs via a pager when results contain more than 10 cases.
+
 ## 1.4.1 - 2021-04-15
 
 ### Added
@@ -17,8 +32,6 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `--begin` filters based on a beginning timestamp.
     - `--end` filters based on an end timestamp.
     - `--event-type` filters based on a list of event types.
-
-## 1.4.1 - 2021-04-15
 
 ### Fixed
 

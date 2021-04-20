@@ -101,11 +101,7 @@ def create_handlers(
         events = _get_events(sdk, handlers, extractor._key, response)
         total_events = len(events)
         handlers.TOTAL_EVENTS += total_events
-
-        if total_events > 10 or force_pager:
-            click.echo_via_pager(formatter.get_formatted_output(events))
-        else:
-            formatter.echo_formatted_list(events)
+        formatter.echo_formatted_list(events, force_pager=force_pager)
 
         # To make sure the extractor records correct timestamp event when `CTRL-C` is pressed.
         if total_events:

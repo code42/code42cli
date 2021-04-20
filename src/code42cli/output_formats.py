@@ -12,6 +12,7 @@ from code42cli.util import format_to_table
 
 CEF_DEFAULT_PRODUCT_NAME = "Advanced Exfiltration Detection"
 CEF_DEFAULT_SEVERITY_LEVEL = "5"
+OUTPUT_VIA_PAGER_THRESHOLD = 10
 
 
 class JsonOutputFormat:
@@ -66,12 +67,15 @@ class OutputFormatter:
             for item in output:
                 yield self._format_output(item)
 
-    def echo_formatted_list(self, output_list):
+    def echo_formatted_list(self, output_list, force_pager=False):
         formatted_output = self.get_formatted_output(output_list)
-        for output in formatted_output:
-            click.echo(output, nl=False)
-        if self.output_format in [OutputFormat.TABLE]:
-            click.echo()
+        if len(output_list) > OUTPUT_VIA_PAGER_THRESHOLD or force_pager:
+            click.echo_via_pager(formatted_output)
+        else:
+            for output in formatted_output:
+                click.echo(output, nl=False)
+            if self.output_format in [OutputFormat.TABLE]:
+                click.echo()
 
     @property
     def _requires_list_output(self):
@@ -124,7 +128,7 @@ class DataFrameOutputFormatter:
 
     def echo_formatted_dataframe(self, df, **kwargs):
         str_output = self.get_formatted_output(df, **kwargs)
-        if len(df) <= 10:
+        if len(df) <= OUTPUT_VIA_PAGER_THRESHOLD:
             click.echo(str_output)
         else:
             click.echo_via_pager(str_output)
@@ -135,7 +139,7 @@ def to_csv(output):
 
     if not output:
         return
-    string_io = io.StringIO()
+    string_io = io.StringIO(newline=None)
     fieldnames = list({k for d in output for k in d.keys()})
     writer = csv.DictWriter(string_io, fieldnames=fieldnames)
     writer.writeheader()
