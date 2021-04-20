@@ -84,7 +84,10 @@ def list_alert_rules(state, format):
     """Fetch existing alert rules."""
     formatter = OutputFormatter(format, _HEADER_KEYS_MAP)
     selected_rules = _get_all_rules_metadata(state.sdk)
-    if selected_rules:
+
+    if len(selected_rules) > 10:
+        click.echo_via_pager(formatter.get_formatted_output(selected_rules))
+    else:
         formatter.echo_formatted_list(selected_rules)
 
 
