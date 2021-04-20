@@ -19,9 +19,9 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Changed
 
-- `code42 alert-rules list` now outputs via a pager when more than 10 rules.
+- `code42 alert-rules list` now outputs via a pager when results contain more than 10 rules.
 
-- `code42 cases list` now outputs via a pager when more than 10 cases.
+- `code42 cases list` now outputs via a pager when results contain more than 10 cases.
 
 ## 1.4.1 - 2021-04-15
 
