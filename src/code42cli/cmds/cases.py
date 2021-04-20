@@ -151,10 +151,7 @@ def _list(
     formatter = OutputFormatter(format, _get_cases_header())
     cases = [case for page in pages for case in page["cases"]]
     if cases:
-        if len(cases) > 10:
-            click.echo_via_pager(formatter.get_formatted_output(cases))
-        else:
-            formatter.echo_formatted_list(cases)
+        formatter.echo_formatted_list(cases)
     else:
         click.echo("No cases found.")
 

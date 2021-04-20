@@ -66,12 +66,15 @@ class OutputFormatter:
             for item in output:
                 yield self._format_output(item)
 
-    def echo_formatted_list(self, output_list):
+    def echo_formatted_list(self, output_list, force_pager=False):
         formatted_output = self.get_formatted_output(output_list)
-        for output in formatted_output:
-            click.echo(output, nl=False)
-        if self.output_format in [OutputFormat.TABLE]:
-            click.echo()
+        if len(output_list) > 10 or force_pager:
+            click.echo_via_pager(formatted_output)
+        else:
+            for output in formatted_output:
+                click.echo(output, nl=False)
+            if self.output_format in [OutputFormat.TABLE]:
+                click.echo()
 
     @property
     def _requires_list_output(self):

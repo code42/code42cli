@@ -165,11 +165,7 @@ def search_events(state, matter_id, event_type, begin, end, format):
     events = _get_all_events(state.sdk, matter_id, begin, end)
     if event_type:
         events = [event for event in events if event["eventType"] == event_type]
-    if len(events) > 10:
-        output = formatter.get_formatted_output(events)
-        click.echo_via_pager(output)
-    else:
-        formatter.echo_formatted_list(events)
+    formatter.echo_formatted_list(events)
 
 
 @legal_hold.group(cls=OrderedGroup)
