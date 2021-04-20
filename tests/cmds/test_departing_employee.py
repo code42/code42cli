@@ -192,7 +192,7 @@ def test_add_departing_employee_when_user_does_not_exist_exits(
 
 
 def test_add_departing_employee_when_user_already_exits_with_correct_message(
-    mocker, runner, cli_state_with_user, user_already_added_error
+    runner, cli_state_with_user, user_already_added_error
 ):
     def add_user(user):
         raise user_already_added_error
@@ -224,7 +224,7 @@ def test_remove_departing_employee_when_user_does_not_exist_exits(
     assert "User '{}' does not exist.".format(TEST_EMPLOYEE) in result.output
 
 
-def test_add_bulk_users_calls_expected_py42_methods(runner, mocker, cli_state):
+def test_add_bulk_users_calls_expected_py42_methods(runner, cli_state):
     de_add_user = thread_safe_side_effect()
     add_user_cloud_alias = thread_safe_side_effect()
     update_user_notes = thread_safe_side_effect()
