@@ -1,6 +1,7 @@
 import click
 import py42.sdk.queries.alerts.filters as f
 from c42eventextractor.extractors import AlertExtractor
+from py42.exceptions import Py42NotFoundError
 from py42.sdk.queries.alerts.filters import AlertState
 from py42.sdk.queries.alerts.filters import RuleType
 from py42.sdk.queries.alerts.filters import Severity
@@ -154,10 +155,10 @@ def _get_default_output_header():
         "name": "RuleName",
         "actor": "Username",
         "createdAt": "ObservedDate",
-        "state": "Status",
+        "state": "State",
         "severity": "Severity",
         "description": "Description",
-        "note": "Note"
+        "note": "Note",
     }
 
 
@@ -239,7 +240,7 @@ def search(
     use_checkpoint,
     or_query,
     include_all,
-    **kwargs
+    **kwargs,
 ):
     """Search for alerts."""
     output_header = ext.try_get_default_header(
@@ -305,19 +306,21 @@ def _get_alert_cursor_store(profile_name):
 def show(state, alert_id):
     """Display the details of a single alert."""
     formatter = OutputFormatter(OutputFormat.TABLE, _get_default_output_header())
-    response = state.sdk.alerts.get_details(alert_id)
-    alerts = response["alerts"]
-    if not alerts:
-        raise Code42CLIError(f"No alert found with ID {alert_id}.")
-    
-    formatter.echo_formatted_list(response["alerts"])
-    
+
+    try:
+        response = state.sdk.alerts.get_details(alert_id)
+    except Py42NotFoundError:
+        raise errors.Code42CLIError(f"No alert found with ID '{alert_id}'.")
+
+    alert = response["alerts"][0]
+    formatter.echo_formatted_list([alert])
+
     # Show note details
-    note = alerts[0].get("note")
+    note = alert.get("note")
     if note:
         click.echo("\nNote:\n")
         click.echo(format_dict(note))
-    
+
 
 @alerts.command()
 @opt.sdk_options()
