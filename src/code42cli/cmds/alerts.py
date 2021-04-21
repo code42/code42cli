@@ -359,7 +359,7 @@ def bulk_update(ctx, cli_state, csv_rows):
     """Bulk update alerts."""
 
     def handle_row(id, state, note):
-        ctx.invoke(update, id, state=state, note=note)
+        ctx.invoke(update, alert_id=id, state=state, note=note)
 
     run_bulk_process(
         handle_row, csv_rows, progress_label="Updating alerts:",
