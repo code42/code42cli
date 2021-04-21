@@ -16,11 +16,11 @@ from code42cli.cmds.auditlogs import audit_logs
 from code42cli.cmds.cases import cases
 from code42cli.cmds.departing_employee import departing_employee
 from code42cli.cmds.devices import devices
-from code42cli.cmds.users import users
 from code42cli.cmds.high_risk_employee import high_risk_employee
 from code42cli.cmds.legal_hold import legal_hold
 from code42cli.cmds.profile import profile
 from code42cli.cmds.securitydata import security_data
+from code42cli.cmds.users import users
 from code42cli.options import sdk_options
 
 BANNER = """\b
