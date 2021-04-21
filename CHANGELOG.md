@@ -19,6 +19,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
+- New command `code42 alerts show` that display information about a single alert.
+
 - New command `code42 alerts update` that can update an alert's state or note.
 
 - New command `code42 alerts bulk generate-tempate` for generating CSV templates for bulk

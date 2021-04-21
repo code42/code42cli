@@ -4,6 +4,7 @@ from c42eventextractor.extractors import AlertExtractor
 from py42.sdk.queries.alerts.filters import AlertState
 from py42.sdk.queries.alerts.filters import RuleType
 from py42.sdk.queries.alerts.filters import Severity
+from py42.util import format_dict
 
 import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
@@ -21,6 +22,7 @@ from code42cli.date_helper import limit_date_range
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.output_formats import JsonOutputFormat
+from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
 
 
@@ -146,15 +148,16 @@ update_state_option = click.option(
 )
 
 
-def _get_search_default_header():
+def _get_default_output_header():
     return {
-        "id": "AlertId",
+        "id": "Id",
         "name": "RuleName",
         "actor": "Username",
         "createdAt": "ObservedDate",
         "state": "Status",
         "severity": "Severity",
         "description": "Description",
+        "note": "Note"
     }
 
 
@@ -240,7 +243,7 @@ def search(
 ):
     """Search for alerts."""
     output_header = ext.try_get_default_header(
-        include_all, _get_search_default_header(), format
+        include_all, _get_default_output_header(), format
     )
     formatter = OutputFormatter(format, output_header)
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
@@ -297,7 +300,27 @@ def _get_alert_cursor_store(profile_name):
 
 
 @alerts.command()
-@opt.sdk_options(hidden=True)
+@opt.sdk_options()
+@alert_id_arg
+def show(state, alert_id):
+    """Display the details of a single alert."""
+    formatter = OutputFormatter(OutputFormat.TABLE, _get_default_output_header())
+    response = state.sdk.alerts.get_details(alert_id)
+    alerts = response["alerts"]
+    if not alerts:
+        raise Code42CLIError(f"No alert found with ID {alert_id}.")
+    
+    formatter.echo_formatted_list(response["alerts"])
+    
+    # Show note details
+    note = alerts[0].get("note")
+    if note:
+        click.echo("\nNote:\n")
+        click.echo(format_dict(note))
+    
+
+@alerts.command()
+@opt.sdk_options()
 @alert_id_arg
 @update_state_option
 @note_option
@@ -317,10 +340,8 @@ def bulk(state):
 
 
 UPDATE_ALERT_CSV_HEADERS = ["id", "state", "note"]
-
-
 update_alerts_generate_template = generate_template_cmd_factory(
-    group_name="alerts",
+    group_name=ALERTS_KEYWORD,
     commands_dict={"update": UPDATE_ALERT_CSV_HEADERS},
     help_message="Generate the CSV template needed for bulk alert commands.",
 )
@@ -328,13 +349,14 @@ bulk.add_command(update_alerts_generate_template)
 
 
 @bulk.command(name="update")
+@opt.sdk_options()
 @read_csv_arg(headers=UPDATE_ALERT_CSV_HEADERS)
 @click.pass_context
 def bulk_update(ctx, cli_state, csv_rows):
     """Bulk update alerts."""
 
-    def handle_row(alert_id, state, note):
-        ctx.invoke(update, alert_id, state=state, note=note)
+    def handle_row(id, state, note):
+        ctx.invoke(update, id, state=state, note=note)
 
     run_bulk_process(
         handle_row, csv_rows, progress_label="Updating alerts:",
