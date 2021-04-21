@@ -17,6 +17,15 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - Issue where outputting or sending an alert or file-event with a timestamp without
   decimals would error.
 
+### Added
+
+- New command `code42 alerts update` that can update an alert's state or note.
+
+- New command `code42 alerts bulk generate-tempate` for generating CSV templates for bulk 
+  commands.
+
+- New command `code42 alerts bulk update` for bulk update alerts.
+
 ### Changed
 
 - `code42 alert-rules list` now outputs via a pager when results contain more than 10 rules.
