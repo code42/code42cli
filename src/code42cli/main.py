@@ -16,6 +16,7 @@ from code42cli.cmds.auditlogs import audit_logs
 from code42cli.cmds.cases import cases
 from code42cli.cmds.departing_employee import departing_employee
 from code42cli.cmds.devices import devices
+from code42cli.cmds.users import users
 from code42cli.cmds.high_risk_employee import high_risk_employee
 from code42cli.cmds.legal_hold import legal_hold
 from code42cli.cmds.profile import profile
@@ -80,5 +81,6 @@ cli.add_command(high_risk_employee)
 cli.add_command(legal_hold)
 cli.add_command(profile)
 cli.add_command(devices)
+cli.add_command(users)
 cli.add_command(audit_logs)
 cli.add_command(cases)
