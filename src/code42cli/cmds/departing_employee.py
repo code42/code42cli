@@ -102,6 +102,7 @@ bulk.add_command(departing_employee_generate_template)
 @sdk_options()
 def bulk_add(state, csv_rows):
     sdk = state.sdk  # Force initialization of py42 to only happen once.
+
     def handle_row(username, cloud_alias, departure_date, notes):
         if departure_date:
             try:
@@ -109,7 +110,9 @@ def bulk_add(state, csv_rows):
                     departure_date, None, None
                 )
             except click.exceptions.BadParameter:
-                message = f"Invalid date {departure_date}, valid date format {DATE_FORMAT}."
+                message = (
+                    f"Invalid date {departure_date}, valid date format {DATE_FORMAT}."
+                )
                 raise Code42CLIError(message)
         _add_departing_employee(sdk, username, cloud_alias, departure_date, notes)
 
