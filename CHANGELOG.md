@@ -10,7 +10,9 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
-- `code42 users list` command
+### Added
+
+- New command `code42 users list` with options:
     - `--org-uid` filters on org membership.
     - `--role-name` filters on users having a particular role.
     - `--active` and `--inactive` filter on user status.
