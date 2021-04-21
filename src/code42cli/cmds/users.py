@@ -12,23 +12,16 @@ from code42cli.output_formats import DataFrameOutputFormatter
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def users(state):
-    """Manage users within your Code42 environment"""
+    """Manage users within your Code42 environment."""
     pass
 
 
 org_uid_option = click.option(
     "--org-uid",
-    required=False,
-    type=str,
-    default=None,
-    help="Limit users to only those in the organization you specify. ",
+    help="Limit users to only those in the organization you specify. Note that child orgs are included.",
 )
 role_name_option = click.option(
-    "--role-name",
-    required=False,
-    type=str,
-    default=None,
-    help="Limit results to only users having the specified role.",
+    "--role-name", help="Limit results to only users having the specified role.",
 )
 active_option = click.option(
     "--active", is_flag=True, help="Limits results to only active users.", default=None,
@@ -52,10 +45,7 @@ def list_users(state, org_uid, role_name, active, inactive, format):
     """List users in your Code42 environment."""
     if inactive:
         active = False
-    if role_name:
-        role_id = _get_role_id(state.sdk, role_name)
-    else:
-        role_id = None
+    role_id = _get_role_id(state.sdk, role_name) if role_name else None
     df = _get_users_dataframe(state.sdk, org_uid, role_id, active)
     if df.empty:
         click.echo("No results found.")
@@ -66,14 +56,13 @@ def list_users(state, org_uid, role_name, active, inactive, format):
 
 def _get_role_id(sdk, role_name):
     try:
-        roles_dataframe = DataFrame.from_records(sdk.users.get_available_roles().data)
-        return str(
-            roles_dataframe.loc[
-                roles_dataframe["roleName"] == role_name, "roleId"
-            ].array[0]
+        roles_dataframe = DataFrame.from_records(
+            sdk.users.get_available_roles().data, index="roleName"
         )
+        role_result = roles_dataframe.at[role_name, "roleId"]
+        return str(role_result)  # extract the role ID from the series
     except KeyError:
-        raise Code42CLIError("Role with name {} not found.".format(role_name))
+        raise Code42CLIError(f"Role with name {role_name} not found.")
 
 
 def _get_users_dataframe(sdk, org_uid, role_id, active):

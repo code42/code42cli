@@ -14,7 +14,7 @@ TEST_ROLE_RETURN_DATA = {"data": [{"roleName": "Customer Cloud Admin", "roleId":
 TEST_USERS_RESPONSE = {
     "users": [
         {
-            "userId": "1234",
+            "userId": 1234,
             "userUid": "997962681513153325",
             "status": "Active",
             "username": "test_username@code42.com",
@@ -76,13 +76,13 @@ def test_get_users_dataframe_returns_dataframe(cli_state, get_all_users_success)
     assert isinstance(result, DataFrame)
 
 
-def test_get_users_dataframe_calls_get_all_users_with_correct_parameters(
-    cli_state, get_all_users_success
+def test_list_users_calls_get_all_users_with_correct_parameters(
+    runner, cli_state, get_all_users_success
 ):
     org_uid = "TEST_ORG_UID"
-    role_id = "TEST_ROLE_ID"
-    active = "TEST_ACTIVE"
-    _get_users_dataframe(cli_state.sdk, org_uid=org_uid, role_id=role_id, active=active)
+    runner.invoke(
+        cli, ["users", "list", "--org-uid", org_uid, "--active"], obj=cli_state
+    )
     cli_state.sdk.users.get_all.assert_called_once_with(
-        active=active, org_uid=org_uid, role_id=role_id
+        active=True, org_uid=org_uid, role_id=None
     )
