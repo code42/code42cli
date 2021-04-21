@@ -322,7 +322,7 @@ UPDATE_ALERT_CSV_HEADERS = ["id", "state", "note"]
 update_alerts_generate_template = generate_template_cmd_factory(
     group_name="alerts",
     commands_dict={"update": UPDATE_ALERT_CSV_HEADERS},
-    help_message="Generate the CSV template needed for bulk alert operation.",
+    help_message="Generate the CSV template needed for bulk alert commands.",
 )
 bulk.add_command(update_alerts_generate_template)
 
