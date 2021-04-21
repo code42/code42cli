@@ -9,6 +9,8 @@ import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 import code42cli.options as opt
+from code42cli.bulk import generate_template_cmd_factory
+from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.cmds.search import SendToCommand
 from code42cli.cmds.search.cursor_store import AlertCursorStore
@@ -16,6 +18,7 @@ from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.cmds.search.options import server_options
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import limit_date_range
+from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.output_formats import JsonOutputFormat
 from code42cli.output_formats import OutputFormatter
@@ -134,10 +137,18 @@ send_to_format_options = click.option(
     help="The output format of the result. Defaults to json format.",
     default=JsonOutputFormat.RAW,
 )
+alert_id_arg = click.argument("alert-id")
+note_option = click.option("--note", help="A note to attach to the alert.")
+update_state_option = click.option(
+    "--state",
+    help="The state to give to the alert.",
+    type=click.Choice(AlertState.choices()),
+)
 
 
 def _get_search_default_header():
     return {
+        "id": "AlertId",
         "name": "RuleName",
         "actor": "Username",
         "createdAt": "ObservedDate",
@@ -155,7 +166,7 @@ def search_options(f):
     return f
 
 
-def alert_options(f):
+def filter_options(f):
     f = actor_option(f)
     f = actor_contains_option(f)
     f = exclude_actor_option(f)
@@ -203,7 +214,7 @@ def _call_extractor(
 
 
 @alerts.command()
-@alert_options
+@filter_options
 @search_options
 @click.option(
     "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
@@ -246,7 +257,7 @@ def search(
 
 
 @alerts.command(cls=SendToCommand)
-@alert_options
+@filter_options
 @search_options
 @click.option(
     "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
@@ -285,22 +296,17 @@ def _get_alert_cursor_store(profile_name):
     return AlertCursorStore(profile_name)
 
 
-alert_id_arg = click.argument("alert-id")
-note_option = click.option("--note", help="A note to attach to the alert.")
-update_state_option = click.option(
-    "--state",
-    help="The state to give to the alert.",
-    type=click.Choice(AlertState.choices()),
-)
-
-
 @alerts.command()
 @opt.sdk_options(hidden=True)
 @alert_id_arg
+@update_state_option
 @note_option
 def update(cli_state, alert_id, state, note):
     """Update alert information."""
-    cli_state.sdk.alerts.update_state(state, [alert_id], note=note)
+    if note:
+        cli_state.sdk.alerts.update_note(alert_id, note)
+    if state:
+        cli_state.sdk.alerts.update_state(state, [alert_id])
 
 
 @alerts.group(cls=OrderedGroup)
@@ -310,7 +316,24 @@ def bulk(state):
     pass
 
 
-# @bulk.command(
-#     name="update",
-#     help="Bulk update alerts."
-# )
+UPDATE_ALERT_CSV_HEADERS = ["id", "state", "note"]
+
+
+update_alerts_generate_template = generate_template_cmd_factory(
+    group_name="alerts", commands_dict={"update": UPDATE_ALERT_CSV_HEADERS},
+)
+bulk.add_command(update_alerts_generate_template)
+
+
+@bulk.command(name="update")
+@read_csv_arg(headers=UPDATE_ALERT_CSV_HEADERS)
+@click.pass_context
+def bulk_update(ctx, cli_state, csv_rows):
+    """Bulk update alerts."""
+
+    def handle_row(alert_id, state, note):
+        ctx.invoke(update, alert_id, state=state, note=note)
+
+    run_bulk_process(
+        handle_row, csv_rows, progress_label="Updating alerts:",
+    )
