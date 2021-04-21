@@ -5,11 +5,11 @@ from py42.sdk.queries.alerts.filters import AlertState
 from py42.sdk.queries.alerts.filters import RuleType
 from py42.sdk.queries.alerts.filters import Severity
 
-import code42cli.click_ext.groups
 import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 import code42cli.options as opt
+from code42cli.click_ext.groups import OrderedGroup
 from code42cli.cmds.search import SendToCommand
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
@@ -39,7 +39,7 @@ severity_option = click.option(
     callback=searchopt.is_in_filter(f.Severity),
     help="Filter alerts by severity. Defaults to returning all severities.",
 )
-state_option = click.option(
+filter_state_option = click.option(
     "--state",
     multiple=True,
     type=click.Choice(AlertState.choices()),
@@ -168,11 +168,11 @@ def alert_options(f):
     f = exclude_rule_type_option(f)
     f = description_option(f)
     f = severity_option(f)
-    f = state_option(f)
+    f = filter_state_option(f)
     return f
 
 
-@click.group(cls=code42cli.click_ext.groups.OrderedGroup)
+@click.group(cls=OrderedGroup)
 @opt.sdk_options(hidden=True)
 def alerts(state):
     """Get and send alert data."""
@@ -283,3 +283,34 @@ def _get_alert_extractor(sdk, handlers):
 
 def _get_alert_cursor_store(profile_name):
     return AlertCursorStore(profile_name)
+
+
+alert_id_arg = click.argument("alert-id")
+note_option = click.option("--note", help="A note to attach to the alert.")
+update_state_option = click.option(
+    "--state",
+    help="The state to give to the alert.",
+    type=click.Choice(AlertState.choices()),
+)
+
+
+@alerts.command()
+@opt.sdk_options(hidden=True)
+@alert_id_arg
+@note_option
+def update(cli_state, alert_id, state, note):
+    """Update alert information."""
+    cli_state.sdk.alerts.update_state(state, [alert_id], note=note)
+
+
+@alerts.group(cls=OrderedGroup)
+@opt.sdk_options(hidden=True)
+def bulk(state):
+    """Tools for executing bulk alerts actions."""
+    pass
+
+
+# @bulk.command(
+#     name="update",
+#     help="Bulk update alerts."
+# )

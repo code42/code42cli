@@ -23,6 +23,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - `code42 cases list` now outputs via a pager when results contain more than 10 cases.
 
+- `code42 alerts search` now includes `alert_id` in its table output.
+
 ## 1.4.1 - 2021-04-15
 
 ### Added
