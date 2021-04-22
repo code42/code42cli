@@ -9,7 +9,9 @@ from code42cli.cmds.users import _get_role_id
 from code42cli.cmds.users import _get_users_dataframe
 from code42cli.main import cli
 
-TEST_ROLE_RETURN_DATA = {"data": [{"roleName": "Customer Cloud Admin", "roleId": "1234543"}]}
+TEST_ROLE_RETURN_DATA = {
+    "data": [{"roleName": "Customer Cloud Admin", "roleId": "1234543"}]
+}
 
 TEST_USERS_RESPONSE = {
     "users": [
@@ -66,9 +68,7 @@ def test_list_users_calls_users_get_all_with_expected_role_id(
     runner, cli_state, get_available_roles_success, get_all_users_success
 ):
     ROLE_NAME = "Customer Cloud Admin"
-    runner.invoke(
-        cli, ["users", "list", "--role-name", ROLE_NAME], obj=cli_state
-    )
+    runner.invoke(cli, ["users", "list", "--role-name", ROLE_NAME], obj=cli_state)
     cli_state.sdk.users.get_all.assert_called_once_with(
         active=None, org_uid=None, role_id="1234543"
     )
@@ -89,12 +89,11 @@ def test_list_users_calls_get_all_users_with_correct_parameters(
 def test_list_users_when_given_inactive_uses_active_equals_false(
     runner, cli_state, get_available_roles_success, get_all_users_success
 ):
-    runner.invoke(
-        cli, ["users", "list", "--inactive"], obj=cli_state
-    )
+    runner.invoke(cli, ["users", "list", "--inactive"], obj=cli_state)
     cli_state.sdk.users.get_all.assert_called_once_with(
         active=False, org_uid=None, role_id=None
     )
+
 
 def test_list_users_when_given_active_and_inactive_raises_error(
     runner, cli_state, get_available_roles_success, get_all_users_success
@@ -108,9 +107,7 @@ def test_list_users_when_given_active_and_inactive_raises_error(
 def test_list_users_when_given_excluding_active_and_inactive_uses_active_equals_none(
     runner, cli_state, get_available_roles_success, get_all_users_success
 ):
-    runner.invoke(
-        cli, ["users", "list"], obj=cli_state
-    )
+    runner.invoke(cli, ["users", "list"], obj=cli_state)
     cli_state.sdk.users.get_all.assert_called_once_with(
         active=None, org_uid=None, role_id=None
     )
