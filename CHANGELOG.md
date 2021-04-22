@@ -17,6 +17,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - Issue where outputting or sending an alert or file-event with a timestamp without
   decimals would error.
 
+- A performance issue with the `code42 departing-employee bulk add` command.
+
 ### Changed
 
 - `code42 alert-rules list` now outputs via a pager when results contain more than 10 rules.
