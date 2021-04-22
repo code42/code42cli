@@ -15,6 +15,9 @@ from code42cli.options import sdk_options
 from code42cli.options import set_begin_default_dict
 from code42cli.options import set_end_default_dict
 from code42cli.output_formats import OutputFormatter
+from code42cli.file_readers import read_csv_arg
+from code42cli.bulk import generate_template_cmd_factory
+from code42cli.bulk import run_bulk_process
 
 
 case_number_arg = click.argument("case-number", type=int)
@@ -261,3 +264,62 @@ def remove(state, case_number, event_id):
         state.sdk.cases.file_events.delete(case_number, event_id)
     except Py42NotFoundError:
         raise Code42CLIError("Invalid case-number or event-id.")
+
+
+@file_events.group(cls=OrderedGroup)
+@sdk_options(hidden=True)
+def bulk(state):
+    """Tools for executing file events actions associated to a case in bulk."""
+    pass
+
+
+FILE_EVENTS_HEADERS = ["case_number", "event_id",]
+
+case_file_events_generate_template = generate_template_cmd_factory(
+    group_name="file_events",
+    commands_dict={
+        "add": FILE_EVENTS_HEADERS,
+        "remove": FILE_EVENTS_HEADERS,
+    },
+)
+bulk.add_command(case_file_events_generate_template)
+
+
+@bulk.command(
+    name="add",
+    help="Bulk associate file events to cases using a CSV file with "
+    "format: {}.".format(",".join(FILE_EVENTS_HEADERS)),
+)
+@read_csv_arg(headers=FILE_EVENTS_HEADERS)
+@sdk_options()
+def bulk_add(state, csv_rows):
+    sdk = state.sdk
+
+    def handle_row(case_number, event_id):
+        sdk.cases.file_events.add(case_number, event_id)
+
+    run_bulk_process(
+        handle_row,
+        csv_rows,
+        progress_label="Associating file events to cases:",
+    )
+
+
+@bulk.command(
+    name="remove",
+    help="Bulk remove the file event association from cases using a CSV file with "
+    "format: {}.".format(",".join(FILE_EVENTS_HEADERS)),
+)
+@read_csv_arg(headers=FILE_EVENTS_HEADERS)
+@sdk_options()
+def bulk_remove(state, csv_rows):
+    sdk = state.sdk
+
+    def handle_row(case_number, event_id):
+        sdk.cases.file_events.delete(case_number, event_id)
+
+    run_bulk_process(
+        handle_row,
+        csv_rows,
+        progress_label="Removing the file event association from cases:",
+    )
