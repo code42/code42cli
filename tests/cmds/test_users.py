@@ -1,12 +1,9 @@
 import json
 
 import pytest
-from pandas.core.frame import DataFrame
 from py42.response import Py42Response
 from requests import Response
 
-from code42cli.cmds.users import _get_role_id
-from code42cli.cmds.users import _get_users_dataframe
 from code42cli.main import cli
 
 TEST_ROLE_RETURN_DATA = {
