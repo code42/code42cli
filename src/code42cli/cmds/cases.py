@@ -8,16 +8,16 @@ from py42.exceptions import Py42CaseAlreadyHasEventError
 from py42.exceptions import Py42NotFoundError
 from py42.exceptions import Py42UpdateClosedCaseError
 
+from code42cli.bulk import generate_template_cmd_factory
+from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.errors import Code42CLIError
+from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.options import set_begin_default_dict
 from code42cli.options import set_end_default_dict
 from code42cli.output_formats import OutputFormatter
-from code42cli.file_readers import read_csv_arg
-from code42cli.bulk import generate_template_cmd_factory
-from code42cli.bulk import run_bulk_process
 
 
 case_number_arg = click.argument("case-number", type=int)
@@ -273,14 +273,14 @@ def bulk(state):
     pass
 
 
-FILE_EVENTS_HEADERS = ["case_number", "event_id",]
+FILE_EVENTS_HEADERS = [
+    "case_number",
+    "event_id",
+]
 
 case_file_events_generate_template = generate_template_cmd_factory(
     group_name="file_events",
-    commands_dict={
-        "add": FILE_EVENTS_HEADERS,
-        "remove": FILE_EVENTS_HEADERS,
-    },
+    commands_dict={"add": FILE_EVENTS_HEADERS, "remove": FILE_EVENTS_HEADERS},
 )
 bulk.add_command(case_file_events_generate_template)
 
@@ -299,9 +299,7 @@ def bulk_add(state, csv_rows):
         sdk.cases.file_events.add(case_number, event_id)
 
     run_bulk_process(
-        handle_row,
-        csv_rows,
-        progress_label="Associating file events to cases:",
+        handle_row, csv_rows, progress_label="Associating file events to cases:",
     )
 
 
