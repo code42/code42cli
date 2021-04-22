@@ -28,6 +28,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - New command `code42 alerts bulk update` for bulk update alerts.
 
+- A performance issue with the `code42 departing-employee bulk add` command.
+
 ### Changed
 
 - `code42 alert-rules list` now outputs via a pager when results contain more than 10 rules.

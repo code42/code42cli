@@ -66,8 +66,6 @@ def _list(state, format, filter):
 @sdk_options()
 def add(state, username, cloud_alias, departure_date, notes):
     """Add a user to the Departing Employees detection list."""
-    if departure_date:
-        departure_date = departure_date.strftime(DATE_FORMAT)
     _add_departing_employee(state.sdk, username, cloud_alias, departure_date, notes)
 
 
@@ -102,8 +100,9 @@ bulk.add_command(departing_employee_generate_template)
 )
 @read_csv_arg(headers=DEPARTING_EMPLOYEE_CSV_HEADERS)
 @sdk_options()
-@click.pass_context
-def bulk_add(ctx, state, csv_rows):
+def bulk_add(state, csv_rows):
+    sdk = state.sdk  # Force initialization of py42 to only happen once.
+
     def handle_row(username, cloud_alias, departure_date, notes):
         if departure_date:
             try:
@@ -111,17 +110,11 @@ def bulk_add(ctx, state, csv_rows):
                     departure_date, None, None
                 )
             except click.exceptions.BadParameter:
-                message = "Invalid date {}, valid date format {}".format(
-                    departure_date, DATE_FORMAT
+                message = (
+                    f"Invalid date {departure_date}, valid date format {DATE_FORMAT}."
                 )
                 raise Code42CLIError(message)
-        ctx.invoke(
-            add,
-            username=username,
-            cloud_alias=cloud_alias,
-            departure_date=departure_date,
-            notes=notes,
-        )
+        _add_departing_employee(sdk, username, cloud_alias, departure_date, notes)
 
     run_bulk_process(
         handle_row,
@@ -155,6 +148,8 @@ def _get_departing_employees(sdk, filter):
 
 
 def _add_departing_employee(sdk, username, cloud_alias, departure_date, notes):
+    if departure_date:
+        departure_date = departure_date.strftime(DATE_FORMAT)
     user_id = get_user_id(sdk, username)
     sdk.detectionlists.departing_employee.add(user_id, departure_date)
     update_user(sdk, username, cloud_alias=cloud_alias, notes=notes)
