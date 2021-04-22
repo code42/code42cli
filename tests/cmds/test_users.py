@@ -9,7 +9,7 @@ from code42cli.cmds.users import _get_role_id
 from code42cli.cmds.users import _get_users_dataframe
 from code42cli.main import cli
 
-TEST_ROLE_RETURN_DATA = {"data": [{"roleName": "Customer Cloud Admin", "roleId": "12"}]}
+TEST_ROLE_RETURN_DATA = {"data": [{"roleName": "Customer Cloud Admin", "roleId": "1234543"}]}
 
 TEST_USERS_RESPONSE = {
     "users": [
@@ -62,18 +62,16 @@ def test_list_outputs_appropriate_columns(runner, cli_state, get_all_users_succe
     assert "modificationDate" in result.output
 
 
-def test_get_role_id_returns_appropriate_role_id(
-    cli_state, get_available_roles_success
+def test_list_users_calls_users_get_all_with_expected_role_id(
+    runner, cli_state, get_available_roles_success, get_all_users_success
 ):
-    result = _get_role_id(cli_state.sdk, "Customer Cloud Admin")
-    assert result == "12"
-
-
-def test_get_users_dataframe_returns_dataframe(cli_state, get_all_users_success):
-    result = _get_users_dataframe(
-        cli_state.sdk, org_uid=None, role_id=None, active=None
+    ROLE_NAME = "Customer Cloud Admin"
+    runner.invoke(
+        cli, ["users", "list", "--role-name", ROLE_NAME], obj=cli_state
     )
-    assert isinstance(result, DataFrame)
+    cli_state.sdk.users.get_all.assert_called_once_with(
+        active=None, org_uid=None, role_id="1234543"
+    )
 
 
 def test_list_users_calls_get_all_users_with_correct_parameters(
@@ -85,4 +83,34 @@ def test_list_users_calls_get_all_users_with_correct_parameters(
     )
     cli_state.sdk.users.get_all.assert_called_once_with(
         active=True, org_uid=org_uid, role_id=None
+    )
+
+
+def test_list_users_when_given_inactive_uses_active_equals_false(
+    runner, cli_state, get_available_roles_success, get_all_users_success
+):
+    runner.invoke(
+        cli, ["users", "list", "--inactive"], obj=cli_state
+    )
+    cli_state.sdk.users.get_all.assert_called_once_with(
+        active=False, org_uid=None, role_id=None
+    )
+
+def test_list_users_when_given_active_and_inactive_raises_error(
+    runner, cli_state, get_available_roles_success, get_all_users_success
+):
+    result = runner.invoke(
+        cli, ["users", "list", "--active", "--inactive"], obj=cli_state
+    )
+    assert "Error: --inactive can't be used with: --active" in result.output
+
+
+def test_list_users_when_given_excluding_active_and_inactive_uses_active_equals_none(
+    runner, cli_state, get_available_roles_success, get_all_users_success
+):
+    runner.invoke(
+        cli, ["users", "list"], obj=cli_state
+    )
+    cli_state.sdk.users.get_all.assert_called_once_with(
+        active=None, org_uid=None, role_id=None
     )
