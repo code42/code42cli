@@ -20,6 +20,7 @@ from code42cli.cmds.high_risk_employee import high_risk_employee
 from code42cli.cmds.legal_hold import legal_hold
 from code42cli.cmds.profile import profile
 from code42cli.cmds.securitydata import security_data
+from code42cli.cmds.users import users
 from code42cli.options import sdk_options
 
 BANNER = """\b
@@ -80,5 +81,6 @@ cli.add_command(high_risk_employee)
 cli.add_command(legal_hold)
 cli.add_command(profile)
 cli.add_command(devices)
+cli.add_command(users)
 cli.add_command(audit_logs)
 cli.add_command(cases)

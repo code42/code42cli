@@ -10,6 +10,13 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## 1.4.2 - 2021-04-22
 
+### Added
+
+- New command `code42 users list` with options:
+    - `--org-uid` filters on org membership.
+    - `--role-name` filters on users having a particular role.
+    - `--active` and `--inactive` filter on user status.
+
 ### Fixed
 
 - Bug where some CSV outputs on Windows would have an extra newline between the rows.
