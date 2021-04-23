@@ -59,8 +59,12 @@ def test_list_when_non_table_format_outputs_expected_columns(
     assert "userUid" in result.output
     assert "status" in result.output
     assert "username" in result.output
+    assert "firstName" in result.output
+    assert "lastName" in result.output
     assert "creationDate" in result.output
     assert "modificationDate" in result.output
+    assert "invited" in result.output
+    assert "quotaInBytes" in result.output
 
 
 def test_list_when_table_format_outputs_expected_columns(
@@ -71,6 +75,12 @@ def test_list_when_table_format_outputs_expected_columns(
     assert "status" in result.output
     assert "username" in result.output
     assert "orgUid" in result.output
+
+    assert "firstName" not in result.output
+    assert "creationDate" not in result.output
+    assert "modificationDate" not in result.output
+    assert "invited" not in result.output
+    assert "quotaInBytes" not in result.output
 
 
 def test_list_users_calls_users_get_all_with_expected_role_id(
