@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## Unreleased
+
+### Added
+
+- `code42 cases file-events bulk` with sub-commands:
+    - `generate-template`: that creates the file template. And parameters:
+        - `cmd`: with options `add` and `remove`.
+        - `path`
+    - `add`: that takes a csv file with case number and event ID.
+    - `remove`: that takes a csv file with case number and event ID.
+
 ## 1.4.2 - 2021-04-22
 
 ### Added
