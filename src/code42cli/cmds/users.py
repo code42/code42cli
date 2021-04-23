@@ -6,7 +6,8 @@ from code42cli.click_ext.options import incompatible_with
 from code42cli.errors import Code42CLIError
 from code42cli.options import format_option
 from code42cli.options import sdk_options
-from code42cli.output_formats import DataFrameOutputFormatter, OutputFormat
+from code42cli.output_formats import DataFrameOutputFormatter
+from code42cli.output_formats import OutputFormat
 
 
 @click.group(cls=OrderedGroup)
@@ -46,12 +47,11 @@ def list_users(state, org_uid, role_name, active, inactive, format):
     if inactive:
         active = False
     role_id = _get_role_id(state.sdk, role_name) if role_name else None
-    columns = [
-        "userUid",
-        "status",
-        "username",
-        "orgUid"
-    ] if format == OutputFormat.TABLE else None
+    columns = (
+        ["userUid", "status", "username", "orgUid"]
+        if format == OutputFormat.TABLE
+        else None
+    )
     df = _get_users_dataframe(state.sdk, columns, org_uid, role_id, active)
     if df.empty:
         click.echo("No results found.")

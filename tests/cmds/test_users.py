@@ -51,14 +51,26 @@ def get_available_roles_success(cli_state, get_available_roles_response):
     cli_state.sdk.users.get_available_roles.return_value = get_available_roles_response
 
 
-def test_list_outputs_appropriate_columns(runner, cli_state, get_all_users_success):
-    result = runner.invoke(cli, ["users", "list"], obj=cli_state)
+def test_list_when_non_table_format_outputs_expected_columns(
+    runner, cli_state, get_all_users_success
+):
+    result = runner.invoke(cli, ["users", "list", "-f", "CSV"], obj=cli_state)
     assert "userId" in result.output
     assert "userUid" in result.output
     assert "status" in result.output
     assert "username" in result.output
     assert "creationDate" in result.output
     assert "modificationDate" in result.output
+
+
+def test_list_when_table_format_outputs_expected_columns(
+    runner, cli_state, get_all_users_success
+):
+    result = runner.invoke(cli, ["users", "list", "-f", "TABLE"], obj=cli_state)
+    assert "userUid" in result.output
+    assert "status" in result.output
+    assert "username" in result.output
+    assert "orgUid" in result.output
 
 
 def test_list_users_calls_users_get_all_with_expected_role_id(
