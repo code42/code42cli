@@ -6,7 +6,7 @@ from code42cli.click_ext.options import incompatible_with
 from code42cli.errors import Code42CLIError
 from code42cli.options import format_option
 from code42cli.options import sdk_options
-from code42cli.output_formats import DataFrameOutputFormatter
+from code42cli.output_formats import DataFrameOutputFormatter, OutputFormat
 
 
 @click.group(cls=OrderedGroup)
@@ -46,7 +46,13 @@ def list_users(state, org_uid, role_name, active, inactive, format):
     if inactive:
         active = False
     role_id = _get_role_id(state.sdk, role_name) if role_name else None
-    df = _get_users_dataframe(state.sdk, org_uid, role_id, active)
+    columns = [
+        "userUid",
+        "status",
+        "username",
+        "orgUid"
+    ] if format == OutputFormat.TABLE else None
+    df = _get_users_dataframe(state.sdk, columns, org_uid, role_id, active)
     if df.empty:
         click.echo("No results found.")
     else:
@@ -65,9 +71,10 @@ def _get_role_id(sdk, role_name):
         raise Code42CLIError(f"Role with name {role_name} not found.")
 
 
-def _get_users_dataframe(sdk, org_uid, role_id, active):
+def _get_users_dataframe(sdk, columns, org_uid, role_id, active):
     users_generator = sdk.users.get_all(active=active, org_uid=org_uid, role_id=role_id)
     users_list = []
     for page in users_generator:
         users_list.extend(page["users"])
-    return DataFrame.from_records(users_list)
+
+    return DataFrame.from_records(users_list, columns=columns)

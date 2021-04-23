@@ -6,10 +6,10 @@ from requests import Response
 
 from code42cli.main import cli
 
+
 TEST_ROLE_RETURN_DATA = {
     "data": [{"roleName": "Customer Cloud Admin", "roleId": "1234543"}]
 }
-
 TEST_USERS_RESPONSE = {
     "users": [
         {
