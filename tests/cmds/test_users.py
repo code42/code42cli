@@ -6,19 +6,29 @@ from requests import Response
 
 from code42cli.main import cli
 
+
 TEST_ROLE_RETURN_DATA = {
     "data": [{"roleName": "Customer Cloud Admin", "roleId": "1234543"}]
 }
-
 TEST_USERS_RESPONSE = {
     "users": [
         {
-            "userId": 1234,
-            "userUid": "997962681513153325",
+            "firstName": "test",
+            "lastName": "username",
+            "orgId": 4321,
+            "orgUid": "44444444",
+            "orgName": "ORG_NAME",
             "status": "Active",
-            "username": "test_username@code42.com",
+            "notes": "This is a note.",
+            "active": True,
+            "blocked": False,
             "creationDate": "2021-03-12T20:07:40.898Z",
             "modificationDate": "2021-03-12T20:07:40.938Z",
+            "userId": 1234,
+            "username": "test.username@example.com",
+            "userUid": "911162111513111325",
+            "invited": False,
+            "quotaInBytes": 55555,
         }
     ]
 }
@@ -51,14 +61,49 @@ def get_available_roles_success(cli_state, get_available_roles_response):
     cli_state.sdk.users.get_available_roles.return_value = get_available_roles_response
 
 
-def test_list_outputs_appropriate_columns(runner, cli_state, get_all_users_success):
-    result = runner.invoke(cli, ["users", "list"], obj=cli_state)
-    assert "userId" in result.output
-    assert "userUid" in result.output
+def test_list_when_non_table_format_outputs_expected_columns(
+    runner, cli_state, get_all_users_success
+):
+    result = runner.invoke(cli, ["users", "list", "-f", "CSV"], obj=cli_state)
+    assert "firstName" in result.output
+    assert "lastName" in result.output
+    assert "orgId" in result.output
+    assert "orgUid" in result.output
+    assert "orgName" in result.output
     assert "status" in result.output
-    assert "username" in result.output
+    assert "notes" in result.output
+    assert "active" in result.output
+    assert "blocked" in result.output
     assert "creationDate" in result.output
     assert "modificationDate" in result.output
+    assert "userId" in result.output
+    assert "username" in result.output
+    assert "userUid" in result.output
+    assert "invited" in result.output
+    assert "quotaInBytes" in result.output
+
+
+def test_list_when_table_format_outputs_expected_columns(
+    runner, cli_state, get_all_users_success
+):
+    result = runner.invoke(cli, ["users", "list", "-f", "TABLE"], obj=cli_state)
+    assert "orgUid" in result.output
+    assert "status" in result.output
+    assert "username" in result.output
+    assert "userUid" in result.output
+
+    assert "firstName" not in result.output
+    assert "lastName" not in result.output
+    assert "orgId" not in result.output
+    assert "orgName" not in result.output
+    assert "notes" not in result.output
+    assert "active" not in result.output
+    assert "blocked" not in result.output
+    assert "creationDate" not in result.output
+    assert "modificationDate" not in result.output
+    assert "userId" not in result.output
+    assert "invited" not in result.output
+    assert "quotaInBytes" not in result.output
 
 
 def test_list_users_calls_users_get_all_with_expected_role_id(
