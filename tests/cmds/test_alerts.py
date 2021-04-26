@@ -1061,3 +1061,21 @@ def test_update_when_given_note_and_not_state_calls_py42_update_note(cli_state, 
     cli_state.sdk.alerts.update_note.assert_called_once_with(
         "TEST-ALERT-ID", "test-note"
     )
+
+
+def test_bulk_update_uses_expected_arguments(runner, mocker, cli_state_with_user):
+    bulk_processor = mocker.patch("code42cli.cmds.alerts.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_update.csv", "w") as csv:
+            csv.writelines(
+                ["id,state,note\n", "1,PENDING,note1\n", "2,IN_PROGRESS,note2\n"]
+            )
+        runner.invoke(
+            cli,
+            ["alerts", "bulk", "update", "test_update.csv"],
+            obj=cli_state_with_user,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"id": "1", "state": "PENDING", "note": "note1"},
+        {"id": "2", "state": "IN_PROGRESS", "note": "note2"},
+    ]
