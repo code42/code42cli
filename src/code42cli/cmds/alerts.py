@@ -328,11 +328,7 @@ def show(state, alert_id):
 @note_option
 def update(cli_state, alert_id, state, note):
     """Update alert information."""
-    _update_alert(state.sdk, alert_id, state, note)
-    if state:
-        cli_state.sdk.alerts.update_state(state, [alert_id], note=note)
-    elif note:
-        cli_state.sdk.alerts.update_note(alert_id, note)
+    _update_alert(cli_state.sdk, alert_id, state, note)
 
 
 @alerts.group(cls=OrderedGroup)

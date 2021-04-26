@@ -4,9 +4,10 @@ import logging
 import py42.sdk.queries.alerts.filters as f
 import pytest
 from c42eventextractor.extractors import AlertExtractor
+from py42.exceptions import Py42NotFoundError
 from py42.response import Py42Response
+from py42.sdk.queries.alerts.filters import AlertState
 from requests import Response
-
 from tests.cmds.conftest import filter_term_is_in_call_args
 from tests.cmds.conftest import get_filter_value_from_json
 from tests.cmds.conftest import get_mark_for_search_and_send_to
@@ -224,7 +225,7 @@ ALERT_DETAILS_FULL_RESPONSE = {
             "id": "TEST-ALERT-ID-123",
             "createdAt": "2021-04-23T21:18:59.2032940Z",
             "state": "PENDING",
-            "stateLastModifiedBy":"test@example.com",
+            "stateLastModifiedBy": "test@example.com",
             "stateLastModifiedAt": "2021-04-26T12:37:30.4605390Z",
             "observations": [
                 {
@@ -247,7 +248,7 @@ ALERT_DETAILS_FULL_RESPONSE = {
                                 "category": "Image",
                                 "fileCount": 1,
                                 "totalFileSize": 8326,
-                                "isSignificant": False
+                                "isSignificant": False,
                             }
                         ],
                         "files": [
@@ -256,30 +257,32 @@ ALERT_DETAILS_FULL_RESPONSE = {
                                 "eventId": "0_c4e43418-07d9-4a9f-a138-29f39a124d33_1002847122023325984_4b6d298c-8660-4cb8-b6d1-61d09a5c69ba_0",
                                 "path": "C:\\Users\\Test Testerson\\Downloads",
                                 "name": "mad cat - Copy.jpg",
-                                "category": "Image", 
-                                "size": 8326
-                             }
+                                "category": "Image",
+                                "size": 8326,
+                            }
                         ],
                         "syncToServices": [],
                         "sendingIpAddresses": ["174.20.92.47"],
                         "appReadDetails": [
                             {
                                 "type$": "APP_READ_DETAILS",
-                                "tabTitles": ["file.example.com - Super simple file sharing - Google Chrome"],
+                                "tabTitles": [
+                                    "file.example.com - Super simple file sharing - Google Chrome"
+                                ],
                                 "tabUrl": "https://www.file.example.com/",
                                 "tabInfos": [
                                     {
                                         "type$": "TAB_INFO",
                                         "tabUrl": "https://www.file.example.com/",
-                                        "tabTitle": "example - Super simple file sharing - Google Chrome"
+                                        "tabTitle": "example - Super simple file sharing - Google Chrome",
                                     }
                                 ],
                                 "destinationCategory": "Uncategorized",
                                 "destinationName": "Uncategorized",
-                                "processName": "\\Device\\HarddiskVolume3\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+                                "processName": "\\Device\\HarddiskVolume3\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
                             }
-                        ]
-                    }
+                        ],
+                    },
                 }
             ],
             "note": {
@@ -287,10 +290,10 @@ ALERT_DETAILS_FULL_RESPONSE = {
                 "id": "72f8cd62-5cb8-4896-947d-f07e17053eaf",
                 "lastModifiedAt": "2021-04-26T12:37:30.4987600Z",
                 "lastModifiedBy": "test@example.com",
-                "message": "TEST-NOTE-CLI-UNIT-TESTS"
-            }
+                "message": "TEST-NOTE-CLI-UNIT-TESTS",
+            },
         }
-    ]
+    ],
 }
 search_and_send_to_test = get_mark_for_search_and_send_to("alerts")
 
@@ -963,9 +966,7 @@ def test_get_alert_details_sorts_results_by_date(sdk):
 
 def test_show_outputs_expected_headers(cli_state, runner, full_alert_details_response):
     cli_state.sdk.alerts.get_details.return_value = full_alert_details_response
-    result = runner.invoke(
-        cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state,
-    )
+    result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state,)
     assert "Id" in result.output
     assert "RuleName" in result.output
     assert "Username" in result.output
@@ -977,9 +978,7 @@ def test_show_outputs_expected_headers(cli_state, runner, full_alert_details_res
 
 def test_show_outputs_expected_values(cli_state, runner, full_alert_details_response):
     cli_state.sdk.alerts.get_details.return_value = full_alert_details_response
-    result = runner.invoke(
-        cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state,
-    )
+    result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state,)
     # Values found in ALERT_DETAILS_FULL_RESPONSE.
     assert "TEST-ALERT-ID-123" in result.output
     assert "Some Burp Suite Test Rule" in result.output
@@ -990,24 +989,75 @@ def test_show_outputs_expected_values(cli_state, runner, full_alert_details_resp
     assert "Some Burp Rule" in result.output
 
 
-def test_show_when_alert_has_note_includes_note(cli_state, runner, full_alert_details_response):
+def test_show_when_alert_has_note_includes_note(
+    cli_state, runner, full_alert_details_response
+):
     cli_state.sdk.alerts.get_details.return_value = full_alert_details_response
-    result = runner.invoke(
-        cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state,
-    )
+    result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state,)
     # Note is included in `full_alert_details_response` initially.
     assert "Note" in result.output
     assert "TEST-NOTE-CLI-UNIT-TESTS" in result.output
 
 
-def test_show_when_alert_has_no_note_excludes_note(mocker, cli_state, runner, full_alert_details_response):
+def test_show_when_alert_has_no_note_excludes_note(
+    mocker, cli_state, runner, full_alert_details_response
+):
     response = mocker.MagicMock(spec=Response)
     sans_note_text = dict(ALERT_DETAILS_FULL_RESPONSE)
     sans_note_text["alerts"][0]["note"] = None
     response.text = json.dumps(sans_note_text)
     cli_state.sdk.alerts.get_details.return_value = Py42Response(response)
-    result = runner.invoke(
-        cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state,
-    )
+    result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state,)
     # Note is included in `full_alert_details_response` initially.
     assert "Note" not in result.output
+
+
+def test_show_when_alert_not_found_output_expected_error_message(
+    cli_state, runner, custom_error
+):
+    cli_state.sdk.alerts.get_details.side_effect = Py42NotFoundError(custom_error)
+    result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state,)
+    assert "No alert found with ID 'TEST-ALERT-ID'." in result.output
+
+
+def test_update_when_given_state_calls_py42_update_state(cli_state, runner):
+    runner.invoke(
+        cli,
+        ["alerts", "update", "TEST-ALERT-ID", "--state", AlertState.PENDING],
+        obj=cli_state,
+    )
+    cli_state.sdk.alerts.update_state.assert_called_once_with(
+        AlertState.PENDING, ["TEST-ALERT-ID"], note=None
+    )
+
+
+def test_update_when_given_state_and_note_calls_py42_update_state_and_includes_note(
+    cli_state, runner
+):
+    runner.invoke(
+        cli,
+        [
+            "alerts",
+            "update",
+            "TEST-ALERT-ID",
+            "--state",
+            AlertState.PENDING,
+            "--note",
+            "test-note",
+        ],
+        obj=cli_state,
+    )
+    cli_state.sdk.alerts.update_state.assert_called_once_with(
+        AlertState.PENDING, ["TEST-ALERT-ID"], note="test-note"
+    )
+
+
+def test_update_when_given_note_and_not_state_calls_py42_update_note(cli_state, runner):
+    runner.invoke(
+        cli,
+        ["alerts", "update", "TEST-ALERT-ID", "--note", "test-note"],
+        obj=cli_state,
+    )
+    cli_state.sdk.alerts.update_note.assert_called_once_with(
+        "TEST-ALERT-ID", "test-note"
+    )
