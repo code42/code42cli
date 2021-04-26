@@ -8,6 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## Unreleased
+
+### Added
+
+- New command `code42 alerts show` that displays information about a single alert.
+
+- New command `code42 alerts update` that can update an alert's state or note.
+
+- New command `code42 alerts bulk generate-tempate` for generating CSV templates for bulk
+  commands.
+
+- New command `code42 alerts bulk update` for bulk updating alerts.
+
+### Changed
+
+- `code42 alerts search` now includes `alert_id` in its table output.
+
 ## 1.4.2 - 2021-04-22
 
 ### Added
@@ -23,18 +40,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Issue where outputting or sending an alert or file-event with a timestamp without
   decimals would error.
-
-### Added
-
-- New command `code42 alerts show` that display information about a single alert.
-
-- New command `code42 alerts update` that can update an alert's state or note.
-
-- New command `code42 alerts bulk generate-tempate` for generating CSV templates for bulk
-  commands.
-
-- New command `code42 alerts bulk update` for bulk update alerts.
-
+  
 - A performance issue with the `code42 departing-employee bulk add` command.
 
 ### Changed
@@ -42,8 +48,6 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - `code42 alert-rules list` now outputs via a pager when results contain more than 10 rules.
 
 - `code42 cases list` now outputs via a pager when results contain more than 10 cases.
-
-- `code42 alerts search` now includes `alert_id` in its table output.
 
 ## 1.4.1 - 2021-04-15
 
