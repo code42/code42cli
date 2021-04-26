@@ -23,7 +23,10 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Changed
 
-- `code42 alerts search` now includes `alert_id` in its table output.
+- `code42 alerts search` now includes the alert ID in its table output.
+
+- `code42 alerts search` table output now refers to the alert state as `state` instead of 
+    `status`.
 
 ## 1.4.2 - 2021-04-22
 
