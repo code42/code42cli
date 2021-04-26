@@ -4,6 +4,9 @@ import logging
 import py42.sdk.queries.alerts.filters as f
 import pytest
 from c42eventextractor.extractors import AlertExtractor
+from py42.response import Py42Response
+from requests import Response
+
 from tests.cmds.conftest import filter_term_is_in_call_args
 from tests.cmds.conftest import get_filter_value_from_json
 from tests.cmds.conftest import get_mark_for_search_and_send_to
@@ -203,6 +206,92 @@ advanced_query_incompat_test_params = pytest.mark.parametrize(
         ("--state", "OPEN"),
     ],
 )
+ALERT_DETAILS_FULL_RESPONSE = {
+    "type$": "ALERT_DETAILS_RESPONSE",
+    "alerts": [
+        {
+            "type$": "ALERT_DETAILS",
+            "tenantId": "11111111-2222-3333-4444-55559a126666",
+            "type": "FED_ENDPOINT_EXFILTRATION",
+            "name": "Some Burp Suite Test Rule",
+            "description": "Some Burp Rule",
+            "actor": "neilwin0415@code42.com",
+            "actorId": "1002844444570300000",
+            "target": "N/A",
+            "severity": "HIGH",
+            "ruleId": "e9bfa082-4541-4432-aacd-d8b2ca074762",
+            "ruleSource": "Alerting",
+            "id": "TEST-ALERT-ID-123",
+            "createdAt": "2021-04-23T21:18:59.2032940Z",
+            "state": "PENDING",
+            "stateLastModifiedBy":"test@example.com",
+            "stateLastModifiedAt": "2021-04-26T12:37:30.4605390Z",
+            "observations": [
+                {
+                    "type$": "OBSERVATION",
+                    "id": "f561e556-a746-4db0-b99b-71546adf57c4",
+                    "observedAt": "2021-04-23T21:10:00.0000000Z",
+                    "type": "FedEndpointExfiltration",
+                    "data": {
+                        "type$": "OBSERVED_ENDPOINT_ACTIVITY",
+                        "id": "f561e556-a746-4db0-b99b-71546adf57c4",
+                        "sources": ["Endpoint"],
+                        "exposureTypes": ["ApplicationRead"],
+                        "firstActivityAt": "2021-04-23T21:10:00.0000000Z",
+                        "lastActivityAt": "2021-04-23T21:15:00.0000000Z",
+                        "fileCount": 1,
+                        "totalFileSize": 8326,
+                        "fileCategories": [
+                            {
+                                "type$": "OBSERVED_FILE_CATEGORY",
+                                "category": "Image",
+                                "fileCount": 1,
+                                "totalFileSize": 8326,
+                                "isSignificant": False
+                            }
+                        ],
+                        "files": [
+                            {
+                                "type$": "OBSERVED_FILE",
+                                "eventId": "0_c4e43418-07d9-4a9f-a138-29f39a124d33_1002847122023325984_4b6d298c-8660-4cb8-b6d1-61d09a5c69ba_0",
+                                "path": "C:\\Users\\Test Testerson\\Downloads",
+                                "name": "mad cat - Copy.jpg",
+                                "category": "Image", 
+                                "size": 8326
+                             }
+                        ],
+                        "syncToServices": [],
+                        "sendingIpAddresses": ["174.20.92.47"],
+                        "appReadDetails": [
+                            {
+                                "type$": "APP_READ_DETAILS",
+                                "tabTitles": ["file.example.com - Super simple file sharing - Google Chrome"],
+                                "tabUrl": "https://www.file.example.com/",
+                                "tabInfos": [
+                                    {
+                                        "type$": "TAB_INFO",
+                                        "tabUrl": "https://www.file.example.com/",
+                                        "tabTitle": "example - Super simple file sharing - Google Chrome"
+                                    }
+                                ],
+                                "destinationCategory": "Uncategorized",
+                                "destinationName": "Uncategorized",
+                                "processName": "\\Device\\HarddiskVolume3\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "note": {
+                "type$": "NOTE",
+                "id": "72f8cd62-5cb8-4896-947d-f07e17053eaf",
+                "lastModifiedAt": "2021-04-26T12:37:30.4987600Z",
+                "lastModifiedBy": "test@example.com",
+                "message": "TEST-NOTE-CLI-UNIT-TESTS"
+            }
+        }
+    ]
+}
 search_and_send_to_test = get_mark_for_search_and_send_to("alerts")
 
 
@@ -250,6 +339,13 @@ def alert_extract_func(mocker):
 @pytest.fixture
 def send_to_logger_factory(mocker):
     return mocker.patch("code42cli.cmds.search._try_get_logger_for_server")
+
+
+@pytest.fixture
+def full_alert_details_response(mocker):
+    response = mocker.MagicMock(spec=Response)
+    response.text = json.dumps(ALERT_DETAILS_FULL_RESPONSE)
+    return Py42Response(response)
 
 
 @search_and_send_to_test
@@ -496,7 +592,6 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_without_check
 def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_calls_extract_with_checkpoint_and_ignores_begin_arg(
     cli_state, alert_extractor, alert_cursor_with_checkpoint, runner, command
 ):
-
     result = runner.invoke(
         cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
     )
@@ -864,3 +959,55 @@ def test_get_alert_details_sorts_results_by_date(sdk):
     sdk.alerts.get_details.side_effect = ALERT_DETAIL_RESULT
     results = extraction._get_alert_details(sdk, ALERT_SUMMARY_LIST)
     assert results == SORTED_ALERT_DETAILS
+
+
+def test_show_outputs_expected_headers(cli_state, runner, full_alert_details_response):
+    cli_state.sdk.alerts.get_details.return_value = full_alert_details_response
+    result = runner.invoke(
+        cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state,
+    )
+    assert "Id" in result.output
+    assert "RuleName" in result.output
+    assert "Username" in result.output
+    assert "ObservedDate" in result.output
+    assert "State" in result.output
+    assert "Severity" in result.output
+    assert "Description" in result.output
+
+
+def test_show_outputs_expected_values(cli_state, runner, full_alert_details_response):
+    cli_state.sdk.alerts.get_details.return_value = full_alert_details_response
+    result = runner.invoke(
+        cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state,
+    )
+    # Values found in ALERT_DETAILS_FULL_RESPONSE.
+    assert "TEST-ALERT-ID-123" in result.output
+    assert "Some Burp Suite Test Rule" in result.output
+    assert "neilwin0415@code42.com" in result.output
+    assert "2021-04-23T21:18:59.2032940Z" in result.output
+    assert "PENDING" in result.output
+    assert "HIGH" in result.output
+    assert "Some Burp Rule" in result.output
+
+
+def test_show_when_alert_has_note_includes_note(cli_state, runner, full_alert_details_response):
+    cli_state.sdk.alerts.get_details.return_value = full_alert_details_response
+    result = runner.invoke(
+        cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state,
+    )
+    # Note is included in `full_alert_details_response` initially.
+    assert "Note" in result.output
+    assert "TEST-NOTE-CLI-UNIT-TESTS" in result.output
+
+
+def test_show_when_alert_has_no_note_excludes_note(mocker, cli_state, runner, full_alert_details_response):
+    response = mocker.MagicMock(spec=Response)
+    sans_note_text = dict(ALERT_DETAILS_FULL_RESPONSE)
+    sans_note_text["alerts"][0]["note"] = None
+    response.text = json.dumps(sans_note_text)
+    cli_state.sdk.alerts.get_details.return_value = Py42Response(response)
+    result = runner.invoke(
+        cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state,
+    )
+    # Note is included in `full_alert_details_response` initially.
+    assert "Note" not in result.output

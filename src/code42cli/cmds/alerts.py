@@ -158,7 +158,6 @@ def _get_default_output_header():
         "state": "State",
         "severity": "Severity",
         "description": "Description",
-        "note": "Note",
     }
 
 
@@ -329,6 +328,7 @@ def show(state, alert_id):
 @note_option
 def update(cli_state, alert_id, state, note):
     """Update alert information."""
+    _update_alert(state.sdk, alert_id, state, note)
     if state:
         cli_state.sdk.alerts.update_state(state, [alert_id], note=note)
     elif note:
@@ -351,16 +351,26 @@ update_alerts_generate_template = generate_template_cmd_factory(
 bulk.add_command(update_alerts_generate_template)
 
 
-@bulk.command(name="update")
+@bulk.command(
+    name="update",
+    help=f"Bulk update alerts using a CSV file with format: {','.join(UPDATE_ALERT_CSV_HEADERS)}",
+)
 @opt.sdk_options()
 @read_csv_arg(headers=UPDATE_ALERT_CSV_HEADERS)
-@click.pass_context
-def bulk_update(ctx, cli_state, csv_rows):
+def bulk_update(cli_state, csv_rows):
     """Bulk update alerts."""
+    sdk = cli_state.sdk
 
     def handle_row(id, state, note):
-        ctx.invoke(update, alert_id=id, state=state, note=note)
+        _update_alert(sdk, id, state, note)
 
     run_bulk_process(
         handle_row, csv_rows, progress_label="Updating alerts:",
     )
+
+
+def _update_alert(sdk, alert_id, alert_state, note):
+    if alert_state:
+        sdk.alerts.update_state(alert_state, [alert_id], note=note)
+    elif note:
+        sdk.alerts.update_note(alert_id, note)
