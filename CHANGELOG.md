@@ -8,7 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-## Unreleased
+## 1.4.2 - 2021-04-22
+
+### Added
+
+- New command `code42 users list` with options:
+    - `--org-uid` filters on org membership.
+    - `--role-name` filters on users having a particular role.
+    - `--active` and `--inactive` filter on user status.
 
 ### Fixed
 
