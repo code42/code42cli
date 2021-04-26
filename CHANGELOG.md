@@ -25,7 +25,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - `code42 alerts search` now includes the alert ID in its table output.
 
-- `code42 alerts search` table output now refers to the alert state as `state` instead of 
+- `code42 alerts search` table output now refers to the alert state as `state` instead of
     `status`.
 
 ## 1.4.2 - 2021-04-22
@@ -43,7 +43,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Issue where outputting or sending an alert or file-event with a timestamp without
   decimals would error.
-  
+
 - A performance issue with the `code42 departing-employee bulk add` command.
 
 ### Changed
