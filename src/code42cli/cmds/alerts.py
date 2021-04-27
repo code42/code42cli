@@ -302,7 +302,10 @@ def _get_alert_cursor_store(profile_name):
 @alerts.command()
 @opt.sdk_options()
 @alert_id_arg
-def show(state, alert_id):
+@click.option(
+    "--include-observations", is_flag=True, help="View observations of the alert."
+)
+def show(state, alert_id, include_observations):
     """Display the details of a single alert."""
     formatter = OutputFormatter(OutputFormat.TABLE, _get_default_output_header())
 
@@ -319,6 +322,14 @@ def show(state, alert_id):
     if note:
         click.echo("\nNote:\n")
         click.echo(format_dict(note))
+
+    if include_observations:
+        observations = alert.get("observations")
+        if observations:
+            click.echo("\nObservations:\n")
+            click.echo(format_dict(observations))
+        else:
+            click.echo("\nNo observations found.")
 
 
 @alerts.command()

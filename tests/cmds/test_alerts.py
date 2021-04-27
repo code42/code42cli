@@ -966,7 +966,7 @@ def test_get_alert_details_sorts_results_by_date(sdk):
 
 def test_show_outputs_expected_headers(cli_state, runner, full_alert_details_response):
     cli_state.sdk.alerts.get_details.return_value = full_alert_details_response
-    result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state,)
+    result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state)
     assert "Id" in result.output
     assert "RuleName" in result.output
     assert "Username" in result.output
@@ -978,7 +978,7 @@ def test_show_outputs_expected_headers(cli_state, runner, full_alert_details_res
 
 def test_show_outputs_expected_values(cli_state, runner, full_alert_details_response):
     cli_state.sdk.alerts.get_details.return_value = full_alert_details_response
-    result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state,)
+    result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state)
     # Values found in ALERT_DETAILS_FULL_RESPONSE.
     assert "TEST-ALERT-ID-123" in result.output
     assert "Some Burp Suite Test Rule" in result.output
@@ -993,7 +993,7 @@ def test_show_when_alert_has_note_includes_note(
     cli_state, runner, full_alert_details_response
 ):
     cli_state.sdk.alerts.get_details.return_value = full_alert_details_response
-    result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state,)
+    result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state)
     # Note is included in `full_alert_details_response` initially.
     assert "Note" in result.output
     assert "TEST-NOTE-CLI-UNIT-TESTS" in result.output
@@ -1007,7 +1007,7 @@ def test_show_when_alert_has_no_note_excludes_note(
     sans_note_text["alerts"][0]["note"] = None
     response.text = json.dumps(sans_note_text)
     cli_state.sdk.alerts.get_details.return_value = Py42Response(response)
-    result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state,)
+    result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state)
     # Note is included in `full_alert_details_response` initially.
     assert "Note" not in result.output
 
@@ -1016,8 +1016,51 @@ def test_show_when_alert_not_found_output_expected_error_message(
     cli_state, runner, custom_error
 ):
     cli_state.sdk.alerts.get_details.side_effect = Py42NotFoundError(custom_error)
-    result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state,)
+    cli_state.sdk.alerts.get_details.side_effect = Py42NotFoundError(custom_error)
+    result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state)
     assert "No alert found with ID 'TEST-ALERT-ID'." in result.output
+
+
+def test_show_when_alert_has_observations_and_includes_observations_outputs_observations(
+    cli_state, runner, full_alert_details_response
+):
+    cli_state.sdk.alerts.get_details.return_value = full_alert_details_response
+    result = runner.invoke(
+        cli,
+        ["alerts", "show", "TEST-ALERT-ID", "--include-observations"],
+        obj=cli_state,
+    )
+    assert "Observations:" in result.output
+    assert "OBSERVATION" in result.output
+    assert "f561e556-a746-4db0-b99b-71546adf57c4" in result.output
+    assert "observedAt" in result.output
+    assert "FedEndpointExfiltration" in result.output
+
+
+def test_show_when_alert_has_observations_and_excludes_observations_does_not_output_observations(
+    cli_state, runner, full_alert_details_response
+):
+    cli_state.sdk.alerts.get_details.return_value = full_alert_details_response
+    result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state)
+    assert "Observations:" not in result.output
+
+
+def test_show_when_alert_does_not_have_observations_and_includes_observations_outputs_no_observations(
+    mocker, cli_state, runner
+):
+    response = mocker.MagicMock(spec=Response)
+    response_text = dict(ALERT_DETAILS_FULL_RESPONSE)
+    response_text["alerts"][0]["observations"] = None
+    response.text = json.dumps(response_text)
+    cli_state.sdk.alerts.get_details.return_value = Py42Response(response)
+    result = runner.invoke(
+        cli,
+        ["alerts", "show", "TEST-ALERT-ID", "--include-observations"],
+        obj=cli_state,
+    )
+    assert "No observations found" in result.output
+    assert "Observations:" not in result.output
+    assert "FedEndpointExfiltration" not in result.output
 
 
 def test_update_when_given_state_calls_py42_update_state(cli_state, runner):
