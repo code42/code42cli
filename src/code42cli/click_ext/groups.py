@@ -13,6 +13,7 @@ from py42.exceptions import Py42LegalHoldNotFoundOrPermissionDeniedError
 from py42.exceptions import Py42UpdateClosedCaseError
 from py42.exceptions import Py42UserAlreadyAddedError
 from py42.exceptions import Py42UserNotOnListError
+from py42.exceptions import Py42MFARequiredError
 
 from code42cli.errors import Code42CLIError
 from code42cli.errors import LoggedCLIError
@@ -70,6 +71,12 @@ class ExceptionHandlingGroup(click.Group):
         ) as err:
             self.logger.log_error(err)
             raise Code42CLIError(str(err))
+
+        except Py42MFARequiredError as err:
+            self.logger.log_error(err)
+            raise Code42CLIError(
+                "User requires multi-factor authentication. Use `--totp <token>` option to provide token."
+            )
 
         except Py42ForbiddenError as err:
             self.logger.log_verbose_error(self._original_args, err.response.request)
