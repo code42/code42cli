@@ -667,6 +667,13 @@ def test_search_events_is_called_with_expected_begin_timestamp(runner, cli_state
     )
 
 
+def test_search_events_when_no_results_outputs_no_results(runner, cli_state):
+    cli_state.sdk.legalhold.get_all_matters.return_value = empty_matters_response
+    command = ["legal-hold", "search-events"]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert "No results found." in result.output
+
+
 @pytest.mark.parametrize(
     "command, error_msg",
     [
@@ -697,7 +704,7 @@ def test_search_events_is_called_with_expected_begin_timestamp(runner, cli_state
         ),
     ],
 )
-def test_alert_rules_command_when_missing_required_parameters_returns_error(
+def test_legal_hold_command_when_missing_required_parameters_returns_error(
     command, error_msg, runner, cli_state
 ):
     result = runner.invoke(cli, command.split(" "), obj=cli_state)
