@@ -1016,7 +1016,6 @@ def test_show_when_alert_not_found_output_expected_error_message(
     cli_state, runner, custom_error
 ):
     cli_state.sdk.alerts.get_details.side_effect = Py42NotFoundError(custom_error)
-    cli_state.sdk.alerts.get_details.side_effect = Py42NotFoundError(custom_error)
     result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state)
     assert "No alert found with ID 'TEST-ALERT-ID'." in result.output
 
