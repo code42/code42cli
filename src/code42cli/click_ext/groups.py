@@ -10,10 +10,10 @@ from py42.exceptions import Py42ForbiddenError
 from py42.exceptions import Py42HTTPError
 from py42.exceptions import Py42InvalidRuleOperationError
 from py42.exceptions import Py42LegalHoldNotFoundOrPermissionDeniedError
+from py42.exceptions import Py42MFARequiredError
 from py42.exceptions import Py42UpdateClosedCaseError
 from py42.exceptions import Py42UserAlreadyAddedError
 from py42.exceptions import Py42UserNotOnListError
-from py42.exceptions import Py42MFARequiredError
 
 from code42cli.errors import Code42CLIError
 from code42cli.errors import LoggedCLIError

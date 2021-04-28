@@ -2,9 +2,10 @@ import py42.sdk
 import py42.settings
 import py42.settings.debug as debug
 import requests
+from click import prompt
 from click import secho
-from py42.exceptions import Py42UnauthorizedError
 from py42.exceptions import Py42MFARequiredError
+from py42.exceptions import Py42UnauthorizedError
 from requests.exceptions import ConnectionError
 
 from code42cli.errors import Code42CLIError
@@ -41,7 +42,8 @@ def validate_connection(authority_url, username, password, totp):
         logger.log_error(str(err))
         raise LoggedCLIError(f"Problem connecting to {authority_url}.")
     except Py42MFARequiredError:
-        raise
+        totp = prompt("Multi-factor authentication required. Enter TOTP", type=int)
+        return validate_connection(authority_url, username, password, totp)
     except Py42UnauthorizedError as err:
         logger.log_error(str(err))
         if "INVALID_TIME_BASED_ONE_TIME_PASSWORD" in err.response.text:

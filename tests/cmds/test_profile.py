@@ -1,4 +1,7 @@
 import pytest
+from py42.exceptions import Py42MFARequiredError
+from requests import Response
+from requests.exceptions import HTTPError
 
 from ..conftest import create_mock_profile
 from code42cli import PRODUCT_NAME
@@ -206,6 +209,29 @@ def test_create_profile_with_password_option_if_credentials_valid_password_saved
     )
     mock_cliprofile_namespace.set_password.assert_called_once_with(password, mocker.ANY)
     assert "Would you like to set a password?" not in result.output
+
+
+def test_create_profile_stores_password_and_prints_message_when_user_requires_mfa(
+    runner, mocker, mock_verify, mock_cliprofile_namespace
+):
+    mock_verify.side_effect = Py42MFARequiredError(HTTPError(response=Response()))
+    result = runner.invoke(
+        cli,
+        [
+            "profile",
+            "create",
+            "-n",
+            "mfa",
+            "-s",
+            "bar",
+            "-u",
+            "baz",
+            "--password",
+            "pass",
+        ],
+    )
+    assert "Multi-factor account detected." in result.output
+    mock_cliprofile_namespace.set_password.assert_called_once_with("pass", mocker.ANY)
 
 
 def test_create_profile_outputs_confirmation(

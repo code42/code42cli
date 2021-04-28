@@ -3,6 +3,7 @@ from getpass import getpass
 import click
 from click import echo
 from click import secho
+from py42.exceptions import Py42MFARequiredError
 
 import code42cli.profile as cliprofile
 from code42cli.errors import Code42CLIError
@@ -10,7 +11,6 @@ from code42cli.options import yes_option
 from code42cli.profile import CREATE_PROFILE_HELP
 from code42cli.sdk_client import validate_connection
 from code42cli.util import does_user_agree
-from py42.exceptions import Py42MFARequiredError
 
 
 @click.group()
