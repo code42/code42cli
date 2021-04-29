@@ -12,6 +12,22 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
+- New command `code42 alerts show` that displays information about a single alert.
+
+- New command `code42 alerts update` that can update an alert's state or note.
+
+- New command `code42 alerts bulk generate-tempate` for generating CSV templates for bulk
+  commands.
+
+- New command `code42 alerts bulk update` for bulk updating alerts.
+
+### Changed
+
+- `code42 alerts search` now includes the alert ID in its table output.
+
+- `code42 alerts search` table output now refers to the alert state as `state` instead of
+    `status`.
+
 - `code42 cases file-events bulk` with sub-commands:
     - `generate-template`: that creates the file template. And parameters:
         - `cmd`: with options `add` and `remove`.
