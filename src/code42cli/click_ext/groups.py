@@ -72,12 +72,6 @@ class ExceptionHandlingGroup(click.Group):
             self.logger.log_error(err)
             raise Code42CLIError(str(err))
 
-        except Py42MFARequiredError as err:
-            self.logger.log_error(err)
-            raise Code42CLIError(
-                "User requires multi-factor authentication. Use `--totp <token>` option to provide token."
-            )
-
         except Py42ForbiddenError as err:
             self.logger.log_verbose_error(self._original_args, err.response.request)
             raise LoggedCLIError(
