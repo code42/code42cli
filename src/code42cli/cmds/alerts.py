@@ -345,7 +345,7 @@ def update(cli_state, alert_id, state, note):
 @alerts.group(cls=OrderedGroup)
 @opt.sdk_options(hidden=True)
 def bulk(state):
-    """Tools for executing bulk alerts actions."""
+    """Tools for executing bulk alert actions."""
     pass
 
 
