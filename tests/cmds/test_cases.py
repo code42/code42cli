@@ -472,15 +472,15 @@ def test_add_bulk_file_events_to_cases_uses_expected_arguments(
     bulk_processor = mocker.patch("code42cli.cmds.cases.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_add.csv", "w") as csv:
-            csv.writelines(["case_number,event_id\n", "1,abc\n", "2,pqr\n"])
+            csv.writelines(["number,eventId\n", "1,abc\n", "2,pqr\n"])
         runner.invoke(
             cli,
             ["cases", "file-events", "bulk", "add", "test_add.csv"],
             obj=cli_state_with_user,
         )
     assert bulk_processor.call_args[0][1] == [
-        {"case_number": "1", "event_id": "abc"},
-        {"case_number": "2", "event_id": "pqr"},
+        {"number": "1", "eventId": "abc"},
+        {"number": "2", "eventId": "pqr"},
     ]
 
 
@@ -490,13 +490,13 @@ def test_remove_bulk_file_events_from_cases_uses_expected_arguments(
     bulk_processor = mocker.patch("code42cli.cmds.cases.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_remove.csv", "w") as csv:
-            csv.writelines(["case_number,event_id\n", "1,abc\n", "2,pqr\n"])
+            csv.writelines(["number,eventId\n", "1,abc\n", "2,pqr\n"])
         runner.invoke(
             cli,
             ["cases", "file-events", "bulk", "remove", "test_remove.csv"],
             obj=cli_state_with_user,
         )
     assert bulk_processor.call_args[0][1] == [
-        {"case_number": "1", "event_id": "abc"},
-        {"case_number": "2", "event_id": "pqr"},
+        {"number": "1", "eventId": "abc"},
+        {"number": "2", "eventId": "pqr"},
     ]

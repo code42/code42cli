@@ -269,13 +269,13 @@ def remove(state, case_number, event_id):
 @file_events.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def bulk(state):
-    """Tools for executing file events actions associated to a case in bulk."""
+    """Tools for executing bulk case file-event actions."""
     pass
 
 
 FILE_EVENTS_HEADERS = [
-    "case_number",
-    "event_id",
+    "number",
+    "eventId",
 ]
 
 case_file_events_generate_template = generate_template_cmd_factory(
