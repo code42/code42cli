@@ -295,8 +295,8 @@ bulk.add_command(case_file_events_generate_template)
 def bulk_add(state, csv_rows):
     sdk = state.sdk
 
-    def handle_row(case_number, event_id):
-        sdk.cases.file_events.add(case_number, event_id)
+    def handle_row(number, event_id):
+        sdk.cases.file_events.add(number, event_id)
 
     run_bulk_process(
         handle_row, csv_rows, progress_label="Associating file events to cases:",
@@ -313,8 +313,8 @@ def bulk_add(state, csv_rows):
 def bulk_remove(state, csv_rows):
     sdk = state.sdk
 
-    def handle_row(case_number, event_id):
-        sdk.cases.file_events.delete(case_number, event_id)
+    def handle_row(number, event_id):
+        sdk.cases.file_events.delete(number, event_id)
 
     run_bulk_process(
         handle_row,
