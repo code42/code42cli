@@ -275,7 +275,7 @@ def bulk(state):
 
 FILE_EVENTS_HEADERS = [
     "number",
-    "eventId",
+    "event_id",
 ]
 
 case_file_events_generate_template = generate_template_cmd_factory(
