@@ -288,7 +288,7 @@ bulk.add_command(case_file_events_generate_template)
 @bulk.command(
     name="add",
     help="Bulk associate file events to cases using a CSV file with "
-    f"format: {','.join(FILE_EVENTS_HEADERS)}."
+    f"format: {','.join(FILE_EVENTS_HEADERS)}.",
 )
 @read_csv_arg(headers=FILE_EVENTS_HEADERS)
 @sdk_options()
@@ -306,7 +306,7 @@ def bulk_add(state, csv_rows):
 @bulk.command(
     name="remove",
     help="Bulk remove the file event association from cases using a CSV file with "
-    f"format: {','.join(FILE_EVENTS_HEADERS)}."
+    f"format: {','.join(FILE_EVENTS_HEADERS)}.",
 )
 @read_csv_arg(headers=FILE_EVENTS_HEADERS)
 @sdk_options()
