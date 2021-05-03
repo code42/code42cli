@@ -275,7 +275,7 @@ def bulk(state):
 
 FILE_EVENTS_HEADERS = [
     "number",
-    "eventId",
+    "event_id",
 ]
 
 case_file_events_generate_template = generate_template_cmd_factory(
@@ -288,15 +288,15 @@ bulk.add_command(case_file_events_generate_template)
 @bulk.command(
     name="add",
     help="Bulk associate file events to cases using a CSV file with "
-    "format: {}.".format(",".join(FILE_EVENTS_HEADERS)),
+    f"format: {','.join(FILE_EVENTS_HEADERS)}.",
 )
 @read_csv_arg(headers=FILE_EVENTS_HEADERS)
 @sdk_options()
 def bulk_add(state, csv_rows):
     sdk = state.sdk
 
-    def handle_row(case_number, event_id):
-        sdk.cases.file_events.add(case_number, event_id)
+    def handle_row(number, event_id):
+        sdk.cases.file_events.add(number, event_id)
 
     run_bulk_process(
         handle_row, csv_rows, progress_label="Associating file events to cases:",
@@ -306,15 +306,15 @@ def bulk_add(state, csv_rows):
 @bulk.command(
     name="remove",
     help="Bulk remove the file event association from cases using a CSV file with "
-    "format: {}.".format(",".join(FILE_EVENTS_HEADERS)),
+    f"format: {','.join(FILE_EVENTS_HEADERS)}.",
 )
 @read_csv_arg(headers=FILE_EVENTS_HEADERS)
 @sdk_options()
 def bulk_remove(state, csv_rows):
     sdk = state.sdk
 
-    def handle_row(case_number, event_id):
-        sdk.cases.file_events.delete(case_number, event_id)
+    def handle_row(number, event_id):
+        sdk.cases.file_events.delete(number, event_id)
 
     run_bulk_process(
         handle_row,
