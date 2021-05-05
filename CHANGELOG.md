@@ -21,13 +21,13 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - New command `code42 alerts bulk update` for bulk updating alerts.
 
-- New command `code42 cases file-events bulk generate-template` creates the template CSV 
+- New command `code42 cases file-events bulk generate-template` creates the template CSV
   file for the given command arg.
-  
+
 - New command `code42 cases file-events bulk add` that takes a CSV file with case number
   and event ID.
-  
-- New command `code42 cases file-events bulk remove` that takes a CSV file with case 
+
+- New command `code42 cases file-events bulk remove` that takes a CSV file with case
   number and event ID.
 
 ### Changed
@@ -36,7 +36,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - `code42 alerts search` table output now refers to the alert state as `state` instead of
     `status`.
-  
+
 ## 1.4.2 - 2021-04-22
 
 ### Added
