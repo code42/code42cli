@@ -28,12 +28,12 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - `code42 alerts search` table output now refers to the alert state as `state` instead of
     `status`.
 
-- `code42 cases file-events bulk` with sub-commands:
+- New command group `code42 cases file-events bulk` with sub-commands:
     - `generate-template`: that creates the file template. And parameters:
         - `cmd`: with options `add` and `remove`.
-        - `path`
-    - `add`: that takes a csv file with case number and event ID.
-    - `remove`: that takes a csv file with case number and event ID.
+        - `path`.
+    - `add`: that takes a CSV file with case number and event ID.
+    - `remove`: that takes a CSV file with case number and event ID.
 
 ## 1.4.2 - 2021-04-22
 
