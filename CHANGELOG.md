@@ -12,7 +12,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Fixed
 
-- Issue where the `--role-name` option on the command `code42 users list` caused the 
+- Issue where the `--role-name` option on the command `code42 users list` caused the
   CLI to call a deprecated method.
 
 ## 1.5.0 - 2021-05-05
