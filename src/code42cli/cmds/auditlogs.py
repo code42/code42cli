@@ -155,10 +155,7 @@ def search(
     if not events:
         click.echo("No results found.")
         return
-    elif len(events) > 10:
-        click.echo_via_pager(formatter.get_formatted_output(events))
-    else:
-        formatter.echo_formatted_list(events)
+    formatter.echo_formatted_list(events)
 
 
 @audit_logs.command(cls=SendToCommand)

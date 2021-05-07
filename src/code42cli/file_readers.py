@@ -2,6 +2,7 @@ import csv
 
 import click
 
+from code42cli.click_ext.types import AutoDecodedFile
 from code42cli.errors import Code42CLIError
 
 
@@ -13,7 +14,7 @@ def read_csv_arg(headers):
     return click.argument(
         "csv_rows",
         metavar="CSV_FILE",
-        type=click.File("r"),
+        type=AutoDecodedFile("r"),
         callback=lambda ctx, param, arg: read_csv(arg, headers=headers),
     )
 
@@ -65,7 +66,7 @@ def read_flat_file(file):
 
 read_flat_file_arg = click.argument(
     "file_rows",
-    type=click.File("r"),
+    type=AutoDecodedFile("r"),
     metavar="FILE",
     callback=lambda ctx, param, arg: read_flat_file(arg),
 )

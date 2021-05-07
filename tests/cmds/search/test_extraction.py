@@ -64,7 +64,7 @@ def test_create_handlers_creates_handlers_that_pass_events_to_output_formatter(
     http_response.text = '{{"{0}": [{{"property": "bar"}}]}}'.format(key)
     py42_response = Py42Response(http_response)
     handlers.handle_response(py42_response)
-    formatter.echo_formatted_list.assert_called_once_with(events)
+    formatter.echo_formatted_list.assert_called_once_with(events, force_pager=False)
 
 
 def test_send_to_handlers_creates_handlers_that_pass_events_to_logger(

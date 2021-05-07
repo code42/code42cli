@@ -20,6 +20,82 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - The `code42 profile use` command now prompts you to select a profile when
     not given a profile name argument.
 
+## 1.5.1 - 2021-05-07
+
+### Fixed
+
+- Issue where the `--role-name` option on the command `code42 users list` caused the
+  CLI to call a deprecated method.
+
+## 1.5.0 - 2021-05-05
+
+### Added
+
+- New command `code42 alerts show` that displays information about a single alert.
+
+- New command `code42 alerts update` that can update an alert's state or note.
+
+- New command `code42 alerts bulk generate-template` for generating CSV templates for bulk
+  commands.
+
+- New command `code42 alerts bulk update` for bulk updating alerts.
+
+- New command `code42 cases file-events bulk generate-template` creates the template CSV
+  file for the given command arg.
+
+- New command `code42 cases file-events bulk add` that takes a CSV file with case number
+  and event ID.
+
+- New command `code42 cases file-events bulk remove` that takes a CSV file with case
+  number and event ID.
+
+### Changed
+
+- `code42 alerts search` now includes the alert ID in its table output.
+
+- `code42 alerts search` table output now refers to the alert state as `state` instead of
+    `status`.
+
+## 1.4.2 - 2021-04-22
+
+### Added
+
+- New command `code42 users list` with options:
+    - `--org-uid` filters on org membership.
+    - `--role-name` filters on users having a particular role.
+    - `--active` and `--inactive` filter on user status.
+
+### Fixed
+
+- Bug where some CSV outputs on Windows would have an extra newline between the rows.
+
+- Issue where outputting or sending an alert or file-event with a timestamp without
+  decimals would error.
+
+- A performance issue with the `code42 departing-employee bulk add` command.
+
+### Changed
+
+- `code42 alert-rules list` now outputs via a pager when results contain more than 10 rules.
+
+- `code42 cases list` now outputs via a pager when results contain more than 10 cases.
+
+## 1.4.1 - 2021-04-15
+
+### Added
+
+- `code42 legal-hold search-events` command:
+    - `--matter-id` filters based on a legal hold uid.
+    - `--begin` filters based on a beginning timestamp.
+    - `--end` filters based on an end timestamp.
+    - `--event-type` filters based on a list of event types.
+
+### Fixed
+
+- Arguments/options that read data from files now attempt to autodetect file encodings.
+  Resolving a bug where CSVs written on Windows with Powershell would fail to be read properly.
+>>>>>>> master
+
 ## 1.4.0 - 2021-03-09
 
 ### Added
