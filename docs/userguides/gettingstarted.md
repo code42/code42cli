@@ -80,7 +80,7 @@ for information on recommended roles. We recommend you test to confirm that the 
 If you choose not to store your password in the CLI, you must enter it for each command that requires a connection.
 
 The Code42 CLI supports local accounts with MFA (multi-factor authentication) enabled. The Time-based One-Time
-Password (TOTP) must be provided at every invocation of the CLI, either via the `--totp` option, or when prompted.
+Password (TOTP) must be provided at every invocation of the CLI, either via the `--totp` option or when prompted.
 
 The Code42 CLI currently does **not** support SSO login providers or any other identity providers such as Active
 Directory or Okta.
