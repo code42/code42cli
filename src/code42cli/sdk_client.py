@@ -35,7 +35,7 @@ def create_sdk(profile, is_debug_mode, totp=None):
     return validate_connection(profile.authority_url, profile.username, password, totp)
 
 
-def validate_connection(authority_url, username, password, totp):
+def validate_connection(authority_url, username, password, totp=None):
     try:
         return py42.sdk.from_local_account(authority_url, username, password, totp=totp)
     except ConnectionError as err:

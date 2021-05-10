@@ -193,9 +193,7 @@ def _prompt_for_allow_password_set(profile_name):
 def _set_pw(profile_name, password):
     c42profile = cliprofile.get_profile(profile_name)
     try:
-        validate_connection(
-            c42profile.authority_url, c42profile.username, password, None
-        )
+        validate_connection(c42profile.authority_url, c42profile.username, password)
     except Py42MFARequiredError:
         echo(
             "Multi-factor account detected. `--totp <token>` option will be required for all code42 invocations."
