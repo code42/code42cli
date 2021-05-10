@@ -155,7 +155,7 @@ def test_totp_option_when_passed_is_passed_to_sdk_initialization(
     mock_py42 = mocker.patch("code42cli.sdk_client.py42.sdk.from_local_account")
     cli_state = CLIState()
     totp = "1234"
-    profile.authority_url = "test.com"
+    profile.authority_url = "example.com"
     profile.username = "user"
     profile.get_password.return_value = "password"
     cli_state._profile = profile
