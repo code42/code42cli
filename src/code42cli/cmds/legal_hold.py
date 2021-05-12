@@ -165,7 +165,10 @@ def search_events(state, matter_id, event_type, begin, end, format):
     events = _get_all_events(state.sdk, matter_id, begin, end)
     if event_type:
         events = [event for event in events if event["eventType"] == event_type]
-    formatter.echo_formatted_list(events)
+    if events:
+        formatter.echo_formatted_list(events)
+    else:
+        click.echo("No results found.")
 
 
 @legal_hold.group(cls=OrderedGroup)

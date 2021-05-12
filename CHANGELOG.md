@@ -8,7 +8,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-## Unreleased
+## 1.5.1 - 2021-05-07
+
+### Fixed
+
+- Issue where the `--role-name` option on the command `code42 users list` caused the
+  CLI to call a deprecated method.
+
+## 1.5.0 - 2021-05-05
+
+### Added
+
+- New command `code42 alerts show` that displays information about a single alert.
+
+- New command `code42 alerts update` that can update an alert's state or note.
+
+- New command `code42 alerts bulk generate-template` for generating CSV templates for bulk
+  commands.
+
+- New command `code42 alerts bulk update` for bulk updating alerts.
+
+- New command `code42 cases file-events bulk generate-template` creates the template CSV
+  file for the given command arg.
+
+- New command `code42 cases file-events bulk add` that takes a CSV file with case number
+  and event ID.
+
+- New command `code42 cases file-events bulk remove` that takes a CSV file with case
+  number and event ID.
+
+### Changed
+
+- `code42 alerts search` now includes the alert ID in its table output.
+
+- `code42 alerts search` table output now refers to the alert state as `state` instead of
+    `status`.
+
+## 1.4.2 - 2021-04-22
+
+### Added
+
+- New command `code42 users list` with options:
+    - `--org-uid` filters on org membership.
+    - `--role-name` filters on users having a particular role.
+    - `--active` and `--inactive` filter on user status.
 
 ### Fixed
 

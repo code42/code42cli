@@ -464,3 +464,39 @@ def test_fileevents_when_event_id_is_already_associated_with_case_py42_raises_ex
     )
     cli_state.sdk.cases.file_events.add.assert_called_once_with(1, "1")
     assert "Event is already associated to the case." in result.output
+
+
+def test_add_bulk_file_events_to_cases_uses_expected_arguments(
+    runner, mocker, cli_state_with_user
+):
+    bulk_processor = mocker.patch("code42cli.cmds.cases.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_add.csv", "w") as csv:
+            csv.writelines(["number,event_id\n", "1,abc\n", "2,pqr\n"])
+        runner.invoke(
+            cli,
+            ["cases", "file-events", "bulk", "add", "test_add.csv"],
+            obj=cli_state_with_user,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"number": "1", "event_id": "abc"},
+        {"number": "2", "event_id": "pqr"},
+    ]
+
+
+def test_remove_bulk_file_events_from_cases_uses_expected_arguments(
+    runner, mocker, cli_state_with_user
+):
+    bulk_processor = mocker.patch("code42cli.cmds.cases.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_remove.csv", "w") as csv:
+            csv.writelines(["number,event_id\n", "1,abc\n", "2,pqr\n"])
+        runner.invoke(
+            cli,
+            ["cases", "file-events", "bulk", "remove", "test_remove.csv"],
+            obj=cli_state_with_user,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"number": "1", "event_id": "abc"},
+        {"number": "2", "event_id": "pqr"},
+    ]
