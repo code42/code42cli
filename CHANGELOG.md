@@ -8,9 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-## 1.5.1 - 2021-05-07
+## 1.5.1 - 2021-05-12
 
 ### Fixed
+
+- Issue where some error messages stopped displaying in the same way that they did in prior versions.
 
 - Issue where the `--role-name` option on the command `code42 users list` caused the
   CLI to call a deprecated method.
