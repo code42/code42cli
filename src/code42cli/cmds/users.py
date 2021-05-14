@@ -1,5 +1,4 @@
 import click
-import py42.exceptions
 from pandas import DataFrame
 
 from code42cli.click_ext.groups import OrderedGroup
