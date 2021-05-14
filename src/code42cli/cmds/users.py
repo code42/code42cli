@@ -1,9 +1,11 @@
 import click
+import py42.exceptions
 from pandas import DataFrame
 
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
 from code42cli.errors import Code42CLIError
+from code42cli.errors import UserDoesNotExistError
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.output_formats import DataFrameOutputFormatter
@@ -58,6 +60,50 @@ def list_users(state, org_uid, role_name, active, inactive, format):
     else:
         formatter = DataFrameOutputFormatter(format)
         formatter.echo_formatted_dataframe(df)
+
+
+@users.command()
+@click.argument("username")
+@click.argument("role-name")
+@sdk_options()
+def add_role(state, username, role_name):
+    """Add the specified role to the specified username"""
+    _add_user_role(state.sdk, role_name, username)
+
+
+@users.command()
+@click.argument("username")
+@click.argument("role-name")
+@sdk_options()
+def remove_role(state, username, role_name):
+    """Add the specified role to the specified username"""
+    _remove_user_role(state.sdk, role_name, username)
+
+
+def _add_user_role(sdk, role_name, username):
+    user_id = _get_user_id(sdk, username)
+    try:
+        _get_role_id(sdk, role_name)
+    except Code42CLIError:
+        raise
+    sdk.users.add_role(user_id, role_name)
+
+
+def _remove_user_role(sdk, role_name, username):
+    user_id = _get_user_id(sdk, username)
+    try:
+        _get_role_id(sdk, role_name)
+    except Code42CLIError:
+        raise
+    sdk.users.remove_role(user_id, role_name)
+
+
+def _get_user_id(sdk, username):
+    user = sdk.users.get_by_username(username)["users"]
+    if not user:
+        raise UserDoesNotExistError
+    user_id = user[0]["userId"]
+    return user_id
 
 
 def _get_role_id(sdk, role_name):
