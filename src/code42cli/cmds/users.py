@@ -22,9 +22,6 @@ org_uid_option = click.option(
     "--org-uid",
     help="Limit users to only those in the organization you specify. Note that child orgs are included.",
 )
-role_name_option = click.option(
-    "--role-name", help="Limit results to only users having the specified role.",
-)
 active_option = click.option(
     "--active", is_flag=True, help="Limits results to only active users.", default=None,
 )
@@ -36,9 +33,17 @@ inactive_option = click.option(
 )
 
 
+def role_name_option(help):
+    return click.option("--role-name", help=help)
+
+
+def username_option(help):
+    return click.option("--username", help=help)
+
+
 @users.command(name="list")
 @org_uid_option
-@role_name_option
+@role_name_option("Limit results to only users having the specified role.")
 @active_option
 @inactive_option
 @format_option
@@ -62,45 +67,39 @@ def list_users(state, org_uid, role_name, active, inactive, format):
 
 
 @users.command()
-@click.argument("username")
-@click.argument("role-name")
+@username_option("Username of the target user")
+@role_name_option("Name of role to add")
 @sdk_options()
 def add_role(state, username, role_name):
-    """Add the specified role to the specified username"""
-    _add_user_role(state.sdk, role_name, username)
+    """Add the specified role to the user with the specified username"""
+    _add_user_role(state.sdk, username, role_name)
 
 
 @users.command()
-@click.argument("username")
-@click.argument("role-name")
+@role_name_option("Name of role to remove")
+@username_option("Username of the target user")
 @sdk_options()
 def remove_role(state, username, role_name):
-    """Add the specified role to the specified username"""
+    """Remove the specified role to the user with the specified username"""
     _remove_user_role(state.sdk, role_name, username)
 
 
-def _add_user_role(sdk, role_name, username):
+def _add_user_role(sdk, username, role_name):
     user_id = _get_user_id(sdk, username)
-    try:
-        _get_role_id(sdk, role_name)
-    except Code42CLIError:
-        raise
+    _get_role_id(sdk, role_name)
     sdk.users.add_role(user_id, role_name)
 
 
 def _remove_user_role(sdk, role_name, username):
     user_id = _get_user_id(sdk, username)
-    try:
-        _get_role_id(sdk, role_name)
-    except Code42CLIError:
-        raise
+    _get_role_id(sdk, role_name)
     sdk.users.remove_role(user_id, role_name)
 
 
 def _get_user_id(sdk, username):
     user = sdk.users.get_by_username(username)["users"]
-    if not user:
-        raise UserDoesNotExistError
+    if len(user) == 0:
+        raise UserDoesNotExistError(username)
     user_id = user[0]["userId"]
     return user_id
 
@@ -113,7 +112,7 @@ def _get_role_id(sdk, role_name):
         role_result = roles_dataframe.at[role_name, "roleId"]
         return str(role_result)  # extract the role ID from the series
     except KeyError:
-        raise Code42CLIError(f"Role with name {role_name} not found.")
+        raise Code42CLIError(f"Role with name '{role_name}' not found.")
 
 
 def _get_users_dataframe(sdk, columns, org_uid, role_id, active):
