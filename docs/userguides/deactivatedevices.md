@@ -38,6 +38,9 @@ curating a list of devices to deactivate:
 * `--exclude-most-recently-connected INTEGER` - allows you to exclude the most recently connected device (per user) from the results. This allows you to ensure that every user is left with at least N device(s), regardless of how recently they have connected.
 * `--created-before DATE|TIMESTAMP|SHORT_TIME` - allows you to only see devices created before a particular date.
 
+```eval_rst
+.. note:: If you use Excel to filter or edit the list of devices, you will find that the ``guid`` column is displayed in scientific notation—when you change the column type to text, you'll see that the full number now has had its last digits replaced by zeros. This modification makes the guid invalid for deactivating devices. In order to edit the list in Excel without overwriting this, you will need to `import the data into a new workbook <https://support.microsoft.com/en-us/office/keeping-leading-zeros-and-large-numbers-1bf7b935-36e1-4985-842f-5dfa51f85fe7>`_. rather than just opening the CSV. If you want to work on this in Excel later, you will also want to save as an xlsx file and only 'save as' csv when you're ready to make the final export for running the bulk deactivate command.
+```
 ## Deactivate devices
 
 Once you have a list of devices that you want to remove, you can
