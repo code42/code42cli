@@ -67,20 +67,20 @@ def list_users(state, org_uid, role_name, active, inactive, format):
 
 
 @users.command()
-@username_option("Username of the target user")
-@role_name_option("Name of role to add")
+@username_option("Username of the target user.")
+@role_name_option("Name of role to add.")
 @sdk_options()
 def add_role(state, username, role_name):
-    """Add the specified role to the user with the specified username"""
+    """Add the specified role to the user with the specified username."""
     _add_user_role(state.sdk, username, role_name)
 
 
 @users.command()
-@role_name_option("Name of role to remove")
-@username_option("Username of the target user")
+@role_name_option("Name of role to remove.")
+@username_option("Username of the target user.")
 @sdk_options()
 def remove_role(state, username, role_name):
-    """Remove the specified role to the user with the specified username"""
+    """Remove the specified role to the user with the specified username."""
     _remove_user_role(state.sdk, role_name, username)
 
 
