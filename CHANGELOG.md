@@ -21,6 +21,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
+- Support for users that require multi-factor authentication.
+
 - New command `code42 alerts show` that displays information about a single alert.
 
 - New command `code42 alerts update` that can update an alert's state or note.
