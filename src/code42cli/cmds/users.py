@@ -86,13 +86,13 @@ def remove_role(state, username, role_name):
 
 def _add_user_role(sdk, username, role_name):
     user_id = _get_user_id(sdk, username)
-    _get_role_id(sdk, role_name)
+    _get_role_id(sdk, role_name)  # function provides role name validation
     sdk.users.add_role(user_id, role_name)
 
 
 def _remove_user_role(sdk, role_name, username):
     user_id = _get_user_id(sdk, username)
-    _get_role_id(sdk, role_name)
+    _get_role_id(sdk, role_name)  # function provides role name validation
     sdk.users.remove_role(user_id, role_name)
 
 
