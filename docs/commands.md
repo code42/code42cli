@@ -10,3 +10,4 @@
 * [High Risk Employee](commands/highriskemployee.rst)
 * [Legal Hold](commands/legalhold.rst)
 * [Cases](commands/cases.rst)
+* [Users](commands/users.rst)
