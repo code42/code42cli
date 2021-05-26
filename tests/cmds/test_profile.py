@@ -1,5 +1,6 @@
 import pytest
 from py42.exceptions import Py42MFARequiredError
+from py42.sdk import SDKClient
 from requests import Response
 from requests.exceptions import HTTPError
 
@@ -37,12 +38,13 @@ def mock_getpass(mocker):
 
 @pytest.fixture
 def mock_verify(mocker):
-    return mocker.patch("{}.cmds.profile.validate_connection".format(PRODUCT_NAME))
+    return mocker.patch("{}.cmds.profile.create_sdk".format(PRODUCT_NAME))
 
 
 @pytest.fixture
-def valid_connection(mock_verify):
-    mock_verify.return_value = True
+def valid_connection(mocker, mock_verify):
+    mock_sdk = mocker.MagicMock(spec=SDKClient)
+    mock_verify.return_value = mock_sdk
     return mock_verify
 
 
