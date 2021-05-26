@@ -5,7 +5,6 @@ from requests import Response
 from requests.exceptions import HTTPError
 
 from ..conftest import create_mock_profile
-from code42cli import PRODUCT_NAME
 from code42cli.errors import Code42CLIError
 from code42cli.errors import LoggedCLIError
 from code42cli.main import cli
@@ -13,32 +12,32 @@ from code42cli.main import cli
 
 @pytest.fixture
 def user_agreement(mocker):
-    mock = mocker.patch("{}.cmds.profile.does_user_agree".format(PRODUCT_NAME))
+    mock = mocker.patch("code42cli.cmds.profile.does_user_agree")
     mock.return_value = True
     return mocker
 
 
 @pytest.fixture
 def user_disagreement(mocker):
-    mock = mocker.patch("{}.cmds.profile.does_user_agree".format(PRODUCT_NAME))
+    mock = mocker.patch("code42cli.cmds.profile.does_user_agree")
     mock.return_value = False
     return mocker
 
 
 @pytest.fixture
 def mock_cliprofile_namespace(mocker):
-    return mocker.patch("{}.cmds.profile.cliprofile".format(PRODUCT_NAME))
+    return mocker.patch("code42cli.cmds.profile.cliprofile")
 
 
 @pytest.fixture(autouse=True)
 def mock_getpass(mocker):
-    mock = mocker.patch("{}.cmds.profile.getpass".format(PRODUCT_NAME))
+    mock = mocker.patch("code42cli.cmds.profile.getpass")
     mock.return_value = "newpassword"
 
 
 @pytest.fixture
 def mock_verify(mocker):
-    return mocker.patch("{}.cmds.profile.create_sdk".format(PRODUCT_NAME))
+    return mocker.patch("code42cli.cmds.profile.create_sdk")
 
 
 @pytest.fixture
