@@ -7,6 +7,7 @@ from click import secho
 from py42.exceptions import Py42MFARequiredError
 from py42.exceptions import Py42UnauthorizedError
 from requests.exceptions import ConnectionError
+from requests.exceptions import SSLError
 
 from code42cli.errors import Code42CLIError
 from code42cli.errors import LoggedCLIError
@@ -17,7 +18,7 @@ py42.settings.items_per_page = 500
 logger = get_main_cli_logger()
 
 
-def create_sdk(profile, is_debug_mode, totp=None):
+def create_sdk(profile, is_debug_mode, password=None, totp=None):
     if is_debug_mode:
         py42.settings.debug.level = debug.DEBUG
     if profile.ignore_ssl_errors == "True":
@@ -31,13 +32,18 @@ def create_sdk(profile, is_debug_mode, totp=None):
             requests.packages.urllib3.exceptions.InsecureRequestWarning
         )
         py42.settings.verify_ssl_certs = False
-    password = profile.get_password()
+    password = password or profile.get_password()
     return validate_connection(profile.authority_url, profile.username, password, totp)
 
 
 def validate_connection(authority_url, username, password, totp=None):
     try:
         return py42.sdk.from_local_account(authority_url, username, password, totp=totp)
+    except SSLError as err:
+        logger.log_error(str(err))
+        raise LoggedCLIError(
+            f"Problem connecting to {authority_url}, SSL certificate verification failed.\nUpdate profile with --disable-ssl-errors to bypass certificate checks (not recommended!)."
+        )
     except ConnectionError as err:
         logger.log_error(str(err))
         raise LoggedCLIError(f"Problem connecting to {authority_url}.")

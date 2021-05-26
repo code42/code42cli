@@ -9,7 +9,7 @@ import code42cli.profile as cliprofile
 from code42cli.errors import Code42CLIError
 from code42cli.options import yes_option
 from code42cli.profile import CREATE_PROFILE_HELP
-from code42cli.sdk_client import validate_connection
+from code42cli.sdk_client import create_sdk
 from code42cli.util import does_user_agree
 
 
@@ -193,7 +193,7 @@ def _prompt_for_allow_password_set(profile_name):
 def _set_pw(profile_name, password):
     c42profile = cliprofile.get_profile(profile_name)
     try:
-        validate_connection(c42profile.authority_url, c42profile.username, password)
+        create_sdk(c42profile, is_debug_mode=False, password=password)
     except Py42MFARequiredError:
         echo(
             "Multi-factor account detected. `--totp <token>` option will be required for all code42 invocations."
