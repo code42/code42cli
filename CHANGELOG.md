@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## Unreleased
+
+### Fixed
+
+- Issue where `profile` commands that required connecting to an authority failed to respect the `--disable-ssl-errors` flag when set.
+
 ## 1.6.0 - 2021-05-20
 
 ### Added
