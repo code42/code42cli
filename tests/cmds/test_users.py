@@ -32,6 +32,10 @@ TEST_USERS_RESPONSE = {
         }
     ]
 }
+TEST_EMPTY_USERS_RESPONSE = {"users": []}
+TEST_USERNAME = TEST_USERS_RESPONSE["users"][0]["username"]
+TEST_USER_ID = TEST_USERS_RESPONSE["users"][0]["userId"]
+TEST_ROLE_NAME = TEST_ROLE_RETURN_DATA["data"][0]["roleName"]
 
 
 def _create_py42_response(mocker, text):
@@ -54,6 +58,16 @@ def get_available_roles_response(mocker):
 @pytest.fixture
 def get_all_users_success(cli_state):
     cli_state.sdk.users.get_all.return_value = get_all_users_generator()
+
+
+@pytest.fixture
+def get_user_id_success(cli_state):
+    cli_state.sdk.users.get_by_username.return_value = TEST_USERS_RESPONSE
+
+
+@pytest.fixture
+def get_user_id_failure(cli_state):
+    cli_state.sdk.users.get_by_username.return_value = TEST_EMPTY_USERS_RESPONSE
 
 
 @pytest.fixture
@@ -153,3 +167,99 @@ def test_list_users_when_given_excluding_active_and_inactive_uses_active_equals_
     cli_state.sdk.users.get_all.assert_called_once_with(
         active=None, org_uid=None, role_id=None
     )
+
+
+def test_add_user_role_adds(
+    runner, cli_state, get_user_id_success, get_available_roles_success
+):
+    command = [
+        "users",
+        "add-role",
+        "--username",
+        "test.username@example.com",
+        "--role-name",
+        "Customer Cloud Admin",
+    ]
+    runner.invoke(cli, command, obj=cli_state)
+    cli_state.sdk.users.add_role.assert_called_once_with(TEST_USER_ID, TEST_ROLE_NAME)
+
+
+def test_add_user_role_raises_error_when_role_does_not_exist(
+    runner, cli_state, get_user_id_success, get_available_roles_success
+):
+    command = [
+        "users",
+        "add-role",
+        "--username",
+        "test.username@example.com",
+        "--role-name",
+        "test",
+    ]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert result.exit_code == 1
+    assert "Role with name 'test' not found." in result.output
+
+
+def test_add_user_role_raises_error_when_username_does_not_exist(
+    runner, cli_state, get_user_id_failure, get_available_roles_success
+):
+    command = [
+        "users",
+        "add-role",
+        "--username",
+        "not_a_username@example.com",
+        "--role-name",
+        "Desktop User",
+    ]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert result.exit_code == 1
+    assert "User 'not_a_username@example.com' does not exist." in result.output
+
+
+def test_remove_user_role_removes(
+    runner, cli_state, get_user_id_success, get_available_roles_success
+):
+    command = [
+        "users",
+        "remove-role",
+        "--username",
+        "test.username@example.com",
+        "--role-name",
+        "Customer Cloud Admin",
+    ]
+    runner.invoke(cli, command, obj=cli_state)
+    cli_state.sdk.users.remove_role.assert_called_once_with(
+        TEST_USER_ID, TEST_ROLE_NAME
+    )
+
+
+def test_remove_user_role_raises_error_when_role_does_not_exist(
+    runner, cli_state, get_user_id_success, get_available_roles_success
+):
+    command = [
+        "users",
+        "remove-role",
+        "--username",
+        "test.username@example.com",
+        "--role-name",
+        "test",
+    ]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert result.exit_code == 1
+    assert "Role with name 'test' not found." in result.output
+
+
+def test_remove_user_role_raises_error_when_username_does_not_exist(
+    runner, cli_state, get_user_id_failure, get_available_roles_success
+):
+    command = [
+        "users",
+        "remove-role",
+        "--username",
+        "not_a_username@example.com",
+        "--role-name",
+        "Desktop User",
+    ]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert result.exit_code == 1
+    assert "User 'not_a_username@example.com' does not exist." in result.output
