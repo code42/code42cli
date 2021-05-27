@@ -1,5 +1,6 @@
 import click
 from pandas import DataFrame
+from pandas import json_normalize
 
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
@@ -46,9 +47,19 @@ def username_option(help):
 @role_name_option("Limit results to only users having the specified role.")
 @active_option
 @inactive_option
+@click.option(
+    "--include-legal-hold-membership",
+    required=False,
+    type=bool,
+    default=False,
+    is_flag=True,
+    help="Include legal hold membership in output.",
+)
 @format_option
 @sdk_options()
-def list_users(state, org_uid, role_name, active, inactive, format):
+def list_users(
+    state, org_uid, role_name, active, inactive, include_legal_hold_membership, format
+):
     """List users in your Code42 environment."""
     if inactive:
         active = False
@@ -59,6 +70,8 @@ def list_users(state, org_uid, role_name, active, inactive, format):
         else None
     )
     df = _get_users_dataframe(state.sdk, columns, org_uid, role_id, active)
+    if include_legal_hold_membership:
+        df = _add_legal_hold_membership_to_user_dataframe(state.sdk, df)
     if df.empty:
         click.echo("No results found.")
     else:
@@ -122,3 +135,37 @@ def _get_users_dataframe(sdk, columns, org_uid, role_id, active):
         users_list.extend(page["users"])
 
     return DataFrame.from_records(users_list, columns=columns)
+
+
+def _add_legal_hold_membership_to_user_dataframe(sdk, df):
+    columns = ["legalHold.legalHoldUid", "legalHold.name", "user.userUid"]
+
+    legal_hold_member_dataframe = (
+        json_normalize(list(_get_all_active_hold_memberships(sdk)))[columns]
+        .groupby(["user.userUid"])
+        .agg(",".join)
+        .rename(
+            {
+                "legalHold.legalHoldUid": "legalHoldUid",
+                "legalHold.name": "legalHoldName",
+            },
+            axis=1,
+        )
+    )
+    df = df.merge(
+        legal_hold_member_dataframe,
+        how="left",
+        left_on="userUid",
+        right_on="user.userUid",
+    )
+
+    return df
+
+
+def _get_all_active_hold_memberships(sdk):
+    for page in sdk.legalhold.get_all_matters(active=True):
+        for matter in page["legalHolds"]:
+            for _page in sdk.legalhold.get_all_matter_custodians(
+                legal_hold_uid=matter["legalHoldUid"], active=True
+            ):
+                yield from _page["legalHoldMemberships"]

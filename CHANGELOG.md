@@ -16,6 +16,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - New command `code42 users remove-role` to remove a user role from a single user.
 
+- New command 'code42 users list --include-legal-hold-membership' to print the legal hold matter name and ID for any user on legal hold
+
 ## 1.6.1 - 2021-05-27
 
 ### Fixed
