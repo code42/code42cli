@@ -60,7 +60,7 @@ class CLIState:
     @property
     def sdk(self):
         if self._sdk is None:
-            self._sdk = create_sdk(self.profile, self.debug, self.totp)
+            self._sdk = create_sdk(self.profile, self.debug, totp=self.totp)
         return self._sdk
 
     def set_assume_yes(self, param):
