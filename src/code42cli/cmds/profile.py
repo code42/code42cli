@@ -3,6 +3,7 @@ from getpass import getpass
 import click
 from click import echo
 from click import secho
+from py42.exceptions import Py42MFARequiredError
 
 import code42cli.profile as cliprofile
 from code42cli.errors import Code42CLIError
@@ -193,6 +194,10 @@ def _set_pw(profile_name, password):
     c42profile = cliprofile.get_profile(profile_name)
     try:
         validate_connection(c42profile.authority_url, c42profile.username, password)
+    except Py42MFARequiredError:
+        echo(
+            "Multi-factor account detected. `--totp <token>` option will be required for all code42 invocations."
+        )
     except Exception:
         secho("Password not stored!", bold=True)
         raise

@@ -41,6 +41,7 @@ class CLIState:
             self._profile = get_profile()
         except Code42CLIError:
             self._profile = None
+        self.totp = None
         self.debug = False
         self._sdk = None
         self.search_filters = []
@@ -59,7 +60,7 @@ class CLIState:
     @property
     def sdk(self):
         if self._sdk is None:
-            self._sdk = create_sdk(self.profile, self.debug)
+            self._sdk = create_sdk(self.profile, self.debug, self.totp)
         return self._sdk
 
     def set_assume_yes(self, param):
@@ -79,6 +80,12 @@ def set_debug(ctx, param, value):
     """
     if value:
         ctx.ensure_object(CLIState).debug = value
+
+
+def set_totp(ctx, param, value):
+    """Sets TOTP token on global state object for multi-factor authentication."""
+    if value:
+        ctx.ensure_object(CLIState).totp = value
 
 
 def profile_option(hidden=False):
@@ -105,12 +112,24 @@ def debug_option(hidden=False):
     return opt
 
 
+def totp_option(hidden=False):
+    opt = click.option(
+        "--totp",
+        expose_value=False,
+        callback=set_totp,
+        hidden=hidden,
+        help="TOTP token for multi-factor authentication.",
+    )
+    return opt
+
+
 pass_state = click.make_pass_decorator(CLIState, ensure=True)
 
 
 def sdk_options(hidden=False):
     def decorator(f):
         f = profile_option(hidden)(f)
+        f = totp_option(hidden)(f)
         f = debug_option(hidden)(f)
         f = pass_state(f)
         return f
