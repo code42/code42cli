@@ -119,7 +119,7 @@ def test_create_sdk_uses_given_credentials(
     )
 
 
-def test_validate_connection_when_mfa_required_exception_raised_prompts_for_totp(
+def test_create_sdk_connection_when_mfa_required_exception_raised_prompts_for_totp(
     mocker, monkeypatch, mock_sdk_factory, capsys, mock_profile_with_password
 ):
     monkeypatch.setattr("sys.stdin", StringIO("101010"))
@@ -133,7 +133,7 @@ def test_validate_connection_when_mfa_required_exception_raised_prompts_for_totp
     assert "Multi-factor authentication required. Enter TOTP:" in output.out
 
 
-def test_validate_connection_when_mfa_token_invalid_raises_expected_cli_error(
+def test_create_sdk_connection_when_mfa_token_invalid_raises_expected_cli_error(
     mocker, mock_sdk_factory, mock_profile_with_password
 ):
     response = mocker.MagicMock(spec=Response)
