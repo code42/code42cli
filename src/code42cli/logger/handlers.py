@@ -144,7 +144,7 @@ def _get_socket_type_from_protocol(protocol):
 
 def _raise_socket_type_error(protocol):
     msg = (
-        f"Could not determine socket type. "
+        "Could not determine socket type. "
         f"Expected one of {list(ServerProtocol())}, but got {protocol}."
     )
     raise ValueError(msg)
