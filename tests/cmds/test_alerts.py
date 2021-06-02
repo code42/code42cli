@@ -444,7 +444,7 @@ def test_search_when_given_begin_and_end_date_and_times_uses_expected_query(
     time = "15:33:02"
     runner.invoke(
         cli,
-        [*command, "--begin", f"{begin_date} {time}", "--end", "{end_date} {time}"],
+        [*command, "--begin", f"{begin_date} {time}", "--end", f"{end_date} {time}"],
         obj=cli_state,
     )
     filters = alert_extractor.extract.call_args[0][0]
