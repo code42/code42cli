@@ -82,7 +82,7 @@ def _format_cef_kvp(cef_field_key, cef_field_value):
         cef_field_value = _convert_list_to_csv(cef_field_value)
     elif cef_field_key in CEF_TIMESTAMP_FIELDS:
         cef_field_value = convert_file_event_timestamp_to_cef_timestamp(cef_field_value)
-    return "{}={}".format(cef_field_key, cef_field_value)
+    return f"{cef_field_key}={cef_field_value}"
 
 
 def _handle_nested_json_fields(cef_field_key, cef_field_value):
@@ -96,13 +96,11 @@ def _handle_nested_json_fields(cef_field_key, cef_field_value):
 
 
 def _format_custom_cef_kvp(custom_cef_field_key, custom_cef_field_value):
-    custom_cef_label_key = "{}Label".format(custom_cef_field_key)
+    custom_cef_label_key = f"{custom_cef_field_key}Label"
     custom_cef_label_value = CEF_CUSTOM_FIELD_NAME_MAP[custom_cef_label_key]
-    return "{}={} {}={}".format(
-        custom_cef_field_key,
-        custom_cef_field_value,
-        custom_cef_label_key,
-        custom_cef_label_value,
+    return (
+        f"{custom_cef_field_key}={custom_cef_field_value} "
+        f"{custom_cef_label_key}={custom_cef_label_value}"
     )
 
 
@@ -116,7 +114,7 @@ def convert_file_event_timestamp_to_cef_timestamp(timestamp_value):
         _datetime = datetime.strptime(timestamp_value, "%Y-%m-%dT%H:%M:%S.%fZ")
     except ValueError:
         _datetime = datetime.strptime(timestamp_value, "%Y-%m-%dT%H:%M:%SZ")
-    value = "{:.0f}".format(_datetime_to_ms_since_epoch(_datetime))
+    value = f"{_datetime_to_ms_since_epoch(_datetime):.0f}"
     return value
 
 

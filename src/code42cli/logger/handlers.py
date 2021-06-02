@@ -143,7 +143,8 @@ def _get_socket_type_from_protocol(protocol):
 
 
 def _raise_socket_type_error(protocol):
-    msg = "Could not determine socket type. Expected one of {}, but got {}.".format(
-        list(ServerProtocol()), protocol
+    msg = (
+        f"Could not determine socket type. "
+        f"Expected one of {list(ServerProtocol())}, but got {protocol}."
     )
     raise ValueError(msg)

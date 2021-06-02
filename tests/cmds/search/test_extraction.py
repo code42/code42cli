@@ -61,7 +61,7 @@ def test_create_handlers_creates_handlers_that_pass_events_to_output_formatter(
     )
     http_response = mocker.MagicMock(spec=Response)
     events = [{"property": "bar"}]
-    http_response.text = '{{"{0}": [{{"property": "bar"}}]}}'.format(key)
+    http_response.text = f'{{"{key}": [{{"property": "bar"}}]}}'
     py42_response = Py42Response(http_response)
     handlers.handle_response(py42_response)
     formatter.echo_formatted_list.assert_called_once_with(events, force_pager=False)

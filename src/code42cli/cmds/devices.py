@@ -113,7 +113,9 @@ def _change_device_activation(sdk, device_guid, cmd_str):
     except exceptions.Py42NotFoundError:
         raise Code42CLIError(f"The device with GUID '{device_guid}' was not found.")
     except exceptions.Py42ForbiddenError:
-        raise Code42CLIError(f"Unable to {cmd_str} the device with GUID '{device_guid}'.")
+        raise Code42CLIError(
+            f"Unable to {cmd_str} the device with GUID '{device_guid}'."
+        )
 
 
 def _verify_guid_type(device_guid):
@@ -503,14 +505,12 @@ def _add_backup_set_settings_to_dataframe(sdk, devices_dataframe):
     def handle_row(guid):
         try:
             current_device_settings = sdk.devices.get_settings(guid)
-        except Exception as e:
+        except Exception as err:
             return DataFrame.from_records(
                 [
                     {
                         "guid": guid,
-                        "ERROR": "Unable to retrieve device settings for {}: {}".format(
-                            guid, e
-                        ),
+                        "ERROR": f"Unable to retrieve device settings for {guid}: {err}",
                     }
                 ]
             )
@@ -585,8 +585,8 @@ def bulk_deactivate(state, csv_rows, change_device_name, purge_date, format):
                 sdk, row["guid"], row["change_device_name"], row["purge_date"]
             )
             row["deactivated"] = "True"
-        except Exception as e:
-            row["deactivated"] = "False: {}".format(e)
+        except Exception as err:
+            row["deactivated"] = f"False: {err}"
         return row
 
     result_rows = run_bulk_process(
@@ -609,8 +609,8 @@ def bulk_reactivate(state, csv_rows, format):
         try:
             _reactivate_device(sdk, row["guid"])
             row["reactivated"] = "True"
-        except Exception as e:
-            row["reactivated"] = "False: {}".format(e)
+        except Exception as err:
+            row["reactivated"] = f"False: {err}"
         return row
 
     result_rows = run_bulk_process(

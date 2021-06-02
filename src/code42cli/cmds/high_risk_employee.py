@@ -184,7 +184,7 @@ def bulk_add_risk_tags(state, csv_rows):
 @bulk.command(
     name="remove-risk-tags",
     help=f"Removes risk tags from users in bulk using a CSV file with format: "
-    f"{','.join(RISK_TAG_CSV_HEADERS)}."
+    f"{','.join(RISK_TAG_CSV_HEADERS)}.",
 )
 @read_csv_arg(headers=RISK_TAG_CSV_HEADERS)
 @sdk_options()

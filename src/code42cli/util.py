@@ -32,7 +32,7 @@ def get_user_project_path(*subdirs):
     """The path on your user dir to /.code42cli/[subdir]."""
     package_name = __name__.split(".")[0]
     home = path.expanduser("~")
-    hidden_package_name = ".{}".format(package_name)
+    hidden_package_name = f".{package_name}"
     user_project_path = path.join(home, hidden_package_name)
     result_path = path.join(user_project_path, *subdirs)
     if not path.exists(result_path):
@@ -90,7 +90,7 @@ def format_string_list_to_columns(string_list, max_width=None):
         max_width, _ = shutil.get_terminal_size()
     column_width = len(max(string_list, key=len)) + _PADDING_SIZE
     num_columns = int(max_width / column_width) or 1
-    format_string = "{{:<{0}}}".format(column_width) * num_columns
+    format_string = f"{{:<{column_width}}}" * num_columns
     batches = [
         string_list[i : i + num_columns]
         for i in range(0, len(string_list), num_columns)
@@ -134,7 +134,7 @@ class warn_interrupt:
     def _handle_interrupts(self, sig, frame):
         if not self.interrupted:
             self.interrupted = True
-            echo("\n{}\n{}".format(self.warning, self.exit_instructions), err=True)
+            echo(f"\n{self.warning}\n{self.exit_instructions}", err=True)
         else:
             exit()
 

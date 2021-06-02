@@ -200,7 +200,7 @@ def test_add_high_risk_employee_when_user_does_not_exist_exits_with_correct_mess
         cli, ["high-risk-employee", "add", TEST_EMPLOYEE], obj=cli_state_without_user
     )
     assert result.exit_code == 1
-    assert "User '{}' does not exist.".format(TEST_EMPLOYEE) in result.output
+    assert f"User '{TEST_EMPLOYEE}' does not exist." in result.output
 
 
 def test_add_high_risk_employee_when_user_already_added_exits_with_correct_message(

@@ -300,14 +300,14 @@ search_and_send_to_test = get_mark_for_search_and_send_to("alerts")
 
 @pytest.fixture
 def alert_extractor(mocker):
-    mock = mocker.patch("{}.cmds.alerts._get_alert_extractor".format(PRODUCT_NAME))
+    mock = mocker.patch(f"{PRODUCT_NAME}.cmds.alerts._get_alert_extractor")
     mock.return_value = mocker.MagicMock(spec=AlertExtractor)
     return mock.return_value
 
 
 @pytest.fixture
 def alert_cursor_with_checkpoint(mocker):
-    mock = mocker.patch("{}.cmds.alerts._get_alert_cursor_store".format(PRODUCT_NAME))
+    mock = mocker.patch(f"{PRODUCT_NAME}.cmds.alerts._get_alert_cursor_store")
     mock_cursor = mocker.MagicMock(spec=AlertCursorStore)
     mock_cursor.get.return_value = CURSOR_TIMESTAMP
     mock.return_value = mock_cursor
@@ -317,7 +317,7 @@ def alert_cursor_with_checkpoint(mocker):
 
 @pytest.fixture
 def alert_cursor_without_checkpoint(mocker):
-    mock = mocker.patch("{}.cmds.alerts._get_alert_cursor_store".format(PRODUCT_NAME))
+    mock = mocker.patch(f"{PRODUCT_NAME}.cmds.alerts._get_alert_cursor_store")
     mock_cursor = mocker.MagicMock(spec=AlertCursorStore)
     mock_cursor.get.return_value = None
     mock.return_value = mock_cursor
@@ -326,9 +326,7 @@ def alert_cursor_without_checkpoint(mocker):
 
 @pytest.fixture
 def begin_option(mocker):
-    mock = mocker.patch(
-        "{}.cmds.alerts.convert_datetime_to_timestamp".format(PRODUCT_NAME)
-    )
+    mock = mocker.patch(f"{PRODUCT_NAME}.cmds.alerts.convert_datetime_to_timestamp")
     mock.return_value = BEGIN_TIMESTAMP
     mock.expected_timestamp = "2020-01-01T06:00:00.000Z"
     return mock
@@ -336,7 +334,7 @@ def begin_option(mocker):
 
 @pytest.fixture
 def alert_extract_func(mocker):
-    return mocker.patch("{}.cmds.alerts._extract".format(PRODUCT_NAME))
+    return mocker.patch(f"{PRODUCT_NAME}.cmds.alerts._extract")
 
 
 @pytest.fixture
@@ -430,9 +428,9 @@ def test_search_and_send_to_when_given_begin_and_end_dates_uses_expected_query(
     )
     filters = alert_extractor.extract.call_args[0][0]
     actual_begin = get_filter_value_from_json(filters, filter_index=0)
-    expected_begin = "{}T00:00:00.000Z".format(begin_date)
+    expected_begin = f"{begin_date}T00:00:00.000Z"
     actual_end = get_filter_value_from_json(filters, filter_index=1)
-    expected_end = "{}T23:59:59.999Z".format(end_date)
+    expected_end = f"{end_date}T23:59:59.999Z"
     assert actual_begin == expected_begin
     assert actual_end == expected_end
 

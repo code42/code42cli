@@ -6,12 +6,11 @@ from py42.response import Py42Response
 from requests import HTTPError
 from requests import Response
 
-from code42cli import PRODUCT_NAME
 from code42cli.cmds.legal_hold import _check_matter_is_accessible
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.main import cli
 
-_NAMESPACE = "{}.cmds.legal_hold".format(PRODUCT_NAME)
+_NAMESPACE = "code42cli.cmds.legal_hold"
 TEST_MATTER_ID = "99999"
 TEST_LEGAL_HOLD_MEMBERSHIP_UID = "88888"
 TEST_LEGAL_HOLD_MEMBERSHIP_UID_2 = "77777"

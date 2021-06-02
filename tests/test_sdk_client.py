@@ -56,10 +56,8 @@ def test_create_sdk_when_profile_has_ssl_errors_disabled_sets_py42_setting_and_p
     output = capsys.readouterr()
     assert not mock_py42.settings.verify_ssl_certs
     assert (
-        "Warning: Profile '{}' has SSL verification disabled. Adding certificate verification is strongly advised.".format(
-            profile.name
-        )
-        in output.err
+        f"Warning: Profile '{profile.name}' has SSL verification disabled. Adding certificate "
+        f"verification is strongly advised." in output.err
     )
 
 

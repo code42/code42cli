@@ -13,7 +13,6 @@ from py42.exceptions import Py42NotFoundError
 from py42.response import Py42Response
 from requests import Response
 
-from code42cli import PRODUCT_NAME
 from code42cli.cmds.devices import _add_backup_set_settings_to_dataframe
 from code42cli.cmds.devices import _add_legal_hold_membership_to_device_dataframe
 from code42cli.cmds.devices import _add_usernames_to_device_dataframe
@@ -21,7 +20,7 @@ from code42cli.cmds.devices import _break_backup_usage_into_total_storage
 from code42cli.cmds.devices import _get_device_dataframe
 from code42cli.main import cli
 
-_NAMESPACE = "{}.cmds.devices".format(PRODUCT_NAME)
+_NAMESPACE = "code42cli.cmds.devices"
 TEST_DATE_OLDER = "2020-01-01T12:00:00.774Z"
 TEST_DATE_NEWER = "2021-01-01T12:00:00.774Z"
 TEST_DATE_MIDDLE = "2020-06-01T12:00:00"
