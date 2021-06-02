@@ -57,7 +57,7 @@ def test_create_sdk_when_profile_has_ssl_errors_disabled_sets_py42_setting_and_p
     assert not mock_py42.settings.verify_ssl_certs
     assert (
         f"Warning: Profile '{profile.name}' has SSL verification disabled. Adding certificate "
-        f"verification is strongly advised." in output.err
+        "verification is strongly advised." in output.err
     )
 
 
