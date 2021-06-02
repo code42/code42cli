@@ -30,7 +30,7 @@ def _get_filter_choices():
 
 filter_option = click.option(
     "--filter",
-    help="High risk employee filter options. Defaults to {}.".format(ALL_FILTER),
+    help=f"High risk employee filter options. Defaults to {ALL_FILTER}.",
     type=click.Choice(_get_filter_choices()),
     default=ALL_FILTER,
     callback=lambda ctx, param, arg: handle_filter_choice(arg),
@@ -126,7 +126,7 @@ bulk.add_command(high_risk_employee_generate_template)
 @bulk.command(
     name="add",
     help="Bulk add users to the high risk employees detection list using a CSV file with "
-    "format: {}.".format(",".join(HIGH_RISK_EMPLOYEE_CSV_HEADERS)),
+    f"format: {','.join(HIGH_RISK_EMPLOYEE_CSV_HEADERS)}.",
 )
 @read_csv_arg(headers=HIGH_RISK_EMPLOYEE_CSV_HEADERS)
 @sdk_options()

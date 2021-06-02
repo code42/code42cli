@@ -190,9 +190,8 @@ bulk.add_command(legal_hold_generate_template)
 
 @bulk.command(
     name="add",
-    help="Bulk add custodians to legal hold matters using a CSV file. CSV file format: {}".format(
-        ",".join(LEGAL_HOLD_CSV_HEADERS)
-    ),
+    help=f"Bulk add custodians to legal hold matters using a CSV file. "
+         f"CSV file format: {','.join(LEGAL_HOLD_CSV_HEADERS)}"
 )
 @read_csv_arg(headers=LEGAL_HOLD_CSV_HEADERS)
 @sdk_options()

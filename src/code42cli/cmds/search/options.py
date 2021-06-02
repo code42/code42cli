@@ -95,9 +95,8 @@ class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
                     checkpoint_value, timezone.utc
                 ).isoformat()
                 click.echo(
-                    "Ignoring --begin value as --use-checkpoint was passed and checkpoint of {} exists.\n".format(
-                        checkpoint_value_str
-                    ),
+                    f"Ignoring --begin value as --use-checkpoint was passed and checkpoint of "
+                    f"{checkpoint_value_str} exists.\n",
                     err=True,
                 )
             if (
@@ -122,11 +121,9 @@ def _parse_query_from_json(ctx, param, arg):
         filter_groups = [FilterGroup.from_dict(group) for group in query["groups"]]
         return filter_groups
     except json.JSONDecodeError as json_error:
-        raise click.BadParameter("Unable to parse JSON: {}".format(json_error))
+        raise click.BadParameter(f"Unable to parse JSON: {json_error}")
     except KeyError as key_error:
-        raise click.BadParameter(
-            "Unable to build query from input JSON: {}".format(key_error)
-        )
+        raise click.BadParameter(f"Unable to build query from input JSON: {key_error}")
 
 
 def advanced_query_option(term, **kwargs):

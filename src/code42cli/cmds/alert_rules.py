@@ -73,7 +73,7 @@ def remove_user(state, rule_id, username):
         _remove_user(state.sdk, rule_id, username)
     except Py42BadRequestError:
         raise Code42CLIError(
-            "User {} is not currently assigned to rule-id {}.".format(username, rule_id)
+            f"User {username} is not currently assigned to rule-id {rule_id}."
         )
 
 

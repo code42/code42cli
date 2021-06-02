@@ -43,9 +43,7 @@ class WorkerStats:
         return self._results
 
     def __str__(self):
-        return "{} succeeded, {} failed out of {}".format(
-            self.total_successes, self._total_errors, self.total
-        )
+        return f"{self.total_successes} succeeded, {self._total_errors} failed out of {self.total}"
 
     def increment_total_processed(self):
         """+1 to self.total_processed"""
