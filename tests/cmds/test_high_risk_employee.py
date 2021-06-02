@@ -234,7 +234,7 @@ def test_remove_high_risk_employee_when_user_does_not_exist_exits_with_correct_m
         cli, ["high-risk-employee", "remove", TEST_EMPLOYEE], obj=cli_state_without_user
     )
     assert result.exit_code == 1
-    assert "User '{}' does not exist.".format(TEST_EMPLOYEE) in result.output
+    assert f"User '{TEST_EMPLOYEE}' does not exist." in result.output
 
 
 def test_bulk_add_employees_calls_expected_py42_methods(runner, cli_state):
@@ -280,7 +280,7 @@ def test_bulk_add_employees_calls_expected_py42_methods(runner, cli_state):
 
 
 def test_bulk_remove_employees_uses_expected_arguments(runner, cli_state, mocker):
-    bulk_processor = mocker.patch("{}.run_bulk_process".format(_NAMESPACE))
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_remove.csv", "w") as csv:
             csv.writelines(["# username\n", "test@example.com\n", "test2@example.com"])
@@ -296,7 +296,7 @@ def test_bulk_remove_employees_uses_expected_arguments(runner, cli_state, mocker
 
 
 def test_bulk_add_risk_tags_uses_expected_arguments(runner, cli_state, mocker):
-    bulk_processor = mocker.patch("{}.run_bulk_process".format(_NAMESPACE))
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_add_risk_tags.csv", "w") as csv:
             csv.writelines(
@@ -314,7 +314,7 @@ def test_bulk_add_risk_tags_uses_expected_arguments(runner, cli_state, mocker):
 
 
 def test_bulk_remove_risk_tags_uses_expected_arguments(runner, cli_state, mocker):
-    bulk_processor = mocker.patch("{}.run_bulk_process".format(_NAMESPACE))
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_remove_risk_tags.csv", "w") as csv:
             csv.writelines(
@@ -347,9 +347,7 @@ def test_remove_high_risk_employee_when_user_not_on_list_prints_expected_error(
         cli, ["high-risk-employee", "remove", test_username], obj=cli_state
     )
     assert (
-        "User with ID '{}' is not currently on the high-risk-employee list.".format(
-            TEST_ID
-        )
+        f"User with ID '{TEST_ID}' is not currently on the high-risk-employee list."
         in result.output
     )
 
@@ -357,16 +355,13 @@ def test_remove_high_risk_employee_when_user_not_on_list_prints_expected_error(
 @pytest.mark.parametrize(
     "command, error_msg",
     [
-        ("{} add".format(HR_EMPLOYEE_COMMAND), "Missing argument 'USERNAME'."),
-        ("{} remove".format(HR_EMPLOYEE_COMMAND), "Missing argument 'USERNAME'."),
-        ("{} bulk add".format(HR_EMPLOYEE_COMMAND), "Missing argument 'CSV_FILE'."),
-        ("{} bulk remove".format(HR_EMPLOYEE_COMMAND), "Missing argument 'FILE'."),
+        (f"{HR_EMPLOYEE_COMMAND} add", "Missing argument 'USERNAME'."),
+        (f"{HR_EMPLOYEE_COMMAND} remove", "Missing argument 'USERNAME'."),
+        (f"{HR_EMPLOYEE_COMMAND} bulk add", "Missing argument 'CSV_FILE'."),
+        (f"{HR_EMPLOYEE_COMMAND} bulk remove", "Missing argument 'FILE'."),
+        (f"{HR_EMPLOYEE_COMMAND} bulk add-risk-tags", "Missing argument 'CSV_FILE'."),
         (
-            "{} bulk add-risk-tags".format(HR_EMPLOYEE_COMMAND),
-            "Missing argument 'CSV_FILE'.",
-        ),
-        (
-            "{} bulk remove-risk-tags".format(HR_EMPLOYEE_COMMAND),
+            f"{HR_EMPLOYEE_COMMAND} bulk remove-risk-tags",
             "Missing argument 'CSV_FILE'.",
         ),
     ],

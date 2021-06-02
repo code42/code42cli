@@ -538,10 +538,7 @@ def test_deactivate_fails_if_device_does_not_exist(
         cli, ["devices", "deactivate", TEST_DEVICE_GUID], obj=cli_state
     )
     assert result.exit_code == 1
-    assert (
-        "The device with GUID '{}' was not found.".format(TEST_DEVICE_GUID)
-        in result.output
-    )
+    assert f"The device with GUID '{TEST_DEVICE_GUID}' was not found." in result.output
 
 
 def test_deactivate_fails_if_device_is_on_legal_hold(
@@ -552,8 +549,7 @@ def test_deactivate_fails_if_device_is_on_legal_hold(
     )
     assert result.exit_code == 1
     assert (
-        "The device with GUID '{}' is in legal hold.".format(TEST_DEVICE_GUID)
-        in result.output
+        f"The device with GUID '{TEST_DEVICE_GUID}' is in legal hold." in result.output
     )
 
 
