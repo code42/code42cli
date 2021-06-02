@@ -10,9 +10,7 @@ def _try_get_logger_for_server(hostname, protocol, output_format, certs):
     try:
         return get_logger_for_server(hostname, protocol, output_format, certs)
     except Exception as err:
-        raise Code42CLIError(
-            "Unable to connect to {}. Failed with error: {}.".format(hostname, str(err))
-        )
+        raise Code42CLIError(f"Unable to connect to {hostname}. Failed with error: {err}.")
 
 
 class SendToCommand(click.Command):

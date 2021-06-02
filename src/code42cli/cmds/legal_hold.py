@@ -191,7 +191,7 @@ bulk.add_command(legal_hold_generate_template)
 @bulk.command(
     name="add",
     help=f"Bulk add custodians to legal hold matters using a CSV file. "
-         f"CSV file format: {','.join(LEGAL_HOLD_CSV_HEADERS)}"
+    f"CSV file format: {','.join(LEGAL_HOLD_CSV_HEADERS)}",
 )
 @read_csv_arg(headers=LEGAL_HOLD_CSV_HEADERS)
 @sdk_options()
@@ -205,9 +205,8 @@ def bulk_add(state, csv_rows):
 
 
 @bulk.command(
-    help="Bulk release custodians from legal hold matters using a CSV file. CSV file format: {}".format(
-        ",".join(LEGAL_HOLD_CSV_HEADERS)
-    )
+    help=f"Bulk release custodians from legal hold matters using a CSV file. "
+    f"CSV file format: {','.join(LEGAL_HOLD_CSV_HEADERS)}"
 )
 @read_csv_arg(headers=LEGAL_HOLD_CSV_HEADERS)
 @sdk_options()
@@ -286,10 +285,10 @@ def _get_all_events(sdk, legal_hold_uid, begin_date, end_date):
 
 def _print_matter_members(username_list, member_type="active"):
     if username_list:
-        echo("\n{} matter members:\n".format(member_type.capitalize()))
+        echo(f"\n{member_type.capitalize()} matter members:\n")
         format_string_list_to_columns(username_list)
     else:
-        echo("No {} matter members.\n".format(member_type))
+        echo(f"No {member_type} matter members.\n")
 
 
 @lru_cache(maxsize=None)

@@ -164,7 +164,7 @@ def delete(profile_name):
         message = f"\n'{profile_name}' is currently the default profile!\n{message}"
     if does_user_agree(message):
         cliprofile.delete_profile(profile_name)
-        echo("Profile '{}' has been deleted.".format(profile_name))
+        echo(f"Profile '{profile_name}' has been deleted.")
 
 
 @profile.command()

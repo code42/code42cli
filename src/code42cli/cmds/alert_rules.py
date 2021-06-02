@@ -118,9 +118,8 @@ bulk.add_command(alert_rules_generate_template)
 
 
 @bulk.command(
-    help="Bulk add users to alert rules from a CSV file. CSV file format: {}".format(
-        ",".join(ALERT_RULES_CSV_HEADERS)
-    )
+    help=f"Bulk add users to alert rules from a CSV file. "
+    f"CSV file format: {','.join(ALERT_RULES_CSV_HEADERS)}"
 )
 @read_csv_arg(headers=ALERT_RULES_CSV_HEADERS)
 @sdk_options()
@@ -136,9 +135,8 @@ def add(state, csv_rows):
 
 
 @bulk.command(
-    help="Bulk remove users from alert rules using a CSV file. CSV file format: {}".format(
-        ",".join(ALERT_RULES_CSV_HEADERS)
-    )
+    help="Bulk remove users from alert rules using a CSV file. "
+    "CSV file format: {','.join(ALERT_RULES_CSV_HEADERS)}"
 )
 @read_csv_arg(headers=ALERT_RULES_CSV_HEADERS)
 @sdk_options()
@@ -182,8 +180,8 @@ def _get_rule_metadata(sdk, rule_id):
 
 def _handle_rules_results(rules, rule_id=None):
     if not rules:
-        id_msg = "with RuleId {} ".format(rule_id) if rule_id else ""
-        msg = "No alert rules {}found.".format(id_msg)
+        id_msg = f"with RuleId {rule_id} " if rule_id else ""
+        msg = f"No alert rules {id_msg}found."
         raise Code42CLIError(msg)
     return rules
 
@@ -198,5 +196,5 @@ def _get_rule_type_func(sdk, rule_type):
     else:
         raise Code42CLIError(
             "Received an unknown rule type from server. You might need to update "
-            "to a newer version of {}".format(PRODUCT_NAME)
+            f"to a newer version of {PRODUCT_NAME}"
         )
