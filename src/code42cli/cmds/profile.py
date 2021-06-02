@@ -11,6 +11,7 @@ from code42cli.options import yes_option
 from code42cli.profile import CREATE_PROFILE_HELP
 from code42cli.sdk_client import create_sdk
 from code42cli.util import does_user_agree
+from code42cli.click_ext.options import incompatible_with
 
 
 @click.group()
@@ -103,16 +104,31 @@ def create(name, server, username, password, disable_ssl_errors):
 @username_option()
 @password_option
 @disable_ssl_option
-def update(name, server, username, password, disable_ssl_errors):
+@click.option(
+    "--enable-ssl-errors",
+    is_flag=True,
+    help="Re-enable SSL verification for a profile (if it had been previously disabled).",
+    default=None,
+    cls=incompatible_with("disable_ssl_errors"),
+)
+def update(name, server, username, password, disable_ssl_errors, enable_ssl_errors):
     """Update an existing profile."""
     c42profile = cliprofile.get_profile(name)
 
-    if not server and not username and not password and disable_ssl_errors is None:
+    if (
+        not server
+        and not username
+        and not password
+        and disable_ssl_errors is None
+        and enable_ssl_errors is None
+    ):
         raise click.UsageError(
             "Must provide at least one of `--username`, `--server`, `--password`, or "
-            "`--disable-ssl-errors` when updating a profile."
+            "`--disable-ssl-errors/--enable-ssl-errors` when updating a profile."
         )
 
+    if enable_ssl_errors:
+        disable_ssl_errors = False
     cliprofile.update_profile(c42profile.name, server, username, disable_ssl_errors)
     if password:
         _set_pw(name, password)
