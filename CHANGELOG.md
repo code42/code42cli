@@ -14,6 +14,10 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Issue where `profile` commands that required connecting to an authority failed to respect the `--disable-ssl-errors` flag when set.
 
+### Added
+
+- `--enable-ssl-errors` option to `profile update` command, making it possible to re-enable ssl verification on a profile that had it disabled.
+
 ## 1.6.0 - 2021-05-20
 
 ### Added
