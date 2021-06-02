@@ -340,9 +340,7 @@ def test_remove_when_user_not_on_rule_raises_expected_error(runner, cli_state, m
         obj=cli_state,
     )
     assert (
-        "User {} is not currently assigned to rule-id {}.".format(
-            test_username, test_rule_id
-        )
+        f"User {test_username} is not currently assigned to rule-id {test_rule_id}."
         in result.output
     )
 
@@ -351,24 +349,18 @@ def test_remove_when_user_not_on_rule_raises_expected_error(runner, cli_state, m
     "command, error_msg",
     [
         (
-            "{} add-user --rule-id test-rule-id".format(ALERT_RULES_COMMAND),
+            f"{ALERT_RULES_COMMAND} add-user --rule-id test-rule-id",
             "Missing option '-u' / '--username'.",
         ),
         (
-            "{} remove-user --rule-id test-rule-id".format(ALERT_RULES_COMMAND),
+            f"{ALERT_RULES_COMMAND} remove-user --rule-id test-rule-id",
             "Missing option '-u' / '--username'.",
         ),
-        ("{} add-user".format(ALERT_RULES_COMMAND), "Missing option '--rule-id'."),
-        ("{} remove-user".format(ALERT_RULES_COMMAND), "Missing option '--rule-id'."),
-        ("{} show".format(ALERT_RULES_COMMAND), "Missing argument 'RULE_ID'."),
-        (
-            "{} bulk add".format(ALERT_RULES_COMMAND),
-            "Error: Missing argument 'CSV_FILE'.",
-        ),
-        (
-            "{} bulk remove".format(ALERT_RULES_COMMAND),
-            "Error: Missing argument 'CSV_FILE'.",
-        ),
+        (f"{ALERT_RULES_COMMAND} add-user", "Missing option '--rule-id'."),
+        (f"{ALERT_RULES_COMMAND} remove-user", "Missing option '--rule-id'."),
+        (f"{ALERT_RULES_COMMAND} show", "Missing argument 'RULE_ID'."),
+        (f"{ALERT_RULES_COMMAND} bulk add", "Error: Missing argument 'CSV_FILE'.",),
+        (f"{ALERT_RULES_COMMAND} bulk remove", "Error: Missing argument 'CSV_FILE'.",),
     ],
 )
 def test_alert_rules_command_when_missing_required_parameters_errors(

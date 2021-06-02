@@ -527,9 +527,7 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_with_stored_c
     assert result.exit_code == 0
     assert len(file_event_extractor.extract.call_args[0]) == 1
     assert (
-        "checkpoint of {} exists".format(
-            file_event_cursor_with_checkpoint.expected_timestamp
-        )
+        f"checkpoint of {file_event_cursor_with_checkpoint.expected_timestamp} exists"
         in result.output
     )
 

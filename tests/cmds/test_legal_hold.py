@@ -416,8 +416,9 @@ def test_remove_user_raises_user_not_in_matter_error_if_user_not_active_in_matte
         obj=cli_state,
     )
     assert result.exit_code == 1
-    assert "User '{}' is not an active member of legal hold matter '{}'".format(
-        ACTIVE_TEST_USERNAME, TEST_MATTER_ID
+    assert (
+        f"User '{ACTIVE_TEST_USERNAME}' is not an active member of legal hold matter "
+        f"'{TEST_MATTER_ID}'"
     )
 
 
@@ -576,7 +577,7 @@ def test_show_matter_does_not_print_preservation_policy(
 
 
 def test_add_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
-    bulk_processor = mocker.patch("{}.run_bulk_process".format(_NAMESPACE))
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_add.csv", "w") as csv:
             csv.writelines(["matter_id,username\n", "test,value\n"])
@@ -587,7 +588,7 @@ def test_add_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
 
 
 def test_remove_bulk_users_uses_expected_arguments(runner, mocker, cli_state):
-    bulk_processor = mocker.patch("{}.run_bulk_process".format(_NAMESPACE))
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_remove.csv", "w") as csv:
             csv.writelines(["matter_id,username\n", "test,value\n"])
@@ -676,30 +677,18 @@ def test_search_events_when_no_results_outputs_no_results(runner, cli_state):
     "command, error_msg",
     [
         (
-            "{} add-user --matter-id test-matter-id".format(LEGAL_HOLD_COMMAND),
+            f"{LEGAL_HOLD_COMMAND} add-user --matter-id test-matter-id",
             "Missing option '-u' / '--username'.",
         ),
         (
-            "{} remove-user --matter-id test-matter-id".format(LEGAL_HOLD_COMMAND),
+            f"{LEGAL_HOLD_COMMAND} remove-user --matter-id test-matter-id",
             "Missing option '-u' / '--username'.",
         ),
-        (
-            "{} add-user".format(LEGAL_HOLD_COMMAND),
-            "Missing option '-m' / '--matter-id'.",
-        ),
-        (
-            "{} remove-user".format(LEGAL_HOLD_COMMAND),
-            "Missing option '-m' / '--matter-id'.",
-        ),
-        ("{} show".format(LEGAL_HOLD_COMMAND), "Missing argument 'MATTER_ID'."),
-        (
-            "{} bulk add".format(LEGAL_HOLD_COMMAND),
-            "Error: Missing argument 'CSV_FILE'.",
-        ),
-        (
-            "{} bulk remove".format(LEGAL_HOLD_COMMAND),
-            "Error: Missing argument 'CSV_FILE'.",
-        ),
+        (f"{LEGAL_HOLD_COMMAND} add-user", "Missing option '-m' / '--matter-id'.",),
+        (f"{LEGAL_HOLD_COMMAND} remove-user", "Missing option '-m' / '--matter-id'.",),
+        (f"{LEGAL_HOLD_COMMAND} show", "Missing argument 'MATTER_ID'."),
+        (f"{LEGAL_HOLD_COMMAND} bulk add", "Error: Missing argument 'CSV_FILE'.",),
+        (f"{LEGAL_HOLD_COMMAND} bulk remove", "Error: Missing argument 'CSV_FILE'.",),
     ],
 )
 def test_legal_hold_command_when_missing_required_parameters_returns_error(

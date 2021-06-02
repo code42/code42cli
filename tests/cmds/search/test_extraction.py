@@ -84,7 +84,7 @@ def test_send_to_handlers_creates_handlers_that_pass_events_to_logger(
     )
     http_response = mocker.MagicMock(spec=Response)
     events = [{"property": "bar"}]
-    http_response.text = '{{"{0}": [{{"property": "bar"}}]}}'.format(key)
+    http_response.text = f'{{"{key}": [{{"property": "bar"}}]}}'
     py42_response = Py42Response(http_response)
     handlers.handle_response(py42_response)
     event_extractor_logger.info.assert_called_once_with(events[0])

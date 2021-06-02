@@ -561,7 +561,7 @@ def test_deactivate_fails_if_device_deactivation_forbidden(
     )
     assert result.exit_code == 1
     assert (
-        "Unable to deactivate the device with GUID '{}'.".format(TEST_DEVICE_GUID)
+        f"Unable to deactivate the device with GUID '{TEST_DEVICE_GUID}'."
         in result.output
     )
 
