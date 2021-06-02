@@ -28,7 +28,7 @@ def _get_filter_choices():
 DATE_FORMAT = "%Y-%m-%d"
 filter_option = click.option(
     "--filter",
-    help="Departing employee filter options. Defaults to {}.".format(ALL_FILTER),
+    help=f"Departing employee filter options. Defaults to {ALL_FILTER}.",
     type=click.Choice(_get_filter_choices()),
     default=ALL_FILTER,
     callback=lambda ctx, param, arg: handle_filter_choice(arg),
@@ -96,7 +96,7 @@ bulk.add_command(departing_employee_generate_template)
 @bulk.command(
     name="add",
     help="Bulk add users to the Departing Employees detection list using a CSV file with "
-    "format: {}.".format(",".join(DEPARTING_EMPLOYEE_CSV_HEADERS)),
+    f"format: {','.join(DEPARTING_EMPLOYEE_CSV_HEADERS)}.",
 )
 @read_csv_arg(headers=DEPARTING_EMPLOYEE_CSV_HEADERS)
 @sdk_options()

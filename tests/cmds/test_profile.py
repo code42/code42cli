@@ -446,8 +446,8 @@ def test_delete_all_does_not_warn_if_assume_yes_flag(runner, mock_cliprofile_nam
     assert (
         "Are you sure you want to delete the following profiles?" not in result.output
     )
-    assert "Profile '{}' has been deleted.".format("test1") in result.output
-    assert "Profile '{}' has been deleted.".format("test2") in result.output
+    assert "Profile 'test1' has been deleted." in result.output
+    assert "Profile 'test2' has been deleted." in result.output
 
 
 def test_delete_all_profiles_does_nothing_if_user_doesnt_agree(
@@ -529,6 +529,4 @@ def test_use_profile(runner, mock_cliprofile_namespace, profile):
     mock_cliprofile_namespace.switch_default_profile.assert_called_once_with(
         profile.name
     )
-    assert (
-        "{} has been set as the default profile.".format(profile.name) in result.output
-    )
+    assert f"{profile.name} has been set as the default profile." in result.output

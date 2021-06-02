@@ -54,7 +54,7 @@ def _set_handlers(cursor_store, checkpoint_name):
 
         errors.ERRORED = True
         if hasattr(exception, "response") and hasattr(exception.response, "text"):
-            message = "{}: {}".format(exception, exception.response.text)
+            message = f"{exception}: {exception.response.text}"
         else:
             message = exception
         logger.log_error(message)

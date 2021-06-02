@@ -46,7 +46,7 @@ def _encode_response(line, encoding_type=_ENCODING_TYPE):
 
 
 def append_profile(command):
-    return "{} --profile {}".format(command, TEST_PROFILE_NAME)
+    return f"{command} --profile {TEST_PROFILE_NAME}"
 
 
 @pytest.fixture(scope="session")

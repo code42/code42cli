@@ -23,16 +23,14 @@ from code42cli.cmds.securitydata import security_data
 from code42cli.cmds.users import users
 from code42cli.options import sdk_options
 
-BANNER = """\b
+BANNER = f"""\b
  dP""b8  dP"Yb  8888b. 888888  dP88  oP"Yb.
 dP   `" dP   Yb 8I  Yb 88__   dP 88  "' dP'
 Yb      Yb   dP 8I  dY 88""  d888888   dP'
  YboodP  YbodP  8888Y" 888888    88  .d8888
 
-code42cli version {}, by Code42 Software.
-powered by py42 version {}.""".format(
-    cliversion, py42version
-)
+code42cli version {cliversion}, by Code42 Software.
+powered by py42 version {py42version}."""
 
 
 # Handle KeyboardInterrupts by just exiting instead of printing out a stack

@@ -1,6 +1,5 @@
 import pytest
 
-from code42cli import PRODUCT_NAME
 from code42cli.util import _PADDING_SIZE
 from code42cli.util import does_user_agree
 from code42cli.util import find_format_width
@@ -31,7 +30,7 @@ def echo_output(mocker):
     return mocker.patch("code42cli.util.echo")
 
 
-_NAMESPACE = "{}.util".format(PRODUCT_NAME)
+_NAMESPACE = "code42cli.util"
 
 
 def get_expected_row_width(max_col_len, max_width):

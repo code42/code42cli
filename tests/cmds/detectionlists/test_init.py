@@ -8,20 +8,18 @@ from code42cli.cmds.detectionlists import update_user
 MOCK_USER_ID = "USER-ID"
 MOCK_USER_NAME = "test@example.com"
 MOCK_ALIAS = "alias@example"
-MOCK_USER_PROFILE_RESPONSE = """
+MOCK_USER_PROFILE_RESPONSE = f"""
 {{
     "type$": "USER_V2",
     "tenantId": "TENANT-ID",
-    "userId": "{0}",
-    "userName": "{1}",
+    "userId": "{MOCK_USER_ID}",
+    "userName": "{MOCK_USER_NAME}",
     "displayName": "Test",
     "notes": "Notes",
-    "cloudUsernames": ["{2}", "{1}"],
+    "cloudUsernames": ["{MOCK_ALIAS}", "{MOCK_USER_NAME}"],
     "riskFactors": ["HIGH_IMPACT_EMPLOYEE"]
 }}
-""".format(
-    MOCK_USER_ID, MOCK_USER_NAME, MOCK_ALIAS
-)
+"""
 
 
 @pytest.fixture

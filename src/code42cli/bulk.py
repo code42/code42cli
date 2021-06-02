@@ -23,9 +23,7 @@ def write_template_file(path, columns=None, flat_item=None):
             new_file.write(",".join(columns))
         else:
             new_file.write(
-                "# This template takes a single {} to be processed on each row.".format(
-                    flat_item or "item"
-                )
+                f"# This template takes a single {flat_item or 'item'} to be processed on each row."
             )
 
 
@@ -58,7 +56,7 @@ def generate_template_cmd_factory(group_name, commands_dict, help_message=None):
     def generate_template(cmd, path):
         columns = commands_dict[cmd]
         if not path:
-            filename = "{}_bulk_{}.csv".format(group_name, cmd.replace("-", "_"))
+            filename = f"{group_name}_bulk_{cmd.replace('-', '_')}.csv"
             path = os.path.join(os.getcwd(), filename)
         if isinstance(columns, str):
             write_template_file(path, columns=None, flat_item=columns)
