@@ -533,7 +533,7 @@ def get_cef_parts(cef_str):
 
 def key_value_pair_in_cef_extension(field_name, field_value, cef_str):
     cef_parts = get_cef_parts(cef_str)
-    kvp = "{}={}".format(field_name, field_value)
+    kvp = f"{field_name}={field_value}"
     return kvp in cef_parts[-1]
 
 

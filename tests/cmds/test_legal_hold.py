@@ -207,9 +207,9 @@ TEST_EVENT_PAGE = {
         },
     ]
 }
-EMPTY_EVENTS_RESPONSE = """{"legalHoldEvents": []}"""
-EMPTY_MATTERS_RESPONSE = """{"legalHolds": []}"""
-ALL_MATTERS_RESPONSE = """{{"legalHolds": [{}]}}""".format(MATTER_RESPONSE)
+EMPTY_EVENTS_RESPONSE = '{"legalHoldEvents": []}'
+EMPTY_MATTERS_RESPONSE = '{"legalHolds": []}'
+ALL_MATTERS_RESPONSE = f'{{"legalHolds": [{MATTER_RESPONSE}]}}'
 LEGAL_HOLD_COMMAND = "legal-hold"
 
 
@@ -326,9 +326,7 @@ def test_add_user_raises_user_already_added_error_when_user_already_on_hold(
         obj=cli_state,
     )
     assert result.exit_code == 1
-    assert "'{}' is already on the legal hold matter id={}".format(
-        ACTIVE_TEST_USERNAME, TEST_MATTER_ID
-    )
+    assert f"'{ACTIVE_TEST_USERNAME}' is already on the legal hold matter id={TEST_MATTER_ID}"
 
 
 def test_add_user_raises_legalhold_not_found_error_if_matter_inaccessible(
@@ -347,8 +345,9 @@ def test_add_user_raises_legalhold_not_found_error_if_matter_inaccessible(
         obj=cli_state,
     )
     assert result.exit_code == 1
-    assert "Matter with id={} either does not exist or your profile does not have permission to view it.".format(
-        TEST_MATTER_ID
+    assert (
+        f"Matter with id={TEST_MATTER_ID} either does not exist or your profile does not have "
+        f"permission to view it."
     )
 
 
@@ -389,8 +388,8 @@ def test_remove_user_raises_legalhold_not_found_error_if_matter_inaccessible(
     )
     assert result.exit_code == 1
     assert (
-        "Matter with id={} either does not exist or your profile does not have "
-        "permission to view it.".format(TEST_MATTER_ID)
+        f"Matter with id={TEST_MATTER_ID} either does not exist or your profile does not have "
+        "permission to view it."
     )
 
 

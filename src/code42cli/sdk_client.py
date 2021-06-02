@@ -23,8 +23,8 @@ def create_sdk(profile, is_debug_mode, password=None, totp=None):
         py42.settings.debug.level = debug.DEBUG
     if profile.ignore_ssl_errors == "True":
         secho(
-            "Warning: Profile '{}' has SSL verification disabled. Adding certificate verification "
-            "is strongly advised.".format(profile.name),
+            f"Warning: Profile '{profile.name}' has SSL verification disabled. "
+            f"Adding certificate verification is strongly advised.",
             fg="red",
             err=True,
         )

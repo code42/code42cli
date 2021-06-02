@@ -19,7 +19,7 @@ def bulk_processor(mocker):
 
 @pytest.fixture
 def bulk_processor_factory(mocker, bulk_processor):
-    mock_factory = mocker.patch("{}._create_bulk_processor".format(_NAMESPACE))
+    mock_factory = mocker.patch(f"{_NAMESPACE}._create_bulk_processor")
     mock_factory.return_value = bulk_processor
     return mock_factory
 

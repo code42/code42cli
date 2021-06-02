@@ -281,7 +281,7 @@ def test_show_rule_when_no_matching_rule_prints_no_rule_message(runner, cli_stat
         TEST_EMPTY_RULE_RESPONSE
     )
     result = runner.invoke(cli, ["alert-rules", "show", TEST_RULE_ID], obj=cli_state)
-    msg = "No alert rules with RuleId {} found".format(TEST_RULE_ID)
+    msg = f"No alert rules with RuleId {TEST_RULE_ID} found"
     assert msg in result.output
 
 

@@ -34,7 +34,7 @@ def delete_password(profile):
 
 
 def _get_keyring_service_name(profile_name):
-    return "{}::{}".format(PRODUCT_NAME, profile_name)
+    return f"{PRODUCT_NAME}::{profile_name}"
 
 
 def _prompt_for_alternative_store():

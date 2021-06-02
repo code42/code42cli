@@ -2,7 +2,6 @@ from os import path
 
 import pytest
 
-from code42cli import PRODUCT_NAME
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.cmds.search.cursor_store import AuditLogCursorStore
 from code42cli.cmds.search.cursor_store import Cursor
@@ -12,7 +11,7 @@ from code42cli.errors import Code42CLIError
 PROFILE_NAME = "testprofile"
 CURSOR_NAME = "testcursor"
 
-_NAMESPACE = "{}.cmds.search.cursor_store".format(PRODUCT_NAME)
+_NAMESPACE = "code42cli.cmds.search.cursor_store"
 
 ALERT_CHECKPOINT_FOLDER_NAME = "alert_checkpoints"
 FILE_EVENT_CHECKPOINT_FOLDER_NAME = "file_event_checkpoints"

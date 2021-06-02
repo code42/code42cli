@@ -12,7 +12,6 @@ from tests.cmds.conftest import get_mark_for_search_and_send_to
 from tests.conftest import get_test_date_str
 
 from code42cli import errors
-from code42cli import PRODUCT_NAME
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.logger.enums import ServerProtocol
 from code42cli.main import cli
@@ -152,9 +151,7 @@ def file_event_cursor_with_checkpoint(mocker):
 
 @pytest.fixture
 def file_event_cursor_without_checkpoint(mocker):
-    mock = mocker.patch(
-        "{}.cmds.securitydata._get_file_event_cursor_store".format(PRODUCT_NAME)
-    )
+    mock = mocker.patch("code42cli.cmds.securitydata._get_file_event_cursor_store")
     mock_cursor = mocker.MagicMock(spec=FileEventCursorStore)
     mock_cursor.get.return_value = None
     mock.return_value = mock_cursor
@@ -840,7 +837,7 @@ def test_search_and_send_to_with_or_query_flag_produces_expected_query(
                     {
                         "operator": "ON_OR_AFTER",
                         "term": "eventTimestamp",
-                        "value": "{}T00:00:00.000Z".format(begin_date),
+                        "value": f"{begin_date}T00:00:00.000Z",
                     },
                 ],
             },
