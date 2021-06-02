@@ -6,12 +6,12 @@ from click import secho
 from py42.exceptions import Py42MFARequiredError
 
 import code42cli.profile as cliprofile
+from code42cli.click_ext.options import incompatible_with
 from code42cli.errors import Code42CLIError
 from code42cli.options import yes_option
 from code42cli.profile import CREATE_PROFILE_HELP
 from code42cli.sdk_client import create_sdk
 from code42cli.util import does_user_agree
-from code42cli.click_ext.options import incompatible_with
 
 
 @click.group()
