@@ -547,7 +547,7 @@ def test_search_and_send_to_with_only_begin_calls_extract_with_expected_filters(
     assert res.exit_code == 0
     assert (
         str(alert_extractor.extract.call_args[0][0])
-        == '{{"filterClause":"AND", "filters":[{{"operator":"ON_OR_AFTER", "term":"createdAt", '
+        == '{"filterClause":"AND", "filters":[{"operator":"ON_OR_AFTER", "term":"createdAt", '
         f'"value":"{begin_option.expected_timestamp}"}}]}}'
     )
 
