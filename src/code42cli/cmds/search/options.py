@@ -95,7 +95,7 @@ class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
                     checkpoint_value, timezone.utc
                 ).isoformat()
                 click.echo(
-                    f"Ignoring --begin value as --use-checkpoint was passed and checkpoint of "
+                    "Ignoring --begin value as --use-checkpoint was passed and checkpoint of "
                     f"{checkpoint_value_str} exists.\n",
                     err=True,
                 )
