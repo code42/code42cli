@@ -4,16 +4,16 @@ import sys
 import click
 from click_plugins import with_plugins
 from pkg_resources import iter_entry_points
-from py42.__version__ import __version__ as py42version
 from py42.settings import set_user_agent_suffix
 
+from code42cli import BANNER
 from code42cli import PRODUCT_NAME
-from code42cli.__version__ import __version__ as cliversion
 from code42cli.click_ext.groups import ExceptionHandlingGroup
 from code42cli.cmds.alert_rules import alert_rules
 from code42cli.cmds.alerts import alerts
 from code42cli.cmds.auditlogs import audit_logs
 from code42cli.cmds.cases import cases
+from code42cli.cmds.console import console
 from code42cli.cmds.departing_employee import departing_employee
 from code42cli.cmds.devices import devices
 from code42cli.cmds.high_risk_employee import high_risk_employee
@@ -22,15 +22,6 @@ from code42cli.cmds.profile import profile
 from code42cli.cmds.securitydata import security_data
 from code42cli.cmds.users import users
 from code42cli.options import sdk_options
-
-BANNER = f"""\b
- dP""b8  dP"Yb  8888b. 888888  dP88  oP"Yb.
-dP   `" dP   Yb 8I  Yb 88__   dP 88  "' dP'
-Yb      Yb   dP 8I  dY 88""  d888888   dP'
- YboodP  YbodP  8888Y" 888888    88  .d8888
-
-code42cli version {cliversion}, by Code42 Software.
-powered by py42 version {py42version}."""
 
 
 # Handle KeyboardInterrupts by just exiting instead of printing out a stack
@@ -82,3 +73,4 @@ cli.add_command(devices)
 cli.add_command(users)
 cli.add_command(audit_logs)
 cli.add_command(cases)
+cli.add_command(console)
