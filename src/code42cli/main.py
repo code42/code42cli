@@ -13,13 +13,13 @@ from code42cli.cmds.alert_rules import alert_rules
 from code42cli.cmds.alerts import alerts
 from code42cli.cmds.auditlogs import audit_logs
 from code42cli.cmds.cases import cases
-from code42cli.cmds.console import console
 from code42cli.cmds.departing_employee import departing_employee
 from code42cli.cmds.devices import devices
 from code42cli.cmds.high_risk_employee import high_risk_employee
 from code42cli.cmds.legal_hold import legal_hold
 from code42cli.cmds.profile import profile
 from code42cli.cmds.securitydata import security_data
+from code42cli.cmds.shell import shell
 from code42cli.cmds.users import users
 from code42cli.options import sdk_options
 
@@ -64,13 +64,13 @@ def cli(state, python):
 
 cli.add_command(alerts)
 cli.add_command(alert_rules)
-cli.add_command(security_data)
+cli.add_command(audit_logs)
+cli.add_command(cases)
 cli.add_command(departing_employee)
+cli.add_command(devices)
 cli.add_command(high_risk_employee)
 cli.add_command(legal_hold)
 cli.add_command(profile)
-cli.add_command(devices)
+cli.add_command(security_data)
+cli.add_command(shell)
 cli.add_command(users)
-cli.add_command(audit_logs)
-cli.add_command(cases)
-cli.add_command(console)
