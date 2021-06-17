@@ -21,7 +21,7 @@ jobs:
           path-to-signatures: '.cla_signatures.json'
           path-to-cla-document: 'https://code42.github.io/code42-cla/Code42_Individual_Contributor_License_Agreement'
           # branch should not be protected
-          branch: 'main'
+          branch: 'master'
           allowlist: alang13,unparalleled-js,kiran-chaudhary,timabrmsn,ceciliastevens,DiscoRiver,annie-payseur,amoravec,patelsagar192
 
           #below are the optional inputs - If the optional inputs are not given, then default values will be taken
