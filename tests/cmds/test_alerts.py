@@ -114,9 +114,9 @@ ADVANCED_QUERY_VALUES = {
     "state_2": "PENDING",
     "state_3": "IN_PROGRESS",
     "actor": "test@example.com",
-    "on_or_after": "2020-01-01T06:00:00.000Z",
+    "on_or_after": "2020-01-01T06:00:00.000000Z",
     "on_or_after_timestamp": 1577858400.0,
-    "on_or_before": "2020-02-01T06:00:00.000Z",
+    "on_or_before": "2020-02-01T06:00:00.000000Z",
     "on_or_before_timestamp": 1580536800.0,
     "rule_id": "xyz123",
 }
@@ -328,7 +328,7 @@ def alert_cursor_without_checkpoint(mocker):
 def begin_option(mocker):
     mock = mocker.patch(f"{PRODUCT_NAME}.cmds.alerts.convert_datetime_to_timestamp")
     mock.return_value = BEGIN_TIMESTAMP
-    mock.expected_timestamp = "2020-01-01T06:00:00.000Z"
+    mock.expected_timestamp = "2020-01-01T06:00:00.000000Z"
     return mock
 
 
@@ -428,9 +428,9 @@ def test_search_and_send_to_when_given_begin_and_end_dates_uses_expected_query(
     )
     filters = alert_extractor.extract.call_args[0][0]
     actual_begin = get_filter_value_from_json(filters, filter_index=0)
-    expected_begin = f"{begin_date}T00:00:00.000Z"
+    expected_begin = f"{begin_date}T00:00:00.000000Z"
     actual_end = get_filter_value_from_json(filters, filter_index=1)
-    expected_end = f"{end_date}T23:59:59.999Z"
+    expected_end = f"{end_date}T23:59:59.999999Z"
     assert actual_begin == expected_begin
     assert actual_end == expected_end
 
@@ -449,9 +449,9 @@ def test_search_when_given_begin_and_end_date_and_times_uses_expected_query(
     )
     filters = alert_extractor.extract.call_args[0][0]
     actual_begin = get_filter_value_from_json(filters, filter_index=0)
-    expected_begin = f"{begin_date}T{time}.000Z"
+    expected_begin = f"{begin_date}T{time}.000000Z"
     actual_end = get_filter_value_from_json(filters, filter_index=1)
-    expected_end = f"{end_date}T{time}.000Z"
+    expected_end = f"{end_date}T{time}.000000Z"
     assert actual_begin == expected_begin
     assert actual_end == expected_end
 
@@ -466,7 +466,7 @@ def test_search_when_given_begin_date_and_time_without_seconds_uses_expected_que
     actual = get_filter_value_from_json(
         alert_extractor.extract.call_args[0][0], filter_index=0
     )
-    expected = f"{date}T{time}:00.000Z"
+    expected = f"{date}T{time}:00.000000Z"
     assert actual == expected
 
 
@@ -485,7 +485,7 @@ def test_search_and_send_to_when_given_end_date_and_time_uses_expected_query(
     actual = get_filter_value_from_json(
         alert_extractor.extract.call_args[0][0], filter_index=1
     )
-    expected = f"{end_date}T{time}:00.000Z"
+    expected = f"{end_date}T{time}:00.000000Z"
     assert actual == expected
 
 
@@ -521,7 +521,7 @@ def test_search_and_send_to_when_given_begin_date_and_not_use_checkpoint_and_cur
     actual_ts = get_filter_value_from_json(
         alert_extractor.extract.call_args[0][0], filter_index=0
     )
-    expected_ts = f"{begin_date}T00:00:00.000Z"
+    expected_ts = f"{begin_date}T00:00:00.000000Z"
     assert actual_ts == expected_ts
     assert filter_term_is_in_call_args(alert_extractor, f.DateObserved._term)
 
@@ -768,7 +768,7 @@ def test_search_and_send_to_with_or_query_flag_produces_expected_query(
                     {
                         "operator": "ON_OR_AFTER",
                         "term": "createdAt",
-                        "value": f"{begin_date}T00:00:00.000Z",
+                        "value": f"{begin_date}T00:00:00.000000Z",
                     }
                 ],
             },
