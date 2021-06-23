@@ -8,11 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-## Unreleased
+## 1.7.1 - 2021-06-23
 
 ### Changed
 
 - `code42 alerts search` now uses microsecond precision when searching by alerts' date observed.
+
+- Authentication against Code42 now uses Bearer tokens instead of custom V3 user tokens.
 
 ## 1.7.0 - 2021-06-17
 
