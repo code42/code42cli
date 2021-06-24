@@ -33,7 +33,9 @@ inactive_option = click.option(
 )
 
 
-user_uid_option = click.option("--user-id", help="The unique identifier of the user to be modified.", required=True)
+user_uid_option = click.option(
+    "--user-id", help="The unique identifier of the user to be modified.", required=True
+)
 
 
 def role_name_option(help):
