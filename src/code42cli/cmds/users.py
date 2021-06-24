@@ -1,4 +1,5 @@
 import click
+from code42cli.bulk import run_bulk_process
 from pandas import DataFrame
 
 from code42cli.click_ext.groups import OrderedGroup
@@ -7,8 +8,10 @@ from code42cli.errors import Code42CLIError
 from code42cli.errors import UserDoesNotExistError
 from code42cli.options import format_option
 from code42cli.options import sdk_options
+from code42cli.file_readers import read_csv_arg
 from code42cli.output_formats import DataFrameOutputFormatter
 from code42cli.output_formats import OutputFormat
+from code42cli.output_formats import OutputFormatter
 
 
 @click.group(cls=OrderedGroup)
@@ -125,6 +128,42 @@ def update_user(
         archive_size_quota,
     )
 
+_bulk_user_update_headers = [
+    "user_id",
+    "username",
+    "email",
+    "password",
+    "first_name",
+    "last_name",
+    "notes",
+    "archive_size_quota"
+]
+
+@users.group(cls=OrderedGroup)
+@sdk_options(hidden=True)
+def bulk(state):
+    """Tools for managing users in bulk"""
+    pass
+
+@bulk.command(name="update")
+@read_csv_arg(headers=_bulk_user_update_headers)
+@format_option
+@sdk_options()
+def bulk_update(state, csv_rows, format):
+    csv_rows[0]["updated"] = False
+    formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+    def handle_row(**row):
+        try:
+            _update_user(state.sdk, **row)
+            row["updated"] = "True"
+        except Exception as err:
+            row["updated"] = f"False: {err}"
+        return row
+    
+    result_rows = run_bulk_process(
+        handle_row, csv_rows, progress_label="Updating users:"
+    )
+    formatter.echo_formatted_list(result_rows)
 
 def _add_user_role(sdk, username, role_name):
     user_id = _get_user_id(sdk, username)
@@ -168,7 +207,7 @@ def _get_users_dataframe(sdk, columns, org_uid, role_id, active):
 
 def _update_user(
     sdk,
-    user_uid,
+    user_id,
     username,
     email,
     password,
@@ -178,7 +217,7 @@ def _update_user(
     archive_size_quota_bytes,
 ):
     return sdk.users.update_user(
-        user_uid,
+        user_id,
         username=username,
         email=email,
         password=password,

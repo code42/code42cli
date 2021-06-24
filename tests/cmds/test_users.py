@@ -7,6 +7,8 @@ from requests import Response
 from code42cli.main import cli
 
 
+_NAMESPACE = "code42cli.cmds.users"
+
 TEST_ROLE_RETURN_DATA = {
     "data": [{"roleName": "Customer Cloud Admin", "roleId": "1234543"}]
 }
@@ -290,3 +292,29 @@ def test_update_user_calls_update_user_with_correct_parameters(
         notes=None,
         archive_size_quota_bytes=None,
     )
+
+def test_bulk_deactivate_uses_expected_arguments(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_update.csv", "w") as csv:
+            csv.writelines([
+                "user_id,username,email,password,first_name,last_name,notes,archive_size_quota\n",
+                "12345,,test_email,,,,,\n"
+            ])
+        runner.invoke(
+            cli,
+            ["users","bulk","update","test_bulk_update.csv"],
+            obj=cli_state
+        )
+    assert bulk_processor.call_args[0][1] == [{
+        "user_id":"12345",
+        "username":'',
+        "email":"test_email",
+        "password":'',
+        "first_name":'',
+        "last_name":'',
+        "notes":'',
+        "archive_size_quota":'',
+        "updated":False
+    }]
+
