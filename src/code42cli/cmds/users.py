@@ -2,6 +2,7 @@ import click
 from code42cli.bulk import run_bulk_process
 from pandas import DataFrame
 
+from code42cli.bulk import generate_template_cmd_factory
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
 from code42cli.errors import Code42CLIError
@@ -145,16 +146,29 @@ def bulk(state):
     """Tools for managing users in bulk"""
     pass
 
+users_generate_template = generate_template_cmd_factory(
+    group_name="users",
+    commands_dict={
+        "update": _bulk_user_update_headers,
+    },
+    help_message="Generate the CSV template needed for bulk user commands.",
+)
+bulk.add_command(users_generate_template)
+
 @bulk.command(name="update")
 @read_csv_arg(headers=_bulk_user_update_headers)
 @format_option
 @sdk_options()
 def bulk_update(state, csv_rows, format):
+    """Update a list of users from the provided CSV."""
     csv_rows[0]["updated"] = False
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
     def handle_row(**row):
         try:
-            _update_user(state.sdk, **row)
+            _update_user(
+                state.sdk,
+                **{key: row[key] for key in row.keys() if key != "updated"}
+            )
             row["updated"] = "True"
         except Exception as err:
             row["updated"] = f"False: {err}"
@@ -214,7 +228,7 @@ def _update_user(
     first_name,
     last_name,
     notes,
-    archive_size_quota_bytes,
+    archive_size_quota,
 ):
     return sdk.users.update_user(
         user_id,
@@ -224,5 +238,5 @@ def _update_user(
         first_name=first_name,
         last_name=last_name,
         notes=notes,
-        archive_size_quota_bytes=archive_size_quota_bytes,
+        archive_size_quota_bytes=archive_size_quota,
     )
