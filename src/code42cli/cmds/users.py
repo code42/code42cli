@@ -33,6 +33,9 @@ inactive_option = click.option(
 )
 
 
+user_uid_option = click.option("--user-id", help="The unique identifier of the user to be modified.", required=True)
+
+
 def role_name_option(help):
     return click.option("--role-name", help=help)
 
@@ -84,6 +87,43 @@ def remove_role(state, username, role_name):
     _remove_user_role(state.sdk, role_name, username)
 
 
+@users.command(name="update")
+@user_uid_option
+@click.option("--username", help="The new username for the user.")
+@click.option("--password", help="The new password for the user.")
+@click.option("--email", help="The new email for the user.")
+@click.option("--first-name", help="The new first name for the user.")
+@click.option("--last-name", help="The new last name for the user.")
+@click.option("--notes", help="Notes about this user.")
+@click.option(
+    "--archive-size-quota", help="The total size (in bytes) allowed for this user."
+)
+@sdk_options()
+def update_user(
+    state,
+    user_id,
+    username,
+    email,
+    password,
+    first_name,
+    last_name,
+    notes,
+    archive_size_quota,
+):
+    """Update a user with the specified unique identifier."""
+    _update_user(
+        state.sdk,
+        user_id,
+        username,
+        email,
+        password,
+        first_name,
+        last_name,
+        notes,
+        archive_size_quota,
+    )
+
+
 def _add_user_role(sdk, username, role_name):
     user_id = _get_user_id(sdk, username)
     _get_role_id(sdk, role_name)  # function provides role name validation
@@ -122,3 +162,26 @@ def _get_users_dataframe(sdk, columns, org_uid, role_id, active):
         users_list.extend(page["users"])
 
     return DataFrame.from_records(users_list, columns=columns)
+
+
+def _update_user(
+    sdk,
+    user_uid,
+    username,
+    email,
+    password,
+    first_name,
+    last_name,
+    notes,
+    archive_size_quota_bytes,
+):
+    return sdk.users.update_user(
+        user_uid,
+        username=username,
+        email=email,
+        password=password,
+        first_name=first_name,
+        last_name=last_name,
+        notes=notes,
+        archive_size_quota_bytes=archive_size_quota_bytes,
+    )
