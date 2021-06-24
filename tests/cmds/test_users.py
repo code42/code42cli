@@ -49,9 +49,11 @@ def _create_py42_response(mocker, text):
 def get_all_users_generator():
     yield TEST_USERS_RESPONSE
 
+
 @pytest.fixture
 def update_user_response(mocker):
     return _create_py42_response(mocker, "")
+
 
 @pytest.fixture
 def get_available_roles_response(mocker):
@@ -76,6 +78,7 @@ def get_user_id_failure(cli_state):
 @pytest.fixture
 def get_available_roles_success(cli_state, get_available_roles_response):
     cli_state.sdk.users.get_available_roles.return_value = get_available_roles_response
+
 
 @pytest.fixture
 def update_user_success(cli_state, update_user_response):
@@ -271,23 +274,19 @@ def test_remove_user_role_raises_error_when_username_does_not_exist(
     assert result.exit_code == 1
     assert "User 'not_a_username@example.com' does not exist." in result.output
 
-def test_update_user_calls_update_user_with_correct_parameters(runner, cli_state, update_user_success):
-    command = [
-        "users",
-        "update",
-        "--user-id",
-        "12345",
-        "--email",
-        "test_email"
-    ]
-    result = runner.invoke(cli, command, obj=cli_state)
+
+def test_update_user_calls_update_user_with_correct_parameters(
+    runner, cli_state, update_user_success
+):
+    command = ["users", "update", "--user-id", "12345", "--email", "test_email"]
+    runner.invoke(cli, command, obj=cli_state)
     cli_state.sdk.users.update_user.assert_called_once_with(
-        "12345", 
+        "12345",
         username=None,
         email="test_email",
         password=None,
         first_name=None,
         last_name=None,
         notes=None,
-        archive_size_quota_bytes=None
+        archive_size_quota_bytes=None,
     )
