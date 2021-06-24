@@ -78,12 +78,8 @@ def get_available_roles_success(cli_state, get_available_roles_response):
     cli_state.sdk.users.get_available_roles.return_value = get_available_roles_response
 
 @pytest.fixture
-def get_available_roles_success(cli_state, update_user_response):
-    cli_state.sdk.users.update_user.return_value = update_user_response
-
-@pytest.fixture
 def update_user_success(cli_state, update_user_response):
-    cli_state.sdk.users.get_by_username.return_value = update_user_response
+    cli_state.sdk.users.update_user.return_value = update_user_response
 
 
 def test_list_when_non_table_format_outputs_expected_columns(
@@ -285,6 +281,13 @@ def test_update_user_calls_update_user_with_correct_parameters(runner, cli_state
         "test_email"
     ]
     result = runner.invoke(cli, command, obj=cli_state)
-    cli_state.sdk.users.update.assert_called_once_with(
-        "12345", email="test_email"
+    cli_state.sdk.users.update_user.assert_called_once_with(
+        "12345", 
+        username=None,
+        email="test_email",
+        password=None,
+        first_name=None,
+        last_name=None,
+        notes=None,
+        archive_size_quota_bytes=None
     )
