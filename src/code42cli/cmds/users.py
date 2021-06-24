@@ -1,15 +1,15 @@
 import click
-from code42cli.bulk import run_bulk_process
 from pandas import DataFrame
 
 from code42cli.bulk import generate_template_cmd_factory
+from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
 from code42cli.errors import Code42CLIError
 from code42cli.errors import UserDoesNotExistError
+from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.options import sdk_options
-from code42cli.file_readers import read_csv_arg
 from code42cli.output_formats import DataFrameOutputFormatter
 from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
@@ -129,6 +129,7 @@ def update_user(
         archive_size_quota,
     )
 
+
 _bulk_user_update_headers = [
     "user_id",
     "username",
@@ -137,8 +138,9 @@ _bulk_user_update_headers = [
     "first_name",
     "last_name",
     "notes",
-    "archive_size_quota"
+    "archive_size_quota",
 ]
+
 
 @users.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
@@ -146,14 +148,14 @@ def bulk(state):
     """Tools for managing users in bulk"""
     pass
 
+
 users_generate_template = generate_template_cmd_factory(
     group_name="users",
-    commands_dict={
-        "update": _bulk_user_update_headers,
-    },
+    commands_dict={"update": _bulk_user_update_headers},
     help_message="Generate the CSV template needed for bulk user commands.",
 )
 bulk.add_command(users_generate_template)
+
 
 @bulk.command(name="update")
 @read_csv_arg(headers=_bulk_user_update_headers)
@@ -163,21 +165,22 @@ def bulk_update(state, csv_rows, format):
     """Update a list of users from the provided CSV."""
     csv_rows[0]["updated"] = False
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+
     def handle_row(**row):
         try:
             _update_user(
-                state.sdk,
-                **{key: row[key] for key in row.keys() if key != "updated"}
+                state.sdk, **{key: row[key] for key in row.keys() if key != "updated"}
             )
             row["updated"] = "True"
         except Exception as err:
             row["updated"] = f"False: {err}"
         return row
-    
+
     result_rows = run_bulk_process(
         handle_row, csv_rows, progress_label="Updating users:"
     )
     formatter.echo_formatted_list(result_rows)
+
 
 def _add_user_role(sdk, username, role_name):
     user_id = _get_user_id(sdk, username)
