@@ -822,7 +822,7 @@ def test_bulk_deactivate_uses_expected_arguments(runner, mocker, cli_state):
     assert bulk_processor.call_args[0][1] == [
         {
             "guid": "test",
-            "deactivated": False,
+            "deactivated": "False",
             "change_device_name": False,
             "purge_date": None,
         }

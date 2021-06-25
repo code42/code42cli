@@ -10,6 +10,12 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
+### Added
+
+- New command `code42 users update` to update a single user.
+
+- New command `code42 users bulk update` to update users in bulk.
+
 ### Changed
 
 - `code42 alerts search` now uses microsecond precision when searching by alerts' date observed.

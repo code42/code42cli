@@ -573,7 +573,7 @@ bulk.add_command(devices_generate_template)
 def bulk_deactivate(state, csv_rows, change_device_name, purge_date, format):
     """Deactivate all devices from the provided CSV containing a 'guid' column."""
     sdk = state.sdk
-    csv_rows[0]["deactivated"] = False
+    csv_rows[0]["deactivated"] = "False"
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
     for row in csv_rows:
         row["change_device_name"] = change_device_name
