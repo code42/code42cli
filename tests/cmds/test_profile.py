@@ -569,8 +569,6 @@ def test_select_profile_outputs_expected_text(
     ]
     result = runner.invoke(cli, ["profile", "select"])
     expected_prompt = "1. test1\n2. test2"
-    expected_result_message = (
-        f"{_SELECTED_PROFILE_NAME} has been set as the default profile."
-    )
+    expected_result_message = "test_profile has been set as the default profile."
     assert expected_prompt in result.output
     assert expected_result_message in result.output
