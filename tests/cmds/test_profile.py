@@ -561,10 +561,16 @@ def test_select_profile_sets_selected_profile_as_default(
 
 
 def test_select_profile_outputs_expected_text(
-    runner, mock_cliprofile_namespace, profile, profile_name_selector
+    runner, mock_cliprofile_namespace, profile_name_selector
 ):
+    mock_cliprofile_namespace.get_all_profiles.return_value = [
+        create_mock_profile("test1"),
+        create_mock_profile("test2"),
+    ]
     result = runner.invoke(cli, ["profile", "select"])
-    assert (
+    expected_prompt = "1. test1\n2. test2"
+    expected_result_message = (
         f"{_SELECTED_PROFILE_NAME} has been set as the default profile."
-        in result.output
     )
+    assert expected_prompt in result.output
+    assert expected_result_message in result.output
