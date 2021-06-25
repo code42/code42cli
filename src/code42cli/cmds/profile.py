@@ -195,7 +195,7 @@ def delete_all():
 
 @profile.command()
 def select():
-    """Choose the default profile from a list."""
+    """Select the profile to use from a list."""
     _select_profile()
 
 
