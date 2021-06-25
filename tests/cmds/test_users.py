@@ -421,3 +421,4 @@ def test_bulk_move_uses_expected_arguments(runner, mocker, cli_state):
     assert bulk_processor.call_args[0][1] == [
         {"username": TEST_USERNAME, "org_id": "4321", "moved": "False"}
     ]
+    bulk_processor.assert_called_once()

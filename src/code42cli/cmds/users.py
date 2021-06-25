@@ -152,11 +152,11 @@ _bulk_user_move_headers = ["username", "org_id"]
 
 
 @users.command(name="move")
-@username_option("The username of the user to be moved.", required=True)
+@username_option("The username of the user to move.", required=True)
 @org_id_option
 @sdk_options()
 def change_organization(state, username, org_id):
-    """Move the user with the given username to the org with the given org ID"""
+    """Change the organization of the user with the given username to the org with the given org ID."""
     _change_organization(state.sdk, username, org_id)
 
 
@@ -208,7 +208,7 @@ def bulk_update(state, csv_rows, format):
 @format_option
 @sdk_options()
 def bulk_move(state, csv_rows, format):
-    """Move the list of users from the provided CSV."""
+    """Change the organization of the list of users from the provided CSV."""
     csv_rows[0]["moved"] = "False"
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
 
