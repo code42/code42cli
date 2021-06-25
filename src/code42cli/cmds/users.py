@@ -290,5 +290,5 @@ def _update_user(
 
 
 def _change_organization(sdk, username, org_id):
-    user_id=_get_user_id(sdk, username)
+    user_id = _get_user_id(sdk, username)
     return sdk.users.change_org_assignment(user_id=int(user_id), org_id=int(org_id))
