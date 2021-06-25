@@ -7,7 +7,7 @@
 
 ## Licensing
 
-This project uses the [MIT License](https://github.com/code42/code42cli/blob/master/LICENSE.md).
+This project uses the [MIT License](https://github.com/code42/code42cli/blob/main/LICENSE.md).
 
 ## Installation
 
@@ -72,9 +72,15 @@ python3 -m pip install code42cli --upgrade
 .. important:: The Code42 CLI currently only supports token-based authentication.
 ```
 
-Create a user in Code42 to authenticate (basic authentication) and access data via the CLI. The CLI returns data based on the roles assigned to this user. To ensure that the user's rights are not too permissive, create a user with the lowest level of privilege necessary. See our [Role assignment use cases](https://support.code42.com/Administrator/Cloud/Monitoring_and_managing/Role_assignment_use_cases) for information on recommended roles. We recommend you test to confirm that the user can access the right data.
+Create a user in Code42 to authenticate (basic authentication) and access data via the CLI. The CLI returns data based
+on the roles assigned to this user. To ensure that the user's rights are not too permissive, create a user with the lowest
+level of privilege necessary. See our [Role assignment use cases](https://support.code42.com/Administrator/Cloud/Monitoring_and_managing/Role_assignment_use_cases)
+for information on recommended roles. We recommend you test to confirm that the user can access the right data.
 
 If you choose not to store your password in the CLI, you must enter it for each command that requires a connection.
+
+The Code42 CLI supports local accounts with MFA (multi-factor authentication) enabled. The Time-based One-Time
+Password (TOTP) must be provided at every invocation of the CLI, either via the `--totp` option or when prompted.
 
 The Code42 CLI currently does **not** support SSO login providers or any other identity providers such as Active
 Directory or Okta.

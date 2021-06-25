@@ -18,7 +18,7 @@ def incompatible_with(incompatible_opts):
             if ctx.obj is not None:
                 found_incompatible = ", ".join(
                     [
-                        "--{}".format(opt.replace("_", "-"))
+                        f"--{opt.replace('_', '-')}"
                         for opt in opts
                         if opt in incompatible_opts
                     ]
@@ -27,9 +27,7 @@ def incompatible_with(incompatible_opts):
                     name = self.name.replace("_", "-")
                     raise click.BadOptionUsage(
                         option_name=self.name,
-                        message="--{} can't be used with: {}".format(
-                            name, found_incompatible
-                        ),
+                        message=f"--{name} can't be used with: {found_incompatible}",
                     )
             return super().handle_parse_result(ctx, opts, args)
 

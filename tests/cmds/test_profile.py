@@ -1,7 +1,10 @@
 import pytest
+from py42.exceptions import Py42MFARequiredError
+from py42.sdk import SDKClient
+from requests import Response
+from requests.exceptions import HTTPError
 
 from ..conftest import create_mock_profile
-from code42cli import PRODUCT_NAME
 from code42cli.errors import Code42CLIError
 from code42cli.errors import LoggedCLIError
 from code42cli.main import cli
@@ -12,37 +15,38 @@ _SELECTED_PROFILE_NAME = "test_profile"
 
 @pytest.fixture
 def user_agreement(mocker):
-    mock = mocker.patch("{}.cmds.profile.does_user_agree".format(PRODUCT_NAME))
+    mock = mocker.patch("code42cli.cmds.profile.does_user_agree")
     mock.return_value = True
     return mocker
 
 
 @pytest.fixture
 def user_disagreement(mocker):
-    mock = mocker.patch("{}.cmds.profile.does_user_agree".format(PRODUCT_NAME))
+    mock = mocker.patch("code42cli.cmds.profile.does_user_agree")
     mock.return_value = False
     return mocker
 
 
 @pytest.fixture
 def mock_cliprofile_namespace(mocker):
-    return mocker.patch("{}.cmds.profile.cliprofile".format(PRODUCT_NAME))
+    return mocker.patch("code42cli.cmds.profile.cliprofile")
 
 
 @pytest.fixture(autouse=True)
 def mock_getpass(mocker):
-    mock = mocker.patch("{}.cmds.profile.getpass".format(PRODUCT_NAME))
+    mock = mocker.patch("code42cli.cmds.profile.getpass")
     mock.return_value = "newpassword"
 
 
 @pytest.fixture
 def mock_verify(mocker):
-    return mocker.patch("{}.cmds.profile.validate_connection".format(PRODUCT_NAME))
+    return mocker.patch("code42cli.cmds.profile.create_sdk")
 
 
 @pytest.fixture
-def valid_connection(mock_verify):
-    mock_verify.return_value = True
+def valid_connection(mocker, mock_verify):
+    mock_sdk = mocker.MagicMock(spec=SDKClient)
+    mock_verify.return_value = mock_sdk
     return mock_verify
 
 
@@ -54,7 +58,7 @@ def invalid_connection(mock_verify):
 
 @pytest.fixture
 def profile_name_selector(mocker):
-    mock = mocker.patch(f"{PRODUCT_NAME}.cmds.profile.get_user_selected_item")
+    mock = mocker.patch("code42cli.cmds.profile.get_user_selected_item")
     mock.return_value = _SELECTED_PROFILE_NAME
     return mock
 
@@ -216,6 +220,29 @@ def test_create_profile_with_password_option_if_credentials_valid_password_saved
     )
     mock_cliprofile_namespace.set_password.assert_called_once_with(password, mocker.ANY)
     assert "Would you like to set a password?" not in result.output
+
+
+def test_create_profile_stores_password_and_prints_message_when_user_requires_mfa(
+    runner, mocker, mock_verify, mock_cliprofile_namespace
+):
+    mock_verify.side_effect = Py42MFARequiredError(HTTPError(response=Response()))
+    result = runner.invoke(
+        cli,
+        [
+            "profile",
+            "create",
+            "-n",
+            "mfa",
+            "-s",
+            "bar",
+            "-u",
+            "baz",
+            "--password",
+            "pass",
+        ],
+    )
+    assert "Multi-factor account detected." in result.output
+    mock_cliprofile_namespace.set_password.assert_called_once_with("pass", mocker.ANY)
 
 
 def test_create_profile_outputs_confirmation(
@@ -429,8 +456,8 @@ def test_delete_all_does_not_warn_if_assume_yes_flag(runner, mock_cliprofile_nam
     assert (
         "Are you sure you want to delete the following profiles?" not in result.output
     )
-    assert "Profile '{}' has been deleted.".format("test1") in result.output
-    assert "Profile '{}' has been deleted.".format("test2") in result.output
+    assert "Profile 'test1' has been deleted." in result.output
+    assert "Profile 'test2' has been deleted." in result.output
 
 
 def test_delete_all_profiles_does_nothing_if_user_doesnt_agree(

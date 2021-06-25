@@ -12,17 +12,49 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
-- A `code42 profile select` command that allows you to select a default profile
+## 1.5.1 - 2021-05-07
+
+- New command `code42 users update` to update a single user.
+
+- New command `code42 users bulk update` to update users in bulk.
+
+- New command `code42 profile select` that allows you to select a default profile
     from a list of all your profiles.
 
 ### Changed
 
-- The `code42 profile use` command now prompts you to select a profile when
-    not given a profile name argument.
+- `code42 alerts search` now uses microsecond precision when searching by alerts' date observed.
 
-## 1.5.1 - 2021-05-07
+- `code42 profile use` now prompts you to select a profile when not given a profile name argument.
+
+## 1.7.0 - 2021-06-17
+
+### Added
+
+- New command `code42 users add-role` to add a user role to a single user.
+
+- New command `code42 users remove-role` to remove a user role from a single user.
+
+- New command `code42 shell` that opens an IPython console with a pre-initialized py42 sdk.
+
+## 1.6.1 - 2021-05-27
+>>>>>>> main
 
 ### Fixed
+
+- Issue where `profile` commands that required connecting to an authority failed to respect the `--disable-ssl-errors` flag when set.
+
+## 1.6.0 - 2021-05-20
+
+### Added
+
+- Support for users that require multi-factor authentication.
+
+## 1.5.1 - 2021-05-12
+
+### Fixed
+
+- Issue where some error messages stopped displaying in the same way that they did in prior versions.
 
 - Issue where the `--role-name` option on the command `code42 users list` caused the
   CLI to call a deprecated method.

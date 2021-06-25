@@ -114,9 +114,9 @@ ADVANCED_QUERY_VALUES = {
     "state_2": "PENDING",
     "state_3": "IN_PROGRESS",
     "actor": "test@example.com",
-    "on_or_after": "2020-01-01T06:00:00.000Z",
+    "on_or_after": "2020-01-01T06:00:00.000000Z",
     "on_or_after_timestamp": 1577858400.0,
-    "on_or_before": "2020-02-01T06:00:00.000Z",
+    "on_or_before": "2020-02-01T06:00:00.000000Z",
     "on_or_before_timestamp": 1580536800.0,
     "rule_id": "xyz123",
 }
@@ -300,14 +300,14 @@ search_and_send_to_test = get_mark_for_search_and_send_to("alerts")
 
 @pytest.fixture
 def alert_extractor(mocker):
-    mock = mocker.patch("{}.cmds.alerts._get_alert_extractor".format(PRODUCT_NAME))
+    mock = mocker.patch(f"{PRODUCT_NAME}.cmds.alerts._get_alert_extractor")
     mock.return_value = mocker.MagicMock(spec=AlertExtractor)
     return mock.return_value
 
 
 @pytest.fixture
 def alert_cursor_with_checkpoint(mocker):
-    mock = mocker.patch("{}.cmds.alerts._get_alert_cursor_store".format(PRODUCT_NAME))
+    mock = mocker.patch(f"{PRODUCT_NAME}.cmds.alerts._get_alert_cursor_store")
     mock_cursor = mocker.MagicMock(spec=AlertCursorStore)
     mock_cursor.get.return_value = CURSOR_TIMESTAMP
     mock.return_value = mock_cursor
@@ -317,7 +317,7 @@ def alert_cursor_with_checkpoint(mocker):
 
 @pytest.fixture
 def alert_cursor_without_checkpoint(mocker):
-    mock = mocker.patch("{}.cmds.alerts._get_alert_cursor_store".format(PRODUCT_NAME))
+    mock = mocker.patch(f"{PRODUCT_NAME}.cmds.alerts._get_alert_cursor_store")
     mock_cursor = mocker.MagicMock(spec=AlertCursorStore)
     mock_cursor.get.return_value = None
     mock.return_value = mock_cursor
@@ -326,17 +326,15 @@ def alert_cursor_without_checkpoint(mocker):
 
 @pytest.fixture
 def begin_option(mocker):
-    mock = mocker.patch(
-        "{}.cmds.alerts.convert_datetime_to_timestamp".format(PRODUCT_NAME)
-    )
+    mock = mocker.patch(f"{PRODUCT_NAME}.cmds.alerts.convert_datetime_to_timestamp")
     mock.return_value = BEGIN_TIMESTAMP
-    mock.expected_timestamp = "2020-01-01T06:00:00.000Z"
+    mock.expected_timestamp = "2020-01-01T06:00:00.000000Z"
     return mock
 
 
 @pytest.fixture
 def alert_extract_func(mocker):
-    return mocker.patch("{}.cmds.alerts._extract".format(PRODUCT_NAME))
+    return mocker.patch(f"{PRODUCT_NAME}.cmds.alerts._extract")
 
 
 @pytest.fixture
@@ -401,7 +399,7 @@ def test_search_with_advanced_query_and_incompatible_argument_errors(
         obj=cli_state,
     )
     assert result.exit_code == 2
-    assert "{} can't be used with: --advanced-query".format(arg[0]) in result.output
+    assert f"{arg[0]} can't be used with: --advanced-query" in result.output
 
 
 @advanced_query_incompat_test_params
@@ -415,7 +413,7 @@ def test_send_to_with_advanced_query_and_incompatible_argument_errors(
         obj=cli_state,
     )
     assert result.exit_code == 2
-    assert "{} can't be used with: --advanced-query".format(arg[0]) in result.output
+    assert f"{arg[0]} can't be used with: --advanced-query" in result.output
 
 
 @search_and_send_to_test
@@ -430,9 +428,9 @@ def test_search_and_send_to_when_given_begin_and_end_dates_uses_expected_query(
     )
     filters = alert_extractor.extract.call_args[0][0]
     actual_begin = get_filter_value_from_json(filters, filter_index=0)
-    expected_begin = "{}T00:00:00.000Z".format(begin_date)
+    expected_begin = f"{begin_date}T00:00:00.000000Z"
     actual_end = get_filter_value_from_json(filters, filter_index=1)
-    expected_end = "{}T23:59:59.999Z".format(end_date)
+    expected_end = f"{end_date}T23:59:59.999999Z"
     assert actual_begin == expected_begin
     assert actual_end == expected_end
 
@@ -446,20 +444,14 @@ def test_search_when_given_begin_and_end_date_and_times_uses_expected_query(
     time = "15:33:02"
     runner.invoke(
         cli,
-        [
-            *command,
-            "--begin",
-            "{} {}".format(begin_date, time),
-            "--end",
-            "{} {}".format(end_date, time),
-        ],
+        [*command, "--begin", f"{begin_date} {time}", "--end", f"{end_date} {time}"],
         obj=cli_state,
     )
     filters = alert_extractor.extract.call_args[0][0]
     actual_begin = get_filter_value_from_json(filters, filter_index=0)
-    expected_begin = "{}T{}.000Z".format(begin_date, time)
+    expected_begin = f"{begin_date}T{time}.000000Z"
     actual_end = get_filter_value_from_json(filters, filter_index=1)
-    expected_end = "{}T{}.000Z".format(end_date, time)
+    expected_end = f"{end_date}T{time}.000000Z"
     assert actual_begin == expected_begin
     assert actual_end == expected_end
 
@@ -470,11 +462,11 @@ def test_search_when_given_begin_date_and_time_without_seconds_uses_expected_que
 ):
     date = get_test_date_str(days_ago=89)
     time = "15:33"
-    runner.invoke(cli, [*command, "--begin", "{} {}".format(date, time)], obj=cli_state)
+    runner.invoke(cli, [*command, "--begin", f"{date} {time}"], obj=cli_state)
     actual = get_filter_value_from_json(
         alert_extractor.extract.call_args[0][0], filter_index=0
     )
-    expected = "{}T{}:00.000Z".format(date, time)
+    expected = f"{date}T{time}:00.000000Z"
     assert actual == expected
 
 
@@ -487,13 +479,13 @@ def test_search_and_send_to_when_given_end_date_and_time_uses_expected_query(
     time = "15:33"
     runner.invoke(
         cli,
-        [*command, "--begin", begin_date, "--end", "{} {}".format(end_date, time)],
+        [*command, "--begin", begin_date, "--end", f"{end_date} {time}"],
         obj=cli_state,
     )
     actual = get_filter_value_from_json(
         alert_extractor.extract.call_args[0][0], filter_index=1
     )
-    expected = "{}T{}:00.000Z".format(end_date, time)
+    expected = f"{end_date}T{time}:00.000000Z"
     assert actual == expected
 
 
@@ -529,7 +521,7 @@ def test_search_and_send_to_when_given_begin_date_and_not_use_checkpoint_and_cur
     actual_ts = get_filter_value_from_json(
         alert_extractor.extract.call_args[0][0], filter_index=0
     )
-    expected_ts = "{}T00:00:00.000Z".format(begin_date)
+    expected_ts = f"{begin_date}T00:00:00.000000Z"
     assert actual_ts == expected_ts
     assert filter_term_is_in_call_args(alert_extractor, f.DateObserved._term)
 
@@ -553,10 +545,10 @@ def test_search_and_send_to_with_only_begin_calls_extract_with_expected_filters(
 ):
     res = runner.invoke(cli, [*command, "--begin", "1d"], obj=cli_state)
     assert res.exit_code == 0
-    assert str(
-        alert_extractor.extract.call_args[0][0]
-    ) == '{{"filterClause":"AND", "filters":[{{"operator":"ON_OR_AFTER", "term":"createdAt", "value":"{}"}}]}}'.format(
-        begin_option.expected_timestamp
+    assert (
+        str(alert_extractor.extract.call_args[0][0])
+        == '{"filterClause":"AND", "filters":[{"operator":"ON_OR_AFTER", "term":"createdAt", '
+        f'"value":"{begin_option.expected_timestamp}"}}]}}'
     )
 
 
@@ -601,9 +593,7 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_with_stored_c
     assert result.exit_code == 0
     assert alert_extractor.extract.call_count == 1
     assert (
-        "checkpoint of {} exists".format(
-            alert_cursor_with_checkpoint.expected_timestamp
-        )
+        f"checkpoint of {alert_cursor_with_checkpoint.expected_timestamp} exists"
         in result.output
     )
 
@@ -778,7 +768,7 @@ def test_search_and_send_to_with_or_query_flag_produces_expected_query(
                     {
                         "operator": "ON_OR_AFTER",
                         "term": "createdAt",
-                        "value": "{}T00:00:00.000Z".format(begin_date),
+                        "value": f"{begin_date}T00:00:00.000000Z",
                     }
                 ],
             },

@@ -40,8 +40,8 @@ class Code42Profile:
         return pwd
 
     def __str__(self):
-        return "{}: Username={}, Authority URL={}".format(
-            self.name, self.username, self.authority_url
+        return (
+            f"{self.name}: Username={self.username}, Authority URL={self.authority_url}"
         )
 
 
@@ -101,7 +101,7 @@ def switch_default_profile(profile_name):
 
 def create_profile(name, server, username, ignore_ssl_errors):
     if profile_exists(name):
-        raise Code42CLIError("A profile named '{}' already exists.".format(name))
+        raise Code42CLIError(f"A profile named '{name}' already exists.")
     config_accessor.create_profile(name, server, username, ignore_ssl_errors)
 
 
@@ -139,7 +139,10 @@ def set_password(new_password, profile_name=None):
 
 CREATE_PROFILE_HELP = "\nTo add a profile, use:\n{}".format(
     style(
-        "\tcode42 profile create --name <profile-name> --server <authority-URL> --username <username>\n",
+        "\tcode42 profile create "
+        "--name <profile-name> "
+        "--server <authority-URL> "
+        "--username <username>\n",
         bold=True,
     )
 )

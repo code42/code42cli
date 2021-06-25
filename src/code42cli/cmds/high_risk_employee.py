@@ -30,7 +30,7 @@ def _get_filter_choices():
 
 filter_option = click.option(
     "--filter",
-    help="High risk employee filter options. Defaults to {}.".format(ALL_FILTER),
+    help=f"High risk employee filter options. Defaults to {ALL_FILTER}.",
     type=click.Choice(_get_filter_choices()),
     default=ALL_FILTER,
     callback=lambda ctx, param, arg: handle_filter_choice(arg),
@@ -126,7 +126,7 @@ bulk.add_command(high_risk_employee_generate_template)
 @bulk.command(
     name="add",
     help="Bulk add users to the high risk employees detection list using a CSV file with "
-    "format: {}.".format(",".join(HIGH_RISK_EMPLOYEE_CSV_HEADERS)),
+    f"format: {','.join(HIGH_RISK_EMPLOYEE_CSV_HEADERS)}.",
 )
 @read_csv_arg(headers=HIGH_RISK_EMPLOYEE_CSV_HEADERS)
 @sdk_options()
@@ -165,9 +165,8 @@ def bulk_remove(state, file_rows):
 
 @bulk.command(
     name="add-risk-tags",
-    help="Adds risk tags to users in bulk using a CSV file with format: {}.".format(
-        ",".join(RISK_TAG_CSV_HEADERS)
-    ),
+    help=f"Adds risk tags to users in bulk using a CSV file with format: "
+    f"{','.join(RISK_TAG_CSV_HEADERS)}.",
 )
 @read_csv_arg(headers=RISK_TAG_CSV_HEADERS)
 @sdk_options()
@@ -184,9 +183,8 @@ def bulk_add_risk_tags(state, csv_rows):
 
 @bulk.command(
     name="remove-risk-tags",
-    help="Removes risk tags from users in bulk using a CSV file with format: {}.".format(
-        ",".join(RISK_TAG_CSV_HEADERS)
-    ),
+    help=f"Removes risk tags from users in bulk using a CSV file with format: "
+    f"{','.join(RISK_TAG_CSV_HEADERS)}.",
 )
 @read_csv_arg(headers=RISK_TAG_CSV_HEADERS)
 @sdk_options()

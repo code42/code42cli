@@ -7,7 +7,7 @@ import code42cli.util as util
 class NoConfigProfileError(Exception):
     def __init__(self, profile_arg_name=None):
         message = (
-            "Profile '{}' does not exist.".format(profile_arg_name)
+            f"Profile '{profile_arg_name}' does not exist."
             if profile_arg_name
             else "Profile does not exist."
         )

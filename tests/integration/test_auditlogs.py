@@ -41,7 +41,7 @@ def test_auditlogs_send_to_udp_command_returns_success_return_code(
 def test_auditlogs_search_command_with_short_hand_begin_returns_success_return_code(
     runner, integration_test_profile
 ):
-    command = "audit-logs search -b '{}'".format(begin_date_str)
+    command = f"audit-logs search -b '{begin_date_str}'"
     assert_test_is_successful(runner, append_profile(command))
 
 
@@ -49,5 +49,5 @@ def test_auditlogs_search_command_with_short_hand_begin_returns_success_return_c
 def test_auditlogs_search_command_with_full_begin_returns_success_return_code(
     runner, integration_test_profile,
 ):
-    command = "audit-logs search --begin '{}'".format(begin_date_str)
+    command = f"audit-logs search --begin '{begin_date_str}'"
     assert_test_is_successful(runner, append_profile(command))

@@ -33,3 +33,9 @@ To see all your profiles, do:
 ```bash
 code42 profile list
 ```
+
+## Profiles with Multi-Factor Authentication
+
+If your Code42 user account requires multi-factor authentication, the token is not required to create your profile but
+will be required for any subsequent CLI commands. The MFA token can either be passed in with the `--totp` option, or if
+not passed you will be prompted to enter it before the command executes.

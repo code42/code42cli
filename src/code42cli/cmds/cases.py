@@ -193,7 +193,7 @@ def show(state, case_number, format, include_file_events):
             events = _get_file_events(state.sdk, case_number)
             _display_file_events(events)
     except Py42NotFoundError:
-        raise Code42CLIError("Invalid case-number {}.".format(case_number))
+        raise Code42CLIError(f"Invalid case-number {case_number}.")
 
 
 @cases.command()
@@ -207,7 +207,7 @@ def show(state, case_number, format, include_file_events):
 def export(state, case_number, path):
     """Download a case detail summary as a PDF file at the given path with name <case_number>_case_summary.pdf."""
     response = state.sdk.cases.export_summary(case_number)
-    file = os.path.join(path, "{}_case_summary.pdf".format(case_number))
+    file = os.path.join(path, f"{case_number}_case_summary.pdf")
     with open(file, "wb") as f:
         f.write(response.content)
 

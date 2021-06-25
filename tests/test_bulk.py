@@ -9,7 +9,7 @@ from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
 from code42cli.logger import get_view_error_details_message
 
-_NAMESPACE = "{}.bulk".format(PRODUCT_NAME)
+_NAMESPACE = f"{PRODUCT_NAME}.bulk"
 
 
 @pytest.fixture
@@ -19,7 +19,7 @@ def bulk_processor(mocker):
 
 @pytest.fixture
 def bulk_processor_factory(mocker, bulk_processor):
-    mock_factory = mocker.patch("{}._create_bulk_processor".format(_NAMESPACE))
+    mock_factory = mocker.patch(f"{_NAMESPACE}._create_bulk_processor")
     mock_factory.return_value = bulk_processor
     return mock_factory
 

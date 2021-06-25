@@ -227,10 +227,10 @@ def get_test_date_str(days_ago):
 
 
 begin_date_str = get_test_date_str(days_ago=89)
-begin_date_str_with_time = "{} 3:12:33".format(begin_date_str)
-begin_date_str_with_t_time = "{}T3:12:33".format(begin_date_str)
+begin_date_str_with_time = f"{begin_date_str} 3:12:33"
+begin_date_str_with_t_time = f"{begin_date_str}T3:12:33"
 end_date_str = get_test_date_str(days_ago=10)
-end_date_str_with_time = "{} 11:22:43".format(end_date_str)
+end_date_str_with_time = f"{end_date_str} 11:22:43"
 begin_date_str = get_test_date_str(days_ago=89)
 begin_date_with_time = [get_test_date_str(days_ago=89), "3:12:33"]
 end_date_str = get_test_date_str(days_ago=10)

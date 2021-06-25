@@ -2,7 +2,6 @@ from os import path
 
 import pytest
 
-from code42cli import PRODUCT_NAME
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.cmds.search.cursor_store import AuditLogCursorStore
 from code42cli.cmds.search.cursor_store import Cursor
@@ -12,7 +11,7 @@ from code42cli.errors import Code42CLIError
 PROFILE_NAME = "testprofile"
 CURSOR_NAME = "testcursor"
 
-_NAMESPACE = "{}.cmds.search.cursor_store".format(PRODUCT_NAME)
+_NAMESPACE = "code42cli.cmds.search.cursor_store"
 
 ALERT_CHECKPOINT_FOLDER_NAME = "alert_checkpoints"
 FILE_EVENT_CHECKPOINT_FOLDER_NAME = "file_event_checkpoints"
@@ -34,9 +33,7 @@ def mock_open_events(mocker):
     mock = mocker.patch(
         "builtins.open",
         mocker.mock_open(
-            read_data='["{}", "{}"]'.format(
-                AUDIT_LOG_EVENT_HASH_1, AUDIT_LOG_EVENT_HASH_2
-            )
+            read_data=f'["{AUDIT_LOG_EVENT_HASH_1}", "{AUDIT_LOG_EVENT_HASH_2}"]'
         ),
     )
     return mock
@@ -44,7 +41,7 @@ def mock_open_events(mocker):
 
 @pytest.fixture
 def mock_isfile(mocker):
-    mock = mocker.patch("{}.os.path.isfile".format(_NAMESPACE))
+    mock = mocker.patch(f"{_NAMESPACE}.os.path.isfile")
     mock.return_value = True
     return mock
 
@@ -73,7 +70,7 @@ class TestAlertCursorStore:
     def test_get_when_profile_does_not_exist_returns_none(self, mocker):
         store = AlertCursorStore(PROFILE_NAME)
         checkpoint = store.get(CURSOR_NAME)
-        mock_open = mocker.patch("{}.open".format(_NAMESPACE))
+        mock_open = mocker.patch(f"{_NAMESPACE}.open")
         mock_open.side_effect = FileNotFoundError
         assert checkpoint is None
 
@@ -159,7 +156,7 @@ class TestFileEventCursorStore:
     def test_get_when_profile_does_not_exist_returns_none(self, mocker):
         store = FileEventCursorStore(PROFILE_NAME)
         checkpoint = store.get(CURSOR_NAME)
-        mock_open = mocker.patch("{}.open".format(_NAMESPACE))
+        mock_open = mocker.patch(f"{_NAMESPACE}.open")
         mock_open.side_effect = FileNotFoundError
         assert checkpoint is None
 
@@ -234,7 +231,7 @@ class TestAuditLogCursorStore:
     def test_get_when_profile_does_not_exist_returns_none(self, mocker):
         store = AuditLogCursorStore(PROFILE_NAME)
         checkpoint = store.get(CURSOR_NAME)
-        mock_open = mocker.patch("{}.open".format(_NAMESPACE))
+        mock_open = mocker.patch(f"{_NAMESPACE}.open")
         mock_open.side_effect = FileNotFoundError
         assert checkpoint is None
 
@@ -308,7 +305,7 @@ class TestAuditLogCursorStore:
     def test_get_events_when_profile_does_not_exist_returns_empty_list(self, mocker):
         store = AuditLogCursorStore(PROFILE_NAME)
         event_list = store.get_events(CURSOR_NAME)
-        mock_open = mocker.patch("{}.open".format(_NAMESPACE))
+        mock_open = mocker.patch(f"{_NAMESPACE}.open")
         mock_open.side_effect = FileNotFoundError
         assert event_list == []
 

@@ -115,9 +115,7 @@ class MagicDate(click.ParamType):
         elif period == "m":
             delta = timedelta(minutes=num)
         else:
-            raise BadParameter(
-                "Couldn't parse magic time string: {}{}".format(num, period)
-            )
+            raise BadParameter(f"Couldn't parse magic time string: {num}{period}")
         return datetime.utcnow() - delta
 
     @staticmethod
@@ -127,11 +125,11 @@ class MagicDate(click.ParamType):
             time = "{}:{}:{}".format(*time.split(":") + ["00", "00"])
         else:
             time = "00:00:00"
-        date_string = "{} {}".format(date, time)
+        date_string = f"{date} {time}"
         try:
             dt = datetime.strptime(date_string, date_format)
         except ValueError:
-            raise BadParameter("Unable to parse date string: {}.".format(date_string))
+            raise BadParameter(f"Unable to parse date string: {date_string}.")
         else:
             return dt
 

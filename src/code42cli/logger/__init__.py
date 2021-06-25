@@ -43,7 +43,7 @@ def get_logger_for_server(hostname, protocol, output_format, certs):
         output_format: CEF, JSON, or RAW_JSON. Each type results in a different logger instance.
         certs: Use for passing SSL/TLS certificates when connecting to the server.
     """
-    logger = logging.getLogger("code42_syslog_{}".format(output_format.lower()))
+    logger = logging.getLogger(f"code42_syslog_{output_format.lower()}")
     if logger_has_handlers(logger):
         return logger
 
@@ -101,7 +101,7 @@ def _get_error_file_logger():
 def get_view_error_details_message():
     """Returns the error message that is printed when errors occur."""
     path = _get_error_log_path()
-    return "View details in {}".format(path)
+    return f"View details in {path}"
 
 
 def _create_formatter_for_error_file():
@@ -123,13 +123,13 @@ class CliLogger:
         prefix = (
             "Exception occurred."
             if not invocation_str
-            else "Exception occurred from input: '{}'.".format(invocation_str)
+            else f"Exception occurred from input: '{invocation_str}'."
         )
-        message = "{}. See error below.".format(prefix)
+        message = f"{prefix}. See error below."
         self.log_error(message)
         self.log_error(traceback.format_exc())
         if http_request:
-            self.log_error("Request parameters: {}".format(http_request.body))
+            self.log_error(f"Request parameters: {http_request.body}")
 
 
 def get_main_cli_logger():

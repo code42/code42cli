@@ -3,12 +3,13 @@ from getpass import getpass
 import click
 from click import echo
 from click import secho
+from py42.exceptions import Py42MFARequiredError
 
 import code42cli.profile as cliprofile
 from code42cli.errors import Code42CLIError
 from code42cli.options import yes_option
 from code42cli.profile import CREATE_PROFILE_HELP
-from code42cli.sdk_client import validate_connection
+from code42cli.sdk_client import create_sdk
 from code42cli.util import does_user_agree
 from code42cli.util import get_user_selected_item
 
@@ -70,10 +71,10 @@ disable_ssl_option = click.option(
 def show(profile_name):
     """Print the details of a profile."""
     c42profile = cliprofile.get_profile(profile_name)
-    echo("\n{}:".format(c42profile.name))
-    echo("\t* username = {}".format(c42profile.username))
-    echo("\t* authority url = {}".format(c42profile.authority_url))
-    echo("\t* ignore-ssl-errors = {}".format(c42profile.ignore_ssl_errors))
+    echo(f"\n{c42profile.name}:")
+    echo(f"\t* username = {c42profile.username}")
+    echo(f"\t* authority url = {c42profile.authority_url}")
+    echo(f"\t* ignore-ssl-errors = {c42profile.ignore_ssl_errors}")
     if cliprofile.get_stored_password(c42profile.name) is not None:
         echo("\t* A password is set.")
     echo("")
@@ -94,7 +95,7 @@ def create(name, server, username, password, disable_ssl_errors):
         _set_pw(name, password)
     else:
         _prompt_for_allow_password_set(name)
-    echo("Successfully created profile '{}'.".format(name))
+    echo(f"Successfully created profile '{name}'.")
 
 
 @profile.command()
@@ -119,7 +120,7 @@ def update(name, server, username, password, disable_ssl_errors):
     elif not c42profile.has_stored_password:
         _prompt_for_allow_password_set(c42profile.name)
 
-    echo("Profile '{}' has been updated.".format(c42profile.name))
+    echo(f"Profile '{c42profile.name}' has been updated.")
 
 
 @profile.command()
@@ -130,7 +131,7 @@ def reset_pw(profile_name):
     does not make any changes to the Code42 user account."""
     password = getpass()
     profile_name_saved = _set_pw(profile_name, password)
-    echo("Password updated for profile '{}'.".format(profile_name_saved))
+    echo(f"Password updated for profile '{profile_name_saved}'.")
 
 
 @profile.command("list")
@@ -160,14 +161,15 @@ def use(profile_name):
 @profile_name_arg(required=True)
 def delete(profile_name):
     """Deletes a profile and its stored password (if any)."""
-    message = "\nDeleting this profile will also delete any stored passwords and checkpoints. Are you sure? (y/n): "
+    message = (
+        "\nDeleting this profile will also delete any stored passwords and checkpoints. "
+        "Are you sure? (y/n): "
+    )
     if cliprofile.is_default_profile(profile_name):
-        message = "\n'{}' is currently the default profile!\n{}".format(
-            profile_name, message
-        )
+        message = f"\n'{profile_name}' is currently the default profile!\n{message}"
     if does_user_agree(message):
         cliprofile.delete_profile(profile_name)
-        echo("Profile '{}' has been deleted.".format(profile_name))
+        echo(f"Profile '{profile_name}' has been deleted.")
 
 
 @profile.command()
@@ -176,14 +178,17 @@ def delete_all():
     """Deletes all profiles and saved passwords (if any)."""
     existing_profiles = cliprofile.get_all_profiles()
     if existing_profiles:
+        profile_str_list = "\n\t".join(
+            [c42profile.name for c42profile in existing_profiles]
+        )
         message = (
-            "\nAre you sure you want to delete the following profiles?\n\t{}"
+            f"\nAre you sure you want to delete the following profiles?\n\t{profile_str_list}"
             "\n\nThis will also delete any stored passwords and checkpoints. (y/n): "
-        ).format("\n\t".join([c42profile.name for c42profile in existing_profiles]))
+        )
         if does_user_agree(message):
             for profile_obj in existing_profiles:
                 cliprofile.delete_profile(profile_obj.name)
-                echo("Profile '{}' has been deleted.".format(profile_obj.name))
+                echo(f"Profile '{profile_obj.name}' has been deleted.")
     else:
         echo("\nNo profiles exist. Nothing to delete.")
 
@@ -203,7 +208,11 @@ def _prompt_for_allow_password_set(profile_name):
 def _set_pw(profile_name, password):
     c42profile = cliprofile.get_profile(profile_name)
     try:
-        validate_connection(c42profile.authority_url, c42profile.username, password)
+        create_sdk(c42profile, is_debug_mode=False, password=password)
+    except Py42MFARequiredError:
+        echo(
+            "Multi-factor account detected. `--totp <token>` option will be required for all code42 invocations."
+        )
     except Exception:
         secho("Password not stored!", bold=True)
         raise
