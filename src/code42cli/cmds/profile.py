@@ -153,7 +153,7 @@ def use(profile_name):
         return
 
     cliprofile.switch_default_profile(profile_name)
-    _print_default_profile_set(profile_name)
+    _print_default_profile_was_set(profile_name)
 
 
 @profile.command()
@@ -232,8 +232,8 @@ def _select_profile():
 
 def _set_default_profile(profile_name):
     cliprofile.switch_default_profile(profile_name)
-    _print_default_profile_set(profile_name)
+    _print_default_profile_was_set(profile_name)
 
 
-def _print_default_profile_set(profile_name):
+def _print_default_profile_was_set(profile_name):
     echo(f"{profile_name} has been set as the default profile.")
