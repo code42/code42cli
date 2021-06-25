@@ -53,8 +53,8 @@ def role_name_option(help):
     return click.option("--role-name", help=help)
 
 
-def username_option(help):
-    return click.option("--username", help=help)
+def username_option(help, required=False):
+    return click.option("--username", help=help, required=required)
 
 
 @users.command(name="list")
@@ -148,18 +148,16 @@ _bulk_user_update_headers = [
     "archive_size_quota",
 ]
 
-_bulk_user_move_headers = ["user_id", "org_id"]
+_bulk_user_move_headers = ["username", "org_id"]
 
 
 @users.command(name="move")
-@click.option(
-    "--user-id", help="The identifier for the user to be moved", required=True, type=int
-)
+@username_option("The username of the user to be moved.", required=True)
 @org_id_option
 @sdk_options()
-def change_organization(state, user_id, org_id):
-    """Move the user with the given user ID to the org with the given org ID"""
-    _change_organization(state.sdk, user_id, org_id)
+def change_organization(state, username, org_id):
+    """Move the user with the given username to the org with the given org ID"""
+    _change_organization(state.sdk, username, org_id)
 
 
 @users.group(cls=OrderedGroup)
@@ -291,5 +289,6 @@ def _update_user(
     )
 
 
-def _change_organization(sdk, user_id, org_id):
+def _change_organization(sdk, username, org_id):
+    user_id=_get_user_id(sdk, username)
     return sdk.users.change_org_assignment(user_id=int(user_id), org_id=int(org_id))
