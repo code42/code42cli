@@ -222,7 +222,7 @@ def _set_pw(profile_name, password):
 
 def _select_profile():
     profiles = cliprofile.get_all_profiles()
-    profile_names = [p.name for p in profiles]
+    profile_names = [profile_choice.name for profile_choice in profiles]
     choices = PromptChoice(profile_names)
     choices.print_choices()
     prompt_message = "Input the number of the profile you wish to use"
