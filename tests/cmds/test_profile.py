@@ -543,7 +543,7 @@ def test_use_profile(runner, mock_cliprofile_namespace, profile):
 
 
 def test_use_profile_when_not_given_profile_name_arg_sets_selected_profile_as_default(
-    runner, mock_cliprofile_namespace, profile, profile_name_selector
+    runner, mock_cliprofile_namespace, profile_name_selector
 ):
     runner.invoke(cli, ["profile", "use"])
     mock_cliprofile_namespace.switch_default_profile.assert_called_once_with(
@@ -552,7 +552,7 @@ def test_use_profile_when_not_given_profile_name_arg_sets_selected_profile_as_de
 
 
 def test_select_profile_sets_selected_profile_as_default(
-    runner, mock_cliprofile_namespace, profile, profile_name_selector
+    runner, mock_cliprofile_namespace, profile_name_selector
 ):
     runner.invoke(cli, ["profile", "select"])
     mock_cliprofile_namespace.switch_default_profile.assert_called_once_with(
