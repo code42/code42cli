@@ -134,14 +134,14 @@ search_and_send_to_test = get_mark_for_search_and_send_to("security-data")
 
 @pytest.fixture
 def file_event_extractor(mocker):
-    mock = mocker.patch("code42cli.cmds.securitydata._get_file_event_extractor")
+    mock = mocker.patch("code42cli.cmds.security_data._get_file_event_extractor")
     mock.return_value = mocker.MagicMock(spec=FileEventExtractor)
     return mock.return_value
 
 
 @pytest.fixture
 def file_event_cursor_with_checkpoint(mocker):
-    mock = mocker.patch("code42cli.cmds.securitydata._get_file_event_cursor_store")
+    mock = mocker.patch("code42cli.cmds.security_data._get_file_event_cursor_store")
     mock_cursor = mocker.MagicMock(spec=FileEventCursorStore)
     mock_cursor.get.return_value = CURSOR_TIMESTAMP
     mock.return_value = mock_cursor
@@ -151,7 +151,7 @@ def file_event_cursor_with_checkpoint(mocker):
 
 @pytest.fixture
 def file_event_cursor_without_checkpoint(mocker):
-    mock = mocker.patch("code42cli.cmds.securitydata._get_file_event_cursor_store")
+    mock = mocker.patch("code42cli.cmds.security_data._get_file_event_cursor_store")
     mock_cursor = mocker.MagicMock(spec=FileEventCursorStore)
     mock_cursor.get.return_value = None
     mock.return_value = mock_cursor
@@ -160,7 +160,7 @@ def file_event_cursor_without_checkpoint(mocker):
 
 @pytest.fixture
 def begin_option(mocker):
-    mock = mocker.patch("code42cli.cmds.securitydata.convert_datetime_to_timestamp")
+    mock = mocker.patch("code42cli.cmds.security_data.convert_datetime_to_timestamp")
     mock.return_value = BEGIN_TIMESTAMP
     mock.expected_timestamp = "2020-01-01T06:00:00.000Z"
     return mock

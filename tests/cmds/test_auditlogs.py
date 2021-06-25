@@ -9,7 +9,7 @@ from requests import Response
 from tests.cmds.conftest import get_mark_for_search_and_send_to
 
 from code42cli.click_ext.types import MagicDate
-from code42cli.cmds.auditlogs import _parse_audit_log_timestamp_string_to_timestamp
+from code42cli.cmds.audit_logs import _parse_audit_log_timestamp_string_to_timestamp
 from code42cli.cmds.search.cursor_store import AuditLogCursorStore
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import round_datetime_to_day_end
@@ -69,7 +69,8 @@ def audit_log_cursor_with_checkpoint(mocker):
     mock_cursor = mocker.MagicMock(spec=AuditLogCursorStore)
     mock_cursor.get.return_value = CURSOR_TIMESTAMP
     mocker.patch(
-        "code42cli.cmds.auditlogs._get_audit_log_cursor_store", return_value=mock_cursor
+        "code42cli.cmds.audit_logs._get_audit_log_cursor_store",
+        return_value=mock_cursor,
     )
     return mock_cursor
 
@@ -82,7 +83,8 @@ def audit_log_cursor_with_checkpoint_and_events(mocker):
         hash_event(TEST_EVENTS_WITH_SAME_TIMESTAMP[0])
     ]
     mocker.patch(
-        "code42cli.cmds.auditlogs._get_audit_log_cursor_store", return_value=mock_cursor
+        "code42cli.cmds.audit_logs._get_audit_log_cursor_store",
+        return_value=mock_cursor,
     )
     return mock_cursor
 
