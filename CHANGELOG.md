@@ -38,7 +38,6 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - New command `code42 shell` that opens an IPython console with a pre-initialized py42 sdk.
 
 ## 1.6.1 - 2021-05-27
->>>>>>> main
 
 ### Fixed
 
@@ -126,7 +125,6 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Arguments/options that read data from files now attempt to autodetect file encodings.
   Resolving a bug where CSVs written on Windows with Powershell would fail to be read properly.
->>>>>>> master
 
 ## 1.4.0 - 2021-03-09
 
