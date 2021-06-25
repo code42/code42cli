@@ -171,7 +171,10 @@ def bulk(state):
 
 users_generate_template = generate_template_cmd_factory(
     group_name="users",
-    commands_dict={"update": _bulk_user_update_headers},
+    commands_dict={
+        "update": _bulk_user_update_headers,
+        "move": _bulk_user_move_headers,
+    },
     help_message="Generate the CSV template needed for bulk user commands.",
 )
 bulk.add_command(users_generate_template)
