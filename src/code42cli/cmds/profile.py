@@ -149,7 +149,7 @@ def _list():
 def use(profile_name):
     """Set a profile as the default."""
     if not profile_name:
-        _select_profile()
+        _select_profile_from_prompt()
         return
 
     cliprofile.switch_default_profile(profile_name)
@@ -196,7 +196,7 @@ def delete_all():
 @profile.command()
 def select():
     """Select the profile to use from a list."""
-    _select_profile()
+    _select_profile_from_prompt()
 
 
 def _prompt_for_allow_password_set(profile_name):
@@ -220,7 +220,7 @@ def _set_pw(profile_name, password):
     return c42profile.name
 
 
-def _select_profile():
+def _select_profile_from_prompt():
     profiles = cliprofile.get_all_profiles()
     profile_names = [profile_choice.name for profile_choice in profiles]
     choices = PromptChoice(profile_names)
