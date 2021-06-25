@@ -148,8 +148,8 @@ def _list():
 @profile_name_arg()
 def use(profile_name):
     """\b
-    Set a profile as the default. If not providing a profile-name as an
-    argument, prompts for a selection from a list of all your profiles."""
+    Set a profile as the default. If not providing a profile-name,
+    prompts for a choice from a list of all profiles."""
 
     if not profile_name:
         _select_profile_from_prompt()
