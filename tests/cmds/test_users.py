@@ -63,6 +63,11 @@ def get_available_roles_response(mocker):
 
 
 @pytest.fixture
+def change_org_response(mocker):
+    return _create_py42_response(mocker, "")
+
+
+@pytest.fixture
 def get_all_users_success(cli_state):
     cli_state.sdk.users.get_all.return_value = get_all_users_generator()
 
@@ -85,6 +90,11 @@ def get_available_roles_success(cli_state, get_available_roles_response):
 @pytest.fixture
 def update_user_success(cli_state, update_user_response):
     cli_state.sdk.users.update_user.return_value = update_user_response
+
+
+@pytest.fixture
+def change_org_success(cli_state, change_org_response):
+    cli_state.sdk.users.change_org_assignment.return_value = change_org_response
 
 
 def test_list_when_non_table_format_outputs_expected_columns(
@@ -387,4 +397,27 @@ def test_bulk_deactivate_uses_expected_arguments_when_all_are_passed(
             "archive_size_quota": "4321",
             "updated": "False",
         }
+    ]
+
+
+def test_change_org_calls_change_org_assignment_with_correct_parameters(
+    runner, cli_state, change_org_success
+):
+    command = ["users", "move", "--user-id", "12345", "--org-id", "54321"]
+    runner.invoke(cli, command, obj=cli_state)
+    cli_state.sdk.users.change_org_assignment.assert_called_once_with(
+        user_id=12345, org_id=54321
+    )
+
+
+def test_bulk_move_uses_expected_arguments(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_move.csv", "w") as csv:
+            csv.writelines(["user_id,org_id\n", "12345,4321\n"])
+        runner.invoke(
+            cli, ["users", "bulk", "move", "test_bulk_move.csv"], obj=cli_state
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"user_id": "12345", "org_id": "4321", "moved": "False"}
     ]

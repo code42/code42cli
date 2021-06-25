@@ -41,6 +41,13 @@ user_uid_option = click.option(
     "--user-id", help="The unique identifier of the user to be modified.", required=True
 )
 
+org_id_option = click.option(
+    "--org-id",
+    help="The identifier for the organization to which the user will be moved.",
+    required=True,
+    type=int,
+)
+
 
 def role_name_option(help):
     return click.option("--role-name", help=help)
@@ -141,6 +148,19 @@ _bulk_user_update_headers = [
     "archive_size_quota",
 ]
 
+_bulk_user_move_headers = ["user_id", "org_id"]
+
+
+@users.command(name="move")
+@click.option(
+    "--user-id", help="The identifier for the user to be moved", required=True, type=int
+)
+@org_id_option
+@sdk_options()
+def change_organization(state, user_id, org_id):
+    """Move the user with the given user ID to the org with the given org ID"""
+    _change_organization(state.sdk, user_id, org_id)
+
 
 @users.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
@@ -179,6 +199,29 @@ def bulk_update(state, csv_rows, format):
     result_rows = run_bulk_process(
         handle_row, csv_rows, progress_label="Updating users:"
     )
+    formatter.echo_formatted_list(result_rows)
+
+
+@bulk.command(name="move")
+@read_csv_arg(headers=_bulk_user_move_headers)
+@format_option
+@sdk_options()
+def bulk_move(state, csv_rows, format):
+    """Move the list of users from the provided CSV."""
+    csv_rows[0]["moved"] = "False"
+    formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+
+    def handle_row(**row):
+        try:
+            _change_organization(
+                state.sdk, **{key: row[key] for key in row.keys() if key != "moved"}
+            )
+            row["moved"] = "True"
+        except Exception as err:
+            row["moved"] = f"False: {err}"
+        return row
+
+    result_rows = run_bulk_process(handle_row, csv_rows, progress_label="Moving users:")
     formatter.echo_formatted_list(result_rows)
 
 
@@ -243,3 +286,7 @@ def _update_user(
         notes=notes,
         archive_size_quota_bytes=archive_size_quota,
     )
+
+
+def _change_organization(sdk, user_id, org_id):
+    return sdk.users.change_org_assignment(user_id=int(user_id), org_id=int(org_id))
