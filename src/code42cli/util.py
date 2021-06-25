@@ -177,7 +177,9 @@ def hash_event(event):
 
 
 def print_numbered_list(items):
-    """Outputs a numbered list of items to the user."""
+    """Outputs a numbered list of items to the user.
+    For example, provide ["test", "foo"] to print "1. test\n2. foo".
+    """
 
     choices = dict(enumerate(items, 1))
     for num in choices:
