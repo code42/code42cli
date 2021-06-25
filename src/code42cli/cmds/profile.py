@@ -148,7 +148,7 @@ def _list():
 @profile_name_arg()
 def use(profile_name):
     """Set a profile as the default."""
-    if profile_name is None:
+    if not profile_name:
         _select_profile()
         return
 
