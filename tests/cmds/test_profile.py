@@ -58,7 +58,7 @@ def invalid_connection(mock_verify):
 
 @pytest.fixture
 def profile_name_selector(mocker):
-    mock = mocker.patch("code42cli.cmds.profile.get_user_selected_item")
+    mock = mocker.patch("code42cli.cmds.profile.click.prompt")
     mock.return_value = _SELECTED_PROFILE_NAME
     return mock
 

@@ -6,12 +6,12 @@ from click import secho
 from py42.exceptions import Py42MFARequiredError
 
 import code42cli.profile as cliprofile
+from code42cli.click_ext.types import PromptChoice
 from code42cli.errors import Code42CLIError
 from code42cli.options import yes_option
 from code42cli.profile import CREATE_PROFILE_HELP
 from code42cli.sdk_client import create_sdk
 from code42cli.util import does_user_agree
-from code42cli.util import get_user_selected_item
 
 
 @click.group()
@@ -223,9 +223,14 @@ def _set_pw(profile_name, password):
 def _select_profile():
     profiles = cliprofile.get_all_profiles()
     profile_names = [p.name for p in profiles]
-    profile_name = get_user_selected_item(
-        "Choose which profile you want to make default", profile_names
-    )
+    choices = PromptChoice(profile_names)
+    choices.print_choices()
+    prompt_message = "Input the number of the profile you wish to use"
+    profile_name = click.prompt(prompt_message, type=choices)
+    _set_default_profile(profile_name)
+
+
+def _set_default_profile(profile_name):
     cliprofile.switch_default_profile(profile_name)
     _print_default_profile_set(profile_name)
 

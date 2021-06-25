@@ -8,6 +8,7 @@ import click
 from click.exceptions import BadParameter
 
 from code42cli.logger import CliLogger
+from code42cli.util import print_numbered_list
 
 
 class AutoDecodedFile(click.File):
@@ -150,17 +151,16 @@ class MapChoice(click.Choice):
         return super().convert(value, param, ctx)
 
 
-class PromptChoices(click.ParamType):
+class PromptChoice(click.ParamType):
     def __init__(self, choices):
-        self.choices = dict(enumerate(choices, 1))
+        self.choices = choices
 
     def print_choices(self):
-        for num in self.choices:
-            click.echo(f"{num}: {self.choices[num]}")
-        click.echo()
+        print_numbered_list(self.choices)
 
     def convert(self, value, param, ctx):
         try:
-            return self.choices[int(value)]
+            choice_index = int(value) - 1
+            return self.choices[choice_index]
         except Exception:
             self.fail("Invalid choice", param=param)

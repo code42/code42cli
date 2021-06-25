@@ -14,8 +14,6 @@ from click import echo
 from click import get_current_context
 from click import style
 
-from code42cli.click_ext.types import PromptChoices
-
 _PADDING_SIZE = 3
 
 
@@ -178,8 +176,10 @@ def hash_event(event):
     return md5(event.encode()).hexdigest()
 
 
-def get_user_selected_item(message, choices):
-    """Prompts the user for which item they would like to pick from a list."""
-    choices = PromptChoices(choices)
-    choices.print_choices()
-    return click.prompt(message, type=choices)
+def print_numbered_list(items):
+    """Outputs a numbered list of items to the user."""
+
+    choices = dict(enumerate(items, 1))
+    for num in choices:
+        click.echo(f"{num}. {choices[num]}")
+    click.echo()
