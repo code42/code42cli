@@ -220,6 +220,7 @@ def _set_pw(profile_name, password):
 
 
 def _select_profile_from_prompt():
+    """Set the default profile from user input."""
     profiles = cliprofile.get_all_profiles()
     profile_names = [profile_choice.name for profile_choice in profiles]
     choices = PromptChoice(profile_names)
