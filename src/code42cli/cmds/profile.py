@@ -152,8 +152,7 @@ def use(profile_name):
         _select_profile_from_prompt()
         return
 
-    cliprofile.switch_default_profile(profile_name)
-    _print_default_profile_was_set(profile_name)
+    _set_default_profile(profile_name)
 
 
 @profile.command()
