@@ -16,6 +16,10 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - New command `code42 users bulk update` to update users in bulk.
 
+- New command `code42 users move` to move a single user to a different organization.
+
+- New command `code42 users bulk move` to move users in bulk.
+
 - New command `code42 profile select` that allows you to select a default profile
     from a list of all your profiles.
 
