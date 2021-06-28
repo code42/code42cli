@@ -41,13 +41,20 @@ user_uid_option = click.option(
     "--user-id", help="The unique identifier of the user to be modified.", required=True
 )
 
+org_id_option = click.option(
+    "--org-id",
+    help="The identifier for the organization to which the user will be moved.",
+    required=True,
+    type=int,
+)
+
 
 def role_name_option(help):
     return click.option("--role-name", help=help)
 
 
-def username_option(help):
-    return click.option("--username", help=help)
+def username_option(help, required=False):
+    return click.option("--username", help=help, required=required)
 
 
 @users.command(name="list")
@@ -141,6 +148,17 @@ _bulk_user_update_headers = [
     "archive_size_quota",
 ]
 
+_bulk_user_move_headers = ["username", "org_id"]
+
+
+@users.command(name="move")
+@username_option("The username of the user to move.", required=True)
+@org_id_option
+@sdk_options()
+def change_organization(state, username, org_id):
+    """Change the organization of the user with the given username to the org with the given org ID."""
+    _change_organization(state.sdk, username, org_id)
+
 
 @users.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
@@ -151,7 +169,10 @@ def bulk(state):
 
 users_generate_template = generate_template_cmd_factory(
     group_name="users",
-    commands_dict={"update": _bulk_user_update_headers},
+    commands_dict={
+        "update": _bulk_user_update_headers,
+        "move": _bulk_user_move_headers,
+    },
     help_message="Generate the CSV template needed for bulk user commands.",
 )
 bulk.add_command(users_generate_template)
@@ -179,6 +200,29 @@ def bulk_update(state, csv_rows, format):
     result_rows = run_bulk_process(
         handle_row, csv_rows, progress_label="Updating users:"
     )
+    formatter.echo_formatted_list(result_rows)
+
+
+@bulk.command(name="move")
+@read_csv_arg(headers=_bulk_user_move_headers)
+@format_option
+@sdk_options()
+def bulk_move(state, csv_rows, format):
+    """Change the organization of the list of users from the provided CSV."""
+    csv_rows[0]["moved"] = "False"
+    formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+
+    def handle_row(**row):
+        try:
+            _change_organization(
+                state.sdk, **{key: row[key] for key in row.keys() if key != "moved"}
+            )
+            row["moved"] = "True"
+        except Exception as err:
+            row["moved"] = f"False: {err}"
+        return row
+
+    result_rows = run_bulk_process(handle_row, csv_rows, progress_label="Moving users:")
     formatter.echo_formatted_list(result_rows)
 
 
@@ -243,3 +287,8 @@ def _update_user(
         notes=notes,
         archive_size_quota_bytes=archive_size_quota,
     )
+
+
+def _change_organization(sdk, username, org_id):
+    user_id = _get_user_id(sdk, username)
+    return sdk.users.change_org_assignment(user_id=int(user_id), org_id=int(org_id))
