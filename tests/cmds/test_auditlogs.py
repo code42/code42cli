@@ -9,7 +9,7 @@ from requests import Response
 from tests.cmds.conftest import get_mark_for_search_and_send_to
 
 from code42cli.click_ext.types import MagicDate
-from code42cli.cmds.audit_logs import _parse_audit_log_timestamp_string_to_timestamp
+from code42cli.cmds.auditlogs import _parse_audit_log_timestamp_string_to_timestamp
 from code42cli.cmds.search.cursor_store import AuditLogCursorStore
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import round_datetime_to_day_end
