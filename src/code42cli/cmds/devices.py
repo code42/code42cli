@@ -587,6 +587,7 @@ def bulk_deactivate(state, csv_rows, change_device_name, purge_date, format):
             row["deactivated"] = "True"
         except Exception as err:
             row["deactivated"] = f"False: {err}"
+            raise
         return row
 
     result_rows = run_bulk_process(
@@ -602,7 +603,7 @@ def bulk_deactivate(state, csv_rows, change_device_name, purge_date, format):
 def bulk_reactivate(state, csv_rows, format):
     """Reactivate all devices from the provided CSV containing a 'guid' column."""
     sdk = state.sdk
-    csv_rows[0]["reactivated"] = False
+    csv_rows[0]["reactivated"] = "False"
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
 
     def handle_row(**row):
@@ -611,6 +612,7 @@ def bulk_reactivate(state, csv_rows, format):
             row["reactivated"] = "True"
         except Exception as err:
             row["reactivated"] = f"False: {err}"
+            raise
         return row
 
     result_rows = run_bulk_process(

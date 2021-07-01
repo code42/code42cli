@@ -195,6 +195,7 @@ def bulk_update(state, csv_rows, format):
             row["updated"] = "True"
         except Exception as err:
             row["updated"] = f"False: {err}"
+            raise
         return row
 
     result_rows = run_bulk_process(
@@ -220,6 +221,7 @@ def bulk_move(state, csv_rows, format):
             row["moved"] = "True"
         except Exception as err:
             row["moved"] = f"False: {err}"
+            raise
         return row
 
     result_rows = run_bulk_process(handle_row, csv_rows, progress_label="Moving users:")
