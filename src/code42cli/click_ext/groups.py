@@ -12,6 +12,7 @@ from py42.exceptions import Py42InvalidRuleOperationError
 from py42.exceptions import Py42LegalHoldNotFoundOrPermissionDeniedError
 from py42.exceptions import Py42UpdateClosedCaseError
 from py42.exceptions import Py42UserAlreadyAddedError
+from py42.exceptions import Py42UsernameMustBeEmailError
 from py42.exceptions import Py42UserNotOnListError
 
 from code42cli.errors import Code42CLIError
@@ -67,6 +68,7 @@ class ExceptionHandlingGroup(click.Group):
             Py42DescriptionLimitExceededError,
             Py42CaseAlreadyHasEventError,
             Py42UpdateClosedCaseError,
+            Py42UsernameMustBeEmailError,
         ) as err:
             self.logger.log_error(err)
             raise Code42CLIError(str(err))

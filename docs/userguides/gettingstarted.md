@@ -7,7 +7,7 @@
 
 ## Licensing
 
-This project uses the [MIT License](https://github.com/code42/code42cli/blob/master/LICENSE.md).
+This project uses the [MIT License](https://github.com/code42/code42cli/blob/main/LICENSE.md).
 
 ## Installation
 

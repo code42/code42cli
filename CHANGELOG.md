@@ -8,6 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## Unreleased
+
+### Fixed
+
+- Issue where `code42 devices bulk deactivate` and `code42 devices bulk reactivate` would
+    output incorrect Successes and Failures at the end of the process.
+
+### Added
+
+- New command `code42 users update` to update a single user.
+
+- New command `code42 users bulk update` to update users in bulk.
+
+- New command `code42 users move` to move a single user to a different organization.
+
+- New command `code42 users bulk move` to move users in bulk.
+
+### Changed
+
+- `code42 alerts search` now uses microsecond precision when searching by alerts' date observed.
+
 ## 1.7.0 - 2021-06-17
 
 ### Added
