@@ -156,7 +156,8 @@ _bulk_user_move_headers = ["username", "org_id"]
 @org_id_option
 @sdk_options()
 def change_organization(state, username, org_id):
-    """Change the organization of the user with the given username to the org with the given org ID."""
+    """Change the organization of the user with the given username 
+    to the org with the given org ID."""
     _change_organization(state.sdk, username, org_id)
 
 
