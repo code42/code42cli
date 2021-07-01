@@ -879,7 +879,7 @@ def test_bulk_reactivate_uses_expected_arguments(runner, mocker, cli_state):
             ["devices", "bulk", "reactivate", "test_bulk_reactivate.csv"],
             obj=cli_state,
         )
-    assert bulk_processor.call_args[0][1] == [{"guid": "test", "reactivated": False}]
+    assert bulk_processor.call_args[0][1] == [{"guid": "test", "reactivated": "False"}]
 
 
 def test_bulk_reactivate_ignores_blank_lines(runner, mocker, cli_state):
