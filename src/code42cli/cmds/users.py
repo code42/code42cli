@@ -45,7 +45,6 @@ org_id_option = click.option(
     "--org-id",
     help="The identifier for the organization to which the user will be moved.",
     required=True,
-    type=int,
 )
 
 
@@ -156,7 +155,7 @@ _bulk_user_move_headers = ["username", "org_id"]
 @org_id_option
 @sdk_options()
 def change_organization(state, username, org_id):
-    """Change the organization of the user with the given username 
+    """Change the organization of the user with the given username
     to the org with the given org ID."""
     _change_organization(state.sdk, username, org_id)
 
@@ -292,4 +291,10 @@ def _update_user(
 
 def _change_organization(sdk, username, org_id):
     user_id = _get_user_id(sdk, username)
+    org_id = _get_org_id(sdk, org_id)
     return sdk.users.change_org_assignment(user_id=int(user_id), org_id=int(org_id))
+
+
+def _get_org_id(sdk, org_id):
+    org = sdk.orgs.get_by_uid(org_id)
+    return org["orgId"]

@@ -38,6 +38,34 @@ TEST_EMPTY_USERS_RESPONSE = {"users": []}
 TEST_USERNAME = TEST_USERS_RESPONSE["users"][0]["username"]
 TEST_USER_ID = TEST_USERS_RESPONSE["users"][0]["userId"]
 TEST_ROLE_NAME = TEST_ROLE_RETURN_DATA["data"][0]["roleName"]
+TEST_GET_ORG_RESPONSE = {
+    "orgId": 9087,
+    "orgUid": "1007759454961904673",
+    "orgGuid": "a9578c3d-736b-4d96-80e5-71edd8a11ea3",
+    "orgName": "19may",
+    "orgExtRef": None,
+    "notes": None,
+    "status": "Active",
+    "active": True,
+    "blocked": False,
+    "parentOrgId": 2689,
+    "parentOrgUid": "890854247383106706",
+    "parentOrgGuid": "8c97h74umc2s8mmm",
+    "type": "ENTERPRISE",
+    "classification": "BASIC",
+    "externalId": "1007759454961904673",
+    "hierarchyCounts": {},
+    "configInheritanceCounts": {},
+    "creationDate": "2021-05-19T10:10:43.459Z",
+    "modificationDate": "2021-05-20T14:43:42.276Z",
+    "deactivationDate": None,
+    "settings": {"maxSeats": None, "maxBytes": None},
+    "settingsInherited": {"maxSeats": "", "maxBytes": ""},
+    "settingsSummary": {"maxSeats": "", "maxBytes": ""},
+    "registrationKey": "72RU-8P9S-M7KK-RHCC",
+    "reporting": {"orgManagers": []},
+    "customConfig": False,
+}
 
 
 def _create_py42_response(mocker, text):
@@ -63,8 +91,23 @@ def get_available_roles_response(mocker):
 
 
 @pytest.fixture
+def get_users_response(mocker):
+    return _create_py42_response(mocker, json.dumps(TEST_USERS_RESPONSE))
+
+
+@pytest.fixture
 def change_org_response(mocker):
     return _create_py42_response(mocker, "")
+
+
+@pytest.fixture
+def get_org_response(mocker):
+    return _create_py42_response(mocker, json.dumps(TEST_GET_ORG_RESPONSE))
+
+
+@pytest.fixture
+def get_org_success(cli_state, get_org_response):
+    cli_state.sdk.orgs.get_by_uid.return_value = get_org_response
 
 
 @pytest.fixture
@@ -73,13 +116,16 @@ def get_all_users_success(cli_state):
 
 
 @pytest.fixture
-def get_user_id_success(cli_state):
-    cli_state.sdk.users.get_by_username.return_value = TEST_USERS_RESPONSE
+def get_user_id_success(cli_state, get_users_response):
+    """Get by username returns a list of users"""
+    cli_state.sdk.users.get_by_username.return_value = get_users_response
 
 
 @pytest.fixture
-def get_user_id_failure(cli_state):
-    cli_state.sdk.users.get_by_username.return_value = TEST_EMPTY_USERS_RESPONSE
+def get_user_id_failure(mocker, cli_state):
+    cli_state.sdk.users.get_by_username.return_value = _create_py42_response(
+        mocker, json.dumps(TEST_EMPTY_USERS_RESPONSE)
+    )
 
 
 @pytest.fixture
@@ -400,13 +446,21 @@ def test_bulk_deactivate_uses_expected_arguments_when_all_are_passed(
     ]
 
 
-def test_change_org_calls_change_org_assignment_with_correct_parameters(
-    runner, cli_state, change_org_success, get_user_id_success
+def test_move_calls_change_org_assignment_with_correct_parameters(
+    runner, cli_state, change_org_success, get_user_id_success, get_org_success
 ):
-    command = ["users", "move", "--username", TEST_USERNAME, "--org-id", "54321"]
+    command = [
+        "users",
+        "move",
+        "--username",
+        TEST_USERNAME,
+        "--org-id",
+        "1007744453331222111",
+    ]
     runner.invoke(cli, command, obj=cli_state)
+    expected_org_id = TEST_GET_ORG_RESPONSE["orgId"]x
     cli_state.sdk.users.change_org_assignment.assert_called_once_with(
-        user_id=TEST_USER_ID, org_id=54321
+        user_id=TEST_USER_ID, org_id=expected_org_id
     )
 
 
