@@ -24,6 +24,7 @@ from code42cli.options import sdk_options
 from code42cli.output_formats import DataFrameOutputFormatter
 from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
+from code42cli.worker import create_worker_stats
 
 
 @click.group(cls=OrderedGroup)
@@ -575,6 +576,7 @@ def bulk_deactivate(state, csv_rows, change_device_name, purge_date, format):
     sdk = state.sdk
     csv_rows[0]["deactivated"] = "False"
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+    stats = create_worker_stats(len(csv_rows))
     for row in csv_rows:
         row["change_device_name"] = change_device_name
         row["purge_date"] = purge_date
@@ -587,11 +589,21 @@ def bulk_deactivate(state, csv_rows, change_device_name, purge_date, format):
             row["deactivated"] = "True"
         except Exception as err:
             row["deactivated"] = f"False: {err}"
-            raise
+            stats.increment_total_errors()
         return row
 
+    def handle_if_errors(*args, **kwargs):
+        """Still output rows to show individual row status by ignoring
+        the default CLI Log Error message.
+        """
+        pass
+
     result_rows = run_bulk_process(
-        handle_row, csv_rows, progress_label="Deactivating devices:"
+        handle_row,
+        csv_rows,
+        progress_label="Deactivating devices:",
+        stats=stats,
+        handle_if_errors=handle_if_errors,
     )
     formatter.echo_formatted_list(result_rows)
 
@@ -605,6 +617,7 @@ def bulk_reactivate(state, csv_rows, format):
     sdk = state.sdk
     csv_rows[0]["reactivated"] = "False"
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+    stats = create_worker_stats(len(csv_rows))
 
     def handle_row(**row):
         try:
@@ -612,10 +625,20 @@ def bulk_reactivate(state, csv_rows, format):
             row["reactivated"] = "True"
         except Exception as err:
             row["reactivated"] = f"False: {err}"
-            raise
+            stats.increment_total_errors()
         return row
 
+    def handle_if_errors(*args, **kwargs):
+        """Still output rows to show individual row status by ignoring
+        the default CLI Log Error message.
+        """
+        pass
+
     result_rows = run_bulk_process(
-        handle_row, csv_rows, progress_label="Reactivating devices:"
+        handle_row,
+        csv_rows,
+        progress_label="Reactivating devices:",
+        stats=stats,
+        handle_if_errors=handle_if_errors,
     )
     formatter.echo_formatted_list(result_rows)

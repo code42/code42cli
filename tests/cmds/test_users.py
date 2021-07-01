@@ -5,7 +5,7 @@ from py42.response import Py42Response
 from requests import Response
 
 from code42cli.main import cli
-
+from code42cli.worker import WorkerStats
 
 _NAMESPACE = "code42cli.cmds.users"
 
@@ -141,6 +141,18 @@ def update_user_success(cli_state, update_user_response):
 @pytest.fixture
 def change_org_success(cli_state, change_org_response):
     cli_state.sdk.users.change_org_assignment.return_value = change_org_response
+
+
+@pytest.fixture
+def worker_stats_factory(mocker):
+    return mocker.patch(f"{_NAMESPACE}.create_worker_stats")
+
+
+@pytest.fixture
+def worker_stats(mocker, worker_stats_factory):
+    stats = mocker.MagicMock(spec=WorkerStats)
+    worker_stats_factory.return_value = stats
+    return stats
 
 
 def test_list_when_non_table_format_outputs_expected_columns(
@@ -476,27 +488,49 @@ def test_bulk_update_ignores_blank_lines(runner, mocker, cli_state):
     ]
 
 
-def test_bulk_update_provides_handler_that_raises_caught_errors(
-    runner, mocker, cli_state
+def test_bulk_update_uses_handler_that_when_encounters_error_increments_total_errors(
+    runner, mocker, cli_state, worker_stats
 ):
-    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    lines = [
+        "user_id,username,email,password,first_name,last_name,notes,archive_size_quota\n",
+        "12345,test_username,test_email,test_pword,test_fname,test_lname,test notes,4321\n",
+    ]
 
+    def _update(user_id, *args, **kwargs):
+        if user_id == "12345":
+            raise Exception("TEST")
+        return _create_py42_response(mocker, TEST_USERS_RESPONSE)
+
+    cli_state.sdk.users.update_user.side_effect = _update
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_bulk_update.csv", "w") as csv:
-            lines = [
-                "user_id,username,email,password,first_name,last_name,notes,archive_size_quota\n",
-                "12345,test_username,test_email,test_pword,test_fname,test_lname,test notes,4321\n",
-            ]
             csv.writelines(lines)
         runner.invoke(
-            cli, ["users", "bulk", "update", "test_bulk_update.csv"], obj=cli_state
+            cli, ["users", "bulk", "update", "test_bulk_update.csv"], obj=cli_state,
         )
-
     handler = bulk_processor.call_args[0][0]
-
-    # This test fails when the handler is implemented such that is swallows exceptions.
-    with pytest.raises(Exception):
-        handler()
+    handler(
+        user_id="12345",
+        username="test",
+        email="test",
+        password="test",
+        first_name="test",
+        last_name="test",
+        notes="test",
+        archive_size_quota="test",
+    )
+    handler(
+        user_id="not 12345",
+        username="test",
+        email="test",
+        password="test",
+        first_name="test",
+        last_name="test",
+        notes="test",
+        archive_size_quota="test",
+    )
+    assert worker_stats.increment_total_errors.call_count == 1
 
 
 def test_move_calls_change_org_assignment_with_correct_parameters(
@@ -545,21 +579,25 @@ def test_bulk_move_ignores_blank_lines(runner, mocker, cli_state):
     bulk_processor.assert_called_once()
 
 
-def test_bulk_move_provides_handler_that_raises_caught_errors(
-    runner, mocker, cli_state
+def test_bulk_move_uses_handler_that_when_encounters_error_increments_total_errors(
+    runner, mocker, cli_state, worker_stats, get_users_response
 ):
-    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    lines = ["username,org_id\n", f"{TEST_USERNAME},4321\n"]
 
+    def _get(username, *args, **kwargs):
+        if username == "test@example.com":
+            raise Exception("TEST")
+        return get_users_response
+
+    cli_state.sdk.users.get_by_username.side_effect = _get
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_bulk_move.csv", "w") as csv:
-            lines = ["username,org_id\n", f"{TEST_USERNAME},4321\n"]
             csv.writelines(lines)
         runner.invoke(
-            cli, ["users", "bulk", "move", "test_bulk_move.csv"], obj=cli_state
+            cli, ["users", "bulk", "move", "test_bulk_move.csv"], obj=cli_state,
         )
-
     handler = bulk_processor.call_args[0][0]
-
-    # This test fails when the handler is implemented such that is swallows exceptions.
-    with pytest.raises(Exception):
-        handler()
+    handler(username="test@example.com", org_id="test")
+    handler(username="not.test@example.com", org_id="test")
+    assert worker_stats.increment_total_errors.call_count == 1

@@ -13,6 +13,7 @@ from code42cli.options import sdk_options
 from code42cli.output_formats import DataFrameOutputFormatter
 from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
+from code42cli.worker import create_worker_stats
 
 
 @click.group(cls=OrderedGroup)
@@ -186,6 +187,7 @@ def bulk_update(state, csv_rows, format):
     """Update a list of users from the provided CSV."""
     csv_rows[0]["updated"] = "False"
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+    stats = create_worker_stats(len(csv_rows))
 
     def handle_row(**row):
         try:
@@ -195,11 +197,21 @@ def bulk_update(state, csv_rows, format):
             row["updated"] = "True"
         except Exception as err:
             row["updated"] = f"False: {err}"
-            raise
+            stats.increment_total_errors()
         return row
 
+    def handle_if_errors(*args, **kwargs):
+        """Still output rows to show individual row status by ignoring
+        the default CLI Log Error message.
+        """
+        pass
+
     result_rows = run_bulk_process(
-        handle_row, csv_rows, progress_label="Updating users:"
+        handle_row,
+        csv_rows,
+        progress_label="Updating users:",
+        stats=stats,
+        handle_if_errors=handle_if_errors,
     )
     formatter.echo_formatted_list(result_rows)
 
@@ -212,6 +224,7 @@ def bulk_move(state, csv_rows, format):
     """Change the organization of the list of users from the provided CSV."""
     csv_rows[0]["moved"] = "False"
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+    stats = create_worker_stats(len(csv_rows))
 
     def handle_row(**row):
         try:
@@ -221,10 +234,22 @@ def bulk_move(state, csv_rows, format):
             row["moved"] = "True"
         except Exception as err:
             row["moved"] = f"False: {err}"
-            raise
+            stats.increment_total_errors()
         return row
 
-    result_rows = run_bulk_process(handle_row, csv_rows, progress_label="Moving users:")
+    def handle_if_errors(*args, **kwargs):
+        """Still output rows to show individual row status by ignoring
+        the default CLI Log Error message.
+        """
+        pass
+
+    result_rows = run_bulk_process(
+        handle_row,
+        csv_rows,
+        progress_label="Moving users:",
+        stats=stats,
+        handle_if_errors=handle_if_errors,
+    )
     formatter.echo_formatted_list(result_rows)
 
 

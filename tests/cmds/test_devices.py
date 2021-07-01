@@ -19,6 +19,7 @@ from code42cli.cmds.devices import _add_usernames_to_device_dataframe
 from code42cli.cmds.devices import _break_backup_usage_into_total_storage
 from code42cli.cmds.devices import _get_device_dataframe
 from code42cli.main import cli
+from code42cli.worker import WorkerStats
 
 _NAMESPACE = "code42cli.cmds.devices"
 TEST_DATE_OLDER = "2020-01-01T12:00:00.774Z"
@@ -463,6 +464,18 @@ def get_all_custodian_success(cli_state):
     )
 
 
+@pytest.fixture
+def worker_stats_factory(mocker):
+    return mocker.patch(f"{_NAMESPACE}.create_worker_stats")
+
+
+@pytest.fixture
+def worker_stats(mocker, worker_stats_factory):
+    stats = mocker.MagicMock(spec=WorkerStats)
+    worker_stats_factory.return_value = stats
+    return stats
+
+
 def test_deactivate_deactivates_device(
     runner, cli_state, deactivate_device_success, get_device_by_guid_success
 ):
@@ -849,24 +862,30 @@ def test_bulk_deactivate_ignores_blank_lines(runner, mocker, cli_state):
     ]
 
 
-def test_bulk_deactivate_provides_handler_that_raises_caught_errors(
-    runner, mocker, cli_state
+def test_bulk_deactivate_uses_handler_that_when_encounters_error_increments_total_errors(
+    runner, mocker, cli_state, worker_stats
 ):
+    lines = ["guid\n", "1\n"]
+
+    def _get(guid):
+        if guid == "test":
+            raise Exception("TEST")
+        return _create_py42_response(mocker, TEST_DEVICE_RESPONSE)
+
+    cli_state.sdk.devices.get_by_guid.side_effect = _get
     bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_bulk_deactivate.csv", "w") as csv:
-            csv.writelines(["guid,username\n", "\n", "test,value\n\n"])
+            csv.writelines(lines)
         runner.invoke(
             cli,
             ["devices", "bulk", "deactivate", "test_bulk_deactivate.csv"],
             obj=cli_state,
         )
-
     handler = bulk_processor.call_args[0][0]
-
-    # This test fails when the handler is implemented such that is swallows exceptions.
-    with pytest.raises(Exception):
-        handler()
+    handler(guid="test", change_device_name="test", purge_date="test")
+    handler(guid="not test", change_device_name="test", purge_date="test")
+    assert worker_stats.increment_total_errors.call_count == 1
 
 
 def test_bulk_reactivate_uses_expected_arguments(runner, mocker, cli_state):
@@ -896,21 +915,27 @@ def test_bulk_reactivate_ignores_blank_lines(runner, mocker, cli_state):
     bulk_processor.assert_called_once()
 
 
-def test_bulk_reactivate_provides_handler_that_raises_caught_errors(
-    runner, mocker, cli_state
+def test_bulk_reactivate_uses_handler_that_when_encounters_error_increments_total_errors(
+    runner, mocker, cli_state, worker_stats
 ):
+    lines = ["guid\n", "1\n"]
+
+    def _get(guid):
+        if guid == "test":
+            raise Exception("TEST")
+        return _create_py42_response(mocker, TEST_DEVICE_RESPONSE)
+
+    cli_state.sdk.devices.get_by_guid.side_effect = _get
     bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_bulk_reactivate.csv", "w") as csv:
-            csv.writelines(["guid,username\n", "\n", "test,value\n\n"])
+            csv.writelines(lines)
         runner.invoke(
             cli,
             ["devices", "bulk", "reactivate", "test_bulk_reactivate.csv"],
             obj=cli_state,
         )
-
     handler = bulk_processor.call_args[0][0]
-
-    # This test fails when the handler is implemented such that is swallows exceptions.
-    with pytest.raises(Exception):
-        handler()
+    handler(guid="test")
+    handler(guid="not test")
+    assert worker_stats.increment_total_errors.call_count == 1
