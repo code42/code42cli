@@ -188,8 +188,7 @@ bulk.add_command(users_generate_template)
 @format_option
 @sdk_options()
 def bulk_update(state, csv_rows, format):
-    """Update a list of users from the provided CSV
-    in format: user_id,username,email,password,first_name,last_name,notes,archive_size_quota."""
+    """Update a list of users from the provided CSV."""
     csv_rows[0]["updated"] = "False"
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
     stats = create_worker_stats(len(csv_rows))
@@ -230,7 +229,7 @@ def bulk_update(state, csv_rows, format):
 @format_option
 @sdk_options()
 def bulk_move(state, csv_rows, format):
-    """Change the organization of the list of users from the provided CSV in format."""
+    """Change the organization of the list of users from the provided CSV."""
     csv_rows[0]["moved"] = "False"
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
     stats = create_worker_stats(len(csv_rows))
