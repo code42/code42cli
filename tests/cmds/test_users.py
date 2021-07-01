@@ -1,7 +1,6 @@
 import json
 
 import pytest
-from py42.exceptions import Py42BadRequestError
 from py42.response import Py42Response
 from requests import Response
 
@@ -477,14 +476,16 @@ def test_bulk_update_ignores_blank_lines(runner, mocker, cli_state):
     ]
 
 
-def test_bulk_update_provides_handler_that_raises_caught_errors(runner, mocker, cli_state):
+def test_bulk_update_provides_handler_that_raises_caught_errors(
+    runner, mocker, cli_state
+):
     bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
 
     with runner.isolated_filesystem():
         with open("test_bulk_update.csv", "w") as csv:
             lines = [
                 "user_id,username,email,password,first_name,last_name,notes,archive_size_quota\n",
-                "12345,test_username,test_email,test_pword,test_fname,test_lname,test notes,4321\n"
+                "12345,test_username,test_email,test_pword,test_fname,test_lname,test notes,4321\n",
             ]
             csv.writelines(lines)
         runner.invoke(
@@ -544,7 +545,9 @@ def test_bulk_move_ignores_blank_lines(runner, mocker, cli_state):
     bulk_processor.assert_called_once()
 
 
-def test_bulk_move_provides_handler_that_raises_caught_errors(runner, mocker, cli_state):
+def test_bulk_move_provides_handler_that_raises_caught_errors(
+    runner, mocker, cli_state
+):
     bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
 
     with runner.isolated_filesystem():

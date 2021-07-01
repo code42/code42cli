@@ -833,7 +833,7 @@ def test_bulk_deactivate_ignores_blank_lines(runner, mocker, cli_state):
     bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_bulk_deactivate.csv", "w") as csv:
-            csv.writelines(["guid,username\n", "\n", "test,value\n\n",])
+            csv.writelines(["guid,username\n", "\n", "test,value\n\n"])
         runner.invoke(
             cli,
             ["devices", "bulk", "deactivate", "test_bulk_deactivate.csv"],
@@ -849,11 +849,13 @@ def test_bulk_deactivate_ignores_blank_lines(runner, mocker, cli_state):
     ]
 
 
-def test_bulk_deactivate_provides_handler_that_raises_caught_errors(runner, mocker, cli_state):
+def test_bulk_deactivate_provides_handler_that_raises_caught_errors(
+    runner, mocker, cli_state
+):
     bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_bulk_deactivate.csv", "w") as csv:
-            csv.writelines(["guid,username\n", "\n", "test,value\n\n",])
+            csv.writelines(["guid,username\n", "\n", "test,value\n\n"])
         runner.invoke(
             cli,
             ["devices", "bulk", "deactivate", "test_bulk_deactivate.csv"],
@@ -884,26 +886,23 @@ def test_bulk_reactivate_ignores_blank_lines(runner, mocker, cli_state):
     bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_bulk_reactivate.csv", "w") as csv:
-            csv.writelines(["guid,username\n", "\n", "test,value\n\n",])
+            csv.writelines(["guid,username\n", "\n", "test,value\n\n"])
         runner.invoke(
             cli,
             ["devices", "bulk", "reactivate", "test_bulk_reactivate.csv"],
             obj=cli_state,
         )
-    assert bulk_processor.call_args[0][1] == [
-        {
-            "guid": "test",
-            "reactivated": "False",
-        }
-    ]
+    assert bulk_processor.call_args[0][1] == [{"guid": "test", "reactivated": "False"}]
     bulk_processor.assert_called_once()
 
 
-def test_bulk_reactivate_provides_handler_that_raises_caught_errors(runner, mocker, cli_state):
+def test_bulk_reactivate_provides_handler_that_raises_caught_errors(
+    runner, mocker, cli_state
+):
     bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_bulk_reactivate.csv", "w") as csv:
-            csv.writelines(["guid,username\n", "\n", "test,value\n\n",])
+            csv.writelines(["guid,username\n", "\n", "test,value\n\n"])
         runner.invoke(
             cli,
             ["devices", "bulk", "reactivate", "test_bulk_reactivate.csv"],

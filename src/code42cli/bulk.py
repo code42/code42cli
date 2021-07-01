@@ -74,7 +74,7 @@ def run_bulk_process(row_handler, rows, progress_label=None):
             either *args or **kwargs.
         rows (iterable): the rows to process.
         progress_label: a label that prints with the progress bar.
-    
+
     Returns:
         :class:`WorkerStats`: A class containing the successes and failures count.
     """

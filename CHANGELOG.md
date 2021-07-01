@@ -12,7 +12,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Fixed
 
-- Issue where `code42 devices bulk deactivate` and `code42 devices bulk reactivate` would 
+- Issue where `code42 devices bulk deactivate` and `code42 devices bulk reactivate` would
     output incorrect Successes and Failures at the end of the process.
 
 ### Added
