@@ -138,6 +138,20 @@ def mock_audit_log_response_with_only_same_timestamps(mocker):
     return response_gen()
 
 
+# TODO: Make have missing ts last 0
+def mock_audit_log_response_with_only_same_timestamps(mocker):
+    http_response = mocker.MagicMock(spec=Response)
+    http_response.status_code = 200
+    http_response.text = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
+    http_response._content_consumed = ""
+
+    def response_gen():
+        yield Py42Response(http_response)
+
+    return response_gen()
+
+
+
 @search_and_send_to_test
 def test_search_and_send_to_handles_json_format(runner, cli_state, date_str, command):
     runner.invoke(cli, [*command, "-b", date_str], obj=cli_state)
@@ -472,9 +486,26 @@ def test_send_to_certs_and_ignore_cert_validation_args_are_incompatible(
     assert "Error: --ignore-cert-validation can't be used with: --certs" in res.output
 
 
-def test_audit_log_parse_timestamp_handles_possible_strings():
-    TIMESTAMP_WITH_MILLISECONDS = "2020-01-01T12:00:00.000Z"
-    TIMESTAMP_WITHOUT_MILLISECONDS = "2020-01-01T12:00:00Z"
-    ts1 = _parse_audit_log_timestamp_string_to_timestamp(TIMESTAMP_WITH_MILLISECONDS)
-    ts2 = _parse_audit_log_timestamp_string_to_timestamp(TIMESTAMP_WITHOUT_MILLISECONDS)
+def test_audit_log_parse_timestamp_handles_missing_milliseconds():
+    timestamp_with_ms = "2020-01-01T12:00:00.000Z"
+    timestamp_without_ms = "2020-01-01T12:00:00Z"
+    ts1 = _parse_audit_log_timestamp_string_to_timestamp(timestamp_with_ms)
+    ts2 = _parse_audit_log_timestamp_string_to_timestamp(timestamp_without_ms)
     assert ts1 == ts2
+
+
+@search_and_send_to_test
+def test_search_and_send_handles_timestamps_missing_milliseconds(
+    cli_state,
+    runner,
+    send_to_logger,
+    mock_audit_log_response,
+    audit_log_cursor_with_checkpoint,
+    command,
+):
+    runner.invoke(
+        cli, [*command, "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state,
+    )
+    assert (
+        cli_state.sdk.auditlogs.get_all.call_args[1]["begin_time"] == CURSOR_TIMESTAMP
+    )
