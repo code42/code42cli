@@ -10,6 +10,11 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
+### Fixed
+
+- Issue where `code42 devices bulk deactivate` and `code42 devices bulk reactivate` would 
+    output incorrect Successes and Failures at the end of the process.
+
 ### Added
 
 - New command `code42 users update` to update a single user.
