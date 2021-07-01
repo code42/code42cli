@@ -67,7 +67,7 @@ def generate_template_cmd_factory(group_name, commands_dict, help_message=None):
 
 
 def run_bulk_process(
-    row_handler, rows, progress_label=None, stats=None, handle_if_errors=None
+    row_handler, rows, progress_label=None, stats=None, raise_global_error=True
 ):
     """Runs a bulk process.
 
@@ -76,6 +76,9 @@ def run_bulk_process(
             either *args or **kwargs.
         rows (iterable): the rows to process.
         progress_label: a label that prints with the progress bar.
+        stats (WorkerStats): Pass in WorkerStats if doing error handling outside of the worker.
+        raise_global_error (bool): Set to False to *NOT* raise a CLI error if any rows fail.
+            This is useful if doing error handling outside of the worker class.
 
     Returns:
         :class:`WorkerStats`: A class containing the successes and failures count.
@@ -85,13 +88,13 @@ def run_bulk_process(
         rows,
         progress_label,
         stats=stats,
-        handle_if_errors=handle_if_errors,
+        raise_global_error=raise_global_error,
     )
     return processor.run()
 
 
 def _create_bulk_processor(
-    row_handler, rows, progress_label, stats=None, handle_if_errors=None
+    row_handler, rows, progress_label, stats=None, raise_global_error=True
 ):
     """A factory method to create the bulk processor, useful for testing purposes."""
     return BulkProcessor(
@@ -99,7 +102,7 @@ def _create_bulk_processor(
         rows,
         progress_label=progress_label,
         stats=stats,
-        handle_if_errors=handle_if_errors,
+        raise_global_error=raise_global_error,
     )
 
 
@@ -121,7 +124,7 @@ class BulkProcessor:
         worker=None,
         progress_label=None,
         stats=None,
-        handle_if_errors=None,
+        raise_global_error=True,
     ):
         total = len(rows)
         self._rows = rows
@@ -131,7 +134,7 @@ class BulkProcessor:
             item_show_func=self._show_stats,
             label=progress_label,
         )
-        self._handle_if_errors_override = handle_if_errors
+        self._raise_global_error = raise_global_error
         self.__worker = worker or Worker(5, total, bar=self._progress_bar, stats=stats)
         self._stats = self.__worker.stats
 
@@ -174,8 +177,5 @@ class BulkProcessor:
 
     def _handle_if_errors(self):
         click.echo("")
-        if self._stats.total_errors:
-            if self._handle_if_errors_override:
-                self._handle_if_errors_override()
-            else:
-                raise LoggedCLIError("Some problems occurred during bulk processing.")
+        if self._stats.total_errors and self._raise_global_error:
+            raise LoggedCLIError("Some problems occurred during bulk processing.")

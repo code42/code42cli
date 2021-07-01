@@ -78,7 +78,7 @@ def test_run_bulk_process_creates_processor(bulk_processor_factory):
     rows = [1, 2]
     run_bulk_process(func_with_one_arg, rows)
     bulk_processor_factory.assert_called_once_with(
-        func_with_one_arg, rows, None, stats=None, handle_if_errors=None
+        func_with_one_arg, rows, None, stats=None, raise_global_error=True
     )
 
 

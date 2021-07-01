@@ -204,18 +204,12 @@ def bulk_update(state, csv_rows, format):
             stats.increment_total_errors()
         return row
 
-    def handle_if_errors(*args, **kwargs):
-        """Still output rows to show individual row status by ignoring
-        the default CLI Log Error message.
-        """
-        pass
-
     result_rows = run_bulk_process(
         handle_row,
         csv_rows,
         progress_label="Updating users:",
         stats=stats,
-        handle_if_errors=handle_if_errors,
+        raise_global_error=False,
     )
     formatter.echo_formatted_list(result_rows)
 
@@ -245,18 +239,12 @@ def bulk_move(state, csv_rows, format):
             stats.increment_total_errors()
         return row
 
-    def handle_if_errors(*args, **kwargs):
-        """Still output rows to show individual row status by ignoring
-        the default CLI Log Error message.
-        """
-        pass
-
     result_rows = run_bulk_process(
         handle_row,
         csv_rows,
         progress_label="Moving users:",
         stats=stats,
-        handle_if_errors=handle_if_errors,
+        raise_global_error=False,
     )
     formatter.echo_formatted_list(result_rows)
 
