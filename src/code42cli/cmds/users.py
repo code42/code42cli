@@ -13,6 +13,7 @@ from code42cli.options import sdk_options
 from code42cli.output_formats import DataFrameOutputFormatter
 from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
+from code42cli.worker import create_worker_stats
 
 
 @click.group(cls=OrderedGroup)
@@ -45,7 +46,6 @@ org_id_option = click.option(
     "--org-id",
     help="The identifier for the organization to which the user will be moved.",
     required=True,
-    type=int,
 )
 
 
@@ -156,14 +156,15 @@ _bulk_user_move_headers = ["username", "org_id"]
 @org_id_option
 @sdk_options()
 def change_organization(state, username, org_id):
-    """Change the organization of the user with the given username to the org with the given org ID."""
+    """Change the organization of the user with the given username
+    to the org with the given org ID."""
     _change_organization(state.sdk, username, org_id)
 
 
 @users.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def bulk(state):
-    """Tools for managing users in bulk"""
+    """Tools for managing users in bulk."""
     pass
 
 
@@ -178,7 +179,11 @@ users_generate_template = generate_template_cmd_factory(
 bulk.add_command(users_generate_template)
 
 
-@bulk.command(name="update")
+@bulk.command(
+    name="update",
+    help="Update a list of users from the provided CSV in format: "
+    f"{','.join(_bulk_user_update_headers)}",
+)
 @read_csv_arg(headers=_bulk_user_update_headers)
 @format_option
 @sdk_options()
@@ -186,6 +191,7 @@ def bulk_update(state, csv_rows, format):
     """Update a list of users from the provided CSV."""
     csv_rows[0]["updated"] = "False"
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+    stats = create_worker_stats(len(csv_rows))
 
     def handle_row(**row):
         try:
@@ -195,15 +201,24 @@ def bulk_update(state, csv_rows, format):
             row["updated"] = "True"
         except Exception as err:
             row["updated"] = f"False: {err}"
+            stats.increment_total_errors()
         return row
 
     result_rows = run_bulk_process(
-        handle_row, csv_rows, progress_label="Updating users:"
+        handle_row,
+        csv_rows,
+        progress_label="Updating users:",
+        stats=stats,
+        raise_global_error=False,
     )
     formatter.echo_formatted_list(result_rows)
 
 
-@bulk.command(name="move")
+@bulk.command(
+    name="move",
+    help="Change the organization of the list of users from the provided CSV in format: "
+    f"{','.join(_bulk_user_move_headers)}",
+)
 @read_csv_arg(headers=_bulk_user_move_headers)
 @format_option
 @sdk_options()
@@ -211,6 +226,7 @@ def bulk_move(state, csv_rows, format):
     """Change the organization of the list of users from the provided CSV."""
     csv_rows[0]["moved"] = "False"
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+    stats = create_worker_stats(len(csv_rows))
 
     def handle_row(**row):
         try:
@@ -220,9 +236,16 @@ def bulk_move(state, csv_rows, format):
             row["moved"] = "True"
         except Exception as err:
             row["moved"] = f"False: {err}"
+            stats.increment_total_errors()
         return row
 
-    result_rows = run_bulk_process(handle_row, csv_rows, progress_label="Moving users:")
+    result_rows = run_bulk_process(
+        handle_row,
+        csv_rows,
+        progress_label="Moving users:",
+        stats=stats,
+        raise_global_error=False,
+    )
     formatter.echo_formatted_list(result_rows)
 
 
@@ -291,4 +314,10 @@ def _update_user(
 
 def _change_organization(sdk, username, org_id):
     user_id = _get_user_id(sdk, username)
+    org_id = _get_org_id(sdk, org_id)
     return sdk.users.change_org_assignment(user_id=int(user_id), org_id=int(org_id))
+
+
+def _get_org_id(sdk, org_id):
+    org = sdk.orgs.get_by_uid(org_id)
+    return org["orgId"]
