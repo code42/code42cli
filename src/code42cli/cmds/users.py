@@ -179,7 +179,11 @@ users_generate_template = generate_template_cmd_factory(
 bulk.add_command(users_generate_template)
 
 
-@bulk.command(name="update")
+@bulk.command(
+    name="update",
+    help=f"Update a list of users from the provided CSV in format: "
+    f"{','.join(_bulk_user_update_headers)}",
+)
 @read_csv_arg(headers=_bulk_user_update_headers)
 @format_option
 @sdk_options()
@@ -217,13 +221,16 @@ def bulk_update(state, csv_rows, format):
     formatter.echo_formatted_list(result_rows)
 
 
-@bulk.command(name="move")
+@bulk.command(
+    name="move",
+    help=f"Change the organization of the list of users from the provided CSV in format: "
+    f"{','.join(_bulk_user_move_headers)}",
+)
 @read_csv_arg(headers=_bulk_user_move_headers)
 @format_option
 @sdk_options()
 def bulk_move(state, csv_rows, format):
-    """Change the organization of the list of users from the provided CSV in format:
-    username,org_id."""
+    """Change the organization of the list of users from the provided CSV in format."""
     csv_rows[0]["moved"] = "False"
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
     stats = create_worker_stats(len(csv_rows))
