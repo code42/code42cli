@@ -164,7 +164,7 @@ def change_organization(state, username, org_id):
 @users.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def bulk(state):
-    """Tools for managing users in bulk"""
+    """Tools for managing users in bulk."""
     pass
 
 
@@ -181,7 +181,7 @@ bulk.add_command(users_generate_template)
 
 @bulk.command(
     name="update",
-    help=f"Update a list of users from the provided CSV in format: "
+    help="Update a list of users from the provided CSV in format: "
     f"{','.join(_bulk_user_update_headers)}",
 )
 @read_csv_arg(headers=_bulk_user_update_headers)
@@ -222,7 +222,7 @@ def bulk_update(state, csv_rows, format):
 
 @bulk.command(
     name="move",
-    help=f"Change the organization of the list of users from the provided CSV in format: "
+    help="Change the organization of the list of users from the provided CSV in format: "
     f"{','.join(_bulk_user_move_headers)}",
 )
 @read_csv_arg(headers=_bulk_user_move_headers)
