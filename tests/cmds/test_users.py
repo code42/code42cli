@@ -444,6 +444,38 @@ def test_bulk_deactivate_uses_expected_arguments_when_all_are_passed(
             "updated": "False",
         }
     ]
+    
+
+def test_bulk_deactivate_ignores_blank_lines(
+    runner, mocker, cli_state
+):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_update.csv", "w") as csv:
+            csv.writelines(
+                [
+                    "user_id,username,email,password,first_name,last_name,notes,archive_size_quota\n",
+                    "\n",
+                    "12345,test_username,test_email,test_pword,test_fname,test_lname,test notes,4321\n",
+                    "\n",
+                ]
+            )
+        runner.invoke(
+            cli, ["users", "bulk", "update", "test_bulk_update.csv"], obj=cli_state
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {
+            "user_id": "12345",
+            "username": "test_username",
+            "email": "test_email",
+            "password": "test_pword",
+            "first_name": "test_fname",
+            "last_name": "test_lname",
+            "notes": "test notes",
+            "archive_size_quota": "4321",
+            "updated": "False",
+        }
+    ]
 
 
 def test_move_calls_change_org_assignment_with_correct_parameters(
@@ -476,3 +508,19 @@ def test_bulk_move_uses_expected_arguments(runner, mocker, cli_state):
         {"username": TEST_USERNAME, "org_id": "4321", "moved": "False"}
     ]
     bulk_processor.assert_called_once()
+
+
+def test_bulk_move_ignores_blank_lines(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_move.csv", "w") as csv:
+            csv.writelines(["username,org_id\n\n\n", f"{TEST_USERNAME},4321\n\n\n"])
+        runner.invoke(
+            cli, [
+                "users", "bulk", "move", "test_bulk_move.csv"], obj=cli_state
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": TEST_USERNAME, "org_id": "4321", "moved": "False"}
+    ]
+    bulk_processor.assert_called_once()
+
