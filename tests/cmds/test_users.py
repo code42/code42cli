@@ -458,7 +458,7 @@ def test_move_calls_change_org_assignment_with_correct_parameters(
         "1007744453331222111",
     ]
     runner.invoke(cli, command, obj=cli_state)
-    expected_org_id = TEST_GET_ORG_RESPONSE["orgId"]x
+    expected_org_id = TEST_GET_ORG_RESPONSE["orgId"]
     cli_state.sdk.users.change_org_assignment.assert_called_once_with(
         user_id=TEST_USER_ID, org_id=expected_org_id
     )
