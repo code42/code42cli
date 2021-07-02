@@ -14,7 +14,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Issue where `code42 devices bulk deactivate` and `code42 devices bulk reactivate` would
     output incorrect Successes and Failures at the end of the process.
-  
+
 - Bug where `code42 audit-logs search` would fail to store checkpoints when timestamps included
     nanoseconds.
 
