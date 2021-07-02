@@ -193,7 +193,7 @@ def bulk_update(state, csv_rows, format):
     # Initialize the SDK before starting any bulk processes
     # to prevent multiple instances and having to enter 2fa multiple times.
     sdk = state.sdk
-    
+
     csv_rows[0]["updated"] = "False"
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
     stats = create_worker_stats(len(csv_rows))
@@ -229,7 +229,7 @@ def bulk_update(state, csv_rows, format):
 @sdk_options()
 def bulk_move(state, csv_rows, format):
     """Change the organization of the list of users from the provided CSV."""
-    
+
     # Initialize the SDK before starting any bulk processes
     # to prevent multiple instances and having to enter 2fa multiple times.
     sdk = state.sdk
