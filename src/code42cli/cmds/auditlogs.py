@@ -145,17 +145,18 @@ def search(
         affected_user_ids=affected_user_id,
         affected_usernames=affected_username,
     )
-    if use_checkpoint:
-        checkpoint_name = use_checkpoint
-        events = list(
-            _dedupe_checkpointed_events_and_store_updated_checkpoint(
-                cursor, checkpoint_name, events
-            )
-        )
     if not events:
         click.echo("No results found.")
         return
-    formatter.echo_formatted_list(events)
+
+    if use_checkpoint:
+        checkpoint_name = use_checkpoint
+        events_gen = _dedupe_checkpointed_events_and_store_updated_checkpoint(
+            cursor, checkpoint_name, events
+        )
+        formatter.echo_formatted_generated_output(events_gen)
+    else:
+        formatter.echo_formatted_list(events)
 
 
 @audit_logs.command(cls=SendToCommand)
@@ -200,10 +201,8 @@ def send_to(
     )
     if use_checkpoint:
         checkpoint_name = use_checkpoint
-        events = list(
-            _dedupe_checkpointed_events_and_store_updated_checkpoint(
-                cursor, checkpoint_name, events
-            )
+        events = _dedupe_checkpointed_events_and_store_updated_checkpoint(
+            cursor, checkpoint_name, events
         )
     with warn_interrupt():
         event = None

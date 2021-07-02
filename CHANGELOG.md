@@ -18,6 +18,9 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - Bug where `code42 audit-logs search` would fail to store checkpoints when timestamps included
     nanoseconds.
 
+- Issue where if an error occurred during `code42 audit-logs search` or `code42 audit-logs send-to`,
+    the user would get a stored checkpoint without having handled events.
+
 ### Added
 
 - New command `code42 users update` to update a single user.

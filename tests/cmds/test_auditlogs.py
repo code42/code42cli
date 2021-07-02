@@ -169,6 +169,22 @@ def mock_audit_log_response_with_nano_seconds(mocker):
     return response_gen()
 
 
+@pytest.fixture
+def mock_audit_log_response_with_error_causing_timestamp(mocker):
+    good_event = dict(TEST_EVENTS_WITH_SAME_TIMESTAMP[0])
+    bad_event = dict(TEST_EVENTS_WITH_SAME_TIMESTAMP[0])
+    bad_event["timestamp"] = "I AM NOT A TIMESTAMP"  # Will cause a ValueError.
+    response_data = {
+        "events": [good_event, bad_event]
+    }  # good_event should still get processed.
+    text = json.dumps(response_data)
+
+    def response_gen():
+        yield create_mock_response(mocker, text)
+
+    return response_gen()
+
+
 @search_and_send_to_test
 def test_search_and_send_to_handles_json_format(runner, cli_state, date_str, command):
     runner.invoke(cli, [*command, "-b", date_str], obj=cli_state)
@@ -561,3 +577,102 @@ def test_search_and_send_when_timestamps_have_nanoseconds_saves_checkpoint(
     call_args = audit_log_cursor_with_checkpoint.replace.call_args
     assert call_args[0][0] == "test"
     assert call_args[0][1] == 1625150833.093616
+
+
+def test_search_if_error_occurs_when_processing_event_timestamp_still_outputs_results(
+    cli_state,
+    runner,
+    mock_audit_log_response_with_error_causing_timestamp,
+    audit_log_cursor_with_checkpoint,
+):
+    cli_state.sdk.auditlogs.get_all.return_value = (
+        mock_audit_log_response_with_error_causing_timestamp
+    )
+    res = runner.invoke(
+        cli, ["audit-logs", "search", "--use-checkpoint", "test"], obj=cli_state,
+    )
+    assert TEST_AUDIT_LOG_TIMESTAMP_1 in res.output
+    assert "I AM NOT A TIMESTAMP" in res.output
+    assert "Error: Unknown problem occurred." in res.output
+
+
+def test_search_if_error_occurs_when_processing_event_timestamp_does_not_store_error_timestamp(
+    cli_state,
+    runner,
+    mock_audit_log_response_with_error_causing_timestamp,
+    audit_log_cursor_with_checkpoint,
+):
+    cli_state.sdk.auditlogs.get_all.return_value = (
+        mock_audit_log_response_with_error_causing_timestamp
+    )
+    runner.invoke(
+        cli, ["audit-logs", "search", "--use-checkpoint", "test"], obj=cli_state,
+    )
+
+    # Saved the timestamp from the good event but not the bad event
+    audit_log_cursor_with_checkpoint.replace.assert_called_once_with(
+        "test", 1577880000.0
+    )
+
+
+def test_send_to_if_error_occurs_still_processes_events(
+    cli_state,
+    runner,
+    mock_audit_log_response_with_error_causing_timestamp,
+    audit_log_cursor_with_checkpoint,
+    send_to_logger,
+):
+    cli_state.sdk.auditlogs.get_all.return_value = (
+        mock_audit_log_response_with_error_causing_timestamp
+    )
+    runner.invoke(
+        cli,
+        [
+            "audit-logs",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--use-checkpoint",
+            "test",
+        ],
+        obj=cli_state,
+    )
+    assert (
+        send_to_logger.info.call_args_list[0][0][0]["timestamp"]
+        == TEST_AUDIT_LOG_TIMESTAMP_1
+    )
+    assert (
+        send_to_logger.info.call_args_list[1][0][0]["timestamp"]
+        == "I AM NOT A TIMESTAMP"
+    )
+
+
+def test_send_to_if_error_occurs_when_processing_event_timestamp_does_not_store_error_timestamp(
+    cli_state,
+    runner,
+    mock_audit_log_response_with_error_causing_timestamp,
+    audit_log_cursor_with_checkpoint,
+    send_to_logger,
+):
+    cli_state.sdk.auditlogs.get_all.return_value = (
+        mock_audit_log_response_with_error_causing_timestamp
+    )
+    runner.invoke(
+        cli,
+        [
+            "audit-logs",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--use-checkpoint",
+            "test",
+        ],
+        obj=cli_state,
+    )
+
+    # Saved the timestamp from the good event but not the bad event
+    audit_log_cursor_with_checkpoint.replace.assert_called_once_with(
+        "test", 1577880000.0
+    )
