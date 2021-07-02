@@ -294,7 +294,7 @@ def test_add_user_role_raises_error_when_username_does_not_exist(
     result = runner.invoke(cli, command, obj=cli_state)
     assert result.exit_code == 1
     assert (
-        "User 'not_a_username@example.com' does not exist or you do not have permissio to view them."
+        "User 'not_a_username@example.com' does not exist or you do not have permission to view them."
         in result.output
     )
 
