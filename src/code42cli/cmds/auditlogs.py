@@ -1,7 +1,4 @@
-from datetime import timezone
-
 import click
-import dateutil.parser
 
 import code42cli.options as opt
 from code42cli.click_ext.groups import OrderedGroup
@@ -14,6 +11,7 @@ from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.output_formats import OutputFormatter
 from code42cli.util import hash_event
+from code42cli.util import parse_timestamp
 from code42cli.util import warn_interrupt
 
 EVENT_KEY = "events"
@@ -252,17 +250,10 @@ def _dedupe_checkpointed_events_and_store_updated_checkpoint(
                 new_events.clear()
             new_events.append(event_hash)
             yield event
-            ts = _parse_audit_log_timestamp_string_to_timestamp(new_timestamp)
+            ts = parse_timestamp(new_timestamp)
             cursor.replace(checkpoint_name, ts)
             cursor.replace_events(checkpoint_name, new_events)
 
 
 def _get_audit_log_cursor_store(profile_name):
     return AuditLogCursorStore(profile_name)
-
-
-def _parse_audit_log_timestamp_string_to_timestamp(ts):
-    # example: {"property": "bar", "timestamp": "2020-11-23T17:13:26.239647Z"}
-    ts = ts[:-1]
-    date = dateutil.parser.parse(ts).replace(tzinfo=timezone.utc)
-    return date.timestamp()

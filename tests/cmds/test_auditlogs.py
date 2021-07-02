@@ -8,7 +8,6 @@ from tests.cmds.conftest import get_mark_for_search_and_send_to
 from tests.conftest import create_mock_response
 
 from code42cli.click_ext.types import MagicDate
-from code42cli.cmds.auditlogs import _parse_audit_log_timestamp_string_to_timestamp
 from code42cli.cmds.search.cursor_store import AuditLogCursorStore
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import round_datetime_to_day_end
@@ -16,13 +15,12 @@ from code42cli.date_helper import round_datetime_to_day_start
 from code42cli.logger.handlers import ServerProtocol
 from code42cli.main import cli
 from code42cli.util import hash_event
+from code42cli.util import parse_timestamp
 
 TEST_AUDIT_LOG_TIMESTAMP_1 = "2020-01-01T12:00:00.000Z"
 TEST_AUDIT_LOG_TIMESTAMP_2 = "2020-02-01T12:01:00.000111Z"
 TEST_AUDIT_LOG_TIMESTAMP_3 = "2020-03-01T02:00:00.123456Z"
-CURSOR_TIMESTAMP = _parse_audit_log_timestamp_string_to_timestamp(
-    TEST_AUDIT_LOG_TIMESTAMP_3
-)
+CURSOR_TIMESTAMP = parse_timestamp(TEST_AUDIT_LOG_TIMESTAMP_3)
 TEST_EVENTS_WITH_SAME_TIMESTAMP = [
     {
         "type$": "audit_log::logged_in/1",

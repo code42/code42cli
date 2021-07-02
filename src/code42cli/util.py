@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+from datetime import timezone
 from functools import wraps
 from hashlib import md5
 from os import path
@@ -8,6 +9,7 @@ from signal import getsignal
 from signal import SIGINT
 from signal import signal
 
+import dateutil.parser
 from click import echo
 from click import get_current_context
 from click import style
@@ -175,3 +177,10 @@ def hash_event(event):
     if isinstance(event, dict):
         event = json.dumps(event, sort_keys=True)
     return md5(event.encode()).hexdigest()
+
+
+def parse_timestamp(date_str):
+    # example: {"property": "bar", "timestamp": "2020-11-23T17:13:26.239647Z"}
+    ts = date_str[:-1]
+    date = dateutil.parser.parse(ts).replace(tzinfo=timezone.utc)
+    return date.timestamp()
