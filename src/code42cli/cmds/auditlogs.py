@@ -1,7 +1,7 @@
-from datetime import datetime
 from datetime import timezone
 
 import click
+import dateutil.parser
 
 import code42cli.options as opt
 from code42cli.click_ext.groups import OrderedGroup
@@ -265,29 +265,5 @@ def _get_audit_log_cursor_store(profile_name):
 def _parse_audit_log_timestamp_string_to_timestamp(ts):
     # example: {"property": "bar", "timestamp": "2020-11-23T17:13:26.239647Z"}
     ts = ts[:-1]
-    try:
-        dt = datetime.strptime(ts, COMMON_AUDIT_LOG_TIMESTAMP_FORMAT).replace(
-            tzinfo=timezone.utc
-        )
-    except ValueError:
-        ts_parts = ts.split(".")
-        if _ts_contains_nanoseconds(ts_parts):
-            ts = _remove_nano_seconds(ts_parts)  # Handle unnecessary precision
-        else:
-            ts = ts + ".0"  # Handle timestamps that are missing ms
-        dt = datetime.strptime(ts, COMMON_AUDIT_LOG_TIMESTAMP_FORMAT).replace(
-            tzinfo=timezone.utc
-        )
-    return dt.timestamp()
-
-
-def _ts_contains_nanoseconds(ts_parts):
-    last_part = ts_parts[-1]
-    return len(ts_parts) > 1 and len(last_part) > 6
-
-
-def _remove_nano_seconds(ts_parts):
-    less_than_seconds_part = ts_parts[-1]
-    less_than_seconds_part = less_than_seconds_part[:6]  # Grab up to microseconds
-    ts_parts[-1] = less_than_seconds_part
-    return ".".join(ts_parts)
+    date = dateutil.parser.parse(ts).replace(tzinfo=timezone.utc)
+    return date.timestamp()
