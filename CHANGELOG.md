@@ -32,6 +32,9 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - `code42 alerts search` now uses microsecond precision when searching by alerts' date observed.
 
+- In cases where you would get errors stating the user "does not exist", you now will get errors
+    stating either the user "does not exist or you don not have permission to view them".
+
 ## 1.7.0 - 2021-06-17
 
 ### Added

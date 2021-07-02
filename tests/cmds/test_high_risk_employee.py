@@ -234,7 +234,10 @@ def test_remove_high_risk_employee_when_user_does_not_exist_exits_with_correct_m
         cli, ["high-risk-employee", "remove", TEST_EMPLOYEE], obj=cli_state_without_user
     )
     assert result.exit_code == 1
-    assert f"User '{TEST_EMPLOYEE}' does not exist." in result.output
+    assert (
+        f"User '{TEST_EMPLOYEE}' does not exist or you do not have permission to view them."
+        in result.output
+    )
 
 
 def test_bulk_add_employees_calls_expected_py42_methods(runner, cli_state):
