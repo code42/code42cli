@@ -573,7 +573,7 @@ bulk.add_command(devices_generate_template)
 @sdk_options()
 def bulk_deactivate(state, csv_rows, change_device_name, purge_date, format):
     """Deactivate all devices from the provided CSV containing a 'guid' column."""
-    sdk = state.sdk
+    sdk = state.sdk  # Initialize the SDK only once (for reasons like 2FA).
     csv_rows[0]["deactivated"] = "False"
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
     stats = create_worker_stats(len(csv_rows))
@@ -608,7 +608,7 @@ def bulk_deactivate(state, csv_rows, change_device_name, purge_date, format):
 @sdk_options()
 def bulk_reactivate(state, csv_rows, format):
     """Reactivate all devices from the provided CSV containing a 'guid' column."""
-    sdk = state.sdk
+    sdk = state.sdk  # Initialize the SDK only once (for reasons like 2FA).
     csv_rows[0]["reactivated"] = "False"
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
     stats = create_worker_stats(len(csv_rows))
