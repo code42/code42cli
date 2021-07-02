@@ -272,6 +272,9 @@ def _remove_user_role(sdk, role_name, username):
 
 
 def _get_user_id(sdk, username):
+    if not username:
+        # py42 returns all users when passing `None` to `get_by_username()`.
+        raise click.BadParameter("Username is required and missing from row.")
     user = sdk.users.get_by_username(username)["users"]
     if len(user) == 0:
         raise UserDoesNotExistError(username)
