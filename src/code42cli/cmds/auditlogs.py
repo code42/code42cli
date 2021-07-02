@@ -271,8 +271,24 @@ def _parse_audit_log_timestamp_string_to_timestamp(ts):
             tzinfo=timezone.utc
         )
     except ValueError:
-        ts = ts + ".0"  # handle timestamps that are missing ms
+        ts_parts = ts.split(".")
+        if _ts_contains_nanoseconds(ts_parts):
+            ts = _remove_nano_seconds(ts_parts)  # Handle unnecessary precision
+        else:
+            ts = ts + ".0"  # Handle timestamps that are missing ms
         dt = datetime.strptime(ts, AUDIT_LOG_TIMESTAMP_FORMAT).replace(
             tzinfo=timezone.utc
         )
     return dt.timestamp()
+
+
+def _ts_contains_nanoseconds(ts_parts):
+    last_part = ts_parts[-1]
+    return len(ts_parts) > 1 and len(last_part) > 6
+
+
+def _remove_nano_seconds(ts_parts):
+    less_than_seconds_part = ts_parts[-1]
+    less_than_seconds_part = less_than_seconds_part[:6]  # Grab up to microseconds
+    ts_parts[-1] = less_than_seconds_part
+    return ".".join(ts_parts)

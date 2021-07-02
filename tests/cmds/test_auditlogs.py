@@ -4,9 +4,8 @@ from datetime import timedelta
 from logging import Logger
 
 import pytest
-from py42.response import Py42Response
-from requests import Response
 from tests.cmds.conftest import get_mark_for_search_and_send_to
+from tests.conftest import create_mock_response
 
 from code42cli.click_ext.types import MagicDate
 from code42cli.cmds.auditlogs import _parse_audit_log_timestamp_string_to_timestamp
@@ -107,49 +106,67 @@ def send_to_logger(mocker, send_to_logger_factory):
 
 @pytest.fixture
 def mock_audit_log_response(mocker):
-    http_response1 = mocker.MagicMock(spec=Response)
-    http_response1.status_code = 200
-    http_response1.text = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
-    http_response1._content_consumed = ""
-
-    http_response2 = mocker.MagicMock(spec=Response)
-    http_response2.status_code = 200
-    http_response2.text = json.dumps({"events": TEST_EVENTS_WITH_DIFFERENT_TIMESTAMPS})
-    http_response2._content_consumed = ""
-    Py42Response(http_response2)
+    response1 = create_mock_response(
+        mocker, json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
+    )
+    response2 = create_mock_response(
+        mocker, json.dumps({"events": TEST_EVENTS_WITH_DIFFERENT_TIMESTAMPS})
+    )
 
     def response_gen():
-        yield Py42Response(http_response1)
-        yield Py42Response(http_response2)
+        yield response1
+        yield response2
 
     return response_gen()
 
 
 @pytest.fixture
 def mock_audit_log_response_with_only_same_timestamps(mocker):
-    http_response = mocker.MagicMock(spec=Response)
-    http_response.status_code = 200
-    http_response.text = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
-    http_response._content_consumed = ""
+    text = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
 
     def response_gen():
-        yield Py42Response(http_response)
+        yield create_mock_response(mocker, text)
 
     return response_gen()
 
 
-# TODO: Make have missing ts last 0
-def mock_audit_log_response_with_only_same_timestamps(mocker):
-    http_response = mocker.MagicMock(spec=Response)
-    http_response.status_code = 200
-    http_response.text = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
-    http_response._content_consumed = ""
+@pytest.fixture
+def mock_audit_log_response_with_missing_ms_timestamp(mocker):
+    event = dict(TEST_EVENTS_WITH_SAME_TIMESTAMP[0])
+    event["timestamp"] = "2020-01-01T12:00:00Z"
+    response_data = {"events": [event]}
+    text = json.dumps(response_data)
 
     def response_gen():
-        yield Py42Response(http_response)
+        yield create_mock_response(mocker, text)
 
     return response_gen()
 
+
+@pytest.fixture
+def mock_audit_log_response_with_micro_seconds(mocker):
+    event = dict(TEST_EVENTS_WITH_SAME_TIMESTAMP[0])
+    event["timestamp"] = "2021-07-01T14:47:13.093616Z"
+    response_data = {"events": [event]}
+    text = json.dumps(response_data)
+
+    def response_gen():
+        yield create_mock_response(mocker, text)
+
+    return response_gen()
+
+
+@pytest.fixture
+def mock_audit_log_response_with_nano_seconds(mocker):
+    event = dict(TEST_EVENTS_WITH_SAME_TIMESTAMP[0])
+    event["timestamp"] = "2021-07-01T14:47:13.093616500Z"
+    response_data = {"events": [event]}
+    text = json.dumps(response_data)
+
+    def response_gen():
+        yield create_mock_response(mocker, text)
+
+    return response_gen()
 
 
 @search_and_send_to_test
@@ -486,26 +503,61 @@ def test_send_to_certs_and_ignore_cert_validation_args_are_incompatible(
     assert "Error: --ignore-cert-validation can't be used with: --certs" in res.output
 
 
-def test_audit_log_parse_timestamp_handles_missing_milliseconds():
-    timestamp_with_ms = "2020-01-01T12:00:00.000Z"
-    timestamp_without_ms = "2020-01-01T12:00:00Z"
-    ts1 = _parse_audit_log_timestamp_string_to_timestamp(timestamp_with_ms)
-    ts2 = _parse_audit_log_timestamp_string_to_timestamp(timestamp_without_ms)
-    assert ts1 == ts2
-
-
 @search_and_send_to_test
-def test_search_and_send_handles_timestamps_missing_milliseconds(
+def test_search_and_send_when_timestamps_missing_milliseconds_saves_checkpoint(
     cli_state,
     runner,
     send_to_logger,
-    mock_audit_log_response,
+    mock_audit_log_response_with_missing_ms_timestamp,
     audit_log_cursor_with_checkpoint,
     command,
 ):
+    cli_state.sdk.auditlogs.get_all.return_value = (
+        mock_audit_log_response_with_missing_ms_timestamp
+    )
     runner.invoke(
         cli, [*command, "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state,
     )
-    assert (
-        cli_state.sdk.auditlogs.get_all.call_args[1]["begin_time"] == CURSOR_TIMESTAMP
+    audit_log_cursor_with_checkpoint.replace.assert_called_once_with(
+        "test", 1577880000.0
     )
+
+
+@search_and_send_to_test
+def test_search_and_send_when_timestamps_have_microseconds_saves_checkpoint(
+    cli_state,
+    runner,
+    send_to_logger,
+    mock_audit_log_response_with_micro_seconds,
+    audit_log_cursor_with_checkpoint,
+    command,
+):
+    cli_state.sdk.auditlogs.get_all.return_value = (
+        mock_audit_log_response_with_micro_seconds
+    )
+    runner.invoke(
+        cli, [*command, "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state,
+    )
+    audit_log_cursor_with_checkpoint.replace.assert_called_once_with(
+        "test", 1625150833.093616
+    )
+
+
+@search_and_send_to_test
+def test_search_and_send_when_timestamps_have_nanoseconds_saves_checkpoint(
+    cli_state,
+    runner,
+    send_to_logger,
+    mock_audit_log_response_with_nano_seconds,
+    audit_log_cursor_with_checkpoint,
+    command,
+):
+    cli_state.sdk.auditlogs.get_all.return_value = (
+        mock_audit_log_response_with_nano_seconds
+    )
+    runner.invoke(
+        cli, [*command, "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state,
+    )
+    call_args = audit_log_cursor_with_checkpoint.replace.call_args
+    assert call_args[0][0] == "test"
+    assert call_args[0][1] == 1625150833.093616
