@@ -18,7 +18,7 @@ from code42cli.util import warn_interrupt
 
 EVENT_KEY = "events"
 AUDIT_LOGS_KEYWORD = "audit-logs"
-AUDIT_LOG_TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
+COMMON_AUDIT_LOG_TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
 
 
 def _get_audit_logs_default_header():
@@ -267,7 +267,7 @@ def _parse_audit_log_timestamp_string_to_timestamp(ts):
     # example: {"property": "bar", "timestamp": "2020-11-23T17:13:26.239647Z"}
     ts = ts[:-1]
     try:
-        dt = datetime.strptime(ts, AUDIT_LOG_TIMESTAMP_FORMAT).replace(
+        dt = datetime.strptime(ts, COMMON_AUDIT_LOG_TIMESTAMP_FORMAT).replace(
             tzinfo=timezone.utc
         )
     except ValueError:
@@ -276,7 +276,7 @@ def _parse_audit_log_timestamp_string_to_timestamp(ts):
             ts = _remove_nano_seconds(ts_parts)  # Handle unnecessary precision
         else:
             ts = ts + ".0"  # Handle timestamps that are missing ms
-        dt = datetime.strptime(ts, AUDIT_LOG_TIMESTAMP_FORMAT).replace(
+        dt = datetime.strptime(ts, COMMON_AUDIT_LOG_TIMESTAMP_FORMAT).replace(
             tzinfo=timezone.utc
         )
     return dt.timestamp()
