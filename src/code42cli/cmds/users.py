@@ -189,6 +189,11 @@ bulk.add_command(users_generate_template)
 @sdk_options()
 def bulk_update(state, csv_rows, format):
     """Update a list of users from the provided CSV."""
+
+    # Initialize the SDK before starting any bulk processes
+    # to prevent multiple instances and having to enter 2fa multiple times.
+    sdk = state.sdk
+
     csv_rows[0]["updated"] = "False"
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
     stats = create_worker_stats(len(csv_rows))
@@ -196,7 +201,7 @@ def bulk_update(state, csv_rows, format):
     def handle_row(**row):
         try:
             _update_user(
-                state.sdk, **{key: row[key] for key in row.keys() if key != "updated"}
+                sdk, **{key: row[key] for key in row.keys() if key != "updated"}
             )
             row["updated"] = "True"
         except Exception as err:
@@ -224,6 +229,11 @@ def bulk_update(state, csv_rows, format):
 @sdk_options()
 def bulk_move(state, csv_rows, format):
     """Change the organization of the list of users from the provided CSV."""
+
+    # Initialize the SDK before starting any bulk processes
+    # to prevent multiple instances and having to enter 2fa multiple times.
+    sdk = state.sdk
+
     csv_rows[0]["moved"] = "False"
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
     stats = create_worker_stats(len(csv_rows))
@@ -231,7 +241,7 @@ def bulk_move(state, csv_rows, format):
     def handle_row(**row):
         try:
             _change_organization(
-                state.sdk, **{key: row[key] for key in row.keys() if key != "moved"}
+                sdk, **{key: row[key] for key in row.keys() if key != "moved"}
             )
             row["moved"] = "True"
         except Exception as err:
@@ -262,6 +272,9 @@ def _remove_user_role(sdk, role_name, username):
 
 
 def _get_user_id(sdk, username):
+    if not username:
+        # py42 returns all users when passing `None` to `get_by_username()`.
+        raise click.BadParameter("Username is required.")
     user = sdk.users.get_by_username(username)["users"]
     if len(user) == 0:
         raise UserDoesNotExistError(username)

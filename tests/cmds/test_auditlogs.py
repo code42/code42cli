@@ -4,12 +4,10 @@ from datetime import timedelta
 from logging import Logger
 
 import pytest
-from py42.response import Py42Response
-from requests import Response
 from tests.cmds.conftest import get_mark_for_search_and_send_to
+from tests.conftest import create_mock_response
 
 from code42cli.click_ext.types import MagicDate
-from code42cli.cmds.auditlogs import _parse_audit_log_timestamp_string_to_timestamp
 from code42cli.cmds.search.cursor_store import AuditLogCursorStore
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import round_datetime_to_day_end
@@ -17,13 +15,12 @@ from code42cli.date_helper import round_datetime_to_day_start
 from code42cli.logger.handlers import ServerProtocol
 from code42cli.main import cli
 from code42cli.util import hash_event
+from code42cli.util import parse_timestamp
 
 TEST_AUDIT_LOG_TIMESTAMP_1 = "2020-01-01T12:00:00.000Z"
 TEST_AUDIT_LOG_TIMESTAMP_2 = "2020-02-01T12:01:00.000111Z"
 TEST_AUDIT_LOG_TIMESTAMP_3 = "2020-03-01T02:00:00.123456Z"
-CURSOR_TIMESTAMP = _parse_audit_log_timestamp_string_to_timestamp(
-    TEST_AUDIT_LOG_TIMESTAMP_3
-)
+CURSOR_TIMESTAMP = parse_timestamp(TEST_AUDIT_LOG_TIMESTAMP_3)
 TEST_EVENTS_WITH_SAME_TIMESTAMP = [
     {
         "type$": "audit_log::logged_in/1",
@@ -106,34 +103,95 @@ def send_to_logger(mocker, send_to_logger_factory):
 
 
 @pytest.fixture
-def test_audit_log_response(mocker):
-    http_response1 = mocker.MagicMock(spec=Response)
-    http_response1.status_code = 200
-    http_response1.text = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
-    http_response1._content_consumed = ""
-
-    http_response2 = mocker.MagicMock(spec=Response)
-    http_response2.status_code = 200
-    http_response2.text = json.dumps({"events": TEST_EVENTS_WITH_DIFFERENT_TIMESTAMPS})
-    http_response2._content_consumed = ""
-    Py42Response(http_response2)
+def mock_audit_log_response(mocker):
+    response1 = create_mock_response(
+        mocker, json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
+    )
+    response2 = create_mock_response(
+        mocker, json.dumps({"events": TEST_EVENTS_WITH_DIFFERENT_TIMESTAMPS})
+    )
 
     def response_gen():
-        yield Py42Response(http_response1)
-        yield Py42Response(http_response2)
+        yield response1
+        yield response2
 
     return response_gen()
 
 
 @pytest.fixture
-def test_audit_log_response_with_only_same_timestamps(mocker):
-    http_response = mocker.MagicMock(spec=Response)
-    http_response.status_code = 200
-    http_response.text = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
-    http_response._content_consumed = ""
+def mock_audit_log_response_with_10_records(mocker):
+    text = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
+    responses = []
+    for _ in range(0, 10):
+        responses.append(create_mock_response(mocker, text))
 
     def response_gen():
-        yield Py42Response(http_response)
+        yield from responses
+
+    return response_gen()
+
+
+@pytest.fixture
+def mock_audit_log_response_with_only_same_timestamps(mocker):
+    text = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
+
+    def response_gen():
+        yield create_mock_response(mocker, text)
+
+    return response_gen()
+
+
+@pytest.fixture
+def mock_audit_log_response_with_missing_ms_timestamp(mocker):
+    event = dict(TEST_EVENTS_WITH_SAME_TIMESTAMP[0])
+    event["timestamp"] = "2020-01-01T12:00:00Z"
+    response_data = {"events": [event]}
+    text = json.dumps(response_data)
+
+    def response_gen():
+        yield create_mock_response(mocker, text)
+
+    return response_gen()
+
+
+@pytest.fixture
+def mock_audit_log_response_with_micro_seconds(mocker):
+    event = dict(TEST_EVENTS_WITH_SAME_TIMESTAMP[0])
+    event["timestamp"] = "2021-07-01T14:47:13.093616Z"
+    response_data = {"events": [event]}
+    text = json.dumps(response_data)
+
+    def response_gen():
+        yield create_mock_response(mocker, text)
+
+    return response_gen()
+
+
+@pytest.fixture
+def mock_audit_log_response_with_nano_seconds(mocker):
+    event = dict(TEST_EVENTS_WITH_SAME_TIMESTAMP[0])
+    event["timestamp"] = "2021-07-01T14:47:13.093616500Z"
+    response_data = {"events": [event]}
+    text = json.dumps(response_data)
+
+    def response_gen():
+        yield create_mock_response(mocker, text)
+
+    return response_gen()
+
+
+@pytest.fixture
+def mock_audit_log_response_with_error_causing_timestamp(mocker):
+    good_event = dict(TEST_EVENTS_WITH_SAME_TIMESTAMP[0])
+    bad_event = dict(TEST_EVENTS_WITH_SAME_TIMESTAMP[0])
+    bad_event["timestamp"] = "I AM NOT A TIMESTAMP"  # Will cause a ValueError.
+    response_data = {
+        "events": [good_event, bad_event]
+    }  # good_event should still get processed.
+    text = json.dumps(response_data)
+
+    def response_gen():
+        yield create_mock_response(mocker, text)
 
     return response_gen()
 
@@ -231,9 +289,9 @@ def test_search_and_send_to_handles_all_filter_parameters(
 
 
 def test_send_to_makes_expected_call_count_to_the_logger_method(
-    cli_state, runner, send_to_logger, test_audit_log_response
+    cli_state, runner, send_to_logger, mock_audit_log_response
 ):
-    cli_state.sdk.auditlogs.get_all.return_value = test_audit_log_response
+    cli_state.sdk.auditlogs.get_all.return_value = mock_audit_log_response
     runner.invoke(
         cli, ["audit-logs", "send-to", "localhost", "--begin", "1d"], obj=cli_state
     )
@@ -284,9 +342,9 @@ def test_send_to_when_given_ignore_cert_validation_uses_certs_equal_to_ignore_st
 
 
 def test_send_to_emits_events_in_chronological_order(
-    cli_state, runner, send_to_logger, test_audit_log_response
+    cli_state, runner, send_to_logger, mock_audit_log_response
 ):
-    cli_state.sdk.auditlogs.get_all.return_value = test_audit_log_response
+    cli_state.sdk.auditlogs.get_all.return_value = mock_audit_log_response
     runner.invoke(
         cli, ["audit-logs", "send-to", "localhost", "--begin", "1d"], obj=cli_state
     )
@@ -359,11 +417,11 @@ def test_search_and_send_to_with_checkpoint_saves_expected_cursor_timestamp(
     cli_state,
     runner,
     send_to_logger,
-    test_audit_log_response,
+    mock_audit_log_response,
     audit_log_cursor_with_checkpoint,
     command,
 ):
-    cli_state.sdk.auditlogs.get_all.return_value = test_audit_log_response
+    cli_state.sdk.auditlogs.get_all.return_value = mock_audit_log_response
     runner.invoke(
         cli, [*command, "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state,
     )
@@ -379,7 +437,7 @@ def test_search_and_send_to_with_existing_checkpoint_replaces_begin_arg_if_passe
     cli_state,
     runner,
     send_to_logger,
-    test_audit_log_response,
+    mock_audit_log_response,
     audit_log_cursor_with_checkpoint,
     command,
 ):
@@ -394,10 +452,10 @@ def test_search_and_send_to_with_existing_checkpoint_replaces_begin_arg_if_passe
 def test_search_with_existing_checkpoint_events_skips_duplicate_events(
     cli_state,
     runner,
-    test_audit_log_response,
+    mock_audit_log_response,
     audit_log_cursor_with_checkpoint_and_events,
 ):
-    cli_state.sdk.auditlogs.get_all.return_value = test_audit_log_response
+    cli_state.sdk.auditlogs.get_all.return_value = mock_audit_log_response
     result = runner.invoke(
         cli,
         ["audit-logs", "search", "--begin", "1d", "--use-checkpoint", "test"],
@@ -412,12 +470,12 @@ def test_search_and_send_to_without_existing_checkpoint_writes_both_event_hashes
     cli_state,
     runner,
     send_to_logger,
-    test_audit_log_response_with_only_same_timestamps,
+    mock_audit_log_response_with_only_same_timestamps,
     audit_log_cursor_with_checkpoint,
     command,
 ):
     cli_state.sdk.auditlogs.get_all.return_value = (
-        test_audit_log_response_with_only_same_timestamps
+        mock_audit_log_response_with_only_same_timestamps
     )
     runner.invoke(
         cli, [*command, "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state,
@@ -472,9 +530,184 @@ def test_send_to_certs_and_ignore_cert_validation_args_are_incompatible(
     assert "Error: --ignore-cert-validation can't be used with: --certs" in res.output
 
 
-def test_audit_log_parse_timestamp_handles_possible_strings():
-    TIMESTAMP_WITH_MILLISECONDS = "2020-01-01T12:00:00.000Z"
-    TIMESTAMP_WITHOUT_MILLISECONDS = "2020-01-01T12:00:00Z"
-    ts1 = _parse_audit_log_timestamp_string_to_timestamp(TIMESTAMP_WITH_MILLISECONDS)
-    ts2 = _parse_audit_log_timestamp_string_to_timestamp(TIMESTAMP_WITHOUT_MILLISECONDS)
-    assert ts1 == ts2
+@search_and_send_to_test
+def test_search_and_send_when_timestamps_missing_milliseconds_saves_checkpoint(
+    cli_state,
+    runner,
+    send_to_logger,
+    mock_audit_log_response_with_missing_ms_timestamp,
+    audit_log_cursor_with_checkpoint,
+    command,
+):
+    cli_state.sdk.auditlogs.get_all.return_value = (
+        mock_audit_log_response_with_missing_ms_timestamp
+    )
+    runner.invoke(
+        cli, [*command, "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state,
+    )
+    audit_log_cursor_with_checkpoint.replace.assert_called_once_with(
+        "test", 1577880000.0
+    )
+
+
+@search_and_send_to_test
+def test_search_and_send_when_timestamps_have_microseconds_saves_checkpoint(
+    cli_state,
+    runner,
+    send_to_logger,
+    mock_audit_log_response_with_micro_seconds,
+    audit_log_cursor_with_checkpoint,
+    command,
+):
+    cli_state.sdk.auditlogs.get_all.return_value = (
+        mock_audit_log_response_with_micro_seconds
+    )
+    runner.invoke(
+        cli, [*command, "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state,
+    )
+    audit_log_cursor_with_checkpoint.replace.assert_called_once_with(
+        "test", 1625150833.093616
+    )
+
+
+@search_and_send_to_test
+def test_search_and_send_when_timestamps_have_nanoseconds_saves_checkpoint(
+    cli_state,
+    runner,
+    send_to_logger,
+    mock_audit_log_response_with_nano_seconds,
+    audit_log_cursor_with_checkpoint,
+    command,
+):
+    cli_state.sdk.auditlogs.get_all.return_value = (
+        mock_audit_log_response_with_nano_seconds
+    )
+    runner.invoke(
+        cli, [*command, "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state,
+    )
+    call_args = audit_log_cursor_with_checkpoint.replace.call_args
+    assert call_args[0][0] == "test"
+    assert call_args[0][1] == 1625150833.093616
+
+
+def test_search_if_error_occurs_when_processing_event_timestamp_still_outputs_results(
+    cli_state,
+    runner,
+    mock_audit_log_response_with_error_causing_timestamp,
+    audit_log_cursor_with_checkpoint,
+):
+    cli_state.sdk.auditlogs.get_all.return_value = (
+        mock_audit_log_response_with_error_causing_timestamp
+    )
+    res = runner.invoke(
+        cli, ["audit-logs", "search", "--use-checkpoint", "test"], obj=cli_state,
+    )
+    assert TEST_AUDIT_LOG_TIMESTAMP_1 in res.output
+    assert "I AM NOT A TIMESTAMP" in res.output
+    assert "Error: Unknown problem occurred." in res.output
+
+
+def test_search_if_error_occurs_when_processing_event_timestamp_does_not_store_error_timestamp(
+    cli_state,
+    runner,
+    mock_audit_log_response_with_error_causing_timestamp,
+    audit_log_cursor_with_checkpoint,
+):
+    cli_state.sdk.auditlogs.get_all.return_value = (
+        mock_audit_log_response_with_error_causing_timestamp
+    )
+    runner.invoke(
+        cli, ["audit-logs", "search", "--use-checkpoint", "test"], obj=cli_state,
+    )
+
+    # Saved the timestamp from the good event but not the bad event
+    audit_log_cursor_with_checkpoint.replace.assert_called_once_with(
+        "test", 1577880000.0
+    )
+
+
+def test_search_when_table_format_and_using_output_via_pager_only_includes_header_keys_once(
+    cli_state,
+    runner,
+    mock_audit_log_response_with_10_records,
+    audit_log_cursor_with_checkpoint,
+):
+    cli_state.sdk.auditlogs.get_all.return_value = (
+        mock_audit_log_response_with_10_records
+    )
+    result = runner.invoke(
+        cli, ["audit-logs", "search", "--use-checkpoint", "test"], obj=cli_state,
+    )
+    output = result.output
+    output = output.split(" ")
+    output = [s for s in output if s]
+    assert (
+        output.count("Timestamp")
+        == output.count("ActorName")
+        == output.count("ActorIpAddress")
+        == output.count("AffectedUserUID")
+        == 1
+    )
+
+
+def test_send_to_if_error_occurs_still_processes_events(
+    cli_state,
+    runner,
+    mock_audit_log_response_with_error_causing_timestamp,
+    audit_log_cursor_with_checkpoint,
+    send_to_logger,
+):
+    cli_state.sdk.auditlogs.get_all.return_value = (
+        mock_audit_log_response_with_error_causing_timestamp
+    )
+    runner.invoke(
+        cli,
+        [
+            "audit-logs",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--use-checkpoint",
+            "test",
+        ],
+        obj=cli_state,
+    )
+    assert (
+        send_to_logger.info.call_args_list[0][0][0]["timestamp"]
+        == TEST_AUDIT_LOG_TIMESTAMP_1
+    )
+    assert (
+        send_to_logger.info.call_args_list[1][0][0]["timestamp"]
+        == "I AM NOT A TIMESTAMP"
+    )
+
+
+def test_send_to_if_error_occurs_when_processing_event_timestamp_does_not_store_error_timestamp(
+    cli_state,
+    runner,
+    mock_audit_log_response_with_error_causing_timestamp,
+    audit_log_cursor_with_checkpoint,
+    send_to_logger,
+):
+    cli_state.sdk.auditlogs.get_all.return_value = (
+        mock_audit_log_response_with_error_causing_timestamp
+    )
+    runner.invoke(
+        cli,
+        [
+            "audit-logs",
+            "send-to",
+            "0.0.0.0",
+            "--begin",
+            "1d",
+            "--use-checkpoint",
+            "test",
+        ],
+        obj=cli_state,
+    )
+
+    # Saved the timestamp from the good event but not the bad event
+    audit_log_cursor_with_checkpoint.replace.assert_called_once_with(
+        "test", 1577880000.0
+    )

@@ -188,7 +188,10 @@ def test_add_departing_employee_when_user_does_not_exist_exits(
         cli, ["departing-employee", "add", TEST_EMPLOYEE], obj=cli_state_without_user
     )
     assert result.exit_code == 1
-    assert f"User '{TEST_EMPLOYEE}' does not exist." in result.output
+    assert (
+        f"User '{TEST_EMPLOYEE}' does not exist or you do not have permission to view them."
+        in result.output
+    )
 
 
 def test_add_departing_employee_when_user_already_exits_with_correct_message(
@@ -221,7 +224,10 @@ def test_remove_departing_employee_when_user_does_not_exist_exits(
         cli, ["departing-employee", "remove", TEST_EMPLOYEE], obj=cli_state_without_user
     )
     assert result.exit_code == 1
-    assert f"User '{TEST_EMPLOYEE}' does not exist." in result.output
+    assert (
+        f"User '{TEST_EMPLOYEE}' does not exist or you do not have permission to view them."
+        in result.output
+    )
 
 
 def test_add_bulk_users_calls_expected_py42_methods(runner, cli_state):

@@ -51,7 +51,9 @@ class UserDoesNotExistError(Code42CLIError):
     bulk add or remove."""
 
     def __init__(self, username):
-        super().__init__(f"User '{username}' does not exist.")
+        super().__init__(
+            f"User '{username}' does not exist or you do not have permission to view them."
+        )
 
 
 class UserNotInLegalHoldError(Code42CLIError):

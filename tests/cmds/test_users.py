@@ -293,7 +293,10 @@ def test_add_user_role_raises_error_when_username_does_not_exist(
     ]
     result = runner.invoke(cli, command, obj=cli_state)
     assert result.exit_code == 1
-    assert "User 'not_a_username@example.com' does not exist." in result.output
+    assert (
+        "User 'not_a_username@example.com' does not exist or you do not have permission to view them."
+        in result.output
+    )
 
 
 def test_remove_user_role_removes(
@@ -342,7 +345,10 @@ def test_remove_user_role_raises_error_when_username_does_not_exist(
     ]
     result = runner.invoke(cli, command, obj=cli_state)
     assert result.exit_code == 1
-    assert "User 'not_a_username@example.com' does not exist." in result.output
+    assert (
+        "User 'not_a_username@example.com' does not exist or you do not have permission to view them."
+        in result.output
+    )
 
 
 def test_update_user_calls_update_user_with_correct_parameters_when_only_some_are_passed(
@@ -601,3 +607,22 @@ def test_bulk_move_uses_handler_that_when_encounters_error_increments_total_erro
     handler(username="test@example.com", org_id="test")
     handler(username="not.test@example.com", org_id="test")
     assert worker_stats.increment_total_errors.call_count == 1
+
+
+def test_bulk_move_uses_handle_than_when_called_and_row_has_missing_username_errors_at_row(
+    runner, mocker, cli_state, worker_stats
+):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    lines = ["username,org_id\n", ",123\n"]  # Missing username
+    with runner.isolated_filesystem():
+        with open("test_bulk_move.csv", "w") as csv:
+            csv.writelines(lines)
+        runner.invoke(
+            cli, ["users", "bulk", "move", "test_bulk_move.csv"], obj=cli_state
+        )
+
+    handler = bulk_processor.call_args[0][0]
+    handler(username=None, org_id="123")
+    assert worker_stats.increment_total_errors.call_count == 1
+    # Ensure it does not try to get the username for the None user.
+    assert not cli_state.sdk.users.get_by_username.call_count

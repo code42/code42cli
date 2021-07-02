@@ -3,7 +3,9 @@ from datetime import timedelta
 
 import pytest
 from click.testing import CliRunner
+from py42.response import Py42Response
 from py42.sdk import SDKClient
+from requests import Response
 
 import code42cli.errors as error_tracker
 from code42cli.config import ConfigAccessor
@@ -281,3 +283,12 @@ def mock_dataframe_to_csv(mocker):
 @pytest.fixture
 def mock_dataframe_to_string(mocker):
     return mocker.patch("pandas.DataFrame.to_string")
+
+
+def create_mock_response(mocker, text):
+    response = mocker.MagicMock(spec=Response)
+    response.text = text
+    response.status_code = 200
+    response.encoding = None
+    response._content_consumed = ""
+    return Py42Response(response)
