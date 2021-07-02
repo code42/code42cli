@@ -121,6 +121,19 @@ def mock_audit_log_response(mocker):
 
 
 @pytest.fixture
+def mock_audit_log_response_with_10_records(mocker):
+    text = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
+    responses = []
+    for _ in range(0, 10):
+        responses.append(create_mock_response(mocker, text))
+
+    def response_gen():
+        yield from responses
+
+    return response_gen()
+
+
+@pytest.fixture
 def mock_audit_log_response_with_only_same_timestamps(mocker):
     text = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
 
@@ -612,6 +625,30 @@ def test_search_if_error_occurs_when_processing_event_timestamp_does_not_store_e
     # Saved the timestamp from the good event but not the bad event
     audit_log_cursor_with_checkpoint.replace.assert_called_once_with(
         "test", 1577880000.0
+    )
+
+
+def test_search_when_table_format_and_using_output_via_pager_only_includes_header_keys_once(
+    cli_state,
+    runner,
+    mock_audit_log_response_with_10_records,
+    audit_log_cursor_with_checkpoint,
+):
+    cli_state.sdk.auditlogs.get_all.return_value = (
+        mock_audit_log_response_with_10_records
+    )
+    result = runner.invoke(
+        cli, ["audit-logs", "search", "--use-checkpoint", "test"], obj=cli_state,
+    )
+    output = result.output
+    output = output.split(" ")
+    output = [s for s in output if s]
+    assert (
+        output.count("Timestamp")
+        == output.count("ActorName")
+        == output.count("ActorIpAddress")
+        == output.count("AffectedUserUID")
+        == 1
     )
 
 

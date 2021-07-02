@@ -12,6 +12,8 @@ from code42cli.util import format_to_table
 
 CEF_DEFAULT_PRODUCT_NAME = "Advanced Exfiltration Detection"
 CEF_DEFAULT_SEVERITY_LEVEL = "5"
+
+# Uses method `output_via_pager()` when 10 or more records.
 OUTPUT_VIA_PAGER_THRESHOLD = 10
 
 
