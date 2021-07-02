@@ -18,7 +18,6 @@ from code42cli.util import warn_interrupt
 
 EVENT_KEY = "events"
 AUDIT_LOGS_KEYWORD = "audit-logs"
-COMMON_AUDIT_LOG_TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
 
 
 def _get_audit_logs_default_header():
