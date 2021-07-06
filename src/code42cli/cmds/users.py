@@ -169,4 +169,3 @@ def _get_all_active_hold_memberships(sdk):
                 legal_hold_uid=matter["legalHoldUid"], active=True
             ):
                 yield from _page["legalHoldMemberships"]
-
