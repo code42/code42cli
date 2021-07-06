@@ -118,7 +118,7 @@ def get_generator_for_get_all(mocker, mock_return_items):
 
     def gen(*args, **kwargs):
         response = mocker.MagicMock(spec=Request)
-        response.text = """{{"items": [{0}]}}""".format(mock_return_items)
+        response.text = f'{{"items": [{mock_return_items}]}}'
         yield Py42Response(response)
 
     return gen

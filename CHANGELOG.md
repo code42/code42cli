@@ -12,11 +12,17 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
+- New command 'code42 users list --include-legal-hold-membership' to print the legal hold matter name and ID for any user on legal hold
+
+## 1.7.0 - 2021-06-17
+
+### Added
+
 - New command `code42 users add-role` to add a user role to a single user.
 
 - New command `code42 users remove-role` to remove a user role from a single user.
 
-- New command 'code42 users list --include-legal-hold-membership' to print the legal hold matter name and ID for any user on legal hold
+- New command `code42 shell` that opens an IPython console with a pre-initialized py42 sdk.
 
 ## 1.6.1 - 2021-05-27
 

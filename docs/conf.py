@@ -23,9 +23,9 @@ copyright = "2020, Code42 Software"
 author = "Code42 Software"
 
 # The short X.Y version
-version = "code42cli v{}".format(meta.__version__)
+version = f"code42cli v{meta.__version__}"
 # The full version, including alpha/beta/rc tags
-release = "code42cli v{}".format(meta.__version__)
+release = f"code42cli v{meta.__version__}"
 
 
 # -- General configuration ---------------------------------------------------

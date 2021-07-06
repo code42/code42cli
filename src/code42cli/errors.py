@@ -20,7 +20,7 @@ class Code42CLIError(click.ClickException):
         """Override default `show` to print CLI errors in red text."""
         if file is None:
             file = get_text_stderr()
-        click.secho("Error: {}".format(self.format_message()), file=file, fg="red")
+        click.secho(f"Error: {self.format_message()}", file=file, fg="red")
         if self.help:
             click.echo(self.help, err=True)
 
@@ -39,7 +39,7 @@ class LoggedCLIError(Code42CLIError):
     def format_message(self):
         locations_message = get_view_error_details_message()
         return (
-            "{}\n{}".format(self.message, locations_message)
+            f"{self.message}\n{locations_message}"
             if self.message
             else locations_message
         )
@@ -51,13 +51,11 @@ class UserDoesNotExistError(Code42CLIError):
     bulk add or remove."""
 
     def __init__(self, username):
-        super().__init__("User '{}' does not exist.".format(username))
+        super().__init__(f"User '{username}' does not exist.")
 
 
 class UserNotInLegalHoldError(Code42CLIError):
     def __init__(self, username, matter_id):
         super().__init__(
-            "User '{}' is not an active member of legal hold matter '{}'.".format(
-                username, matter_id
-            )
+            f"User '{username}' is not an active member of legal hold matter '{matter_id}'."
         )

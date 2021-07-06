@@ -38,7 +38,7 @@ def limit_date_range(dt, max_days_back=90, param=None):
     now = datetime.utcnow().replace(tzinfo=timezone.utc)
     if now - dt > timedelta(days=max_days_back):
         raise click.BadParameter(
-            message="must be within {} days.".format(max_days_back), param=param
+            message=f"must be within {max_days_back} days.", param=param
         )
     return dt
 

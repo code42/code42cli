@@ -188,7 +188,7 @@ def test_add_departing_employee_when_user_does_not_exist_exits(
         cli, ["departing-employee", "add", TEST_EMPLOYEE], obj=cli_state_without_user
     )
     assert result.exit_code == 1
-    assert "User '{}' does not exist.".format(TEST_EMPLOYEE) in result.output
+    assert f"User '{TEST_EMPLOYEE}' does not exist." in result.output
 
 
 def test_add_departing_employee_when_user_already_exits_with_correct_message(
@@ -202,7 +202,7 @@ def test_add_departing_employee_when_user_already_exits_with_correct_message(
         cli, ["departing-employee", "add", TEST_EMPLOYEE], obj=cli_state_with_user
     )
     assert result.exit_code == 1
-    assert "'{}' is already on the departing-employee list.".format(TEST_EMPLOYEE)
+    assert f"'{TEST_EMPLOYEE}' is already on the departing-employee list."
 
 
 def test_remove_departing_employee_calls_remove(runner, cli_state_with_user):
@@ -221,7 +221,7 @@ def test_remove_departing_employee_when_user_does_not_exist_exits(
         cli, ["departing-employee", "remove", TEST_EMPLOYEE], obj=cli_state_without_user
     )
     assert result.exit_code == 1
-    assert "User '{}' does not exist.".format(TEST_EMPLOYEE) in result.output
+    assert f"User '{TEST_EMPLOYEE}' does not exist." in result.output
 
 
 def test_add_bulk_users_calls_expected_py42_methods(runner, cli_state):
@@ -333,9 +333,7 @@ def test_remove_departing_employee_when_user_not_on_list_prints_expected_error(
         cli, ["departing-employee", "remove", test_username], obj=cli_state
     )
     assert (
-        "User with ID '{}' is not currently on the departing-employee list.".format(
-            TEST_ID
-        )
+        f"User with ID '{TEST_ID}' is not currently on the departing-employee list."
         in result.output
     )
 
@@ -343,19 +341,10 @@ def test_remove_departing_employee_when_user_not_on_list_prints_expected_error(
 @pytest.mark.parametrize(
     "command, error_msg",
     [
-        ("{} add".format(DEPARTING_EMPLOYEE_COMMAND), "Missing argument 'USERNAME'."),
-        (
-            "{} remove".format(DEPARTING_EMPLOYEE_COMMAND),
-            "Missing argument 'USERNAME'.",
-        ),
-        (
-            "{} bulk add".format(DEPARTING_EMPLOYEE_COMMAND),
-            "Missing argument 'CSV_FILE'.",
-        ),
-        (
-            "{} bulk remove".format(DEPARTING_EMPLOYEE_COMMAND),
-            "Missing argument 'FILE'.",
-        ),
+        (f"{DEPARTING_EMPLOYEE_COMMAND} add", "Missing argument 'USERNAME'."),
+        (f"{DEPARTING_EMPLOYEE_COMMAND} remove", "Missing argument 'USERNAME'.",),
+        (f"{DEPARTING_EMPLOYEE_COMMAND} bulk add", "Missing argument 'CSV_FILE'.",),
+        (f"{DEPARTING_EMPLOYEE_COMMAND} bulk remove", "Missing argument 'FILE'.",),
     ],
 )
 def test_departing_employee_command_when_missing_required_parameters_returns_error(

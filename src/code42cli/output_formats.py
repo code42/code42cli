@@ -157,13 +157,12 @@ def to_table(output, header):
 
 def to_json(output):
     """Output is a single record"""
-    return "{}\n".format(json.dumps(output))
+    return f"{json.dumps(output)}\n"
 
 
 def to_formatted_json(output):
     """Output is a single record"""
-    json_str = "{}\n".format(json.dumps(output, indent=4))
-    return json_str
+    return f"{json.dumps(output, indent=4)}\n"
 
 
 class FileEventsOutputFormat(OutputFormat):
@@ -185,7 +184,7 @@ class FileEventsOutputFormatter(OutputFormatter):
 
 def to_cef(output):
     """Output is a single record"""
-    return "{}\n".format(_convert_event_to_cef(output))
+    return f"{_convert_event_to_cef(output)}\n"
 
 
 def _convert_event_to_cef(event):

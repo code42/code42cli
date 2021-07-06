@@ -263,12 +263,12 @@ def test_to_table_when_not_given_header_creates_header_dynamically():
 
 def test_to_json():
     formatted_output = output_formats_module.to_json(TEST_DATA)
-    assert formatted_output == "{}\n".format(json.dumps(TEST_DATA))
+    assert formatted_output == f"{json.dumps(TEST_DATA)}\n"
 
 
 def test_to_formatted_json():
     formatted_output = output_formats_module.to_formatted_json(TEST_DATA)
-    assert formatted_output == "{}\n".format(json.dumps(TEST_DATA, indent=4))
+    assert formatted_output == f"{json.dumps(TEST_DATA, indent=4)}\n"
 
 
 class TestOutputFormatter:
@@ -753,7 +753,7 @@ def get_cef_parts(cef_str):
 
 def key_value_pair_in_cef_extension(field_name, field_value, cef_str):
     cef_parts = get_cef_parts(cef_str)
-    kvp = "{}={}".format(field_name, field_value)
+    kvp = f"{field_name}={field_value}"
     return kvp in cef_parts[-1]
 
 
