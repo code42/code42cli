@@ -1,9 +1,7 @@
 import pytest
-from py42.response import Py42Response
-from requests import Response
+from tests.conftest import create_mock_response
 
 from code42cli.cmds.detectionlists import update_user
-
 
 MOCK_USER_ID = "USER-ID"
 MOCK_USER_NAME = "test@example.com"
@@ -24,9 +22,7 @@ MOCK_USER_PROFILE_RESPONSE = f"""
 
 @pytest.fixture
 def user_response_with_cloud_aliases(mocker):
-    response = mocker.MagicMock(spec=Response)
-    response.text = MOCK_USER_PROFILE_RESPONSE
-    return Py42Response(response)
+    return create_mock_response(mocker, data=MOCK_USER_PROFILE_RESPONSE)
 
 
 @pytest.fixture

@@ -79,12 +79,12 @@ def update_user_response(mocker):
 
 @pytest.fixture
 def get_available_roles_response(mocker):
-    return create_mock_response(mocker, TEST_ROLE_RETURN_DATA)
+    return create_mock_response(mocker, data=TEST_ROLE_RETURN_DATA)
 
 
 @pytest.fixture
 def get_users_response(mocker):
-    return create_mock_response(mocker, TEST_USERS_RESPONSE)
+    return create_mock_response(mocker, data=TEST_USERS_RESPONSE)
 
 
 @pytest.fixture
@@ -94,7 +94,7 @@ def change_org_response(mocker):
 
 @pytest.fixture
 def get_org_response(mocker):
-    return create_mock_response(mocker, TEST_GET_ORG_RESPONSE)
+    return create_mock_response(mocker, data=TEST_GET_ORG_RESPONSE)
 
 
 @pytest.fixture
@@ -116,18 +116,13 @@ def get_user_id_success(cli_state, get_users_response):
 @pytest.fixture
 def get_user_id_failure(mocker, cli_state):
     cli_state.sdk.users.get_by_username.return_value = create_mock_response(
-        mocker, TEST_EMPTY_USERS_RESPONSE
+        mocker, data=TEST_EMPTY_USERS_RESPONSE
     )
 
 
 @pytest.fixture
 def get_available_roles_success(cli_state, get_available_roles_response):
     cli_state.sdk.users.get_available_roles.return_value = get_available_roles_response
-
-
-@pytest.fixture
-def update_user_success(cli_state, update_user_response):
-    cli_state.sdk.users.update_user.return_value = update_user_response
 
 
 @pytest.fixture
@@ -539,7 +534,7 @@ def test_bulk_update_uses_handler_that_when_encounters_error_increments_total_er
     def _update(user_id, *args, **kwargs):
         if user_id == "12345":
             raise Exception("TEST")
-        return create_mock_response(mocker, TEST_USERS_RESPONSE)
+        return create_mock_response(mocker, data=TEST_USERS_RESPONSE)
 
     cli_state.sdk.users.update_user.side_effect = _update
     bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")

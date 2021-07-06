@@ -10,8 +10,7 @@ from pandas._testing import assert_series_equal
 from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42ForbiddenError
 from py42.exceptions import Py42NotFoundError
-from py42.response import Py42Response
-from requests import Response
+from tests.conftest import create_mock_response
 
 from code42cli.cmds.devices import _add_backup_set_settings_to_dataframe
 from code42cli.cmds.devices import _add_legal_hold_membership_to_device_dataframe
@@ -311,14 +310,6 @@ ALL_CUSTODIANS_RESPONSE = {
 }
 
 
-def _create_py42_response(mocker, text):
-    response = mocker.MagicMock(spec=Response)
-    response.text = text
-    response._content_consumed = mocker.MagicMock()
-    response.status_code = 200
-    return Py42Response(response)
-
-
 @pytest.fixture
 def mock_device_settings(mocker, mock_backup_set):
     device_settings = mocker.MagicMock()
@@ -342,12 +333,12 @@ def mock_backup_set(mocker):
 
 @pytest.fixture
 def empty_successful_response(mocker):
-    return _create_py42_response(mocker, "")
+    return create_mock_response(mocker)
 
 
 @pytest.fixture
 def device_info_response(mocker):
-    return _create_py42_response(mocker, TEST_DEVICE_RESPONSE)
+    return create_mock_response(mocker, data=TEST_DEVICE_RESPONSE)
 
 
 def archives_list_generator():
@@ -372,12 +363,12 @@ def custodian_list_generator():
 
 @pytest.fixture
 def backupusage_response(mocker):
-    return _create_py42_response(mocker, TEST_BACKUPUSAGE_RESPONSE)
+    return create_mock_response(mocker, data=TEST_BACKUPUSAGE_RESPONSE)
 
 
 @pytest.fixture
 def empty_backupusage_response(mocker):
-    return _create_py42_response(mocker, TEST_EMPTY_BACKUPUSAGE_RESPONSE)
+    return create_mock_response(mocker, data=TEST_EMPTY_BACKUPUSAGE_RESPONSE)
 
 
 @pytest.fixture
@@ -870,7 +861,7 @@ def test_bulk_deactivate_uses_handler_that_when_encounters_error_increments_tota
     def _get(guid):
         if guid == "test":
             raise Exception("TEST")
-        return _create_py42_response(mocker, TEST_DEVICE_RESPONSE)
+        return create_mock_response(mocker, data=TEST_DEVICE_RESPONSE)
 
     cli_state.sdk.devices.get_by_guid.side_effect = _get
     bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
@@ -923,7 +914,7 @@ def test_bulk_reactivate_uses_handler_that_when_encounters_error_increments_tota
     def _get(guid):
         if guid == "test":
             raise Exception("TEST")
-        return _create_py42_response(mocker, TEST_DEVICE_RESPONSE)
+        return create_mock_response(mocker, data=TEST_DEVICE_RESPONSE)
 
     cli_state.sdk.devices.get_by_guid.side_effect = _get
     bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")

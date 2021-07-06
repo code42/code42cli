@@ -287,17 +287,20 @@ def mock_dataframe_to_string(mocker):
     return mocker.patch("pandas.DataFrame.to_string")
 
 
-def create_mock_response(mocker, text=None, status=200):
-    text = json.dumps(text) if text else ""
+def create_mock_response(mocker, data=None, status=200):
+    if isinstance(data, dict):
+        data = json.dumps(data)
+    elif not data:
+        data = ""
     response = mocker.MagicMock(spec=Response)
-    response.text = text
+    response.text = data
     response.status_code = status
     response.encoding = None
     response._content_consumed = ""
     return Py42Response(response)
 
 
-def create_mock_http_error(mocker, text=None, status=400):
+def create_mock_http_error(mocker, data=None, status=400):
     mock_http_error = mocker.MagicMock(spec=HTTPError)
-    mock_http_error.response = create_mock_response(mocker, text, status=status)
+    mock_http_error.response = create_mock_response(mocker, data=data, status=status)
     return mock_http_error
