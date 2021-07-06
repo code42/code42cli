@@ -1,14 +1,14 @@
-import json
-
 import pytest
-from py42.response import Py42Response
-from requests import Response
+from py42.exceptions import Py42InvalidEmailError
+from py42.exceptions import Py42InvalidPasswordError
+from py42.exceptions import Py42InvalidUsernameError
+from tests.conftest import create_mock_http_error
+from tests.conftest import create_mock_response
 
 from code42cli.main import cli
 from code42cli.worker import WorkerStats
 
 _NAMESPACE = "code42cli.cmds.users"
-
 TEST_ROLE_RETURN_DATA = {
     "data": [{"roleName": "Customer Cloud Admin", "roleId": "1234543"}]
 }
@@ -68,41 +68,33 @@ TEST_GET_ORG_RESPONSE = {
 }
 
 
-def _create_py42_response(mocker, text):
-    response = mocker.MagicMock(spec=Response)
-    response.text = text
-    response._content_consumed = mocker.MagicMock()
-    response.status_code = 200
-    return Py42Response(response)
-
-
 def get_all_users_generator():
     yield TEST_USERS_RESPONSE
 
 
 @pytest.fixture
 def update_user_response(mocker):
-    return _create_py42_response(mocker, "")
+    return create_mock_response(mocker)
 
 
 @pytest.fixture
 def get_available_roles_response(mocker):
-    return _create_py42_response(mocker, json.dumps(TEST_ROLE_RETURN_DATA))
+    return create_mock_response(mocker, TEST_ROLE_RETURN_DATA)
 
 
 @pytest.fixture
 def get_users_response(mocker):
-    return _create_py42_response(mocker, json.dumps(TEST_USERS_RESPONSE))
+    return create_mock_response(mocker, TEST_USERS_RESPONSE)
 
 
 @pytest.fixture
 def change_org_response(mocker):
-    return _create_py42_response(mocker, "")
+    return create_mock_response(mocker)
 
 
 @pytest.fixture
 def get_org_response(mocker):
-    return _create_py42_response(mocker, json.dumps(TEST_GET_ORG_RESPONSE))
+    return create_mock_response(mocker, TEST_GET_ORG_RESPONSE)
 
 
 @pytest.fixture
@@ -123,14 +115,19 @@ def get_user_id_success(cli_state, get_users_response):
 
 @pytest.fixture
 def get_user_id_failure(mocker, cli_state):
-    cli_state.sdk.users.get_by_username.return_value = _create_py42_response(
-        mocker, json.dumps(TEST_EMPTY_USERS_RESPONSE)
+    cli_state.sdk.users.get_by_username.return_value = create_mock_response(
+        mocker, TEST_EMPTY_USERS_RESPONSE
     )
 
 
 @pytest.fixture
 def get_available_roles_success(cli_state, get_available_roles_response):
     cli_state.sdk.users.get_available_roles.return_value = get_available_roles_response
+
+
+@pytest.fixture
+def update_user_success(cli_state, update_user_response):
+    cli_state.sdk.users.update_user.return_value = update_user_response
 
 
 @pytest.fixture
@@ -203,8 +200,8 @@ def test_list_when_table_format_outputs_expected_columns(
 def test_list_users_calls_users_get_all_with_expected_role_id(
     runner, cli_state, get_available_roles_success, get_all_users_success
 ):
-    ROLE_NAME = "Customer Cloud Admin"
-    runner.invoke(cli, ["users", "list", "--role-name", ROLE_NAME], obj=cli_state)
+    role_name = "Customer Cloud Admin"
+    runner.invoke(cli, ["users", "list", "--role-name", role_name], obj=cli_state)
     cli_state.sdk.users.get_all.assert_called_once_with(
         active=None, org_uid=None, role_id="1234543"
     )
@@ -404,6 +401,43 @@ def test_update_user_calls_update_user_with_correct_parameters_when_all_are_pass
     )
 
 
+def test_update_when_py42_raises_invalid_email_outputs_error_message(
+    mocker, runner, cli_state, update_user_success
+):
+    test_email = "test_email"
+    mock_http_error = create_mock_http_error(mocker, status=500)
+    cli_state.sdk.users.update_user.side_effect = Py42InvalidEmailError(
+        test_email, mock_http_error
+    )
+    command = ["users", "update", "--user-id", "12345", "--email", test_email]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert "Error: 'test_email' is not a valid email." in result.output
+
+
+def test_update_when_py42_raises_invalid_username_outputs_error_message(
+    mocker, runner, cli_state, update_user_success
+):
+    mock_http_error = create_mock_http_error(mocker, status=500)
+    cli_state.sdk.users.update_user.side_effect = Py42InvalidUsernameError(
+        mock_http_error
+    )
+    command = ["users", "update", "--user-id", "12345", "--username", "test_username"]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert "Error: Invalid username." in result.output
+
+
+def test_update_when_py42_raises_invalid_password_outputs_error_message(
+    mocker, runner, cli_state, update_user_success
+):
+    mock_http_error = create_mock_http_error(mocker, status=500)
+    cli_state.sdk.users.update_user.side_effect = Py42InvalidPasswordError(
+        mock_http_error
+    )
+    command = ["users", "update", "--user-id", "12345", "--password", "test_password"]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert "Error: Invalid password." in result.output
+
+
 def test_bulk_update_uses_expected_arguments_when_only_some_are_passed(
     runner, mocker, cli_state
 ):
@@ -505,7 +539,7 @@ def test_bulk_update_uses_handler_that_when_encounters_error_increments_total_er
     def _update(user_id, *args, **kwargs):
         if user_id == "12345":
             raise Exception("TEST")
-        return _create_py42_response(mocker, TEST_USERS_RESPONSE)
+        return create_mock_response(mocker, TEST_USERS_RESPONSE)
 
     cli_state.sdk.users.update_user.side_effect = _update
     bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
