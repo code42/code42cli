@@ -105,10 +105,10 @@ def send_to_logger(mocker, send_to_logger_factory):
 @pytest.fixture
 def mock_audit_log_response(mocker):
     response1 = create_mock_response(
-        mocker, json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
+        mocker, data={"events": TEST_EVENTS_WITH_SAME_TIMESTAMP}
     )
     response2 = create_mock_response(
-        mocker, json.dumps({"events": TEST_EVENTS_WITH_DIFFERENT_TIMESTAMPS})
+        mocker, data={"events": TEST_EVENTS_WITH_DIFFERENT_TIMESTAMPS}
     )
 
     def response_gen():
@@ -120,10 +120,10 @@ def mock_audit_log_response(mocker):
 
 @pytest.fixture
 def mock_audit_log_response_with_10_records(mocker):
-    text = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
+    data = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
     responses = []
     for _ in range(0, 10):
-        responses.append(create_mock_response(mocker, text))
+        responses.append(create_mock_response(mocker, data=data))
 
     def response_gen():
         yield from responses
@@ -133,10 +133,10 @@ def mock_audit_log_response_with_10_records(mocker):
 
 @pytest.fixture
 def mock_audit_log_response_with_only_same_timestamps(mocker):
-    text = json.dumps({"events": TEST_EVENTS_WITH_SAME_TIMESTAMP})
+    data = {"events": TEST_EVENTS_WITH_SAME_TIMESTAMP}
 
     def response_gen():
-        yield create_mock_response(mocker, text)
+        yield create_mock_response(mocker, data=data)
 
     return response_gen()
 
@@ -146,10 +146,9 @@ def mock_audit_log_response_with_missing_ms_timestamp(mocker):
     event = dict(TEST_EVENTS_WITH_SAME_TIMESTAMP[0])
     event["timestamp"] = "2020-01-01T12:00:00Z"
     response_data = {"events": [event]}
-    text = json.dumps(response_data)
 
     def response_gen():
-        yield create_mock_response(mocker, text)
+        yield create_mock_response(mocker, data=response_data)
 
     return response_gen()
 
@@ -158,11 +157,9 @@ def mock_audit_log_response_with_missing_ms_timestamp(mocker):
 def mock_audit_log_response_with_micro_seconds(mocker):
     event = dict(TEST_EVENTS_WITH_SAME_TIMESTAMP[0])
     event["timestamp"] = "2021-07-01T14:47:13.093616Z"
-    response_data = {"events": [event]}
-    text = json.dumps(response_data)
 
     def response_gen():
-        yield create_mock_response(mocker, text)
+        yield create_mock_response(mocker, data={"events": [event]})
 
     return response_gen()
 
@@ -171,11 +168,9 @@ def mock_audit_log_response_with_micro_seconds(mocker):
 def mock_audit_log_response_with_nano_seconds(mocker):
     event = dict(TEST_EVENTS_WITH_SAME_TIMESTAMP[0])
     event["timestamp"] = "2021-07-01T14:47:13.093616500Z"
-    response_data = {"events": [event]}
-    text = json.dumps(response_data)
 
     def response_gen():
-        yield create_mock_response(mocker, text)
+        yield create_mock_response(mocker, data={"events": [event]})
 
     return response_gen()
 
@@ -185,13 +180,12 @@ def mock_audit_log_response_with_error_causing_timestamp(mocker):
     good_event = dict(TEST_EVENTS_WITH_SAME_TIMESTAMP[0])
     bad_event = dict(TEST_EVENTS_WITH_SAME_TIMESTAMP[0])
     bad_event["timestamp"] = "I AM NOT A TIMESTAMP"  # Will cause a ValueError.
-    response_data = {
-        "events": [good_event, bad_event]
-    }  # good_event should still get processed.
-    text = json.dumps(response_data)
+
+    # good_event should still get processed.
+    response_data = {"events": [good_event, bad_event]}
 
     def response_gen():
-        yield create_mock_response(mocker, text)
+        yield create_mock_response(mocker, data=response_data)
 
     return response_gen()
 

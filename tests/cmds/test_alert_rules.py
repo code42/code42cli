@@ -1,14 +1,14 @@
-import json
 import logging
 
 import pytest
 from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42InternalServerError
 from py42.exceptions import Py42InvalidRuleOperationError
-from py42.response import Py42Response
 from requests import HTTPError
 from requests import Request
 from requests import Response
+from tests.conftest import create_mock_http_error
+from tests.conftest import create_mock_response
 
 from code42cli.main import cli
 
@@ -16,11 +16,8 @@ TEST_RULE_ID = "rule-id"
 TEST_USER_ID = "test-user-id"
 TEST_USERNAME = "test@example.com"
 TEST_SOURCE = "rule source"
-
 TEST_EMPTY_RULE_RESPONSE = {"ruleMetadata": []}
-
 ALERT_RULES_COMMAND = "alert-rules"
-
 TEST_RULE_RESPONSE = {
     "ruleMetadata": [
         {
@@ -33,7 +30,6 @@ TEST_RULE_RESPONSE = {
         }
     ]
 }
-
 TEST_GET_ALL_RESPONSE_EXFILTRATION = {
     "ruleMetadata": [
         {"observerRuleId": TEST_RULE_ID, "type": "FED_ENDPOINT_EXFILTRATION"}
@@ -51,19 +47,14 @@ TEST_GET_ALL_RESPONSE_FILE_TYPE_MISMATCH = {
 
 def get_rule_not_found_side_effect(mocker):
     def side_effect(*args, **kwargs):
-        response = mocker.MagicMock(spec=Response)
-        response.text = json.dumps(TEST_EMPTY_RULE_RESPONSE)
-        return Py42Response(response)
+        return create_mock_response(mocker, data=TEST_EMPTY_RULE_RESPONSE)
 
     return side_effect
 
 
 def get_user_not_on_alert_rule_side_effect(mocker):
     def side_effect(*args, **kwargs):
-        err = mocker.MagicMock(spec=HTTPError)
-        resp = mocker.MagicMock(spec=Response)
-        resp.text = "TEST_ERR"
-        err.response = resp
+        err = create_mock_http_error(mocker, data="TEST_ERR", status=400)
         raise Py42BadRequestError(err)
 
     return side_effect
@@ -71,10 +62,7 @@ def get_user_not_on_alert_rule_side_effect(mocker):
 
 def create_invalid_rule_type_side_effect(mocker):
     def side_effect(*args, **kwargs):
-        err = mocker.MagicMock(spec=HTTPError)
-        resp = mocker.MagicMock(spec=Response)
-        resp.text = "TEST_ERR"
-        err.response = resp
+        err = create_mock_http_error(mocker, data="TEST_ERR", status=400)
         raise Py42InvalidRuleOperationError(err, TEST_RULE_ID, TEST_SOURCE)
 
     return side_effect

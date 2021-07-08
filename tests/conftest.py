@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from datetime import timedelta
 
@@ -5,6 +6,7 @@ import pytest
 from click.testing import CliRunner
 from py42.response import Py42Response
 from py42.sdk import SDKClient
+from requests import HTTPError
 from requests import Response
 
 import code42cli.errors as error_tracker
@@ -285,10 +287,20 @@ def mock_dataframe_to_string(mocker):
     return mocker.patch("pandas.DataFrame.to_string")
 
 
-def create_mock_response(mocker, text):
+def create_mock_response(mocker, data=None, status=200):
+    if isinstance(data, dict):
+        data = json.dumps(data)
+    elif not data:
+        data = ""
     response = mocker.MagicMock(spec=Response)
-    response.text = text
-    response.status_code = 200
+    response.text = data
+    response.status_code = status
     response.encoding = None
     response._content_consumed = ""
     return Py42Response(response)
+
+
+def create_mock_http_error(mocker, data=None, status=400):
+    mock_http_error = mocker.MagicMock(spec=HTTPError)
+    mock_http_error.response = create_mock_response(mocker, data=data, status=status)
+    return mock_http_error
