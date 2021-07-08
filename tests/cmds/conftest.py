@@ -1,3 +1,4 @@
+import json
 import json as json_module
 import threading
 
@@ -110,10 +111,13 @@ def thread_safe_side_effect():
 
 
 def get_generator_for_get_all(mocker, mock_return_items):
-    mock_return_items = mock_return_items or ""
+    if not mock_return_items:
+        mock_return_items = []
+    elif not isinstance(mock_return_items, dict):
+        mock_return_items = [json.loads(mock_return_items)]
 
     def gen(*args, **kwargs):
-        yield create_mock_response(mocker, data={"items": [{mock_return_items}]})
+        yield create_mock_response(mocker, data={"items": mock_return_items})
 
     return gen
 

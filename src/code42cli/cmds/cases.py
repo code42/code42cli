@@ -4,7 +4,9 @@ import os
 import click
 from py42.clients.cases import CaseStatus
 from py42.exceptions import Py42BadRequestError
+from py42.exceptions import Py42CaseAlreadyHasEventError
 from py42.exceptions import Py42NotFoundError
+from py42.exceptions import Py42UpdateClosedCaseError
 
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
@@ -244,6 +246,10 @@ def add(state, case_number, event_id):
     """Associate a file event to a case, by event ID."""
     try:
         state.sdk.cases.file_events.add(case_number, event_id)
+    except Py42UpdateClosedCaseError:
+        raise
+    except Py42CaseAlreadyHasEventError:
+        raise
     except Py42BadRequestError:
         raise Code42CLIError("Invalid case-number or event-id.")
 
