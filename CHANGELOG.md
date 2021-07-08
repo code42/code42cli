@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-## Unreleased
+## 1.8.0 - 2021-07-08
 
 ### Fixed
 
@@ -32,8 +32,6 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - New command `code42 users bulk move` to move users in bulk.
 
 ### Changed
-
-- `code42 alerts search` now uses microsecond precision when searching by alerts' date observed.
 
 - Now when a user is not found, the error message suggests that it might be because you don't
     have the necessary permissions.
