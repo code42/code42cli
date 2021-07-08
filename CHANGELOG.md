@@ -32,9 +32,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 - New command `code42 users bulk move` to move users in bulk.
 
 ### Changed
-
-- `code42 alerts search` now uses microsecond precision when searching by alerts' date observed.
-
+q
 - Now when a user is not found, the error message suggests that it might be because you don't
     have the necessary permissions.
 
