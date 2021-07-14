@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## 1.8.1 - 2021-07-14
+
+### Fixed
+
+- The `chardet` library is now an explicit dependency, resolving dependency issues for fresh installations using latest `requests` v.2.26.0
+
 ## 1.8.0 - 2021-07-08
 
 ### Fixed
