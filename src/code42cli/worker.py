@@ -10,6 +10,10 @@ from code42cli.errors import Code42CLIError
 from code42cli.logger import get_main_cli_logger
 
 
+def create_worker_stats(total):
+    return WorkerStats(total)
+
+
 class WorkerStats:
     """Stats about the tasks that have run."""
 
@@ -66,15 +70,15 @@ class WorkerStats:
 
 
 class Worker:
-    def __init__(self, thread_count, expected_total, bar=None):
+    def __init__(self, thread_count, expected_total, bar=None, stats=None):
         self._queue = queue.Queue()
         self._thread_count = thread_count
-        self._stats = WorkerStats(expected_total)
+        self._bar = bar
+        self._stats = stats or WorkerStats(expected_total)
         self._tasks = 0
         self.__started = False
         self.__start_lock = Lock()
         self._logger = get_main_cli_logger()
-        self._bar = bar
 
     def do_async(self, func, *args, **kwargs):
         """Execute the given func asynchronously given *args and **kwargs.

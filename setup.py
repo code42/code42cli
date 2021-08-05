@@ -31,6 +31,7 @@ setup(
     zip_safe=False,
     python_requires=">3, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, <4",
     install_requires=[
+        "chardet>=4.0.0",
         "click>=7.1.1, <8",
         "click_plugins>=1.1.1",
         "colorama>=0.4.3",
@@ -39,7 +40,7 @@ setup(
         "keyrings.alt==3.2.0",
         "ipython>=7.16.1",
         "pandas>=1.1.3",
-        "py42>=1.15.0",
+        "py42>=1.16.0",
     ],
     extras_require={
         "dev": [

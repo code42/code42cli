@@ -12,6 +12,8 @@ from code42cli.util import format_to_table
 
 CEF_DEFAULT_PRODUCT_NAME = "Advanced Exfiltration Detection"
 CEF_DEFAULT_SEVERITY_LEVEL = "5"
+
+# Uses method `output_via_pager()` when 10 or more records.
 OUTPUT_VIA_PAGER_THRESHOLD = 10
 
 
@@ -54,11 +56,11 @@ class OutputFormatter:
         elif output_format == OutputFormat.JSON:
             self._format_func = to_formatted_json
 
-    def _format_output(self, output):
-        return self._format_func(output)
+    def _format_output(self, output, *args, **kwargs):
+        return self._format_func(output, *args, **kwargs)
 
-    def _to_table(self, output):
-        return to_table(output, self.header)
+    def _to_table(self, output, include_header=True):
+        return to_table(output, self.header, include_header=include_header)
 
     def get_formatted_output(self, output):
         if self._requires_list_output:
@@ -76,6 +78,19 @@ class OutputFormatter:
                 click.echo(output, nl=False)
             if self.output_format in [OutputFormat.TABLE]:
                 click.echo()
+
+    def echo_formatted_generated_output(self, output_generator):
+        def _gen():
+            include_header = True
+            for output in output_generator:
+                if output:
+                    formatted_output = self._format_output(
+                        output, include_header=include_header
+                    )
+                    yield formatted_output
+                    include_header = False
+
+        click.echo_via_pager(_gen)
 
     @property
     def _requires_list_output(self):
@@ -147,11 +162,12 @@ def to_csv(output):
     return string_io.getvalue()
 
 
-def to_table(output, header):
+def to_table(output, header, include_header=True):
     """Output is a list of records"""
     if not output:
         return
-    rows, column_size = find_format_width(output, header)
+
+    rows, column_size = find_format_width(output, header, include_header=include_header)
     return format_to_table(rows, column_size)
 
 

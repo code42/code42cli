@@ -10,8 +10,7 @@ from pandas._testing import assert_series_equal
 from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42ForbiddenError
 from py42.exceptions import Py42NotFoundError
-from py42.response import Py42Response
-from requests import Response
+from tests.conftest import create_mock_response
 
 from code42cli.cmds.devices import _add_backup_set_settings_to_dataframe
 from code42cli.cmds.devices import _add_legal_hold_membership_to_device_dataframe
@@ -19,6 +18,7 @@ from code42cli.cmds.devices import _add_usernames_to_device_dataframe
 from code42cli.cmds.devices import _break_backup_usage_into_total_storage
 from code42cli.cmds.devices import _get_device_dataframe
 from code42cli.main import cli
+from code42cli.worker import WorkerStats
 
 _NAMESPACE = "code42cli.cmds.devices"
 TEST_DATE_OLDER = "2020-01-01T12:00:00.774Z"
@@ -310,14 +310,6 @@ ALL_CUSTODIANS_RESPONSE = {
 }
 
 
-def _create_py42_response(mocker, text):
-    response = mocker.MagicMock(spec=Response)
-    response.text = text
-    response._content_consumed = mocker.MagicMock()
-    response.status_code = 200
-    return Py42Response(response)
-
-
 @pytest.fixture
 def mock_device_settings(mocker, mock_backup_set):
     device_settings = mocker.MagicMock()
@@ -341,12 +333,12 @@ def mock_backup_set(mocker):
 
 @pytest.fixture
 def empty_successful_response(mocker):
-    return _create_py42_response(mocker, "")
+    return create_mock_response(mocker)
 
 
 @pytest.fixture
 def device_info_response(mocker):
-    return _create_py42_response(mocker, TEST_DEVICE_RESPONSE)
+    return create_mock_response(mocker, data=TEST_DEVICE_RESPONSE)
 
 
 def archives_list_generator():
@@ -371,12 +363,12 @@ def custodian_list_generator():
 
 @pytest.fixture
 def backupusage_response(mocker):
-    return _create_py42_response(mocker, TEST_BACKUPUSAGE_RESPONSE)
+    return create_mock_response(mocker, data=TEST_BACKUPUSAGE_RESPONSE)
 
 
 @pytest.fixture
 def empty_backupusage_response(mocker):
-    return _create_py42_response(mocker, TEST_EMPTY_BACKUPUSAGE_RESPONSE)
+    return create_mock_response(mocker, data=TEST_EMPTY_BACKUPUSAGE_RESPONSE)
 
 
 @pytest.fixture
@@ -461,6 +453,18 @@ def get_all_custodian_success(cli_state):
     cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
         custodian_list_generator()
     )
+
+
+@pytest.fixture
+def worker_stats_factory(mocker):
+    return mocker.patch(f"{_NAMESPACE}.create_worker_stats")
+
+
+@pytest.fixture
+def worker_stats(mocker, worker_stats_factory):
+    stats = mocker.MagicMock(spec=WorkerStats)
+    worker_stats_factory.return_value = stats
+    return stats
 
 
 def test_deactivate_deactivates_device(
@@ -822,11 +826,57 @@ def test_bulk_deactivate_uses_expected_arguments(runner, mocker, cli_state):
     assert bulk_processor.call_args[0][1] == [
         {
             "guid": "test",
-            "deactivated": False,
+            "deactivated": "False",
             "change_device_name": False,
             "purge_date": None,
         }
     ]
+
+
+def test_bulk_deactivate_ignores_blank_lines(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_deactivate.csv", "w") as csv:
+            csv.writelines(["guid,username\n", "\n", "test,value\n\n"])
+        runner.invoke(
+            cli,
+            ["devices", "bulk", "deactivate", "test_bulk_deactivate.csv"],
+            obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {
+            "guid": "test",
+            "deactivated": "False",
+            "change_device_name": False,
+            "purge_date": None,
+        }
+    ]
+
+
+def test_bulk_deactivate_uses_handler_that_when_encounters_error_increments_total_errors(
+    runner, mocker, cli_state, worker_stats
+):
+    lines = ["guid\n", "1\n"]
+
+    def _get(guid):
+        if guid == "test":
+            raise Exception("TEST")
+        return create_mock_response(mocker, data=TEST_DEVICE_RESPONSE)
+
+    cli_state.sdk.devices.get_by_guid.side_effect = _get
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_deactivate.csv", "w") as csv:
+            csv.writelines(lines)
+        runner.invoke(
+            cli,
+            ["devices", "bulk", "deactivate", "test_bulk_deactivate.csv"],
+            obj=cli_state,
+        )
+    handler = bulk_processor.call_args[0][0]
+    handler(guid="test", change_device_name="test", purge_date="test")
+    handler(guid="not test", change_device_name="test", purge_date="test")
+    assert worker_stats.increment_total_errors.call_count == 1
 
 
 def test_bulk_reactivate_uses_expected_arguments(runner, mocker, cli_state):
@@ -839,4 +889,44 @@ def test_bulk_reactivate_uses_expected_arguments(runner, mocker, cli_state):
             ["devices", "bulk", "reactivate", "test_bulk_reactivate.csv"],
             obj=cli_state,
         )
-    assert bulk_processor.call_args[0][1] == [{"guid": "test", "reactivated": False}]
+    assert bulk_processor.call_args[0][1] == [{"guid": "test", "reactivated": "False"}]
+
+
+def test_bulk_reactivate_ignores_blank_lines(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_reactivate.csv", "w") as csv:
+            csv.writelines(["guid,username\n", "\n", "test,value\n\n"])
+        runner.invoke(
+            cli,
+            ["devices", "bulk", "reactivate", "test_bulk_reactivate.csv"],
+            obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [{"guid": "test", "reactivated": "False"}]
+    bulk_processor.assert_called_once()
+
+
+def test_bulk_reactivate_uses_handler_that_when_encounters_error_increments_total_errors(
+    runner, mocker, cli_state, worker_stats
+):
+    lines = ["guid\n", "1\n"]
+
+    def _get(guid):
+        if guid == "test":
+            raise Exception("TEST")
+        return create_mock_response(mocker, data=TEST_DEVICE_RESPONSE)
+
+    cli_state.sdk.devices.get_by_guid.side_effect = _get
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_reactivate.csv", "w") as csv:
+            csv.writelines(lines)
+        runner.invoke(
+            cli,
+            ["devices", "bulk", "reactivate", "test_bulk_reactivate.csv"],
+            obj=cli_state,
+        )
+    handler = bulk_processor.call_args[0][0]
+    handler(guid="test")
+    handler(guid="not test")
+    assert worker_stats.increment_total_errors.call_count == 1

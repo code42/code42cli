@@ -1,15 +1,16 @@
+import json
 import json as json_module
 import threading
 
 import pytest
 from py42.exceptions import Py42UserAlreadyAddedError
 from py42.exceptions import Py42UserNotOnListError
-from py42.response import Py42Response
 from py42.sdk import SDKClient
 from requests import HTTPError
-from requests import Request
 from requests import Response
 from tests.conftest import convert_str_to_date
+from tests.conftest import create_mock_http_error
+from tests.conftest import create_mock_response
 from tests.conftest import TEST_ID
 
 from code42cli.logger import CliLogger
@@ -20,12 +21,8 @@ TEST_EMPLOYEE = "risky employee"
 
 def get_user_not_on_list_side_effect(mocker, list_name):
     def side_effect(*args, **kwargs):
-        err = mocker.MagicMock(spec=HTTPError)
-        resp = mocker.MagicMock(spec=Response)
-        resp.text = "TEST_ERR"
-        err.response = resp
-        err.response.request = mocker.MagicMock(spec=Request)
-        raise Py42UserNotOnListError(err, TEST_ID, list_name)
+        mock_http_error = create_mock_http_error(mocker, data="TEST_ERR")
+        raise Py42UserNotOnListError(mock_http_error, TEST_ID, list_name)
 
     return side_effect
 
@@ -114,12 +111,13 @@ def thread_safe_side_effect():
 
 
 def get_generator_for_get_all(mocker, mock_return_items):
-    mock_return_items = mock_return_items or ""
+    if not mock_return_items:
+        mock_return_items = []
+    elif not isinstance(mock_return_items, dict):
+        mock_return_items = [json.loads(mock_return_items)]
 
     def gen(*args, **kwargs):
-        response = mocker.MagicMock(spec=Request)
-        response.text = f'{{"items": [{mock_return_items}]}}'
-        yield Py42Response(response)
+        yield create_mock_response(mocker, data={"items": mock_return_items})
 
     return gen
 

@@ -5,12 +5,11 @@ import py42.sdk.queries.alerts.filters as f
 import pytest
 from c42eventextractor.extractors import AlertExtractor
 from py42.exceptions import Py42NotFoundError
-from py42.response import Py42Response
 from py42.sdk.queries.alerts.filters import AlertState
-from requests import Response
 from tests.cmds.conftest import filter_term_is_in_call_args
 from tests.cmds.conftest import get_filter_value_from_json
 from tests.cmds.conftest import get_mark_for_search_and_send_to
+from tests.conftest import create_mock_response
 from tests.conftest import get_test_date_str
 
 from code42cli import errors
@@ -114,9 +113,9 @@ ADVANCED_QUERY_VALUES = {
     "state_2": "PENDING",
     "state_3": "IN_PROGRESS",
     "actor": "test@example.com",
-    "on_or_after": "2020-01-01T06:00:00.000Z",
+    "on_or_after": "2020-01-01T06:00:00.000000Z",
     "on_or_after_timestamp": 1577858400.0,
-    "on_or_before": "2020-02-01T06:00:00.000Z",
+    "on_or_before": "2020-02-01T06:00:00.000000Z",
     "on_or_before_timestamp": 1580536800.0,
     "rule_id": "xyz123",
 }
@@ -328,7 +327,7 @@ def alert_cursor_without_checkpoint(mocker):
 def begin_option(mocker):
     mock = mocker.patch(f"{PRODUCT_NAME}.cmds.alerts.convert_datetime_to_timestamp")
     mock.return_value = BEGIN_TIMESTAMP
-    mock.expected_timestamp = "2020-01-01T06:00:00.000Z"
+    mock.expected_timestamp = "2020-01-01T06:00:00.000000Z"
     return mock
 
 
@@ -344,9 +343,7 @@ def send_to_logger_factory(mocker):
 
 @pytest.fixture
 def full_alert_details_response(mocker):
-    response = mocker.MagicMock(spec=Response)
-    response.text = json.dumps(ALERT_DETAILS_FULL_RESPONSE)
-    return Py42Response(response)
+    return create_mock_response(mocker, data=ALERT_DETAILS_FULL_RESPONSE)
 
 
 @search_and_send_to_test
@@ -428,9 +425,9 @@ def test_search_and_send_to_when_given_begin_and_end_dates_uses_expected_query(
     )
     filters = alert_extractor.extract.call_args[0][0]
     actual_begin = get_filter_value_from_json(filters, filter_index=0)
-    expected_begin = f"{begin_date}T00:00:00.000Z"
+    expected_begin = f"{begin_date}T00:00:00.000000Z"
     actual_end = get_filter_value_from_json(filters, filter_index=1)
-    expected_end = f"{end_date}T23:59:59.999Z"
+    expected_end = f"{end_date}T23:59:59.999999Z"
     assert actual_begin == expected_begin
     assert actual_end == expected_end
 
@@ -449,9 +446,9 @@ def test_search_when_given_begin_and_end_date_and_times_uses_expected_query(
     )
     filters = alert_extractor.extract.call_args[0][0]
     actual_begin = get_filter_value_from_json(filters, filter_index=0)
-    expected_begin = f"{begin_date}T{time}.000Z"
+    expected_begin = f"{begin_date}T{time}.000000Z"
     actual_end = get_filter_value_from_json(filters, filter_index=1)
-    expected_end = f"{end_date}T{time}.000Z"
+    expected_end = f"{end_date}T{time}.000000Z"
     assert actual_begin == expected_begin
     assert actual_end == expected_end
 
@@ -466,7 +463,7 @@ def test_search_when_given_begin_date_and_time_without_seconds_uses_expected_que
     actual = get_filter_value_from_json(
         alert_extractor.extract.call_args[0][0], filter_index=0
     )
-    expected = f"{date}T{time}:00.000Z"
+    expected = f"{date}T{time}:00.000000Z"
     assert actual == expected
 
 
@@ -485,7 +482,7 @@ def test_search_and_send_to_when_given_end_date_and_time_uses_expected_query(
     actual = get_filter_value_from_json(
         alert_extractor.extract.call_args[0][0], filter_index=1
     )
-    expected = f"{end_date}T{time}:00.000Z"
+    expected = f"{end_date}T{time}:00.000000Z"
     assert actual == expected
 
 
@@ -521,7 +518,7 @@ def test_search_and_send_to_when_given_begin_date_and_not_use_checkpoint_and_cur
     actual_ts = get_filter_value_from_json(
         alert_extractor.extract.call_args[0][0], filter_index=0
     )
-    expected_ts = f"{begin_date}T00:00:00.000Z"
+    expected_ts = f"{begin_date}T00:00:00.000000Z"
     assert actual_ts == expected_ts
     assert filter_term_is_in_call_args(alert_extractor, f.DateObserved._term)
 
@@ -768,7 +765,7 @@ def test_search_and_send_to_with_or_query_flag_produces_expected_query(
                     {
                         "operator": "ON_OR_AFTER",
                         "term": "createdAt",
-                        "value": f"{begin_date}T00:00:00.000Z",
+                        "value": f"{begin_date}T00:00:00.000000Z",
                     }
                 ],
             },
@@ -992,11 +989,11 @@ def test_show_when_alert_has_note_includes_note(
 def test_show_when_alert_has_no_note_excludes_note(
     mocker, cli_state, runner, full_alert_details_response
 ):
-    response = mocker.MagicMock(spec=Response)
-    sans_note_text = dict(ALERT_DETAILS_FULL_RESPONSE)
-    sans_note_text["alerts"][0]["note"] = None
-    response.text = json.dumps(sans_note_text)
-    cli_state.sdk.alerts.get_details.return_value = Py42Response(response)
+    response_data = dict(ALERT_DETAILS_FULL_RESPONSE)
+    response_data["alerts"][0]["note"] = None
+    cli_state.sdk.alerts.get_details.return_value = create_mock_response(
+        mocker, data=response_data
+    )
     result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state)
     # Note is included in `full_alert_details_response` initially.
     assert "Note" not in result.output
@@ -1037,11 +1034,11 @@ def test_show_when_alert_has_observations_and_excludes_observations_does_not_out
 def test_show_when_alert_does_not_have_observations_and_includes_observations_outputs_no_observations(
     mocker, cli_state, runner
 ):
-    response = mocker.MagicMock(spec=Response)
-    response_text = dict(ALERT_DETAILS_FULL_RESPONSE)
-    response_text["alerts"][0]["observations"] = None
-    response.text = json.dumps(response_text)
-    cli_state.sdk.alerts.get_details.return_value = Py42Response(response)
+    response_data = dict(ALERT_DETAILS_FULL_RESPONSE)
+    response_data["alerts"][0]["observations"] = None
+    cli_state.sdk.alerts.get_details.return_value = create_mock_response(
+        mocker, data=response_data
+    )
     result = runner.invoke(
         cli,
         ["alerts", "show", "TEST-ALERT-ID", "--include-observations"],

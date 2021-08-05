@@ -66,7 +66,9 @@ def generate_template_cmd_factory(group_name, commands_dict, help_message=None):
     return generate_template
 
 
-def run_bulk_process(row_handler, rows, progress_label=None):
+def run_bulk_process(
+    row_handler, rows, progress_label=None, stats=None, raise_global_error=True
+):
     """Runs a bulk process.
 
     Args:
@@ -74,14 +76,34 @@ def run_bulk_process(row_handler, rows, progress_label=None):
             either *args or **kwargs.
         rows (iterable): the rows to process.
         progress_label: a label that prints with the progress bar.
+        stats (WorkerStats): Pass in WorkerStats if doing error handling outside of the worker.
+        raise_global_error (bool): Set to False to *NOT* raise a CLI error if any rows fail.
+            This is useful if doing error handling outside of the worker class.
+
+    Returns:
+        :class:`WorkerStats`: A class containing the successes and failures count.
     """
-    processor = _create_bulk_processor(row_handler, rows, progress_label)
+    processor = _create_bulk_processor(
+        row_handler,
+        rows,
+        progress_label,
+        stats=stats,
+        raise_global_error=raise_global_error,
+    )
     return processor.run()
 
 
-def _create_bulk_processor(row_handler, rows, progress_label):
+def _create_bulk_processor(
+    row_handler, rows, progress_label, stats=None, raise_global_error=True
+):
     """A factory method to create the bulk processor, useful for testing purposes."""
-    return BulkProcessor(row_handler, rows, progress_label=progress_label)
+    return BulkProcessor(
+        row_handler,
+        rows,
+        progress_label=progress_label,
+        stats=stats,
+        raise_global_error=raise_global_error,
+    )
 
 
 class BulkProcessor:
@@ -95,7 +117,15 @@ class BulkProcessor:
             `row_handler` only needs to take an extra arg.
     """
 
-    def __init__(self, row_handler, rows, worker=None, progress_label=None):
+    def __init__(
+        self,
+        row_handler,
+        rows,
+        worker=None,
+        progress_label=None,
+        stats=None,
+        raise_global_error=True,
+    ):
         total = len(rows)
         self._rows = rows
         self._row_handler = row_handler
@@ -104,7 +134,8 @@ class BulkProcessor:
             item_show_func=self._show_stats,
             label=progress_label,
         )
-        self.__worker = worker or Worker(5, total, bar=self._progress_bar)
+        self._raise_global_error = raise_global_error
+        self.__worker = worker or Worker(5, total, bar=self._progress_bar, stats=stats)
         self._stats = self.__worker.stats
 
     def run(self):
@@ -113,7 +144,7 @@ class BulkProcessor:
         for row in self._rows:
             self._process_row(row)
         self.__worker.wait()
-        self._print_results()
+        self._handle_if_errors()
         return self._stats._results
 
     def _process_row(self, row):
@@ -144,7 +175,7 @@ class BulkProcessor:
     def _show_stats(self, _):
         return str(self._stats)
 
-    def _print_results(self):
+    def _handle_if_errors(self):
         click.echo("")
-        if self._stats.total_errors:
+        if self._stats.total_errors and self._raise_global_error:
             raise LoggedCLIError("Some problems occurred during bulk processing.")

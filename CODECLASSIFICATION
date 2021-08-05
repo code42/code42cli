@@ -1,0 +1,7 @@
+# CODECLASSIFICATION for code42cli
+
+# Specify all repository branches as non-production (catch all)
+/refs/heads/* non-prod
+
+# Specify the 'main' branch as the only production branch
+/refs/heads/main production
