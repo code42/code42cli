@@ -1,7 +1,6 @@
 import pytest
 from c42eventextractor.extractors import BaseExtractor
-from py42.response import Py42Response
-from requests import Response
+from tests.conftest import create_mock_response
 
 from code42cli import errors
 from code42cli.cmds.search.cursor_store import BaseCursorStore
@@ -9,7 +8,6 @@ from code42cli.cmds.search.extraction import create_handlers
 from code42cli.cmds.search.extraction import create_send_to_handlers
 from code42cli.cmds.search.extraction import try_get_default_header
 from code42cli.output_formats import OutputFormat
-
 
 key = "events"
 
@@ -59,10 +57,9 @@ def test_create_handlers_creates_handlers_that_pass_events_to_output_formatter(
     handlers = create_handlers(
         sdk, TestExtractor, cursor_store, "chk-name", formatter, force_pager=False
     )
-    http_response = mocker.MagicMock(spec=Response)
     events = [{"property": "bar"}]
-    http_response.text = f'{{"{key}": [{{"property": "bar"}}]}}'
-    py42_response = Py42Response(http_response)
+    data = f'{{"{key}": [{{"property": "bar"}}]}}'
+    py42_response = create_mock_response(mocker, data=data)
     handlers.handle_response(py42_response)
     formatter.echo_formatted_list.assert_called_once_with(events, force_pager=False)
 
@@ -82,9 +79,8 @@ def test_send_to_handlers_creates_handlers_that_pass_events_to_logger(
     handlers = create_send_to_handlers(
         sdk, TestExtractor, cursor_store, "chk-name", event_extractor_logger
     )
-    http_response = mocker.MagicMock(spec=Response)
     events = [{"property": "bar"}]
-    http_response.text = f'{{"{key}": [{{"property": "bar"}}]}}'
-    py42_response = Py42Response(http_response)
+    data = f'{{"{key}": [{{"property": "bar"}}]}}'
+    py42_response = create_mock_response(mocker, data=data)
     handlers.handle_response(py42_response)
     event_extractor_logger.info.assert_called_once_with(events[0])

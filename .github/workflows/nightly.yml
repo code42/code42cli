@@ -32,7 +32,7 @@ jobs:
       - name: Run Unit tests
         env:
             SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-        run: tox -e nightly  # Run tox using latest master branch from py42/c42eventextractor
+        run: tox -e nightly  # Run tox using latest main branch from py42/c42eventextractor
       - name: Notify Slack Action
         uses: 8398a7/action-slack@v3
         with:

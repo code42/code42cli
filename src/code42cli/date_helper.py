@@ -48,4 +48,4 @@ def round_datetime_to_day_start(dt):
 
 
 def round_datetime_to_day_end(dt):
-    return dt.replace(hour=23, minute=59, second=59, microsecond=999000)
+    return dt.replace(hour=23, minute=59, second=59, microsecond=999999)

@@ -117,7 +117,7 @@ class TestMagicDateRoundingToEnd:
         actual = self.convert(end_date_str)
         expected = datetime.strptime(end_date_str, "%Y-%m-%d")
         expected = utc(
-            expected.replace(hour=23, minute=59, second=59, microsecond=999000)
+            expected.replace(hour=23, minute=59, second=59, microsecond=999999)
         )
         assert actual == expected
 
@@ -130,7 +130,7 @@ class TestMagicDateRoundingToEnd:
         actual_date = self.convert("20d")
         expected_date = get_test_date(days_ago=20)
         expected_date = utc(
-            expected_date.replace(hour=23, minute=59, second=59, microsecond=999000)
+            expected_date.replace(hour=23, minute=59, second=59, microsecond=999999)
         )
         assert actual_date == expected_date
 

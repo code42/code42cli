@@ -1,7 +1,7 @@
 import json
 import os
 import shutil
-from collections import OrderedDict
+from datetime import timezone
 from functools import wraps
 from hashlib import md5
 from os import path
@@ -9,6 +9,7 @@ from signal import getsignal
 from signal import SIGINT
 from signal import signal
 
+import dateutil.parser
 from click import echo
 from click import get_current_context
 from click import style
@@ -40,28 +41,31 @@ def get_user_project_path(*subdirs):
     return result_path
 
 
-def find_format_width(record, header, include_header=True):
+def find_format_width(records, header, include_header=True):
     """Fetches needed keys/items to be displayed based on header keys.
 
     Finds the largest string against each column so as to decide the padding size for the column.
 
     Args:
-        record (dict): data to be formatted.
-        header (dict): key-value where keys should map to keys of record dict and
+        records (list or dict): A list of data to be formatted.
+        header (dict): Key-value where keys should map to keys of record dict and
           value is the corresponding column name to be displayed on the CLI.
-        include_header (bool): include header in output, defaults to True.
+        include_header (bool): Include header in output, defaults to True.
 
     Returns:
         tuple (list of dict, dict): i.e Filtered records, padding size of columns.
     """
+    if isinstance(records, dict):
+        records = [records]
+
     rows = []
     if include_header:
         if not header:
-            header = _get_default_header(record)
+            header = _get_default_header(records)
         rows.append(header)
     widths = dict(header.items())  # Copy
-    for record_row in record:
-        row = OrderedDict()
+    for record_row in records:
+        row = {}
         for header_key in header.keys():
             item = record_row.get(header_key)
             row[header_key] = item
@@ -173,3 +177,10 @@ def hash_event(event):
     if isinstance(event, dict):
         event = json.dumps(event, sort_keys=True)
     return md5(event.encode()).hexdigest()
+
+
+def parse_timestamp(date_str):
+    # example: {"property": "bar", "timestamp": "2020-11-23T17:13:26.239647Z"}
+    ts = date_str[:-1]
+    date = dateutil.parser.parse(ts).replace(tzinfo=timezone.utc)
+    return date.timestamp()

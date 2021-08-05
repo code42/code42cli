@@ -1,7 +1,7 @@
 # The Code42 CLI
 
 ![Build status](https://github.com/code42/code42cli/workflows/build/badge.svg)
-[![codecov.io](https://codecov.io/github/code42/code42cli/coverage.svg?branch=master)](https://codecov.io/github/code42/code42cli?branch=master)
+[![codecov.io](https://codecov.io/github/code42/code42cli/coverage.svg?branch=main)](https://codecov.io/github/code42/code42cli?branch=master)
 [![versions](https://img.shields.io/pypi/pyversions/code42cli.svg)](https://pypi.org/project/code42cli/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Documentation Status](https://readthedocs.org/projects/code42cli/badge/?version=latest)](https://clidocs.code42.com/en/latest/?badge=latest)
