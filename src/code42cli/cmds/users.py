@@ -65,8 +65,6 @@ def username_option(help, required=False):
 @inactive_option
 @click.option(
     "--include-legal-hold-membership",
-    required=False,
-    type=bool,
     default=False,
     is_flag=True,
     help="Include legal hold membership in output.",
@@ -315,7 +313,6 @@ def _get_users_dataframe(sdk, columns, org_uid, role_id, active):
     return DataFrame.from_records(users_list, columns=columns)
 
 
-<<<<<<< HEAD
 def _add_legal_hold_membership_to_user_dataframe(sdk, df):
     columns = ["legalHold.legalHoldUid", "legalHold.name", "user.userUid"]
 
@@ -348,7 +345,8 @@ def _get_all_active_hold_memberships(sdk):
                 legal_hold_uid=matter["legalHoldUid"], active=True
             ):
                 yield from _page["legalHoldMemberships"]
-=======
+
+
 def _update_user(
     sdk,
     user_id,
@@ -381,4 +379,3 @@ def _change_organization(sdk, username, org_id):
 def _get_org_id(sdk, org_id):
     org = sdk.orgs.get_by_uid(org_id)
     return org["orgId"]
->>>>>>> df8406052c337416e296326cd7e51ec678e504c6

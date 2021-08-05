@@ -8,13 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-<<<<<<< HEAD
+
 ## Unreleased
 
 ### Added
 
-- New command 'code42 users list --include-legal-hold-membership' to print the legal hold matter name and ID for any user on legal hold
-=======
+- New command 'code42 users list --include-legal-hold-membership' to print the legal hold matter name and ID for any user on legal hold.
+
 ## 1.8.1 - 2021-07-14
 
 ### Fixed
@@ -48,7 +48,6 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Now when a user is not found, the error message suggests that it might be because you don't
     have the necessary permissions.
->>>>>>> df8406052c337416e296326cd7e51ec678e504c6
 
 ## 1.7.0 - 2021-06-17
 

@@ -1,15 +1,10 @@
 import pytest
-<<<<<<< HEAD
 from pandas import DataFrame
-from py42.response import Py42Response
-from requests import Response
-=======
 from py42.exceptions import Py42InvalidEmailError
 from py42.exceptions import Py42InvalidPasswordError
 from py42.exceptions import Py42InvalidUsernameError
 from tests.conftest import create_mock_http_error
 from tests.conftest import create_mock_response
->>>>>>> df8406052c337416e296326cd7e51ec678e504c6
 
 from code42cli.cmds.users import _add_legal_hold_membership_to_user_dataframe
 from code42cli.main import cli
