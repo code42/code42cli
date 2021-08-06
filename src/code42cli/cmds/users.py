@@ -316,8 +316,12 @@ def _get_users_dataframe(sdk, columns, org_uid, role_id, active):
 def _add_legal_hold_membership_to_user_dataframe(sdk, df):
     columns = ["legalHold.legalHoldUid", "legalHold.name", "user.userUid"]
 
+    custodians = list(_get_all_active_hold_memberships(sdk))
+    if len(custodians) == 0:
+        return df
+
     legal_hold_member_dataframe = (
-        json_normalize(list(_get_all_active_hold_memberships(sdk)))[columns]
+        json_normalize(custodians)[columns]
         .groupby(["user.userUid"])
         .agg(",".join)
         .rename(

@@ -1,12 +1,10 @@
 import pytest
-from pandas import DataFrame
 from py42.exceptions import Py42InvalidEmailError
 from py42.exceptions import Py42InvalidPasswordError
 from py42.exceptions import Py42InvalidUsernameError
 from tests.conftest import create_mock_http_error
 from tests.conftest import create_mock_response
 
-from code42cli.cmds.users import _add_legal_hold_membership_to_user_dataframe
 from code42cli.main import cli
 from code42cli.worker import WorkerStats
 
@@ -70,7 +68,8 @@ TEST_CUSTODIANS_RESPONSE = {
         },
     ]
 }
-
+TEST_EMPTY_CUSTODIANS_RESPONSE = {"legalHoldMemberships": []}
+TEST_EMPTY_MATTERS_RESPONSE = {"legalHolds": []}
 TEST_EMPTY_USERS_RESPONSE = {"users": []}
 TEST_USERNAME = TEST_USERS_RESPONSE["users"][0]["username"]
 TEST_USER_ID = TEST_USERS_RESPONSE["users"][0]["userId"]
@@ -115,6 +114,14 @@ def matter_list_generator():
 
 def custodian_list_generator():
     yield TEST_CUSTODIANS_RESPONSE
+
+
+def empty_custodian_list_generator():
+    yield TEST_EMPTY_CUSTODIANS_RESPONSE
+
+
+def empty_matter_list_generator():
+    yield TEST_EMPTY_MATTERS_RESPONSE
 
 
 @pytest.fixture
@@ -163,6 +170,18 @@ def get_user_id_failure(mocker, cli_state):
     cli_state.sdk.users.get_by_username.return_value = create_mock_response(
         mocker, data=TEST_EMPTY_USERS_RESPONSE
     )
+
+
+@pytest.fixture
+def get_custodian_failure(cli_state):
+    cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
+        empty_custodian_list_generator()
+    )
+
+
+@pytest.fixture
+def get_matter_failure(cli_state):
+    cli_state.sdk.legalhold.get_all_matters.return_value = empty_matter_list_generator()
 
 
 @pytest.fixture
@@ -298,15 +317,49 @@ def test_list_users_when_given_excluding_active_and_inactive_uses_active_equals_
     )
 
 
-def test_add_legal_hold_membership_to_user_dataframe_adds_legal_hold_columns_to_dataframe(
-    cli_state, get_all_matter_success, get_all_custodian_success
+def test_list_legal_hold_flag_reports_none_for_users_not_on_legal_hold(
+    runner,
+    cli_state,
+    get_all_users_success,
+    get_custodian_failure,
+    get_all_matter_success,
 ):
-    testdf = DataFrame.from_records(
-        [{"userUid": "840103986007089121", "status": "Active"}]
+    result = runner.invoke(
+        cli,
+        ["users", "list", "--include-legal-hold-membership", "-f", "CSV"],
+        obj=cli_state,
     )
-    result = _add_legal_hold_membership_to_user_dataframe(cli_state.sdk, testdf)
-    assert "legalHoldUid" in result.columns
-    assert "legalHoldName" in result.columns
+
+    assert "Legal Hold #1,Legal Hold #2" not in result.output
+    assert "123456789,987654321" not in result.output
+    assert "legalHoldUid" not in result.output
+    assert "test.username@example.com" in result.output
+
+
+def test_list_legal_hold_flag_reports_none_if_no_matters_exist(
+    runner, cli_state, get_all_users_success, get_custodian_failure, get_matter_failure
+):
+    result = runner.invoke(
+        cli, ["users", "list", "--include-legal-hold-membership"], obj=cli_state
+    )
+
+    assert "Legal Hold #1,Legal Hold #2" not in result.output
+    assert "123456789,987654321" not in result.output
+    assert "legalHoldUid" not in result.output
+    assert "test.username@example.com" in result.output
+
+
+def test_list_legal_hold_values_not_included_for_legal_hold_user_if_legal_hold_flag_not_passed(
+    runner,
+    cli_state,
+    get_all_users_success,
+    get_all_custodian_success,
+    get_all_matter_success,
+):
+    result = runner.invoke(cli, ["users", "list"], obj=cli_state)
+    assert "Legal Hold #1,Legal Hold #2" not in result.output
+    assert "123456789,987654321" not in result.output
+    assert "test.username@example.com" in result.output
 
 
 def test_list_include_legal_hold_membership_merges_in_and_concats_legal_hold_info(
