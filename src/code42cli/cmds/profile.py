@@ -21,7 +21,7 @@ def profile():
 debug_option = click.option(
     "-d", "--debug", is_flag=True, help="Turn on debug logging.",
 )
-
+totp_option = click.option("--totp", help="TOTP token for multi-factor authentication.")
 
 def profile_name_arg(required=False):
     return click.argument("profile_name", required=required)
@@ -92,11 +92,12 @@ def show(profile_name):
 @yes_option(hidden=True)
 @disable_ssl_option
 @debug_option
-def create(name, server, username, password, disable_ssl_errors, debug):
+@totp_option
+def create(name, server, username, password, disable_ssl_errors, debug, totp):
     """Create profile settings. The first profile created will be the default."""
     cliprofile.create_profile(name, server, username, disable_ssl_errors)
     if password:
-        _set_pw(name, password, debug)
+        _set_pw(name, password, debug, totp=totp)
     else:
         _prompt_for_allow_password_set(name)
     echo(f"Successfully created profile '{name}'.")
@@ -109,7 +110,8 @@ def create(name, server, username, password, disable_ssl_errors, debug):
 @password_option
 @disable_ssl_option
 @debug_option
-def update(name, server, username, password, disable_ssl_errors, debug):
+@totp_option
+def update(name, server, username, password, disable_ssl_errors, debug, totp):
     """Update an existing profile."""
     c42profile = cliprofile.get_profile(name)
 
@@ -121,7 +123,7 @@ def update(name, server, username, password, disable_ssl_errors, debug):
 
     cliprofile.update_profile(c42profile.name, server, username, disable_ssl_errors)
     if password:
-        _set_pw(name, password, debug)
+        _set_pw(name, password, debug, totp=totp)
     elif not c42profile.has_stored_password:
         _prompt_for_allow_password_set(c42profile.name)
 
@@ -163,6 +165,10 @@ def use(profile_name):
 @profile_name_arg(required=True)
 def delete(profile_name):
     """Deletes a profile and its stored password (if any)."""
+    try:
+        cliprofile.get_profile(profile_name)
+    except Code42CLIError:
+        raise Code42CLIError(f"Profile '{profile_name}' does not exist.")
     message = (
         "\nDeleting this profile will also delete any stored passwords and checkpoints. "
         "Are you sure? (y/n): "
@@ -201,10 +207,10 @@ def _prompt_for_allow_password_set(profile_name):
         _set_pw(profile_name, password, False)
 
 
-def _set_pw(profile_name, password, debug):
+def _set_pw(profile_name, password, debug, totp=None):
     c42profile = cliprofile.get_profile(profile_name)
     try:
-        create_sdk(c42profile, is_debug_mode=debug, password=password)
+        create_sdk(c42profile, is_debug_mode=debug, password=password, totp=totp)
     except Exception:
         secho("Password not stored!", bold=True)
         raise

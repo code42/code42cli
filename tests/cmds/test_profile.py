@@ -386,6 +386,11 @@ def test_delete_profile_requires_profile_name_arg(runner, mock_cliprofile_namesp
     assert mock_cliprofile_namespace.delete_profile.call_count == 0
 
 
+def test_delete_profile_raises_CLIError_when_profile_does_not_exist(runner):
+    result = runner.invoke(cli, ["profile", "delete", "not_a_real_profile"])
+    assert result.output == "Error: Profile 'not_a_real_profile' does not exist.\n"
+
+
 def test_delete_profile_does_nothing_if_user_doesnt_agree(
     runner, user_disagreement, mock_cliprofile_namespace
 ):
