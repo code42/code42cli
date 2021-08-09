@@ -23,6 +23,7 @@ debug_option = click.option(
 )
 totp_option = click.option("--totp", help="TOTP token for multi-factor authentication.")
 
+
 def profile_name_arg(required=False):
     return click.argument("profile_name", required=required)
 

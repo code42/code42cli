@@ -36,5 +36,5 @@ code42 profile list
 
 ## Profiles with Multi-Factor Authentication
 
-If your Code42 user account requires multi-factor authentication, the MFA token can either be passed in with the `--totp` 
+If your Code42 user account requires multi-factor authentication, the MFA token can either be passed in with the `--totp`
 option, or if not passed you will be prompted to enter it before the command executes.

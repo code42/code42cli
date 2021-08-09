@@ -10,13 +10,13 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
-### Added 
+### Added
 
 - `code42 profile` commands that validate passwords (`create`, `update`, `reset-pw`) now have `--totp` and `--debug` options available.
 
 ### Changed
 
-- A TOTP token is now required on `code42 profile` commands that check for password validity when a user has MFA enabled. 
+- A TOTP token is now required on `code42 profile` commands that check for password validity when a user has MFA enabled.
 
 ### Fixed
 
