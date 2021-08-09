@@ -3,7 +3,6 @@ from getpass import getpass
 import click
 from click import echo
 from click import secho
-from py42.exceptions import Py42MFARequiredError
 
 import code42cli.profile as cliprofile
 from code42cli.errors import Code42CLIError
@@ -17,6 +16,11 @@ from code42cli.util import does_user_agree
 def profile():
     """Manage Code42 connection settings."""
     pass
+
+
+debug_option = click.option(
+    "-d", "--debug", is_flag=True, help="Turn on debug logging.",
+)
 
 
 def profile_name_arg(required=False):
@@ -87,11 +91,12 @@ def show(profile_name):
 @password_option
 @yes_option(hidden=True)
 @disable_ssl_option
-def create(name, server, username, password, disable_ssl_errors):
+@debug_option
+def create(name, server, username, password, disable_ssl_errors, debug):
     """Create profile settings. The first profile created will be the default."""
     cliprofile.create_profile(name, server, username, disable_ssl_errors)
     if password:
-        _set_pw(name, password)
+        _set_pw(name, password, debug)
     else:
         _prompt_for_allow_password_set(name)
     echo(f"Successfully created profile '{name}'.")
@@ -103,7 +108,8 @@ def create(name, server, username, password, disable_ssl_errors):
 @username_option()
 @password_option
 @disable_ssl_option
-def update(name, server, username, password, disable_ssl_errors):
+@debug_option
+def update(name, server, username, password, disable_ssl_errors, debug):
     """Update an existing profile."""
     c42profile = cliprofile.get_profile(name)
 
@@ -115,7 +121,7 @@ def update(name, server, username, password, disable_ssl_errors):
 
     cliprofile.update_profile(c42profile.name, server, username, disable_ssl_errors)
     if password:
-        _set_pw(name, password)
+        _set_pw(name, password, debug)
     elif not c42profile.has_stored_password:
         _prompt_for_allow_password_set(c42profile.name)
 
@@ -124,12 +130,13 @@ def update(name, server, username, password, disable_ssl_errors):
 
 @profile.command()
 @profile_name_arg()
-def reset_pw(profile_name):
+@debug_option
+def reset_pw(profile_name, debug):
     """\b
     Change the stored password for a profile. Only affects what's stored in the local profile,
     does not make any changes to the Code42 user account."""
     password = getpass()
-    profile_name_saved = _set_pw(profile_name, password)
+    profile_name_saved = _set_pw(profile_name, password, debug)
     echo(f"Password updated for profile '{profile_name_saved}'.")
 
 
@@ -191,17 +198,13 @@ def delete_all():
 def _prompt_for_allow_password_set(profile_name):
     if does_user_agree("Would you like to set a password? (y/n): "):
         password = getpass()
-        _set_pw(profile_name, password)
+        _set_pw(profile_name, password, False)
 
 
-def _set_pw(profile_name, password):
+def _set_pw(profile_name, password, debug):
     c42profile = cliprofile.get_profile(profile_name)
     try:
-        create_sdk(c42profile, is_debug_mode=False, password=password)
-    except Py42MFARequiredError:
-        echo(
-            "Multi-factor account detected. `--totp <token>` option will be required for all code42 invocations."
-        )
+        create_sdk(c42profile, is_debug_mode=debug, password=password)
     except Exception:
         secho("Password not stored!", bold=True)
         raise
