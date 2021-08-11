@@ -509,3 +509,75 @@ def test_use_profile(runner, mock_cliprofile_namespace, profile):
         profile.name
     )
     assert f"{profile.name} has been set as the default profile." in result.output
+
+
+def test_totp_option_passes_token_to_sdk_on_profile_cmds_that_init_sdk(
+    runner, mocker, mock_cliprofile_namespace, cli_state
+):
+    totp1 = "123456"
+    totp2 = "234567"
+    mock_create_sdk = mocker.patch("code42cli.cmds.profile.create_sdk")
+    runner.invoke(
+        cli,
+        [
+            "profile",
+            "create",
+            "-n",
+            "foo",
+            "-s",
+            "bar",
+            "-u",
+            "baz",
+            "--password",
+            "testpass",
+            "--totp",
+            totp1,
+        ],
+        obj=cli_state,
+    )
+    runner.invoke(
+        cli,
+        [
+            "profile",
+            "update",
+            "-n",
+            "foo",
+            "--password",
+            "updatedpass",
+            "--totp",
+            totp2,
+        ],
+        obj=cli_state,
+    )
+    assert mock_create_sdk.call_args_list[0].kwargs["totp"] == totp1
+    assert mock_create_sdk.call_args_list[1].kwargs["totp"] == totp2
+
+
+def test_debug_option_passed_to_sdk_on_profile_cmds_that_init_sdk(
+    runner, mocker, mock_cliprofile_namespace, cli_state
+):
+    mock_create_sdk = mocker.patch("code42cli.cmds.profile.create_sdk")
+    runner.invoke(
+        cli,
+        [
+            "profile",
+            "create",
+            "-n",
+            "foo",
+            "-s",
+            "bar",
+            "-u",
+            "baz",
+            "--password",
+            "testpass",
+            "--debug",
+        ],
+        obj=cli_state,
+    )
+    runner.invoke(
+        cli,
+        ["profile", "update", "-n", "foo", "--password", "updatedpass", "--debug"],
+        obj=cli_state,
+    )
+    assert mock_create_sdk.call_args_list[0].kwargs["is_debug_mode"] is True
+    assert mock_create_sdk.call_args_list[1].kwargs["is_debug_mode"] is True

@@ -1,6 +1,7 @@
 import click
 
 from code42cli.click_ext.types import MagicDate
+from code42cli.click_ext.types import TOTP
 from code42cli.cmds.search.options import AdvancedQueryAndSavedSearchIncompatible
 from code42cli.cmds.search.options import BeginOption
 from code42cli.date_helper import convert_datetime_to_timestamp
@@ -115,6 +116,7 @@ def debug_option(hidden=False):
 def totp_option(hidden=False):
     opt = click.option(
         "--totp",
+        type=TOTP(),
         expose_value=False,
         callback=set_totp,
         hidden=hidden,

@@ -8,6 +8,7 @@ from py42.exceptions import Py42UnauthorizedError
 from requests.exceptions import ConnectionError
 from requests.exceptions import SSLError
 
+from code42cli.click_ext.types import TOTP
 from code42cli.errors import Code42CLIError
 from code42cli.errors import LoggedCLIError
 from code42cli.logger import get_main_cli_logger
@@ -51,7 +52,7 @@ def _validate_connection(authority_url, username, password, totp=None):
         if "LoginConfig: LOCAL_2FA" in str(err):
             if totp is None:
                 totp = prompt(
-                    "Multi-factor authentication required. Enter TOTP", type=int
+                    "Multi-factor authentication required. Enter TOTP", type=TOTP()
                 )
                 return _validate_connection(authority_url, username, password, totp)
             else:

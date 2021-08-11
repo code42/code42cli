@@ -5,6 +5,7 @@ from click import echo
 from click import secho
 
 import code42cli.profile as cliprofile
+from code42cli.click_ext.types import TOTP
 from code42cli.errors import Code42CLIError
 from code42cli.options import yes_option
 from code42cli.profile import CREATE_PROFILE_HELP
@@ -21,7 +22,9 @@ def profile():
 debug_option = click.option(
     "-d", "--debug", is_flag=True, help="Turn on debug logging.",
 )
-totp_option = click.option("--totp", help="TOTP token for multi-factor authentication.")
+totp_option = click.option(
+    "--totp", help="TOTP token for multi-factor authentication.", type=TOTP()
+)
 
 
 def profile_name_arg(required=False):
