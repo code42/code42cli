@@ -549,8 +549,8 @@ def test_totp_option_passes_token_to_sdk_on_profile_cmds_that_init_sdk(
         ],
         obj=cli_state,
     )
-    assert mock_create_sdk.call_args_list[0].kwargs["totp"] == totp1
-    assert mock_create_sdk.call_args_list[1].kwargs["totp"] == totp2
+    assert mock_create_sdk.call_args_list[0][1]["totp"] == totp1
+    assert mock_create_sdk.call_args_list[1][1]["totp"] == totp2
 
 
 def test_debug_option_passed_to_sdk_on_profile_cmds_that_init_sdk(
@@ -579,5 +579,5 @@ def test_debug_option_passed_to_sdk_on_profile_cmds_that_init_sdk(
         ["profile", "update", "-n", "foo", "--password", "updatedpass", "--debug"],
         obj=cli_state,
     )
-    assert mock_create_sdk.call_args_list[0].kwargs["is_debug_mode"] is True
-    assert mock_create_sdk.call_args_list[1].kwargs["is_debug_mode"] is True
+    assert mock_create_sdk.call_args_list[0][1]["is_debug_mode"] is True
+    assert mock_create_sdk.call_args_list[1][1]["is_debug_mode"] is True
