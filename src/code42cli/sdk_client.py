@@ -4,11 +4,11 @@ import py42.settings.debug as debug
 import requests
 from click import prompt
 from click import secho
-from py42.exceptions import Py42MFARequiredError
 from py42.exceptions import Py42UnauthorizedError
 from requests.exceptions import ConnectionError
 from requests.exceptions import SSLError
 
+from code42cli.click_ext.types import TOTP
 from code42cli.errors import Code42CLIError
 from code42cli.errors import LoggedCLIError
 from code42cli.logger import get_main_cli_logger
@@ -47,13 +47,18 @@ def _validate_connection(authority_url, username, password, totp=None):
     except ConnectionError as err:
         logger.log_error(err)
         raise LoggedCLIError(f"Problem connecting to {authority_url}.")
-    except Py42MFARequiredError:
-        totp = prompt("Multi-factor authentication required. Enter TOTP", type=int)
-        return _validate_connection(authority_url, username, password, totp)
     except Py42UnauthorizedError as err:
         logger.log_error(err)
-        if "INVALID_TIME_BASED_ONE_TIME_PASSWORD" in err.response.text:
-            raise Code42CLIError(f"Invalid TOTP token for user {username}.")
+        if "LoginConfig: LOCAL_2FA" in str(err):
+            if totp is None:
+                totp = prompt(
+                    "Multi-factor authentication required. Enter TOTP", type=TOTP()
+                )
+                return _validate_connection(authority_url, username, password, totp)
+            else:
+                raise Code42CLIError(
+                    f"Invalid credentials or TOTP token for user {username}."
+                )
         else:
             raise Code42CLIError(f"Invalid credentials for user {username}.")
     except Exception as err:

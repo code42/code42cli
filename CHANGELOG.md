@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## Unreleased
+
+### Added
+
+- `code42 profile` commands that validate passwords (`create`, `update`, `reset-pw`) now have the `--debug` option available, and `create` and `update` can now also pass in `--totp` as an option.
+
+### Changed
+
+- A TOTP token is now required on `code42 profile` commands that check for password validity when a user has MFA enabled.
+
+### Fixed
+
+- `code42 profile delete` command now prints a clear error message when deletion target doesn't exist.
+
 ## 1.8.1 - 2021-07-14
 
 ### Fixed
