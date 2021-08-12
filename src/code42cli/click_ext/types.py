@@ -152,7 +152,10 @@ class MapChoice(click.Choice):
 
 class TOTP(click.ParamType):
     """Validates param to be a 6-digit integer, which is what all Code42 TOTP tokens will be."""
-
+    
+    def get_metavar(self, param):
+        return "TEXT"
+    
     def convert(self, value, param, ctx):
         try:
             int(value)

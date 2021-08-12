@@ -93,10 +93,10 @@ def show(profile_name):
 @server_option(required=True)
 @username_option(required=True)
 @password_option
+@totp_option
 @yes_option(hidden=True)
 @disable_ssl_option
 @debug_option
-@totp_option
 def create(name, server, username, password, disable_ssl_errors, debug, totp):
     """Create profile settings. The first profile created will be the default."""
     cliprofile.create_profile(name, server, username, disable_ssl_errors)
@@ -112,9 +112,9 @@ def create(name, server, username, password, disable_ssl_errors, debug, totp):
 @server_option()
 @username_option()
 @password_option
+@totp_option
 @disable_ssl_option
 @debug_option
-@totp_option
 def update(name, server, username, password, disable_ssl_errors, debug, totp):
     """Update an existing profile."""
     c42profile = cliprofile.get_profile(name)
