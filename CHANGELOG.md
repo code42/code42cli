@@ -12,7 +12,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
-- `code42 profile` commands that validate passwords (`create`, `update`, `reset-pw`) now have `--totp` and `--debug` options available.
+- `code42 profile` commands that validate passwords (`create`, `update`, `reset-pw`) now have the `--debug` option available, and `create` and `update` can now also pass in `--totp` as an option.
 
 ### Changed
 
