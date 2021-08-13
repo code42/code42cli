@@ -315,7 +315,7 @@ def security_data(state):
 @click.argument("checkpoint-name")
 @sdk_options()
 def clear_checkpoint(state, checkpoint_name):
-    """Remove the saved file event checkpoint from ,--use-checkpoint/-c, mode."""
+    """Remove the saved file event checkpoint from `--use-checkpoint/-c` mode."""
     _get_file_event_cursor_store(state.profile.name).delete(checkpoint_name)
 
 
