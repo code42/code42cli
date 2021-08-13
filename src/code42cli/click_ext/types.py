@@ -140,9 +140,14 @@ class MapChoice(click.Choice):
     in help text, but work when passed as a choice.
     """
 
-    def __init__(self, choices, extras_map, **kwargs):
+    def __init__(self, choices, extras_map, help_map=None, **kwargs):
         self.extras_map = extras_map
+        self.help_map = help_map
         super().__init__(choices, **kwargs)
+
+    def get_metavar(self, param):
+        choices = self.help_map or self.choices
+        return "[{}]".format("|".join(choices))
 
     def convert(self, value, param, ctx):
         if value in self.extras_map:
