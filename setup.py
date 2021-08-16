@@ -31,7 +31,7 @@ setup(
     zip_safe=False,
     python_requires=">3, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, <4",
     install_requires=[
-        "chardet>=4.0.0",
+        "chardet",
         "click>=7.1.1, <8",
         "click_plugins>=1.1.1",
         "colorama>=0.4.3",
