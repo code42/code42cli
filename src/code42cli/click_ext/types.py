@@ -152,7 +152,20 @@ class MapChoice(click.Choice):
     def convert(self, value, param, ctx):
         if value in self.extras_map:
             value = self.extras_map[value]
-        return super().convert(value, param, ctx)
+
+        try:
+            return super().convert(value, param, ctx)
+        except BadParameter:
+            if self.help_map:
+                self.fail(
+                    "invalid choice: {}. (choose from {})".format(
+                        value, ", ".join(self.help_map)
+                    ),
+                    param,
+                    ctx,
+                )
+            else:
+                raise
 
 
 class TOTP(click.ParamType):
