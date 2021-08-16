@@ -4,10 +4,10 @@ import click
 import py42.sdk.queries.fileevents.filters as f
 from c42eventextractor.extractors import FileEventExtractor
 from click import echo
-from py42.sdk.queries.fileevents.filters.risk_filter import RiskIndicator
-from py42.sdk.queries.fileevents.filters.risk_filter import RiskSeverity
 from py42.sdk.queries.fileevents.filters.exposure_filter import ExposureType
 from py42.sdk.queries.fileevents.filters.file_filter import FileCategory
+from py42.sdk.queries.fileevents.filters.risk_filter import RiskIndicator
+from py42.sdk.queries.fileevents.filters.risk_filter import RiskSeverity
 
 import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
