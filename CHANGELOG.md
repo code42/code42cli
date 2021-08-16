@@ -14,6 +14,10 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - `code42 profile` commands that validate passwords (`create`, `update`, `reset-pw`) now have the `--debug` option available, and `create` and `update` can now also pass in `--totp` as an option.
 
+- New command options for `code42 security-data search`
+    - `--risk-indicator` to filter events by risk indicators.
+    - `--risk-severity` to filter events by risk severity.
+
 ### Changed
 
 - A TOTP token is now required on `code42 profile` commands that check for password validity when a user has MFA enabled.
