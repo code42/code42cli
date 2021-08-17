@@ -208,15 +208,26 @@ risk_indicator_map = {
     "OFF_HOURS": RiskIndicator.UserBehavior.OFF_HOURS,
     "REMOTE": RiskIndicator.UserBehavior.REMOTE,
 }
+risk_indicator_map_reversed = {v: k for k, v in risk_indicator_map.items()}
+
+
+def risk_indicator_callback(filter_cls):
+    def callback(ctx, param, arg):
+        if arg:
+            mapped_arg = (risk_indicator_map[arg[0]],)
+            filter_func = searchopt.is_in_filter(filter_cls)
+            return filter_func(ctx, param, mapped_arg)
+
+    return callback
+
+
 risk_indicator_option = click.option(
     "--risk-indicator",
     multiple=True,
     type=MapChoice(
-        choices=list(RiskIndicator.choices()),
-        extras_map=risk_indicator_map,
-        help_map=list(risk_indicator_map.keys()),
+        choices=list(risk_indicator_map.keys()), extras_map=risk_indicator_map_reversed,
     ),
-    callback=searchopt.is_in_filter(f.RiskIndicator),
+    callback=risk_indicator_callback(f.RiskIndicator),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to those classified by the given risk indicator categories.",
 )

@@ -140,32 +140,15 @@ class MapChoice(click.Choice):
     in help text, but work when passed as a choice.
     """
 
-    def __init__(self, choices, extras_map, help_map=None, **kwargs):
+    def __init__(self, choices, extras_map, **kwargs):
         self.extras_map = extras_map
-        self.help_map = help_map
         super().__init__(choices, **kwargs)
-
-    def get_metavar(self, param):
-        choices = self.help_map or self.choices
-        return "[{}]".format("|".join(choices))
 
     def convert(self, value, param, ctx):
         if value in self.extras_map:
             value = self.extras_map[value]
 
-        try:
-            return super().convert(value, param, ctx)
-        except BadParameter:
-            if self.help_map:
-                self.fail(
-                    "invalid choice: {}. (choose from {})".format(
-                        value, ", ".join(self.help_map)
-                    ),
-                    param,
-                    ctx,
-                )
-            else:
-                raise
+        return super().convert(value, param, ctx)
 
 
 class TOTP(click.ParamType):
