@@ -147,6 +147,7 @@ class MapChoice(click.Choice):
     def convert(self, value, param, ctx):
         if value in self.extras_map:
             value = self.extras_map[value]
+
         return super().convert(value, param, ctx)
 
 
