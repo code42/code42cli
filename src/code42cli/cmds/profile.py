@@ -129,7 +129,7 @@ def update(name, server, username, password, disable_ssl_errors, debug, totp):
         password = _prompt_for_password(c42profile.name)
     if password:
         _set_pw(name, password, debug, totp=totp)
-            
+
     echo(f"Profile '{c42profile.name}' has been updated.")
 
 
