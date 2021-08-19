@@ -214,9 +214,11 @@ risk_indicator_map_reversed = {v: k for k, v in risk_indicator_map.items()}
 def risk_indicator_callback(filter_cls):
     def callback(ctx, param, arg):
         if arg:
-            mapped_arg = (risk_indicator_map[arg[0]],)
+            mapped_args = ()
+            for i in range(len(arg)):
+                mapped_args += (risk_indicator_map[arg[i]],)
             filter_func = searchopt.is_in_filter(filter_cls)
-            return filter_func(ctx, param, mapped_arg)
+            return filter_func(ctx, param, mapped_args)
 
     return callback
 
