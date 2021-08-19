@@ -177,7 +177,7 @@ risk_indicator_map = {
     "PROTONMAIL": RiskIndicator.EmailServiceUploads.PROTONMAIL,
     "QQMAIL": RiskIndicator.EmailServiceUploads.QQMAIL,
     "SINA_MAIL": RiskIndicator.EmailServiceUploads.SINA_MAIL,
-    "SOHU_MAIl": RiskIndicator.EmailServiceUploads.SOHU_MAIl,
+    "SOHU_MAIL": RiskIndicator.EmailServiceUploads.SOHU_MAIL,
     "YAHOO": RiskIndicator.EmailServiceUploads.YAHOO,
     "ZOHO_MAIL": RiskIndicator.EmailServiceUploads.ZOHO_MAIL,
     "AIRDROP": RiskIndicator.ExternalDevices.AIRDROP,
@@ -208,7 +208,7 @@ risk_indicator_map = {
     "OFF_HOURS": RiskIndicator.UserBehavior.OFF_HOURS,
     "REMOTE": RiskIndicator.UserBehavior.REMOTE,
     "FIRST_DESTINATION_USE": RiskIndicator.UserBehavior.FIRST_DESTINATION_USE,
-    "RARE_DESTINATION_USE": RiskIndicator.UserBehavior.RARE_DESTINATION_USE
+    "RARE_DESTINATION_USE": RiskIndicator.UserBehavior.RARE_DESTINATION_USE,
 }
 risk_indicator_map_reversed = {v: k for k, v in risk_indicator_map.items()}
 

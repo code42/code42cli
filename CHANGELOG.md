@@ -22,6 +22,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - A TOTP token is now required on `code42 profile` commands that check for password validity when a user has MFA enabled.
 
+- Updated minimum version of py42 to `1.18.0`
+
 ### Fixed
 
 - `code42 profile delete` command now prints a clear error message when deletion target doesn't exist.

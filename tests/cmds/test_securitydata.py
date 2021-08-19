@@ -854,7 +854,7 @@ def test_search_and_send_to_when_given_risk_indicator_uses_risk_indicator_filter
         ("PROTONMAIL", RiskIndicator.EmailServiceUploads.PROTONMAIL),
         ("QQMAIL", RiskIndicator.EmailServiceUploads.QQMAIL),
         ("SINA_MAIL", RiskIndicator.EmailServiceUploads.SINA_MAIL),
-        ("SOHU_MAIl", RiskIndicator.EmailServiceUploads.SOHU_MAIl),
+        ("SOHU_MAIL", RiskIndicator.EmailServiceUploads.SOHU_MAIL),
         ("YAHOO", RiskIndicator.EmailServiceUploads.YAHOO),
         ("ZOHO_MAIL", RiskIndicator.EmailServiceUploads.ZOHO_MAIL),
         ("AIRDROP", RiskIndicator.ExternalDevices.AIRDROP),
@@ -888,7 +888,7 @@ def test_search_and_send_to_when_given_risk_indicator_uses_risk_indicator_filter
         ("OFF_HOURS", RiskIndicator.UserBehavior.OFF_HOURS),
         ("REMOTE", RiskIndicator.UserBehavior.REMOTE),
         ("FIRST_DESTINATION_USE", RiskIndicator.UserBehavior.FIRST_DESTINATION_USE),
-        ("RARE_DESTINATION_USE", RiskIndicator.UserBehavior.RARE_DESTINATION_USE)
+        ("RARE_DESTINATION_USE", RiskIndicator.UserBehavior.RARE_DESTINATION_USE),
     ],
 )
 def test_all_caps_risk_indicator_choices_convert_to_risk_indicator_string(
