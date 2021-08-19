@@ -100,10 +100,9 @@ def show(profile_name):
 def create(name, server, username, password, disable_ssl_errors, debug, totp):
     """Create profile settings. The first profile created will be the default."""
     cliprofile.create_profile(name, server, username, disable_ssl_errors)
+    password = password or _prompt_for_password(name)
     if password:
         _set_pw(name, password, debug, totp=totp)
-    else:
-        _prompt_for_allow_password_set(name)
     echo(f"Successfully created profile '{name}'.")
 
 
@@ -126,10 +125,10 @@ def update(name, server, username, password, disable_ssl_errors, debug, totp):
         )
 
     cliprofile.update_profile(c42profile.name, server, username, disable_ssl_errors)
+    if not password and not c42profile.has_stored_password:
+        password = _prompt_for_password(c42profile.name)
     if password:
         _set_pw(name, password, debug, totp=totp)
-    elif not c42profile.has_stored_password:
-        _prompt_for_allow_password_set(c42profile.name)
 
     echo(f"Profile '{c42profile.name}' has been updated.")
 
@@ -205,10 +204,10 @@ def delete_all():
         echo("\nNo profiles exist. Nothing to delete.")
 
 
-def _prompt_for_allow_password_set(profile_name):
+def _prompt_for_password(profile_name):
     if does_user_agree("Would you like to set a password? (y/n): "):
         password = getpass()
-        _set_pw(profile_name, password, False)
+        return password
 
 
 def _set_pw(profile_name, password, debug, totp=None):
