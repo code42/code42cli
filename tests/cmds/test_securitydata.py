@@ -887,6 +887,8 @@ def test_search_and_send_to_when_given_risk_indicator_uses_risk_indicator_filter
         ("FILE_MISMATCH", RiskIndicator.UserBehavior.FILE_MISMATCH),
         ("OFF_HOURS", RiskIndicator.UserBehavior.OFF_HOURS),
         ("REMOTE", RiskIndicator.UserBehavior.REMOTE),
+        ("FIRST_DESTINATION_USE", RiskIndicator.UserBehavior.FIRST_DESTINATION_USE),
+        ("RARE_DESTINATION_USE", RiskIndicator.UserBehavior.RARE_DESTINATION_USE)
     ],
 )
 def test_all_caps_risk_indicator_choices_convert_to_risk_indicator_string(

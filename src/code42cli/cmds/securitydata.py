@@ -207,6 +207,8 @@ risk_indicator_map = {
     "FILE_MISMATCH": RiskIndicator.UserBehavior.FILE_MISMATCH,
     "OFF_HOURS": RiskIndicator.UserBehavior.OFF_HOURS,
     "REMOTE": RiskIndicator.UserBehavior.REMOTE,
+    "FIRST_DESTINATION_USE": RiskIndicator.UserBehavior.FIRST_DESTINATION_USE,
+    "RARE_DESTINATION_USE": RiskIndicator.UserBehavior.RARE_DESTINATION_USE
 }
 risk_indicator_map_reversed = {v: k for k, v in risk_indicator_map.items()}
 
