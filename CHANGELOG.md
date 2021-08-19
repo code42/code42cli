@@ -22,7 +22,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - A TOTP token is now required on `code42 profile` commands that check for password validity when a user has MFA enabled.
 
-- Updated minimum version of py42 to `1.18.0`
+- Updated minimum version of py42 to `1.18.0` to provide access to `FIRST_DESTINATION_USE` and `RARE_DESTINATION_USE` search filters.
 
 ### Fixed
 
