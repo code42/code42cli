@@ -158,7 +158,7 @@ def get_user_id_failure(mocker, cli_state):
 @pytest.fixture
 def get_custodian_failure(mocker, cli_state):
     def empty_custodian_list_generator():
-        yield TEST_EMPTY_CUSTODIANS_RESPONSE
+        yield create_mock_response(mocker, data=TEST_EMPTY_CUSTODIANS_RESPONSE)
 
     cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
         empty_custodian_list_generator()
@@ -166,9 +166,9 @@ def get_custodian_failure(mocker, cli_state):
 
 
 @pytest.fixture
-def get_matter_failure(cli_state):
+def get_matter_failure(mocker, cli_state):
     def empty_matter_list_generator():
-        yield TEST_EMPTY_MATTERS_RESPONSE
+        yield create_mock_response(mocker, data=TEST_EMPTY_MATTERS_RESPONSE)
     
     cli_state.sdk.legalhold.get_all_matters.return_value = empty_matter_list_generator()
 
