@@ -169,7 +169,7 @@ def get_custodian_failure(mocker, cli_state):
 def get_matter_failure(mocker, cli_state):
     def empty_matter_list_generator():
         yield create_mock_response(mocker, data=TEST_EMPTY_MATTERS_RESPONSE)
-    
+
     cli_state.sdk.legalhold.get_all_matters.return_value = empty_matter_list_generator()
 
 
