@@ -9,8 +9,10 @@ from signal import getsignal
 from signal import SIGINT
 from signal import signal
 
+from click import echo
+from click import get_current_context
+from click import style
 import dateutil.parser
-import click
 
 _PADDING_SIZE = 3
 
@@ -19,7 +21,7 @@ def does_user_agree(prompt):
     """Prompts the user and checks if they said yes. If command has the `yes_option` flag, and
     `-y/--yes` is passed, this will always return `True`.
     """
-    ctx = click.get_current_context()
+    ctx = get_current_context()
     if ctx.obj.assume_yes:
         return True
     ans = input(prompt)
@@ -100,8 +102,8 @@ def format_string_list_to_columns(string_list, max_width=None):
     ]
     padding = ["" for _ in range(num_columns)]
     for batch in batches:
-        format_string.format(*batch + padding))
-    click.echo()
+        format_string.format(*batch + padding)
+    echo()
 
 
 class warn_interrupt:
@@ -120,7 +122,9 @@ class warn_interrupt:
         self.warning = warning
         self.old_int_handler = None
         self.interrupted = False
-        self.exit_instructions = click.style("Hit CTRL-C again to force quit.", fg="red")
+        self.exit_instructions = style(
+            "Hit CTRL-C again to force quit.", fg="red"
+        )
 
     def __enter__(self):
         self.old_int_handler = getsignal(SIGINT)
@@ -137,7 +141,7 @@ class warn_interrupt:
     def _handle_interrupts(self, sig, frame):
         if not self.interrupted:
             self.interrupted = True
-            click.echo(f"\n{self.warning}\n{self.exit_instructions}", err=True)
+            echo(f"\n{self.warning}\n{self.exit_instructions}", err=True)
         else:
             exit()
 
@@ -187,8 +191,9 @@ def print_numbered_list(items):
 
     choices = dict(enumerate(items, 1))
     for num in choices:
-        click.echo(f"{num}. {choices[num]}")
-    click.echo()
+        echo(f"{num}. {choices[num]}")
+    echo()
+
 
 def parse_timestamp(date_str):
     # example: {"property": "bar", "timestamp": "2020-11-23T17:13:26.239647Z"}
