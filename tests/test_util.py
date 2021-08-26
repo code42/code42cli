@@ -127,7 +127,7 @@ def test_format_string_list_to_columns_when_given_small_max_width_prints_one_col
     max_width = 5
 
     columns = ["col1", "col2"]
-    click.echo(format_string_list_to_columns(columns, max_width))
+    format_string_list_to_columns(columns, max_width)
 
     expected_row_width = get_expected_row_width(4, max_width)
     printed_row = echo_output.call_args_list[0][0][0]

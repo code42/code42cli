@@ -102,7 +102,7 @@ def format_string_list_to_columns(string_list, max_width=None):
     ]
     padding = ["" for _ in range(num_columns)]
     for batch in batches:
-        format_string.format(*batch + padding)
+        echo(format_string.format(*batch + padding))
     echo()
 
 
