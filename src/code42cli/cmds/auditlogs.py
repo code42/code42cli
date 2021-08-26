@@ -1,6 +1,3 @@
-from datetime import datetime
-from datetime import timezone
-
 import click
 
 import code42cli.options as opt
@@ -14,11 +11,11 @@ from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.output_formats import OutputFormatter
 from code42cli.util import hash_event
+from code42cli.util import parse_timestamp
 from code42cli.util import warn_interrupt
 
 EVENT_KEY = "events"
 AUDIT_LOGS_KEYWORD = "audit-logs"
-AUDIT_LOG_TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
 
 
 def _get_audit_logs_default_header():
@@ -144,17 +141,18 @@ def search(
         affected_user_ids=affected_user_id,
         affected_usernames=affected_username,
     )
-    if use_checkpoint:
-        checkpoint_name = use_checkpoint
-        events = list(
-            _dedupe_checkpointed_events_and_store_updated_checkpoint(
-                cursor, checkpoint_name, events
-            )
-        )
     if not events:
         click.echo("No results found.")
         return
-    formatter.echo_formatted_list(events)
+
+    if use_checkpoint:
+        checkpoint_name = use_checkpoint
+        events_gen = _dedupe_checkpointed_events_and_store_updated_checkpoint(
+            cursor, checkpoint_name, events
+        )
+        formatter.echo_formatted_generated_output(events_gen)
+    else:
+        formatter.echo_formatted_list(events)
 
 
 @audit_logs.command(cls=SendToCommand)
@@ -199,10 +197,8 @@ def send_to(
     )
     if use_checkpoint:
         checkpoint_name = use_checkpoint
-        events = list(
-            _dedupe_checkpointed_events_and_store_updated_checkpoint(
-                cursor, checkpoint_name, events
-            )
+        events = _dedupe_checkpointed_events_and_store_updated_checkpoint(
+            cursor, checkpoint_name, events
         )
     with warn_interrupt():
         event = None
@@ -253,25 +249,10 @@ def _dedupe_checkpointed_events_and_store_updated_checkpoint(
                 new_events.clear()
             new_events.append(event_hash)
             yield event
-            ts = _parse_audit_log_timestamp_string_to_timestamp(new_timestamp)
+            ts = parse_timestamp(new_timestamp)
             cursor.replace(checkpoint_name, ts)
             cursor.replace_events(checkpoint_name, new_events)
 
 
 def _get_audit_log_cursor_store(profile_name):
     return AuditLogCursorStore(profile_name)
-
-
-def _parse_audit_log_timestamp_string_to_timestamp(ts):
-    # example: {"property": "bar", "timestamp": "2020-11-23T17:13:26.239647Z"}
-    ts = ts[:-1]
-    try:
-        dt = datetime.strptime(ts, AUDIT_LOG_TIMESTAMP_FORMAT).replace(
-            tzinfo=timezone.utc
-        )
-    except ValueError:
-        ts = ts + ".0"  # handle timestamps that are missing ms
-        dt = datetime.strptime(ts, AUDIT_LOG_TIMESTAMP_FORMAT).replace(
-            tzinfo=timezone.utc
-        )
-    return dt.timestamp()

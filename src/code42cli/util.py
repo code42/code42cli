@@ -1,7 +1,7 @@
 import json
 import os
 import shutil
-from collections import OrderedDict
+from datetime import timezone
 from functools import wraps
 from hashlib import md5
 from os import path
@@ -9,10 +9,8 @@ from signal import getsignal
 from signal import SIGINT
 from signal import signal
 
+import dateutil.parser
 import click
-from click import echo
-from click import get_current_context
-from click import style
 
 _PADDING_SIZE = 3
 
@@ -21,7 +19,7 @@ def does_user_agree(prompt):
     """Prompts the user and checks if they said yes. If command has the `yes_option` flag, and
     `-y/--yes` is passed, this will always return `True`.
     """
-    ctx = get_current_context()
+    ctx = click.get_current_context()
     if ctx.obj.assume_yes:
         return True
     ans = input(prompt)
@@ -38,31 +36,35 @@ def get_user_project_path(*subdirs):
     result_path = path.join(user_project_path, *subdirs)
     if not path.exists(result_path):
         os.makedirs(result_path)
+
     return result_path
 
 
-def find_format_width(record, header, include_header=True):
+def find_format_width(records, header, include_header=True):
     """Fetches needed keys/items to be displayed based on header keys.
 
     Finds the largest string against each column so as to decide the padding size for the column.
 
     Args:
-        record (dict): data to be formatted.
-        header (dict): key-value where keys should map to keys of record dict and
+        records (list or dict): A list of data to be formatted.
+        header (dict): Key-value where keys should map to keys of record dict and
           value is the corresponding column name to be displayed on the CLI.
-        include_header (bool): include header in output, defaults to True.
+        include_header (bool): Include header in output, defaults to True.
 
     Returns:
         tuple (list of dict, dict): i.e Filtered records, padding size of columns.
     """
+    if isinstance(records, dict):
+        records = [records]
+
     rows = []
     if include_header:
         if not header:
-            header = _get_default_header(record)
+            header = _get_default_header(records)
         rows.append(header)
     widths = dict(header.items())  # Copy
-    for record_row in record:
-        row = OrderedDict()
+    for record_row in records:
+        row = {}
         for header_key in header.keys():
             item = record_row.get(header_key)
             row[header_key] = item
@@ -98,8 +100,8 @@ def format_string_list_to_columns(string_list, max_width=None):
     ]
     padding = ["" for _ in range(num_columns)]
     for batch in batches:
-        echo(format_string.format(*batch + padding))
-    echo()
+        format_string.format(*batch + padding))
+    click.echo()
 
 
 class warn_interrupt:
@@ -118,7 +120,7 @@ class warn_interrupt:
         self.warning = warning
         self.old_int_handler = None
         self.interrupted = False
-        self.exit_instructions = style("Hit CTRL-C again to force quit.", fg="red")
+        self.exit_instructions = click.style("Hit CTRL-C again to force quit.", fg="red")
 
     def __enter__(self):
         self.old_int_handler = getsignal(SIGINT)
@@ -135,7 +137,7 @@ class warn_interrupt:
     def _handle_interrupts(self, sig, frame):
         if not self.interrupted:
             self.interrupted = True
-            echo(f"\n{self.warning}\n{self.exit_instructions}", err=True)
+            click.echo(f"\n{self.warning}\n{self.exit_instructions}", err=True)
         else:
             exit()
 
@@ -153,6 +155,7 @@ def get_url_parts(url_str):
     port = None
     if len(parts) > 1 and parts[1] != "":
         port = int(parts[1])
+
     return parts[0], port
 
 
@@ -167,6 +170,7 @@ def _get_default_header(header_items):
         for key in keys:
             if key not in header and isinstance(key, str):
                 header[key] = key
+
     return header
 
 
@@ -185,3 +189,9 @@ def print_numbered_list(items):
     for num in choices:
         click.echo(f"{num}. {choices[num]}")
     click.echo()
+
+def parse_timestamp(date_str):
+    # example: {"property": "bar", "timestamp": "2020-11-23T17:13:26.239647Z"}
+    ts = date_str[:-1]
+    date = dateutil.parser.parse(ts).replace(tzinfo=timezone.utc)
+    return date.timestamp()

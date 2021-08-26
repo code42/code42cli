@@ -8,7 +8,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-## Unreleased
+## 1.9.0 - 2021-08-19
+
+### Added
+
+- `code42 profile` commands that validate passwords (`create`, `update`, `reset-pw`) now have the `--debug` option available, and `create` and `update` can now also pass in `--totp` as an option.
+
+- New command options for `code42 security-data search`
+    - `--risk-indicator` to filter events by risk indicators.
+    - `--risk-severity` to filter events by risk severity.
+
+### Changed
+
+- A TOTP token is now required on `code42 profile` commands that check for password validity when a user has MFA enabled.
+
+- Updated minimum version of py42 to `1.18.0` to provide access to `FIRST_DESTINATION_USE` and `RARE_DESTINATION_USE` search filters.
+
+### Fixed
+
+- `code42 profile delete` command now prints a clear error message when deletion target doesn't exist.
+
+## 1.8.1 - 2021-07-14
+
+### Fixed
+
+- The `chardet` library is now an explicit dependency, resolving dependency issues for fresh installations using latest `requests` v.2.26.0
+
+## 1.8.0 - 2021-07-08
+
+### Fixed
+
+- Issue where `code42 devices bulk deactivate` and `code42 devices bulk reactivate` would
+    output incorrect Successes and Failures at the end of the process.
+
+- Bug where `code42 audit-logs search` would fail to store checkpoints when timestamps included
+    nanoseconds.
+
+- Issue where if an error occurred during `code42 audit-logs search` or `code42 audit-logs send-to`,
+    the user would get a stored checkpoint without having handled events.
 
 ### Added
 
@@ -25,7 +62,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Changed
 
-- `code42 alerts search` now uses microsecond precision when searching by alerts' date observed.
+- Now when a user is not found, the error message suggests that it might be because you don't
+    have the necessary permissions.
 
 - `code42 profile use` now prompts you to select a profile when not given a profile name argument.
 

@@ -1,8 +1,5 @@
 import pytest
-from py42.exceptions import Py42MFARequiredError
 from py42.sdk import SDKClient
-from requests import Response
-from requests.exceptions import HTTPError
 
 from ..conftest import create_mock_profile
 from code42cli.errors import Code42CLIError
@@ -222,29 +219,6 @@ def test_create_profile_with_password_option_if_credentials_valid_password_saved
     assert "Would you like to set a password?" not in result.output
 
 
-def test_create_profile_stores_password_and_prints_message_when_user_requires_mfa(
-    runner, mocker, mock_verify, mock_cliprofile_namespace
-):
-    mock_verify.side_effect = Py42MFARequiredError(HTTPError(response=Response()))
-    result = runner.invoke(
-        cli,
-        [
-            "profile",
-            "create",
-            "-n",
-            "mfa",
-            "-s",
-            "bar",
-            "-u",
-            "baz",
-            "--password",
-            "pass",
-        ],
-    )
-    assert "Multi-factor account detected." in result.output
-    mock_cliprofile_namespace.set_password.assert_called_once_with("pass", mocker.ANY)
-
-
 def test_create_profile_outputs_confirmation(
     runner, user_agreement, valid_connection, mock_cliprofile_namespace
 ):
@@ -422,6 +396,11 @@ def test_delete_profile_requires_profile_name_arg(runner, mock_cliprofile_namesp
     assert mock_cliprofile_namespace.delete_profile.call_count == 0
 
 
+def test_delete_profile_raises_CLIError_when_profile_does_not_exist(runner):
+    result = runner.invoke(cli, ["profile", "delete", "not_a_real_profile"])
+    assert result.output == "Error: Profile 'not_a_real_profile' does not exist.\n"
+
+
 def test_delete_profile_does_nothing_if_user_doesnt_agree(
     runner, user_disagreement, mock_cliprofile_namespace
 ):
@@ -563,3 +542,75 @@ def test_use_profile_when_not_given_profile_name_outputs_expected_text(
     expected_result_message = "test_profile has been set as the default profile."
     assert expected_prompt in result.output
     assert expected_result_message in result.output
+
+
+def test_totp_option_passes_token_to_sdk_on_profile_cmds_that_init_sdk(
+    runner, mocker, mock_cliprofile_namespace, cli_state
+):
+    totp1 = "123456"
+    totp2 = "234567"
+    mock_create_sdk = mocker.patch("code42cli.cmds.profile.create_sdk")
+    runner.invoke(
+        cli,
+        [
+            "profile",
+            "create",
+            "-n",
+            "foo",
+            "-s",
+            "bar",
+            "-u",
+            "baz",
+            "--password",
+            "testpass",
+            "--totp",
+            totp1,
+        ],
+        obj=cli_state,
+    )
+    runner.invoke(
+        cli,
+        [
+            "profile",
+            "update",
+            "-n",
+            "foo",
+            "--password",
+            "updatedpass",
+            "--totp",
+            totp2,
+        ],
+        obj=cli_state,
+    )
+    assert mock_create_sdk.call_args_list[0][1]["totp"] == totp1
+    assert mock_create_sdk.call_args_list[1][1]["totp"] == totp2
+
+
+def test_debug_option_passed_to_sdk_on_profile_cmds_that_init_sdk(
+    runner, mocker, mock_cliprofile_namespace, cli_state
+):
+    mock_create_sdk = mocker.patch("code42cli.cmds.profile.create_sdk")
+    runner.invoke(
+        cli,
+        [
+            "profile",
+            "create",
+            "-n",
+            "foo",
+            "-s",
+            "bar",
+            "-u",
+            "baz",
+            "--password",
+            "testpass",
+            "--debug",
+        ],
+        obj=cli_state,
+    )
+    runner.invoke(
+        cli,
+        ["profile", "update", "-n", "foo", "--password", "updatedpass", "--debug"],
+        obj=cli_state,
+    )
+    assert mock_create_sdk.call_args_list[0][1]["is_debug_mode"] is True
+    assert mock_create_sdk.call_args_list[1][1]["is_debug_mode"] is True

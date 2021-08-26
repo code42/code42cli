@@ -5,12 +5,11 @@ import py42.sdk.queries.alerts.filters as f
 import pytest
 from c42eventextractor.extractors import AlertExtractor
 from py42.exceptions import Py42NotFoundError
-from py42.response import Py42Response
 from py42.sdk.queries.alerts.filters import AlertState
-from requests import Response
 from tests.cmds.conftest import filter_term_is_in_call_args
 from tests.cmds.conftest import get_filter_value_from_json
 from tests.cmds.conftest import get_mark_for_search_and_send_to
+from tests.conftest import create_mock_response
 from tests.conftest import get_test_date_str
 
 from code42cli import errors
@@ -344,9 +343,7 @@ def send_to_logger_factory(mocker):
 
 @pytest.fixture
 def full_alert_details_response(mocker):
-    response = mocker.MagicMock(spec=Response)
-    response.text = json.dumps(ALERT_DETAILS_FULL_RESPONSE)
-    return Py42Response(response)
+    return create_mock_response(mocker, data=ALERT_DETAILS_FULL_RESPONSE)
 
 
 @search_and_send_to_test
@@ -992,11 +989,11 @@ def test_show_when_alert_has_note_includes_note(
 def test_show_when_alert_has_no_note_excludes_note(
     mocker, cli_state, runner, full_alert_details_response
 ):
-    response = mocker.MagicMock(spec=Response)
-    sans_note_text = dict(ALERT_DETAILS_FULL_RESPONSE)
-    sans_note_text["alerts"][0]["note"] = None
-    response.text = json.dumps(sans_note_text)
-    cli_state.sdk.alerts.get_details.return_value = Py42Response(response)
+    response_data = dict(ALERT_DETAILS_FULL_RESPONSE)
+    response_data["alerts"][0]["note"] = None
+    cli_state.sdk.alerts.get_details.return_value = create_mock_response(
+        mocker, data=response_data
+    )
     result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state)
     # Note is included in `full_alert_details_response` initially.
     assert "Note" not in result.output
@@ -1037,11 +1034,11 @@ def test_show_when_alert_has_observations_and_excludes_observations_does_not_out
 def test_show_when_alert_does_not_have_observations_and_includes_observations_outputs_no_observations(
     mocker, cli_state, runner
 ):
-    response = mocker.MagicMock(spec=Response)
-    response_text = dict(ALERT_DETAILS_FULL_RESPONSE)
-    response_text["alerts"][0]["observations"] = None
-    response.text = json.dumps(response_text)
-    cli_state.sdk.alerts.get_details.return_value = Py42Response(response)
+    response_data = dict(ALERT_DETAILS_FULL_RESPONSE)
+    response_data["alerts"][0]["observations"] = None
+    cli_state.sdk.alerts.get_details.return_value = create_mock_response(
+        mocker, data=response_data
+    )
     result = runner.invoke(
         cli,
         ["alerts", "show", "TEST-ALERT-ID", "--include-observations"],

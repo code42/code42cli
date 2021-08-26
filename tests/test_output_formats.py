@@ -297,7 +297,7 @@ class TestOutputFormatter:
         formatter = output_formats_module.OutputFormatter(output_format)
         for _ in formatter.get_formatted_output("TEST"):
             pass
-        mock_to_table.assert_called_once_with("TEST", None)
+        mock_to_table.assert_called_once_with("TEST", None, include_header=True)
 
     def test_init_sets_format_func_to_csv_function_when_csv_format_option_is_passed(
         self, mock_to_csv
@@ -314,7 +314,7 @@ class TestOutputFormatter:
         formatter = output_formats_module.OutputFormatter(None)
         for _ in formatter.get_formatted_output("TEST"):
             pass
-        mock_to_table.assert_called_once_with("TEST", None)
+        mock_to_table.assert_called_once_with("TEST", None, include_header=True)
 
 
 class TestFileEventsOutputFormatter:
@@ -356,7 +356,7 @@ class TestFileEventsOutputFormatter:
         formatter = FileEventsOutputFormatter(FileEventsOutputFormat.TABLE)
         for _ in formatter.get_formatted_output("TEST"):
             pass
-        mock_to_table.assert_called_once_with("TEST", None)
+        mock_to_table.assert_called_once_with("TEST", None, include_header=True)
 
     def test_init_sets_format_func_to_table_function_when_no_format_option_is_passed(
         self, mock_to_table
@@ -364,7 +364,7 @@ class TestFileEventsOutputFormatter:
         formatter = FileEventsOutputFormatter(None)
         for _ in formatter.get_formatted_output("TEST"):
             pass
-        mock_to_table.assert_called_once_with("TEST", None)
+        mock_to_table.assert_called_once_with("TEST", None, include_header=True)
 
 
 def test_to_cef_returns_cef_tagged_string(mock_file_event):
