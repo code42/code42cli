@@ -9,10 +9,10 @@ from signal import getsignal
 from signal import SIGINT
 from signal import signal
 
+import dateutil.parser
 from click import echo
 from click import get_current_context
 from click import style
-import dateutil.parser
 
 _PADDING_SIZE = 3
 
@@ -122,9 +122,7 @@ class warn_interrupt:
         self.warning = warning
         self.old_int_handler = None
         self.interrupted = False
-        self.exit_instructions = style(
-            "Hit CTRL-C again to force quit.", fg="red"
-        )
+        self.exit_instructions = style("Hit CTRL-C again to force quit.", fg="red")
 
     def __enter__(self):
         self.old_int_handler = getsignal(SIGINT)
