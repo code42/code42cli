@@ -36,12 +36,9 @@ inactive_option = click.option(
     help="Limits results to only deactivated users.",
     cls=incompatible_with("active"),
 )
-
-
-user_uid_option = click.option(
+user_id_option = click.option(
     "--user-id", help="The unique identifier of the user to be modified.", required=True
 )
-
 org_id_option = click.option(
     "--org-id",
     help="The identifier for the organization to which the user will be moved.",
@@ -101,7 +98,7 @@ def remove_role(state, username, role_name):
 
 
 @users.command(name="update")
-@user_uid_option
+@user_id_option
 @click.option("--username", help="The new username for the user.")
 @click.option("--password", help="The new password for the user.")
 @click.option("--email", help="The new email for the user.")
@@ -135,6 +132,24 @@ def update_user(
         notes,
         archive_size_quota,
     )
+
+
+@users.command()
+@click.argument("username")
+@sdk_options()
+def deactivate(state, username):
+    """Deactivate a user."""
+    sdk = state.sdk
+    _deactivate_user(sdk, username)
+
+
+@users.command()
+@click.argument("username")
+@sdk_options()
+def reactivate(state, username):
+    """Reactivate a user."""
+    sdk = state.sdk
+    _reactivate_user(sdk, username)
 
 
 _bulk_user_update_headers = [
@@ -259,19 +274,100 @@ def bulk_move(state, csv_rows, format):
     formatter.echo_formatted_list(result_rows)
 
 
+_bulk_user_activation_headers = ["username"]
+
+
+@bulk.command(
+    name="deactivate",
+    help=f"Deactivate a list of users from the provided CSV in format: {','.join(_bulk_user_activation_headers)}",
+)
+@read_csv_arg(headers=_bulk_user_activation_headers)
+@format_option
+@sdk_options()
+def bulk_deactivate(state, csv_rows, format):
+    """Deactivate a list of users."""
+
+    # Initialize the SDK before starting any bulk processes
+    # to prevent multiple instances and having to enter 2fa multiple times.
+    sdk = state.sdk
+
+    csv_rows[0]["deactivated"] = "False"
+    formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+    stats = create_worker_stats(len(csv_rows))
+
+    def handle_row(**row):
+        try:
+            _deactivate_user(
+                sdk, **{key: row[key] for key in row.keys() if key != "deactivated"}
+            )
+            row["deactivated"] = "True"
+        except Exception as err:
+            row["deactivated"] = f"False: {err}"
+            stats.increment_total_errors()
+        return row
+
+    result_rows = run_bulk_process(
+        handle_row,
+        csv_rows,
+        progress_label="Deactivating users:",
+        stats=stats,
+        raise_global_error=False,
+    )
+    formatter.echo_formatted_list(result_rows)
+
+
+@bulk.command(
+    name="reactivate",
+    help=f"Reactivate a list of users from the provided CSV in format: {','.join(_bulk_user_activation_headers)}",
+)
+@read_csv_arg(headers=_bulk_user_activation_headers)
+@format_option
+@sdk_options()
+def bulk_reactivate(state, csv_rows, format):
+    """Reactivate a list of users."""
+
+    # Initialize the SDK before starting any bulk processes
+    # to prevent multiple instances and having to enter 2fa multiple times.
+    sdk = state.sdk
+
+    csv_rows[0]["reactivated"] = "False"
+    formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+    stats = create_worker_stats(len(csv_rows))
+
+    def handle_row(**row):
+        try:
+            _reactivate_user(
+                sdk, **{key: row[key] for key in row.keys() if key != "reactivated"}
+            )
+            row["reactivated"] = "True"
+        except Exception as err:
+            row["reactivated"] = f"False: {err}"
+            stats.increment_total_errors()
+        return row
+
+    result_rows = run_bulk_process(
+        handle_row,
+        csv_rows,
+        progress_label="Reactivating users:",
+        stats=stats,
+        raise_global_error=False,
+    )
+    formatter.echo_formatted_list(result_rows)
+
+
 def _add_user_role(sdk, username, role_name):
-    user_id = _get_user_id(sdk, username)
+    user_id = _get_legacy_user_id(sdk, username)
     _get_role_id(sdk, role_name)  # function provides role name validation
     sdk.users.add_role(user_id, role_name)
 
 
 def _remove_user_role(sdk, role_name, username):
-    user_id = _get_user_id(sdk, username)
+    user_id = _get_legacy_user_id(sdk, username)
     _get_role_id(sdk, role_name)  # function provides role name validation
     sdk.users.remove_role(user_id, role_name)
 
 
-def _get_user_id(sdk, username):
+def _get_legacy_user_id(sdk, username):
     if not username:
         # py42 returns all users when passing `None` to `get_by_username()`.
         raise click.BadParameter("Username is required.")
@@ -326,7 +422,7 @@ def _update_user(
 
 
 def _change_organization(sdk, username, org_id):
-    user_id = _get_user_id(sdk, username)
+    user_id = _get_legacy_user_id(sdk, username)
     org_id = _get_org_id(sdk, org_id)
     return sdk.users.change_org_assignment(user_id=int(user_id), org_id=int(org_id))
 
@@ -334,3 +430,13 @@ def _change_organization(sdk, username, org_id):
 def _get_org_id(sdk, org_id):
     org = sdk.orgs.get_by_uid(org_id)
     return org["orgId"]
+
+
+def _deactivate_user(sdk, username):
+    user_id = _get_legacy_user_id(sdk, username)
+    sdk.users.deactivate(user_id)
+
+
+def _reactivate_user(sdk, username):
+    user_id = _get_legacy_user_id(sdk, username)
+    sdk.users.reactivate(user_id)
