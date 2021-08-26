@@ -104,26 +104,6 @@ TEST_GET_ORG_RESPONSE = {
 }
 
 
-def get_all_users_generator():
-    yield TEST_USERS_RESPONSE
-
-
-def matter_list_generator():
-    yield TEST_MATTER_RESPONSE
-
-
-def custodian_list_generator():
-    yield TEST_CUSTODIANS_RESPONSE
-
-
-def empty_custodian_list_generator():
-    yield TEST_EMPTY_CUSTODIANS_RESPONSE
-
-
-def empty_matter_list_generator():
-    yield TEST_EMPTY_MATTERS_RESPONSE
-
-
 @pytest.fixture
 def update_user_response(mocker):
     return create_mock_response(mocker)
@@ -155,7 +135,10 @@ def get_org_success(cli_state, get_org_response):
 
 
 @pytest.fixture
-def get_all_users_success(cli_state):
+def get_all_users_success(mocker, cli_state):
+    def get_all_users_generator():
+        yield create_mock_response(mocker, data=TEST_USERS_RESPONSE)
+
     cli_state.sdk.users.get_all.return_value = get_all_users_generator()
 
 
@@ -173,7 +156,10 @@ def get_user_id_failure(mocker, cli_state):
 
 
 @pytest.fixture
-def get_custodian_failure(cli_state):
+def get_custodian_failure(mocker, cli_state):
+    def empty_custodian_list_generator():
+        yield TEST_EMPTY_CUSTODIANS_RESPONSE
+
     cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
         empty_custodian_list_generator()
     )
@@ -181,16 +167,25 @@ def get_custodian_failure(cli_state):
 
 @pytest.fixture
 def get_matter_failure(cli_state):
+    def empty_matter_list_generator():
+        yield TEST_EMPTY_MATTERS_RESPONSE
+    
     cli_state.sdk.legalhold.get_all_matters.return_value = empty_matter_list_generator()
 
 
 @pytest.fixture
-def get_all_matter_success(cli_state):
+def get_all_matter_success(mocker, cli_state):
+    def matter_list_generator():
+        yield create_mock_response(mocker, data=TEST_MATTER_RESPONSE)
+
     cli_state.sdk.legalhold.get_all_matters.return_value = matter_list_generator()
 
 
 @pytest.fixture
-def get_all_custodian_success(cli_state):
+def get_all_custodian_success(mocker, cli_state):
+    def custodian_list_generator():
+        yield create_mock_response(mocker, data=TEST_CUSTODIANS_RESPONSE)
+
     cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
         custodian_list_generator()
     )
