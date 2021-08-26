@@ -6,6 +6,8 @@ from c42eventextractor.extractors import FileEventExtractor
 from click import echo
 from py42.sdk.queries.fileevents.filters.exposure_filter import ExposureType
 from py42.sdk.queries.fileevents.filters.file_filter import FileCategory
+from py42.sdk.queries.fileevents.filters.risk_filter import RiskIndicator
+from py42.sdk.queries.fileevents.filters.risk_filter import RiskSeverity
 
 import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
@@ -143,6 +145,102 @@ include_non_exposure_option = click.option(
     cls=incompatible_with(["advanced_query", "type", "saved_search"]),
     help="Get all events including non-exposure events.",
 )
+risk_indicator_map = {
+    "PUBLIC_CORPORATE_BOX": RiskIndicator.CloudDataExposures.PUBLIC_CORPORATE_BOX,
+    "PUBLIC_CORPORATE_GOOGLE": RiskIndicator.CloudDataExposures.PUBLIC_CORPORATE_GOOGLE_DRIVE,
+    "PUBLIC_CORPORATE_ONEDRIVE": RiskIndicator.CloudDataExposures.PUBLIC_CORPORATE_ONEDRIVE,
+    "SENT_CORPORATE_GMAIL": RiskIndicator.CloudDataExposures.SENT_CORPORATE_GMAIL,
+    "SHARED_CORPORATE_BOX": RiskIndicator.CloudDataExposures.SHARED_CORPORATE_BOX,
+    "SHARED_CORPORATE_GOOGLE_DRIVE": RiskIndicator.CloudDataExposures.SHARED_CORPORATE_GOOGLE_DRIVE,
+    "SHARED_CORPORATE_ONEDRIVE": RiskIndicator.CloudDataExposures.SHARED_CORPORATE_ONEDRIVE,
+    "AMAZON_DRIVE": RiskIndicator.CloudStorageUploads.AMAZON_DRIVE,
+    "BOX": RiskIndicator.CloudStorageUploads.BOX,
+    "DROPBOX": RiskIndicator.CloudStorageUploads.DROPBOX,
+    "GOOGLE_DRIVE": RiskIndicator.CloudStorageUploads.GOOGLE_DRIVE,
+    "ICLOUD": RiskIndicator.CloudStorageUploads.ICLOUD,
+    "MEGA": RiskIndicator.CloudStorageUploads.MEGA,
+    "ONEDRIVE": RiskIndicator.CloudStorageUploads.ONEDRIVE,
+    "ZOHO": RiskIndicator.CloudStorageUploads.ZOHO,
+    "BITBUCKET": RiskIndicator.CodeRepositoryUploads.BITBUCKET,
+    "GITHUB": RiskIndicator.CodeRepositoryUploads.GITHUB,
+    "GITLAB": RiskIndicator.CodeRepositoryUploads.GITLAB,
+    "SOURCEFORGE": RiskIndicator.CodeRepositoryUploads.SOURCEFORGE,
+    "STASH": RiskIndicator.CodeRepositoryUploads.STASH,
+    "163.COM": RiskIndicator.EmailServiceUploads.ONESIXTHREE_DOT_COM,
+    "126.COM": RiskIndicator.EmailServiceUploads.ONETWOSIX_DOT_COM,
+    "AOL": RiskIndicator.EmailServiceUploads.AOL,
+    "COMCAST": RiskIndicator.EmailServiceUploads.COMCAST,
+    "GMAIL": RiskIndicator.EmailServiceUploads.GMAIL,
+    "ICLOUD_MAIL": RiskIndicator.EmailServiceUploads.ICLOUD,
+    "MAIL.COM": RiskIndicator.EmailServiceUploads.MAIL_DOT_COM,
+    "OUTLOOK": RiskIndicator.EmailServiceUploads.OUTLOOK,
+    "PROTONMAIL": RiskIndicator.EmailServiceUploads.PROTONMAIL,
+    "QQMAIL": RiskIndicator.EmailServiceUploads.QQMAIL,
+    "SINA_MAIL": RiskIndicator.EmailServiceUploads.SINA_MAIL,
+    "SOHU_MAIL": RiskIndicator.EmailServiceUploads.SOHU_MAIL,
+    "YAHOO": RiskIndicator.EmailServiceUploads.YAHOO,
+    "ZOHO_MAIL": RiskIndicator.EmailServiceUploads.ZOHO_MAIL,
+    "AIRDROP": RiskIndicator.ExternalDevices.AIRDROP,
+    "REMOVABLE_MEDIA": RiskIndicator.ExternalDevices.REMOVABLE_MEDIA,
+    "AUDIO": RiskIndicator.FileCategories.AUDIO,
+    "DOCUMENT": RiskIndicator.FileCategories.DOCUMENT,
+    "EXECUTABLE": RiskIndicator.FileCategories.EXECUTABLE,
+    "IMAGE": RiskIndicator.FileCategories.IMAGE,
+    "PDF": RiskIndicator.FileCategories.PDF,
+    "PRESENTATION": RiskIndicator.FileCategories.PRESENTATION,
+    "SCRIPT": RiskIndicator.FileCategories.SCRIPT,
+    "SOURCE_CODE": RiskIndicator.FileCategories.SOURCE_CODE,
+    "SPREADSHEET": RiskIndicator.FileCategories.SPREADSHEET,
+    "VIDEO": RiskIndicator.FileCategories.VIDEO,
+    "VIRTUAL_DISK_IMAGE": RiskIndicator.FileCategories.VIRTUAL_DISK_IMAGE,
+    "ZIP": RiskIndicator.FileCategories.ZIP,
+    "FACEBOOK_MESSENGER": RiskIndicator.MessagingServiceUploads.FACEBOOK_MESSENGER,
+    "MICROSOFT_TEAMS": RiskIndicator.MessagingServiceUploads.MICROSOFT_TEAMS,
+    "SLACK": RiskIndicator.MessagingServiceUploads.SLACK,
+    "WHATSAPP": RiskIndicator.MessagingServiceUploads.WHATSAPP,
+    "OTHER": RiskIndicator.Other.OTHER,
+    "UNKNOWN": RiskIndicator.Other.UNKNOWN,
+    "FACEBOOK": RiskIndicator.SocialMediaUploads.FACEBOOK,
+    "LINKEDIN": RiskIndicator.SocialMediaUploads.LINKEDIN,
+    "REDDIT": RiskIndicator.SocialMediaUploads.REDDIT,
+    "TWITTER": RiskIndicator.SocialMediaUploads.TWITTER,
+    "FILE_MISMATCH": RiskIndicator.UserBehavior.FILE_MISMATCH,
+    "OFF_HOURS": RiskIndicator.UserBehavior.OFF_HOURS,
+    "REMOTE": RiskIndicator.UserBehavior.REMOTE,
+    "FIRST_DESTINATION_USE": RiskIndicator.UserBehavior.FIRST_DESTINATION_USE,
+    "RARE_DESTINATION_USE": RiskIndicator.UserBehavior.RARE_DESTINATION_USE,
+}
+risk_indicator_map_reversed = {v: k for k, v in risk_indicator_map.items()}
+
+
+def risk_indicator_callback(filter_cls):
+    def callback(ctx, param, arg):
+        if arg:
+            mapped_args = tuple(risk_indicator_map[i] for i in arg)
+            filter_func = searchopt.is_in_filter(filter_cls)
+            return filter_func(ctx, param, mapped_args)
+
+    return callback
+
+
+risk_indicator_option = click.option(
+    "--risk-indicator",
+    multiple=True,
+    type=MapChoice(
+        choices=list(risk_indicator_map.keys()), extras_map=risk_indicator_map_reversed,
+    ),
+    callback=risk_indicator_callback(f.RiskIndicator),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
+    help="Limits events to those classified by the given risk indicator categories.",
+)
+risk_severity_option = click.option(
+    "--risk-severity",
+    multiple=True,
+    type=click.Choice(list(RiskSeverity.choices())),
+    callback=searchopt.is_in_filter(f.RiskSeverity),
+    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
+    help="Limits events to those classified by the given risk severity.",
+)
 begin_option = opt.begin_option(
     SECURITY_DATA_KEYWORD,
     callback=lambda ctx, param, arg: convert_datetime_to_timestamp(
@@ -186,6 +284,8 @@ def _create_search_header_map():
         "fileOwner": "FileOwner",
         "md5Checksum": "MD5Checksum",
         "sha256Checksum": "SHA256Checksum",
+        "riskIndicators": "RiskIndicator",
+        "riskSeverity": "RiskSeverity",
     }
 
 
@@ -210,6 +310,8 @@ def file_event_options(f):
     f = process_owner_option(f)
     f = tab_url_option(f)
     f = include_non_exposure_option(f)
+    f = risk_indicator_option(f)
+    f = risk_severity_option(f)
     f = _get_saved_search_option()(f)
     return f
 

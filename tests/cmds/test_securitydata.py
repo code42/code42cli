@@ -5,6 +5,8 @@ import py42.sdk.queries.fileevents.filters as f
 import pytest
 from c42eventextractor.extractors import FileEventExtractor
 from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
+from py42.sdk.queries.fileevents.filters import RiskIndicator
+from py42.sdk.queries.fileevents.filters import RiskSeverity
 from py42.sdk.queries.fileevents.filters.file_filter import FileCategory
 from tests.cmds.conftest import filter_term_is_in_call_args
 from tests.cmds.conftest import get_filter_value_from_json
@@ -107,6 +109,8 @@ advanced_query_incompat_test_params = pytest.mark.parametrize(
         ("--tab-url", "https://example.com"),
         ("--type", "SharedViaLink"),
         ("--include-non-exposure",),
+        ("--risk-indicator", "PUBLIC_CORPORATE_BOX"),
+        ("--risk-severity", "LOW"),
     ],
 )
 saved_search_incompat_test_params = pytest.mark.parametrize(
@@ -127,6 +131,8 @@ saved_search_incompat_test_params = pytest.mark.parametrize(
         ("--type", "SharedViaLink"),
         ("--include-non-exposure",),
         ("--use-checkpoint", "test"),
+        ("--risk-indicator", "PUBLIC_CORPORATE_BOX"),
+        ("--risk-severity", "LOW"),
     ],
 )
 search_and_send_to_test = get_mark_for_search_and_send_to("security-data")
@@ -787,6 +793,134 @@ def test_search_and_send_to_when_given_include_non_exposure_and_exposure_types_c
         obj=cli_state,
     )
     assert result.exit_code == 2
+
+
+@search_and_send_to_test
+def test_search_and_send_to_when_given_risk_indicator_uses_risk_indicator_filter(
+    runner, cli_state, file_event_extractor, command
+):
+    risk_indicator = RiskIndicator.MessagingServiceUploads.SLACK
+    command = [*command, "--begin", "1h", "--risk-indicator", risk_indicator]
+    runner.invoke(
+        cli, command, obj=cli_state,
+    )
+    filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
+    assert str(f.RiskIndicator.is_in([risk_indicator])) in filter_strings
+
+
+@pytest.mark.parametrize(
+    "indicator_choice",
+    [
+        ("PUBLIC_CORPORATE_BOX", RiskIndicator.CloudDataExposures.PUBLIC_CORPORATE_BOX),
+        (
+            "PUBLIC_CORPORATE_GOOGLE",
+            RiskIndicator.CloudDataExposures.PUBLIC_CORPORATE_GOOGLE_DRIVE,
+        ),
+        (
+            "PUBLIC_CORPORATE_ONEDRIVE",
+            RiskIndicator.CloudDataExposures.PUBLIC_CORPORATE_ONEDRIVE,
+        ),
+        ("SENT_CORPORATE_GMAIL", RiskIndicator.CloudDataExposures.SENT_CORPORATE_GMAIL),
+        ("SHARED_CORPORATE_BOX", RiskIndicator.CloudDataExposures.SHARED_CORPORATE_BOX),
+        (
+            "SHARED_CORPORATE_GOOGLE_DRIVE",
+            RiskIndicator.CloudDataExposures.SHARED_CORPORATE_GOOGLE_DRIVE,
+        ),
+        (
+            "SHARED_CORPORATE_ONEDRIVE",
+            RiskIndicator.CloudDataExposures.SHARED_CORPORATE_ONEDRIVE,
+        ),
+        ("AMAZON_DRIVE", RiskIndicator.CloudStorageUploads.AMAZON_DRIVE),
+        ("BOX", RiskIndicator.CloudStorageUploads.BOX),
+        ("DROPBOX", RiskIndicator.CloudStorageUploads.DROPBOX),
+        ("GOOGLE_DRIVE", RiskIndicator.CloudStorageUploads.GOOGLE_DRIVE),
+        ("ICLOUD", RiskIndicator.CloudStorageUploads.ICLOUD),
+        ("MEGA", RiskIndicator.CloudStorageUploads.MEGA),
+        ("ONEDRIVE", RiskIndicator.CloudStorageUploads.ONEDRIVE),
+        ("ZOHO", RiskIndicator.CloudStorageUploads.ZOHO),
+        ("BITBUCKET", RiskIndicator.CodeRepositoryUploads.BITBUCKET),
+        ("GITHUB", RiskIndicator.CodeRepositoryUploads.GITHUB),
+        ("GITLAB", RiskIndicator.CodeRepositoryUploads.GITLAB),
+        ("SOURCEFORGE", RiskIndicator.CodeRepositoryUploads.SOURCEFORGE),
+        ("STASH", RiskIndicator.CodeRepositoryUploads.STASH),
+        ("163.COM", RiskIndicator.EmailServiceUploads.ONESIXTHREE_DOT_COM),
+        ("126.COM", RiskIndicator.EmailServiceUploads.ONETWOSIX_DOT_COM),
+        ("AOL", RiskIndicator.EmailServiceUploads.AOL),
+        ("COMCAST", RiskIndicator.EmailServiceUploads.COMCAST),
+        ("GMAIL", RiskIndicator.EmailServiceUploads.GMAIL),
+        ("ICLOUD_MAIL", RiskIndicator.EmailServiceUploads.ICLOUD),
+        ("MAIL.COM", RiskIndicator.EmailServiceUploads.MAIL_DOT_COM),
+        ("OUTLOOK", RiskIndicator.EmailServiceUploads.OUTLOOK),
+        ("PROTONMAIL", RiskIndicator.EmailServiceUploads.PROTONMAIL),
+        ("QQMAIL", RiskIndicator.EmailServiceUploads.QQMAIL),
+        ("SINA_MAIL", RiskIndicator.EmailServiceUploads.SINA_MAIL),
+        ("SOHU_MAIL", RiskIndicator.EmailServiceUploads.SOHU_MAIL),
+        ("YAHOO", RiskIndicator.EmailServiceUploads.YAHOO),
+        ("ZOHO_MAIL", RiskIndicator.EmailServiceUploads.ZOHO_MAIL),
+        ("AIRDROP", RiskIndicator.ExternalDevices.AIRDROP),
+        ("REMOVABLE_MEDIA", RiskIndicator.ExternalDevices.REMOVABLE_MEDIA),
+        ("AUDIO", RiskIndicator.FileCategories.AUDIO),
+        ("DOCUMENT", RiskIndicator.FileCategories.DOCUMENT),
+        ("EXECUTABLE", RiskIndicator.FileCategories.EXECUTABLE),
+        ("IMAGE", RiskIndicator.FileCategories.IMAGE),
+        ("PDF", RiskIndicator.FileCategories.PDF),
+        ("PRESENTATION", RiskIndicator.FileCategories.PRESENTATION),
+        ("SCRIPT", RiskIndicator.FileCategories.SCRIPT),
+        ("SOURCE_CODE", RiskIndicator.FileCategories.SOURCE_CODE),
+        ("SPREADSHEET", RiskIndicator.FileCategories.SPREADSHEET),
+        ("VIDEO", RiskIndicator.FileCategories.VIDEO),
+        ("VIRTUAL_DISK_IMAGE", RiskIndicator.FileCategories.VIRTUAL_DISK_IMAGE),
+        ("ZIP", RiskIndicator.FileCategories.ZIP),
+        (
+            "FACEBOOK_MESSENGER",
+            RiskIndicator.MessagingServiceUploads.FACEBOOK_MESSENGER,
+        ),
+        ("MICROSOFT_TEAMS", RiskIndicator.MessagingServiceUploads.MICROSOFT_TEAMS),
+        ("SLACK", RiskIndicator.MessagingServiceUploads.SLACK),
+        ("WHATSAPP", RiskIndicator.MessagingServiceUploads.WHATSAPP),
+        ("OTHER", RiskIndicator.Other.OTHER),
+        ("UNKNOWN", RiskIndicator.Other.UNKNOWN),
+        ("FACEBOOK", RiskIndicator.SocialMediaUploads.FACEBOOK),
+        ("LINKEDIN", RiskIndicator.SocialMediaUploads.LINKEDIN),
+        ("REDDIT", RiskIndicator.SocialMediaUploads.REDDIT),
+        ("TWITTER", RiskIndicator.SocialMediaUploads.TWITTER),
+        ("FILE_MISMATCH", RiskIndicator.UserBehavior.FILE_MISMATCH),
+        ("OFF_HOURS", RiskIndicator.UserBehavior.OFF_HOURS),
+        ("REMOTE", RiskIndicator.UserBehavior.REMOTE),
+        ("FIRST_DESTINATION_USE", RiskIndicator.UserBehavior.FIRST_DESTINATION_USE),
+        ("RARE_DESTINATION_USE", RiskIndicator.UserBehavior.RARE_DESTINATION_USE),
+    ],
+)
+def test_all_caps_risk_indicator_choices_convert_to_risk_indicator_string(
+    runner, cli_state, file_event_extractor, indicator_choice
+):
+    ALL_CAPS_VALUE, string_value = indicator_choice
+    command = [
+        "security-data",
+        "search",
+        "--begin",
+        "1h",
+        "--risk-indicator",
+        ALL_CAPS_VALUE,
+    ]
+    runner.invoke(
+        cli, command, obj=cli_state,
+    )
+    filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
+    assert str(f.RiskIndicator.is_in([string_value])) in filter_strings
+
+
+@search_and_send_to_test
+def test_search_and_send_to_when_given_risk_severity_uses_risk_severity_filter(
+    runner, cli_state, file_event_extractor, command
+):
+    risk_severity = RiskSeverity.LOW
+    command = [*command, "--begin", "1h", "--risk-severity", risk_severity]
+    runner.invoke(
+        cli, command, obj=cli_state,
+    )
+    filter_strings = [str(arg) for arg in file_event_extractor.extract.call_args[0]]
+    assert str(f.RiskSeverity.is_in([risk_severity])) in filter_strings
 
 
 @search_and_send_to_test

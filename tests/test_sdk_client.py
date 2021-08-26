@@ -3,7 +3,6 @@ from io import StringIO
 import py42.sdk
 import py42.settings.debug as debug
 import pytest
-from py42.exceptions import Py42MFARequiredError
 from py42.exceptions import Py42UnauthorizedError
 from requests import Response
 from requests.exceptions import ConnectionError
@@ -117,15 +116,14 @@ def test_create_sdk_uses_given_credentials(
     )
 
 
-def test_create_sdk_connection_when_mfa_required_exception_raised_prompts_for_totp(
+def test_create_sdk_connection_when_2FA_login_config_detected_prompts_for_totp(
     mocker, monkeypatch, mock_sdk_factory, capsys, mock_profile_with_password
 ):
     monkeypatch.setattr("sys.stdin", StringIO("101010"))
     response = mocker.MagicMock(spec=Response)
-    mock_sdk_factory.side_effect = [
-        Py42MFARequiredError(HTTPError(response=response)),
-        None,
-    ]
+    exception = Py42UnauthorizedError(HTTPError(response=response))
+    exception.args = ("LoginConfig: LOCAL_2FA",)
+    mock_sdk_factory.side_effect = [exception, None]
     create_sdk(mock_profile_with_password, False)
     output = capsys.readouterr()
     assert "Multi-factor authentication required. Enter TOTP:" in output.out
@@ -135,11 +133,13 @@ def test_create_sdk_connection_when_mfa_token_invalid_raises_expected_cli_error(
     mocker, mock_sdk_factory, mock_profile_with_password
 ):
     response = mocker.MagicMock(spec=Response)
-    response.text = '{"data":null,"error":[{"primaryErrorKey":"INVALID_TIME_BASED_ONE_TIME_PASSWORD","otherErrors":null}],"warnings":null}'
-    mock_sdk_factory.side_effect = Py42UnauthorizedError(HTTPError(response=response))
+    exception = Py42UnauthorizedError(HTTPError(response=response))
+    error_text = "SDK initialization failed, double-check username/password, and provide two-factor TOTP token if Multi-Factor Auth configured for your user. User LoginConfig: LOCAL_2FA"
+    exception.args = (error_text,)
+    mock_sdk_factory.side_effect = exception
     with pytest.raises(Code42CLIError) as err:
         create_sdk(mock_profile_with_password, False, totp="1234")
-    assert str(err.value) == "Invalid TOTP token for user foo."
+    assert str(err.value) == "Invalid credentials or TOTP token for user foo."
 
 
 def test_totp_option_when_passed_is_passed_to_sdk_initialization(
@@ -147,7 +147,7 @@ def test_totp_option_when_passed_is_passed_to_sdk_initialization(
 ):
     mock_py42 = mocker.patch("code42cli.sdk_client.py42.sdk.from_local_account")
     cli_state = CLIState()
-    totp = "1234"
+    totp = "123456"
     profile.authority_url = "example.com"
     profile.username = "user"
     profile.get_password.return_value = "password"
