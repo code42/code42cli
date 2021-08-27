@@ -1,4 +1,5 @@
 import pytest
+from py42.exceptions import Py42ActiveLegalHoldError
 from py42.exceptions import Py42InvalidEmailError
 from py42.exceptions import Py42InvalidPasswordError
 from py42.exceptions import Py42InvalidUsernameError
@@ -34,6 +35,42 @@ TEST_USERS_RESPONSE = {
         }
     ]
 }
+TEST_MATTER_RESPONSE = {
+    "legalHolds": [
+        {"legalHoldUid": "123456789", "name": "Legal Hold #1", "active": True},
+        {"legalHoldUid": "987654321", "name": "Legal Hold #2", "active": True},
+    ]
+}
+TEST_CUSTODIANS_RESPONSE = {
+    "legalHoldMemberships": [
+        {
+            "legalHoldMembershipUid": "99999",
+            "active": True,
+            "creationDate": "2020-07-16T08:50:23.405Z",
+            "legalHold": {"legalHoldUid": "123456789", "name": "Legal Hold #1"},
+            "user": {
+                "userUid": "911162111513111325",
+                "username": "test.username@example.com",
+                "email": "test.username@example.com",
+                "userExtRef": None,
+            },
+        },
+        {
+            "legalHoldMembershipUid": "11111",
+            "active": True,
+            "creationDate": "2020-07-16T08:50:23.405Z",
+            "legalHold": {"legalHoldUid": "987654321", "name": "Legal Hold #2"},
+            "user": {
+                "userUid": "911162111513111325",
+                "username": "test.username@example.com",
+                "email": "test.username@example.com",
+                "userExtRef": None,
+            },
+        },
+    ]
+}
+TEST_EMPTY_CUSTODIANS_RESPONSE = {"legalHoldMemberships": []}
+TEST_EMPTY_MATTERS_RESPONSE = {"legalHolds": []}
 TEST_EMPTY_USERS_RESPONSE = {"users": []}
 TEST_USERNAME = TEST_USERS_RESPONSE["users"][0]["username"]
 TEST_USER_ID = TEST_USERS_RESPONSE["users"][0]["userId"]
@@ -68,10 +105,6 @@ TEST_GET_ORG_RESPONSE = {
 }
 
 
-def get_all_users_generator():
-    yield TEST_USERS_RESPONSE
-
-
 @pytest.fixture
 def update_user_response(mocker):
     return create_mock_response(mocker)
@@ -103,7 +136,10 @@ def get_org_success(cli_state, get_org_response):
 
 
 @pytest.fixture
-def get_all_users_success(cli_state):
+def get_all_users_success(mocker, cli_state):
+    def get_all_users_generator():
+        yield create_mock_response(mocker, data=TEST_USERS_RESPONSE)
+
     cli_state.sdk.users.get_all.return_value = get_all_users_generator()
 
 
@@ -121,6 +157,42 @@ def get_user_id_failure(mocker, cli_state):
 
 
 @pytest.fixture
+def get_custodian_failure(mocker, cli_state):
+    def empty_custodian_list_generator():
+        yield create_mock_response(mocker, data=TEST_EMPTY_CUSTODIANS_RESPONSE)
+
+    cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
+        empty_custodian_list_generator()
+    )
+
+
+@pytest.fixture
+def get_matter_failure(mocker, cli_state):
+    def empty_matter_list_generator():
+        yield create_mock_response(mocker, data=TEST_EMPTY_MATTERS_RESPONSE)
+
+    cli_state.sdk.legalhold.get_all_matters.return_value = empty_matter_list_generator()
+
+
+@pytest.fixture
+def get_all_matter_success(mocker, cli_state):
+    def matter_list_generator():
+        yield create_mock_response(mocker, data=TEST_MATTER_RESPONSE)
+
+    cli_state.sdk.legalhold.get_all_matters.return_value = matter_list_generator()
+
+
+@pytest.fixture
+def get_all_custodian_success(mocker, cli_state):
+    def custodian_list_generator():
+        yield create_mock_response(mocker, data=TEST_CUSTODIANS_RESPONSE)
+
+    cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
+        custodian_list_generator()
+    )
+
+
+@pytest.fixture
 def get_available_roles_success(cli_state, get_available_roles_response):
     cli_state.sdk.users.get_available_roles.return_value = get_available_roles_response
 
@@ -128,6 +200,23 @@ def get_available_roles_success(cli_state, get_available_roles_response):
 @pytest.fixture
 def update_user_success(cli_state, update_user_response):
     cli_state.sdk.users.update_user.return_value = update_user_response
+
+
+@pytest.fixture
+def deactivate_user_success(mocker, cli_state):
+    cli_state.sdk.users.deactivate.return_value = create_mock_response(mocker)
+
+
+@pytest.fixture
+def deactivate_user_legal_hold_failure(mocker, cli_state):
+    cli_state.sdk.users.deactivate.side_effect = Py42ActiveLegalHoldError(
+        create_mock_http_error(mocker, status=400), "user", TEST_USER_ID
+    )
+
+
+@pytest.fixture
+def reactivate_user_success(mocker, cli_state):
+    cli_state.sdk.users.deactivate.return_value = create_mock_response(mocker)
 
 
 @pytest.fixture
@@ -239,6 +328,66 @@ def test_list_users_when_given_excluding_active_and_inactive_uses_active_equals_
     cli_state.sdk.users.get_all.assert_called_once_with(
         active=None, org_uid=None, role_id=None
     )
+
+
+def test_list_legal_hold_flag_reports_none_for_users_not_on_legal_hold(
+    runner,
+    cli_state,
+    get_all_users_success,
+    get_custodian_failure,
+    get_all_matter_success,
+):
+    result = runner.invoke(
+        cli,
+        ["users", "list", "--include-legal-hold-membership", "-f", "CSV"],
+        obj=cli_state,
+    )
+
+    assert "Legal Hold #1,Legal Hold #2" not in result.output
+    assert "123456789,987654321" not in result.output
+    assert "legalHoldUid" not in result.output
+    assert "test.username@example.com" in result.output
+
+
+def test_list_legal_hold_flag_reports_none_if_no_matters_exist(
+    runner, cli_state, get_all_users_success, get_custodian_failure, get_matter_failure
+):
+    result = runner.invoke(
+        cli, ["users", "list", "--include-legal-hold-membership"], obj=cli_state
+    )
+
+    assert "Legal Hold #1,Legal Hold #2" not in result.output
+    assert "123456789,987654321" not in result.output
+    assert "legalHoldUid" not in result.output
+    assert "test.username@example.com" in result.output
+
+
+def test_list_legal_hold_values_not_included_for_legal_hold_user_if_legal_hold_flag_not_passed(
+    runner,
+    cli_state,
+    get_all_users_success,
+    get_all_custodian_success,
+    get_all_matter_success,
+):
+    result = runner.invoke(cli, ["users", "list"], obj=cli_state)
+    assert "Legal Hold #1,Legal Hold #2" not in result.output
+    assert "123456789,987654321" not in result.output
+    assert "test.username@example.com" in result.output
+
+
+def test_list_include_legal_hold_membership_merges_in_and_concats_legal_hold_info(
+    runner,
+    cli_state,
+    get_all_users_success,
+    get_all_custodian_success,
+    get_all_matter_success,
+):
+    result = runner.invoke(
+        cli, ["users", "list", "--include-legal-hold-membership"], obj=cli_state
+    )
+
+    assert "Legal Hold #1,Legal Hold #2" in result.output
+    assert "123456789,987654321" in result.output
 
 
 def test_add_user_role_adds(
@@ -431,6 +580,33 @@ def test_update_when_py42_raises_invalid_password_outputs_error_message(
     command = ["users", "update", "--user-id", "12345", "--password", "test_password"]
     result = runner.invoke(cli, command, obj=cli_state)
     assert "Error: Invalid password." in result.output
+
+
+def test_deactivate_calls_deactivate_with_correct_parameters(
+    runner, cli_state, get_user_id_success, deactivate_user_success
+):
+    command = ["users", "deactivate", "test@example.com"]
+    runner.invoke(cli, command, obj=cli_state)
+    cli_state.sdk.users.deactivate.assert_called_once_with(TEST_USER_ID)
+
+
+def test_deactivate_when_user_on_legal_hold_outputs_expected_error_text(
+    runner, cli_state, get_user_id_success, deactivate_user_legal_hold_failure
+):
+    command = ["users", "deactivate", "test@example.com"]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert (
+        "Error: Cannot deactivate the user with ID 1234 as the user is involved in a legal hold matter."
+        in result.output
+    )
+
+
+def test_reactivate_calls_reactivate_with_correct_parameters(
+    runner, cli_state, get_user_id_success, deactivate_user_success
+):
+    command = ["users", "reactivate", "test@example.com"]
+    runner.invoke(cli, command, obj=cli_state)
+    cli_state.sdk.users.reactivate.assert_called_once_with(TEST_USER_ID)
 
 
 def test_bulk_update_uses_expected_arguments_when_only_some_are_passed(
@@ -655,3 +831,120 @@ def test_bulk_move_uses_handle_than_when_called_and_row_has_missing_username_err
     assert worker_stats.increment_total_errors.call_count == 1
     # Ensure it does not try to get the username for the None user.
     assert not cli_state.sdk.users.get_by_username.call_count
+
+
+def test_bulk_deactivate_uses_expected_arguments(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_deactivate.csv", "w") as csv:
+            csv.writelines(["username\n", f"{TEST_USERNAME}\n"])
+        runner.invoke(
+            cli,
+            ["users", "bulk", "deactivate", "test_bulk_deactivate.csv"],
+            obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": TEST_USERNAME, "deactivated": "False"}
+    ]
+    bulk_processor.assert_called_once()
+
+
+def test_bulk_deactivate_ignores_blank_lines(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_deactivate.csv", "w") as csv:
+            csv.writelines(["username\n\n\n", f"{TEST_USERNAME}\n\n\n"])
+        runner.invoke(
+            cli,
+            ["users", "bulk", "deactivate", "test_bulk_deactivate.csv"],
+            obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": TEST_USERNAME, "deactivated": "False"}
+    ]
+    bulk_processor.assert_called_once()
+
+
+def test_bulk_deactivate_uses_handler_that_when_encounters_error_increments_total_errors(
+    runner, mocker, cli_state, worker_stats, get_users_response
+):
+    lines = ["username\n", f"{TEST_USERNAME}\n"]
+
+    def _get(username, *args, **kwargs):
+        if username == "test@example.com":
+            raise Exception("TEST")
+        return get_users_response
+
+    cli_state.sdk.users.get_by_username.side_effect = _get
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_deactivate.csv", "w") as csv:
+            csv.writelines(lines)
+        runner.invoke(
+            cli,
+            ["users", "bulk", "deactivate", "test_bulk_deactivate.csv"],
+            obj=cli_state,
+        )
+    handler = bulk_processor.call_args[0][0]
+    handler(username="test@example.com")
+    handler(username="not.test@example.com")
+    assert worker_stats.increment_total_errors.call_count == 1
+
+
+def test_bulk_reactivate_uses_expected_arguments(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_reactivate.csv", "w") as csv:
+            csv.writelines(["username\n", f"{TEST_USERNAME}\n"])
+        runner.invoke(
+            cli,
+            ["users", "bulk", "reactivate", "test_bulk_reactivate.csv"],
+            obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": TEST_USERNAME, "reactivated": "False"}
+    ]
+    bulk_processor.assert_called_once()
+
+
+def test_bulk_reactivate_ignores_blank_lines(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_reactivate.csv", "w") as csv:
+            csv.writelines(["username\n\n\n", f"{TEST_USERNAME}\n\n\n"])
+        runner.invoke(
+            cli,
+            ["users", "bulk", "reactivate", "test_bulk_reactivate.csv"],
+            obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": TEST_USERNAME, "reactivated": "False"}
+    ]
+    bulk_processor.assert_called_once()
+
+
+def test_bulk_reactivate_uses_handler_that_when_encounters_error_increments_total_errors(
+    runner, mocker, cli_state, worker_stats, get_users_response
+):
+    lines = ["username\n", f"{TEST_USERNAME}\n"]
+
+    def _get(username, *args, **kwargs):
+        if username == "test@example.com":
+            raise Exception("TEST")
+
+        return get_users_response
+
+    cli_state.sdk.users.get_by_username.side_effect = _get
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_reactivate.csv", "w") as csv:
+            csv.writelines(lines)
+        runner.invoke(
+            cli,
+            ["users", "bulk", "reactivate", "test_bulk_reactivate.csv"],
+            obj=cli_state,
+        )
+    handler = bulk_processor.call_args[0][0]
+    handler(username="test@example.com")
+    handler(username="not.test@example.com")
+    assert worker_stats.increment_total_errors.call_count == 1
