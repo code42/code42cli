@@ -1,4 +1,5 @@
 import pytest
+from py42.exceptions import Py42ActiveLegalHoldError
 from py42.exceptions import Py42InvalidEmailError
 from py42.exceptions import Py42InvalidPasswordError
 from py42.exceptions import Py42InvalidUsernameError
@@ -128,6 +129,23 @@ def get_available_roles_success(cli_state, get_available_roles_response):
 @pytest.fixture
 def update_user_success(cli_state, update_user_response):
     cli_state.sdk.users.update_user.return_value = update_user_response
+
+
+@pytest.fixture
+def deactivate_user_success(mocker, cli_state):
+    cli_state.sdk.users.deactivate.return_value = create_mock_response(mocker)
+
+
+@pytest.fixture
+def deactivate_user_legal_hold_failure(mocker, cli_state):
+    cli_state.sdk.users.deactivate.side_effect = Py42ActiveLegalHoldError(
+        create_mock_http_error(mocker, status=400), "user", TEST_USER_ID
+    )
+
+
+@pytest.fixture
+def reactivate_user_success(mocker, cli_state):
+    cli_state.sdk.users.deactivate.return_value = create_mock_response(mocker)
 
 
 @pytest.fixture
@@ -433,6 +451,33 @@ def test_update_when_py42_raises_invalid_password_outputs_error_message(
     assert "Error: Invalid password." in result.output
 
 
+def test_deactivate_calls_deactivate_with_correct_parameters(
+    runner, cli_state, get_user_id_success, deactivate_user_success
+):
+    command = ["users", "deactivate", "test@example.com"]
+    runner.invoke(cli, command, obj=cli_state)
+    cli_state.sdk.users.deactivate.assert_called_once_with(TEST_USER_ID)
+
+
+def test_deactivate_when_user_on_legal_hold_outputs_expected_error_text(
+    runner, cli_state, get_user_id_success, deactivate_user_legal_hold_failure
+):
+    command = ["users", "deactivate", "test@example.com"]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert (
+        "Error: Cannot deactivate the user with ID 1234 as the user is involved in a legal hold matter."
+        in result.output
+    )
+
+
+def test_reactivate_calls_reactivate_with_correct_parameters(
+    runner, cli_state, get_user_id_success, deactivate_user_success
+):
+    command = ["users", "reactivate", "test@example.com"]
+    runner.invoke(cli, command, obj=cli_state)
+    cli_state.sdk.users.reactivate.assert_called_once_with(TEST_USER_ID)
+
+
 def test_bulk_update_uses_expected_arguments_when_only_some_are_passed(
     runner, mocker, cli_state
 ):
@@ -655,3 +700,120 @@ def test_bulk_move_uses_handle_than_when_called_and_row_has_missing_username_err
     assert worker_stats.increment_total_errors.call_count == 1
     # Ensure it does not try to get the username for the None user.
     assert not cli_state.sdk.users.get_by_username.call_count
+
+
+def test_bulk_deactivate_uses_expected_arguments(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_deactivate.csv", "w") as csv:
+            csv.writelines(["username\n", f"{TEST_USERNAME}\n"])
+        runner.invoke(
+            cli,
+            ["users", "bulk", "deactivate", "test_bulk_deactivate.csv"],
+            obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": TEST_USERNAME, "deactivated": "False"}
+    ]
+    bulk_processor.assert_called_once()
+
+
+def test_bulk_deactivate_ignores_blank_lines(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_deactivate.csv", "w") as csv:
+            csv.writelines(["username\n\n\n", f"{TEST_USERNAME}\n\n\n"])
+        runner.invoke(
+            cli,
+            ["users", "bulk", "deactivate", "test_bulk_deactivate.csv"],
+            obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": TEST_USERNAME, "deactivated": "False"}
+    ]
+    bulk_processor.assert_called_once()
+
+
+def test_bulk_deactivate_uses_handler_that_when_encounters_error_increments_total_errors(
+    runner, mocker, cli_state, worker_stats, get_users_response
+):
+    lines = ["username\n", f"{TEST_USERNAME}\n"]
+
+    def _get(username, *args, **kwargs):
+        if username == "test@example.com":
+            raise Exception("TEST")
+        return get_users_response
+
+    cli_state.sdk.users.get_by_username.side_effect = _get
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_deactivate.csv", "w") as csv:
+            csv.writelines(lines)
+        runner.invoke(
+            cli,
+            ["users", "bulk", "deactivate", "test_bulk_deactivate.csv"],
+            obj=cli_state,
+        )
+    handler = bulk_processor.call_args[0][0]
+    handler(username="test@example.com")
+    handler(username="not.test@example.com")
+    assert worker_stats.increment_total_errors.call_count == 1
+
+
+def test_bulk_reactivate_uses_expected_arguments(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_reactivate.csv", "w") as csv:
+            csv.writelines(["username\n", f"{TEST_USERNAME}\n"])
+        runner.invoke(
+            cli,
+            ["users", "bulk", "reactivate", "test_bulk_reactivate.csv"],
+            obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": TEST_USERNAME, "reactivated": "False"}
+    ]
+    bulk_processor.assert_called_once()
+
+
+def test_bulk_reactivate_ignores_blank_lines(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_reactivate.csv", "w") as csv:
+            csv.writelines(["username\n\n\n", f"{TEST_USERNAME}\n\n\n"])
+        runner.invoke(
+            cli,
+            ["users", "bulk", "reactivate", "test_bulk_reactivate.csv"],
+            obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": TEST_USERNAME, "reactivated": "False"}
+    ]
+    bulk_processor.assert_called_once()
+
+
+def test_bulk_reactivate_uses_handler_that_when_encounters_error_increments_total_errors(
+    runner, mocker, cli_state, worker_stats, get_users_response
+):
+    lines = ["username\n", f"{TEST_USERNAME}\n"]
+
+    def _get(username, *args, **kwargs):
+        if username == "test@example.com":
+            raise Exception("TEST")
+
+        return get_users_response
+
+    cli_state.sdk.users.get_by_username.side_effect = _get
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_reactivate.csv", "w") as csv:
+            csv.writelines(lines)
+        runner.invoke(
+            cli,
+            ["users", "bulk", "reactivate", "test_bulk_reactivate.csv"],
+            obj=cli_state,
+        )
+    handler = bulk_processor.call_args[0][0]
+    handler(username="test@example.com")
+    handler(username="not.test@example.com")
+    assert worker_stats.increment_total_errors.call_count == 1
