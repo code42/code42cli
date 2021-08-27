@@ -91,12 +91,12 @@ class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
                 and begin_present
             ):
                 opts.pop("begin")
-                checkpoint_value_str = datetime.fromtimestamp(
-                    checkpoint_value, timezone.utc
-                ).isoformat()
+                # checkpoint_value_str = datetime.fromtimestamp(
+                #     checkpoint_value, timezone.utc
+                # ).isoformat()
                 click.echo(
                     "Ignoring --begin value as --use-checkpoint was passed and checkpoint of "
-                    f"{checkpoint_value_str} exists.\n",
+                    f"{checkpoint_value} exists.\n",
                     err=True,
                 )
             if (

@@ -368,47 +368,45 @@ def search(
 ):
 
     """Search for file events."""
-
     output_header = _try_get_default_header(
         include_all, _create_search_header_map(), format
     )
     formatter = FileEventsOutputFormatter(format, output_header)
     cursor = _get_cursor(state, use_checkpoint)
-    print(use_checkpoint)
     if use_checkpoint:
         checkpoint_name = use_checkpoint
+        # if checkpoint name exists, checkpoint should be that eventId, 
+        # otherwise it should create the checkpoint and set the initial one to ""
         checkpoint = cursor.get(checkpoint_name)
-        #checkpoint = ""
-        # if checkpoint is not None:
-        #     begin = checkpoint
+        if not checkpoint:
+            checkpoint = ""
+
     else:
         checkpoint = ""
-    print("checkpoint:" + checkpoint)
-
-    # print(cursor.get(use_checkpoint))
+        
     # older app versions stored checkpoint as float timestamp.
     # we handle those here until the next run containing events will store checkpoint as the last eventId
-    # if isinstance(checkpoint, (int, float)):
-    #     state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
-    #     checkpoint = ""
-    print("before query")
+    if isinstance(checkpoint, (int, float)):
+        state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
+        checkpoint = ""
+
     query = _construct_query(state, begin, end, saved_search,
                              advanced_query, or_query)
-    print("before events")
     events = _get_all_file_events(state, query, cursor, checkpoint)
-    print("after response")
 
     if not events:
         click.echo("No results found.")
         return
 
+    # after events are retrieved, if use_checkpoint
+    # update checkpoint to eventId of last event retrieved
     if use_checkpoint:
-        # checkpoint_name = use_checkpoint
-        # events_gen = _dedupe_checkpointed_events_and_store_updated_checkpoint(
+        checkpoint_name = use_checkpoint
+        cursor.replace(checkpoint_name, events[-1]['eventId'])
+        # events_gen = _store_updated_checkpoint(
         #     cursor, checkpoint_name, events
         # )
-        # formatter.echo_formatted_generated_output(events_gen)
-        cursor.replace(use_checkpoint, events[-1]['eventId'])
+        
     formatter.echo_formatted_list(events)
 
 
@@ -512,7 +510,7 @@ def send_to(
     
     if use_checkpoint:
         checkpoint_name = use_checkpoint
-        events = _dedupe_checkpointed_events_and_store_updated_checkpoint(
+        events = _store_updated_checkpoint(
             cursor, checkpoint_name, events
         )
     with warn_interrupt():
@@ -564,17 +562,9 @@ def _is_exempt_filter(f):
     return False
 
 
-def _dedupe_checkpointed_events_and_store_updated_checkpoint(
+def _store_updated_checkpoint(
     cursor, checkpoint_name, events
 ):
-    """De-duplicates events across checkpointed runs. Since using the timestamp of the last event
-    processed as the `--begin` time of the next run causes the last event to show up again in the
-    next results, we hash the last event(s) of each run and store those hashes in the cursor to
-    filter out on the next run. It's also possible that two events have the exact same timestamp, so
-    `checkpoint_events` needs to be a list of hashes so we can filter out everything that's actually
-    been processed.
-    """
-
     checkpoint_events = cursor.get_events(checkpoint_name)
     new_timestamp = None
     new_events = []
@@ -586,9 +576,8 @@ def _dedupe_checkpointed_events_and_store_updated_checkpoint(
                 new_events.clear()
             new_events.append(event_hash)
             yield event
-            # ts = parse_timestamp(new_timestamp)
-            cursor.replace(checkpoint_name, ts)
-            # cursor.replace_events(checkpoint_name, new_events)
+        cursor.replace(checkpoint_name, events[-1]['eventId'])
+
     return events
 
 

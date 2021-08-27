@@ -75,7 +75,7 @@ class FileEventCursorStore(BaseCursorStore):
             location = path.join(self._dir_path, cursor_name)
             with open(location) as checkpoint:
                 # add some logic to separate eventId's from timestamps
-                return checkpoint.read()
+                return str(checkpoint.read())
         except FileNotFoundError:
             return None
 
