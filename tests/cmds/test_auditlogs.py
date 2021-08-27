@@ -66,7 +66,8 @@ def audit_log_cursor_with_checkpoint(mocker):
     mock_cursor = mocker.MagicMock(spec=AuditLogCursorStore)
     mock_cursor.get.return_value = CURSOR_TIMESTAMP
     mocker.patch(
-        "code42cli.cmds.auditlogs._get_audit_log_cursor_store", return_value=mock_cursor
+        "code42cli.cmds.auditlogs._get_audit_log_cursor_store",
+        return_value=mock_cursor,
     )
     return mock_cursor
 
@@ -79,7 +80,8 @@ def audit_log_cursor_with_checkpoint_and_events(mocker):
         hash_event(TEST_EVENTS_WITH_SAME_TIMESTAMP[0])
     ]
     mocker.patch(
-        "code42cli.cmds.auditlogs._get_audit_log_cursor_store", return_value=mock_cursor
+        "code42cli.cmds.auditlogs._get_audit_log_cursor_store",
+        return_value=mock_cursor,
     )
     return mock_cursor
 

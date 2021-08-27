@@ -49,7 +49,6 @@ filter_option_user_ids = click.option(
     help="Filter results by actor user IDs.",
     multiple=True,
 )
-
 filter_option_user_ip_addresses = click.option(
     "--actor-ip",
     required=False,

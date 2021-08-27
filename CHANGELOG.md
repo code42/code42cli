@@ -14,11 +14,13 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - New option `--include-legal-hold-membership` on command `code42 users list` that includes the legal hold matter name and ID for any user on legal hold.
 
-- New commands:
+- New commands for deactivating/reactivating Code42 user accounts:
   - `code42 users deactivate`
   - `code42 users reactivate`
   - `code42 users bulk deactivate`
   - `code42 users bulk reactivate`
+
+- `code42 profile use` now prompts you to select a profile when not given a profile name argument.
 
 ## 1.9.0 - 2021-08-19
 

@@ -61,7 +61,7 @@ def test_does_user_agree_when_user_says_n_returns_false(
 
 
 def test_does_user_agree_when_assume_yes_argument_passed_returns_true_and_does_not_print_prompt(
-    mocker, context_with_assume_yes, capsys
+    context_with_assume_yes, capsys
 ):
     result = does_user_agree("Test Prompt")
     output = capsys.readouterr()

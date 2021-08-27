@@ -5,6 +5,7 @@ from click import echo
 from click import secho
 
 import code42cli.profile as cliprofile
+from code42cli.click_ext.types import PromptChoice
 from code42cli.click_ext.types import TOTP
 from code42cli.errors import Code42CLIError
 from code42cli.options import yes_option
@@ -158,9 +159,15 @@ def _list():
 @profile.command()
 @profile_name_arg()
 def use(profile_name):
-    """Set a profile as the default."""
-    cliprofile.switch_default_profile(profile_name)
-    echo(f"{profile_name} has been set as the default profile.")
+    """\b
+    Set a profile as the default. If not providing a profile-name,
+    prompts for a choice from a list of all profiles."""
+
+    if not profile_name:
+        _select_profile_from_prompt()
+        return
+
+    _set_default_profile(profile_name)
 
 
 @profile.command()
@@ -219,3 +226,23 @@ def _set_pw(profile_name, password, debug, totp=None):
         raise
     cliprofile.set_password(password, c42profile.name)
     return c42profile.name
+
+
+def _select_profile_from_prompt():
+    """Set the default profile from user input."""
+    profiles = cliprofile.get_all_profiles()
+    profile_names = [profile_choice.name for profile_choice in profiles]
+    choices = PromptChoice(profile_names)
+    choices.print_choices()
+    prompt_message = "Input the number of the profile you wish to use"
+    profile_name = click.prompt(prompt_message, type=choices)
+    _set_default_profile(profile_name)
+
+
+def _set_default_profile(profile_name):
+    cliprofile.switch_default_profile(profile_name)
+    _print_default_profile_was_set(profile_name)
+
+
+def _print_default_profile_was_set(profile_name):
+    echo(f"{profile_name} has been set as the default profile.")
