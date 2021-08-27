@@ -20,6 +20,8 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
   - `code42 users bulk deactivate`
   - `code42 users bulk reactivate`
 
+- `code42 profile use` now prompts you to select a profile when not given a profile name argument.
+
 ## 1.9.0 - 2021-08-19
 
 ### Added
@@ -69,15 +71,10 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - New command `code42 users bulk move` to move users in bulk.
 
-- New command `code42 profile select` that allows you to select a default profile
-    from a list of all your profiles.
-
 ### Changed
 
 - Now when a user is not found, the error message suggests that it might be because you don't
     have the necessary permissions.
-
-- `code42 profile use` now prompts you to select a profile when not given a profile name argument.
 
 ## 1.7.0 - 2021-06-17
 
