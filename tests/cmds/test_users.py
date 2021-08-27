@@ -35,6 +35,42 @@ TEST_USERS_RESPONSE = {
         }
     ]
 }
+TEST_MATTER_RESPONSE = {
+    "legalHolds": [
+        {"legalHoldUid": "123456789", "name": "Legal Hold #1", "active": True},
+        {"legalHoldUid": "987654321", "name": "Legal Hold #2", "active": True},
+    ]
+}
+TEST_CUSTODIANS_RESPONSE = {
+    "legalHoldMemberships": [
+        {
+            "legalHoldMembershipUid": "99999",
+            "active": True,
+            "creationDate": "2020-07-16T08:50:23.405Z",
+            "legalHold": {"legalHoldUid": "123456789", "name": "Legal Hold #1"},
+            "user": {
+                "userUid": "911162111513111325",
+                "username": "test.username@example.com",
+                "email": "test.username@example.com",
+                "userExtRef": None,
+            },
+        },
+        {
+            "legalHoldMembershipUid": "11111",
+            "active": True,
+            "creationDate": "2020-07-16T08:50:23.405Z",
+            "legalHold": {"legalHoldUid": "987654321", "name": "Legal Hold #2"},
+            "user": {
+                "userUid": "911162111513111325",
+                "username": "test.username@example.com",
+                "email": "test.username@example.com",
+                "userExtRef": None,
+            },
+        },
+    ]
+}
+TEST_EMPTY_CUSTODIANS_RESPONSE = {"legalHoldMemberships": []}
+TEST_EMPTY_MATTERS_RESPONSE = {"legalHolds": []}
 TEST_EMPTY_USERS_RESPONSE = {"users": []}
 TEST_USERNAME = TEST_USERS_RESPONSE["users"][0]["username"]
 TEST_USER_ID = TEST_USERS_RESPONSE["users"][0]["userId"]
@@ -69,10 +105,6 @@ TEST_GET_ORG_RESPONSE = {
 }
 
 
-def get_all_users_generator():
-    yield TEST_USERS_RESPONSE
-
-
 @pytest.fixture
 def update_user_response(mocker):
     return create_mock_response(mocker)
@@ -104,7 +136,10 @@ def get_org_success(cli_state, get_org_response):
 
 
 @pytest.fixture
-def get_all_users_success(cli_state):
+def get_all_users_success(mocker, cli_state):
+    def get_all_users_generator():
+        yield create_mock_response(mocker, data=TEST_USERS_RESPONSE)
+
     cli_state.sdk.users.get_all.return_value = get_all_users_generator()
 
 
@@ -118,6 +153,42 @@ def get_user_id_success(cli_state, get_users_response):
 def get_user_id_failure(mocker, cli_state):
     cli_state.sdk.users.get_by_username.return_value = create_mock_response(
         mocker, data=TEST_EMPTY_USERS_RESPONSE
+    )
+
+
+@pytest.fixture
+def get_custodian_failure(mocker, cli_state):
+    def empty_custodian_list_generator():
+        yield create_mock_response(mocker, data=TEST_EMPTY_CUSTODIANS_RESPONSE)
+
+    cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
+        empty_custodian_list_generator()
+    )
+
+
+@pytest.fixture
+def get_matter_failure(mocker, cli_state):
+    def empty_matter_list_generator():
+        yield create_mock_response(mocker, data=TEST_EMPTY_MATTERS_RESPONSE)
+
+    cli_state.sdk.legalhold.get_all_matters.return_value = empty_matter_list_generator()
+
+
+@pytest.fixture
+def get_all_matter_success(mocker, cli_state):
+    def matter_list_generator():
+        yield create_mock_response(mocker, data=TEST_MATTER_RESPONSE)
+
+    cli_state.sdk.legalhold.get_all_matters.return_value = matter_list_generator()
+
+
+@pytest.fixture
+def get_all_custodian_success(mocker, cli_state):
+    def custodian_list_generator():
+        yield create_mock_response(mocker, data=TEST_CUSTODIANS_RESPONSE)
+
+    cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
+        custodian_list_generator()
     )
 
 
@@ -257,6 +328,66 @@ def test_list_users_when_given_excluding_active_and_inactive_uses_active_equals_
     cli_state.sdk.users.get_all.assert_called_once_with(
         active=None, org_uid=None, role_id=None
     )
+
+
+def test_list_legal_hold_flag_reports_none_for_users_not_on_legal_hold(
+    runner,
+    cli_state,
+    get_all_users_success,
+    get_custodian_failure,
+    get_all_matter_success,
+):
+    result = runner.invoke(
+        cli,
+        ["users", "list", "--include-legal-hold-membership", "-f", "CSV"],
+        obj=cli_state,
+    )
+
+    assert "Legal Hold #1,Legal Hold #2" not in result.output
+    assert "123456789,987654321" not in result.output
+    assert "legalHoldUid" not in result.output
+    assert "test.username@example.com" in result.output
+
+
+def test_list_legal_hold_flag_reports_none_if_no_matters_exist(
+    runner, cli_state, get_all_users_success, get_custodian_failure, get_matter_failure
+):
+    result = runner.invoke(
+        cli, ["users", "list", "--include-legal-hold-membership"], obj=cli_state
+    )
+
+    assert "Legal Hold #1,Legal Hold #2" not in result.output
+    assert "123456789,987654321" not in result.output
+    assert "legalHoldUid" not in result.output
+    assert "test.username@example.com" in result.output
+
+
+def test_list_legal_hold_values_not_included_for_legal_hold_user_if_legal_hold_flag_not_passed(
+    runner,
+    cli_state,
+    get_all_users_success,
+    get_all_custodian_success,
+    get_all_matter_success,
+):
+    result = runner.invoke(cli, ["users", "list"], obj=cli_state)
+    assert "Legal Hold #1,Legal Hold #2" not in result.output
+    assert "123456789,987654321" not in result.output
+    assert "test.username@example.com" in result.output
+
+
+def test_list_include_legal_hold_membership_merges_in_and_concats_legal_hold_info(
+    runner,
+    cli_state,
+    get_all_users_success,
+    get_all_custodian_success,
+    get_all_matter_success,
+):
+    result = runner.invoke(
+        cli, ["users", "list", "--include-legal-hold-membership"], obj=cli_state
+    )
+
+    assert "Legal Hold #1,Legal Hold #2" in result.output
+    assert "123456789,987654321" in result.output
 
 
 def test_add_user_role_adds(
