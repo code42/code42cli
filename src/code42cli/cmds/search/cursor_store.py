@@ -34,11 +34,11 @@ class BaseCursorStore:
         except FileNotFoundError:
             return None
 
-    def replace(self, cursor_name, new_timestamp):
+    def replace(self, cursor_name, new_checkpoint):
         """Replaces the last stored date observed timestamp with the given one."""
         location = path.join(self._dir_path, cursor_name)
         with open(location, "w") as checkpoint:
-            checkpoint.write(str(new_timestamp))
+            checkpoint.write(str(new_checkpoint))
 
     def delete(self, cursor_name):
         """Removes a single cursor from the store."""
@@ -68,7 +68,22 @@ class FileEventCursorStore(BaseCursorStore):
     def __init__(self, profile_name):
         dir_path = get_user_project_path("file_event_checkpoints", profile_name)
         super().__init__(dir_path)
+    
+    def get(self, cursor_name):
+        """Gets the last stored date observed timestamp."""
+        try:
+            location = path.join(self._dir_path, cursor_name)
+            with open(location) as checkpoint:
+                # add some logic to separate eventId's from timestamps
+                return checkpoint.read()
+        except FileNotFoundError:
+            return None
 
+    def replace(self, cursor_name, new_checkpoint):
+        """Replaces the last stored date observed timestamp with the given one."""
+        location = path.join(self._dir_path, cursor_name)
+        with open(location, "w") as checkpoint:
+            checkpoint.write(str(new_checkpoint))
 
 class AlertCursorStore(BaseCursorStore):
     def __init__(self, profile_name):
