@@ -470,7 +470,7 @@ def test_deactivate_when_user_on_legal_hold_outputs_expected_error_text(
     )
 
 
-def test_reactivate_calls_deactivate_with_correct_parameters(
+def test_reactivate_calls_reactivate_with_correct_parameters(
     runner, cli_state, get_user_id_success, deactivate_user_success
 ):
     command = ["users", "reactivate", "test@example.com"]
