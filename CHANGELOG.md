@@ -12,7 +12,13 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
-- New command 'code42 users list --include-legal-hold-membership' to print the legal hold matter name and ID for any user on legal hold.
+- New option `--include-legal-hold-membership` on command `code42 users list` that includes the legal hold matter name and ID for any user on legal hold.
+
+- New commands:
+  - `code42 users deactivate`
+  - `code42 users reactivate`
+  - `code42 users bulk deactivate`
+  - `code42 users bulk reactivate`
 
 ## 1.9.0 - 2021-08-19
 

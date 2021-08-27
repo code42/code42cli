@@ -3,6 +3,7 @@ import re
 from collections import OrderedDict
 
 import click
+from py42.exceptions import Py42ActiveLegalHoldError
 from py42.exceptions import Py42CaseAlreadyHasEventError
 from py42.exceptions import Py42CaseNameExistsError
 from py42.exceptions import Py42DescriptionLimitExceededError
@@ -75,6 +76,7 @@ class ExceptionHandlingGroup(click.Group):
             Py42InvalidEmailError,
             Py42InvalidPasswordError,
             Py42InvalidUsernameError,
+            Py42ActiveLegalHoldError,
         ) as err:
             self.logger.log_error(err)
             raise Code42CLIError(str(err))
