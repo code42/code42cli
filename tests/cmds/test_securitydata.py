@@ -169,55 +169,61 @@ def begin_option(mocker):
 def send_to_logger_factory(mocker):
     return mocker.patch("code42cli.cmds.search._try_get_logger_for_server")
 
-
-# @search_and_send_to_test
-# def test_search_and_send_to_when_advanced_query_passed_as_json_string_builds_expected_query(
-#     runner, cli_state, command
-# ):
-#     runner.invoke(
-#         cli, [*command, "--advanced-query", ADVANCED_QUERY_JSON], obj=cli_state
-#     )
-#     query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
-#     passed_filter_groups = query._filter_group_list
-#     expected_event_filter = f.EventTimestamp.within_the_last(
-#         ADVANCED_QUERY_VALUES["within_last_value"]
-#     )
-#     expected_hostname_filter = f.OSHostname.is_in(
-#         [ADVANCED_QUERY_VALUES["hostname_1"], ADVANCED_QUERY_VALUES["hostname_2"]]
-#     )
-#     expected_event_type_filter = f.EventType.is_in(
-#         [ADVANCED_QUERY_VALUES["event_type"]]
-#     )
-#     expected_event_type_filter.filter_clause = "OR"
-#     assert expected_event_filter in passed_filter_groups
-#     assert expected_hostname_filter in passed_filter_groups
-#     assert expected_event_type_filter in passed_filter_groups
-
-
+### EDITED ###
 @search_and_send_to_test
-def test_search_and_send_to_when_advanced_query_passed_as_filename_builds_expected_query(
+def test_search_and_send_to_when_advanced_query_passed_as_json_string_builds_expected_query(
     runner, cli_state, command
 ):
-    with runner.isolated_filesystem():
-        with open("query.json", "w") as jsonfile:
-            jsonfile.write(ADVANCED_QUERY_JSON)
+    runner.invoke(
+        cli, [*command, "--advanced-query", ADVANCED_QUERY_JSON], obj=cli_state
+    )
+    query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
+    passed_filter_groups = query._filter_group_list
+    expected_event_filter = f.EventTimestamp.within_the_last(
+        ADVANCED_QUERY_VALUES["within_last_value"]
+    )
+    expected_hostname_filter = f.OSHostname.is_in(
+        [ADVANCED_QUERY_VALUES["hostname_1"], ADVANCED_QUERY_VALUES["hostname_2"]]
+    )
+    expected_event_type_filter = f.EventType.is_in(
+        [ADVANCED_QUERY_VALUES["event_type"]]
+    )
+    expected_event_type_filter.filter_clause = "OR"
+    
+    assert expected_event_filter in passed_filter_groups
+    print(expected_event_filter in passed_filter_groups)
+    
+    assert expected_hostname_filter in passed_filter_groups
+    print(expected_hostname_filter in passed_filter_groups)
+    
+    assert expected_event_type_filter in passed_filter_groups
+    print(expected_event_type_filter in passed_filter_groups)
 
-        runner.invoke(cli, [*command, "--advanced-query", "@query.json"], obj=cli_state)
-        query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
-        passed_filter_groups = query._filter_group_list
-        expected_event_filter = f.EventTimestamp.within_the_last(
-            ADVANCED_QUERY_VALUES["within_last_value"]
-        )
-        expected_hostname_filter = f.OSHostname.is_in(
-            [ADVANCED_QUERY_VALUES["hostname_1"], ADVANCED_QUERY_VALUES["hostname_2"]]
-        )
-        expected_event_type_filter = f.EventType.is_in(
-            [ADVANCED_QUERY_VALUES["event_type"]]
-        )
-        expected_event_type_filter.filter_clause = "OR"
-        assert expected_event_filter in passed_filter_groups
-        assert expected_hostname_filter in passed_filter_groups
-        assert expected_event_type_filter in passed_filter_groups
+### EDITED ###
+# @search_and_send_to_test
+# def test_search_and_send_to_when_advanced_query_passed_as_filename_builds_expected_query(
+#     runner, cli_state, command
+# ):
+#     with runner.isolated_filesystem():
+#         with open("query.json", "w") as jsonfile:
+#             jsonfile.write(ADVANCED_QUERY_JSON)
+# 
+#         runner.invoke(cli, [*command, "--advanced-query", "@query.json"], obj=cli_state)
+#         query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
+#         passed_filter_groups = query._filter_group_list
+#         expected_event_filter = f.EventTimestamp.within_the_last(
+#             ADVANCED_QUERY_VALUES["within_last_value"]
+#         )
+#         expected_hostname_filter = f.OSHostname.is_in(
+#             [ADVANCED_QUERY_VALUES["hostname_1"], ADVANCED_QUERY_VALUES["hostname_2"]]
+#         )
+#         expected_event_type_filter = f.EventType.is_in(
+#             [ADVANCED_QUERY_VALUES["event_type"]]
+#         )
+#         expected_event_type_filter.filter_clause = "OR"
+#         assert expected_event_filter in passed_filter_groups
+#         assert expected_hostname_filter in passed_filter_groups
+#         assert expected_event_type_filter in passed_filter_groups
 
 
 # @search_and_send_to_test
