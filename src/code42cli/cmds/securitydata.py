@@ -1,5 +1,4 @@
 import itertools
-import json
 from pprint import pformat
 
 import click
@@ -9,7 +8,8 @@ from py42.exceptions import Py42InvalidPageTokenError
 from py42.sdk.queries import FilterGroup
 from py42.sdk.queries.alerts.filters import DateObserved
 from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
-from py42.sdk.queries.fileevents.filters import InsertionTimestamp, EventTimestamp
+from py42.sdk.queries.fileevents.filters import EventTimestamp
+from py42.sdk.queries.fileevents.filters import InsertionTimestamp
 from py42.sdk.queries.fileevents.filters.exposure_filter import ExposureType
 from py42.sdk.queries.fileevents.filters.file_filter import FileCategory
 from py42.sdk.queries.fileevents.filters.risk_filter import RiskIndicator
@@ -26,15 +26,17 @@ from code42cli.cmds.search import SendToCommand
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.cmds.search.options import send_to_format_options
 from code42cli.cmds.search.options import server_options
-from code42cli.date_helper import convert_datetime_to_timestamp, verify_timestamp_order
+from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import limit_date_range
+from code42cli.date_helper import verify_timestamp_order
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import format_option
 from code42cli.options import sdk_options
-from code42cli.output_formats import FileEventsOutputFormat, OutputFormat
+from code42cli.output_formats import FileEventsOutputFormat
 from code42cli.output_formats import FileEventsOutputFormatter
+from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
-from code42cli.util import warn_interrupt, hash_event
+from code42cli.util import warn_interrupt
 
 logger = get_main_cli_logger()
 
@@ -375,39 +377,32 @@ def search(
     cursor = _get_cursor(state, use_checkpoint)
     if use_checkpoint:
         checkpoint_name = use_checkpoint
-        # if checkpoint name exists, checkpoint should be that eventId, 
-        # otherwise it should create the checkpoint and set the initial one to ""
-        checkpoint = cursor.get(checkpoint_name)
-        if not checkpoint:
-            checkpoint = ""
-
+        # if checkpoint name exists, checkpoint should be that eventId,
+        # otherwise it should set the initial value to ""
+        checkpoint = cursor.get(checkpoint_name) or ""
     else:
         checkpoint = ""
-        
+
     # older app versions stored checkpoint as float timestamp.
     # we handle those here until the next run containing events will store checkpoint as the last eventId
     if isinstance(checkpoint, (int, float)):
         state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
         checkpoint = ""
 
-    query = _construct_query(state, begin, end, saved_search,
-                             advanced_query, or_query)
+    query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
     events = _get_all_file_events(state, query, cursor, checkpoint)
 
     if not events:
         click.echo("No results found.")
         return
 
-    # after events are retrieved, if use_checkpoint
-    # update checkpoint to eventId of last event retrieved
     if use_checkpoint:
         checkpoint_name = use_checkpoint
-        cursor.replace(checkpoint_name, events[-1]['eventId'])
-        # events_gen = _store_updated_checkpoint(
-        #     cursor, checkpoint_name, events
-        # )
-        
-    formatter.echo_formatted_list(events)
+        # update checkpoint to eventId of last event retrieved
+        events_gen = _store_updated_checkpoint(cursor, checkpoint_name, events)
+        formatter.echo_formatted_generated_output(events_gen)
+    else:
+        formatter.echo_formatted_list(events)
 
 
 def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
@@ -433,13 +428,16 @@ def _get_all_file_events(state, query, cursor, checkpoint=""):
     events = []
 
     try:
-        response = state.sdk.securitydata.search_all_file_events(query, page_token=checkpoint)
+        response = state.sdk.securitydata.search_all_file_events(
+            query, page_token=checkpoint
+        )
     except Py42InvalidPageTokenError:
         response = state.sdk.securitydata.search_all_file_events(query)
     while response["nextPgToken"] is not None:
-        response = state.sdk.securitydata.search_all_file_events(query,
-                                                                 page_token=response["nextPgToken"])
-        
+        response = state.sdk.securitydata.search_all_file_events(
+            query, page_token=response["nextPgToken"]
+        )
+
     for event in response["fileEvents"]:
         events.append(event)
 
@@ -500,19 +498,32 @@ def send_to(
     HOSTNAME format: address:port where port is optional and defaults to 514.
     """
     cursor = _get_cursor(state, use_checkpoint)
-    if use_checkpoint:
-        checkpoint_name = use_checkpoint
-        checkpoint = cursor.get(checkpoint_name)
-        # if checkpoint is not None:
-        #     begin = checkpoint
 
-    events = [] # get audit log checkpoints
-    
     if use_checkpoint:
         checkpoint_name = use_checkpoint
-        events = _store_updated_checkpoint(
-            cursor, checkpoint_name, events
-        )
+        # if checkpoint name exists, checkpoint should be that eventId,
+        # otherwise it should set the initial value to ""
+        checkpoint = cursor.get(checkpoint_name) or ""
+    else:
+        checkpoint = ""
+
+    # older app versions stored checkpoint as float timestamp.
+    # we handle those here until the next run containing events will store checkpoint as the last eventId
+    if isinstance(checkpoint, (int, float)):
+        state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
+        checkpoint = ""
+
+    query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
+    events = _get_all_file_events(state, query, cursor, checkpoint)
+
+    if not events:
+        click.echo("No results found.")
+        return
+
+    if use_checkpoint:
+        checkpoint_name = use_checkpoint
+        # update checkpoint to eventId of last event retrieved
+        events = _store_updated_checkpoint(cursor, checkpoint_name, events)
     with warn_interrupt():
         event = None
         for event in events:
@@ -527,7 +538,7 @@ def _get_cursor(state, use_checkpoint):
 
 def _get_file_event_cursor_store(profile_name):
     return FileEventCursorStore(profile_name)
-        
+
 
 def _convert_to_or_query(filter_groups):
     and_group = FilterGroup([], "AND")
@@ -549,7 +560,12 @@ def _is_exempt_filter(f):
     # if other filters need to be exempt when building a query, append them to this list
     # can either be a `QueryFilter` subclass, or a composed `FilterGroup` if more precision on
     # is needed for which filters should be "AND"ed
-    or_query_exempt_filters = [InsertionTimestamp, EventTimestamp, DateObserved, ExposureType.exists()]
+    or_query_exempt_filters = [
+        InsertionTimestamp,
+        EventTimestamp,
+        DateObserved,
+        ExposureType.exists(),
+    ]
 
     for exempt in or_query_exempt_filters:
         if isinstance(exempt, FilterGroup):
@@ -562,23 +578,10 @@ def _is_exempt_filter(f):
     return False
 
 
-def _store_updated_checkpoint(
-    cursor, checkpoint_name, events
-):
-    checkpoint_events = cursor.get_events(checkpoint_name)
-    new_timestamp = None
-    new_events = []
+def _store_updated_checkpoint(cursor, checkpoint_name, events):
     for event in events:
-        event_hash = hash_event(event)
-        if event_hash not in checkpoint_events:
-            if event["timestamp"] != new_timestamp:
-                new_timestamp = event["timestamp"]
-                new_events.clear()
-            new_events.append(event_hash)
-            yield event
-        cursor.replace(checkpoint_name, events[-1]['eventId'])
-
-    return events
+        yield event
+        cursor.replace(checkpoint_name, events[-1]["eventId"])
 
 
 def _try_get_default_header(include_all, default_header, output_format):

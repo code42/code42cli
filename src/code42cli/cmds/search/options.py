@@ -1,6 +1,4 @@
 import json
-from datetime import datetime
-from datetime import timezone
 
 import click
 from py42.sdk.queries.query_filter import FilterGroup
@@ -91,9 +89,6 @@ class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
                 and begin_present
             ):
                 opts.pop("begin")
-                # checkpoint_value_str = datetime.fromtimestamp(
-                #     checkpoint_value, timezone.utc
-                # ).isoformat()
                 click.echo(
                     "Ignoring --begin value as --use-checkpoint was passed and checkpoint of "
                     f"{checkpoint_value} exists.\n",

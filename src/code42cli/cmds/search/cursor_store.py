@@ -68,7 +68,7 @@ class FileEventCursorStore(BaseCursorStore):
     def __init__(self, profile_name):
         dir_path = get_user_project_path("file_event_checkpoints", profile_name)
         super().__init__(dir_path)
-    
+
     def get(self, cursor_name):
         """Gets the last stored date observed timestamp."""
         try:
@@ -84,6 +84,7 @@ class FileEventCursorStore(BaseCursorStore):
         location = path.join(self._dir_path, cursor_name)
         with open(location, "w") as checkpoint:
             checkpoint.write(str(new_checkpoint))
+
 
 class AlertCursorStore(BaseCursorStore):
     def __init__(self, profile_name):
