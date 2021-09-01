@@ -409,8 +409,6 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
 
     if advanced_query:
         state.search_filters = advanced_query
-    if or_query:
-        state.search_filters = _convert_to_or_query(state.search_filters)
     if saved_search:
         state.search_filters = saved_search._filter_group_list
     else:
@@ -418,6 +416,8 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
             state.search_filters.append(
                 _create_time_range_filter(f.EventTimestamp, begin, end)
             )
+    if or_query:
+        state.search_filters = _convert_to_or_query(state.search_filters)
     query = FileEventQuery(*state.search_filters)
     query.sort_key = "insertionTimestamp"
     return query

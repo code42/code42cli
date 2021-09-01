@@ -94,6 +94,14 @@ def filter_term_is_in_call_args(extractor, term):
     return False
 
 
+def filter_term_is_in_call_args_no_extractor(query, term):
+    arg_filters = query
+    for f in arg_filters:
+        if term in str(f):
+            return True
+    return False
+    
+
 def parse_date_from_filter_value(json, filter_index):
     date_str = get_filter_value_from_json(json, filter_index)
     return convert_str_to_date(date_str)
