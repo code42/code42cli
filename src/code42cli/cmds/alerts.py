@@ -5,6 +5,8 @@ from py42.exceptions import Py42NotFoundError
 from py42.sdk.queries.alerts.filters import AlertState
 from py42.sdk.queries.alerts.filters import RuleType
 from py42.sdk.queries.alerts.filters import Severity
+from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
+from py42.sdk.queries.fileevents.filters import InsertionTimestamp
 from py42.util import format_dict
 
 import code42cli.cmds.search.extraction as ext
@@ -18,6 +20,8 @@ from code42cli.cmds.search import SendToCommand
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.cmds.search.options import server_options
+from code42cli.cmds.utils import create_time_range_filter, convert_to_or_query, \
+    try_get_default_header
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import limit_date_range
 from code42cli.file_readers import read_csv_arg
@@ -231,7 +235,7 @@ def _call_extractor(
 )
 @format_option
 def search(
-    cli_state,
+    state,
     format,
     begin,
     end,
@@ -242,21 +246,55 @@ def search(
     **kwargs,
 ):
     """Search for alerts."""
-    output_header = ext.try_get_default_header(
+    output_header = try_get_default_header(
         include_all, _get_default_output_header(), format
     )
     formatter = OutputFormatter(format, output_header)
-    cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
-    handlers = ext.create_handlers(
-        cli_state.sdk,
-        AlertExtractor,
-        cursor,
-        use_checkpoint,
-        formatter=formatter,
-        force_pager=include_all,
-    )
-    _call_extractor(cli_state, handlers, begin, end, or_query, advanced_query, **kwargs)
-    handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
+    cursor = _get_alert_cursor_store(state.profile.name) if use_checkpoint else None
+    if use_checkpoint:
+        checkpoint_name = use_checkpoint
+        # if checkpoint name exists, checkpoint should be that eventId,
+        # otherwise it should set the initial value to ""
+        checkpoint = cursor.get(checkpoint_name) or ""
+    else:
+        checkpoint = ""
+
+    # older app versions stored checkpoint as float timestamp.
+    # we handle those here until the next run containing events will store checkpoint as the last eventId
+    if isinstance(checkpoint, (int, float)):
+        state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
+        checkpoint = ""
+
+    query = _construct_query(state, begin, end, advanced_query, or_query)
+    events = _get_all_file_events(state, query, cursor, checkpoint)
+
+    if not events:
+        click.echo("No results found.")
+        return
+
+    if use_checkpoint:
+        checkpoint_name = use_checkpoint
+        # update checkpoint to eventId of last event retrieved
+        events_gen = _store_updated_checkpoint(cursor, checkpoint_name, events)
+        formatter.echo_formatted_generated_output(events_gen)
+    else:
+        formatter.echo_formatted_list(events)
+
+
+def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
+
+    if advanced_query:
+        state.search_filters = advanced_query
+    else:
+        if begin or end:
+            state.search_filters.append(
+                create_time_range_filter(f.DateObserved, begin, end)
+            )
+    if or_query:
+        state.search_filters = convert_to_or_query(state.search_filters)
+    query = FileEventQuery(*state.search_filters)
+    query.sort_key = "insertionTimestamp"
+    return query
 
 
 @alerts.command(cls=SendToCommand)

@@ -433,7 +433,7 @@ def _get_all_file_events(state, query, cursor, checkpoint=""):
         )
     except Py42InvalidPageTokenError:
         response = state.sdk.securitydata.search_all_file_events(query)
-    while response["nextPgToken"] is not None:
+    while response["nextPgToken"] is not '':
         response = state.sdk.securitydata.search_all_file_events(
             query, page_token=response["nextPgToken"]
         )
