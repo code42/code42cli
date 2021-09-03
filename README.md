@@ -1,3 +1,4 @@
+test update
 # The Code42 CLI
 
 ![Build status](https://github.com/code42/code42cli/workflows/build/badge.svg)
