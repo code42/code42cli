@@ -1,7 +1,8 @@
 import click
 import py42.sdk.queries.alerts.filters as f
 from c42eventextractor.extractors import AlertExtractor
-from py42.exceptions import Py42NotFoundError
+from py42.exceptions import Py42NotFoundError, Py42InvalidPageTokenError
+from py42.sdk.queries.alerts.alert_query import AlertQuery
 from py42.sdk.queries.alerts.filters import AlertState
 from py42.sdk.queries.alerts.filters import RuleType
 from py42.sdk.queries.alerts.filters import Severity
@@ -29,7 +30,7 @@ from code42cli.options import format_option
 from code42cli.output_formats import JsonOutputFormat
 from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
-
+from code42cli.util import warn_interrupt
 
 ALERTS_KEYWORD = "alerts"
 begin = opt.begin_option(
@@ -235,7 +236,7 @@ def _call_extractor(
 )
 @format_option
 def search(
-    state,
+    cli_state,
     format,
     begin,
     end,
@@ -250,38 +251,37 @@ def search(
         include_all, _get_default_output_header(), format
     )
     formatter = OutputFormatter(format, output_header)
-    cursor = _get_alert_cursor_store(state.profile.name) if use_checkpoint else None
+    cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
     if use_checkpoint:
         checkpoint_name = use_checkpoint
-        # if checkpoint name exists, checkpoint should be that eventId,
+        # if checkpoint name exists, checkpoint should be that alertId,
         # otherwise it should set the initial value to ""
         checkpoint = cursor.get(checkpoint_name) or ""
     else:
         checkpoint = ""
 
     # older app versions stored checkpoint as float timestamp.
-    # we handle those here until the next run containing events will store checkpoint as the last eventId
+    # we handle those here until the next run containing alerts will store checkpoint as the last alertId
     if isinstance(checkpoint, (int, float)):
-        state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
+        cli_state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
         checkpoint = ""
 
-    query = _construct_query(state, begin, end, advanced_query, or_query)
-    events = _get_all_file_events(state, query, cursor, checkpoint)
+    query = _construct_query(cli_state, begin, end, advanced_query, or_query)
+    alerts_list = _get_all_alerts(cli_state, query)
 
-    if not events:
+    if not alerts_list:
         click.echo("No results found.")
         return
 
     if use_checkpoint:
         checkpoint_name = use_checkpoint
-        # update checkpoint to eventId of last event retrieved
-        events_gen = _store_updated_checkpoint(cursor, checkpoint_name, events)
-        formatter.echo_formatted_generated_output(events_gen)
+        # update checkpoint to alertId of last event retrieved
+        alerts_gen = _store_updated_checkpoint(cursor, checkpoint_name, alerts_list)
     else:
-        formatter.echo_formatted_list(events)
+        formatter.echo_formatted_list(alerts_list)
 
 
-def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
+def _construct_query(state, begin, end, advanced_query, or_query):
 
     if advanced_query:
         state.search_filters = advanced_query
@@ -292,10 +292,30 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
             )
     if or_query:
         state.search_filters = convert_to_or_query(state.search_filters)
-    query = FileEventQuery(*state.search_filters)
-    query.sort_key = "insertionTimestamp"
+    query = AlertQuery(*state.search_filters)
+    query.sort_direction = u"asc"
+    query.sort_key = "CreatedAt"
     return query
 
+
+def _get_all_alerts(state, query):
+
+    alert_list = []
+
+    responses = state.sdk.alerts.search_all_pages(query)
+    
+    for response in responses:
+        for alert in response["alerts"]:
+            alert_list.append(alert)
+
+    return alert_list
+
+
+def _store_updated_checkpoint(cursor, checkpoint_name, alerts_gen):
+    for alert in alerts_gen:
+        yield alert
+        cursor.replace(checkpoint_name, alert[u"alertId"])
+        
 
 @alerts.command(cls=SendToCommand)
 @filter_options
@@ -318,12 +338,38 @@ def send_to(cli_state, begin, end, advanced_query, use_checkpoint, or_query, **k
     HOSTNAME format: address:port where port is optional and defaults to 514.
     """
     cursor = _get_cursor(cli_state, use_checkpoint)
-    handlers = ext.create_send_to_handlers(
-        cli_state.sdk, AlertExtractor, cursor, use_checkpoint, cli_state.logger,
-    )
-    _call_extractor(cli_state, handlers, begin, end, or_query, advanced_query, **kwargs)
-    handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
+    
+    if use_checkpoint:
+        checkpoint_name = use_checkpoint
+        # if checkpoint name exists, checkpoint should be that alertId,
+        # otherwise it should set the initial value to ""
+        checkpoint = cursor.get(checkpoint_name) or ""
+    else:
+        checkpoint = ""
 
+    # older app versions stored checkpoint as float timestamp.
+    # we handle those here until the next run containing alerts will store checkpoint as the last alertId
+    if isinstance(checkpoint, (int, float)):
+        cli_state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
+        checkpoint = ""
+
+    query = _construct_query(cli_state, begin, end, advanced_query, or_query)
+    alerts_list = _get_all_alerts(cli_state, query)
+
+    if not alerts_list:
+        click.echo("No results found.")
+        return
+
+    if use_checkpoint:
+        checkpoint_name = use_checkpoint
+        # update checkpoint to eventId of last event retrieved
+        alerts_gen = _store_updated_checkpoint(cursor, checkpoint_name, alerts_list)
+    with warn_interrupt():
+        alert = None
+        for alert in alerts_list:
+            cli_state.logger.info(alert)
+        if alert is None:  # generator was empty
+            click.echo("No results found.")
 
 def _get_cursor(state, use_checkpoint):
     return _get_alert_cursor_store(state.profile.name) if use_checkpoint else None
@@ -383,6 +429,7 @@ def update(cli_state, alert_id, state, note):
 @alerts.group(cls=OrderedGroup)
 @opt.sdk_options(hidden=True)
 def bulk(state):
+    """Tools for executing bulk alert actions."""
     """Tools for executing bulk alert actions."""
     pass
 

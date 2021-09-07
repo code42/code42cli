@@ -51,12 +51,6 @@ def _is_exempt_filter(f):
     return False
 
 
-def _store_updated_checkpoint(cursor, checkpoint_name, events):
-    for event in events:
-        yield event
-        cursor.replace(checkpoint_name, events[-1]["eventId"])
-
-
 def try_get_default_header(include_all, default_header, output_format):
     """Returns appropriate header based on include-all and output format. If returns None,
     the CLI format option will figure out the header based on the data keys."""

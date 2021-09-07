@@ -419,6 +419,7 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
     if or_query:
         state.search_filters = _convert_to_or_query(state.search_filters)
     query = FileEventQuery(*state.search_filters)
+    query.sort_direction = u"asc"
     query.sort_key = "insertionTimestamp"
     return query
 
@@ -433,7 +434,7 @@ def _get_all_file_events(state, query, cursor, checkpoint=""):
         )
     except Py42InvalidPageTokenError:
         response = state.sdk.securitydata.search_all_file_events(query)
-    while response["nextPgToken"] is not '':
+    while response["nextPgToken"]:
         response = state.sdk.securitydata.search_all_file_events(
             query, page_token=response["nextPgToken"]
         )
@@ -581,7 +582,7 @@ def _is_exempt_filter(f):
 def _store_updated_checkpoint(cursor, checkpoint_name, events):
     for event in events:
         yield event
-        cursor.replace(checkpoint_name, events[-1]["eventId"])
+        cursor.replace(checkpoint_name, event["eventId"])
 
 
 def _try_get_default_header(include_all, default_header, output_format):

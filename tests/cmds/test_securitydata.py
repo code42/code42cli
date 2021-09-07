@@ -139,11 +139,13 @@ saved_search_incompat_test_params = pytest.mark.parametrize(
     ],
 )
 
-TEST_FILE_EVENT_TIMESTAMP_1= "2020-01-01T12:00:00.000Z"
+TEST_FILE_EVENT_TIMESTAMP_1 = "2020-01-01T12:00:00.000Z"
 TEST_FILE_EVENT_TIMESTAMP_2 = "2020-02-01T12:01:00.000111Z"
+TEST_FILE_EVENT_ID_1 = "0_test1"
+TEST_FILE_EVENT_ID_2 = "0_test2"
 TEST_EVENTS = [
     {
-        "eventId": "0_1d71796f-af5b-4231-9d8e-df6434da4663_1011988361784212915_1020848483229446284_211_EPS",
+        "eventId": TEST_FILE_EVENT_ID_1,
         "eventType": "READ_BY_APP",
         "eventTimestamp": TEST_FILE_EVENT_TIMESTAMP_1,
         "insertionTimestamp": TEST_FILE_EVENT_TIMESTAMP_1,
@@ -166,7 +168,7 @@ TEST_EVENTS = [
         ]
     },
     {
-        "eventId": "0_1d71796f-af5b-4231-9d8e-df6434da4663_1011988361784212915_1020850710857855116_12_EPS",
+        "eventId": TEST_FILE_EVENT_ID_2,
         "eventType": "READ_BY_APP",
         "eventTimestamp": TEST_FILE_EVENT_TIMESTAMP_2,
         "insertionTimestamp": TEST_FILE_EVENT_TIMESTAMP_2,
@@ -194,12 +196,22 @@ search_and_send_to_test = get_mark_for_search_and_send_to("security-data")
 
 
 @pytest.fixture
-def file_event_cursor_with_checkpoint(mocker):
+def file_event_cursor_with_timestamp_checkpoint(mocker):
     mock = mocker.patch("code42cli.cmds.securitydata._get_file_event_cursor_store")
     mock_cursor = mocker.MagicMock(spec=FileEventCursorStore)
     mock_cursor.get.return_value = CURSOR_TIMESTAMP
     mock.return_value = mock_cursor
-    mock.expected_timestamp = "2020-01-20T06:00:00+00:00"
+    mock.expected_timestamp = "2020-01-20T06:00:00.000Z"
+    return mock
+
+
+@pytest.fixture
+def file_event_cursor_with_eventid_checkpoint(mocker):
+    mock = mocker.patch("code42cli.cmds.securitydata._get_file_event_cursor_store")
+    mock_cursor = mocker.MagicMock(spec=FileEventCursorStore)
+    mock_cursor.get.return_value = TEST_FILE_EVENT_ID_2
+    mock.return_value = mock_cursor
+    mock.expected_eventid = "0_test2"
     return mock
 
 
@@ -231,7 +243,7 @@ def mock_file_event_response(mocker):
         'totalCount': 2,
         'fileEvents': TEST_EVENTS,
         'nextPgToken': '',
-        # 'problems': ''
+        'problems': ''
     })
     
     response = create_mock_response(
@@ -538,29 +550,21 @@ def test_search_send_to_when_given_begin_date_more_than_ninety_days_back_errors(
     assert "must be within 90 days" in result.output
 
 
-# @search_and_send_to_test
-# def test_search_and_send_to_when_given_begin_date_past_90_days_and_use_checkpoint_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
-#     runner, cli_state, file_event_cursor_with_checkpoint, command
-# ):
-#     begin_date = get_test_date_str(days_ago=91) + " 12:51:00"
-# 
-# #     runner.invoke(
-#         cli,
-#         [*command, "--begin", begin_date, "--use-checkpoint", "test"],
-#         obj=cli_state,
-#     )
-#     query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
-#     query_dict = {k: v for k, v in query}
-# 
-#     filter_groups = query_dict["groups"]
-#     filter_obj = f.ExposureType.exists()
-#     # assert filter_obj not in query._filter_group_list
-#     # print(filter_groups)
-#     # assert not filter_term_is_in_call_args_no_extractor(
-#     #     filter_groups, f.InsertionTimestamp._term
-#     # )
-#     print(filter_groups)
-#     assert True
+@search_and_send_to_test
+def test_search_and_send_to_when_given_begin_date_past_90_days_and_use_checkpoint_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
+    runner, cli_state, file_event_cursor_with_eventid_checkpoint, command, search_all_file_events_success
+):
+    begin_date = get_test_date_str(days_ago=91) + " 12:51:00"
+
+    runner.invoke(
+        cli,
+        [*command, "--begin", begin_date, "--use-checkpoint", "test"],
+        obj=cli_state,
+    )
+    query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
+    assert not filter_term_is_in_call_args_no_extractor(
+        query._filter_group_list, f.InsertionTimestamp._term
+    )
 
 
 @search_and_send_to_test
@@ -574,7 +578,7 @@ def test_search_and_send_to_when_given_begin_date_and_not_use_checkpoint_and_cur
     actual_ts = query_dict["groups"][1]['filters'][0]['value']
     expected_ts = f"{begin_date}T00:00:00.000Z"
     assert actual_ts == expected_ts
-    assert filter_term_is_in_call_args_no_extractor(query, f.EventTimestamp._term)
+    assert filter_term_is_in_call_args_no_extractor(query._filter_group_list, f.EventTimestamp._term)
 
 
 @search_and_send_to_test
@@ -650,24 +654,34 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_without_check
     assert begin_option.expected_timestamp == actual_begin
 
 
-# @search_and_send_to_test
-# def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_as_timestamp_calls_search_all_file_events_with_timestamp_and_ignores_begin_arg(
-#     runner, cli_state, file_event_cursor_with_checkpoint, command, search_all_file_events_success
-# ):
-#     result = runner.invoke(
-#         cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
-#     )
-#     query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
-#     assert result.exit_code == 0
-#     assert len(query._filter_group_list) == 1
-#     assert (
-#         f"checkpoint of {file_event_cursor_with_checkpoint.expected_timestamp} exists"
-#         in result.output
-#     )
+@search_and_send_to_test
+def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_as_timestamp_calls_search_all_file_events_with_checkpoint_timestamp_and_ignores_begin_arg(
+    runner, cli_state, file_event_cursor_with_timestamp_checkpoint, command, search_all_file_events_success
+):
+    result = runner.invoke(
+        cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
+    )
+    query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
+    query_dict = {k: v for k, v in query}
+    actual_query_timestamp = query_dict["groups"][1]['filters'][0]['value']
+    assert result.exit_code == 0
+    assert len(query._filter_group_list) == 2
+    assert file_event_cursor_with_timestamp_checkpoint.expected_timestamp == actual_query_timestamp
 
-# @search_and_send_to_test
-# def test_search_and_send_to_with_use_checkpoint_and_with_stored_checkpoint_as_eventid_calls_search_all_file_events_with_checkpoint_and_ignores_begin_arg():
-#     assert True
+@search_and_send_to_test
+def test_search_and_send_to_with_use_checkpoint_and_with_stored_checkpoint_as_eventid_calls_search_all_file_events_with_checkpoint_and_ignores_begin_arg(    
+    runner, cli_state, file_event_cursor_with_eventid_checkpoint, command, search_all_file_events_success
+):
+    result = runner.invoke(
+        cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
+    )
+    query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
+    assert result.exit_code == 0
+    assert len(query._filter_group_list) == 1
+    assert (
+        f"checkpoint of {file_event_cursor_with_eventid_checkpoint.expected_eventid} exists"
+        in result.output
+    )
 
 
 @search_and_send_to_test
@@ -1078,7 +1092,6 @@ def test_search_and_send_to_when_given_risk_severity_uses_risk_severity_filter(
 #     errors.ERRORED = False
 #     exception_msg = "Test Exception"
 #     cli_state.sdk.securitydata.search_file_events.side_effect = Exception(exception_msg)
-#     # cli_state.sdk.securitydata.search_all_file_events.side_effect = Exception(exception_msg)
 #     with caplog.at_level(logging.ERROR):
 #         result = runner.invoke(cli, [*command, "--begin", "1d"], obj=cli_state)
 #         assert "Error:" in result.output

@@ -83,7 +83,7 @@ def user_already_added_error(custom_error):
 
 
 def get_filter_value_from_json(json, filter_index):
-    return json_module.loads(str(json))["filters"][filter_index]["value"]
+    return json_module.loads(str(json))[u"filters"][filter_index][u"value"]
 
 
 def filter_term_is_in_call_args(extractor, term):
@@ -94,9 +94,8 @@ def filter_term_is_in_call_args(extractor, term):
     return False
 
 
-def filter_term_is_in_call_args_no_extractor(query, term):
-    arg_filters = query
-    for f in arg_filters:
+def filter_term_is_in_call_args_no_extractor(filter_group, term):
+    for f in filter_group:
         if term in str(f):
             return True
     return False
