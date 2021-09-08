@@ -385,7 +385,7 @@ def test_search_and_send_to_passes_query_object_when_searching_file_events(
         cli, [*command, "--advanced-query", ADVANCED_QUERY_JSON], obj=cli_state
     )
 
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     assert isinstance(query, AlertQuery)
 
 
@@ -396,7 +396,7 @@ def test_search_and_send_to_when_advanced_query_passed_as_json_string_builds_exp
     runner.invoke(
         cli, [*command, "--advanced-query", ADVANCED_QUERY_JSON], obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     passed_filter_groups = query._filter_group_list
     expected_actor_filter = f.Actor.contains(ADVANCED_QUERY_VALUES["actor"])
     expected_actor_filter.filter_clause = "OR"
@@ -457,7 +457,7 @@ def test_search_and_send_to_when_given_begin_and_end_dates_uses_expected_query(
     runner.invoke(
         cli, [*command, "--begin", begin_date, "--end", end_date], obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     query_dict = {k: v for k, v in query}
 
     actual_begin = query_dict["groups"][0]["filters"][0]["value"]
@@ -482,7 +482,7 @@ def test_search_when_given_begin_and_end_date_and_times_uses_expected_query(
         [*command, "--begin", f"{begin_date} {time}", "--end", f"{end_date} {time}"],
         obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     query_dict = {k: v for k, v in query}
 
     actual_begin = query_dict["groups"][0]["filters"][0]["value"]
@@ -502,7 +502,7 @@ def test_search_when_given_begin_date_and_time_without_seconds_uses_expected_que
     date = get_test_date_str(days_ago=89)
     time = "15:33"
     runner.invoke(cli, [*command, "--begin", f"{date} {time}"], obj=cli_state)
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     query_dict = {k: v for k, v in query}
     actual = query_dict["groups"][0]["filters"][0]["value"]
     expected = f"{date}T{time}:00.000000Z"
@@ -521,7 +521,7 @@ def test_search_and_send_to_when_given_end_date_and_time_uses_expected_query(
         [*command, "--begin", begin_date, "--end", f"{end_date} {time}"],
         obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     query_dict = {k: v for k, v in query}
     actual = query_dict["groups"][0]["filters"][1]["value"]
     expected = f"{end_date}T{time}:00.000000Z"
@@ -544,7 +544,7 @@ def test_search_and_send_to_when_given_begin_date_and_not_use_checkpoint_and_cur
 ):
     begin_date = get_test_date_str(days_ago=1)
     runner.invoke(cli, [*command, "--begin", begin_date], obj=cli_state)
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     query_dict = {k: v for k, v in query}
     actual_ts = query_dict["groups"][0]["filters"][0]["value"]
     expected_ts = f"{begin_date}T00:00:00.000000Z"
@@ -570,7 +570,7 @@ def test_search_and_send_to_with_only_begin_calls_search_all_alerts_with_expecte
     cli_state, begin_option, runner, command, search_all_alerts_success
 ):
     res = runner.invoke(cli, [*command, "--begin", "1d"], obj=cli_state)
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     query_dict = {k: v for k, v in query}
     expected_filter_groups = [
         {
@@ -612,7 +612,7 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_without_check
     res = runner.invoke(
         cli, [*command, "--use-checkpoint", "test", "--begin", "1d"], obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     query_dict = {k: v for k, v in query}
     actual_begin = query_dict["groups"][0]["filters"][0]["value"]
 
@@ -628,7 +628,7 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_with_stored_c
     result = runner.invoke(
         cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     assert result.exit_code == 0
     assert len(query._filter_group_list) == 1
     assert (
@@ -645,7 +645,7 @@ def test_search_and_send_to_when_given_actor_is_uses_username_filter(
     runner.invoke(
         cli, [*command, "--begin", "1h", "--actor", actor_name], obj=cli_state
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     assert f.Actor.is_in([actor_name]) in query._filter_group_list
 
 
@@ -657,7 +657,7 @@ def test_search_and_send_to_when_given_exclude_actor_uses_actor_filter(
     runner.invoke(
         cli, [*command, "--begin", "1h", "--exclude-actor", actor_name], obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     assert f.Actor.not_in([actor_name]) in query._filter_group_list
 
 
@@ -669,7 +669,7 @@ def test_search_and_send_to_when_given_rule_name_uses_rule_name_filter(
     runner.invoke(
         cli, [*command, "--begin", "1h", "--rule-name", rule_name], obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     assert f.RuleName.is_in([rule_name]) in query._filter_group_list
 
 
@@ -683,7 +683,7 @@ def test_search_and_send_to_when_given_exclude_rule_name_uses_rule_name_not_filt
         [*command, "--begin", "1h", "--exclude-rule-name", rule_name],
         obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     assert f.RuleName.not_in([rule_name]) in query._filter_group_list
 
 
@@ -695,7 +695,7 @@ def test_search_and_send_to_when_given_rule_type_uses_rule_name_filter(
     runner.invoke(
         cli, [*command, "--begin", "1h", "--rule-type", rule_type], obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     assert f.RuleType.is_in([rule_type]) in query._filter_group_list
 
 
@@ -709,7 +709,7 @@ def test_search_and_send_to_when_given_exclude_rule_type_uses_rule_name_not_filt
         [*command, "--begin", "1h", "--exclude-rule-type", rule_type],
         obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     assert f.RuleType.not_in([rule_type]) in query._filter_group_list
 
 
@@ -719,7 +719,7 @@ def test_search_and_send_to_when_given_rule_id_uses_rule_name_filter(
 ):
     rule_id = "departing employee"
     runner.invoke(cli, [*command, "--begin", "1h", "--rule-id", rule_id], obj=cli_state)
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     assert f.RuleId.is_in([rule_id]) in query._filter_group_list
 
 
@@ -731,7 +731,7 @@ def test_search_and_send_to_when_given_exclude_rule_id_uses_rule_name_not_filter
     runner.invoke(
         cli, [*command, "--begin", "1h", "--exclude-rule-id", rule_id], obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     assert f.RuleId.not_in([rule_id]) in query._filter_group_list
 
 
@@ -743,7 +743,7 @@ def test_search_and_send_to_when_given_description_uses_description_filter(
     runner.invoke(
         cli, [*command, "--begin", "1h", "--description", description], obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     assert f.Description.contains(description) in query._filter_group_list
 
 
@@ -770,7 +770,7 @@ def test_search_and_send_to_when_given_multiple_search_args_uses_expected_filter
         ],
         obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     assert f.Actor.is_in([actor]) in query._filter_group_list
     assert f.Actor.not_in([exclude_actor]) in query._filter_group_list
     assert f.RuleName.is_in([rule_name]) in query._filter_group_list
@@ -828,7 +828,7 @@ def test_search_and_send_to_with_or_query_flag_produces_expected_query(
         "srtDirection": "asc",
         "srtKey": "CreatedAt",
     }
-    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
     actual_query = {k: v for k, v in query}
     assert actual_query == expected_query
 
