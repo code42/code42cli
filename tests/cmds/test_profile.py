@@ -7,6 +7,9 @@ from code42cli.errors import LoggedCLIError
 from code42cli.main import cli
 
 
+_SELECTED_PROFILE_NAME = "test_profile"
+
+
 @pytest.fixture
 def user_agreement(mocker):
     mock = mocker.patch("code42cli.cmds.profile.does_user_agree")
@@ -48,6 +51,13 @@ def valid_connection(mocker, mock_verify):
 def invalid_connection(mock_verify):
     mock_verify.side_effect = LoggedCLIError("Problem connecting to server")
     return mock_verify
+
+
+@pytest.fixture
+def profile_name_selector(mocker):
+    mock = mocker.patch("code42cli.cmds.profile.click.prompt")
+    mock.return_value = _SELECTED_PROFILE_NAME
+    return mock
 
 
 def test_show_profile_outputs_profile_info(runner, mock_cliprofile_namespace, profile):
@@ -509,6 +519,29 @@ def test_use_profile(runner, mock_cliprofile_namespace, profile):
         profile.name
     )
     assert f"{profile.name} has been set as the default profile." in result.output
+
+
+def test_use_profile_when_not_given_profile_name_arg_sets_selected_profile_as_default(
+    runner, mock_cliprofile_namespace, profile_name_selector
+):
+    runner.invoke(cli, ["profile", "use"])
+    mock_cliprofile_namespace.switch_default_profile.assert_called_once_with(
+        _SELECTED_PROFILE_NAME
+    )
+
+
+def test_use_profile_when_not_given_profile_name_outputs_expected_text(
+    runner, mock_cliprofile_namespace, profile_name_selector
+):
+    mock_cliprofile_namespace.get_all_profiles.return_value = [
+        create_mock_profile("test1"),
+        create_mock_profile("test2"),
+    ]
+    result = runner.invoke(cli, ["profile", "use"])
+    expected_prompt = "1. test1\n2. test2"
+    expected_result_message = "test_profile has been set as the default profile."
+    assert expected_prompt in result.output
+    assert expected_result_message in result.output
 
 
 def test_totp_option_passes_token_to_sdk_on_profile_cmds_that_init_sdk(

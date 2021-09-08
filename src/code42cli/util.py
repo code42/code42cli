@@ -38,6 +38,7 @@ def get_user_project_path(*subdirs):
     result_path = path.join(user_project_path, *subdirs)
     if not path.exists(result_path):
         os.makedirs(result_path)
+
     return result_path
 
 
@@ -156,6 +157,7 @@ def get_url_parts(url_str):
     port = None
     if len(parts) > 1 and parts[1] != "":
         port = int(parts[1])
+
     return parts[0], port
 
 
@@ -170,6 +172,7 @@ def _get_default_header(header_items):
         for key in keys:
             if key not in header and isinstance(key, str):
                 header[key] = key
+
     return header
 
 
@@ -177,6 +180,17 @@ def hash_event(event):
     if isinstance(event, dict):
         event = json.dumps(event, sort_keys=True)
     return md5(event.encode()).hexdigest()
+
+
+def print_numbered_list(items):
+    """Outputs a numbered list of items to the user.
+    For example, provide ["test", "foo"] to print "1. test\n2. foo".
+    """
+
+    choices = dict(enumerate(items, 1))
+    for num in choices:
+        echo(f"{num}. {choices[num]}")
+    echo()
 
 
 def parse_timestamp(date_str):
