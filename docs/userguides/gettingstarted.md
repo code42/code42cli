@@ -22,7 +22,7 @@ python3 -m pip install code42cli
 ```
 
 To install a previous version of the Code42 CLI via `pip`, add the version number. For example, to install version
-0.4.1, enter:
+0.5.3, enter:
 
 ```bash
 python3 -m pip install code42cli==0.5.3
