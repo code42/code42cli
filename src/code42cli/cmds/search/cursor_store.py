@@ -30,7 +30,12 @@ class BaseCursorStore:
         try:
             location = path.join(self._dir_path, cursor_name)
             with open(location) as checkpoint:
-                return float(checkpoint.read())
+                try:
+                    return float(checkpoint.read())
+                except ValueError:
+                    raise Code42CLIError(
+                        f"No valid checkpoint value associated with the checkpoint named {cursor_name}"
+                    )
         except FileNotFoundError:
             return None
 
@@ -74,16 +79,9 @@ class FileEventCursorStore(BaseCursorStore):
         try:
             location = path.join(self._dir_path, cursor_name)
             with open(location) as checkpoint:
-                # add some logic to separate eventId's from timestamps
                 return str(checkpoint.read())
         except FileNotFoundError:
             return None
-
-    def replace(self, cursor_name, new_checkpoint):
-        """Replaces the last stored date observed timestamp with the given one."""
-        location = path.join(self._dir_path, cursor_name)
-        with open(location, "w") as checkpoint:
-            checkpoint.write(str(new_checkpoint))
 
 
 class AlertCursorStore(BaseCursorStore):

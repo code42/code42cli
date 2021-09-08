@@ -3,20 +3,16 @@ import logging
 
 import py42.sdk.queries.alerts.filters as f
 import pytest
-from c42eventextractor.extractors import AlertExtractor
 from py42.exceptions import Py42NotFoundError
 from py42.sdk.queries.alerts.alert_query import AlertQuery
 from py42.sdk.queries.alerts.filters import AlertState
-from tests.cmds.conftest import filter_term_is_in_call_args, \
-    filter_term_is_in_call_args_no_extractor
-from tests.cmds.conftest import get_filter_value_from_json
+from tests.cmds.conftest import filter_term_is_in_call_args
 from tests.cmds.conftest import get_mark_for_search_and_send_to
 from tests.conftest import create_mock_response
 from tests.conftest import get_test_date_str
 
-from code42cli import errors
 from code42cli import PRODUCT_NAME
-from code42cli.cmds.search import extraction
+from code42cli.cmds import alerts
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.logger.enums import ServerProtocol
 from code42cli.main import cli
@@ -300,19 +296,12 @@ search_and_send_to_test = get_mark_for_search_and_send_to("alerts")
 
 
 @pytest.fixture
-def alert_extractor(mocker):
-    mock = mocker.patch(f"{PRODUCT_NAME}.cmds.alerts._get_alert_extractor")
-    mock.return_value = mocker.MagicMock(spec=AlertExtractor)
-    return mock.return_value
-
-
-@pytest.fixture
 def alert_cursor_with_checkpoint(mocker):
     mock = mocker.patch(f"{PRODUCT_NAME}.cmds.alerts._get_alert_cursor_store")
     mock_cursor = mocker.MagicMock(spec=AlertCursorStore)
     mock_cursor.get.return_value = CURSOR_TIMESTAMP
     mock.return_value = mock_cursor
-    mock.expected_timestamp = "2020-01-20T06:00:00+00:00"
+    mock.expected_datetime = "2020-01-20 06:00:00"
     return mock
 
 
@@ -334,11 +323,6 @@ def begin_option(mocker):
 
 
 @pytest.fixture
-def alert_extract_func(mocker):
-    return mocker.patch(f"{PRODUCT_NAME}.cmds.alerts._extract")
-
-
-@pytest.fixture
 def send_to_logger_factory(mocker):
     return mocker.patch("code42cli.cmds.search._try_get_logger_for_server")
 
@@ -350,8 +334,9 @@ def full_alert_details_response(mocker):
 
 @pytest.fixture
 def mock_alert_search_response(mocker):
-    data = json.dumps({
-            'type$': 'ALERT_QUERY_RESPONSE',
+    data = json.dumps(
+        {
+            "type$": "ALERT_QUERY_RESPONSE",
             "alerts": [
                 {
                     "tenantId": "MyExampleTenant",
@@ -369,20 +354,17 @@ def mock_alert_search_response(mocker):
                     "createdAt": "2020-02-19T01:57:45.006683Z",
                     "state": "OPEN",
                     "stateLastModifiedBy": "string",
-                    "stateLastModifiedAt": "2019-08-24T14:15:22Z"
+                    "stateLastModifiedAt": "2019-08-24T14:15:22Z",
                 }
             ],
             "totalCount": "3",
-            "problems": []
-    })
+            "problems": [],
+        }
+    )
 
-    response1 = create_mock_response(
-        mocker, data=data
-    )
-    response2 = create_mock_response(
-        mocker, data=data
-    )
-    
+    response1 = create_mock_response(mocker, data=data)
+    response2 = create_mock_response(mocker, data=data)
+
     def response_gen():
         yield response1
         yield response2
@@ -405,7 +387,7 @@ def test_search_and_send_to_passes_query_object_when_searching_file_events(
 
     query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
     assert isinstance(query, AlertQuery)
-    
+
 
 @search_and_send_to_test
 def test_search_and_send_to_when_advanced_query_passed_as_json_string_builds_expected_query(
@@ -478,10 +460,10 @@ def test_search_and_send_to_when_given_begin_and_end_dates_uses_expected_query(
     query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
     query_dict = {k: v for k, v in query}
 
-    actual_begin = query_dict["groups"][0]['filters'][0]['value']
+    actual_begin = query_dict["groups"][0]["filters"][0]["value"]
     expected_begin = f"{begin_date}T00:00:00.000000Z"
 
-    actual_end = query_dict["groups"][0]['filters'][1]['value']
+    actual_end = query_dict["groups"][0]["filters"][1]["value"]
     expected_end = f"{end_date}T23:59:59.999999Z"
 
     assert actual_begin == expected_begin
@@ -503,12 +485,12 @@ def test_search_when_given_begin_and_end_date_and_times_uses_expected_query(
     query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
     query_dict = {k: v for k, v in query}
 
-    actual_begin = query_dict["groups"][0]['filters'][0]['value']
+    actual_begin = query_dict["groups"][0]["filters"][0]["value"]
     expected_begin = f"{begin_date}T{time}.000000Z"
-    
-    actual_end = query_dict["groups"][0]['filters'][1]['value']
+
+    actual_end = query_dict["groups"][0]["filters"][1]["value"]
     expected_end = f"{end_date}T{time}.000000Z"
-    
+
     assert actual_begin == expected_begin
     assert actual_end == expected_end
 
@@ -522,7 +504,7 @@ def test_search_when_given_begin_date_and_time_without_seconds_uses_expected_que
     runner.invoke(cli, [*command, "--begin", f"{date} {time}"], obj=cli_state)
     query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
     query_dict = {k: v for k, v in query}
-    actual = query_dict["groups"][0]['filters'][0]['value']
+    actual = query_dict["groups"][0]["filters"][0]["value"]
     expected = f"{date}T{time}:00.000000Z"
     assert actual == expected
 
@@ -541,7 +523,7 @@ def test_search_and_send_to_when_given_end_date_and_time_uses_expected_query(
     )
     query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
     query_dict = {k: v for k, v in query}
-    actual = query_dict["groups"][0]['filters'][1]['value']
+    actual = query_dict["groups"][0]["filters"][1]["value"]
     expected = f"{end_date}T{time}:00.000000Z"
     assert actual == expected
 
@@ -556,19 +538,6 @@ def test_search_and_send_to_when_given_begin_date_more_than_ninety_days_back_err
     assert result.exit_code == 2
 
 
-# @search_and_send_to_test
-# def test_search_and_send_to_when_given_begin_date_past_90_days_and_use_checkpoint_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
-#     cli_state, alert_cursor_with_checkpoint, alert_extractor, runner, command
-# ):
-#     begin_date = get_test_date_str(days_ago=91) + " 12:51:00"
-#     runner.invoke(
-#         cli,
-#         [*command, "--begin", begin_date, "--use-checkpoint", "test"],
-#         obj=cli_state,
-#     )
-#     assert not filter_term_is_in_call_args(alert_extractor, f.DateObserved._term)
-
-
 @search_and_send_to_test
 def test_search_and_send_to_when_given_begin_date_and_not_use_checkpoint_and_cursor_exists_uses_begin_date(
     cli_state, runner, command, search_all_alerts_success
@@ -577,10 +546,10 @@ def test_search_and_send_to_when_given_begin_date_and_not_use_checkpoint_and_cur
     runner.invoke(cli, [*command, "--begin", begin_date], obj=cli_state)
     query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
     query_dict = {k: v for k, v in query}
-    actual_ts = query_dict["groups"][0]['filters'][0]['value']
+    actual_ts = query_dict["groups"][0]["filters"][0]["value"]
     expected_ts = f"{begin_date}T00:00:00.000000Z"
     assert actual_ts == expected_ts
-    assert filter_term_is_in_call_args_no_extractor(query, f.DateObserved._term)
+    assert filter_term_is_in_call_args(query, f.DateObserved._term)
 
 
 @search_and_send_to_test
@@ -610,9 +579,9 @@ def test_search_and_send_to_with_only_begin_calls_search_all_alerts_with_expecte
                 {
                     "operator": "ON_OR_AFTER",
                     "term": "createdAt",
-                    "value": begin_option.expected_timestamp
+                    "value": begin_option.expected_timestamp,
                 }
-            ]
+            ],
         }
     ]
     assert res.exit_code == 0
@@ -638,34 +607,34 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_without_check
     alert_cursor_without_checkpoint,
     runner,
     command,
-    search_all_alerts_success
+    search_all_alerts_success,
 ):
     res = runner.invoke(
         cli, [*command, "--use-checkpoint", "test", "--begin", "1d"], obj=cli_state,
     )
     query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
     query_dict = {k: v for k, v in query}
-    actual_begin = query_dict["groups"][0]['filters'][0]['value']
+    actual_begin = query_dict["groups"][0]["filters"][0]["value"]
 
     assert res.exit_code == 0
     assert len(query._filter_group_list) == 1
     assert begin_option.expected_timestamp == actual_begin
 
 
-# @search_and_send_to_test
-# def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_calls_extract_with_checkpoint_and_ignores_begin_arg(
-#     cli_state, alert_cursor_with_checkpoint, runner, command
-# ):
-#     result = runner.invoke(
-#         cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
-#     )
-#     query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
-#     assert result.exit_code == 0
-#     assert len(query._filter_group_list) == 1
-#     assert (
-#         f"checkpoint of {alert_cursor_with_checkpoint.expected_timestamp} exists"
-#         in result.output
-#     )
+@search_and_send_to_test
+def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_calls_search_all_alerts_with_checkpoint_and_ignores_begin_arg(
+    cli_state, alert_cursor_with_checkpoint, runner, command, search_all_alerts_success
+):
+    result = runner.invoke(
+        cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
+    )
+    query = cli_state.sdk.alerts.search_all_pages.call_args.args[0]
+    assert result.exit_code == 0
+    assert len(query._filter_group_list) == 1
+    assert (
+        f"checkpoint of {alert_cursor_with_checkpoint.expected_datetime} exists"
+        in result.output
+    )
 
 
 @search_and_send_to_test
@@ -864,21 +833,20 @@ def test_search_and_send_to_with_or_query_flag_produces_expected_query(
     assert actual_query == expected_query
 
 
-# @search_and_send_to_test
-# def test_search_and_send_to_when_extraction_handles_error_expected_message_logged_and_printed_and_global_errored_flag_set(
-#     runner, cli_state, caplog, command
-# ):
-#     errors.ERRORED = False
-#     exception_msg = "Test Exception"
-#     cli_state.sdk.alerts.search.side_effect = Exception(exception_msg)
-#     with caplog.at_level(logging.ERROR):
-#         result = runner.invoke(cli, [*command, "--begin", "1d"], obj=cli_state)
-#         assert "Error:" in result.output
-#         assert exception_msg in result.output
-#         assert exception_msg in caplog.text
-#         assert errors.ERRORED
-# 
-# 
+@search_and_send_to_test
+def test_search_and_send_to_handles_error_expected_message_logged_and_printed(
+    runner, cli_state, caplog, command
+):
+    exception_msg = "Test Exception"
+    expected_msg = "Unknown problem occurred"
+    cli_state.sdk.alerts.search_all_pages.side_effect = Exception(exception_msg)
+    with caplog.at_level(logging.ERROR):
+        result = runner.invoke(cli, [*command, "--begin", "1d"], obj=cli_state)
+        assert "Error:" in result.output
+        assert expected_msg in result.output
+        assert exception_msg in caplog.text
+
+
 @pytest.mark.parametrize(
     "protocol", (ServerProtocol.TLS_TCP, ServerProtocol.TLS_TCP, ServerProtocol.UDP)
 )
@@ -1012,19 +980,20 @@ def test_send_to_when_given_certs_with_non_tls_protocol_fails_expectedly(
 
 
 def test_get_alert_details_batches_results_according_to_batch_size(sdk):
-    extraction._ALERT_DETAIL_BATCH_SIZE = 2
+    alerts._ALERT_DETAIL_BATCH_SIZE = 2
     sdk.alerts.get_details.side_effect = ALERT_DETAIL_RESULT
-    extraction._get_alert_details(sdk, ALERT_SUMMARY_LIST)
+    alerts._get_alert_details(sdk, ALERT_SUMMARY_LIST)
     assert sdk.alerts.get_details.call_count == 10
 
 
 def test_get_alert_details_sorts_results_by_date(sdk):
-    extraction._ALERT_DETAIL_BATCH_SIZE = 2
+    alerts._ALERT_DETAIL_BATCH_SIZE = 2
     sdk.alerts.get_details.side_effect = ALERT_DETAIL_RESULT
-    results = extraction._get_alert_details(sdk, ALERT_SUMMARY_LIST)
+    results = alerts._get_alert_details(sdk, ALERT_SUMMARY_LIST)
     assert results == SORTED_ALERT_DETAILS
 
-# 
+
+#
 def test_show_outputs_expected_headers(cli_state, runner, full_alert_details_response):
     cli_state.sdk.alerts.get_details.return_value = full_alert_details_response
     result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state)

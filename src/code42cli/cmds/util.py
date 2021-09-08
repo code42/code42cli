@@ -1,9 +1,11 @@
 import itertools
 
 from py42.sdk.queries.alerts.filters import DateObserved
-from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
-from py42.sdk.queries.fileevents.filters import InsertionTimestamp, EventTimestamp, ExposureType
-from py42.sdk.queries.query_filter import QueryFilterTimestampField, FilterGroup
+from py42.sdk.queries.fileevents.filters import EventTimestamp
+from py42.sdk.queries.fileevents.filters import ExposureType
+from py42.sdk.queries.fileevents.filters import InsertionTimestamp
+from py42.sdk.queries.query_filter import FilterGroup
+from py42.sdk.queries.query_filter import QueryFilterTimestampField
 
 from code42cli import errors
 from code42cli.date_helper import verify_timestamp_order
@@ -85,3 +87,10 @@ def create_time_range_filter(filter_cls, begin_date=None, end_date=None):
 
     elif end_date and not begin_date:
         return filter_cls.on_or_before(end_date)
+
+
+def verify_filter_groups(filter_groups):
+    if not all(isinstance(group, FilterGroup) for group in filter_groups):
+        raise ValueError(
+            "arguments must be py42.sdk.queries.query_filter.FilterGroup objects."
+        )

@@ -1,16 +1,12 @@
 import click
 import py42.sdk.queries.alerts.filters as f
-from c42eventextractor.extractors import AlertExtractor
-from py42.exceptions import Py42NotFoundError, Py42InvalidPageTokenError
+from py42.exceptions import Py42NotFoundError
 from py42.sdk.queries.alerts.alert_query import AlertQuery
 from py42.sdk.queries.alerts.filters import AlertState
 from py42.sdk.queries.alerts.filters import RuleType
 from py42.sdk.queries.alerts.filters import Severity
-from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
-from py42.sdk.queries.fileevents.filters import InsertionTimestamp
 from py42.util import format_dict
 
-import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 import code42cli.options as opt
@@ -19,10 +15,11 @@ from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.cmds.search import SendToCommand
 from code42cli.cmds.search.cursor_store import AlertCursorStore
-from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.cmds.search.options import server_options
-from code42cli.cmds.utils import create_time_range_filter, convert_to_or_query, \
-    try_get_default_header
+from code42cli.cmds.util import convert_to_or_query
+from code42cli.cmds.util import create_time_range_filter
+from code42cli.cmds.util import try_get_default_header
+from code42cli.cmds.util import verify_filter_groups
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import limit_date_range
 from code42cli.file_readers import read_csv_arg
@@ -30,9 +27,13 @@ from code42cli.options import format_option
 from code42cli.output_formats import JsonOutputFormat
 from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
+from code42cli.util import parse_timestamp
 from code42cli.util import warn_interrupt
 
 ALERTS_KEYWORD = "alerts"
+MAX_ALERT_PAGE_SIZE = 500
+_ALERT_DETAIL_BATCH_SIZE = 100
+
 begin = opt.begin_option(
     ALERTS_KEYWORD,
     callback=lambda ctx, param, arg: convert_datetime_to_timestamp(
@@ -207,20 +208,6 @@ def clear_checkpoint(state, checkpoint_name):
     _get_alert_cursor_store(state.profile.name).delete(checkpoint_name)
 
 
-def _call_extractor(
-    cli_state, handlers, begin, end, or_query, advanced_query, **kwargs
-):
-    extractor = _get_alert_extractor(cli_state.sdk, handlers)
-    extractor.use_or_query = or_query
-    if advanced_query:
-        cli_state.search_filters = advanced_query
-    if begin or end:
-        cli_state.search_filters.append(
-            ext.create_time_range_filter(f.DateObserved, begin, end)
-        )
-    extractor.extract(*cli_state.search_filters)
-
-
 @alerts.command()
 @filter_options
 @search_options
@@ -254,17 +241,9 @@ def search(
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
     if use_checkpoint:
         checkpoint_name = use_checkpoint
-        # if checkpoint name exists, checkpoint should be that alertId,
-        # otherwise it should set the initial value to ""
-        checkpoint = cursor.get(checkpoint_name) or ""
-    else:
-        checkpoint = ""
-
-    # older app versions stored checkpoint as float timestamp.
-    # we handle those here until the next run containing alerts will store checkpoint as the last alertId
-    if isinstance(checkpoint, (int, float)):
-        cli_state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
-        checkpoint = ""
+        checkpoint = cursor.get(checkpoint_name)
+        if checkpoint is not None:
+            begin = checkpoint
 
     query = _construct_query(cli_state, begin, end, advanced_query, or_query)
     alerts_list = _get_all_alerts(cli_state, query)
@@ -277,6 +256,7 @@ def search(
         checkpoint_name = use_checkpoint
         # update checkpoint to alertId of last event retrieved
         alerts_gen = _store_updated_checkpoint(cursor, checkpoint_name, alerts_list)
+        formatter.echo_formatted_generated_output(alerts_gen)
     else:
         formatter.echo_formatted_list(alerts_list)
 
@@ -292,8 +272,10 @@ def _construct_query(state, begin, end, advanced_query, or_query):
             )
     if or_query:
         state.search_filters = convert_to_or_query(state.search_filters)
+    verify_filter_groups(state.search_filters)
     query = AlertQuery(*state.search_filters)
-    query.sort_direction = u"asc"
+    query.page_size = MAX_ALERT_PAGE_SIZE
+    query.sort_direction = "asc"
     query.sort_key = "CreatedAt"
     return query
 
@@ -303,7 +285,7 @@ def _get_all_alerts(state, query):
     alert_list = []
 
     responses = state.sdk.alerts.search_all_pages(query)
-    
+
     for response in responses:
         for alert in response["alerts"]:
             alert_list.append(alert)
@@ -313,9 +295,15 @@ def _get_all_alerts(state, query):
 
 def _store_updated_checkpoint(cursor, checkpoint_name, alerts_gen):
     for alert in alerts_gen:
+        new_timestamp = alert[f.DateObserved._term]
         yield alert
-        cursor.replace(checkpoint_name, alert[u"alertId"])
-        
+        ts = parse_timestamp(new_timestamp)
+        cursor.replace(checkpoint_name, ts)
+    # if end of resulting alerts, set checkpoint to empty string
+    last_timestamp = parse_timestamp(alerts_gen[-1][f.DateObserved._term])
+    if cursor.get(checkpoint_name) == last_timestamp:
+        cursor.replace(checkpoint_name, "")
+
 
 @alerts.command(cls=SendToCommand)
 @filter_options
@@ -338,20 +326,12 @@ def send_to(cli_state, begin, end, advanced_query, use_checkpoint, or_query, **k
     HOSTNAME format: address:port where port is optional and defaults to 514.
     """
     cursor = _get_cursor(cli_state, use_checkpoint)
-    
+
     if use_checkpoint:
         checkpoint_name = use_checkpoint
-        # if checkpoint name exists, checkpoint should be that alertId,
-        # otherwise it should set the initial value to ""
-        checkpoint = cursor.get(checkpoint_name) or ""
-    else:
-        checkpoint = ""
-
-    # older app versions stored checkpoint as float timestamp.
-    # we handle those here until the next run containing alerts will store checkpoint as the last alertId
-    if isinstance(checkpoint, (int, float)):
-        cli_state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
-        checkpoint = ""
+        checkpoint = cursor.get(checkpoint_name)
+        if checkpoint is not None:
+            begin = checkpoint
 
     query = _construct_query(cli_state, begin, end, advanced_query, or_query)
     alerts_list = _get_all_alerts(cli_state, query)
@@ -362,8 +342,7 @@ def send_to(cli_state, begin, end, advanced_query, use_checkpoint, or_query, **k
 
     if use_checkpoint:
         checkpoint_name = use_checkpoint
-        # update checkpoint to eventId of last event retrieved
-        alerts_gen = _store_updated_checkpoint(cursor, checkpoint_name, alerts_list)
+        alerts_list = _store_updated_checkpoint(cursor, checkpoint_name, alerts_list)
     with warn_interrupt():
         alert = None
         for alert in alerts_list:
@@ -371,12 +350,9 @@ def send_to(cli_state, begin, end, advanced_query, use_checkpoint, or_query, **k
         if alert is None:  # generator was empty
             click.echo("No results found.")
 
+
 def _get_cursor(state, use_checkpoint):
     return _get_alert_cursor_store(state.profile.name) if use_checkpoint else None
-
-
-def _get_alert_extractor(sdk, handlers):
-    return AlertExtractor(sdk, handlers)
 
 
 def _get_alert_cursor_store(profile_name):
@@ -466,3 +442,17 @@ def _update_alert(sdk, alert_id, alert_state, note):
         sdk.alerts.update_state(alert_state, [alert_id], note=note)
     elif note:
         sdk.alerts.update_note(alert_id, note)
+
+
+def _get_alert_details(sdk, alert_summary_list):
+    alert_ids = [alert["id"] for alert in alert_summary_list]
+    batches = [
+        alert_ids[i : i + _ALERT_DETAIL_BATCH_SIZE]
+        for i in range(0, len(alert_ids), _ALERT_DETAIL_BATCH_SIZE)
+    ]
+    results = []
+    for batch in batches:
+        r = sdk.alerts.get_details(batch)
+        results.extend(r["alerts"])
+    results = sorted(results, key=lambda x: x["createdAt"], reverse=True)
+    return results

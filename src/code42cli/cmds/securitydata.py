@@ -1,23 +1,17 @@
-import itertools
 from pprint import pformat
 
 import click
 import py42.sdk.queries.fileevents.filters as f
 from click import echo
 from py42.exceptions import Py42InvalidPageTokenError
-from py42.sdk.queries import FilterGroup
-from py42.sdk.queries.alerts.filters import DateObserved
 from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
-from py42.sdk.queries.fileevents.filters import EventTimestamp
 from py42.sdk.queries.fileevents.filters import InsertionTimestamp
 from py42.sdk.queries.fileevents.filters.exposure_filter import ExposureType
 from py42.sdk.queries.fileevents.filters.file_filter import FileCategory
 from py42.sdk.queries.fileevents.filters.risk_filter import RiskIndicator
 from py42.sdk.queries.fileevents.filters.risk_filter import RiskSeverity
-from py42.sdk.queries.query_filter import QueryFilterTimestampField
 
 import code42cli.cmds.search.options as searchopt
-import code42cli.errors as errors
 import code42cli.options as opt
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
@@ -26,19 +20,22 @@ from code42cli.cmds.search import SendToCommand
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.cmds.search.options import send_to_format_options
 from code42cli.cmds.search.options import server_options
+from code42cli.cmds.util import convert_to_or_query
+from code42cli.cmds.util import create_time_range_filter
+from code42cli.cmds.util import try_get_default_header
+from code42cli.cmds.util import verify_filter_groups
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import limit_date_range
-from code42cli.date_helper import verify_timestamp_order
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.output_formats import FileEventsOutputFormat
 from code42cli.output_formats import FileEventsOutputFormatter
-from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
 from code42cli.util import warn_interrupt
 
 logger = get_main_cli_logger()
+MAX_EVENT_PAGE_SIZE = 10000
 
 SECURITY_DATA_KEYWORD = "file events"
 file_events_format_option = click.option(
@@ -370,7 +367,7 @@ def search(
 ):
 
     """Search for file events."""
-    output_header = _try_get_default_header(
+    output_header = try_get_default_header(
         include_all, _create_search_header_map(), format
     )
     formatter = FileEventsOutputFormatter(format, output_header)
@@ -390,7 +387,7 @@ def search(
         checkpoint = ""
 
     query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
-    events = _get_all_file_events(state, query, cursor, checkpoint)
+    events = _get_all_file_events(state, query, checkpoint)
 
     if not events:
         click.echo("No results found.")
@@ -414,17 +411,19 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
     else:
         if begin or end:
             state.search_filters.append(
-                _create_time_range_filter(f.EventTimestamp, begin, end)
+                create_time_range_filter(f.EventTimestamp, begin, end)
             )
     if or_query:
-        state.search_filters = _convert_to_or_query(state.search_filters)
+        state.search_filters = convert_to_or_query(state.search_filters)
+    verify_filter_groups(state.search_filters)
     query = FileEventQuery(*state.search_filters)
-    query.sort_direction = u"asc"
+    query.page_size = MAX_EVENT_PAGE_SIZE
+    query.sort_direction = "asc"
     query.sort_key = "insertionTimestamp"
     return query
 
 
-def _get_all_file_events(state, query, cursor, checkpoint=""):
+def _get_all_file_events(state, query, checkpoint=""):
 
     events = []
 
@@ -515,7 +514,7 @@ def send_to(
         checkpoint = ""
 
     query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
-    events = _get_all_file_events(state, query, cursor, checkpoint)
+    events = _get_all_file_events(state, query, checkpoint)
 
     if not events:
         click.echo("No results found.")
@@ -541,81 +540,7 @@ def _get_file_event_cursor_store(profile_name):
     return FileEventCursorStore(profile_name)
 
 
-def _convert_to_or_query(filter_groups):
-    and_group = FilterGroup([], "AND")
-    or_group = FilterGroup([], "OR")
-    filters = itertools.chain.from_iterable([f.filter_list for f in filter_groups])
-    for _filter in filters:
-        if _is_exempt_filter(_filter):
-            and_group.filter_list.append(_filter)
-        else:
-            or_group.filter_list.append(_filter)
-    if and_group.filter_list:
-        return [and_group, or_group]
-    else:
-        return [or_group]
-
-
-def _is_exempt_filter(f):
-    # exclude timestamp filters by default from "OR" queries
-    # if other filters need to be exempt when building a query, append them to this list
-    # can either be a `QueryFilter` subclass, or a composed `FilterGroup` if more precision on
-    # is needed for which filters should be "AND"ed
-    or_query_exempt_filters = [
-        InsertionTimestamp,
-        EventTimestamp,
-        DateObserved,
-        ExposureType.exists(),
-    ]
-
-    for exempt in or_query_exempt_filters:
-        if isinstance(exempt, FilterGroup):
-            if f in exempt:
-                return True
-            else:
-                continue
-        elif f.term == exempt._term:
-            return True
-    return False
-
-
 def _store_updated_checkpoint(cursor, checkpoint_name, events):
     for event in events:
         yield event
         cursor.replace(checkpoint_name, event["eventId"])
-
-
-def _try_get_default_header(include_all, default_header, output_format):
-    """Returns appropriate header based on include-all and output format. If returns None,
-    the CLI format option will figure out the header based on the data keys."""
-    output_header = None if include_all else default_header
-    if output_format != OutputFormat.TABLE and include_all:
-        err_text = "--include-all only allowed for Table output format."
-        logger.log_error(err_text)
-        raise errors.Code42CLIError(err_text)
-    return output_header
-
-
-def _create_time_range_filter(filter_cls, begin_date=None, end_date=None):
-    """Creates a filter using the given filter class (must be a subclass of
-        :class:`py42.sdk.queries.query_filter.QueryFilterTimestampField`) and date args. Returns
-        `None` if both begin_date and end_date args are `None`.
-
-        Args:
-            filter_cls: The class of filter to create. (must be a subclass of
-              :class:`py42.sdk.queries.query_filter.QueryFilterTimestampField`)
-            begin_date: The begin date for the range.
-            end_date: The end date for the range.
-    """
-    if not issubclass(filter_cls, QueryFilterTimestampField):
-        raise Exception("filter_cls must be a subclass of QueryFilterTimestampField")
-
-    if begin_date and end_date:
-        verify_timestamp_order(begin_date, end_date)
-        return filter_cls.in_range(begin_date, end_date)
-
-    elif begin_date and not end_date:
-        return filter_cls.on_or_after(begin_date)
-
-    elif end_date and not begin_date:
-        return filter_cls.on_or_before(end_date)

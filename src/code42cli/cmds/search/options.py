@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 import click
 from py42.sdk.queries.query_filter import FilterGroup
@@ -89,6 +90,8 @@ class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
                 and begin_present
             ):
                 opts.pop("begin")
+                if isinstance(checkpoint_value, (int, float)):
+                    checkpoint_value = datetime.utcfromtimestamp(checkpoint_value)
                 click.echo(
                     "Ignoring --begin value as --use-checkpoint was passed and checkpoint of "
                     f"{checkpoint_value} exists.\n",

@@ -3,20 +3,15 @@ import logging
 
 import py42.sdk.queries.fileevents.filters as f
 import pytest
-from c42eventextractor.extractors import FileEventExtractor
 from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
 from py42.sdk.queries.fileevents.filters import RiskIndicator
 from py42.sdk.queries.fileevents.filters import RiskSeverity
 from py42.sdk.queries.fileevents.filters.file_filter import FileCategory
-
-from code42cli.util import parse_timestamp
-from tests.cmds.conftest import filter_term_is_in_call_args, \
-    filter_term_is_in_call_args_no_extractor
-from tests.cmds.conftest import get_filter_value_from_json
+from tests.cmds.conftest import filter_term_is_in_call_args
 from tests.cmds.conftest import get_mark_for_search_and_send_to
-from tests.conftest import get_test_date_str, create_mock_response
+from tests.conftest import create_mock_response
+from tests.conftest import get_test_date_str
 
-from code42cli import errors
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.logger.enums import ServerProtocol
 from code42cli.main import cli
@@ -157,15 +152,9 @@ TEST_EVENTS = [
         "riskScore": 5,
         "riskSeverity": "MODERATE",
         "riskIndicators": [
-            {
-                "name": "Google Drive upload",
-                "weight": 5
-            },
-            {
-                "name": "Document",
-                "weight": 0
-            }
-        ]
+            {"name": "Google Drive upload", "weight": 5},
+            {"name": "Document", "weight": 0},
+        ],
     },
     {
         "eventId": TEST_FILE_EVENT_ID_2,
@@ -180,16 +169,10 @@ TEST_EVENTS = [
         "riskScore": 5,
         "riskSeverity": "MODERATE",
         "riskIndicators": [
-            {
-                "name": "Google Drive upload",
-                "weight": 5
-            },
-            {
-                "name": "Document",
-                "weight": 0
-            }
-        ]
-    }
+            {"name": "Google Drive upload", "weight": 5},
+            {"name": "Document", "weight": 0},
+        ],
+    },
 ]
 
 search_and_send_to_test = get_mark_for_search_and_send_to("security-data")
@@ -239,23 +222,20 @@ def send_to_logger_factory(mocker):
 
 @pytest.fixture
 def mock_file_event_response(mocker):
-    data = json.dumps({
-        'totalCount': 2,
-        'fileEvents': TEST_EVENTS,
-        'nextPgToken': '',
-        'problems': ''
-    })
-    
-    response = create_mock_response(
-        mocker, data=data
+    data = json.dumps(
+        {"totalCount": 2, "fileEvents": TEST_EVENTS, "nextPgToken": "", "problems": ""}
     )
+
+    response = create_mock_response(mocker, data=data)
 
     return response
 
 
 @pytest.fixture
 def search_all_file_events_success(cli_state, mock_file_event_response):
-    cli_state.sdk.securitydata.search_all_file_events.return_value = mock_file_event_response
+    cli_state.sdk.securitydata.search_all_file_events.return_value = (
+        mock_file_event_response
+    )
 
 
 @search_and_send_to_test
@@ -294,7 +274,7 @@ def test_search_and_send_to_when_advanced_query_passed_as_json_string_builds_exp
     assert expected_event_filter in passed_filter_groups
     assert expected_hostname_filter in passed_filter_groups
     assert expected_event_type_filter in passed_filter_groups
-    
+
 
 @search_and_send_to_test
 def test_search_and_send_to_when_advanced_query_passed_as_filename_builds_expected_query(
@@ -306,7 +286,7 @@ def test_search_and_send_to_when_advanced_query_passed_as_filename_builds_expect
             jsonfile.write(ADVANCED_QUERY_JSON)
 
         runner.invoke(cli, [*command, "--advanced-query", "@query.json"], obj=cli_state)
-        
+
         query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
         passed_filter_groups = query._filter_group_list
         expected_event_filter = f.EventTimestamp.within_the_last(
@@ -461,13 +441,13 @@ def test_search_and_send_to_when_given_begin_and_end_dates_uses_expected_query(
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
     query_dict = {k: v for k, v in query}
-    
-    actual_begin = query_dict["groups"][1]['filters'][0]['value']
+
+    actual_begin = query_dict["groups"][1]["filters"][0]["value"]
     expected_begin = f"{begin_date}T00:00:00.000Z"
-    
-    actual_end = query_dict["groups"][1]['filters'][1]['value']
+
+    actual_end = query_dict["groups"][1]["filters"][1]["value"]
     expected_end = f"{end_date}T23:59:59.999Z"
-    
+
     assert actual_begin == expected_begin
     assert actual_end == expected_end
 
@@ -479,7 +459,7 @@ def test_search_and_send_to_when_given_begin_and_end_date_and_time_uses_expected
     begin_date = get_test_date_str(days_ago=89)
     end_date = get_test_date_str(days_ago=1)
     time = "15:33:02"
-    
+
     runner.invoke(
         cli,
         [*command, "--begin", f"{begin_date} {time}", "--end", f"{end_date} {time}"],
@@ -487,13 +467,13 @@ def test_search_and_send_to_when_given_begin_and_end_date_and_time_uses_expected
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
     query_dict = {k: v for k, v in query}
-    
-    actual_begin = query_dict["groups"][1]['filters'][0]['value']
+
+    actual_begin = query_dict["groups"][1]["filters"][0]["value"]
     expected_begin = f"{begin_date}T{time}.000Z"
-    
-    actual_end = query_dict["groups"][1]['filters'][1]['value']
+
+    actual_end = query_dict["groups"][1]["filters"][1]["value"]
     expected_end = f"{end_date}T{time}.000Z"
-    
+
     assert actual_begin == expected_begin
     assert actual_end == expected_end
 
@@ -504,14 +484,14 @@ def test_search_and_send_to_when_given_begin_date_and_time_without_seconds_uses_
 ):
     date = get_test_date_str(days_ago=89)
     time = "15:33"
-    
+
     runner.invoke(
         cli, [*command, "--begin", f"{date} {time}"], obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
     query_dict = {k: v for k, v in query}
 
-    actual = query_dict["groups"][1]['filters'][0]['value']
+    actual = query_dict["groups"][1]["filters"][0]["value"]
     expected = f"{date}T{time}:00.000Z"
     assert actual == expected
 
@@ -523,7 +503,7 @@ def test_search_and_send_to_when_given_end_date_and_time_uses_expected_query(
     begin_date = get_test_date_str(days_ago=10)
     end_date = get_test_date_str(days_ago=1)
     time = "15:33"
-    
+
     runner.invoke(
         cli,
         [*command, "--begin", begin_date, "--end", f"{end_date} {time}"],
@@ -531,8 +511,8 @@ def test_search_and_send_to_when_given_end_date_and_time_uses_expected_query(
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
     query_dict = {k: v for k, v in query}
-    
-    actual = query_dict["groups"][1]['filters'][1]['value']
+
+    actual = query_dict["groups"][1]["filters"][1]["value"]
     expected = f"{end_date}T{time}:00.000Z"
     assert actual == expected
 
@@ -552,7 +532,11 @@ def test_search_send_to_when_given_begin_date_more_than_ninety_days_back_errors(
 
 @search_and_send_to_test
 def test_search_and_send_to_when_given_begin_date_past_90_days_and_use_checkpoint_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
-    runner, cli_state, file_event_cursor_with_eventid_checkpoint, command, search_all_file_events_success
+    runner,
+    cli_state,
+    file_event_cursor_with_eventid_checkpoint,
+    command,
+    search_all_file_events_success,
 ):
     begin_date = get_test_date_str(days_ago=91) + " 12:51:00"
 
@@ -562,7 +546,7 @@ def test_search_and_send_to_when_given_begin_date_past_90_days_and_use_checkpoin
         obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
-    assert not filter_term_is_in_call_args_no_extractor(
+    assert not filter_term_is_in_call_args(
         query._filter_group_list, f.InsertionTimestamp._term
     )
 
@@ -575,10 +559,10 @@ def test_search_and_send_to_when_given_begin_date_and_not_use_checkpoint_and_cur
     runner.invoke(cli, [*command, "--begin", begin_date], obj=cli_state)
     query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
     query_dict = {k: v for k, v in query}
-    actual_ts = query_dict["groups"][1]['filters'][0]['value']
+    actual_ts = query_dict["groups"][1]["filters"][0]["value"]
     expected_ts = f"{begin_date}T00:00:00.000Z"
     assert actual_ts == expected_ts
-    assert filter_term_is_in_call_args_no_extractor(query._filter_group_list, f.EventTimestamp._term)
+    assert filter_term_is_in_call_args(query._filter_group_list, f.EventTimestamp._term)
 
 
 @search_and_send_to_test
@@ -603,11 +587,11 @@ def test_search_and_send_to_with_only_begin_calls_search_all_file_events_with_ex
     query_dict = {k: v for k, v in query}
     expected_filter_groups = [
         {
-            'filterClause': 'AND',
-            'filters': [{'operator': 'EXISTS', 'term': 'exposure', 'value': None}]
+            "filterClause": "AND",
+            "filters": [{"operator": "EXISTS", "term": "exposure", "value": None}],
         },
         {
-            "filterClause":"AND",
+            "filterClause": "AND",
             "filters": [
                 {
                     "operator": "ON_OR_AFTER",
@@ -615,7 +599,7 @@ def test_search_and_send_to_with_only_begin_calls_search_all_file_events_with_ex
                     "value": begin_option.expected_timestamp,
                 }
             ],
-        }
+        },
     ]
     assert result.exit_code == 0
     assert query_dict["groups"] == expected_filter_groups
@@ -640,14 +624,14 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_without_check
     begin_option,
     file_event_cursor_without_checkpoint,
     command,
-    search_all_file_events_success
+    search_all_file_events_success,
 ):
     result = runner.invoke(
         cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
     query_dict = {k: v for k, v in query}
-    actual_begin = query_dict["groups"][1]['filters'][0]['value']
+    actual_begin = query_dict["groups"][1]["filters"][0]["value"]
 
     assert result.exit_code == 0
     assert len(query._filter_group_list) == 2
@@ -656,21 +640,33 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_without_check
 
 @search_and_send_to_test
 def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_as_timestamp_calls_search_all_file_events_with_checkpoint_timestamp_and_ignores_begin_arg(
-    runner, cli_state, file_event_cursor_with_timestamp_checkpoint, command, search_all_file_events_success
+    runner,
+    cli_state,
+    file_event_cursor_with_timestamp_checkpoint,
+    command,
+    search_all_file_events_success,
 ):
     result = runner.invoke(
         cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
     query_dict = {k: v for k, v in query}
-    actual_query_timestamp = query_dict["groups"][1]['filters'][0]['value']
+    actual_query_timestamp = query_dict["groups"][1]["filters"][0]["value"]
     assert result.exit_code == 0
     assert len(query._filter_group_list) == 2
-    assert file_event_cursor_with_timestamp_checkpoint.expected_timestamp == actual_query_timestamp
+    assert (
+        file_event_cursor_with_timestamp_checkpoint.expected_timestamp
+        == actual_query_timestamp
+    )
+
 
 @search_and_send_to_test
-def test_search_and_send_to_with_use_checkpoint_and_with_stored_checkpoint_as_eventid_calls_search_all_file_events_with_checkpoint_and_ignores_begin_arg(    
-    runner, cli_state, file_event_cursor_with_eventid_checkpoint, command, search_all_file_events_success
+def test_search_and_send_to_with_use_checkpoint_and_with_stored_checkpoint_as_eventid_calls_search_all_file_events_with_checkpoint_and_ignores_begin_arg(
+    runner,
+    cli_state,
+    file_event_cursor_with_eventid_checkpoint,
+    command,
+    search_all_file_events_success,
 ):
     result = runner.invoke(
         cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
@@ -701,12 +697,12 @@ def test_search_and_send_to_when_given_username_uses_username_filter(
 ):
     c42_username = "test@example.com"
     command = [*command, "--begin", "1h", "--c42-username", c42_username]
-    
+
     runner.invoke(
         cli, [*command], obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
-    
+
     filter_obj = f.DeviceUsername.is_in([c42_username])
     assert filter_obj in query._filter_group_list
 
@@ -717,11 +713,11 @@ def test_search_and_send_to_when_given_actor_is_uses_username_filter(
 ):
     actor_name = "test.testerson"
     command = [*command, "--begin", "1h", "--actor", actor_name]
-    
+
     runner.invoke(
         cli, [*command], obj=cli_state,
     )
-    
+
     query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
     filter_obj = f.Actor.is_in([actor_name])
     assert filter_obj in query._filter_group_list
@@ -899,6 +895,7 @@ def test_search_and_send_to_when_given_include_non_exposure_does_not_include_exp
     filter_obj = f.ExposureType.exists()
     assert filter_obj not in query._filter_group_list
 
+
 @search_and_send_to_test
 def test_search_and_send_to_when_not_given_include_non_exposure_includes_exposure_type_exists(
     runner, cli_state, command, search_all_file_events_success
@@ -909,6 +906,7 @@ def test_search_and_send_to_when_not_given_include_non_exposure_includes_exposur
     query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
     filter_obj = f.ExposureType.exists()
     assert filter_obj in query._filter_group_list
+
 
 @search_and_send_to_test
 def test_search_and_send_to_when_given_multiple_search_args_uses_expected_filters(
@@ -1084,20 +1082,21 @@ def test_search_and_send_to_when_given_risk_severity_uses_risk_severity_filter(
     query = cli_state.sdk.securitydata.search_all_file_events.call_args.args[0]
     assert f.RiskSeverity.is_in([risk_severity]) in query._filter_group_list
 
-# 
-# @search_and_send_to_test
-# def test_search_and_send_to_when_extraction_handles_error_expected_message_logged_and_printed_and_global_errored_flag_set(
-#     runner, cli_state, caplog, command
-# ):
-#     errors.ERRORED = False
-#     exception_msg = "Test Exception"
-#     cli_state.sdk.securitydata.search_file_events.side_effect = Exception(exception_msg)
-#     with caplog.at_level(logging.ERROR):
-#         result = runner.invoke(cli, [*command, "--begin", "1d"], obj=cli_state)
-#         assert "Error:" in result.output
-#         assert exception_msg in result.output
-#         assert exception_msg in caplog.text
-#         assert errors.ERRORED
+
+@search_and_send_to_test
+def test_search_and_send_to_handles_error_expected_message_logged_and_printed(
+    runner, cli_state, caplog, command
+):
+    exception_msg = "Test Exception"
+    expected_msg = "Unknown problem occurred"
+    cli_state.sdk.securitydata.search_all_file_events.side_effect = Exception(
+        exception_msg
+    )
+    with caplog.at_level(logging.ERROR):
+        result = runner.invoke(cli, [*command, "--begin", "1d"], obj=cli_state)
+        assert "Error:" in result.output
+        assert expected_msg in result.output
+        assert exception_msg in caplog.text
 
 
 @search_and_send_to_test
@@ -1203,7 +1202,9 @@ def test_saved_search_calls_search_all_file_events_and_saved_search_execute(
 @pytest.mark.parametrize(
     "protocol", (ServerProtocol.TLS_TCP, ServerProtocol.TLS_TCP, ServerProtocol.UDP)
 )
-def test_send_to_allows_protocol_arg(cli_state, runner, protocol, search_all_file_events_success):
+def test_send_to_allows_protocol_arg(
+    cli_state, runner, protocol, search_all_file_events_success
+):
     res = runner.invoke(
         cli,
         [
@@ -1220,7 +1221,9 @@ def test_send_to_allows_protocol_arg(cli_state, runner, protocol, search_all_fil
     assert res.exit_code == 0
 
 
-def test_send_to_fails_when_given_unknown_protocol(cli_state, runner, search_all_file_events_success):
+def test_send_to_fails_when_given_unknown_protocol(
+    cli_state, runner, search_all_file_events_success
+):
     res = runner.invoke(
         cli,
         ["security-data", "send-to", "0.0.0.0", "--begin", "1d", "--protocol", "ATM"],
@@ -1251,7 +1254,9 @@ def test_send_to_certs_and_ignore_cert_validation_args_are_incompatible(
     assert "Error: --ignore-cert-validation can't be used with: --certs" in res.output
 
 
-def test_send_to_creates_expected_logger(cli_state, runner, send_to_logger_factory, search_all_file_events_success):
+def test_send_to_creates_expected_logger(
+    cli_state, runner, send_to_logger_factory, search_all_file_events_success
+):
     runner.invoke(
         cli,
         [
