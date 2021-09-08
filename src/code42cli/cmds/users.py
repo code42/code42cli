@@ -1,6 +1,7 @@
 import click
 from pandas import DataFrame
 from pandas import json_normalize
+from py42.exceptions import Py42OrgNotFoundError
 
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
@@ -401,12 +402,16 @@ def _get_role_id(sdk, role_name):
 
 
 def _get_users_dataframe(sdk, columns, org_uid, role_id, active):
-    users_generator = sdk.users.get_all(active=active, org_uid=org_uid, role_id=role_id)
-    users_list = []
-    for page in users_generator:
-        users_list.extend(page["users"])
-
-    return DataFrame.from_records(users_list, columns=columns)
+    try:
+        users_generator = sdk.users.get_all(
+            active=active, org_uid=org_uid, role_id=role_id
+        )
+        users_list = []
+        for page in users_generator:
+            users_list.extend(page["users"])
+        return DataFrame.from_records(users_list, columns=columns)
+    except Py42OrgNotFoundError:
+        raise Code42CLIError(f"Org with ID '{org_uid}' not found.")
 
 
 def _add_legal_hold_membership_to_user_dataframe(sdk, df):
