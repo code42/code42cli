@@ -1,6 +1,3 @@
-from setuptools import Distribution
-from setuptools.command.install import install
+from code42cli.main import cli
 
-i = install(Distribution())
-i.ensure_finalized()
-print(i.install_scripts)
+cli(prog_name="code42")

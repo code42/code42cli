@@ -1,4 +1,6 @@
+import os
 import signal
+import site
 import sys
 
 import click
@@ -53,13 +55,28 @@ CONTEXT_SETTINGS = {
 @click.option(
     "--python",
     is_flag=True,
-    help="Print path to the python interpreter env that `code42` is installed in.",
+    help="Print path to the python interpreter env that `code42cli` is installed in.",
+)
+@click.option(
+    "--script-dir",
+    is_flag=True,
+    help="Print the directory the `code42` script was installed in (for adding to your PATH if needed)."
 )
 @sdk_options(hidden=True)
-def cli(state, python):
+def cli(state, python, script_dir):
     if python:
         click.echo(sys.executable)
         sys.exit(0)
+    if script_dir:
+        for root, dirs, files in os.walk(site.PREFIXES[0]):
+            if "code42" in files or "code42.exe" in files:
+                print(root)
+                sys.exit(0)
+
+        for root, dirs, files in os.walk(site.USER_BASE):
+            if "code42" in files or "code42.exe" in files:
+                print(root)
+                sys.exit(0)
 
 
 cli.add_command(alerts)
