@@ -123,6 +123,41 @@ To learn more about authenticating in the CLI, follow the [Configure profile gui
 
 ## Troubleshooting and support
 
+### PATH issues
+
+If your python installation has added itself to your environment's PATH variable, then running `code42` _should_ just work.
+
+However, if after installation the `code42` command is not found, the CLI has some helpers for this (added in version 1.10):
+
+You can execute the CLI by calling the python module directly:
+
+```bash
+python3 -m code42cli
+```
+
+And the base `code42` command now has a `--script-dir` option that will print out the directory the `code42` script was 
+installed into, so you can manually add it to your PATH, enabling the `code42` command to work.
+
+#### On Mac/Linux:
+
+```bash
+export PATH=$PATH:$(python3 -m code42cli --script-dir)
+```
+
+Add the above to your shell configuration file to persist the change.
+
+#### On Windows:
+
+```bash
+$env:Path += ";$(python -m code42cli --script-dir)"
+```
+
+Then to store the updated PATH variable permanently:
+
+```bash
+Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $env:Path
+```
+
 ### Debug mode
 
 Debug mode may be useful if you are trying to determine if you are experiencing permissions issues. When debug mode is
