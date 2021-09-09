@@ -8,7 +8,6 @@ from pandas import json_normalize
 from pandas import Series
 from pandas import to_datetime
 from py42 import exceptions
-from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42NotFoundError
 
 from code42cli.bulk import generate_template_cmd_factory
