@@ -425,7 +425,7 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
 def _get_all_file_events(state, query, checkpoint=""):
 
     events = []
-    
+
     def _handle_response(response):
         for event in response["fileEvents"]:
             events.append(event)
@@ -513,7 +513,6 @@ def send_to(
             checkpoint = ""
     else:
         checkpoint = ""
-
 
     query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
     events = _get_all_file_events(state, query, checkpoint)
