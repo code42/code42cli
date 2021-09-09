@@ -135,7 +135,7 @@ You can execute the CLI by calling the python module directly:
 python3 -m code42cli
 ```
 
-And the base `code42` command now has a `--script-dir` option that will print out the directory the `code42` script was 
+And the base `code42` command now has a `--script-dir` option that will print out the directory the `code42` script was
 installed into, so you can manually add it to your PATH, enabling the `code42` command to work.
 
 #### On Mac/Linux:
