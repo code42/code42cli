@@ -341,7 +341,10 @@ def test_list_users_when_given_invalid_org_uid_raises_error(
     result = runner.invoke(
         cli, ["users", "list", "--org-uid", invalid_org_uid], obj=cli_state
     )
-    assert f"Error: Org with ID '{invalid_org_uid}' not found." in result.output
+    assert (
+        f"Error: The organization with UID '{invalid_org_uid}' was not found."
+        in result.output
+    )
 
 
 def test_list_legal_hold_flag_reports_none_for_users_not_on_legal_hold(

@@ -725,30 +725,6 @@ def test_list_include_legal_hold_membership_merges_in_and_concats_legal_hold_inf
     assert "123456789,987654321" in result.output
 
 
-def test_list_invalid_org_uid_raises_error(runner, cli_state, custom_error):
-    custom_error.response.text = "Unable to find org"
-    invalid_org_uid = "invalid_org_uid"
-    cli_state.sdk.devices.get_all.side_effect = Py42BadRequestError(custom_error)
-    result = runner.invoke(
-        cli, ["devices", "list", "--org-uid", invalid_org_uid], obj=cli_state
-    )
-    assert result.exit_code == 1
-    assert f"Error: Org with ID '{invalid_org_uid}' not found." in result.output
-
-
-def test_list_backup_sets_invalid_org_uid_raises_error(runner, cli_state, custom_error):
-    custom_error.response.text = "Unable to find org"
-    invalid_org_uid = "invalid_org_uid"
-    cli_state.sdk.devices.get_all.side_effect = Py42BadRequestError(custom_error)
-    result = runner.invoke(
-        cli,
-        ["devices", "list-backup-sets", "--org-uid", invalid_org_uid],
-        obj=cli_state,
-    )
-    assert result.exit_code == 1
-    assert f"Error: Org with ID '{invalid_org_uid}' not found." in result.output
-
-
 def test_break_backup_usage_into_total_storage_correctly_calculates_values():
     test_backupusage_cell = json.loads(TEST_BACKUPUSAGE_RESPONSE)["data"]["backupUsage"]
     result = _break_backup_usage_into_total_storage(test_backupusage_cell)

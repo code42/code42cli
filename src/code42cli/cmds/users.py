@@ -402,16 +402,11 @@ def _get_role_id(sdk, role_name):
 
 
 def _get_users_dataframe(sdk, columns, org_uid, role_id, active):
-    try:
-        users_generator = sdk.users.get_all(
-            active=active, org_uid=org_uid, role_id=role_id
-        )
-        users_list = []
-        for page in users_generator:
-            users_list.extend(page["users"])
-        return DataFrame.from_records(users_list, columns=columns)
-    except Py42OrgNotFoundError:
-        raise Code42CLIError(f"Org with ID '{org_uid}' not found.")
+    users_generator = sdk.users.get_all(active=active, org_uid=org_uid, role_id=role_id)
+    users_list = []
+    for page in users_generator:
+        users_list.extend(page["users"])
+    return DataFrame.from_records(users_list, columns=columns)
 
 
 def _add_legal_hold_membership_to_user_dataframe(sdk, df):

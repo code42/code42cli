@@ -404,21 +404,15 @@ def _get_all_active_hold_memberships(sdk):
 def _get_device_dataframe(
     sdk, columns, active=None, org_uid=None, include_backup_usage=False
 ):
-    try:
-        devices_generator = sdk.devices.get_all(
-            active=active, include_backup_usage=include_backup_usage, org_uid=org_uid
-        )
-        devices_list = []
-        if include_backup_usage:
-            columns.append("backupUsage")
-        for page in devices_generator:
-            devices_list.extend(page["computers"])
-        return DataFrame.from_records(devices_list, columns=columns)
-    except Py42BadRequestError as err:
-        if "Unable to find org" in err.response.text:
-            raise Code42CLIError(f"Org with ID '{org_uid}' not found.")
-        else:
-            raise
+    devices_generator = sdk.devices.get_all(
+        active=active, include_backup_usage=include_backup_usage, org_uid=org_uid
+    )
+    devices_list = []
+    if include_backup_usage:
+        columns.append("backupUsage")
+    for page in devices_generator:
+        devices_list.extend(page["computers"])
+    return DataFrame.from_records(devices_list, columns=columns)
 
 
 def _add_settings_to_dataframe(sdk, device_dataframe):
