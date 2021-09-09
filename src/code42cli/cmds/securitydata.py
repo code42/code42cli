@@ -387,20 +387,19 @@ def search(
         checkpoint = ""
 
     query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
-    events_gen = _get_all_file_events(state, query, checkpoint)
+    events = _get_all_file_events(state, query, checkpoint)
 
-    if not events_gen:
+    if not events:
         click.echo("No results found.")
         return
-    
-    for events in events_gen:
-        if use_checkpoint:
-            checkpoint_name = use_checkpoint
-            # update checkpoint to eventId of last event retrieved
-            events = _store_updated_checkpoint(cursor, checkpoint_name, events)
-            formatter.echo_formatted_generated_output(events)
-        else:
-            formatter.echo_formatted_list(events)
+
+    if use_checkpoint:
+        checkpoint_name = use_checkpoint
+        # update checkpoint to eventId of last event retrieved
+        events_gen = _store_updated_checkpoint(cursor, checkpoint_name, events)
+        formatter.echo_formatted_generated_output(events_gen)
+    else:
+        formatter.echo_formatted_list(events)
 
 
 def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
@@ -426,24 +425,26 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
 
 def _get_all_file_events(state, query, checkpoint=""):
 
+    events = []
+    
     def _handle_response(response):
-        events = []
         for event in response["fileEvents"]:
             events.append(event)
-        return events
-        
+
     try:
         response = state.sdk.securitydata.search_all_file_events(
             query, page_token=checkpoint
         )
     except Py42InvalidPageTokenError:
         response = state.sdk.securitydata.search_all_file_events(query)
-    yield _handle_response(response)
-    while response["nextPgToken"] is not None:
+    _handle_response(response)
+    while response["nextPgToken"]:
         response = state.sdk.securitydata.search_all_file_events(
             query, page_token=response["nextPgToken"]
         )
-        yield _handle_response(response)
+        _handle_response(response)
+
+    return events
 
 
 @security_data.group(cls=OrderedGroup)
@@ -516,23 +517,22 @@ def send_to(
         checkpoint = ""
 
     query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
-    events_gen = _get_all_file_events(state, query, checkpoint)
+    events = _get_all_file_events(state, query, checkpoint)
 
-    if not events_gen:
+    if not events:
         click.echo("No results found.")
         return
-    
-    for events in events_gen:
-        if use_checkpoint:
-            checkpoint_name = use_checkpoint
-            # update checkpoint to eventId of last event retrieved
-            events = _store_updated_checkpoint(cursor, checkpoint_name, events)
-        with warn_interrupt():
-            event = None
-            for event in events:
-                state.logger.info(event)
-            if event is None:  # generator was empty
-                click.echo("No results found.")
+
+    if use_checkpoint:
+        checkpoint_name = use_checkpoint
+        # update checkpoint to eventId of last event retrieved
+        events = _store_updated_checkpoint(cursor, checkpoint_name, events)
+    with warn_interrupt():
+        event = None
+        for event in events:
+            state.logger.info(event)
+        if event is None:  # generator was empty
+            click.echo("No results found.")
 
 
 def _get_cursor(state, use_checkpoint):
