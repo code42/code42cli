@@ -377,13 +377,12 @@ def search(
         # if checkpoint name exists, checkpoint should be that eventId,
         # otherwise it should set the initial value to ""
         checkpoint = cursor.get(checkpoint_name) or ""
+        # older app versions stored checkpoint as float timestamp.
+        # we handle those here until the next run containing events will store checkpoint as the last eventId
+        if isinstance(checkpoint, (int, float)):
+            state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
+            checkpoint = ""
     else:
-        checkpoint = ""
-
-    # older app versions stored checkpoint as float timestamp.
-    # we handle those here until the next run containing events will store checkpoint as the last eventId
-    if isinstance(checkpoint, (int, float)):
-        state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
         checkpoint = ""
 
     query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
@@ -507,14 +506,14 @@ def send_to(
         # if checkpoint name exists, checkpoint should be that eventId,
         # otherwise it should set the initial value to ""
         checkpoint = cursor.get(checkpoint_name) or ""
+        # older app versions stored checkpoint as float timestamp.
+        # we handle those here until the next run containing events will store checkpoint as the last eventId
+        if isinstance(checkpoint, (int, float)):
+            state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
+            checkpoint = ""
     else:
         checkpoint = ""
 
-    # older app versions stored checkpoint as float timestamp.
-    # we handle those here until the next run containing events will store checkpoint as the last eventId
-    if isinstance(checkpoint, (int, float)):
-        state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
-        checkpoint = ""
 
     query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
     events = _get_all_file_events(state, query, checkpoint)
