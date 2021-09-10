@@ -148,13 +148,13 @@ Add the above to your shell configuration file to persist the change.
 
 #### On Windows:
 
-```bash
+```powershell 
 $env:Path += ";$(python -m code42cli --script-dir)"
 ```
 
 Then to store the updated PATH variable permanently:
 
-```bash
+```powershell
 Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $env:Path
 ```
 
