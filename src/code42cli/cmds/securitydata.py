@@ -270,7 +270,8 @@ def _get_saved_search_option():
 
     return click.option(
         "--saved-search",
-        help="Get events from a saved search filter with the given ID.",
+        help="Get events from a saved search filter with the given ID."
+        "WARNING: Using a saved search is incompatible with other query-building arguments.",
         callback=_get_saved_search_query,
         cls=incompatible_with("advanced_query"),
     )
