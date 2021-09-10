@@ -148,7 +148,7 @@ Add the above to your shell configuration file to persist the change.
 
 #### On Windows:
 
-```powershell 
+```powershell
 $env:Path += ";$(python -m code42cli --script-dir)"
 ```
 
