@@ -144,12 +144,16 @@ def search(
 
     if use_checkpoint:
         checkpoint_name = use_checkpoint
-        events = list(_dedupe_checkpointed_events_and_store_updated_checkpoint(cursor, checkpoint_name, events))
-    
+        events = list(
+            _dedupe_checkpointed_events_and_store_updated_checkpoint(
+                cursor, checkpoint_name, events
+            )
+        )
+
     if not events:
         click.echo("No results found.", err=True)
         return
-    
+
     formatter.echo_formatted_list(events)
 
 
