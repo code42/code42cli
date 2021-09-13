@@ -22,6 +22,10 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - `code42 profile use` now prompts you to select a profile when not given a profile name argument.
 
+### Fixed
+
+- Bug where `audit-logs search` with `--use-checkpoint` option was causing output formatting problems.
+
 ## 1.9.0 - 2021-08-19
 
 ### Added
