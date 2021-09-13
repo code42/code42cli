@@ -79,19 +79,6 @@ class OutputFormatter:
             if self.output_format in [OutputFormat.TABLE]:
                 click.echo()
 
-    def echo_formatted_generated_output(self, output_generator):
-        def _gen():
-            include_header = True
-            for output in output_generator:
-                if output:
-                    formatted_output = self._format_output(
-                        output, include_header=include_header
-                    )
-                    yield formatted_output
-                    include_header = False
-
-        click.echo_via_pager(_gen)
-
     @property
     def _requires_list_output(self):
         return self.output_format in (OutputFormat.TABLE, OutputFormat.CSV)
