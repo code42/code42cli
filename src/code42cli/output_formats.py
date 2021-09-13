@@ -136,7 +136,7 @@ class DataFrameOutputFormatter:
             click.echo_via_pager(str_output)
 
 
-def to_csv(output, include_header=True):
+def to_csv(output):
     """Output is a list of records"""
 
     if not output:
@@ -158,12 +158,12 @@ def to_table(output, header, include_header=True):
     return format_to_table(rows, column_size)
 
 
-def to_json(output, **kwargs):
+def to_json(output):
     """Output is a single record"""
     return f"{json.dumps(output)}\n"
 
 
-def to_formatted_json(output, **kwargs):
+def to_formatted_json(output):
     """Output is a single record"""
     return f"{json.dumps(output, indent=4)}\n"
 
