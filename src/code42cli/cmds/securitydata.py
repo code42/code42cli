@@ -388,18 +388,28 @@ def search(
 
     query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
     events = _get_all_file_events(state, query, checkpoint)
-
+    
     if not events:
         click.echo("No results found.")
         return
-
-    if use_checkpoint:
-        checkpoint_name = use_checkpoint
-        # update checkpoint to eventId of last event retrieved
-        events_gen = _store_updated_checkpoint(cursor, checkpoint_name, events)
-        formatter.echo_formatted_generated_output(events_gen)
-    else:
-        formatter.echo_formatted_list(events)
+    
+    for event in events:
+        if use_checkpoint:
+            checkpoint_name = use_checkpoint
+            formatter.echo_formatted_generated_output(_store_updated_checkpoint(cursor, checkpoint_name, event))
+        else:
+            formatter.echo_formatted_generated_output(event)
+    # if not events:
+    #     click.echo("No results found.")
+    #     return
+    # 
+    # if use_checkpoint:
+    #     checkpoint_name = use_checkpoint
+    #     # update checkpoint to eventId of last event retrieved
+    #     events_gen = _store_updated_checkpoint(cursor, checkpoint_name, events)
+    #     formatter.echo_formatted_generated_output(events_gen)
+    # else:
+    #     formatter.echo_formatted_list(events)
 
 
 def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
@@ -425,18 +435,22 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
 
 def _get_all_file_events(state, query, checkpoint=""):
 
-    events = []
+    #events = []
 
     def _handle_response(response):
+        print("in the handler")
         for event in response["fileEvents"]:
-            events.append(event)
-
+            print("doing stuff")
+            #events.append(event)
+            yield event
     try:
         response = state.sdk.securitydata.search_all_file_events(
             query, page_token=checkpoint
         )
+        print("over here")
     except Py42InvalidPageTokenError:
         response = state.sdk.securitydata.search_all_file_events(query)
+
     _handle_response(response)
     while response["nextPgToken"]:
         response = state.sdk.securitydata.search_all_file_events(
@@ -444,7 +458,7 @@ def _get_all_file_events(state, query, checkpoint=""):
         )
         _handle_response(response)
 
-    return events
+   # return events
 
 
 @security_data.group(cls=OrderedGroup)
@@ -522,16 +536,18 @@ def send_to(
         click.echo("No results found.")
         return
 
-    if use_checkpoint:
-        checkpoint_name = use_checkpoint
-        # update checkpoint to eventId of last event retrieved
-        events = _store_updated_checkpoint(cursor, checkpoint_name, events)
-    with warn_interrupt():
-        event = None
-        for event in events:
+    if not events:
+        click.echo("No results found.")
+        return
+
+    for event in events:
+        if use_checkpoint:
+            checkpoint_name = use_checkpoint
+            event = _store_updated_checkpoint(cursor, checkpoint_name, event)
+        with warn_interrupt():
             state.logger.info(event)
-        if event is None:  # generator was empty
-            click.echo("No results found.")
+            if event is None:  # generator was empty
+                click.echo("No results found.")
 
 
 def _get_cursor(state, use_checkpoint):
@@ -542,7 +558,7 @@ def _get_file_event_cursor_store(profile_name):
     return FileEventCursorStore(profile_name)
 
 
-def _store_updated_checkpoint(cursor, checkpoint_name, events):
-    for event in events:
-        yield event
-        cursor.replace(checkpoint_name, event["eventId"])
+def _store_updated_checkpoint(cursor, checkpoint_name, event):
+    #for event in events:
+    yield event
+    cursor.replace(checkpoint_name, event["eventId"])

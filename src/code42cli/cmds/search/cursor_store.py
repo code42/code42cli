@@ -34,7 +34,7 @@ class BaseCursorStore:
                     return float(checkpoint.read())
                 except ValueError:
                     raise Code42CLIError(
-                        f"No valid checkpoint value associated with the checkpoint named {cursor_name}"
+                        f"Unable to parse checkpoint from {location}, expected a unix-epoch timestamp, got {checkpoint.read()}."
                     )
         except FileNotFoundError:
             return None
