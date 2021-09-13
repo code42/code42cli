@@ -79,19 +79,6 @@ class OutputFormatter:
             if self.output_format in [OutputFormat.TABLE]:
                 click.echo()
 
-    def echo_formatted_generated_output(self, output_generator):
-        def _gen():
-            include_header = True
-            for output in output_generator:
-                if output:
-                    formatted_output = self._format_output(
-                        output, include_header=include_header
-                    )
-                    yield formatted_output
-                    include_header = False
-
-        click.echo_via_pager(_gen)
-
     @property
     def _requires_list_output(self):
         return self.output_format in (OutputFormat.TABLE, OutputFormat.CSV)
@@ -149,7 +136,7 @@ class DataFrameOutputFormatter:
             click.echo_via_pager(str_output)
 
 
-def to_csv(output):
+def to_csv(output, include_header=True):
     """Output is a list of records"""
 
     if not output:
@@ -171,12 +158,12 @@ def to_table(output, header, include_header=True):
     return format_to_table(rows, column_size)
 
 
-def to_json(output):
+def to_json(output, **kwargs):
     """Output is a single record"""
     return f"{json.dumps(output)}\n"
 
 
-def to_formatted_json(output):
+def to_formatted_json(output, **kwargs):
     """Output is a single record"""
     return f"{json.dumps(output, indent=4)}\n"
 
