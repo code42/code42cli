@@ -27,7 +27,8 @@ from code42cli.options import format_option
 from code42cli.output_formats import JsonOutputFormat
 from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
-from code42cli.util import parse_timestamp, hash_event
+from code42cli.util import hash_event
+from code42cli.util import parse_timestamp
 from code42cli.util import warn_interrupt
 
 ALERTS_KEYWORD = "alerts"
@@ -255,7 +256,9 @@ def search(
     if use_checkpoint:
         checkpoint_name = use_checkpoint
         # update checkpoint to alertId of last event retrieved
-        alerts_gen = _dedupe_checkpointed_events_and_store_updated_checkpoint(cursor, checkpoint_name, alerts_list)
+        alerts_gen = _dedupe_checkpointed_events_and_store_updated_checkpoint(
+            cursor, checkpoint_name, alerts_list
+        )
         formatter.echo_formatted_list(list(alerts_gen))
     else:
         formatter.echo_formatted_list(alerts_list)
@@ -293,7 +296,9 @@ def _get_all_alerts(state, query):
     return alert_list
 
 
-def _dedupe_checkpointed_events_and_store_updated_checkpoint(cursor, checkpoint_name, alerts_gen):
+def _dedupe_checkpointed_events_and_store_updated_checkpoint(
+    cursor, checkpoint_name, alerts_gen
+):
     """De-duplicates events across checkpointed runs. Since using the timestamp of the last event
     processed as the `--begin` time of the next run causes the last event to show up again in the
     next results, we hash the last event(s) of each run and store those hashes in the cursor to
@@ -355,7 +360,9 @@ def send_to(cli_state, begin, end, advanced_query, use_checkpoint, or_query, **k
 
     if use_checkpoint:
         checkpoint_name = use_checkpoint
-        alerts_list = _dedupe_checkpointed_events_and_store_updated_checkpoint(cursor, checkpoint_name, alerts_list)
+        alerts_list = _dedupe_checkpointed_events_and_store_updated_checkpoint(
+            cursor, checkpoint_name, alerts_list
+        )
     with warn_interrupt():
         alert = None
         for alert in alerts_list:

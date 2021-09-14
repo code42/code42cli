@@ -88,7 +88,7 @@ class AlertCursorStore(BaseCursorStore):
     def __init__(self, profile_name):
         dir_path = get_user_project_path("alert_checkpoints", profile_name)
         super().__init__(dir_path)
-        
+
     def get_alerts(self, cursor_name):
         try:
             location = path.join(self._dir_path, cursor_name) + "_alerts"
