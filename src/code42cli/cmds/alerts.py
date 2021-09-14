@@ -27,7 +27,7 @@ from code42cli.options import format_option
 from code42cli.output_formats import JsonOutputFormat
 from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
-from code42cli.util import parse_timestamp
+from code42cli.util import parse_timestamp, hash_event
 from code42cli.util import warn_interrupt
 
 ALERTS_KEYWORD = "alerts"
@@ -255,7 +255,7 @@ def search(
     if use_checkpoint:
         checkpoint_name = use_checkpoint
         # update checkpoint to alertId of last event retrieved
-        alerts_gen = _store_updated_checkpoint(cursor, checkpoint_name, alerts_list)
+        alerts_gen = _dedupe_checkpointed_events_and_store_updated_checkpoint(cursor, checkpoint_name, alerts_list)
         formatter.echo_formatted_list(list(alerts_gen))
     else:
         formatter.echo_formatted_list(alerts_list)
@@ -293,16 +293,29 @@ def _get_all_alerts(state, query):
     return alert_list
 
 
-def _store_updated_checkpoint(cursor, checkpoint_name, alerts_gen):
+def _dedupe_checkpointed_events_and_store_updated_checkpoint(cursor, checkpoint_name, alerts_gen):
+    """De-duplicates events across checkpointed runs. Since using the timestamp of the last event
+    processed as the `--begin` time of the next run causes the last event to show up again in the
+    next results, we hash the last event(s) of each run and store those hashes in the cursor to
+    filter out on the next run. It's also possible that two events have the exact same timestamp, so
+    `checkpoint_events` needs to be a list of hashes so we can filter out everything that's actually
+    been processed.
+    """
+
+    checkpoint_alerts = cursor.get_alerts(checkpoint_name)
+    new_timestamp = None
+    new_alerts = []
     for alert in alerts_gen:
-        new_timestamp = alert[f.DateObserved._term]
-        yield alert
-        ts = parse_timestamp(new_timestamp)
-        cursor.replace(checkpoint_name, ts)
-    # if end of resulting alerts, set checkpoint to empty string
-    last_timestamp = parse_timestamp(alerts_gen[-1][f.DateObserved._term])
-    if cursor.get(checkpoint_name) == last_timestamp:
-        cursor.replace(checkpoint_name, "")
+        event_hash = hash_event(alert)
+        if event_hash not in checkpoint_alerts:
+            if alert[f.DateObserved._term] != new_timestamp:
+                new_timestamp = alert[f.DateObserved._term]
+                new_alerts.clear()
+            new_alerts.append(event_hash)
+            yield alert
+            ts = parse_timestamp(new_timestamp)
+            cursor.replace(checkpoint_name, ts)
+            cursor.replace_alerts(checkpoint_name, new_alerts)
 
 
 @alerts.command(cls=SendToCommand)
@@ -342,7 +355,7 @@ def send_to(cli_state, begin, end, advanced_query, use_checkpoint, or_query, **k
 
     if use_checkpoint:
         checkpoint_name = use_checkpoint
-        alerts_list = _store_updated_checkpoint(cursor, checkpoint_name, alerts_list)
+        alerts_list = _dedupe_checkpointed_events_and_store_updated_checkpoint(cursor, checkpoint_name, alerts_list)
     with warn_interrupt():
         alert = None
         for alert in alerts_list:

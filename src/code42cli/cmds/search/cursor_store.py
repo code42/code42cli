@@ -88,6 +88,22 @@ class AlertCursorStore(BaseCursorStore):
     def __init__(self, profile_name):
         dir_path = get_user_project_path("alert_checkpoints", profile_name)
         super().__init__(dir_path)
+        
+    def get_alerts(self, cursor_name):
+        try:
+            location = path.join(self._dir_path, cursor_name) + "_alerts"
+            with open(location) as checkpoint:
+                try:
+                    return json.loads(checkpoint.read())
+                except json.JSONDecodeError:
+                    return []
+        except FileNotFoundError:
+            return []
+
+    def replace_alerts(self, cursor_name, new_alerts):
+        location = path.join(self._dir_path, cursor_name) + "_alerts"
+        with open(location, "w") as checkpoint:
+            checkpoint.write(json.dumps(new_alerts))
 
 
 class AuditLogCursorStore(BaseCursorStore):
