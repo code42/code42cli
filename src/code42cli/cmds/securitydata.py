@@ -378,6 +378,7 @@ def search(
         # if checkpoint name exists, checkpoint should be that eventId,
         # otherwise it should set the initial value to ""
         checkpoint = cursor.get(checkpoint_name) or ""
+
         # older app versions stored checkpoint as float timestamp.
         # we handle those here until the next run containing events will store checkpoint as the last eventId
         if isinstance(checkpoint, (int, float)):
@@ -388,28 +389,18 @@ def search(
 
     query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
     events = _get_all_file_events(state, query, checkpoint)
-    
+
     if not events:
         click.echo("No results found.")
         return
-    
-    for event in events:
-        if use_checkpoint:
-            checkpoint_name = use_checkpoint
-            formatter.echo_formatted_generated_output(_store_updated_checkpoint(cursor, checkpoint_name, event))
-        else:
-            formatter.echo_formatted_generated_output(event)
-    # if not events:
-    #     click.echo("No results found.")
-    #     return
-    # 
-    # if use_checkpoint:
-    #     checkpoint_name = use_checkpoint
-    #     # update checkpoint to eventId of last event retrieved
-    #     events_gen = _store_updated_checkpoint(cursor, checkpoint_name, events)
-    #     formatter.echo_formatted_generated_output(events_gen)
-    # else:
-    #     formatter.echo_formatted_list(events)
+
+    if use_checkpoint:
+        checkpoint_name = use_checkpoint
+        formatter.echo_formatted_list(
+            list(_store_updated_checkpoint(cursor, checkpoint_name, events))
+        )
+    else:
+        formatter.echo_formatted_list(list(events))
 
 
 def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
@@ -435,30 +426,23 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
 
 def _get_all_file_events(state, query, checkpoint=""):
 
-    #events = []
-
-    def _handle_response(response):
-        print("in the handler")
-        for event in response["fileEvents"]:
-            print("doing stuff")
-            #events.append(event)
-            yield event
+    # def _handle_response(response):
+    #     for event in response["fileEvents"]:
+    #         yield event
     try:
         response = state.sdk.securitydata.search_all_file_events(
             query, page_token=checkpoint
         )
-        print("over here")
     except Py42InvalidPageTokenError:
         response = state.sdk.securitydata.search_all_file_events(query)
-
-    _handle_response(response)
+    yield from response["fileEvents"]
+    # _handle_response(response)
     while response["nextPgToken"]:
         response = state.sdk.securitydata.search_all_file_events(
             query, page_token=response["nextPgToken"]
         )
-        _handle_response(response)
-
-   # return events
+        # _handle_response(response)
+    yield from response["fileEvents"]
 
 
 @security_data.group(cls=OrderedGroup)
@@ -521,6 +505,7 @@ def send_to(
         # if checkpoint name exists, checkpoint should be that eventId,
         # otherwise it should set the initial value to ""
         checkpoint = cursor.get(checkpoint_name) or ""
+
         # older app versions stored checkpoint as float timestamp.
         # we handle those here until the next run containing events will store checkpoint as the last eventId
         if isinstance(checkpoint, (int, float)):
@@ -536,14 +521,10 @@ def send_to(
         click.echo("No results found.")
         return
 
-    if not events:
-        click.echo("No results found.")
-        return
-
     for event in events:
         if use_checkpoint:
             checkpoint_name = use_checkpoint
-            event = _store_updated_checkpoint(cursor, checkpoint_name, event)
+            cursor.replace(checkpoint_name, event["eventId"])
         with warn_interrupt():
             state.logger.info(event)
             if event is None:  # generator was empty
@@ -558,7 +539,7 @@ def _get_file_event_cursor_store(profile_name):
     return FileEventCursorStore(profile_name)
 
 
-def _store_updated_checkpoint(cursor, checkpoint_name, event):
-    #for event in events:
-    yield event
-    cursor.replace(checkpoint_name, event["eventId"])
+def _store_updated_checkpoint(cursor, checkpoint_name, events):
+    for event in events:
+        yield event
+        cursor.replace(checkpoint_name, event["eventId"])

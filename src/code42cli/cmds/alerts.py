@@ -256,7 +256,7 @@ def search(
         checkpoint_name = use_checkpoint
         # update checkpoint to alertId of last event retrieved
         alerts_gen = _store_updated_checkpoint(cursor, checkpoint_name, alerts_list)
-        formatter.echo_formatted_generated_output(alerts_gen)
+        formatter.echo_formatted_list(list(alerts_gen))
     else:
         formatter.echo_formatted_list(alerts_list)
 
