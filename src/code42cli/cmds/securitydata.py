@@ -426,9 +426,6 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
 
 def _get_all_file_events(state, query, checkpoint=""):
 
-    # def _handle_response(response):
-    #     for event in response["fileEvents"]:
-    #         yield event
     try:
         response = state.sdk.securitydata.search_all_file_events(
             query, page_token=checkpoint
@@ -436,13 +433,11 @@ def _get_all_file_events(state, query, checkpoint=""):
     except Py42InvalidPageTokenError:
         response = state.sdk.securitydata.search_all_file_events(query)
     yield from response["fileEvents"]
-    # _handle_response(response)
     while response["nextPgToken"]:
         response = state.sdk.securitydata.search_all_file_events(
             query, page_token=response["nextPgToken"]
         )
-        # _handle_response(response)
-    yield from response["fileEvents"]
+        yield from response["fileEvents"]
 
 
 @security_data.group(cls=OrderedGroup)
