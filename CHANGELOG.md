@@ -24,6 +24,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Fixed
 
+- Bug where `audit-logs search` with `--use-checkpoint` option was causing output formatting problems.
 - Improve error message for `code42 users list`, `code42 devices list`, `code42 devices list-backup-sets`
 
 ## 1.9.0 - 2021-08-19

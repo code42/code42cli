@@ -586,23 +586,6 @@ def test_search_and_send_when_timestamps_have_nanoseconds_saves_checkpoint(
     assert call_args[0][1] == 1625150833.093616
 
 
-def test_search_if_error_occurs_when_processing_event_timestamp_still_outputs_results(
-    cli_state,
-    runner,
-    mock_audit_log_response_with_error_causing_timestamp,
-    audit_log_cursor_with_checkpoint,
-):
-    cli_state.sdk.auditlogs.get_all.return_value = (
-        mock_audit_log_response_with_error_causing_timestamp
-    )
-    res = runner.invoke(
-        cli, ["audit-logs", "search", "--use-checkpoint", "test"], obj=cli_state,
-    )
-    assert TEST_AUDIT_LOG_TIMESTAMP_1 in res.output
-    assert "I AM NOT A TIMESTAMP" in res.output
-    assert "Error: Unknown problem occurred." in res.output
-
-
 def test_search_if_error_occurs_when_processing_event_timestamp_does_not_store_error_timestamp(
     cli_state,
     runner,
