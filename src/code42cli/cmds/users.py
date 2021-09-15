@@ -405,6 +405,7 @@ def _get_users_dataframe(sdk, columns, org_uid, role_id, active):
     users_list = []
     for page in users_generator:
         users_list.extend(page["users"])
+
     return DataFrame.from_records(users_list, columns=columns)
 
 
