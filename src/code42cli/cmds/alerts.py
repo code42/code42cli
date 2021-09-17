@@ -20,10 +20,10 @@ from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.cmds.search.options import server_options
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import limit_date_range
+from code42cli.enums import JsonOutputFormat
+from code42cli.enums import OutputFormat
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
-from code42cli.output_formats import JsonOutputFormat
-from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
 
 

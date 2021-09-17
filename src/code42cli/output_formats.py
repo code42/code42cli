@@ -1,9 +1,15 @@
 import csv
 import io
 import json
+from itertools import chain
+from typing import Generator
 
 import click
+import pandas
 
+from code42cli.enums import FileEventsOutputFormat
+from code42cli.enums import OutputFormat
+from code42cli.errors import Code42CLIError
 from code42cli.logger.formatters import CEF_TEMPLATE
 from code42cli.logger.formatters import map_event_to_cef
 from code42cli.util import find_format_width
@@ -13,31 +19,8 @@ from code42cli.util import format_to_table
 CEF_DEFAULT_PRODUCT_NAME = "Advanced Exfiltration Detection"
 CEF_DEFAULT_SEVERITY_LEVEL = "5"
 
-# Uses method `output_via_pager()` when 10 or more records.
+# Uses method `echo_via_pager()` when 10 or more records.
 OUTPUT_VIA_PAGER_THRESHOLD = 10
-
-
-class JsonOutputFormat:
-    JSON = "JSON"
-    RAW = "RAW-JSON"
-
-    def __iter__(self):
-        return iter([self.JSON, self.RAW])
-
-
-class OutputFormat(JsonOutputFormat):
-    TABLE = "TABLE"
-    CSV = "CSV"
-
-    def __iter__(self):
-        return iter([self.TABLE, self.CSV, self.JSON, self.RAW])
-
-
-class SendToFileEventsOutputFormat(JsonOutputFormat):
-    CEF = "CEF"
-
-    def __iter__(self):
-        return iter([self.CEF, self.JSON, self.RAW])
 
 
 class OutputFormatter:
@@ -85,55 +68,133 @@ class OutputFormatter:
 
 
 class DataFrameOutputFormatter:
-    def __init__(self, output_format):
+    def __init__(self, output_format, checkpoint_func=None):
         self.output_format = (
             output_format.upper() if output_format else OutputFormat.TABLE
         )
-
-    def get_formatted_output(self, df, **kwargs):
-        if self.output_format == OutputFormat.JSON:
-            defaults = {
-                "orient": "records",
-                "lines": True,
-                "index": True,
-                "default_handler": str,
-            }
-            defaults.update(kwargs)
-            return df.to_json(**defaults)
-
-        elif self.output_format == OutputFormat.RAW:
-            defaults = {
-                "orient": "records",
-                "lines": False,
-                "index": True,
-                "default_handler": str,
-            }
-            defaults.update(kwargs)
-            return df.to_json(**defaults)
-
-        elif self.output_format == OutputFormat.CSV:
-            defaults = {"index": False}
-            defaults.update(kwargs)
-            df = df.fillna("")
-            return df.to_csv(**defaults)
-
-        elif self.output_format == OutputFormat.TABLE:
-            defaults = {"index": False}
-            defaults.update(kwargs)
-            df = df.fillna("")
-            return df.to_string(**defaults)
-
-        else:
+        if self.output_format not in OutputFormat.choices():
             raise ValueError(
                 f"DataFrameOutputFormatter received an invalid format: {self.output_format}"
             )
+        self.checkpoint_func = checkpoint_func or (lambda x: None)
 
-    def echo_formatted_dataframe(self, df, **kwargs):
-        str_output = self.get_formatted_output(df, **kwargs)
-        if len(df) <= OUTPUT_VIA_PAGER_THRESHOLD:
-            click.echo(str_output)
+    def _ensure_iterable(self, dfs):
+        if not isinstance(dfs, (Generator, list)):
+            return [dfs]
+        return dfs
+
+    def iter_table_lines(self, dfs, **kwargs):
+        """
+        Accepts a dataframe or list/generator of dataframes, and formats them as a text
+        table.
+
+        The dataframes get concatenated into one (thus consuming the generator before
+        processing) as all data must be present to determine ideal column widths.
+
+        Yields each row of output individually, calling checkpoint function (if present)
+        on the event dict for that row after yield. Allowing for accurate checkpointing
+        up until the last processed event.
+        """
+        df = pandas.concat(self._ensure_iterable(dfs)).fillna("")
+
+        # set overrideable default kwargs
+        kwargs = {"index": False, **kwargs}
+        formatted_rows = df.to_string(**kwargs).splitlines(keepends=True)
+
+        # don't checkpoint the header row
+        if kwargs.get("header") is not False:
+            yield formatted_rows.pop(0)
+
+        yield from self._checkpoint_and_iter_formatted_events(df, formatted_rows)
+
+    def iter_csv_lines(self, dfs, **kwargs):
+        """
+        Accepts a dataframe or list/generator of dataframes, and formats the data as a
+        CSV.
+
+        Yields each row of output individually, calling checkpoint function (if present)
+        on the event dict for that row after yield. Allowing for accurate checkpointing
+        up until the last processed event.
+        """
+        dfs = self._ensure_iterable(dfs)
+        no_header = kwargs.get("header") is False
+        for i, df in enumerate(dfs):
+            df.fillna("", inplace=True)
+            # only add header on first df and if header=False was not passed in kwargs
+            header = False if no_header else (i == 0)
+            kwargs = {"index": False, "header": header, **kwargs}
+            formatted_rows = df.to_csv(**kwargs).splitlines(keepends=True)
+            if header:
+                yield formatted_rows.pop(0)
+
+            yield from self._checkpoint_and_iter_formatted_events(df, formatted_rows)
+
+    def iter_json_lines(self, dfs, **kwargs):
+        """
+        Accepts a dataframe or list/generator of dataframes, and formats the data as
+        json. Any additional kwargs provided get passed to the `json.dumps()` method.
+
+        Yields each row of output individually, calling checkpoint function (if present)
+        on the event dict for that row after yield. Allowing for accurate checkpointing
+        up until the last processed event.
+        """
+        dfs = self._ensure_iterable(dfs)
+        for df in dfs:
+            df = df.mask(df.isna(), other=None)
+            for row in df.iterrows():
+                event = dict(row[1])
+                self.checkpoint_func(event)
+                yield f"{json.dumps(event, **kwargs)}\n"
+
+    def _checkpoint_and_iter_formatted_events(self, df, formatted_rows):
+        events = (dict(row[1]) for row in df.iterrows())
+        for event, row in zip(events, formatted_rows):
+            yield row
+            self.checkpoint_func(event)
+
+    def _echo_via_pager_if_over_threshold(self, gen):
+        first_rows = []
+        try:
+            for _ in range(OUTPUT_VIA_PAGER_THRESHOLD):
+                first_rows.append(next(gen))
+        except StopIteration:
+            click.echo("".join(first_rows))
+            return
+
+        click.echo_via_pager(chain(first_rows, gen))
+
+    def get_formatted_output(self, dfs, **kwargs):
+        if self.output_format == OutputFormat.TABLE:
+            yield from self.iter_table_lines(dfs, **kwargs)
+        elif self.output_format == OutputFormat.CSV:
+            yield from self.iter_csv_lines(dfs, **kwargs)
+        elif self.output_format == OutputFormat.JSON:
+            kwargs = {"indent": 4, **kwargs}
+            yield from self.iter_json_lines(dfs, **kwargs)
+        elif self.output_format == OutputFormat.RAW:
+            yield from self.iter_json_lines(dfs, **kwargs)
         else:
-            click.echo_via_pager(str_output)
+            raise Code42CLIError(
+                f"DataFrameOutputFormatter received an invalid format: {self.output_format}"
+            )
+
+    def echo_formatted_dataframes(
+        self, dfs, force_pager=False, force_no_pager=False, **kwargs
+    ):
+        """
+        Accepts a dataframe or list/generator of dataframes and formats and echos the
+        result to stdout. If total lines > 10, results will be sent to pager.
+        """
+        lines = self.get_formatted_output(dfs, **kwargs)
+        if force_pager and force_no_pager:
+            raise Code42CLIError("force_pager cannot be used with force_no_pager.")
+        if force_pager:
+            click.echo_via_pager(lines)
+        elif force_no_pager:
+            for line in lines:
+                click.echo(line)
+        else:
+            self._echo_via_pager_if_over_threshold(lines)
 
 
 def to_csv(output):
@@ -166,13 +227,6 @@ def to_json(output):
 def to_formatted_json(output):
     """Output is a single record"""
     return f"{json.dumps(output, indent=4)}\n"
-
-
-class FileEventsOutputFormat(OutputFormat):
-    CEF = "CEF"
-
-    def __iter__(self):
-        return iter([self.TABLE, self.CSV, self.JSON, self.RAW, self.CEF])
 
 
 class FileEventsOutputFormatter(OutputFormatter):

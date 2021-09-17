@@ -361,7 +361,7 @@ def list_devices(
         click.echo("No results found.")
     else:
         formatter = DataFrameOutputFormatter(format)
-        formatter.echo_formatted_dataframe(df)
+        formatter.echo_formatted_dataframes(df)
 
 
 def _add_legal_hold_membership_to_device_dataframe(sdk, df):
@@ -497,7 +497,7 @@ def list_backup_sets(
         click.echo("No results found.")
     else:
         formatter = DataFrameOutputFormatter(format)
-        formatter.echo_formatted_dataframe(df)
+        formatter.echo_formatted_dataframes(df)
 
 
 def _add_backup_set_settings_to_dataframe(sdk, devices_dataframe):

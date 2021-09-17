@@ -7,8 +7,8 @@ from py42.sdk.queries.query_filter import FilterGroup
 
 from code42cli.click_ext.options import incompatible_with
 from code42cli.click_ext.types import FileOrString
+from code42cli.enums import SendToFileEventsOutputFormat
 from code42cli.logger.enums import ServerProtocol
-from code42cli.output_formats import SendToFileEventsOutputFormat
 
 
 def is_in_filter(filter_cls):

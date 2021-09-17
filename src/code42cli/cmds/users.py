@@ -87,7 +87,7 @@ def list_users(
         click.echo("No results found.")
     else:
         formatter = DataFrameOutputFormatter(format)
-        formatter.echo_formatted_dataframe(df)
+        formatter.echo_formatted_dataframes(df)
 
 
 @users.command()

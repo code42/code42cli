@@ -786,42 +786,42 @@ class TestDataFrameOutputFormatter:
 
     def test_format_when_unknown_format_raises_value_error(self):
         with pytest.raises(ValueError):
-            formatter = DataFrameOutputFormatter("NOT_A_FORMAT")
-            formatter.get_formatted_output(self.test_df)
+            DataFrameOutputFormatter("NOT_A_FORMAT")
 
     def test_json_formatter_converts_to_expected_string(self):
         formatter = DataFrameOutputFormatter(OutputFormat.JSON)
         output = formatter.get_formatted_output(self.test_df)
         assert (
-            output.strip()
-            == '{"string_column":"string1","int_column":42,"null_column":null}\n{"string_column":"string2","int_column":43,"null_column":null}'
+            "".join(output)
+            == '{\n    "string_column": "string1",\n    "int_column": 42,\n    "null_column": null\n}\n{\n    "string_column": "string2",\n    "int_column": 43,\n    "null_column": null\n}\n'
         )
 
     def test_raw_formatter_converts_to_expected_string(self):
         formatter = DataFrameOutputFormatter(OutputFormat.RAW)
         output = formatter.get_formatted_output(self.test_df)
         assert (
-            output
-            == '[{"string_column":"string1","int_column":42,"null_column":null},{"string_column":"string2","int_column":43,"null_column":null}]'
+            "".join(output)
+            == '{"string_column": "string1", "int_column": 42, "null_column": null}\n{"string_column": "string2", "int_column": 43, "null_column": null}\n'
         )
 
     def test_csv_formatter_converts_to_expected_string(self):
         formatter = DataFrameOutputFormatter(OutputFormat.CSV)
         output = formatter.get_formatted_output(self.test_df)
         assert (
-            output == "string_column,int_column,null_column\nstring1,42,\nstring2,43,\n"
+            "".join(output)
+            == "string_column,int_column,null_column\nstring1,42,\nstring2,43,\n"
         )
 
     def test_table_formatter_converts_to_expected_string(self):
         formatter = DataFrameOutputFormatter(OutputFormat.TABLE)
         output = formatter.get_formatted_output(self.test_df)
-        assert output == (
+        assert "".join(output) == (
             "string_column  int_column null_column\n"
             "      string1          42            \n"
             "      string2          43            "
         )
 
-    def test_echo_formatted_dataframe_uses_pager_when_len_rows_gt_threshold_const(
+    def test_echo_formatted_dataframes_uses_pager_when_len_rows_gt_threshold_const(
         self, mocker
     ):
         mock_echo = mocker.patch("click.echo")
@@ -830,7 +830,18 @@ class TestDataFrameOutputFormatter:
         rows_len = output_formats_module.OUTPUT_VIA_PAGER_THRESHOLD + 1
         big_df = DataFrame([{"column": val} for val in range(rows_len)])
         small_df = DataFrame([{"column": val} for val in range(5)])
-        formatter.echo_formatted_dataframe(big_df)
-        formatter.echo_formatted_dataframe(small_df)
+        formatter.echo_formatted_dataframes(big_df)
+        formatter.echo_formatted_dataframes(small_df)
         assert mock_echo.call_count == 1
         assert mock_pager.call_count == 1
+
+    @pytest.mark.parametrize("fmt", OutputFormat.choices())
+    def test_get_formatted_ouput_calls_checkpoint_func_on_every_row_in_df(self, fmt):
+        checkpointed = []
+
+        def checkpoint(event):
+            checkpointed.append(event["string_column"])
+
+        formatter = DataFrameOutputFormatter(fmt, checkpoint_func=checkpoint)
+        list(formatter.get_formatted_output(self.test_df))
+        assert checkpointed == list(self.test_df.string_column.values)
