@@ -73,7 +73,7 @@ class DataFrameOutputFormatter:
             output_format.upper() if output_format else OutputFormat.TABLE
         )
         if self.output_format not in OutputFormat.choices():
-            raise ValueError(
+            raise Code42CLIError(
                 f"DataFrameOutputFormatter received an invalid format: {self.output_format}"
             )
         self.checkpoint_func = checkpoint_func or (lambda x: None)
@@ -83,42 +83,23 @@ class DataFrameOutputFormatter:
             return [dfs]
         return dfs
 
-    def iter_table_lines(self, dfs, **kwargs):
-        """
-        Accepts a dataframe or list/generator of dataframes, and formats them as a text
-        table.
-
-        The dataframes get concatenated into one (thus consuming the generator before
-        processing) as all data must be present to determine ideal column widths.
-
-        Yields each row of output individually, calling checkpoint function (if present)
-        on the event dict for that row after yield. Allowing for accurate checkpointing
-        up until the last processed event.
-        """
+    def _iter_table(self, dfs, **kwargs):
         df = pandas.concat(self._ensure_iterable(dfs)).fillna("")
-
         # set overrideable default kwargs
         kwargs = {"index": False, **kwargs}
         formatted_rows = df.to_string(**kwargs).splitlines(keepends=True)
-
         # don't checkpoint the header row
         if kwargs.get("header") is not False:
             yield formatted_rows.pop(0)
 
         yield from self._checkpoint_and_iter_formatted_events(df, formatted_rows)
 
-    def iter_csv_lines(self, dfs, **kwargs):
-        """
-        Accepts a dataframe or list/generator of dataframes, and formats the data as a
-        CSV.
-
-        Yields each row of output individually, calling checkpoint function (if present)
-        on the event dict for that row after yield. Allowing for accurate checkpointing
-        up until the last processed event.
-        """
+    def _iter_csv(self, dfs, **kwargs):
         dfs = self._ensure_iterable(dfs)
         no_header = kwargs.get("header") is False
+        
         for i, df in enumerate(dfs):
+            # convert null values to empty string
             df.fillna("", inplace=True)
             # only add header on first df and if header=False was not passed in kwargs
             header = False if no_header else (i == 0)
@@ -129,23 +110,21 @@ class DataFrameOutputFormatter:
 
             yield from self._checkpoint_and_iter_formatted_events(df, formatted_rows)
 
-    def iter_json_lines(self, dfs, **kwargs):
-        """
-        Accepts a dataframe or list/generator of dataframes, and formats the data as
-        json. Any additional kwargs provided get passed to the `json.dumps()` method.
-
-        Yields each row of output individually, calling checkpoint function (if present)
-        on the event dict for that row after yield. Allowing for accurate checkpointing
-        up until the last processed event.
-        """
+    def _iter_json(self, dfs, **kwargs):
         dfs = self._ensure_iterable(dfs)
         for df in dfs:
+            # converts np.NaN nulls to None
             df = df.mask(df.isna(), other=None)
-            for row in df.iterrows():
+            row_count = len(df)
+            for i, row in enumerate(df.iterrows(), start=1):
                 event = dict(row[1])
                 self.checkpoint_func(event)
-                yield f"{json.dumps(event, **kwargs)}\n"
-
+                json_string = json.dumps(event, **kwargs)
+                if i == row_count:
+                    yield json_string
+                else:
+                    yield f"{json_string}\n"
+                
     def _checkpoint_and_iter_formatted_events(self, df, formatted_rows):
         events = (dict(row[1]) for row in df.iterrows())
         for event, row in zip(events, formatted_rows):
@@ -165,14 +144,18 @@ class DataFrameOutputFormatter:
 
     def get_formatted_output(self, dfs, **kwargs):
         if self.output_format == OutputFormat.TABLE:
-            yield from self.iter_table_lines(dfs, **kwargs)
+            yield from self._iter_table(dfs, **kwargs)
+        
         elif self.output_format == OutputFormat.CSV:
-            yield from self.iter_csv_lines(dfs, **kwargs)
+            yield from self._iter_csv(dfs, **kwargs)
+        
         elif self.output_format == OutputFormat.JSON:
             kwargs = {"indent": 4, **kwargs}
-            yield from self.iter_json_lines(dfs, **kwargs)
+            yield from self._iter_json(dfs, **kwargs)
+        
         elif self.output_format == OutputFormat.RAW:
-            yield from self.iter_json_lines(dfs, **kwargs)
+            yield from self._iter_json(dfs, **kwargs)
+        
         else:
             raise Code42CLIError(
                 f"DataFrameOutputFormatter received an invalid format: {self.output_format}"
