@@ -6,6 +6,7 @@ from numpy import NaN
 from pandas import DataFrame
 
 import code42cli.output_formats as output_formats_module
+from code42cli.errors import Code42CLIError
 from code42cli.maps import FILE_EVENT_TO_SIGNATURE_ID_MAP
 from code42cli.output_formats import DataFrameOutputFormatter
 from code42cli.output_formats import FileEventsOutputFormat
@@ -785,8 +786,13 @@ class TestDataFrameOutputFormatter:
         assert formatter.output_format == OutputFormat.TABLE
 
     def test_format_when_unknown_format_raises_value_error(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(Code42CLIError):
             DataFrameOutputFormatter("NOT_A_FORMAT")
+        
+        with pytest.raises(Code42CLIError):
+            formatter = DataFrameOutputFormatter("JSON")
+            formatter.output_format = "NOT_A_FORMAT"
+            list(formatter.get_formatted_output(self.test_df))
 
     def test_json_formatter_converts_to_expected_string(self):
         formatter = DataFrameOutputFormatter(OutputFormat.JSON)

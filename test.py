@@ -1,14 +1,21 @@
-from code42cli.output_formats import DataFrameOutputFormatter
+from datetime import datetime
+
 import pandas as pd
 import py42.sdk
 from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
 from py42.sdk.queries.fileevents.filters import EventTimestamp
-from datetime import datetime
+
+from code42cli.output_formats import DataFrameOutputFormatter
 
 
-sdk = py42.sdk.from_local_account("console.us.code42.com", "literally_skynet+c42demo@code42.com", "2e*6Mya&fe3&iX)")
+sdk = py42.sdk.from_local_account(
+    "console.us.code42.com", "literally_skynet+c42demo@code42.com", "2e*6Mya&fe3&iX)"
+)
 
-query = FileEventQuery(EventTimestamp.on_or_after(datetime(2021, 8, 10)), EventTimestamp.on_or_before(datetime(2021, 8, 11)))
+query = FileEventQuery(
+    EventTimestamp.on_or_after(datetime(2021, 8, 10)),
+    EventTimestamp.on_or_before(datetime(2021, 8, 11)),
+)
 r = sdk.securitydata.search_file_events(query)
 df = pd.DataFrame(r["fileEvents"])
 
