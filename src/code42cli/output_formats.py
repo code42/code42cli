@@ -97,7 +97,7 @@ class DataFrameOutputFormatter:
     def _iter_csv(self, dfs, **kwargs):
         dfs = self._ensure_iterable(dfs)
         no_header = kwargs.get("header") is False
-        
+
         for i, df in enumerate(dfs):
             # convert null values to empty string
             df.fillna("", inplace=True)
@@ -124,7 +124,7 @@ class DataFrameOutputFormatter:
                     yield json_string
                 else:
                     yield f"{json_string}\n"
-                
+
     def _checkpoint_and_iter_formatted_events(self, df, formatted_rows):
         events = (dict(row[1]) for row in df.iterrows())
         for event, row in zip(events, formatted_rows):
@@ -145,17 +145,17 @@ class DataFrameOutputFormatter:
     def get_formatted_output(self, dfs, **kwargs):
         if self.output_format == OutputFormat.TABLE:
             yield from self._iter_table(dfs, **kwargs)
-        
+
         elif self.output_format == OutputFormat.CSV:
             yield from self._iter_csv(dfs, **kwargs)
-        
+
         elif self.output_format == OutputFormat.JSON:
             kwargs = {"indent": 4, **kwargs}
             yield from self._iter_json(dfs, **kwargs)
-        
+
         elif self.output_format == OutputFormat.RAW:
             yield from self._iter_json(dfs, **kwargs)
-        
+
         else:
             raise Code42CLIError(
                 f"DataFrameOutputFormatter received an invalid format: {self.output_format}"
