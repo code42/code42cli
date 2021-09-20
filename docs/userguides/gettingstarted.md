@@ -123,7 +123,7 @@ To learn more about authenticating in the CLI, follow the [Configure profile gui
 
 ## Troubleshooting and support
 
-### PATH issues
+### Code42 command not found
 
 If your python installation has added itself to your environment's PATH variable, then running `code42` _should_ just work.
 
@@ -140,11 +140,11 @@ installed into, so you can manually add it to your PATH, enabling the `code42` c
 
 #### On Mac/Linux:
 
+Run the following to make `code42` visible in your shell's PATH (to persist the change, add it to your shell's configuration file):
+
 ```bash
 export PATH=$PATH:$(python3 -m code42cli --script-dir)
 ```
-
-Add the above to your shell configuration file to persist the change.
 
 #### On Windows:
 
@@ -152,7 +152,7 @@ Add the above to your shell configuration file to persist the change.
 $env:Path += ";$(python -m code42cli --script-dir)"
 ```
 
-Then to store the updated PATH variable permanently:
+To persist the change, add the updated PATH to your registry:
 
 ```powershell
 Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $env:Path
