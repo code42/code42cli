@@ -788,7 +788,7 @@ class TestDataFrameOutputFormatter:
     def test_format_when_unknown_format_raises_value_error(self):
         with pytest.raises(Code42CLIError):
             DataFrameOutputFormatter("NOT_A_FORMAT")
-        
+
         with pytest.raises(Code42CLIError):
             formatter = DataFrameOutputFormatter("JSON")
             formatter.output_format = "NOT_A_FORMAT"
