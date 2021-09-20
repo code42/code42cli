@@ -22,7 +22,7 @@ python3 -m pip install code42cli
 ```
 
 To install a previous version of the Code42 CLI via `pip`, add the version number. For example, to install version
-0.4.1, enter:
+0.5.3, enter:
 
 ```bash
 python3 -m pip install code42cli==0.5.3
@@ -122,6 +122,41 @@ If Keyring doesn't support your Ubuntu system, the Code42 CLI will ask permissio
 To learn more about authenticating in the CLI, follow the [Configure profile guide](profile.md).
 
 ## Troubleshooting and support
+
+### Code42 command not found
+
+If your python installation has added itself to your environment's PATH variable, then running `code42` _should_ just work.
+
+However, if after installation the `code42` command is not found, the CLI has some helpers for this (added in version 1.10):
+
+You can execute the CLI by calling the python module directly:
+
+```bash
+python3 -m code42cli
+```
+
+And the base `code42` command now has a `--script-dir` option that will print out the directory the `code42` script was
+installed into, so you can manually add it to your PATH, enabling the `code42` command to work.
+
+#### On Mac/Linux:
+
+Run the following to make `code42` visible in your shell's PATH (to persist the change, add it to your shell's configuration file):
+
+```bash
+export PATH=$PATH:$(python3 -m code42cli --script-dir)
+```
+
+#### On Windows:
+
+```powershell
+$env:Path += ";$(python -m code42cli --script-dir)"
+```
+
+To persist the change, add the updated PATH to your registry:
+
+```powershell
+Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $env:Path
+```
 
 ### Debug mode
 
