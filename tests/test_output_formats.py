@@ -793,7 +793,7 @@ class TestDataFrameOutputFormatter:
         output = formatter.get_formatted_output(self.test_df)
         assert (
             "".join(output)
-            == '{\n    "string_column": "string1",\n    "int_column": 42,\n    "null_column": null\n}\n{\n    "string_column": "string2",\n    "int_column": 43,\n    "null_column": null\n}\n'
+            == '{\n    "string_column": "string1",\n    "int_column": 42,\n    "null_column": null\n}\n{\n    "string_column": "string2",\n    "int_column": 43,\n    "null_column": null\n}'
         )
 
     def test_raw_formatter_converts_to_expected_string(self):
@@ -801,7 +801,7 @@ class TestDataFrameOutputFormatter:
         output = formatter.get_formatted_output(self.test_df)
         assert (
             "".join(output)
-            == '{"string_column": "string1", "int_column": 42, "null_column": null}\n{"string_column": "string2", "int_column": 43, "null_column": null}\n'
+            == '{"string_column": "string1", "int_column": 42, "null_column": null}\n{"string_column": "string2", "int_column": 43, "null_column": null}'
         )
 
     def test_csv_formatter_converts_to_expected_string(self):
