@@ -15,5 +15,5 @@ def test_trusted_activities_list_command_returns_success_return_code(
 def test_trusted_activities_show_command_returns_success_return_code(
     runner, integration_test_profile
 ):
-    command = "trusted-activities show"
+    command = "trusted-activities show 1"
     assert_test_is_successful(runner, append_profile(command))
