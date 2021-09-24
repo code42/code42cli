@@ -22,6 +22,7 @@ from code42cli.cmds.legal_hold import legal_hold
 from code42cli.cmds.profile import profile
 from code42cli.cmds.securitydata import security_data
 from code42cli.cmds.shell import shell
+from code42cli.cmds.trustedactivities import trusted_activities
 from code42cli.cmds.users import users
 from code42cli.options import sdk_options
 
@@ -91,3 +92,4 @@ cli.add_command(profile)
 cli.add_command(security_data)
 cli.add_command(shell)
 cli.add_command(users)
+cli.add_command(trusted_activities)
