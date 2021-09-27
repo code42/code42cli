@@ -294,43 +294,6 @@ def test_remove_when_resource_id_not_found_py42_raises_exception_prints_error(
     assert RESOURCE_ID_NOT_FOUND_ERROR.format(TEST_RESOURCE_ID) in result.output
 
 
-def test_show_calls_get_with_expected_params(runner, cli_state):
-    command = ["trusted-activities", "show", f"{TEST_RESOURCE_ID}"]
-    runner.invoke(cli, command, obj=cli_state)
-    cli_state.sdk.trustedactivities.get.assert_called_once_with(TEST_RESOURCE_ID)
-
-
-def test_show_prints_expected_data(runner, cli_state, py42_response):
-    py42_response.data = json.loads(TRUSTED_ACTIVITY_DETAILS)
-    cli_state.sdk.trustedactivities.get.return_value = py42_response
-    command = ["trusted-activities", "show", f"{TEST_RESOURCE_ID}"]
-    result = runner.invoke(cli, command, obj=cli_state)
-    assert "2021-09-22T20:39:59.999Z" in result.output
-    assert "test" in result.output
-    assert "DOMAIN" in result.output
-    assert "123" in result.output
-    assert "test description" in result.output
-
-
-def test_show_when_missing_resource_id_prints_error(runner, cli_state):
-    command = ["trusted-activities", "show"]
-    result = runner.invoke(cli, command, obj=cli_state)
-    assert result.exit_code == 2
-    assert MISSING_RESOURCE_ID_ARG in result.output
-
-
-def test_show_when_resource_id_not_found_py42_raises_exception_prints_error(
-    runner, cli_state, trusted_activity_resource_id_not_found_error
-):
-    cli_state.sdk.trustedactivities.get.side_effect = (
-        trusted_activity_resource_id_not_found_error
-    )
-    command = ["trusted-activities", "show", f"{TEST_RESOURCE_ID}"]
-    result = runner.invoke(cli, command, obj=cli_state)
-    assert result.exit_code == 1
-    assert RESOURCE_ID_NOT_FOUND_ERROR.format(TEST_RESOURCE_ID) in result.output
-
-
 def test_list_calls_get_all_with_expected_params(runner, cli_state):
     command = ["trusted-activities", "list"]
     runner.invoke(cli, command, obj=cli_state)

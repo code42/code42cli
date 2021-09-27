@@ -79,17 +79,6 @@ def remove(state, resource_id):
     state.sdk.trustedactivities.delete(resource_id)
 
 
-@trusted_activities.command()
-@resource_id_arg
-@format_option
-@sdk_options()
-def show(state, resource_id, format):
-    """Print the details of a single trusted activity.  Requires the activity's resource ID."""
-    formatter = OutputFormatter(format)
-    response = state.sdk.trustedactivities.get(resource_id)
-    formatter.echo_formatted_list([response.data])
-
-
 @trusted_activities.command("list")
 @click.option("--type", type=click.Choice(TrustedActivityType.choices()))
 @format_option
