@@ -26,7 +26,6 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
     - `code42 trusted-activities create` to create a trusted activity.
     - `code42 trusted-activities update` to update a trusted activity.
     - `code42 trusted-activities remove` to remove a trusted activity.
-    - `code42 trusted-activities show` to print the details of a single trusted activity.
     - `code42 trusted-activities list` to print the details of all trusted activities.
     - `code42 trusted-activities bulk create` to bulk create trusted activities from a CSV file.
     - `code42 trusted-activities bulk update` to bulk update trusted activities from a CSV file.
