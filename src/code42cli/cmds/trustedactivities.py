@@ -4,6 +4,7 @@ from py42.clients.trustedactivities import TrustedActivityType
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
+from code42cli.errors import Code42CLIError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.options import sdk_options
@@ -12,7 +13,7 @@ from code42cli.output_formats import OutputFormatter
 resource_id_arg = click.argument("resource-id", type=int)
 type_option = click.option(
     "--type",
-    help="Type of trusted activity. `DOMAIN` or `SLACK`.",
+    help=f"Type of trusted activity. Valid types include {', '.join(TrustedActivityType.choices())}.",
     type=click.Choice(TrustedActivityType.choices()),
 )
 value_option = click.option(
@@ -31,7 +32,8 @@ def _get_trust_header():
         "value": "Value",
         "description": "Description",
         "updatedAt": "Last Update Time",
-        "updatedByUsername": "Last Updated By",
+        "updatedByUsername": "Last Updated By (Username)",
+        "updatedByUserUid": "Last updated By (UserUID)"
     }
 
 
@@ -48,7 +50,7 @@ def trusted_activities(state):
 @description_option
 @sdk_options()
 def create(state, type, value, description):
-    """Add a trusted activity.
+    """Create a trusted activity.
 
     VALUE is the name of the domain or Slack workspace.
     """
@@ -102,7 +104,7 @@ def _list(state, type, format):
     if trusted_resources:
         formatter.echo_formatted_list(trusted_resources)
     else:
-        click.echo("No cases found.")
+        click.echo("No trusted activities found.")
 
 
 @trusted_activities.group(cls=OrderedGroup)
@@ -112,7 +114,7 @@ def bulk(state):
     pass
 
 
-TRUST_ADD_HEADERS = [
+TRUST_CREATE_HEADERS = [
     "type",
     "value",
     "description",
@@ -129,7 +131,7 @@ TRUST_REMOVE_HEADERS = [
 trusted_activities_generate_template = generate_template_cmd_factory(
     group_name="trusted_activities",
     commands_dict={
-        "add": TRUST_ADD_HEADERS,
+        "create": TRUST_CREATE_HEADERS,
         "update": TRUST_UPDATE_HEADERS,
         "remove": TRUST_REMOVE_HEADERS,
     },
@@ -138,18 +140,27 @@ trusted_activities_generate_template = generate_template_cmd_factory(
 bulk.add_command(trusted_activities_generate_template)
 
 
-@bulk.command(name="create", help="")
-@read_csv_arg(headers=TRUST_ADD_HEADERS)
+@bulk.command(
+    name="create",
+    help="Bulk create trusted activities using a CSV file with "
+    f"format: {','.join(TRUST_UPDATE_HEADERS)}.",
+)
+@read_csv_arg(headers=TRUST_CREATE_HEADERS)
 @sdk_options()
 def bulk_create(state, csv_rows):
-    """Bulk add trusted activities."""
+    """Bulk create trusted activities."""
     sdk = state.sdk
 
     def handle_row(type, value, description):
+        if type not in TrustedActivityType.choices():
+            message = (
+                f"Invalid type {type}, valid types include {', '.join(TrustedActivityType.choices())}."
+            )
+            raise Code42CLIError(message)
         sdk.trustedactivities.create(type, value, description)
 
     run_bulk_process(
-        handle_row, csv_rows, progress_label="Adding trusting activities:",
+        handle_row, csv_rows, progress_label="Creating trusting activities:",
     )
 
 
