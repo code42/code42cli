@@ -33,7 +33,7 @@ def _get_trust_header():
         "description": "Description",
         "updatedAt": "Last Update Time",
         "updatedByUsername": "Last Updated By (Username)",
-        "updatedByUserUid": "Last updated By (UserUID)"
+        "updatedByUserUid": "Last updated By (UserUID)",
     }
 
 
@@ -153,9 +153,7 @@ def bulk_create(state, csv_rows):
 
     def handle_row(type, value, description):
         if type not in TrustedActivityType.choices():
-            message = (
-                f"Invalid type {type}, valid types include {', '.join(TrustedActivityType.choices())}."
-            )
+            message = f"Invalid type {type}, valid types include {', '.join(TrustedActivityType.choices())}."
             raise Code42CLIError(message)
         sdk.trustedactivities.create(type, value, description)
 
