@@ -144,6 +144,12 @@ def bulk_create(state, csv_rows):
         if type not in TrustedActivityType.choices():
             message = f"Invalid type {type}, valid types include {', '.join(TrustedActivityType.choices())}."
             raise Code42CLIError(message)
+        if type is None:
+            message = "'type' is a required field to create a trusted activity."
+            raise Code42CLIError(message)
+        if value is None:
+            message = "'value' is a required field to create a trusted activity."
+            raise Code42CLIError(message)
         sdk.trustedactivities.create(type, value, description)
 
     run_bulk_process(
@@ -163,6 +169,12 @@ def bulk_update(state, csv_rows):
     sdk = state.sdk
 
     def handle_row(resource_id, value, description):
+        if resource_id is None:
+            message = "'resource_id' is a required field to update a trusted activity."
+            raise Code42CLIError(message)
+        if not isinstance(resource_id, int):
+            message = f"Invalid resource ID {resource_id}.  Must be an integer."
+            raise Code42CLIError(message)
         sdk.trustedactivities.update(resource_id, value, description)
 
     run_bulk_process(
@@ -182,6 +194,12 @@ def bulk_remove(state, csv_rows):
     sdk = state.sdk
 
     def handle_row(resource_id):
+        if resource_id is None:
+            message = "'resource_id' is a required field to remove a trusted activity."
+            raise Code42CLIError(message)
+        if not isinstance(resource_id, int):
+            message = f"Invalid resource ID {resource_id}.  Must be an integer."
+            raise Code42CLIError(message)
         sdk.trustedactivities.delete(resource_id)
 
     run_bulk_process(
