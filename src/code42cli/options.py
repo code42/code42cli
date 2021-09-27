@@ -165,7 +165,7 @@ send_to_format_options = click.option(
 def begin_option(term, **kwargs):
     defaults = dict(
         type=MagicDate(rounding_func=round_datetime_to_day_start),
-        help=f"The beginning of the date range in which to look for {term}. {MagicDate.HELP_TEXT}",
+        help=f"The beginning of the date range in which to look for {term}. {MagicDate.HELP_TEXT} [required unless --use-checkpoint option used]",
         cls=BeginOption,
         callback=lambda ctx, param, arg: convert_datetime_to_timestamp(arg),
     )
