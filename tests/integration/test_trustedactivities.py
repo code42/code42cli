@@ -9,4 +9,3 @@ def test_trusted_activities_list_command_returns_success_return_code(
 ):
     command = "trusted-activities list"
     assert_test_is_successful(runner, append_profile(command))
-
