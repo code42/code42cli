@@ -176,7 +176,6 @@ def bulk_update(state, csv_rows):
             _check_resource_id_type(resource_id)
         except Code42CLIError:
             raise
-
         sdk.trustedactivities.update(resource_id, value, description)
 
     run_bulk_process(
