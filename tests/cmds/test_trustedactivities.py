@@ -8,6 +8,7 @@ from py42.exceptions import Py42TrustedActivityInvalidCharacterError
 from py42.response import Py42Response
 
 from code42cli.main import cli
+from tests.conftest import create_mock_response
 
 TEST_RESOURCE_ID = 123
 ALL_TRUSTED_ACTIVITIES = """
@@ -52,8 +53,11 @@ DESCRIPTION_LIMIT_ERROR = "Description limit exceeded, max 250 characters allowe
 
 
 @pytest.fixture
-def py42_response(mocker):
-    return mocker.MagicMock(spec=Py42Response)
+def get_all_activities_response(mocker):
+    def gen():
+        yield create_mock_response(mocker, data=ALL_TRUSTED_ACTIVITIES)
+        
+    return gen()
 
 
 @pytest.fixture
@@ -308,13 +312,8 @@ def test_list_with_optional_fields_called_get_all_with_expected_params(
     cli_state.sdk.trustedactivities.get_all.assert_called_once_with(type="DOMAIN")
 
 
-def test_list_prints_expected_data(runner, cli_state, py42_response):
-    py42_response.data = json.loads(ALL_TRUSTED_ACTIVITIES)
-
-    def gen():
-        yield py42_response.data
-
-    cli_state.sdk.trustedactivities.get_all.return_value = gen()
+def test_list_prints_expected_data(runner, cli_state, get_all_activities_response):
+    cli_state.sdk.trustedactivities.get_all.return_value = get_all_activities_response
     command = ["trusted-activities", "list"]
     result = runner.invoke(cli, command, obj=cli_state)
     assert "2021-09-22T15:46:35.088Z" in result.output

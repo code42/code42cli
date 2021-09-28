@@ -172,9 +172,11 @@ def bulk_update(state, csv_rows):
         if resource_id is None:
             message = "'resource_id' is a required field to update a trusted activity."
             raise Code42CLIError(message)
-        if not isinstance(resource_id, int):
-            message = f"Invalid resource ID {resource_id}.  Must be an integer."
-            raise Code42CLIError(message)
+        try:
+            _check_resource_id_type(resource_id)
+        except Code42CLIError:
+            raise
+
         sdk.trustedactivities.update(resource_id, value, description)
 
     run_bulk_process(
@@ -197,11 +199,24 @@ def bulk_remove(state, csv_rows):
         if resource_id is None:
             message = "'resource_id' is a required field to remove a trusted activity."
             raise Code42CLIError(message)
-        if not isinstance(resource_id, int):
-            message = f"Invalid resource ID {resource_id}.  Must be an integer."
-            raise Code42CLIError(message)
+        try:
+            _check_resource_id_type(resource_id)
+        except Code42CLIError:
+            raise
         sdk.trustedactivities.delete(resource_id)
 
     run_bulk_process(
         handle_row, csv_rows, progress_label="Removing trusted activities:",
     )
+
+
+def _check_resource_id_type(resource_id):
+    def raise_error(resource_id):
+        message = f"Invalid resource ID {resource_id}.  Must be an integer."
+        raise Code42CLIError(message)
+
+    try:
+        if not float(resource_id).is_integer():
+            raise_error(resource_id)
+    except ValueError:
+        raise_error(resource_id)
