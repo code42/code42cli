@@ -1,14 +1,11 @@
-import json
-
 import pytest
 from py42.exceptions import Py42DescriptionLimitExceededError
 from py42.exceptions import Py42TrustedActivityConflictError
 from py42.exceptions import Py42TrustedActivityIdNotFound
 from py42.exceptions import Py42TrustedActivityInvalidCharacterError
-from py42.response import Py42Response
+from tests.conftest import create_mock_response
 
 from code42cli.main import cli
-from tests.conftest import create_mock_response
 
 TEST_RESOURCE_ID = 123
 ALL_TRUSTED_ACTIVITIES = """
@@ -56,7 +53,7 @@ DESCRIPTION_LIMIT_ERROR = "Description limit exceeded, max 250 characters allowe
 def get_all_activities_response(mocker):
     def gen():
         yield create_mock_response(mocker, data=ALL_TRUSTED_ACTIVITIES)
-        
+
     return gen()
 
 
