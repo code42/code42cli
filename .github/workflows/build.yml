@@ -50,6 +50,7 @@ jobs:
           127.0.0.1 preservation-data-service
           127.0.0.1 connected-server
           127.0.0.1 cases
+          127.0.0.1 trusted-activities-service
           EOF
       - name: Install ncat
         run: sudo apt-get install ncat
