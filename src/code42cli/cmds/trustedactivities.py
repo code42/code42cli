@@ -172,10 +172,7 @@ def bulk_update(state, csv_rows):
         if resource_id is None:
             message = "'resource_id' is a required field to update a trusted activity."
             raise Code42CLIError(message)
-        try:
-            _check_resource_id_type(resource_id)
-        except Code42CLIError:
-            raise
+        _check_resource_id_type(resource_id)
         sdk.trustedactivities.update(resource_id, value, description)
 
     run_bulk_process(
@@ -198,10 +195,7 @@ def bulk_remove(state, csv_rows):
         if resource_id is None:
             message = "'resource_id' is a required field to remove a trusted activity."
             raise Code42CLIError(message)
-        try:
-            _check_resource_id_type(resource_id)
-        except Code42CLIError:
-            raise
+        _check_resource_id_type(resource_id)
         sdk.trustedactivities.delete(resource_id)
 
     run_bulk_process(
