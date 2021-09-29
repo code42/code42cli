@@ -12,7 +12,7 @@
 
 ### Get CSV Template
 
-The following command will generate a csv template to either create, update, or remove multiple trusted activities at once.  The csv file will be saved to the current working directory.
+The following command will generate a CSV template to either update users' data, or move users between organizations.  The csv file will be saved to the current working directory.
 ```bash
 code42 trusted-activities bulk generate-template [update|move]
 ```

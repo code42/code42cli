@@ -2,7 +2,7 @@
 
 ## Get CSV Template
 
-The following command will generate a csv template to either create, update, or remove multiple trusted activities at once.  The csv file will be saved to the current working directory.
+The following command will generate a CSV template to either create, update, or remove multiple trusted activities at once.  The csv file will be saved to the current working directory.
 ```bash
 code42 trusted-activities bulk generate-template [create|update|remove]
 ```
@@ -55,10 +55,11 @@ code42 trusted-activities bulk update /Users/my_user/update_trusted_activities.c
 ```
 
 ```eval_rst
-.. important::
-    Because there's no way to indicate an empty string in the CSV format, the `bulk update` command cannot be used to clear a trusted activity's description.  
-    However, submitting an empty string to the regular `update` command will successfully clear the description.
-    `code42 trusted-activities update 123 --description ""`
+.. note::
+    The ``bulk update`` command cannot be used to clear a trusted activity's description because there's no way to indicate an empty string in the CSV format.
+    Pass an empty string to the ``description`` option of the ``update`` command to clear the description of a trusted activity.
+    
+    For example: ``code42 trusted-activities update 123 --description ""``
 ```
 
 

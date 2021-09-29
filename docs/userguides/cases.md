@@ -1,7 +1,7 @@
-# Addand Manage Cases
+# Add and Manage Cases
 
-# Creating a New Case
+## Creating a New Case
 
-# Exporting Case Details
+## Exporting Case Details
 
-# View Associated File Events
+## View Associated File Events
