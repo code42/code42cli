@@ -1,4 +1,4 @@
-# Manage Trusted Activities
+# Configure Trusted Activities
 
 ## Get CSV Template
 
@@ -29,38 +29,34 @@ code42 trusted-activities bulk generate-template create
 
 ## Creating a New Trusted Activity
 
-To update multiple trusted activites, enter the trusted activity's information in the CSV file, then use the `bulk create` command with the CSV file path. For example:
+Use the `create` command to add a new trusted domain or Slack workspace to your organization's trusted activities.
+```bash
+code42 trusted-activities create DOMAIN mydomain.com --description "a new trusted activity"
+```
+
+To create multiple trusted activities at once, enter the trusted activity's information into the `create` CSV file template, then use the `bulk create` command with the CSV file path. For example:
 
 ```bash
 code42 trusted-activities bulk create /Users/my_user/create_trusted_activities.csv
 ```
 
-Use the `create` command to create just a single trusted activity.
-```bash
-code42 trusted-activities create DOMAIN mydomain.com --description "a new trusted activity"
-```
-
 ## Updating a Trusted Activity
 
-Once you have entered the trusted activity's desired information in the CSV file, use the `bulk update` command with the CSV file path to
-update multiple trusted activities at once. 
+Use the `update` command to update either the value or description of a single trusted activity. The `resource_id` of the activity is required for updating.  The other fields are optional.
 
-The `resource_id` of the activity is required for updating.  The other fields are optional.
+```bash
+code42 trusted-activities update 123 --value my-updated-domain.com --description "an updated trusted activity"
+```
 
-For example:
+To update multiple trusted activities at once, enter the trusted activity's information into the `update` CSV file template, then use the `bulk update` command with the CSV file path.
 
 ```bash
 code42 trusted-activities bulk update /Users/my_user/update_trusted_activities.csv
 ```
 
-Use the `update` command to update just a single trusted activity.
-```bash
-code42 trusted-activities update 123 --value my-updated-domain.com --description "an updated trusted activity"
-```
-
 ```eval_rst
 .. important::
-    Because there's no way to indicate an empty string in the CSV format, the `bulk update` command cannot be used to remove a trusted activity's description.  
+    Because there's no way to indicate an empty string in the CSV format, the `bulk update` command cannot be used to clear a trusted activity's description.  
     However, submitting an empty string to the regular `update` command will successfully clear the description.
     `code42 trusted-activities update 123 --description ""`
 ```
@@ -68,19 +64,19 @@ code42 trusted-activities update 123 --value my-updated-domain.com --description
 
 ## Removing a Trusted Activity
 
-Once you have entered the trusted activity's desired information in the CSV file, use the `bulk remove` command with the CSV file path to
-remove multiple trusted activities at once.  
-
-Only the `resource_id` of an activity is required to remove it.
-
-```bash
-code42 trusted-activities bulk remove /Users/my_user/remove_trusted_activities.csv
-```
-
-Use the `remove` command to remove just a single trusted activity.
+Use the `remove` command to remove just a single trusted activity.  Only the `resource_id` of an activity is required to remove it.
 
 ```bash
 code42 trusted-activities remove 123
 ```
 
-Learn more about the [Trusted Activities](../commands/highriskemployee.md) commands.
+To remove multiple trusted activities at once, enter the trusted activity's information into the `remove` CSV file template, then use the `bulk remove` command with the CSV file path.
+
+
+```bash
+code42 trusted-activities bulk remove /Users/my_user/remove_trusted_activities.csv
+```
+
+
+
+Learn more about the [Trusted Activities](../commands/trustedactivities.md) commands.

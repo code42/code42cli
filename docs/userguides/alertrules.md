@@ -1,4 +1,4 @@
-# Alert Rules
+# Configure Alert Rules
 
 ## Add and Remove Users
 
