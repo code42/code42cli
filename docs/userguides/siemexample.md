@@ -233,3 +233,5 @@ See the table below to map file events to CEF signature IDs.
 | EMAILED            | C42204    |
 +--------------------+-----------+
 ```
+
+## Audit Logs

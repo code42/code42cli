@@ -7,6 +7,11 @@ The following command will generate a csv template to either create, update, or 
 code42 trusted-activities bulk generate-template [create|update|remove]
 ```
 
+Each of the CSV templates can then be filled out and used with their respective bulk command. 
+```bash
+code42 trusted-activities bulk [create|update|remove] Users/my_user/bulk-command.csv
+```
+
 
 For example, to create multiple trusted activities at once:
 
@@ -22,10 +27,9 @@ code42 trusted-activities bulk generate-template create
 
 3. Save the CSV file.
 
-## Create a New Trusted Activity
+## Creating a New Trusted Activity
 
-Once you have entered the trusted activity's information in the CSV file, use the `bulk create` command with the CSV file path to
-create multiple trusted activities at once. For example:
+To update multiple trusted activites, enter the trusted activity's information in the CSV file, then use the `bulk create` command with the CSV file path. For example:
 
 ```bash
 code42 trusted-activities bulk create /Users/my_user/create_trusted_activities.csv
@@ -36,12 +40,12 @@ Use the `create` command to create just a single trusted activity.
 code42 trusted-activities create DOMAIN mydomain.com --description "a new trusted activity"
 ```
 
-## Update a Trusted Activity
+## Updating a Trusted Activity
 
 Once you have entered the trusted activity's desired information in the CSV file, use the `bulk update` command with the CSV file path to
 update multiple trusted activities at once. 
 
-To update a trusted activity, the `resource_id` of the activity is required.  The other fields are optional.
+The `resource_id` of the activity is required for updating.  The other fields are optional.
 
 For example:
 
@@ -62,20 +66,21 @@ code42 trusted-activities update 123 --value my-updated-domain.com --description
 ```
 
 
-## Remove a Trusted Activity
-You can remove one or more users from the High Risk Employees list. Use `code42 departing-employee remove` to remove a
-single user.
+## Removing a Trusted Activity
 
-To remove multiple users at once:
+Once you have entered the trusted activity's desired information in the CSV file, use the `bulk remove` command with the CSV file path to
+remove multiple trusted activities at once.  
 
-1. Create a CSV file with one username per line.
-
-2. Save the file to your current working directory.
-
-3. Use the `bulk remove` command. For example:
+Only the `resource_id` of an activity is required to remove it.
 
 ```bash
-code42 high-risk-employee bulk remove /Users/matt.allen/remove_high_risk_employee.csv
+code42 trusted-activities bulk remove /Users/my_user/remove_trusted_activities.csv
 ```
 
-Learn more about the [Trusted Activities](../commands/trustedactivities.md) commands.
+Use the `remove` command to remove just a single trusted activity.
+
+```bash
+code42 trusted-activities remove 123
+```
+
+Learn more about the [Trusted Activities](../commands/highriskemployee.md) commands.
