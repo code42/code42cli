@@ -1,5 +1,7 @@
 # Configure Trusted Activities
 
+You can add trusted activities to your organization to prevent file activity associated with these locations from appearing in your security data dashboards, user profiles, and alerts.
+
 ## Get CSV Template
 
 The following command will generate a CSV template to either create, update, or remove multiple trusted activities at once.  The csv file will be saved to the current working directory.
@@ -7,7 +9,7 @@ The following command will generate a CSV template to either create, update, or 
 code42 trusted-activities bulk generate-template [create|update|remove]
 ```
 
-Each of the CSV templates can then be filled out and used with their respective bulk command. 
+Each of the CSV templates can then be filled out and used with their respective bulk command.
 ```bash
 code42 trusted-activities bulk [create|update|remove] Users/my_user/bulk-command.csv
 ```
@@ -21,7 +23,7 @@ For example, to create multiple trusted activities at once:
 code42 trusted-activities bulk generate-template create
 ```
 
-2. Use the CSV template to enter each trusted activity's information. 
+2. Use the CSV template to enter each trusted activity's information.
    The `type` and `value` fields are required. `type` indicates the category of activity, either `DOMAIN`, to indicate a trusted domain, or `SLACK`, to indicate a trusted Slack workspace.
    `value` indicates either name of the domain or Slack workspace, respectively.
 
@@ -58,7 +60,7 @@ code42 trusted-activities bulk update /Users/my_user/update_trusted_activities.c
 .. note::
     The ``bulk update`` command cannot be used to clear a trusted activity's description because there's no way to indicate an empty string in the CSV format.
     Pass an empty string to the ``description`` option of the ``update`` command to clear the description of a trusted activity.
-    
+
     For example: ``code42 trusted-activities update 123 --description ""``
 ```
 
@@ -73,11 +75,8 @@ code42 trusted-activities remove 123
 
 To remove multiple trusted activities at once, enter the trusted activity's information into the `remove` CSV file template, then use the `bulk remove` command with the CSV file path.
 
-
 ```bash
 code42 trusted-activities bulk remove /Users/my_user/remove_trusted_activities.csv
 ```
-
-
 
 Learn more about the [Trusted Activities](../commands/trustedactivities.md) commands.

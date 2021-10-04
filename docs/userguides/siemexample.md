@@ -15,25 +15,26 @@ First install and configure the Code42 CLI following the instructions in
 
 ## Run queries
 You can get file events in either a JSON or CEF format for use by your SIEM tool. Alerts data and audit logs are available in JSON format. You can query the data as a
-scheduled job or run ad-hoc queries. 
+scheduled job or run ad-hoc queries.
 
 Learn more about searching [File Events](../commands/securitydata.md), [Alerts](../commands/alerts.md), and [Audit Logs](../commands/auditlogs.md) using the CLI.
 
 ### Run a query as a scheduled job
 
 Use your favorite scheduling tool, such as cron or Windows Task Scheduler, to run a query on a regular basis. Specify
-the profile to use by including `--profile`. 
+the profile to use by including `--profile`.
 
+#### File Exposure Events
 An example using the `send-to` command to forward only the new file event data since the previous request to an external syslog server:
 ```bash
 code42 security-data send-to syslog.example.com:514 -p UDP --profile profile1 -c syslog_sender
 ```
-
+#### Alerts
 An example to send to the syslog server only the new alerts that meet the filter criteria since the previous request:
 ```bash
 code42 alerts send-to syslog.example.com:514 -p UDP --profile profile1 --rule-name "Source code exfiltration" --state OPEN -i
 ```
-
+#### Audit Logs
 An example to send to the syslog server only the audit log events that meet the filter criteria from the last 30 days.
 ```bash
 code42 audit-logs send-to syslog.example.com:514 -p UDP --profile profile1 --actor-username 'sean.cassidy@example.com' -b 30d
@@ -44,7 +45,7 @@ As a best practice, use a separate profile when executing a scheduled task. Usin
 ### Run an ad-hoc query
 
 Examples of ad-hoc queries you can run are as follows.
-
+#### File Exposure Events
 Print file events since March 5 for a user in raw JSON format:
 ```bash
 code42 security-data search -f RAW-JSON -b 2020-03-05 --c42-username 'sean.cassidy@example.com'
@@ -60,12 +61,12 @@ March 5:
 ```bash
 code42 security-data search -f RAW-JSON -b 2020-03-05 -t ApplicationRead --c42-username 'sean.cassidy@example.com' > /Users/sangita.maskey/Downloads/c42cli_output.txt
 ```
-
+#### Alerts
 Print alerts since May 5 where a file's cloud share permissions changed:
 ```bash
 code42 alerts print -b 2020-05-05 --rule-type FedCloudSharePermissions
 ```
-
+#### Audit Logs
 Print audit log events since June 5 which affected a certain user:
 ```bash
 code42 audit-logs search -b 2021-06-05 --affected-username 'sean.cassidy@examply.com'
