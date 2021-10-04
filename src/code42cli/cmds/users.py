@@ -17,12 +17,7 @@ from code42cli.output_formats import OutputFormatter
 from code42cli.worker import create_worker_stats
 
 
-@click.group(cls=OrderedGroup)
-@sdk_options(hidden=True)
-def users(state):
-    """Manage users within your Code42 environment."""
-    pass
-
+username_arg = click.argument("username")
 
 org_uid_option = click.option(
     "--org-uid",
@@ -45,6 +40,12 @@ org_id_option = click.option(
     help="The identifier for the organization to which the user will be moved.",
     required=True,
 )
+include_legal_hold_option = click.option(
+    "--include-legal-hold-membership",
+    default=False,
+    is_flag=True,
+    help="Include legal hold membership in output.",
+)
 
 
 def role_name_option(help):
@@ -55,21 +56,33 @@ def username_option(help, required=False):
     return click.option("--username", help=help, required=required)
 
 
+@click.group(cls=OrderedGroup)
+@sdk_options(hidden=True)
+def users(state):
+    """Manage users within your Code42 environment."""
+    pass
+
+
 @users.command(name="list")
 @org_uid_option
 @role_name_option("Limit results to only users having the specified role.")
 @active_option
 @inactive_option
+@include_legal_hold_option
 @click.option(
-    "--include-legal-hold-membership",
-    default=False,
-    is_flag=True,
-    help="Include legal hold membership in output.",
+    "--include-roles", default=False, is_flag=True, help="Include user roles."
 )
 @format_option
 @sdk_options()
 def list_users(
-    state, org_uid, role_name, active, inactive, include_legal_hold_membership, format
+    state,
+    org_uid,
+    role_name,
+    active,
+    inactive,
+    include_legal_hold_membership,
+    include_roles,
+    format,
 ):
     """List users in your Code42 environment."""
     if inactive:
@@ -80,8 +93,35 @@ def list_users(
         if format == OutputFormat.TABLE
         else None
     )
-    df = _get_users_dataframe(state.sdk, columns, org_uid, role_id, active)
+    if include_roles and columns:
+        columns.append("roles")
+    df = _get_users_dataframe(
+        state.sdk, columns, org_uid, role_id, active, include_roles
+    )
     if include_legal_hold_membership:
+        df = _add_legal_hold_membership_to_user_dataframe(state.sdk, df)
+    if df.empty:
+        click.echo("No results found.")
+    else:
+        formatter = DataFrameOutputFormatter(format)
+        formatter.echo_formatted_dataframe(df)
+
+
+@users.command("show")
+@username_arg
+@include_legal_hold_option
+@format_option
+@sdk_options()
+def show_user(state, username, include_legal_hold_membership, format):
+    """Show user details."""
+    columns = (
+        ["userUid", "status", "username", "orgUid", "roles"]
+        if format == OutputFormat.TABLE
+        else None
+    )
+    response = state.sdk.users.get_by_username(username, incRoles=True)
+    df = DataFrame.from_records(response["users"], columns=columns)
+    if include_legal_hold_membership and not df.empty:
         df = _add_legal_hold_membership_to_user_dataframe(state.sdk, df)
     if df.empty:
         click.echo("No results found.")
@@ -400,8 +440,10 @@ def _get_role_id(sdk, role_name):
         raise Code42CLIError(f"Role with name '{role_name}' not found.")
 
 
-def _get_users_dataframe(sdk, columns, org_uid, role_id, active):
-    users_generator = sdk.users.get_all(active=active, org_uid=org_uid, role_id=role_id)
+def _get_users_dataframe(sdk, columns, org_uid, role_id, active, include_roles):
+    users_generator = sdk.users.get_all(
+        active=active, org_uid=org_uid, role_id=role_id, incRoles=include_roles
+    )
     users_list = []
     for page in users_generator:
         users_list.extend(page["users"])
@@ -413,6 +455,7 @@ def _add_legal_hold_membership_to_user_dataframe(sdk, df):
     columns = ["legalHold.legalHoldUid", "legalHold.name", "user.userUid"]
 
     custodians = list(_get_all_active_hold_memberships(sdk))
+
     if len(custodians) == 0:
         return df
 

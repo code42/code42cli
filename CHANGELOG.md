@@ -12,6 +12,10 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
+- New option `--include-roles` on `code42 users list` that includes the roles for all users.
+
+- New command `code42 users show <username>` that prints all the details of that user.
+
 - New option `--include-legal-hold-membership` on command `code42 users list` that includes the legal hold matter name and ID for any user on legal hold.
 
 - New commands for deactivating/reactivating Code42 user accounts:

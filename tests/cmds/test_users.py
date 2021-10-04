@@ -28,6 +28,7 @@ TEST_USERS_RESPONSE = {
             "blocked": False,
             "creationDate": "2021-03-12T20:07:40.898Z",
             "modificationDate": "2021-03-12T20:07:40.938Z",
+            "roles": ["Desktop User"],
             "userId": 1234,
             "username": "test.username@example.com",
             "userUid": "911162111513111325",
@@ -288,7 +289,7 @@ def test_list_users_calls_users_get_all_with_expected_role_id(
     role_name = "Customer Cloud Admin"
     runner.invoke(cli, ["users", "list", "--role-name", role_name], obj=cli_state)
     cli_state.sdk.users.get_all.assert_called_once_with(
-        active=None, org_uid=None, role_id="1234543"
+        active=None, org_uid=None, role_id="1234543", incRoles=False
     )
 
 
@@ -297,10 +298,12 @@ def test_list_users_calls_get_all_users_with_correct_parameters(
 ):
     org_uid = "TEST_ORG_UID"
     runner.invoke(
-        cli, ["users", "list", "--org-uid", org_uid, "--active"], obj=cli_state
+        cli,
+        ["users", "list", "--org-uid", org_uid, "--active", "--include-roles"],
+        obj=cli_state,
     )
     cli_state.sdk.users.get_all.assert_called_once_with(
-        active=True, org_uid=org_uid, role_id=None
+        active=True, org_uid=org_uid, role_id=None, incRoles=True
     )
 
 
@@ -309,7 +312,7 @@ def test_list_users_when_given_inactive_uses_active_equals_false(
 ):
     runner.invoke(cli, ["users", "list", "--inactive"], obj=cli_state)
     cli_state.sdk.users.get_all.assert_called_once_with(
-        active=False, org_uid=None, role_id=None
+        active=False, org_uid=None, role_id=None, incRoles=False
     )
 
 
@@ -327,7 +330,7 @@ def test_list_users_when_given_excluding_active_and_inactive_uses_active_equals_
 ):
     runner.invoke(cli, ["users", "list"], obj=cli_state)
     cli_state.sdk.users.get_all.assert_called_once_with(
-        active=None, org_uid=None, role_id=None
+        active=None, org_uid=None, role_id=None, incRoles=False
     )
 
 
@@ -401,6 +404,122 @@ def test_list_include_legal_hold_membership_merges_in_and_concats_legal_hold_inf
 ):
     result = runner.invoke(
         cli, ["users", "list", "--include-legal-hold-membership"], obj=cli_state
+    )
+
+    assert "Legal Hold #1,Legal Hold #2" in result.output
+    assert "123456789,987654321" in result.output
+
+
+def test_list_prints_expected_data_if_include_roles(
+    runner, cli_state, get_all_users_success
+):
+    result = runner.invoke(cli, ["users", "list", "--include-roles"], obj=cli_state)
+    assert "roles" in result.output
+    assert "Desktop User" in result.output
+
+
+def test_show_calls_get_by_username_with_expected_params(runner, cli_state):
+    runner.invoke(
+        cli, ["users", "show", "test.username@example.com"], obj=cli_state,
+    )
+    cli_state.sdk.users.get_by_username.assert_called_once_with(
+        "test.username@example.com", incRoles=True
+    )
+
+
+def test_show_prints_expected_data(runner, cli_state, get_users_response):
+    cli_state.sdk.users.get_by_username.return_value = get_users_response
+    result = runner.invoke(
+        cli, ["users", "show", "test.username@example.com"], obj=cli_state,
+    )
+    assert "test.username@example.com" in result.output
+    assert "911162111513111325" in result.output
+    assert "Active" in result.output
+    assert "44444444" in result.output
+    assert "Desktop User" in result.output
+
+
+def test_show_legal_hold_flag_reports_none_for_users_not_on_legal_hold(
+    runner,
+    cli_state,
+    get_users_response,
+    get_custodian_failure,
+    get_all_matter_success,
+):
+    cli_state.sdk.users.get_by_username.return_value = get_users_response
+    result = runner.invoke(
+        cli,
+        [
+            "users",
+            "show",
+            "test.username@example.com",
+            "--include-legal-hold-membership",
+            "-f",
+            "CSV",
+        ],
+        obj=cli_state,
+    )
+
+    assert "Legal Hold #1,Legal Hold #2" not in result.output
+    assert "123456789,987654321" not in result.output
+    assert "legalHoldUid" not in result.output
+    assert "test.username@example.com" in result.output
+
+
+def test_show_legal_hold_flag_reports_none_if_no_matters_exist(
+    runner, cli_state, get_users_response, get_custodian_failure, get_matter_failure
+):
+    cli_state.sdk.users.get_by_username.return_value = get_users_response
+    result = runner.invoke(
+        cli,
+        [
+            "users",
+            "show",
+            "test.username@example.com",
+            "--include-legal-hold-membership",
+        ],
+        obj=cli_state,
+    )
+
+    assert "Legal Hold #1,Legal Hold #2" not in result.output
+    assert "123456789,987654321" not in result.output
+    assert "legalHoldUid" not in result.output
+    assert "test.username@example.com" in result.output
+
+
+def test_show_legal_hold_values_not_included_for_legal_hold_user_if_legal_hold_flag_not_passed(
+    runner,
+    cli_state,
+    get_users_response,
+    get_all_custodian_success,
+    get_all_matter_success,
+):
+    cli_state.sdk.users.get_by_username.return_value = get_users_response
+    result = runner.invoke(
+        cli, ["users", "show", "test.username@example.com"], obj=cli_state
+    )
+    assert "Legal Hold #1,Legal Hold #2" not in result.output
+    assert "123456789,987654321" not in result.output
+    assert "test.username@example.com" in result.output
+
+
+def test_show_include_legal_hold_membership_merges_in_and_concats_legal_hold_info(
+    runner,
+    cli_state,
+    get_users_response,
+    get_all_custodian_success,
+    get_all_matter_success,
+):
+    cli_state.sdk.users.get_by_username.return_value = get_users_response
+    result = runner.invoke(
+        cli,
+        [
+            "users",
+            "show",
+            "test.username@example.com",
+            "--include-legal-hold-membership",
+        ],
+        obj=cli_state,
     )
 
     assert "Legal Hold #1,Legal Hold #2" in result.output
