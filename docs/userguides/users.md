@@ -17,10 +17,10 @@ To change the information for one or more users, provide the user UID and update
 
 Use the following command to add a role to a user:
 ```bash
-code42 users add-role "Desktop User"
+code42 users add-role --username "sean.cassidy@example.com" --role-name "Desktop User"
 ```
 
-Similarly, use the `remove role` command to remove a role from a user.
+Similarly, use the `remove-role` command to remove a role from a user.
 
 ## Deactivate a User
 
@@ -31,7 +31,7 @@ code42 users deactivate sean.cassidy@example.com
 
 To deactivate multiple users at once, enter each username on a new line in a CSV file, then use the `bulk deactivate` command with the CSV file path. For example:
 ```bash
-code42 users bulk deactivate /Users/my_user/users_to_deactivate.csv
+code42 users bulk deactivate users_to_deactivate.csv
 ```
 
 You can use the `reactivate` and `bulk reactivate` commands similarly to reactivate a user.
@@ -40,14 +40,14 @@ You can use the `reactivate` and `bulk reactivate` commands similarly to reactiv
 
 Use [Organizations](https://support.code42.com/Administrator/Cloud/Code42_console_reference/Organizations_reference) to group users together in the Code42 environment.
 
-Use the following example command to move a user into an organization associated with the `org_id`
+Use the following example command to move a user into an organization associated with the `org_id` 1234567890:
 ```bash
 code42 users move --username sean.cassidy@example.com --org-id 1234567890
 ```
 
 Alternatively, to add move multiple users between organizations, fill out the `move` CSV file template, then use the `bulk move` command with the CSV file path.
 ```bash
-code42 users bulk move Users/my_user/bulk-command.csv
+code42 users bulk move bulk-command.csv
 ```
 
 ## Get CSV Template
@@ -59,7 +59,7 @@ code42 trusted-activities bulk generate-template [update|move]
 
 Each of the CSV templates can then be filled out and used with their respective bulk command.
 ```bash
-code42 trusted-activities bulk [update|move|reactivate|deactivate] Users/my_user/bulk-command.csv
+code42 trusted-activities bulk [update|move|reactivate|deactivate] bulk-command.csv
 ```
 
 A CSV with a single `username` column and each username on a new line is used for the `reactivate` and `deactivate` bulk commands.  They are not available as options for `generate-template`.

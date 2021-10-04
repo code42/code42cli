@@ -11,7 +11,7 @@ code42 trusted-activities bulk generate-template [create|update|remove]
 
 Each of the CSV templates can then be filled out and used with their respective bulk command.
 ```bash
-code42 trusted-activities bulk [create|update|remove] Users/my_user/bulk-command.csv
+code42 trusted-activities bulk [create|update|remove] bulk-command.csv
 ```
 
 
@@ -39,7 +39,7 @@ code42 trusted-activities create DOMAIN mydomain.com --description "a new truste
 To create multiple trusted activities at once, enter the trusted activity's information into the `create` CSV file template, then use the `bulk create` command with the CSV file path. For example:
 
 ```bash
-code42 trusted-activities bulk create /Users/my_user/create_trusted_activities.csv
+code42 trusted-activities bulk create create_trusted_activities.csv
 ```
 
 ## Updating a Trusted Activity
@@ -53,7 +53,7 @@ code42 trusted-activities update 123 --value my-updated-domain.com --description
 To update multiple trusted activities at once, enter the trusted activity's information into the `update` CSV file template, then use the `bulk update` command with the CSV file path.
 
 ```bash
-code42 trusted-activities bulk update /Users/my_user/update_trusted_activities.csv
+code42 trusted-activities bulk update update_trusted_activities.csv
 ```
 
 ```eval_rst
@@ -76,7 +76,7 @@ code42 trusted-activities remove 123
 To remove multiple trusted activities at once, enter the trusted activity's information into the `remove` CSV file template, then use the `bulk remove` command with the CSV file path.
 
 ```bash
-code42 trusted-activities bulk remove /Users/my_user/remove_trusted_activities.csv
+code42 trusted-activities bulk remove remove_trusted_activities.csv
 ```
 
 Learn more about the [Trusted Activities](../commands/trustedactivities.md) commands.

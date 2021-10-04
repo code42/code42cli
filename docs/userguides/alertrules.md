@@ -1,9 +1,10 @@
 # Associate Users to Alert Rules
 
-Once you [create an alert rule in the Code42 console](https://support.code42.com/Administrator/Cloud/Code42_console_reference/Alert_rule_settings_reference), you can use the CLI add and remove users from your existing alert rules.
+Once you [create an alert rule in the Code42 console](https://support.code42.com/Administrator/Cloud/Code42_console_reference/Alert_rule_settings_reference), you can use the CLI `alert-rules` commands to add and remove users from your existing alert rules.
 
-Use the `alert-rules` commands to manage which users belong to each rule.
-- To see a list of all the users currently in your organization, you can export a list from the [Users action menu](https://support.code42.com/Administrator/Cloud/Code42_console_reference/Users_reference#Action_menu).
+To see a list of all the users currently in your organization: 
+- Export a list from the [Users action menu](https://support.code42.com/Administrator/Cloud/Code42_console_reference/Users_reference#Action_menu).
+- Use the [CLI users commands](./users.md) to print all users.
 
 ## View Existing Alert Rules
 
@@ -88,15 +89,15 @@ code42 alert-rules add-user --rule-id <rule-id> -u sean.cassidy@example.com
 
 Alternatively, to add multiple users to your alert rule, fill out the `add` CSV file template, then use the `bulk add` command with the CSV file path.
 ```bash
-code42 alert-rules bulk add Users/my_user/bulk-command.csv
+code42 alert-rules bulk add users.csv
 ```
 
-You can remove single or multiple users from alert rules similarly using the `remove` and `bulk remove` commands.
+You can remove single or multiple users from alert rules similarly using the `remove-user` and `bulk remove` commands.
 
 
 ## Get CSV Template
 
-The following command will generate a CSV template to either add or remove users from multiple alert rules at once.  The csv file will be saved to the current working directory.
+The following command will generate a CSV template to either add or remove users from multiple alert rules at once.  The CSV file will be saved to the current working directory.
 ```bash
 code42 alert-rules bulk generate-template [add|remove]
 ```

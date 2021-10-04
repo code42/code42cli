@@ -59,7 +59,7 @@ code42 cases file-events bulk generate-template [add|remove]
 
 Each of the CSV templates can then be filled out and used with their respective bulk command.
 ```bash
-code42 cases file-events bulk [add|remove] Users/my_user/bulk-command.csv
+code42 cases file-events bulk [add|remove] bulk-command.csv
 ```
 
 For example, to associate one or more file exposure events to one or more cases at once:
@@ -70,7 +70,7 @@ For example, to associate one or more file exposure events to one or more cases 
 code42 cases bulk generate-template add
 ```
 
-2. Use the CSV template to enter each trusted activity's information.
+2. Use the CSV template to enter the case and file event information.
    The `number` and `event_id` fields are required. The `number` refers to the identifying case number to add the events, and the `event_id` refers to the ID of the file exposure event to associate with the case.
 
 3. Save the CSV file.
@@ -89,9 +89,9 @@ Below is an example command to associate some event with ID `event_abc` with cas
 code42 cases file-events add 42 event_abc
 ```
 
-To associate multiple file events with one or more cases at once, enter the trusted activity's information into the `file-events add` CSV file template, then use the `bulk add` command with the CSV file path. For example:
+To associate multiple file events with one or more cases at once, enter the case and file event information into the `file-events add` CSV file template, then use the `bulk add` command with the CSV file path. For example:
 ```bash
-code42 cases file-events bulk add /Users/my_user/create_trusted_activities.csv
+code42 cases file-events bulk add my_new_cases.csv
 ```
 
 Similarly, the `remove` and `bulk remove` commands can be used to remove a file event's association with a case.
