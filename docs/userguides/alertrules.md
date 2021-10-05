@@ -2,7 +2,7 @@
 
 Once you [create an alert rule in the Code42 console](https://support.code42.com/Administrator/Cloud/Code42_console_reference/Alert_rule_settings_reference), you can use the CLI `alert-rules` commands to add and remove users from your existing alert rules.
 
-To see a list of all the users currently in your organization: 
+To see a list of all the users currently in your organization:
 - Export a list from the [Users action menu](https://support.code42.com/Administrator/Cloud/Code42_console_reference/Users_reference#Action_menu).
 - Use the [CLI users commands](./users.md) to print all users.
 
