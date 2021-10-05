@@ -8,13 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-## 1.10.0 - 2021-10-05
+## Unreleased
 
 ### Added
 
 - New option `--include-roles` on `code42 users list` that includes the roles for all users.
 
 - New command `code42 users show <username>` that prints all the details of that user.
+
+- New commands to view orgs
+    - `code42 users orgs list`
+    - `code42 users orgs show <org-id>`
+
+## 1.10.0 - 2021-10-05
+
+### Added
 
 - New option `--include-legal-hold-membership` on command `code42 users list` that includes the legal hold matter name and ID for any user on legal hold.
 

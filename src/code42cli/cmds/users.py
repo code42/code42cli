@@ -1,6 +1,7 @@
 import click
 from pandas import DataFrame
 from pandas import json_normalize
+from py42.exceptions import Py42NotFoundError
 
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
@@ -54,6 +55,21 @@ def role_name_option(help):
 
 def username_option(help, required=False):
     return click.option("--username", help=help, required=required)
+
+
+def _get_orgs_header():
+    return {
+        "orgId": "ID",
+        "orgUid": "UID",
+        "orgName": "Name",
+        "status": "Status",
+        "parentOrgId": "Parent ID",
+        "parentOrgUid": "Parent UID",
+        "type": "Type",
+        "classification": "Classfication",
+        "creationDate": "Creation Date",
+        "settings": "Settings",
+    }
 
 
 @click.group(cls=OrderedGroup)
@@ -225,6 +241,46 @@ def change_organization(state, username, org_id):
     """Change the organization of the user with the given username
     to the org with the given org ID."""
     _change_organization(state.sdk, username, org_id)
+
+
+@users.group(cls=OrderedGroup)
+@sdk_options(hidden=True)
+def orgs(state):
+    """Tools for viewing user orgs."""
+    pass
+
+
+@orgs.command(name="list")
+@format_option
+@sdk_options()
+def list_orgs(
+    state,
+    format,
+):
+    """List all orgs."""
+    pages = state.sdk.orgs.get_all()
+    formatter = OutputFormatter(format, _get_orgs_header())
+    orgs = [org for page in pages for org in page["orgs"]]
+    if orgs:
+        formatter.echo_formatted_list(orgs)
+    else:
+        click.echo("No orgs found.")
+    
+
+@orgs.command(name="show")
+@click.argument("org-id")
+@format_option
+@sdk_options()
+def show_org(
+    state, org_id, format,
+):
+    """Show org details."""
+    formatter = OutputFormatter(format)
+    try:
+        response = state.sdk.orgs.get_by_id(org_id)
+        formatter.echo_formatted_list([response.data])
+    except Py42NotFoundError:
+        raise Code42CLIError(f"Invalid org ID {org_id}.")
 
 
 @users.group(cls=OrderedGroup)
