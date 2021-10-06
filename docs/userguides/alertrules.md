@@ -1,10 +1,10 @@
-# Associate Users to Alert Rules
+# Add Users to Alert Rules
 
 Once you [create an alert rule in the Code42 console](https://support.code42.com/Administrator/Cloud/Code42_console_reference/Alert_rule_settings_reference), you can use the CLI `alert-rules` commands to add and remove users from your existing alert rules.
 
 To see a list of all the users currently in your organization:
 - Export a list from the [Users action menu](https://support.code42.com/Administrator/Cloud/Code42_console_reference/Users_reference#Action_menu).
-- Use the [CLI users commands](./users.md) to print all users.
+- Use the [CLI users commands](./users.md).
 
 ## View Existing Alert Rules
 
@@ -15,7 +15,7 @@ To view a list of all alert rules currently created for your organization, inclu
 code42 alert-rules list
 ```
 
-If you've identified the rule ID, to view the details of that alert rule use:
+Once you've identified the rule ID, view the details of the alert rule as follows:
 ```bash
 code42 alert-rules show <rule-ID>
 ```
@@ -102,22 +102,9 @@ The following command will generate a CSV template to either add or remove users
 code42 alert-rules bulk generate-template [add|remove]
 ```
 
-Each of the CSV templates can then be filled out and used with their respective bulk command.
+You can then fill out and use each of the CSV templates with their respective bulk commands.
 ```bash
 code42 alert-rules bulk [add|remove] Users/my_user/bulk-command.csv
 ```
-
-For example, to associate one or more users to one or more alert rules:
-
-1. Generate a CSV template. Below is the command for generating a template to add users to an alert rules. Once generated, the CSV file is saved to your current working directory.
-
-```bash
-code42 alert-rules bulk generate-template add
-```
-
-2. Use the CSV template to enter each trusted activity's information.
-   The `rule_id` and `username` fields are required. The `rule_id` refers to the ID number of the alert rule to add the users too, and the `username` refers to that of the user to add to the alert rule.
-
-3. Save the CSV file.
 
 Learn more about the [Alert Rules](../commands/alertrules.md) commands.

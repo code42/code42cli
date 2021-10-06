@@ -2,7 +2,7 @@
 
 You can use the CLI to manage user information, update user roles, and move users between organizations.
 
-To see a list of all the users currently in your organization, you can export a list from the [Users action menu](https://support.code42.com/Administrator/Cloud/Code42_console_reference/Users_reference#Action_menu) or you can use the  `list` command.
+To see a list of all the users currently in your organization, you can export a list from the [Users action menu](https://support.code42.com/Administrator/Cloud/Code42_console_reference/Users_reference#Action_menu) or you can use the `list` command.
 
 You can use optional flags to filter the users you want to view. The following command will print all active users with the `Desktop User` role who belong to the organization with UID `1234567890`:
 ```bash
@@ -57,7 +57,7 @@ The following command will generate a CSV template to either update users' data,
 code42 trusted-activities bulk generate-template [update|move]
 ```
 
-Each of the CSV templates can then be filled out and used with their respective bulk command.
+You can then fill out and use each of the CSV templates with their respective bulk commands.
 ```bash
 code42 trusted-activities bulk [update|move|reactivate|deactivate] bulk-command.csv
 ```

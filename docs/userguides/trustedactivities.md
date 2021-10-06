@@ -9,7 +9,7 @@ The following command will generate a CSV template to either create, update, or 
 code42 trusted-activities bulk generate-template [create|update|remove]
 ```
 
-Each of the CSV templates can then be filled out and used with their respective bulk command.
+You can then fill out and use each of the CSV templates with their respective bulk commands.
 ```bash
 code42 trusted-activities bulk [create|update|remove] bulk-command.csv
 ```
