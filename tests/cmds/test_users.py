@@ -3,6 +3,7 @@ from py42.exceptions import Py42ActiveLegalHoldError
 from py42.exceptions import Py42InvalidEmailError
 from py42.exceptions import Py42InvalidPasswordError
 from py42.exceptions import Py42InvalidUsernameError
+from py42.exceptions import Py42OrgNotFoundError
 from tests.conftest import create_mock_http_error
 from tests.conftest import create_mock_response
 
@@ -327,6 +328,22 @@ def test_list_users_when_given_excluding_active_and_inactive_uses_active_equals_
     runner.invoke(cli, ["users", "list"], obj=cli_state)
     cli_state.sdk.users.get_all.assert_called_once_with(
         active=None, org_uid=None, role_id=None
+    )
+
+
+def test_list_users_when_given_invalid_org_uid_raises_error(
+    runner, cli_state, get_available_roles_success, custom_error
+):
+    invalid_org_uid = "invalid_org_uid"
+    cli_state.sdk.users.get_all.side_effect = Py42OrgNotFoundError(
+        custom_error, invalid_org_uid
+    )
+    result = runner.invoke(
+        cli, ["users", "list", "--org-uid", invalid_org_uid], obj=cli_state
+    )
+    assert (
+        f"Error: The organization with UID '{invalid_org_uid}' was not found."
+        in result.output
     )
 
 
