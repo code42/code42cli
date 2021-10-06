@@ -40,7 +40,7 @@ You can use the `reactivate` and `bulk reactivate` commands similarly to reactiv
 
 Use [Organizations](https://support.code42.com/Administrator/Cloud/Code42_console_reference/Organizations_reference) to group users together in the Code42 environment.
 
-Use the following example command to move a user into an organization associated with the `org_id` 1234567890:
+Use the following example command to move a user into an organization associated with the `org_id` `1234567890`:
 ```bash
 code42 users move --username sean.cassidy@example.com --org-id 1234567890
 ```

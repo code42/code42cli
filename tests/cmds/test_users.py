@@ -1,5 +1,7 @@
+import json
+
 import pytest
-from py42.exceptions import Py42ActiveLegalHoldError
+from py42.exceptions import Py42ActiveLegalHoldError, Py42NotFoundError
 from py42.exceptions import Py42InvalidEmailError
 from py42.exceptions import Py42InvalidPasswordError
 from py42.exceptions import Py42InvalidUsernameError
@@ -85,7 +87,7 @@ TEST_GET_ORG_RESPONSE = {
     "orgExtRef": None,
     "notes": None,
     "status": "Active",
-    "active": True,
+    "active": True, 
     "blocked": False,
     "parentOrgId": 2689,
     "parentOrgUid": "890854247383106706",
@@ -105,7 +107,17 @@ TEST_GET_ORG_RESPONSE = {
     "reporting": {"orgManagers": []},
     "customConfig": False,
 }
-
+TEST_EMPTY_ORGS_RESPONSE = {
+    "totalCount": 0,
+    "orgs": []
+}
+TEST_GET_ALL_ORGS_RESPONSE = {
+    "totalCount": 1,
+    "orgs": [
+        TEST_GET_ORG_RESPONSE,
+    ]
+}
+TEST_ORG_UID = "1007759454961904673"
 
 @pytest.fixture
 def update_user_response(mocker):
@@ -135,6 +147,22 @@ def get_org_response(mocker):
 @pytest.fixture
 def get_org_success(cli_state, get_org_response):
     cli_state.sdk.orgs.get_by_uid.return_value = get_org_response
+
+
+@pytest.fixture
+def get_all_orgs_empty_success(mocker, cli_state):
+    def get_all_orgs_empty_generator():
+        yield create_mock_response(mocker, data=json.dumps(TEST_EMPTY_ORGS_RESPONSE))
+        
+    cli_state.sdk.orgs.get_all.return_value = get_all_orgs_empty_generator()
+
+
+@pytest.fixture
+def get_all_orgs_success(mocker, cli_state):
+    def get_all_orgs_generator():
+        yield create_mock_response(mocker, data=json.dumps(TEST_GET_ALL_ORGS_RESPONSE))
+        
+    cli_state.sdk.orgs.get_all.return_value = get_all_orgs_generator()
 
 
 @pytest.fixture
@@ -1084,3 +1112,109 @@ def test_bulk_reactivate_uses_handler_that_when_encounters_error_increments_tota
     handler(username="test@example.com")
     handler(username="not.test@example.com")
     assert worker_stats.increment_total_errors.call_count == 1
+
+
+def test_orgs_list_calls_orgs_get_all_with_expected_params(
+    runner, cli_state
+):
+    runner.invoke(cli, ["users", "orgs", "list"], obj=cli_state)
+    assert cli_state.sdk.orgs.get_all.call_count == 1
+
+
+def test_orgs_list_prints_no_results_if_no_orgs_found(
+    runner, cli_state, get_all_orgs_empty_success
+):
+    result = runner.invoke(cli, ["users", "orgs", "list"], obj=cli_state)
+    assert "No orgs found." in result.output
+
+
+def test_orgs_list_prints_expected_data(
+    runner, cli_state, get_all_orgs_success
+):
+    result = runner.invoke(cli, ["users", "orgs", "list"], obj=cli_state)
+    assert "9087" in result.output
+    assert "1007759454961904673" in result.output
+    assert "19may" in result.output
+    assert "Active" in result.output
+    assert "2689" in result.output
+    assert "890854247383106706" in result.output
+    assert "ENTERPRISE" in result.output
+    assert "BASIC" in result.output
+    assert "2021-05-19T10:10:43.459Z" in result.output
+    assert "{'maxSeats': None, 'maxBytes': None}" in result.output
+
+
+def test_orgs_list_prints_all_data_fields_when_not_table_format(
+    runner, cli_state, get_all_orgs_success
+):
+    result = runner.invoke(cli, ["users", "orgs", "list", "-f", "JSON"], obj=cli_state)
+    for k, v in TEST_GET_ORG_RESPONSE.items():   
+        assert k in result.output
+    assert "9087" in result.output
+    assert "1007759454961904673" in result.output
+    assert "19may" in result.output
+    assert "Active" in result.output
+    assert "2689" in result.output
+    assert "890854247383106706" in result.output
+    assert "ENTERPRISE" in result.output
+    assert "BASIC" in result.output
+    assert "2021-05-19T10:10:43.459Z" in result.output
+    assert "{'maxSeats': None, 'maxBytes': None}" in result.output
+
+
+def test_orgs_show_calls_orgs_get_by_uid_with_expected_params(
+    runner, cli_state,
+):
+    runner.invoke(cli, ["users", "orgs", "show", TEST_ORG_UID], obj=cli_state)
+    cli_state.sdk.orgs.get_by_uid.assert_called_once_with(TEST_ORG_UID)
+    
+
+def test_orgs_show_exits_and_returns_error_if_uid_arg_not_provided(
+    runner, cli_state
+):
+    result = runner.invoke(cli, ["users", "orgs", "show"], obj=cli_state)
+    assert result.exit_code == 2
+    assert "Error: Missing argument 'ORG_UID'." in result.output
+    
+
+def test_orgs_show_prints_expected_data(
+    runner, cli_state, get_org_success,
+):
+    result = runner.invoke(cli, ["users", "orgs", "show", TEST_ORG_UID], obj=cli_state)
+    assert "9087" in result.output
+    assert "1007759454961904673" in result.output
+    assert "19may" in result.output
+    assert "Active" in result.output
+    assert "2689" in result.output
+    assert "890854247383106706" in result.output
+    assert "ENTERPRISE" in result.output
+    assert "BASIC" in result.output
+    assert "2021-05-19T10:10:43.459Z" in result.output
+    assert "{'maxSeats': None, 'maxBytes': None}" in result.output
+
+
+def test_orgs_show_prints_all_data_fields_when_not_table_format(
+    runner, cli_state, get_org_success,
+):
+    result = runner.invoke(cli, ["users", "orgs", "show", TEST_ORG_UID, "-f", "JSON"], obj=cli_state)
+    for k, v in TEST_GET_ORG_RESPONSE.items():   
+        assert k in result.output
+    assert "9087" in result.output
+    assert "1007759454961904673" in result.output
+    assert "19may" in result.output
+    assert "Active" in result.output
+    assert "2689" in result.output
+    assert "890854247383106706" in result.output
+    assert "ENTERPRISE" in result.output
+    assert "BASIC" in result.output
+    assert "2021-05-19T10:10:43.459Z" in result.output
+    assert "{'maxSeats': None, 'maxBytes': None}" in result.output
+
+def test_orgs_show_when_invalid_org_uid_raises_error(
+    runner, cli_state, custom_error
+):
+    cli_state.sdk.orgs.get_by_uid.side_effect = Py42NotFoundError(custom_error)
+    result = runner.invoke(cli, ["users", "orgs", "show", TEST_ORG_UID], obj=cli_state)
+    assert result.exit_code == 1
+    assert f"Invalid org UID {TEST_ORG_UID}." in result.output
+    

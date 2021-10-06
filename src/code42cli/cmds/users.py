@@ -268,19 +268,19 @@ def list_orgs(
     
 
 @orgs.command(name="show")
-@click.argument("org-id")
+@click.argument("org-uid")
 @format_option
 @sdk_options()
 def show_org(
-    state, org_id, format,
+    state, org_uid, format,
 ):
     """Show org details."""
     formatter = OutputFormatter(format)
     try:
-        response = state.sdk.orgs.get_by_id(org_id)
+        response = state.sdk.orgs.get_by_uid(org_uid)
         formatter.echo_formatted_list([response.data])
     except Py42NotFoundError:
-        raise Code42CLIError(f"Invalid org ID {org_id}.")
+        raise Code42CLIError(f"Invalid org UID {org_uid}.")
 
 
 @users.group(cls=OrderedGroup)
