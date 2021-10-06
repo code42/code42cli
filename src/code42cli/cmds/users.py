@@ -254,8 +254,7 @@ def orgs(state):
 @format_option
 @sdk_options()
 def list_orgs(
-    state,
-    format,
+    state, format,
 ):
     """List all orgs."""
     pages = state.sdk.orgs.get_all()
@@ -265,7 +264,7 @@ def list_orgs(
         formatter.echo_formatted_list(orgs)
     else:
         click.echo("No orgs found.")
-    
+
 
 @orgs.command(name="show")
 @click.argument("org-uid")
