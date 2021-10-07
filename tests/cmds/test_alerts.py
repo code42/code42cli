@@ -12,7 +12,6 @@ from tests.conftest import create_mock_response
 from tests.conftest import get_test_date_str
 
 from code42cli import PRODUCT_NAME
-from code42cli.cmds import alerts
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.logger.enums import ServerProtocol
 from code42cli.main import cli
@@ -979,21 +978,6 @@ def test_send_to_when_given_certs_with_non_tls_protocol_fails_expectedly(
     assert "'--certs' can only be used with '--protocol TLS-TCP'" in res.output
 
 
-def test_get_alert_details_batches_results_according_to_batch_size(sdk):
-    alerts._ALERT_DETAIL_BATCH_SIZE = 2
-    sdk.alerts.get_details.side_effect = ALERT_DETAIL_RESULT
-    alerts._get_alert_details(sdk, ALERT_SUMMARY_LIST)
-    assert sdk.alerts.get_details.call_count == 10
-
-
-def test_get_alert_details_sorts_results_by_date(sdk):
-    alerts._ALERT_DETAIL_BATCH_SIZE = 2
-    sdk.alerts.get_details.side_effect = ALERT_DETAIL_RESULT
-    results = alerts._get_alert_details(sdk, ALERT_SUMMARY_LIST)
-    assert results == SORTED_ALERT_DETAILS
-
-
-#
 def test_show_outputs_expected_headers(cli_state, runner, full_alert_details_response):
     cli_state.sdk.alerts.get_details.return_value = full_alert_details_response
     result = runner.invoke(cli, ["alerts", "show", "TEST-ALERT-ID"], obj=cli_state)

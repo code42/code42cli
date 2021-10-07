@@ -459,17 +459,3 @@ def _update_alert(sdk, alert_id, alert_state, note):
         sdk.alerts.update_state(alert_state, [alert_id], note=note)
     elif note:
         sdk.alerts.update_note(alert_id, note)
-
-
-def _get_alert_details(sdk, alert_summary_list):
-    alert_ids = [alert["id"] for alert in alert_summary_list]
-    batches = [
-        alert_ids[i : i + _ALERT_DETAIL_BATCH_SIZE]
-        for i in range(0, len(alert_ids), _ALERT_DETAIL_BATCH_SIZE)
-    ]
-    results = []
-    for batch in batches:
-        r = sdk.alerts.get_details(batch)
-        results.extend(r["alerts"])
-    results = sorted(results, key=lambda x: x["createdAt"], reverse=True)
-    return results
