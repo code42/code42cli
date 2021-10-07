@@ -4,9 +4,9 @@ from shlex import split as split_command
 
 import pytest
 from tests.integration.conftest import append_profile
+from tests.integration.util import assert_test_is_successful
 
 from code42cli.main import cli
-from tests.integration.util import assert_test_is_successful
 
 begin_date = datetime.utcnow() - timedelta(days=20)
 end_date = datetime.utcnow() - timedelta(days=10)
@@ -47,8 +47,8 @@ def test_security_data_advanced_query_returns_success_return_code(
     """
     command = f"security-data search --advanced-query '{advanced_query}'"
     assert_test_is_successful(runner, append_profile(command))
-    
-    
+
+
 @pytest.mark.integration
 def test_security_data_search_command_returns_success_return_code(
     runner, integration_test_profile
