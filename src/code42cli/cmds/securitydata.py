@@ -380,9 +380,11 @@ def search(
 
         # older app versions stored checkpoint as float timestamp.
         # we handle those here until the next run containing events will store checkpoint as the last eventId
-        if isinstance(checkpoint, (int, float)):
-            state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
+        try:
+            state.search_filters.append(InsertionTimestamp.on_or_after(float(checkpoint)))
             checkpoint = ""
+        except ValueError:
+            pass
     else:
         checkpoint = ""
 
@@ -501,9 +503,11 @@ def send_to(
 
         # older app versions stored checkpoint as float timestamp.
         # we handle those here until the next run containing events will store checkpoint as the last eventId
-        if isinstance(checkpoint, (int, float)):
-            state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
+        try:
+            state.search_filters.append(InsertionTimestamp.on_or_after(float(checkpoint)))
             checkpoint = ""
+        except ValueError:
+            pass
     else:
         checkpoint = ""
 
@@ -513,15 +517,16 @@ def send_to(
     if not events:
         click.echo("No results found.")
         return
-
-    for event in events:
-        if use_checkpoint:
-            checkpoint_name = use_checkpoint
-            cursor.replace(checkpoint_name, event["eventId"])
-        with warn_interrupt():
+    
+    with warn_interrupt():
+        event = None
+        for event in events:
+            if use_checkpoint:
+                checkpoint_name = use_checkpoint
+                cursor.replace(checkpoint_name, event["eventId"])
             state.logger.info(event)
-            if event is None:  # generator was empty
-                click.echo("No results found.")
+        if event is None:  # generator was empty
+            click.echo("No results found.")
 
 
 def _get_cursor(state, use_checkpoint):

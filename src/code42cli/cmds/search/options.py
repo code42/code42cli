@@ -90,8 +90,10 @@ class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
                 and begin_present
             ):
                 opts.pop("begin")
-                if isinstance(checkpoint_value, (int, float)):
-                    checkpoint_value = datetime.utcfromtimestamp(checkpoint_value)
+                try:
+                    checkpoint_value = datetime.utcfromtimestamp(float(checkpoint_value))
+                except ValueError:
+                    pass
                 click.echo(
                     "Ignoring --begin value as --use-checkpoint was passed and checkpoint of "
                     f"{checkpoint_value} exists.\n",

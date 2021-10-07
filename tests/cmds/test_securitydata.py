@@ -440,7 +440,7 @@ def test_search_and_send_to_when_given_begin_and_end_dates_uses_expected_query(
         obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
-    query_dict = {k: v for k, v in query}
+    query_dict = dict(query)
 
     actual_begin = query_dict["groups"][1]["filters"][0]["value"]
     expected_begin = f"{begin_date}T00:00:00.000Z"
@@ -466,7 +466,7 @@ def test_search_and_send_to_when_given_begin_and_end_date_and_time_uses_expected
         obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
-    query_dict = {k: v for k, v in query}
+    query_dict = dict(query)
 
     actual_begin = query_dict["groups"][1]["filters"][0]["value"]
     expected_begin = f"{begin_date}T{time}.000Z"
@@ -489,7 +489,7 @@ def test_search_and_send_to_when_given_begin_date_and_time_without_seconds_uses_
         cli, [*command, "--begin", f"{date} {time}"], obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
-    query_dict = {k: v for k, v in query}
+    query_dict = dict(query)
 
     actual = query_dict["groups"][1]["filters"][0]["value"]
     expected = f"{date}T{time}:00.000Z"
@@ -510,7 +510,7 @@ def test_search_and_send_to_when_given_end_date_and_time_uses_expected_query(
         obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
-    query_dict = {k: v for k, v in query}
+    query_dict = dict(query)
 
     actual = query_dict["groups"][1]["filters"][1]["value"]
     expected = f"{end_date}T{time}:00.000Z"
@@ -558,7 +558,7 @@ def test_search_and_send_to_when_given_begin_date_and_not_use_checkpoint_and_cur
     begin_date = get_test_date_str(days_ago=1)
     runner.invoke(cli, [*command, "--begin", begin_date], obj=cli_state)
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
-    query_dict = {k: v for k, v in query}
+    query_dict = dict(query)
     actual_ts = query_dict["groups"][1]["filters"][0]["value"]
     expected_ts = f"{begin_date}T00:00:00.000Z"
     assert actual_ts == expected_ts
@@ -584,7 +584,7 @@ def test_search_and_send_to_with_only_begin_calls_search_all_file_events_with_ex
 ):
     result = runner.invoke(cli, [*command, "--begin", "1h"], obj=cli_state)
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
-    query_dict = {k: v for k, v in query}
+    query_dict = dict(query)
     expected_filter_groups = [
         {
             "filterClause": "AND",
@@ -630,7 +630,7 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_without_check
         cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
-    query_dict = {k: v for k, v in query}
+    query_dict = dict(query)
     actual_begin = query_dict["groups"][1]["filters"][0]["value"]
 
     assert result.exit_code == 0
@@ -650,7 +650,7 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_with_stored_c
         cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
-    query_dict = {k: v for k, v in query}
+    query_dict = dict(query)
     actual_query_timestamp = query_dict["groups"][1]["filters"][0]["value"]
     assert result.exit_code == 0
     assert len(query._filter_group_list) == 2
@@ -1152,7 +1152,7 @@ def test_search_and_send_to_with_or_query_flag_produces_expected_query(
         "srtKey": "insertionTimestamp",
     }
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
-    actual_query = {k: v for k, v in query}
+    actual_query = dict(query)
     assert actual_query == expected_query
 
 
