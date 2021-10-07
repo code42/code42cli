@@ -33,7 +33,7 @@ from code42cli.util import warn_interrupt
 
 ALERTS_KEYWORD = "alerts"
 MAX_ALERT_PAGE_SIZE = 500
-_ALERT_DETAIL_BATCH_SIZE = 100
+_ALERT_DETAIL_BATCH_SIZE = 25
 
 begin = opt.begin_option(
     ALERTS_KEYWORD,
