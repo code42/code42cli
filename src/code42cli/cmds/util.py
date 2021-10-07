@@ -87,10 +87,3 @@ def create_time_range_filter(filter_cls, begin_date=None, end_date=None):
 
     elif end_date and not begin_date:
         return filter_cls.on_or_before(end_date)
-
-
-def verify_filter_groups(filter_groups):
-    if not all(isinstance(group, FilterGroup) for group in filter_groups):
-        raise ValueError(
-            "arguments must be py42.sdk.queries.query_filter.FilterGroup objects."
-        )

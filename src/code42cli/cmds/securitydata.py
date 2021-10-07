@@ -23,7 +23,6 @@ from code42cli.cmds.search.options import server_options
 from code42cli.cmds.util import convert_to_or_query
 from code42cli.cmds.util import create_time_range_filter
 from code42cli.cmds.util import try_get_default_header
-from code42cli.cmds.util import verify_filter_groups
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import limit_date_range
 from code42cli.logger import get_main_cli_logger
@@ -416,7 +415,6 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
             )
     if or_query:
         state.search_filters = convert_to_or_query(state.search_filters)
-    verify_filter_groups(state.search_filters)
     query = FileEventQuery(*state.search_filters)
     query.page_size = MAX_EVENT_PAGE_SIZE
     query.sort_direction = "asc"
