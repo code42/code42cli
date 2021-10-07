@@ -246,9 +246,9 @@ def search(
             begin = checkpoint
 
     query = _construct_query(cli_state, begin, end, advanced_query, or_query)
-    alerts_list = _get_all_alerts(cli_state, query)
+    alerts_gen = cli_state.sdk.alerts.get_all_alert_details(query)
 
-    if not alerts_list:
+    if not alerts_gen:
         click.echo("No results found.")
         return
 
@@ -256,11 +256,11 @@ def search(
         checkpoint_name = use_checkpoint
         # update checkpoint to alertId of last event retrieved
         alerts_gen = _dedupe_checkpointed_events_and_store_updated_checkpoint(
-            cursor, checkpoint_name, alerts_list
+            cursor, checkpoint_name, alerts_gen
         )
         formatter.echo_formatted_list(list(alerts_gen))
     else:
-        formatter.echo_formatted_list(alerts_list)
+        formatter.echo_formatted_list(list(alerts_gen))
 
 
 def _construct_query(state, begin, end, advanced_query, or_query):
@@ -279,19 +279,6 @@ def _construct_query(state, begin, end, advanced_query, or_query):
     query.sort_direction = "asc"
     query.sort_key = "CreatedAt"
     return query
-
-
-def _get_all_alerts(state, query):
-
-    alert_list = []
-
-    responses = state.sdk.alerts.search_all_pages(query)
-
-    for response in responses:
-        for alert in response["alerts"]:
-            alert_list.append(alert)
-
-    return alert_list
 
 
 def _dedupe_checkpointed_events_and_store_updated_checkpoint(
@@ -350,20 +337,20 @@ def send_to(cli_state, begin, end, advanced_query, use_checkpoint, or_query, **k
             begin = checkpoint
 
     query = _construct_query(cli_state, begin, end, advanced_query, or_query)
-    alerts_list = _get_all_alerts(cli_state, query)
+    alerts_gen = cli_state.sdk.alerts.get_all_alert_details(query)
 
-    if not alerts_list:
+    if not alerts_gen:
         click.echo("No results found.")
         return
 
     if use_checkpoint:
         checkpoint_name = use_checkpoint
-        alerts_list = _dedupe_checkpointed_events_and_store_updated_checkpoint(
-            cursor, checkpoint_name, alerts_list
+        alerts_gen = _dedupe_checkpointed_events_and_store_updated_checkpoint(
+            cursor, checkpoint_name, alerts_gen
         )
     with warn_interrupt():
         alert = None
-        for alert in alerts_list:
+        for alert in alerts_gen:
             cli_state.logger.info(alert)
         if alert is None:  # generator was empty
             click.echo("No results found.")
