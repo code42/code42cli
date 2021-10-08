@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+### Unreleased
+
+- New bulk commands to manage user roles
+    - `code42 users bulk add-roles`
+    - `code42 users bulk remove-roles`
+
 ## 1.10.0 - 2021-10-05
 
 ### Added

@@ -176,6 +176,8 @@ _bulk_user_update_headers = [
 
 _bulk_user_move_headers = ["username", "org_id"]
 
+_bulk_user_roles_headers = ["username", "role_name"]
+
 
 @users.command(name="move")
 @username_option("The username of the user to move.", required=True)
@@ -364,6 +366,42 @@ def bulk_reactivate(state, csv_rows, format):
         raise_global_error=False,
     )
     formatter.echo_formatted_list(result_rows)
+
+
+@bulk.command(
+    name="add-roles",
+    help=f"Add roles to a list of users from the provided CSV in format: {','.join(_bulk_user_roles_headers)}",
+)
+@read_csv_arg(headers=_bulk_user_roles_headers)
+@format_option
+@sdk_options()
+def bulk_add_roles(state, csv_rows):
+    """Bulk add roles to a list of users."""
+
+    sdk = state.sdk
+
+    def handle_row(username, role_name):
+        _add_user_role(sdk, username, role_name)
+
+    run_bulk_process(handle_row, csv_rows, progress_label="Adding roles to users:")
+
+
+@bulk.command(
+    name="remove-roles",
+    help=f"Remove roles from a list of users from the provided CSV in format: {','.join(_bulk_user_roles_headers)}",
+)
+@read_csv_arg(headers=_bulk_user_roles_headers)
+@format_option
+@sdk_options()
+def bulk_remove_roles(state, csv_rows):
+    """Bulk remove roles from a list of users."""
+
+    sdk = state.sdk
+
+    def handle_row(username, role_name):
+        _remove_user_role(sdk, username, role_name)
+
+    run_bulk_process(handle_row, csv_rows, progress_label="Removing roles from users:")
 
 
 def _add_user_role(sdk, username, role_name):
