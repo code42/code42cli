@@ -61,13 +61,13 @@ To update multiple trusted activities at once, enter information about the trust
 code42 trusted-activities bulk update update_trusted_activities.csv
 ```
 
-
-**Note:**
+```eval_rst
+.. note::
     The ``bulk update`` command cannot be used to clear the description of a trusted activity because you cannot indicate an empty string in a CSV format.
     Pass an empty string to the ``description`` option of the ``update`` command to clear the description of a trusted activity.
 
     For example: ``code42 trusted-activities update 123 --description ""``
-
+```
 
 ## Remove a Trusted Activity
 
