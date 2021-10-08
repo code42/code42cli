@@ -45,7 +45,9 @@ As a best practice, use a separate profile when executing a scheduled task. Usin
 ### Run an ad-hoc query
 
 Examples of ad-hoc queries you can run are as follows.
+
 #### File Exposure Events
+
 Print file events since March 5 for a user in raw JSON format:
 ```bash
 code42 security-data search -f RAW-JSON -b 2020-03-05 --c42-username 'sean.cassidy@example.com'
@@ -147,7 +149,7 @@ Example output for a single alert (in default JSON format):
 }
 ```
 
-Example output for a single audit log (in default JSON format):
+Example output for a single audit log event (in default JSON format):
 ```json
 {
     "type$": "audit_log::logged_in/1",
