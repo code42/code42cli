@@ -2,8 +2,9 @@
 
 Use the `departing-employee` commands to add employees to or remove employees from the Departing Employees list. Use the `high-risk-employee` commands to add employees to or remove employees from the High Risk list, or update risk tags for those users.
 
-To see a list of all the users currently in your organization, you can export a list from the
-[Users action menu](https://support.code42.com/Administrator/Cloud/Administration_console_reference/Users_reference#Action_menu).
+To see a list of all the users currently in your organization:
+- Export a list from the [Users action menu](https://support.code42.com/Administrator/Cloud/Code42_console_reference/Users_reference#Action_menu).
+- Use the [CLI users commands](./users.md).
 
 ## Get CSV template
 To add multiple users to the Departing Employees list:
