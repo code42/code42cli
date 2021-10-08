@@ -1,8 +1,8 @@
 # Add and Manage Cases
 
-To create a new case, only providing the name is required.  Other attributes are optional and can be provided through the available flags.
+To create a new case, only the name is required.  Other attributes are optional and can be provided through the available flags.
 
-The following command creates a case with the subject and assignee users indicated by their respective UIDs.
+The following command creates a case with the `subject` and `assignee` user indicated by their respective UIDs.
 ```bash
 code42 cases create My-Case --subject 123 --assignee 456 --description "Sample case"
 ```
@@ -62,19 +62,6 @@ You can then fill out and use each of the CSV templates with their respective bu
 code42 cases file-events bulk [add|remove] bulk-command.csv
 ```
 
-For example, to associate one or more file exposure events to one or more cases at once:
-
-1. Generate a CSV template. Below is the command for generating a template to add file events to cases. Once generated, the CSV file is saved to your current working directory.
-
-```bash
-code42 cases bulk generate-template add
-```
-
-2. Use the CSV template to enter the case and file event information.
-   The `number` and `event_id` fields are required. The `number` refers to the identifying case number to add the events, and the `event_id` refers to the ID of the file exposure event to associate with the case.
-
-3. Save the CSV file.
-
 ## Manage File Exposure Events Associated with a Case
 
 The following example command can be used to view all the file exposure events currently associated with a case, indicated here by case number `42`.
@@ -94,7 +81,7 @@ To associate multiple file events with one or more cases at once, enter the case
 code42 cases file-events bulk add my_new_cases.csv
 ```
 
-Similarly, the `remove` and `bulk remove` commands can be used to remove a file event from a case.
+Similarly, the `file-events remove` and `file-events bulk remove` commands can be used to remove a file event from a case.
 
 ## Export Case Details
 

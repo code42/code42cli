@@ -82,7 +82,7 @@ Example output for a single alert rule in default JSON format.
 
 You can manage the users who are associated with an alert rule once you know the rule's `rule_id` and the user's `username`.
 
-To add a single user to your alert rule, use the following command.
+To add a single user to your alert rule, use the following command:
 ```bash
 code42 alert-rules add-user --rule-id <rule-id> -u sean.cassidy@example.com
 ```

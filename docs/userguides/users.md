@@ -34,7 +34,7 @@ To deactivate multiple users at once, enter each username on a new line in a CSV
 code42 users bulk deactivate users_to_deactivate.csv
 ```
 
-You can use the `reactivate` and `bulk reactivate` commands similarly to reactivate a user.
+Similarly, use the `reactivate` and `bulk reactivate` commands to reactivate a user.
 
 ## Assign an Organization
 
@@ -45,7 +45,7 @@ Use the following example command to move a user into an organization associated
 code42 users move --username sean.cassidy@example.com --org-id 1234567890
 ```
 
-Alternatively, to add move multiple users between organizations, fill out the `move` CSV file template, then use the `bulk move` command with the CSV file path.
+Alternatively, to move multiple users between organizations, fill out the `move` CSV file template, then use the `bulk move` command with the CSV file path.
 ```bash
 code42 users bulk move bulk-command.csv
 ```
@@ -61,7 +61,6 @@ Once generated, fill out and use each of the CSV templates with their respective
 ```bash
 code42 trusted-activities bulk [update|move|reactivate|deactivate] bulk-command.csv
 ```
-
-A CSV with a single `username` column and each username on a new line is used for the `reactivate` and `deactivate` bulk commands.  They are not available as options for `generate-template`.
+A CSV with a `username` column and a single username on each new line is used for the `reactivate` and `deactivate` bulk commands.  These commands are not available as options for `generate-template`.
 
 Learn more about [Managing Users](../commands/users.md).
