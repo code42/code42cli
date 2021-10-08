@@ -19,7 +19,6 @@ from code42cli.main import cli
 BEGIN_TIMESTAMP = 1577858400.0
 END_TIMESTAMP = 1580450400.0
 CURSOR_TIMESTAMP = 1579500000.0
-ALERT_SUMMARY_LIST = [{"id": i} for i in range(20)]
 ALERT_DETAIL_RESULT = [
     {
         "alerts": [
