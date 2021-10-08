@@ -24,12 +24,12 @@ code42 trusted-activities bulk generate-template create
 ```
 
 2. Use the CSV template to enter information about each trusted activity.
-   The `type` and `value` fields are required. 
-   
-   `type` indicates the category of activity: 
+   The `type` and `value` fields are required.
+
+   `type` indicates the category of activity:
    - `DOMAIN` indicates a trusted domain
    - `SLACK` indicates a trusted Slack workspace
-   
+
    `value` indicates either the name of the domain or Slack workspace.
 
 3. Save the CSV file.
@@ -62,7 +62,7 @@ code42 trusted-activities bulk update update_trusted_activities.csv
 ```
 
 
-**Note:** 
+**Note:**
     The ``bulk update`` command cannot be used to clear the description of a trusted activity because you cannot indicate an empty string in a CSV format.
     Pass an empty string to the ``description`` option of the ``update`` command to clear the description of a trusted activity.
 
