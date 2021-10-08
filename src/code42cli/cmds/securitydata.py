@@ -381,7 +381,9 @@ def search(
         # older app versions stored checkpoint as float timestamp.
         # we handle those here until the next run containing events will store checkpoint as the last eventId
         try:
-            state.search_filters.append(InsertionTimestamp.on_or_after(float(checkpoint)))
+            state.search_filters.append(
+                InsertionTimestamp.on_or_after(float(checkpoint))
+            )
             checkpoint = ""
         except ValueError:
             pass
@@ -504,7 +506,9 @@ def send_to(
         # older app versions stored checkpoint as float timestamp.
         # we handle those here until the next run containing events will store checkpoint as the last eventId
         try:
-            state.search_filters.append(InsertionTimestamp.on_or_after(float(checkpoint)))
+            state.search_filters.append(
+                InsertionTimestamp.on_or_after(float(checkpoint))
+            )
             checkpoint = ""
         except ValueError:
             pass
@@ -517,7 +521,7 @@ def send_to(
     if not events:
         click.echo("No results found.")
         return
-    
+
     with warn_interrupt():
         event = None
         for event in events:

@@ -91,7 +91,9 @@ class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
             ):
                 opts.pop("begin")
                 try:
-                    checkpoint_value = datetime.utcfromtimestamp(float(checkpoint_value))
+                    checkpoint_value = datetime.utcfromtimestamp(
+                        float(checkpoint_value)
+                    )
                 except ValueError:
                     pass
                 click.echo(

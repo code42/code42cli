@@ -260,7 +260,10 @@ def search(
         )
         formatter.echo_formatted_list(list(alerts_gen))
     else:
-        formatter.echo_formatted_list(list(alerts_gen))
+        alerts_list = []
+        for alert in alerts_gen:
+            alerts_list.append(alert)
+        formatter.echo_formatted_list(alerts_list)
 
 
 def _construct_query(state, begin, end, advanced_query, or_query):

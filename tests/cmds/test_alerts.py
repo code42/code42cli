@@ -1,4 +1,3 @@
-import json
 import logging
 
 import py42.sdk.queries.alerts.filters as f
@@ -333,47 +332,127 @@ def full_alert_details_response(mocker):
 
 @pytest.fixture
 def mock_alert_search_response(mocker):
-    data = json.dumps(
-        {
-            "type$": "ALERT_QUERY_RESPONSE",
-            "alerts": [
-                {
-                    "tenantId": "MyExampleTenant",
-                    "type": "FED_ENDPOINT_EXFILTRATION",
-                    "name": "Removable Media Exfiltration Rule",
-                    "description": "Alert me on all removable media exfiltration.",
-                    "actor": "exampleUser@mycompany.com",
-                    "actorId": "authorityUserId",
-                    "target": "string",
-                    "severity": "LOW",
-                    "notificationInfo": [],
-                    "ruleId": "uniqueRuleId",
-                    "ruleSource": "Departing Employee",
-                    "id": "alertId",
-                    "createdAt": "2020-02-19T01:57:45.006683Z",
-                    "state": "OPEN",
-                    "stateLastModifiedBy": "string",
-                    "stateLastModifiedAt": "2019-08-24T14:15:22Z",
-                }
-            ],
-            "totalCount": "3",
-            "problems": [],
-        }
-    )
 
-    response1 = create_mock_response(mocker, data=data)
-    response2 = create_mock_response(mocker, data=data)
+    data = {
+        "type$": "ALERT_DETAILS",
+        "tenantId": "1d71796f-af5b-4231-9d8e-df6434da4663",
+        "type": "FED_COMPOSITE",
+        "name": "File Upload Alert",
+        "description": "Alert on any file upload events",
+        "actor": "test.user@code42.com",
+        "actorId": "1018651385932568954",
+        "target": "N/A",
+        "severity": "MEDIUM",
+        "ruleId": "962a6a1c-54f6-4477-90bd-a08cc74cbf71",
+        "ruleSource": "Alerting",
+        "id": "c209fa6c-c3c7-4242-b6de-207c0ff13e38",
+        "createdAt": "2021-09-01T07:43:06.7831980Z",
+        "state": "OPEN",
+        "observations": [
+            {
+                "type$": "OBSERVATION",
+                "id": "3af2494d-3981-46b5-a14b-6087edc48c5c",
+                "observedAt": "2021-09-01T07:15:00.0000000Z",
+                "type": "FedEndpointExfiltration",
+                "data": {
+                    "type$": "OBSERVED_ENDPOINT_ACTIVITY",
+                    "id": "3af2494d-3981-46b5-a14b-6087edc48c5c",
+                    "sources": ["Endpoint"],
+                    "exposureTypes": ["ApplicationRead"],
+                    "exposureTypeIsSignificant": True,
+                    "firstActivityAt": "2021-09-01T07:15:00.0000000Z",
+                    "lastActivityAt": "2021-09-01T07:20:00.0000000Z",
+                    "fileCount": 1,
+                    "totalFileSize": 7842255,
+                    "fileCategories": [
+                        {
+                            "type$": "OBSERVED_FILE_CATEGORY",
+                            "category": "Archive",
+                            "fileCount": 1,
+                            "totalFileSize": 7842255,
+                        }
+                    ],
+                    "fileCategoryIsSignificant": False,
+                    "files": [
+                        {
+                            "type$": "OBSERVED_FILE",
+                            "eventId": "0_1d71796f-af5b-4231-9d8e-df6434da4663_1019043250830767116_1022963810130583921_3_EPS",
+                            "path": "C:/Users/qa/Downloads/",
+                            "name": "TA-code42-insider-threats-add-on.tar.gz",
+                            "category": "Archive",
+                            "size": 7842255,
+                            "riskSeverityInfo": {
+                                "type$": "RISK_SEVERITY_INFO",
+                                "score": 3,
+                                "severity": "LOW",
+                                "matchedRiskIndicators": [
+                                    {
+                                        "type$": "RISK_INDICATOR",
+                                        "name": "Zip",
+                                        "weight": 3,
+                                    },
+                                    {
+                                        "type$": "RISK_INDICATOR",
+                                        "name": "Other destination",
+                                        "weight": 0,
+                                    },
+                                ],
+                            },
+                            "observedAt": "2021-09-01T07:19:18.5860000Z",
+                        }
+                    ],
+                    "riskSeverityIsSignificant": False,
+                    "riskSeveritySummary": [
+                        {
+                            "type$": "RISK_SEVERITY_SUMMARY",
+                            "severity": "LOW",
+                            "numEvents": 1,
+                            "summarizedRiskIndicators": [
+                                {
+                                    "type$": "SUMMARIZED_RISK_INDICATOR",
+                                    "name": "Zip",
+                                    "numEvents": 1,
+                                },
+                                {
+                                    "type$": "SUMMARIZED_RISK_INDICATOR",
+                                    "name": "Other destination",
+                                    "numEvents": 1,
+                                },
+                            ],
+                        }
+                    ],
+                    "syncToServices": [],
+                    "sendingIpAddresses": ["162.222.47.183"],
+                    "appReadDetails": [
+                        {
+                            "type$": "APP_READ_DETAILS",
+                            "tabInfos": [
+                                {
+                                    "type$": "TAB_INFO",
+                                    "tabUrl": "http://127.0.0.1:8000/en-US/manager/appinstall/_upload",
+                                    "tabTitle": "Settings | Splunk - Google Chrome",
+                                }
+                            ],
+                            "destinationCategory": "Uncategorized",
+                            "destinationName": "Uncategorized",
+                            "processName": "\\Device\\HarddiskVolume2\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+                        }
+                    ],
+                    "destinationIsSignificant": False,
+                },
+            }
+        ],
+    }
 
     def response_gen():
-        yield response1
-        yield response2
+        yield data
 
     return response_gen()
 
 
 @pytest.fixture
 def search_all_alerts_success(cli_state, mock_alert_search_response):
-    cli_state.sdk.alerts.search_all_pages.return_value = mock_alert_search_response
+    cli_state.sdk.alerts.get_all_alert_details.return_value = mock_alert_search_response
 
 
 @search_and_send_to_test
@@ -384,7 +463,7 @@ def test_search_and_send_to_passes_query_object_when_searching_file_events(
         cli, [*command, "--advanced-query", ADVANCED_QUERY_JSON], obj=cli_state
     )
 
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     assert isinstance(query, AlertQuery)
 
 
@@ -395,7 +474,7 @@ def test_search_and_send_to_when_advanced_query_passed_as_json_string_builds_exp
     runner.invoke(
         cli, [*command, "--advanced-query", ADVANCED_QUERY_JSON], obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     passed_filter_groups = query._filter_group_list
     expected_actor_filter = f.Actor.contains(ADVANCED_QUERY_VALUES["actor"])
     expected_actor_filter.filter_clause = "OR"
@@ -456,7 +535,7 @@ def test_search_and_send_to_when_given_begin_and_end_dates_uses_expected_query(
     runner.invoke(
         cli, [*command, "--begin", begin_date, "--end", end_date], obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     query_dict = dict(query)
 
     actual_begin = query_dict["groups"][0]["filters"][0]["value"]
@@ -481,7 +560,7 @@ def test_search_when_given_begin_and_end_date_and_times_uses_expected_query(
         [*command, "--begin", f"{begin_date} {time}", "--end", f"{end_date} {time}"],
         obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     query_dict = dict(query)
 
     actual_begin = query_dict["groups"][0]["filters"][0]["value"]
@@ -501,7 +580,7 @@ def test_search_when_given_begin_date_and_time_without_seconds_uses_expected_que
     date = get_test_date_str(days_ago=89)
     time = "15:33"
     runner.invoke(cli, [*command, "--begin", f"{date} {time}"], obj=cli_state)
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     query_dict = dict(query)
     actual = query_dict["groups"][0]["filters"][0]["value"]
     expected = f"{date}T{time}:00.000000Z"
@@ -520,7 +599,7 @@ def test_search_and_send_to_when_given_end_date_and_time_uses_expected_query(
         [*command, "--begin", begin_date, "--end", f"{end_date} {time}"],
         obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     query_dict = dict(query)
     actual = query_dict["groups"][0]["filters"][1]["value"]
     expected = f"{end_date}T{time}:00.000000Z"
@@ -543,7 +622,7 @@ def test_search_and_send_to_when_given_begin_date_and_not_use_checkpoint_and_cur
 ):
     begin_date = get_test_date_str(days_ago=1)
     runner.invoke(cli, [*command, "--begin", begin_date], obj=cli_state)
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     query_dict = dict(query)
     actual_ts = query_dict["groups"][0]["filters"][0]["value"]
     expected_ts = f"{begin_date}T00:00:00.000000Z"
@@ -569,7 +648,7 @@ def test_search_and_send_to_with_only_begin_calls_search_all_alerts_with_expecte
     cli_state, begin_option, runner, command, search_all_alerts_success
 ):
     res = runner.invoke(cli, [*command, "--begin", "1d"], obj=cli_state)
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     query_dict = dict(query)
     expected_filter_groups = [
         {
@@ -611,7 +690,7 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_without_check
     res = runner.invoke(
         cli, [*command, "--use-checkpoint", "test", "--begin", "1d"], obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     query_dict = dict(query)
     actual_begin = query_dict["groups"][0]["filters"][0]["value"]
 
@@ -627,7 +706,7 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_with_stored_c
     result = runner.invoke(
         cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     assert result.exit_code == 0
     assert len(query._filter_group_list) == 1
     assert (
@@ -644,7 +723,7 @@ def test_search_and_send_to_when_given_actor_is_uses_username_filter(
     runner.invoke(
         cli, [*command, "--begin", "1h", "--actor", actor_name], obj=cli_state
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     assert f.Actor.is_in([actor_name]) in query._filter_group_list
 
 
@@ -656,7 +735,7 @@ def test_search_and_send_to_when_given_exclude_actor_uses_actor_filter(
     runner.invoke(
         cli, [*command, "--begin", "1h", "--exclude-actor", actor_name], obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     assert f.Actor.not_in([actor_name]) in query._filter_group_list
 
 
@@ -668,7 +747,7 @@ def test_search_and_send_to_when_given_rule_name_uses_rule_name_filter(
     runner.invoke(
         cli, [*command, "--begin", "1h", "--rule-name", rule_name], obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     assert f.RuleName.is_in([rule_name]) in query._filter_group_list
 
 
@@ -682,7 +761,7 @@ def test_search_and_send_to_when_given_exclude_rule_name_uses_rule_name_not_filt
         [*command, "--begin", "1h", "--exclude-rule-name", rule_name],
         obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     assert f.RuleName.not_in([rule_name]) in query._filter_group_list
 
 
@@ -694,7 +773,7 @@ def test_search_and_send_to_when_given_rule_type_uses_rule_name_filter(
     runner.invoke(
         cli, [*command, "--begin", "1h", "--rule-type", rule_type], obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     assert f.RuleType.is_in([rule_type]) in query._filter_group_list
 
 
@@ -708,7 +787,7 @@ def test_search_and_send_to_when_given_exclude_rule_type_uses_rule_name_not_filt
         [*command, "--begin", "1h", "--exclude-rule-type", rule_type],
         obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     assert f.RuleType.not_in([rule_type]) in query._filter_group_list
 
 
@@ -718,7 +797,7 @@ def test_search_and_send_to_when_given_rule_id_uses_rule_name_filter(
 ):
     rule_id = "departing employee"
     runner.invoke(cli, [*command, "--begin", "1h", "--rule-id", rule_id], obj=cli_state)
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     assert f.RuleId.is_in([rule_id]) in query._filter_group_list
 
 
@@ -730,7 +809,7 @@ def test_search_and_send_to_when_given_exclude_rule_id_uses_rule_name_not_filter
     runner.invoke(
         cli, [*command, "--begin", "1h", "--exclude-rule-id", rule_id], obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     assert f.RuleId.not_in([rule_id]) in query._filter_group_list
 
 
@@ -742,7 +821,7 @@ def test_search_and_send_to_when_given_description_uses_description_filter(
     runner.invoke(
         cli, [*command, "--begin", "1h", "--description", description], obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     assert f.Description.contains(description) in query._filter_group_list
 
 
@@ -769,7 +848,7 @@ def test_search_and_send_to_when_given_multiple_search_args_uses_expected_filter
         ],
         obj=cli_state,
     )
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     assert f.Actor.is_in([actor]) in query._filter_group_list
     assert f.Actor.not_in([exclude_actor]) in query._filter_group_list
     assert f.RuleName.is_in([rule_name]) in query._filter_group_list
@@ -827,7 +906,7 @@ def test_search_and_send_to_with_or_query_flag_produces_expected_query(
         "srtDirection": "asc",
         "srtKey": "CreatedAt",
     }
-    query = cli_state.sdk.alerts.search_all_pages.call_args[0][0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     actual_query = dict(query)
     assert actual_query == expected_query
 
@@ -838,7 +917,7 @@ def test_search_and_send_to_handles_error_expected_message_logged_and_printed(
 ):
     exception_msg = "Test Exception"
     expected_msg = "Unknown problem occurred"
-    cli_state.sdk.alerts.search_all_pages.side_effect = Exception(exception_msg)
+    cli_state.sdk.alerts.get_all_alert_details.side_effect = Exception(exception_msg)
     with caplog.at_level(logging.ERROR):
         result = runner.invoke(cli, [*command, "--begin", "1d"], obj=cli_state)
         assert "Error:" in result.output
