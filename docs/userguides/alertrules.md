@@ -104,7 +104,7 @@ code42 alert-rules bulk generate-template [add|remove]
 
 You can then fill out and use each of the CSV templates with their respective bulk commands.
 ```bash
-code42 alert-rules bulk [add|remove] Users/my_user/bulk-command.csv
+code42 alert-rules bulk [add|remove] /Users/my_user/bulk-command.csv
 ```
 
 Learn more about the [Alert Rules](../commands/alertrules.md) commands.

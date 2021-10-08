@@ -90,7 +90,7 @@ You can use the CLI to export the details of a case into a PDF.
 The following example command will download the details from case number `42` and save a PDF with the name `42_case_summary.pdf` to the provided path.  If a path is not provided, it will be saved to the current working directory.
 
 ```bash
-code42 cases export 42 --path Users/my_user/cases/
+code42 cases export 42 --path /Users/my_user/cases/
 ```
 
 Learn more about the [Managing Cases](../commands/cases.md).
