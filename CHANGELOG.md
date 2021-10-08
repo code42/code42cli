@@ -18,7 +18,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - New commands to view orgs
     - `code42 users orgs list`
-    - `code42 users orgs show <org-id>`
+    - `code42 users orgs show <org-uid>`
 
 ## 1.10.0 - 2021-10-05
 

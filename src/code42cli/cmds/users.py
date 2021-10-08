@@ -38,7 +38,7 @@ user_id_option = click.option(
 )
 org_id_option = click.option(
     "--org-id",
-    help="The identifier for the organization to which the user will be moved.",
+    help="The unique identifier (UID) for the organization to which the user will be moved.",
     required=True,
 )
 include_legal_hold_option = click.option(
@@ -230,7 +230,7 @@ _bulk_user_update_headers = [
     "archive_size_quota",
 ]
 
-_bulk_user_move_headers = ["username", "org_id"]
+_bulk_user_move_headers = ["username", "org_uid"]
 
 
 @users.command(name="move")
@@ -239,7 +239,7 @@ _bulk_user_move_headers = ["username", "org_id"]
 @sdk_options()
 def change_organization(state, username, org_id):
     """Change the organization of the user with the given username
-    to the org with the given org ID."""
+    to the org with the given org UID."""
     _change_organization(state.sdk, username, org_id)
 
 
@@ -568,14 +568,14 @@ def _update_user(
     )
 
 
-def _change_organization(sdk, username, org_id):
+def _change_organization(sdk, username, org_uid):
     user_id = _get_legacy_user_id(sdk, username)
-    org_id = _get_org_id(sdk, org_id)
+    org_id = _get_org_id(sdk, org_uid)
     return sdk.users.change_org_assignment(user_id=int(user_id), org_id=int(org_id))
 
 
-def _get_org_id(sdk, org_id):
-    org = sdk.orgs.get_by_uid(org_id)
+def _get_org_id(sdk, org_uid):
+    org = sdk.orgs.get_by_uid(org_uid)
     return org["orgId"]
 
 

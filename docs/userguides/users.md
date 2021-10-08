@@ -15,6 +15,18 @@ To change the information for one or more users, provide the user UID and update
 
 Apply [Code42's user roles](https://support.code42.com/Administrator/Cloud/Monitoring_and_managing/Roles_resources/Roles_reference#Standard_roles) to user accounts to provide administrators with the desired set of permissions.  Each role has associated permissions, limitations, and recommended use cases.
 
+#### View User Roles
+View a user's current roles and other details with the `show` command:
+```bash
+code42 users show "sean.cassidy@example.com"
+```
+Alternatively, pass the `--include-roles` flag to the `list ` command.  The following command will print a list of all active users and their current roles:
+```bash
+code42 users list --active --include-roles
+```
+
+#### Update User Roles
+
 Use the following command to add a role to a user:
 ```bash
 code42 users add-role --username "sean.cassidy@example.com" --role-name "Desktop User"
@@ -40,7 +52,17 @@ Similarly, use the `reactivate` and `bulk reactivate` commands to reactivate a u
 
 Use [Organizations](https://support.code42.com/Administrator/Cloud/Code42_console_reference/Organizations_reference) to group users together in the Code42 environment.
 
-Use the following example command to move a user into an organization associated with the `org_id` 1234567890:
+You'll need an organization's unique identifier number (UID) to move a user into it.  You can use the `list` command to view a list of all current user organizations, including UIDs:
+```bash
+code42 users orgs list
+```
+
+As an example, to print the details of an organization associated with the UID `123456789` in JSON format:
+```bash
+code42 users show 123456789 -f JSON
+```
+
+Once you've identified your organizations UID number, use the `move` command to move a user into that organization.  In the following example a user is moved into the organization associated with the UID `1234567890`:
 ```bash
 code42 users move --username sean.cassidy@example.com --org-id 1234567890
 ```
