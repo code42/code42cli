@@ -230,7 +230,7 @@ _bulk_user_update_headers = [
     "archive_size_quota",
 ]
 
-_bulk_user_move_headers = ["username", "org_uid"]
+_bulk_user_move_headers = ["username", "org_id"]
 
 
 @users.command(name="move")
@@ -568,14 +568,14 @@ def _update_user(
     )
 
 
-def _change_organization(sdk, username, org_uid):
+def _change_organization(sdk, username, org_id):
     user_id = _get_legacy_user_id(sdk, username)
-    org_id = _get_org_id(sdk, org_uid)
+    org_id = _get_org_id(sdk, org_id)
     return sdk.users.change_org_assignment(user_id=int(user_id), org_id=int(org_id))
 
 
-def _get_org_id(sdk, org_uid):
-    org = sdk.orgs.get_by_uid(org_uid)
+def _get_org_id(sdk, org_id):
+    org = sdk.orgs.get_by_uid(org_id)
     return org["orgId"]
 
 
