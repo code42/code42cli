@@ -57,6 +57,7 @@ You'll need an organization's unique identifier number (UID) to move a user into
 code42 users orgs list
 ```
 
+Use the `show` command to view all the details of a user organization.
 As an example, to print the details of an organization associated with the UID `123456789` in JSON format:
 ```bash
 code42 users show 123456789 -f JSON
