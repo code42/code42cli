@@ -57,21 +57,6 @@ def username_option(help, required=False):
     return click.option("--username", help=help, required=required)
 
 
-def _get_orgs_header():
-    return {
-        "orgId": "ID",
-        "orgUid": "UID",
-        "orgName": "Name",
-        "status": "Status",
-        "parentOrgId": "Parent ID",
-        "parentOrgUid": "Parent UID",
-        "type": "Type",
-        "classification": "Classfication",
-        "creationDate": "Creation Date",
-        "settings": "Settings",
-    }
-
-
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def users(state):
@@ -202,7 +187,7 @@ def update_user(
 
 
 @users.command()
-@click.argument("username")
+@username_arg
 @sdk_options()
 def deactivate(state, username):
     """Deactivate a user."""
@@ -211,7 +196,7 @@ def deactivate(state, username):
 
 
 @users.command()
-@click.argument("username")
+@username_arg
 @sdk_options()
 def reactivate(state, username):
     """Reactivate a user."""
@@ -248,6 +233,21 @@ def change_organization(state, username, org_id):
 def orgs(state):
     """Tools for viewing user orgs."""
     pass
+
+
+def _get_orgs_header():
+    return {
+        "orgId": "ID",
+        "orgUid": "UID",
+        "orgName": "Name",
+        "status": "Status",
+        "parentOrgId": "Parent ID",
+        "parentOrgUid": "Parent UID",
+        "type": "Type",
+        "classification": "Classification",
+        "creationDate": "Creation Date",
+        "settings": "Settings",
+    }
 
 
 @orgs.command(name="list")
