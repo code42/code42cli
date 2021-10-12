@@ -1,8 +1,11 @@
+import json
+
 import pytest
 from py42.exceptions import Py42ActiveLegalHoldError
 from py42.exceptions import Py42InvalidEmailError
 from py42.exceptions import Py42InvalidPasswordError
 from py42.exceptions import Py42InvalidUsernameError
+from py42.exceptions import Py42NotFoundError
 from py42.exceptions import Py42OrgNotFoundError
 from tests.conftest import create_mock_http_error
 from tests.conftest import create_mock_response
@@ -28,6 +31,7 @@ TEST_USERS_RESPONSE = {
             "blocked": False,
             "creationDate": "2021-03-12T20:07:40.898Z",
             "modificationDate": "2021-03-12T20:07:40.938Z",
+            "roles": ["Desktop User"],
             "userId": 1234,
             "username": "test.username@example.com",
             "userUid": "911162111513111325",
@@ -104,6 +108,9 @@ TEST_GET_ORG_RESPONSE = {
     "reporting": {"orgManagers": []},
     "customConfig": False,
 }
+TEST_EMPTY_ORGS_RESPONSE = {"totalCount": 0, "orgs": []}
+TEST_GET_ALL_ORGS_RESPONSE = {"totalCount": 1, "orgs": [TEST_GET_ORG_RESPONSE]}
+TEST_ORG_UID = "1007759454961904673"
 
 
 @pytest.fixture
@@ -134,6 +141,22 @@ def get_org_response(mocker):
 @pytest.fixture
 def get_org_success(cli_state, get_org_response):
     cli_state.sdk.orgs.get_by_uid.return_value = get_org_response
+
+
+@pytest.fixture
+def get_all_orgs_empty_success(mocker, cli_state):
+    def get_all_orgs_empty_generator():
+        yield create_mock_response(mocker, data=json.dumps(TEST_EMPTY_ORGS_RESPONSE))
+
+    cli_state.sdk.orgs.get_all.return_value = get_all_orgs_empty_generator()
+
+
+@pytest.fixture
+def get_all_orgs_success(mocker, cli_state):
+    def get_all_orgs_generator():
+        yield create_mock_response(mocker, data=json.dumps(TEST_GET_ALL_ORGS_RESPONSE))
+
+    cli_state.sdk.orgs.get_all.return_value = get_all_orgs_generator()
 
 
 @pytest.fixture
@@ -288,7 +311,7 @@ def test_list_users_calls_users_get_all_with_expected_role_id(
     role_name = "Customer Cloud Admin"
     runner.invoke(cli, ["users", "list", "--role-name", role_name], obj=cli_state)
     cli_state.sdk.users.get_all.assert_called_once_with(
-        active=None, org_uid=None, role_id="1234543"
+        active=None, org_uid=None, role_id="1234543", incRoles=False
     )
 
 
@@ -297,10 +320,12 @@ def test_list_users_calls_get_all_users_with_correct_parameters(
 ):
     org_uid = "TEST_ORG_UID"
     runner.invoke(
-        cli, ["users", "list", "--org-uid", org_uid, "--active"], obj=cli_state
+        cli,
+        ["users", "list", "--org-uid", org_uid, "--active", "--include-roles"],
+        obj=cli_state,
     )
     cli_state.sdk.users.get_all.assert_called_once_with(
-        active=True, org_uid=org_uid, role_id=None
+        active=True, org_uid=org_uid, role_id=None, incRoles=True
     )
 
 
@@ -309,7 +334,7 @@ def test_list_users_when_given_inactive_uses_active_equals_false(
 ):
     runner.invoke(cli, ["users", "list", "--inactive"], obj=cli_state)
     cli_state.sdk.users.get_all.assert_called_once_with(
-        active=False, org_uid=None, role_id=None
+        active=False, org_uid=None, role_id=None, incRoles=False
     )
 
 
@@ -327,7 +352,7 @@ def test_list_users_when_given_excluding_active_and_inactive_uses_active_equals_
 ):
     runner.invoke(cli, ["users", "list"], obj=cli_state)
     cli_state.sdk.users.get_all.assert_called_once_with(
-        active=None, org_uid=None, role_id=None
+        active=None, org_uid=None, role_id=None, incRoles=False
     )
 
 
@@ -401,6 +426,122 @@ def test_list_include_legal_hold_membership_merges_in_and_concats_legal_hold_inf
 ):
     result = runner.invoke(
         cli, ["users", "list", "--include-legal-hold-membership"], obj=cli_state
+    )
+
+    assert "Legal Hold #1,Legal Hold #2" in result.output
+    assert "123456789,987654321" in result.output
+
+
+def test_list_prints_expected_data_if_include_roles(
+    runner, cli_state, get_all_users_success
+):
+    result = runner.invoke(cli, ["users", "list", "--include-roles"], obj=cli_state)
+    assert "roles" in result.output
+    assert "Desktop User" in result.output
+
+
+def test_show_calls_get_by_username_with_expected_params(runner, cli_state):
+    runner.invoke(
+        cli, ["users", "show", "test.username@example.com"], obj=cli_state,
+    )
+    cli_state.sdk.users.get_by_username.assert_called_once_with(
+        "test.username@example.com", incRoles=True
+    )
+
+
+def test_show_prints_expected_data(runner, cli_state, get_users_response):
+    cli_state.sdk.users.get_by_username.return_value = get_users_response
+    result = runner.invoke(
+        cli, ["users", "show", "test.username@example.com"], obj=cli_state,
+    )
+    assert "test.username@example.com" in result.output
+    assert "911162111513111325" in result.output
+    assert "Active" in result.output
+    assert "44444444" in result.output
+    assert "Desktop User" in result.output
+
+
+def test_show_legal_hold_flag_reports_none_for_users_not_on_legal_hold(
+    runner,
+    cli_state,
+    get_users_response,
+    get_custodian_failure,
+    get_all_matter_success,
+):
+    cli_state.sdk.users.get_by_username.return_value = get_users_response
+    result = runner.invoke(
+        cli,
+        [
+            "users",
+            "show",
+            "test.username@example.com",
+            "--include-legal-hold-membership",
+            "-f",
+            "CSV",
+        ],
+        obj=cli_state,
+    )
+
+    assert "Legal Hold #1,Legal Hold #2" not in result.output
+    assert "123456789,987654321" not in result.output
+    assert "legalHoldUid" not in result.output
+    assert "test.username@example.com" in result.output
+
+
+def test_show_legal_hold_flag_reports_none_if_no_matters_exist(
+    runner, cli_state, get_users_response, get_custodian_failure, get_matter_failure
+):
+    cli_state.sdk.users.get_by_username.return_value = get_users_response
+    result = runner.invoke(
+        cli,
+        [
+            "users",
+            "show",
+            "test.username@example.com",
+            "--include-legal-hold-membership",
+        ],
+        obj=cli_state,
+    )
+
+    assert "Legal Hold #1,Legal Hold #2" not in result.output
+    assert "123456789,987654321" not in result.output
+    assert "legalHoldUid" not in result.output
+    assert "test.username@example.com" in result.output
+
+
+def test_show_legal_hold_values_not_included_for_legal_hold_user_if_legal_hold_flag_not_passed(
+    runner,
+    cli_state,
+    get_users_response,
+    get_all_custodian_success,
+    get_all_matter_success,
+):
+    cli_state.sdk.users.get_by_username.return_value = get_users_response
+    result = runner.invoke(
+        cli, ["users", "show", "test.username@example.com"], obj=cli_state
+    )
+    assert "Legal Hold #1,Legal Hold #2" not in result.output
+    assert "123456789,987654321" not in result.output
+    assert "test.username@example.com" in result.output
+
+
+def test_show_include_legal_hold_membership_merges_in_and_concats_legal_hold_info(
+    runner,
+    cli_state,
+    get_users_response,
+    get_all_custodian_success,
+    get_all_matter_success,
+):
+    cli_state.sdk.users.get_by_username.return_value = get_users_response
+    result = runner.invoke(
+        cli,
+        [
+            "users",
+            "show",
+            "test.username@example.com",
+            "--include-legal-hold-membership",
+        ],
+        obj=cli_state,
     )
 
     assert "Legal Hold #1,Legal Hold #2" in result.output
@@ -965,3 +1106,105 @@ def test_bulk_reactivate_uses_handler_that_when_encounters_error_increments_tota
     handler(username="test@example.com")
     handler(username="not.test@example.com")
     assert worker_stats.increment_total_errors.call_count == 1
+
+
+def test_orgs_list_calls_orgs_get_all_with_expected_params(runner, cli_state):
+    runner.invoke(cli, ["users", "orgs", "list"], obj=cli_state)
+    assert cli_state.sdk.orgs.get_all.call_count == 1
+
+
+def test_orgs_list_prints_no_results_if_no_orgs_found(
+    runner, cli_state, get_all_orgs_empty_success
+):
+    result = runner.invoke(cli, ["users", "orgs", "list"], obj=cli_state)
+    assert "No orgs found." in result.output
+
+
+def test_orgs_list_prints_expected_data(runner, cli_state, get_all_orgs_success):
+    result = runner.invoke(cli, ["users", "orgs", "list"], obj=cli_state)
+    assert "9087" in result.output
+    assert "1007759454961904673" in result.output
+    assert "19may" in result.output
+    assert "Active" in result.output
+    assert "2689" in result.output
+    assert "890854247383106706" in result.output
+    assert "ENTERPRISE" in result.output
+    assert "BASIC" in result.output
+    assert "2021-05-19T10:10:43.459Z" in result.output
+    assert "{'maxSeats': None, 'maxBytes': None}" in result.output
+
+
+def test_orgs_list_prints_all_data_fields_when_not_table_format(
+    runner, cli_state, get_all_orgs_success
+):
+    result = runner.invoke(cli, ["users", "orgs", "list", "-f", "JSON"], obj=cli_state)
+    for k, _v in TEST_GET_ORG_RESPONSE.items():
+        assert k in result.output
+    assert "9087" in result.output
+    assert "1007759454961904673" in result.output
+    assert "19may" in result.output
+    assert "Active" in result.output
+    assert "2689" in result.output
+    assert "890854247383106706" in result.output
+    assert "ENTERPRISE" in result.output
+    assert "BASIC" in result.output
+    assert "2021-05-19T10:10:43.459Z" in result.output
+    assert '"maxSeats": null' in result.output
+    assert '"maxSeats": null' in result.output
+
+
+def test_orgs_show_calls_orgs_get_by_uid_with_expected_params(
+    runner, cli_state,
+):
+    runner.invoke(cli, ["users", "orgs", "show", TEST_ORG_UID], obj=cli_state)
+    cli_state.sdk.orgs.get_by_uid.assert_called_once_with(TEST_ORG_UID)
+
+
+def test_orgs_show_exits_and_returns_error_if_uid_arg_not_provided(runner, cli_state):
+    result = runner.invoke(cli, ["users", "orgs", "show"], obj=cli_state)
+    assert result.exit_code == 2
+    assert "Error: Missing argument 'ORG_UID'." in result.output
+
+
+def test_orgs_show_prints_expected_data(
+    runner, cli_state, get_org_success,
+):
+    result = runner.invoke(cli, ["users", "orgs", "show", TEST_ORG_UID], obj=cli_state)
+    assert "9087" in result.output
+    assert "1007759454961904673" in result.output
+    assert "19may" in result.output
+    assert "Active" in result.output
+    assert "2689" in result.output
+    assert "890854247383106706" in result.output
+    assert "ENTERPRISE" in result.output
+    assert "BASIC" in result.output
+    assert "2021-05-19T10:10:43.459Z" in result.output
+    assert "{'maxSeats': None, 'maxBytes': None}" in result.output
+
+
+def test_orgs_show_prints_all_data_fields_when_not_table_format(
+    runner, cli_state, get_org_success,
+):
+    result = runner.invoke(
+        cli, ["users", "orgs", "show", TEST_ORG_UID, "-f", "JSON"], obj=cli_state
+    )
+    for k, _v in TEST_GET_ORG_RESPONSE.items():
+        assert k in result.output
+    assert "9087" in result.output
+    assert "1007759454961904673" in result.output
+    assert "19may" in result.output
+    assert "Active" in result.output
+    assert "2689" in result.output
+    assert "890854247383106706" in result.output
+    assert "ENTERPRISE" in result.output
+    assert "BASIC" in result.output
+    assert "2021-05-19T10:10:43.459Z" in result.output
+    assert '"maxSeats": null' in result.output
+    assert '"maxSeats": null' in result.output
+
+
+def test_orgs_show_when_invalid_org_uid_raises_error(runner, cli_state, custom_error):
+    cli_state.sdk.orgs.get_by_uid.side_effect = Py42NotFoundError(custom_error)
+    result = runner.invoke(cli, ["users", "orgs", "show", TEST_ORG_UID], obj=cli_state)
+    assert result.exit_code == 1
+    assert f"Invalid org UID {TEST_ORG_UID}." in result.output
