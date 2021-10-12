@@ -1,13 +1,12 @@
 import click
 import py42.sdk.queries.alerts.filters as f
-from c42eventextractor.extractors import AlertExtractor
 from py42.exceptions import Py42NotFoundError
+from py42.sdk.queries.alerts.alert_query import AlertQuery
 from py42.sdk.queries.alerts.filters import AlertState
 from py42.sdk.queries.alerts.filters import RuleType
 from py42.sdk.queries.alerts.filters import Severity
 from py42.util import format_dict
 
-import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
 import code42cli.errors as errors
 import code42cli.options as opt
@@ -16,8 +15,10 @@ from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.cmds.search import SendToCommand
 from code42cli.cmds.search.cursor_store import AlertCursorStore
-from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.cmds.search.options import server_options
+from code42cli.cmds.util import convert_to_or_query
+from code42cli.cmds.util import create_time_range_filter
+from code42cli.cmds.util import try_get_default_header
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import limit_date_range
 from code42cli.file_readers import read_csv_arg
@@ -25,9 +26,13 @@ from code42cli.options import format_option
 from code42cli.output_formats import JsonOutputFormat
 from code42cli.output_formats import OutputFormat
 from code42cli.output_formats import OutputFormatter
-
+from code42cli.util import hash_event
+from code42cli.util import parse_timestamp
+from code42cli.util import warn_interrupt
 
 ALERTS_KEYWORD = "alerts"
+ALERT_PAGE_SIZE = 25
+
 begin = opt.begin_option(
     ALERTS_KEYWORD,
     callback=lambda ctx, param, arg: convert_datetime_to_timestamp(
@@ -202,20 +207,6 @@ def clear_checkpoint(state, checkpoint_name):
     _get_alert_cursor_store(state.profile.name).delete(checkpoint_name)
 
 
-def _call_extractor(
-    cli_state, handlers, begin, end, or_query, advanced_query, **kwargs
-):
-    extractor = _get_alert_extractor(cli_state.sdk, handlers)
-    extractor.use_or_query = or_query
-    if advanced_query:
-        cli_state.search_filters = advanced_query
-    if begin or end:
-        cli_state.search_filters.append(
-            ext.create_time_range_filter(f.DateObserved, begin, end)
-        )
-    extractor.extract(*cli_state.search_filters)
-
-
 @alerts.command()
 @filter_options
 @search_options
@@ -242,21 +233,78 @@ def search(
     **kwargs,
 ):
     """Search for alerts."""
-    output_header = ext.try_get_default_header(
+    output_header = try_get_default_header(
         include_all, _get_default_output_header(), format
     )
     formatter = OutputFormatter(format, output_header)
     cursor = _get_alert_cursor_store(cli_state.profile.name) if use_checkpoint else None
-    handlers = ext.create_handlers(
-        cli_state.sdk,
-        AlertExtractor,
-        cursor,
-        use_checkpoint,
-        formatter=formatter,
-        force_pager=include_all,
-    )
-    _call_extractor(cli_state, handlers, begin, end, or_query, advanced_query, **kwargs)
-    handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
+    if use_checkpoint:
+        checkpoint_name = use_checkpoint
+        checkpoint = cursor.get(checkpoint_name)
+        if checkpoint is not None:
+            begin = checkpoint
+
+    query = _construct_query(cli_state, begin, end, advanced_query, or_query)
+    alerts_gen = cli_state.sdk.alerts.get_all_alert_details(query)
+
+    if use_checkpoint:
+        checkpoint_name = use_checkpoint
+        # update checkpoint to alertId of last event retrieved
+        alerts_gen = _dedupe_checkpointed_events_and_store_updated_checkpoint(
+            cursor, checkpoint_name, alerts_gen
+        )
+    alerts_list = []
+    for alert in alerts_gen:
+        alerts_list.append(alert)
+    if not alerts_list:
+        click.echo("No results found.")
+        return
+    formatter.echo_formatted_list(alerts_list)
+
+
+def _construct_query(state, begin, end, advanced_query, or_query):
+
+    if advanced_query:
+        state.search_filters = advanced_query
+    else:
+        if begin or end:
+            state.search_filters.append(
+                create_time_range_filter(f.DateObserved, begin, end)
+            )
+    if or_query:
+        state.search_filters = convert_to_or_query(state.search_filters)
+    query = AlertQuery(*state.search_filters)
+    query.page_size = ALERT_PAGE_SIZE
+    query.sort_direction = "asc"
+    query.sort_key = "CreatedAt"
+    return query
+
+
+def _dedupe_checkpointed_events_and_store_updated_checkpoint(
+    cursor, checkpoint_name, alerts_gen
+):
+    """De-duplicates events across checkpointed runs. Since using the timestamp of the last event
+    processed as the `--begin` time of the next run causes the last event to show up again in the
+    next results, we hash the last event(s) of each run and store those hashes in the cursor to
+    filter out on the next run. It's also possible that two events have the exact same timestamp, so
+    `checkpoint_events` needs to be a list of hashes so we can filter out everything that's actually
+    been processed.
+    """
+
+    checkpoint_alerts = cursor.get_alerts(checkpoint_name)
+    new_timestamp = None
+    new_alerts = []
+    for alert in alerts_gen:
+        event_hash = hash_event(alert)
+        if event_hash not in checkpoint_alerts:
+            if alert[f.DateObserved._term] != new_timestamp:
+                new_timestamp = alert[f.DateObserved._term]
+                new_alerts.clear()
+            new_alerts.append(event_hash)
+            yield alert
+            ts = parse_timestamp(new_timestamp)
+            cursor.replace(checkpoint_name, ts)
+            cursor.replace_alerts(checkpoint_name, new_alerts)
 
 
 @alerts.command(cls=SendToCommand)
@@ -280,19 +328,31 @@ def send_to(cli_state, begin, end, advanced_query, use_checkpoint, or_query, **k
     HOSTNAME format: address:port where port is optional and defaults to 514.
     """
     cursor = _get_cursor(cli_state, use_checkpoint)
-    handlers = ext.create_send_to_handlers(
-        cli_state.sdk, AlertExtractor, cursor, use_checkpoint, cli_state.logger,
-    )
-    _call_extractor(cli_state, handlers, begin, end, or_query, advanced_query, **kwargs)
-    handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
+
+    if use_checkpoint:
+        checkpoint_name = use_checkpoint
+        checkpoint = cursor.get(checkpoint_name)
+        if checkpoint is not None:
+            begin = checkpoint
+
+    query = _construct_query(cli_state, begin, end, advanced_query, or_query)
+    alerts_gen = cli_state.sdk.alerts.get_all_alert_details(query)
+
+    if use_checkpoint:
+        checkpoint_name = use_checkpoint
+        alerts_gen = _dedupe_checkpointed_events_and_store_updated_checkpoint(
+            cursor, checkpoint_name, alerts_gen
+        )
+    with warn_interrupt():
+        alert = None
+        for alert in alerts_gen:
+            cli_state.logger.info(alert)
+        if alert is None:  # generator was empty
+            click.echo("No results found.")
 
 
 def _get_cursor(state, use_checkpoint):
     return _get_alert_cursor_store(state.profile.name) if use_checkpoint else None
-
-
-def _get_alert_extractor(sdk, handlers):
-    return AlertExtractor(sdk, handlers)
 
 
 def _get_alert_cursor_store(profile_name):

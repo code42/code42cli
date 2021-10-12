@@ -186,7 +186,11 @@ def end_option(term, **kwargs):
 
 
 def checkpoint_option(term, **kwargs):
-    defaults = dict(help=f"Only get {term} that were not previously retrieved.")
+    defaults = dict(
+        help=f"Use a checkpoint with the given name to only get {term} that were not previously retrieved."
+        f"If a checkpoint for {term} with the given name doesn't exist, it will be created on the first run."
+        "Subsequent CLI runs with this flag and the same name will use the stored checkpoint to modify the search query and then update the stored checkpoint"
+    )
     defaults.update(kwargs)
     return click.option("-c", "--use-checkpoint", **defaults)
 

@@ -42,7 +42,7 @@ MISSING_TYPE = MISSING_ARGUMENT_ERROR.format("[DOMAIN|SLACK]")
 MISSING_VALUE = MISSING_ARGUMENT_ERROR.format("VALUE")
 MISSING_RESOURCE_ID_ARG = MISSING_ARGUMENT_ERROR.format("RESOURCE_ID")
 RESOURCE_ID_NOT_FOUND_ERROR = "Resource ID '{}' not found."
-INVALID_CHARACTER_ERROR = "Invalid character in domain or slack workspace name"
+INVALID_CHARACTER_ERROR = "Invalid character in domain or Slack workspace name"
 CONFLICT_ERROR = (
     "Duplicate URL or workspace name, '{}' already exists on your trusted list."
 )

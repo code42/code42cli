@@ -2,33 +2,39 @@ from pprint import pformat
 
 import click
 import py42.sdk.queries.fileevents.filters as f
-from c42eventextractor.extractors import FileEventExtractor
 from click import echo
+from py42.exceptions import Py42InvalidPageTokenError
+from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
+from py42.sdk.queries.fileevents.filters import InsertionTimestamp
 from py42.sdk.queries.fileevents.filters.exposure_filter import ExposureType
 from py42.sdk.queries.fileevents.filters.file_filter import FileCategory
 from py42.sdk.queries.fileevents.filters.risk_filter import RiskIndicator
 from py42.sdk.queries.fileevents.filters.risk_filter import RiskSeverity
 
-import code42cli.cmds.search.extraction as ext
 import code42cli.cmds.search.options as searchopt
-import code42cli.errors as errors
 import code42cli.options as opt
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
 from code42cli.click_ext.types import MapChoice
 from code42cli.cmds.search import SendToCommand
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
-from code42cli.cmds.search.extraction import handle_no_events
 from code42cli.cmds.search.options import send_to_format_options
 from code42cli.cmds.search.options import server_options
+from code42cli.cmds.util import convert_to_or_query
+from code42cli.cmds.util import create_time_range_filter
+from code42cli.cmds.util import try_get_default_header
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import limit_date_range
+from code42cli.logger import get_main_cli_logger
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.output_formats import FileEventsOutputFormat
 from code42cli.output_formats import FileEventsOutputFormatter
 from code42cli.output_formats import OutputFormatter
+from code42cli.util import warn_interrupt
 
+logger = get_main_cli_logger()
+MAX_EVENT_PAGE_SIZE = 10000
 
 SECURITY_DATA_KEYWORD = "file events"
 file_events_format_option = click.option(
@@ -263,7 +269,8 @@ def _get_saved_search_option():
 
     return click.option(
         "--saved-search",
-        help="Get events from a saved search filter with the given ID.",
+        help="Get events from a saved search filter with the given ID."
+        "WARNING: Using a saved search is incompatible with other query-building arguments.",
         callback=_get_saved_search_query,
         cls=incompatible_with("advanced_query"),
     )
@@ -358,23 +365,81 @@ def search(
     include_all,
     **kwargs,
 ):
+
     """Search for file events."""
-    output_header = ext.try_get_default_header(
+    output_header = try_get_default_header(
         include_all, _create_search_header_map(), format
     )
     formatter = FileEventsOutputFormatter(format, output_header)
     cursor = _get_cursor(state, use_checkpoint)
-    handlers = ext.create_handlers(
-        state.sdk,
-        FileEventExtractor,
-        cursor,
-        use_checkpoint,
-        formatter=formatter,
-        force_pager=include_all,
-    )
-    _extract(
-        state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
-    )
+    if use_checkpoint:
+        checkpoint_name = use_checkpoint
+        # if checkpoint name exists, checkpoint should be that eventId,
+        # otherwise it should set the initial value to ""
+        checkpoint = cursor.get(checkpoint_name) or ""
+
+        # older app versions stored checkpoint as float timestamp.
+        # we handle those here until the next run containing events will store checkpoint as the last eventId
+        try:
+            state.search_filters.append(
+                InsertionTimestamp.on_or_after(float(checkpoint))
+            )
+            checkpoint = ""
+        except ValueError:
+            pass
+    else:
+        checkpoint = ""
+
+    query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
+    events = _get_all_file_events(state, query, checkpoint)
+
+    if use_checkpoint:
+        checkpoint_name = use_checkpoint
+        events = _store_updated_checkpoint(cursor, checkpoint_name, events)
+
+    events_list = []
+    for event in events:
+        events_list.append(event)
+    if not events_list:
+        click.echo("No results found.")
+        return
+    formatter.echo_formatted_list(events_list)
+
+
+def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
+
+    if advanced_query:
+        state.search_filters = advanced_query
+    if saved_search:
+        state.search_filters = saved_search._filter_group_list
+    else:
+        if begin or end:
+            state.search_filters.append(
+                create_time_range_filter(f.EventTimestamp, begin, end)
+            )
+    if or_query:
+        state.search_filters = convert_to_or_query(state.search_filters)
+    query = FileEventQuery(*state.search_filters)
+    query.page_size = MAX_EVENT_PAGE_SIZE
+    query.sort_direction = "asc"
+    query.sort_key = "insertionTimestamp"
+    return query
+
+
+def _get_all_file_events(state, query, checkpoint=""):
+
+    try:
+        response = state.sdk.securitydata.search_all_file_events(
+            query, page_token=checkpoint
+        )
+    except Py42InvalidPageTokenError:
+        response = state.sdk.securitydata.search_all_file_events(query)
+    yield from response["fileEvents"]
+    while response["nextPgToken"]:
+        response = state.sdk.securitydata.search_all_file_events(
+            query, page_token=response["nextPgToken"]
+        )
+        yield from response["fileEvents"]
 
 
 @security_data.group(cls=OrderedGroup)
@@ -431,16 +496,37 @@ def send_to(
     HOSTNAME format: address:port where port is optional and defaults to 514.
     """
     cursor = _get_cursor(state, use_checkpoint)
-    handlers = ext.create_send_to_handlers(
-        state.sdk, FileEventExtractor, cursor, use_checkpoint, state.logger
-    )
-    _extract(
-        state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
-    )
 
+    if use_checkpoint:
+        checkpoint_name = use_checkpoint
+        # if checkpoint name exists, checkpoint should be that eventId,
+        # otherwise it should set the initial value to ""
+        checkpoint = cursor.get(checkpoint_name) or ""
 
-def _get_file_event_extractor(sdk, handlers):
-    return FileEventExtractor(sdk, handlers)
+        # older app versions stored checkpoint as float timestamp.
+        # we handle those here until the next run containing events will store checkpoint as the last eventId
+        try:
+            state.search_filters.append(
+                InsertionTimestamp.on_or_after(float(checkpoint))
+            )
+            checkpoint = ""
+        except ValueError:
+            pass
+    else:
+        checkpoint = ""
+
+    query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
+    events = _get_all_file_events(state, query, checkpoint)
+
+    with warn_interrupt():
+        event = None
+        for event in events:
+            if use_checkpoint:
+                checkpoint_name = use_checkpoint
+                cursor.replace(checkpoint_name, event["eventId"])
+            state.logger.info(event)
+        if event is None:  # generator was empty
+            click.echo("No results found.")
 
 
 def _get_cursor(state, use_checkpoint):
@@ -451,28 +537,7 @@ def _get_file_event_cursor_store(profile_name):
     return FileEventCursorStore(profile_name)
 
 
-def _extract(
-    state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
-):
-    _call_extractor(
-        state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
-    )
-    handle_no_events(not handlers.TOTAL_EVENTS and not errors.ERRORED)
-
-
-def _call_extractor(
-    state, handlers, begin, end, or_query, advanced_query, saved_search, **kwargs
-):
-    if advanced_query:
-        state.search_filters = advanced_query
-    extractor = _get_file_event_extractor(state.sdk, handlers)
-    extractor.use_or_query = or_query
-    extractor.or_query_exempt_filters.append(f.ExposureType.exists())
-    if saved_search:
-        extractor.extract(*saved_search._filter_group_list)
-    else:
-        if begin or end:
-            state.search_filters.append(
-                ext.create_time_range_filter(f.EventTimestamp, begin, end)
-            )
-        extractor.extract(*state.search_filters)
+def _store_updated_checkpoint(cursor, checkpoint_name, events):
+    for event in events:
+        yield event
+        cursor.replace(checkpoint_name, event["eventId"])
