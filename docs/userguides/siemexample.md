@@ -14,20 +14,30 @@ First install and configure the Code42 CLI following the instructions in
 [Getting Started](gettingstarted.md).
 
 ## Run queries
-You can get file events in either a JSON or CEF format for use by your SIEM tool. Alerts data is available in JSON format. You can query the data as a
-scheduled job or run ad-hoc queries. Learn more about [searching](../commands/securitydata.md) using the CLI.
+You can get file events in either a JSON or CEF format for use by your SIEM tool. Alerts data and audit logs are available in JSON format. You can query the data as a
+scheduled job or run ad-hoc queries.
+
+Learn more about searching [File Events](../commands/securitydata.md), [Alerts](../commands/alerts.md), and [Audit Logs](../commands/auditlogs.md) using the CLI.
 
 ### Run a query as a scheduled job
 
 Use your favorite scheduling tool, such as cron or Windows Task Scheduler, to run a query on a regular basis. Specify
-the profile to use by including `--profile`. An example using the `send-to` command to forward only the new file event data since the previous request to an external syslog server:
+the profile to use by including `--profile`.
+
+#### File Exposure Events
+An example using the `send-to` command to forward only the new file event data since the previous request to an external syslog server:
 ```bash
 code42 security-data send-to syslog.example.com:514 -p UDP --profile profile1 -c syslog_sender
 ```
-
+#### Alerts
 An example to send to the syslog server only the new alerts that meet the filter criteria since the previous request:
 ```bash
-code42 alerts send-to syslog.example.com:514 -p UDP --profile profile1 --rule-name “Source code exfiltration” --state OPEN -i
+code42 alerts send-to syslog.example.com:514 -p UDP --profile profile1 --rule-name "Source code exfiltration" --state OPEN -i
+```
+#### Audit Logs
+An example to send to the syslog server only the audit log events that meet the filter criteria from the last 30 days.
+```bash
+code42 audit-logs send-to syslog.example.com:514 -p UDP --profile profile1 --actor-username 'sean.cassidy@example.com' -b 30d
 ```
 
 As a best practice, use a separate profile when executing a scheduled task. Using separate profiles can help prevent accidental updates to your stored checkpoints, for example, by adding `--use-checkpoint` to adhoc queries.
@@ -35,6 +45,8 @@ As a best practice, use a separate profile when executing a scheduled task. Usin
 ### Run an ad-hoc query
 
 Examples of ad-hoc queries you can run are as follows.
+
+#### File Exposure Events
 
 Print file events since March 5 for a user in raw JSON format:
 ```bash
@@ -51,11 +63,18 @@ March 5:
 ```bash
 code42 security-data search -f RAW-JSON -b 2020-03-05 -t ApplicationRead --c42-username 'sean.cassidy@example.com' > /Users/sangita.maskey/Downloads/c42cli_output.txt
 ```
-
+#### Alerts
 Print alerts since May 5 where a file's cloud share permissions changed:
 ```bash
 code42 alerts print -b 2020-05-05 --rule-type FedCloudSharePermissions
 ```
+#### Audit Logs
+Print audit log events since June 5 which affected a certain user:
+```bash
+code42 audit-logs search -b 2021-06-05 --affected-username 'sean.cassidy@examply.com'
+```
+
+#### Example Outputs
 
 Example output for a single file exposure event (in default JSON format):
 
@@ -97,35 +116,52 @@ Example output for a single file exposure event (in default JSON format):
 Example output for a single alert (in default JSON format):
 
 ```json
-{"type$": "ALERT_DETAILS",
-"tenantId": "c4b5e830-824a-40a3-a6d9-345664cfbb33",
-"type": "FED_CLOUD_SHARE_PERMISSIONS",
-"name": "Cloud Share",
-"description": "Alert Rule for data exfiltration via Cloud Share",
-"actor": "leland.stewart@example.com",
-"target": "N/A",
-"severity": "HIGH",
-"ruleId": "408eb1ae-587e-421a-9444-f75d5399eacb",
-"ruleSource": "Alerting",
-"id": "7d936d0d-e783-4b24-817d-f19f625e0965",
-"createdAt": "2020-05-22T09:47:33.8863230Z",
-"state": "OPEN",
-"observations": [{"type$": "OBSERVATION",
-"id": "4bc378e6-bfbd-40f0-9572-6ed605ea9f6c",
-"observedAt": "2020-05-22T09:40:00.0000000Z",
-"type": "FedCloudSharePermissions",
-"data": {"type$": "OBSERVED_CLOUD_SHARE_ACTIVITY",
-"id": "4bc378e6-bfbd-40f0-9572-6ed605ea9f6c",
-"sources": ["GoogleDrive"],
-"exposureTypes": ["PublicLinkShare"],
-"firstActivityAt": "2020-05-22T09:40:00.0000000Z",
-"lastActivityAt": "2020-05-22T09:45:00.0000000Z",
-"fileCount": 1,
-"totalFileSize": 6025,
-"fileCategories": [{"type$": "OBSERVED_FILE_CATEGORY", "category": "Document", "fileCount": 1, "totalFileSize": 6025, "isSignificant": false}],
-"files": [{"type$": "OBSERVED_FILE", "eventId": "1hHdK6Qe6hez4vNCtS-UimDf-sbaFd-D7_3_baac33d0-a1d3-4e0a-9957-25632819eda7", "name": "1590140395_Longfellow_Cloud_Arch_Redesign.drawio", "category": "Document", "size": 6025}],
-"outsideTrustedDomainsEmailsCount": 0, "outsideTrustedDomainsTotalDomainCount": 0, "outsideTrustedDomainsTotalDomainCountTruncated": false}}]}
+{
+    "type$": "ALERT_DETAILS",
+    "tenantId": "c4b5e830-824a-40a3-a6d9-345664cfbb33",
+    "type": "FED_CLOUD_SHARE_PERMISSIONS",
+    "name": "Cloud Share",
+    "description": "Alert Rule for data exfiltration via Cloud Share",
+    "actor": "leland.stewart@example.com",
+    "target": "N/A",
+    "severity": "HIGH",
+    "ruleId": "408eb1ae-587e-421a-9444-f75d5399eacb",
+    "ruleSource": "Alerting",
+    "id": "7d936d0d-e783-4b24-817d-f19f625e0965",
+    "createdAt": "2020-05-22T09:47:33.8863230Z",
+    "state": "OPEN",
+    "observations": [{"type$": "OBSERVATION",
+        "id": "4bc378e6-bfbd-40f0-9572-6ed605ea9f6c",
+        "observedAt": "2020-05-22T09:40:00.0000000Z",
+        "type": "FedCloudSharePermissions",
+        "data": {
+            "type$": "OBSERVED_CLOUD_SHARE_ACTIVITY",
+            "id": "4bc378e6-bfbd-40f0-9572-6ed605ea9f6c",
+            "sources": ["GoogleDrive"],
+            "exposureTypes": ["PublicLinkShare"],
+            "firstActivityAt": "2020-05-22T09:40:00.0000000Z",
+            "lastActivityAt": "2020-05-22T09:45:00.0000000Z",
+            "fileCount": 1,
+            "totalFileSize": 6025,
+            "fileCategories": [{"type$": "OBSERVED_FILE_CATEGORY", "category": "Document", "fileCount": 1, "totalFileSize": 6025, "isSignificant": false}],
+            "files": [{"type$": "OBSERVED_FILE", "eventId": "1hHdK6Qe6hez4vNCtS-UimDf-sbaFd-D7_3_baac33d0-a1d3-4e0a-9957-25632819eda7", "name": "1590140395_Longfellow_Cloud_Arch_Redesign.drawio", "category": "Document", "size": 6025}],
+            "outsideTrustedDomainsEmailsCount": 0, "outsideTrustedDomainsTotalDomainCount": 0, "outsideTrustedDomainsTotalDomainCountTruncated": false}}]
+}
 ```
+
+Example output for a single audit log event (in default JSON format):
+```json
+{
+    "type$": "audit_log::logged_in/1",
+    "actorId": "1015070955620029617",
+    "actorName": "sean.cassidy@example.com",
+    "actorAgent": "py42 1.17.0 python 3.7.10",
+    "actorIpAddress": "67.220.16.122",
+    "timestamp": "2021-08-30T16:16:19.165Z",
+    "actorType": "USER"
+}
+```
+
 
 ## CEF Mapping
 
