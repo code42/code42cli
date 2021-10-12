@@ -901,7 +901,7 @@ def test_search_and_send_to_with_or_query_flag_produces_expected_query(
             },
         ],
         "pgNum": 0,
-        "pgSize": 500,
+        "pgSize": 25,
         "srtDirection": "asc",
         "srtKey": "CreatedAt",
     }
