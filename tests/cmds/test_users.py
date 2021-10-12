@@ -965,3 +965,49 @@ def test_bulk_reactivate_uses_handler_that_when_encounters_error_increments_tota
     handler(username="test@example.com")
     handler(username="not.test@example.com")
     assert worker_stats.increment_total_errors.call_count == 1
+
+
+def test_bulk_add_roles_uses_expected_arguments(
+    runner, mocker, cli_state_with_user
+):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_add_roles.csv", "w") as csv:
+            csv.writelines(
+                [
+                    "username,role_name\n",
+                    "test0@example.com,Desktop User\n",
+                    "test1@example.com,Desktop User\n",
+                ]
+            )
+        command = ["users", "bulk", "add-roles", "test_bulk_add_roles.csv"]
+        runner.invoke(
+            cli, command, obj=cli_state_with_user,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": "test0@example.com", "role_name": "Desktop User"},
+        {"username": "test1@example.com", "role_name": "Desktop User"},
+    ]
+    
+
+def test_bulk_remove_roles_uses_expected_arguments(
+    runner, mocker, cli_state_with_user
+):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_remove_roles.csv", "w") as csv:
+            csv.writelines(
+                [
+                    "username,role_name\n",
+                    "test0@example.com,Desktop User\n",
+                    "test1@example.com,Desktop User\n",
+                ]
+            )
+        command = ["users", "bulk", "remove-roles", "test_bulk_remove_roles.csv"]
+        runner.invoke(
+            cli, command, obj=cli_state_with_user,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": "test0@example.com", "role_name": "Desktop User"},
+        {"username": "test1@example.com", "role_name": "Desktop User"},
+    ]
