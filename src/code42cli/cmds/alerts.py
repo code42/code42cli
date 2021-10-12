@@ -31,8 +31,7 @@ from code42cli.util import parse_timestamp
 from code42cli.util import warn_interrupt
 
 ALERTS_KEYWORD = "alerts"
-MAX_ALERT_PAGE_SIZE = 500
-_ALERT_DETAIL_BATCH_SIZE = 25
+ALERT_PAGE_SIZE = 25
 
 begin = opt.begin_option(
     ALERTS_KEYWORD,
@@ -275,7 +274,7 @@ def _construct_query(state, begin, end, advanced_query, or_query):
     if or_query:
         state.search_filters = convert_to_or_query(state.search_filters)
     query = AlertQuery(*state.search_filters)
-    query.page_size = MAX_ALERT_PAGE_SIZE
+    query.page_size = ALERT_PAGE_SIZE
     query.sort_direction = "asc"
     query.sort_key = "CreatedAt"
     return query
