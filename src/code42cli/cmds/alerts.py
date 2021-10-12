@@ -248,22 +248,19 @@ def search(
     query = _construct_query(cli_state, begin, end, advanced_query, or_query)
     alerts_gen = cli_state.sdk.alerts.get_all_alert_details(query)
 
-    if not alerts_gen:
-        click.echo("No results found.")
-        return
-
     if use_checkpoint:
         checkpoint_name = use_checkpoint
         # update checkpoint to alertId of last event retrieved
         alerts_gen = _dedupe_checkpointed_events_and_store_updated_checkpoint(
             cursor, checkpoint_name, alerts_gen
         )
-        formatter.echo_formatted_list(list(alerts_gen))
-    else:
-        alerts_list = []
-        for alert in alerts_gen:
-            alerts_list.append(alert)
-        formatter.echo_formatted_list(alerts_list)
+    alerts_list = []
+    for alert in alerts_gen:
+        alerts_list.append(alert)
+    if not alerts_list:
+        click.echo("No results found.")
+        return
+    formatter.echo_formatted_list(alerts_list)
 
 
 def _construct_query(state, begin, end, advanced_query, or_query):
@@ -341,10 +338,6 @@ def send_to(cli_state, begin, end, advanced_query, use_checkpoint, or_query, **k
 
     query = _construct_query(cli_state, begin, end, advanced_query, or_query)
     alerts_gen = cli_state.sdk.alerts.get_all_alert_details(query)
-
-    if not alerts_gen:
-        click.echo("No results found.")
-        return
 
     if use_checkpoint:
         checkpoint_name = use_checkpoint
