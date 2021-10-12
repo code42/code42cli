@@ -37,7 +37,7 @@ class BaseCursorStore:
                     return float(checkpoint_value)
                 except ValueError:
                     raise Code42CLIError(
-                        f"Unable to parse checkpoint from {location}, expected a unix-epoch timestamp, got {checkpoint_value}."
+                        f"Unable to parse checkpoint from {location}, expected a unix-epoch timestamp, got '{checkpoint_value}'."
                     )
         except FileNotFoundError:
             return None
@@ -82,7 +82,10 @@ class FileEventCursorStore(BaseCursorStore):
         try:
             location = path.join(self._dir_path, cursor_name)
             with open(location) as checkpoint:
-                return str(checkpoint.read())
+                checkpoint_value = checkpoint.read()
+                if not checkpoint_value:
+                    return None
+                return str(checkpoint_value)
         except FileNotFoundError:
             return None
 

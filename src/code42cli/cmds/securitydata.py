@@ -393,17 +393,17 @@ def search(
     query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
     events = _get_all_file_events(state, query, checkpoint)
 
-    if not events:
-        click.echo("No results found.")
-        return
-
     if use_checkpoint:
         checkpoint_name = use_checkpoint
-        formatter.echo_formatted_list(
-            list(_store_updated_checkpoint(cursor, checkpoint_name, events))
-        )
-    else:
-        formatter.echo_formatted_list(list(events))
+        events = _store_updated_checkpoint(cursor, checkpoint_name, events)
+
+    events_list = []
+    for event in events:
+        events_list.append(event)
+    if not events_list:
+        click.echo("No results found.")
+        return
+    formatter.echo_formatted_list(events_list)
 
 
 def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
@@ -517,10 +517,6 @@ def send_to(
 
     query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
     events = _get_all_file_events(state, query, checkpoint)
-
-    if not events:
-        click.echo("No results found.")
-        return
 
     with warn_interrupt():
         event = None
