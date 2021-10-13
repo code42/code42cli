@@ -967,9 +967,7 @@ def test_bulk_reactivate_uses_handler_that_when_encounters_error_increments_tota
     assert worker_stats.increment_total_errors.call_count == 1
 
 
-def test_bulk_add_roles_uses_expected_arguments(
-    runner, mocker, cli_state_with_user
-):
+def test_bulk_add_roles_uses_expected_arguments(runner, mocker, cli_state_with_user):
     bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_bulk_add_roles.csv", "w") as csv:
@@ -988,11 +986,9 @@ def test_bulk_add_roles_uses_expected_arguments(
         {"username": "test0@example.com", "role_name": "Desktop User"},
         {"username": "test1@example.com", "role_name": "Desktop User"},
     ]
-    
 
-def test_bulk_remove_roles_uses_expected_arguments(
-    runner, mocker, cli_state_with_user
-):
+
+def test_bulk_remove_roles_uses_expected_arguments(runner, mocker, cli_state_with_user):
     bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_bulk_remove_roles.csv", "w") as csv:

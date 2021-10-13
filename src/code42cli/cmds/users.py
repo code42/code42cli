@@ -373,22 +373,37 @@ def bulk_reactivate(state, csv_rows, format):
     help=f"Add roles to a list of users from the provided CSV in format: {','.join(_bulk_user_roles_headers)}",
 )
 @read_csv_arg(headers=_bulk_user_roles_headers)
+@format_option
 @sdk_options()
-def bulk_add_roles(state, csv_rows):
+def bulk_add_roles(state, csv_rows, format):
     """Bulk add roles to a list of users."""
 
     sdk = state.sdk
+    role_key = "role added"
 
-    def handle_row(username, role_name):
-        if username is None:
-            message = "'username' is a required field to add a role to a user."
-            raise Code42CLIError(message)
-        if role_name is None:
-            message = "'role_name' is a required field to add a role to a user."
-            raise Code42CLIError(message)
-        _add_user_role(sdk, username, role_name)
+    csv_rows[0][role_key] = "False"
+    formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+    stats = create_worker_stats(len(csv_rows))
 
-    run_bulk_process(handle_row, csv_rows, progress_label="Adding roles to users:")
+    def handle_row(**row):
+        try:
+            _add_user_role(
+                sdk, **{key: row[key] for key in row.keys() if key != role_key}
+            )
+            row[role_key] = "True"
+        except Exception as err:
+            row[role_key] = f"False: {err}"
+            stats.increment_total_errors()
+        return row
+
+    result_rows = run_bulk_process(
+        handle_row,
+        csv_rows,
+        progress_label="Adding roles to users:",
+        stats=stats,
+        raise_global_error=False,
+    )
+    formatter.echo_formatted_list(result_rows)
 
 
 @bulk.command(
@@ -396,22 +411,37 @@ def bulk_add_roles(state, csv_rows):
     help=f"Remove roles from a list of users from the provided CSV in format: {','.join(_bulk_user_roles_headers)}",
 )
 @read_csv_arg(headers=_bulk_user_roles_headers)
+@format_option
 @sdk_options()
-def bulk_remove_roles(state, csv_rows):
+def bulk_remove_roles(state, csv_rows, format):
     """Bulk remove roles from a list of users."""
 
     sdk = state.sdk
+    role_key = "role removed"
 
-    def handle_row(username, role_name):
-        if username is None:
-            message = "'username' is a required field to add a role to a user."
-            raise Code42CLIError(message)
-        if role_name is None:
-            message = "'role_name' is a required field to add a role to a user."
-            raise Code42CLIError(message)
-        _remove_user_role(sdk, username, role_name)
+    csv_rows[0][role_key] = "False"
+    formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+    stats = create_worker_stats(len(csv_rows))
 
-    run_bulk_process(handle_row, csv_rows, progress_label="Removing roles from users:")
+    def handle_row(**row):
+        try:
+            _remove_user_role(
+                sdk, **{key: row[key] for key in row.keys() if key != role_key}
+            )
+            row[role_key] = "True"
+        except Exception as err:
+            row[role_key] = f"False: {err}"
+            stats.increment_total_errors()
+        return row
+
+    result_rows = run_bulk_process(
+        handle_row,
+        csv_rows,
+        progress_label="Removing roles from users:",
+        stats=stats,
+        raise_global_error=False,
+    )
+    formatter.echo_formatted_list(result_rows)
 
 
 def _add_user_role(sdk, username, role_name):
