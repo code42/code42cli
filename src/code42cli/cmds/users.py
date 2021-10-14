@@ -476,20 +476,20 @@ def bulk_add_roles(state, csv_rows, format):
     # Initialize the SDK before starting any bulk processes
     # to prevent multiple instances and having to enter 2fa multiple times.
     sdk = state.sdk
-    role_key = "role added"
+    status_header = "role added"
 
-    csv_rows[0][role_key] = "False"
+    csv_rows[0][status_header] = "False"
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
     stats = create_worker_stats(len(csv_rows))
 
     def handle_row(**row):
         try:
             _add_user_role(
-                sdk, **{key: row[key] for key in row.keys() if key != role_key}
+                sdk, **{key: row[key] for key in row.keys() if key != status_header}
             )
-            row[role_key] = "True"
+            row[status_header] = "True"
         except Exception as err:
-            row[role_key] = f"False: {err}"
+            row[status_header] = f"False: {err}"
             stats.increment_total_errors()
         return row
 
@@ -516,20 +516,20 @@ def bulk_remove_roles(state, csv_rows, format):
     # Initialize the SDK before starting any bulk processes
     # to prevent multiple instances and having to enter 2fa multiple times.
     sdk = state.sdk
-    role_key = "role removed"
+    success_header = "role removed"
 
-    csv_rows[0][role_key] = "False"
+    csv_rows[0][success_header] = "False"
     formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
     stats = create_worker_stats(len(csv_rows))
 
     def handle_row(**row):
         try:
             _remove_user_role(
-                sdk, **{key: row[key] for key in row.keys() if key != role_key}
+                sdk, **{key: row[key] for key in row.keys() if key != success_header}
             )
-            row[role_key] = "True"
+            row[success_header] = "True"
         except Exception as err:
-            row[role_key] = f"False: {err}"
+            row[success_header] = f"False: {err}"
             stats.increment_total_errors()
         return row
 
