@@ -473,6 +473,8 @@ def bulk_reactivate(state, csv_rows, format):
 def bulk_add_roles(state, csv_rows, format):
     """Bulk add roles to a list of users."""
 
+    # Initialize the SDK before starting any bulk processes
+    # to prevent multiple instances and having to enter 2fa multiple times.
     sdk = state.sdk
     role_key = "role added"
 
@@ -511,6 +513,8 @@ def bulk_add_roles(state, csv_rows, format):
 def bulk_remove_roles(state, csv_rows, format):
     """Bulk remove roles from a list of users."""
 
+    # Initialize the SDK before starting any bulk processes
+    # to prevent multiple instances and having to enter 2fa multiple times.
     sdk = state.sdk
     role_key = "role removed"
 
