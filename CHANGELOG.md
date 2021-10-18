@@ -16,6 +16,10 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
+- New bulk commands to manage user roles
+    - `code42 users bulk add-roles`
+    - `code42 users bulk remove-roles`
+
 - New option `--include-roles` on `code42 users list` that includes the roles for all users.
 
 - New command `code42 users show <username>` that prints all the details of that user.

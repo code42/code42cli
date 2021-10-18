@@ -1,3 +1,5 @@
+import functools
+
 import click
 from pandas import DataFrame
 from pandas import json_normalize
@@ -216,6 +218,8 @@ _bulk_user_update_headers = [
 ]
 
 _bulk_user_move_headers = ["username", "org_id"]
+
+_bulk_user_roles_headers = ["username", "role_name"]
 
 
 @users.command(name="move")
@@ -461,6 +465,86 @@ def bulk_reactivate(state, csv_rows, format):
     formatter.echo_formatted_list(result_rows)
 
 
+@bulk.command(
+    name="add-roles",
+    help=f"Add roles to a list of users from the provided CSV in format: {','.join(_bulk_user_roles_headers)}",
+)
+@read_csv_arg(headers=_bulk_user_roles_headers)
+@format_option
+@sdk_options()
+def bulk_add_roles(state, csv_rows, format):
+    """Bulk add roles to a list of users."""
+
+    # Initialize the SDK before starting any bulk processes
+    # to prevent multiple instances and having to enter 2fa multiple times.
+    sdk = state.sdk
+    status_header = "role added"
+
+    csv_rows[0][status_header] = "False"
+    formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+    stats = create_worker_stats(len(csv_rows))
+
+    def handle_row(**row):
+        try:
+            _add_user_role(
+                sdk, **{key: row[key] for key in row.keys() if key != status_header}
+            )
+            row[status_header] = "True"
+        except Exception as err:
+            row[status_header] = f"False: {err}"
+            stats.increment_total_errors()
+        return row
+
+    result_rows = run_bulk_process(
+        handle_row,
+        csv_rows,
+        progress_label="Adding roles to users:",
+        stats=stats,
+        raise_global_error=False,
+    )
+    formatter.echo_formatted_list(result_rows)
+
+
+@bulk.command(
+    name="remove-roles",
+    help=f"Remove roles from a list of users from the provided CSV in format: {','.join(_bulk_user_roles_headers)}",
+)
+@read_csv_arg(headers=_bulk_user_roles_headers)
+@format_option
+@sdk_options()
+def bulk_remove_roles(state, csv_rows, format):
+    """Bulk remove roles from a list of users."""
+
+    # Initialize the SDK before starting any bulk processes
+    # to prevent multiple instances and having to enter 2fa multiple times.
+    sdk = state.sdk
+    success_header = "role removed"
+
+    csv_rows[0][success_header] = "False"
+    formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+    stats = create_worker_stats(len(csv_rows))
+
+    def handle_row(**row):
+        try:
+            _remove_user_role(
+                sdk, **{key: row[key] for key in row.keys() if key != success_header}
+            )
+            row[success_header] = "True"
+        except Exception as err:
+            row[success_header] = f"False: {err}"
+            stats.increment_total_errors()
+        return row
+
+    result_rows = run_bulk_process(
+        handle_row,
+        csv_rows,
+        progress_label="Removing roles from users:",
+        stats=stats,
+        raise_global_error=False,
+    )
+    formatter.echo_formatted_list(result_rows)
+
+
 def _add_user_role(sdk, username, role_name):
     user_id = _get_legacy_user_id(sdk, username)
     _get_role_id(sdk, role_name)  # function provides role name validation
@@ -484,6 +568,7 @@ def _get_legacy_user_id(sdk, username):
     return user_id
 
 
+@functools.lru_cache()
 def _get_role_id(sdk, role_name):
     try:
         roles_dataframe = DataFrame.from_records(

@@ -1108,6 +1108,154 @@ def test_bulk_reactivate_uses_handler_that_when_encounters_error_increments_tota
     assert worker_stats.increment_total_errors.call_count == 1
 
 
+def test_bulk_add_roles_uses_expected_arguments(runner, mocker, cli_state_with_user):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_add_roles.csv", "w") as csv:
+            csv.writelines(
+                ["username,role_name\n", f"{TEST_USERNAME},{TEST_ROLE_NAME}\n"]
+            )
+        command = ["users", "bulk", "add-roles", "test_bulk_add_roles.csv"]
+        runner.invoke(
+            cli, command, obj=cli_state_with_user,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": TEST_USERNAME, "role_name": TEST_ROLE_NAME, "role added": "False"},
+    ]
+    bulk_processor.assert_called_once()
+
+
+def test_bulk_add_roles_ignores_blank_lines(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_add_roles.csv", "w") as csv:
+            csv.writelines(
+                ["username,role_name\n\n\n", f"{TEST_USERNAME},{TEST_ROLE_NAME}\n\n\n"]
+            )
+        runner.invoke(
+            cli,
+            ["users", "bulk", "add-roles", "test_bulk_add_roles.csv"],
+            obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": TEST_USERNAME, "role_name": TEST_ROLE_NAME, "role added": "False"},
+    ]
+    bulk_processor.assert_called_once()
+
+
+def test_bulk_add_roles_uses_handler_that_when_encounters_error_increments_total_errors(
+    runner,
+    mocker,
+    cli_state,
+    worker_stats,
+    get_users_response,
+    get_available_roles_success,
+):
+    def _get(username, *args, **kwargs):
+        if username == "test@example.com":
+            raise Exception("TEST")
+        return get_users_response
+
+    cli_state.sdk.users.get_by_username.side_effect = _get
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_add_roles.csv", "w") as csv:
+            csv.writelines(
+                ["username,role_name\n", f"{TEST_USERNAME},{TEST_ROLE_NAME}\n"]
+            )
+
+        runner.invoke(
+            cli,
+            ["users", "bulk", "add-roles", "test_bulk_add_roles.csv"],
+            obj=cli_state,
+        )
+    handler = bulk_processor.call_args[0][0]
+
+    handler(
+        username="test@example.com", role_name=TEST_ROLE_NAME,
+    )
+    handler(username="not.test@example.com", role_name=TEST_ROLE_NAME)
+    assert worker_stats.increment_total_errors.call_count == 1
+
+
+def test_bulk_remove_roles_uses_expected_arguments(runner, mocker, cli_state_with_user):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_remove_roles.csv", "w") as csv:
+            csv.writelines(
+                ["username,role_name\n", f"{TEST_USERNAME},{TEST_ROLE_NAME}\n"]
+            )
+        command = ["users", "bulk", "remove-roles", "test_bulk_remove_roles.csv"]
+        runner.invoke(
+            cli, command, obj=cli_state_with_user,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {
+            "username": TEST_USERNAME,
+            "role_name": TEST_ROLE_NAME,
+            "role removed": "False",
+        },
+    ]
+    bulk_processor.assert_called_once()
+
+
+def test_bulk_remove_roles_ignores_blank_lines(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_remove_roles.csv", "w") as csv:
+            csv.writelines(
+                ["username,role_name\n\n\n", f"{TEST_USERNAME},{TEST_ROLE_NAME}\n\n\n"]
+            )
+        runner.invoke(
+            cli,
+            ["users", "bulk", "remove-roles", "test_bulk_remove_roles.csv"],
+            obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {
+            "username": TEST_USERNAME,
+            "role_name": TEST_ROLE_NAME,
+            "role removed": "False",
+        },
+    ]
+    bulk_processor.assert_called_once()
+
+
+def test_bulk_remove_roles_uses_handler_that_when_encounters_error_increments_total_errors(
+    runner,
+    mocker,
+    cli_state,
+    worker_stats,
+    get_users_response,
+    get_available_roles_success,
+):
+    def _get(username, *args, **kwargs):
+        if username == "test@example.com":
+            raise Exception("TEST")
+
+        return get_users_response
+
+    cli_state.sdk.users.get_by_username.side_effect = _get
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_remove_roles.csv", "w") as csv:
+            csv.writelines(
+                ["username,role_name\n", f"{TEST_USERNAME},{TEST_ROLE_NAME}\n"]
+            )
+
+        runner.invoke(
+            cli,
+            ["users", "bulk", "remove-roles", "test_bulk_remove_roles.csv"],
+            obj=cli_state,
+        )
+    handler = bulk_processor.call_args[0][0]
+    handler(
+        username="test@example.com", role_name=TEST_ROLE_NAME,
+    )
+    handler(username="not.test@example.com", role_name=TEST_ROLE_NAME)
+    assert worker_stats.increment_total_errors.call_count == 1
+
+
 def test_orgs_list_calls_orgs_get_all_with_expected_params(runner, cli_state):
     runner.invoke(cli, ["users", "orgs", "list"], obj=cli_state)
     assert cli_state.sdk.orgs.get_all.call_count == 1
