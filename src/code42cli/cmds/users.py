@@ -568,7 +568,7 @@ def _get_legacy_user_id(sdk, username):
     return user_id
 
 
-@functools.lru_cache
+@functools.lru_cache()
 def _get_role_id(sdk, role_name):
     try:
         roles_dataframe = DataFrame.from_records(
