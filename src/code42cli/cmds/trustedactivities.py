@@ -132,7 +132,8 @@ bulk.add_command(trusted_activities_generate_template)
 @bulk.command(
     name="create",
     help="Bulk create trusted activities using a CSV file with "
-    f"format: {','.join(TRUST_UPDATE_HEADERS)}.",
+    f"format: {','.join(TRUST_CREATE_HEADERS)}.\b\n\n"
+    f"Available `type` values are: {'|'.join(TrustedActivityType.choices())}",
 )
 @read_csv_arg(headers=TRUST_CREATE_HEADERS)
 @sdk_options()

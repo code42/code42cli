@@ -10,6 +10,10 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
+### Fixed
+
+- Incorrect column title on `code42 trusted-activities bulk create` command help text.
+
 ### Added
 
 - New bulk commands to manage user roles
