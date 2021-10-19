@@ -14,6 +14,10 @@ from py42.exceptions import Py42InvalidPasswordError
 from py42.exceptions import Py42InvalidRuleOperationError
 from py42.exceptions import Py42InvalidUsernameError
 from py42.exceptions import Py42LegalHoldNotFoundOrPermissionDeniedError
+from py42.exceptions import Py42OrgNotFoundError
+from py42.exceptions import Py42TrustedActivityConflictError
+from py42.exceptions import Py42TrustedActivityIdNotFound
+from py42.exceptions import Py42TrustedActivityInvalidCharacterError
 from py42.exceptions import Py42UpdateClosedCaseError
 from py42.exceptions import Py42UserAlreadyAddedError
 from py42.exceptions import Py42UsernameMustBeEmailError
@@ -77,6 +81,10 @@ class ExceptionHandlingGroup(click.Group):
             Py42InvalidPasswordError,
             Py42InvalidUsernameError,
             Py42ActiveLegalHoldError,
+            Py42OrgNotFoundError,
+            Py42TrustedActivityConflictError,
+            Py42TrustedActivityInvalidCharacterError,
+            Py42TrustedActivityIdNotFound,
         ) as err:
             self.logger.log_error(err)
             raise Code42CLIError(str(err))

@@ -417,7 +417,7 @@ def test_cases_create_when_description_length_limit_exceeds_raises_exception_pri
     assert "Description limit exceeded, max 250 characters allowed." in result.output
 
 
-def test_cases_udpate_when_description_length_limit_exceeds_raises_exception_prints_error_message(
+def test_cases_update_when_description_length_limit_exceeds_raises_exception_prints_error_message(
     runner, cli_state, case_description_limit_exceeded_error
 ):
     cli_state.sdk.cases.update.side_effect = case_description_limit_exceeded_error

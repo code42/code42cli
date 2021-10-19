@@ -1,20 +1,16 @@
-import json
 import logging
 
 import py42.sdk.queries.alerts.filters as f
 import pytest
-from c42eventextractor.extractors import AlertExtractor
 from py42.exceptions import Py42NotFoundError
+from py42.sdk.queries.alerts.alert_query import AlertQuery
 from py42.sdk.queries.alerts.filters import AlertState
 from tests.cmds.conftest import filter_term_is_in_call_args
-from tests.cmds.conftest import get_filter_value_from_json
 from tests.cmds.conftest import get_mark_for_search_and_send_to
 from tests.conftest import create_mock_response
 from tests.conftest import get_test_date_str
 
-from code42cli import errors
 from code42cli import PRODUCT_NAME
-from code42cli.cmds.search import extraction
 from code42cli.cmds.search.cursor_store import AlertCursorStore
 from code42cli.logger.enums import ServerProtocol
 from code42cli.main import cli
@@ -23,7 +19,6 @@ from code42cli.main import cli
 BEGIN_TIMESTAMP = 1577858400.0
 END_TIMESTAMP = 1580450400.0
 CURSOR_TIMESTAMP = 1579500000.0
-ALERT_SUMMARY_LIST = [{"id": i} for i in range(20)]
 ALERT_DETAIL_RESULT = [
     {
         "alerts": [
@@ -298,19 +293,12 @@ search_and_send_to_test = get_mark_for_search_and_send_to("alerts")
 
 
 @pytest.fixture
-def alert_extractor(mocker):
-    mock = mocker.patch(f"{PRODUCT_NAME}.cmds.alerts._get_alert_extractor")
-    mock.return_value = mocker.MagicMock(spec=AlertExtractor)
-    return mock.return_value
-
-
-@pytest.fixture
 def alert_cursor_with_checkpoint(mocker):
     mock = mocker.patch(f"{PRODUCT_NAME}.cmds.alerts._get_alert_cursor_store")
     mock_cursor = mocker.MagicMock(spec=AlertCursorStore)
     mock_cursor.get.return_value = CURSOR_TIMESTAMP
     mock.return_value = mock_cursor
-    mock.expected_timestamp = "2020-01-20T06:00:00+00:00"
+    mock.expected_datetime = "2020-01-20 06:00:00"
     return mock
 
 
@@ -332,11 +320,6 @@ def begin_option(mocker):
 
 
 @pytest.fixture
-def alert_extract_func(mocker):
-    return mocker.patch(f"{PRODUCT_NAME}.cmds.alerts._extract")
-
-
-@pytest.fixture
 def send_to_logger_factory(mocker):
     return mocker.patch("code42cli.cmds.search._try_get_logger_for_server")
 
@@ -346,14 +329,152 @@ def full_alert_details_response(mocker):
     return create_mock_response(mocker, data=ALERT_DETAILS_FULL_RESPONSE)
 
 
+@pytest.fixture
+def mock_alert_search_response(mocker):
+
+    data = {
+        "type$": "ALERT_DETAILS",
+        "tenantId": "1d71796f-af5b-4231-9d8e-df6434da4663",
+        "type": "FED_COMPOSITE",
+        "name": "File Upload Alert",
+        "description": "Alert on any file upload events",
+        "actor": "test.user@code42.com",
+        "actorId": "1018651385932568954",
+        "target": "N/A",
+        "severity": "MEDIUM",
+        "ruleId": "962a6a1c-54f6-4477-90bd-a08cc74cbf71",
+        "ruleSource": "Alerting",
+        "id": "c209fa6c-c3c7-4242-b6de-207c0ff13e38",
+        "createdAt": "2021-09-01T07:43:06.7831980Z",
+        "state": "OPEN",
+        "observations": [
+            {
+                "type$": "OBSERVATION",
+                "id": "3af2494d-3981-46b5-a14b-6087edc48c5c",
+                "observedAt": "2021-09-01T07:15:00.0000000Z",
+                "type": "FedEndpointExfiltration",
+                "data": {
+                    "type$": "OBSERVED_ENDPOINT_ACTIVITY",
+                    "id": "3af2494d-3981-46b5-a14b-6087edc48c5c",
+                    "sources": ["Endpoint"],
+                    "exposureTypes": ["ApplicationRead"],
+                    "exposureTypeIsSignificant": True,
+                    "firstActivityAt": "2021-09-01T07:15:00.0000000Z",
+                    "lastActivityAt": "2021-09-01T07:20:00.0000000Z",
+                    "fileCount": 1,
+                    "totalFileSize": 7842255,
+                    "fileCategories": [
+                        {
+                            "type$": "OBSERVED_FILE_CATEGORY",
+                            "category": "Archive",
+                            "fileCount": 1,
+                            "totalFileSize": 7842255,
+                        }
+                    ],
+                    "fileCategoryIsSignificant": False,
+                    "files": [
+                        {
+                            "type$": "OBSERVED_FILE",
+                            "eventId": "0_1d71796f-af5b-4231-9d8e-df6434da4663_1019043250830767116_1022963810130583921_3_EPS",
+                            "path": "C:/Users/qa/Downloads/",
+                            "name": "TA-code42-insider-threats-add-on.tar.gz",
+                            "category": "Archive",
+                            "size": 7842255,
+                            "riskSeverityInfo": {
+                                "type$": "RISK_SEVERITY_INFO",
+                                "score": 3,
+                                "severity": "LOW",
+                                "matchedRiskIndicators": [
+                                    {
+                                        "type$": "RISK_INDICATOR",
+                                        "name": "Zip",
+                                        "weight": 3,
+                                    },
+                                    {
+                                        "type$": "RISK_INDICATOR",
+                                        "name": "Other destination",
+                                        "weight": 0,
+                                    },
+                                ],
+                            },
+                            "observedAt": "2021-09-01T07:19:18.5860000Z",
+                        }
+                    ],
+                    "riskSeverityIsSignificant": False,
+                    "riskSeveritySummary": [
+                        {
+                            "type$": "RISK_SEVERITY_SUMMARY",
+                            "severity": "LOW",
+                            "numEvents": 1,
+                            "summarizedRiskIndicators": [
+                                {
+                                    "type$": "SUMMARIZED_RISK_INDICATOR",
+                                    "name": "Zip",
+                                    "numEvents": 1,
+                                },
+                                {
+                                    "type$": "SUMMARIZED_RISK_INDICATOR",
+                                    "name": "Other destination",
+                                    "numEvents": 1,
+                                },
+                            ],
+                        }
+                    ],
+                    "syncToServices": [],
+                    "sendingIpAddresses": ["162.222.47.183"],
+                    "appReadDetails": [
+                        {
+                            "type$": "APP_READ_DETAILS",
+                            "tabInfos": [
+                                {
+                                    "type$": "TAB_INFO",
+                                    "tabUrl": "http://127.0.0.1:8000/en-US/manager/appinstall/_upload",
+                                    "tabTitle": "Settings | Splunk - Google Chrome",
+                                }
+                            ],
+                            "destinationCategory": "Uncategorized",
+                            "destinationName": "Uncategorized",
+                            "processName": "\\Device\\HarddiskVolume2\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+                        }
+                    ],
+                    "destinationIsSignificant": False,
+                },
+            }
+        ],
+    }
+
+    def response_gen():
+        yield data
+
+    return response_gen()
+
+
+@pytest.fixture
+def search_all_alerts_success(cli_state, mock_alert_search_response):
+    cli_state.sdk.alerts.get_all_alert_details.return_value = mock_alert_search_response
+
+
+@search_and_send_to_test
+def test_search_and_send_to_passes_query_object_when_searching_file_events(
+    runner, cli_state, command, search_all_alerts_success
+):
+    runner.invoke(
+        cli, [*command, "--advanced-query", ADVANCED_QUERY_JSON], obj=cli_state
+    )
+
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    assert isinstance(query, AlertQuery)
+
+
 @search_and_send_to_test
 def test_search_and_send_to_when_advanced_query_passed_as_json_string_builds_expected_query(
-    cli_state, alert_extractor, runner, command
+    cli_state, runner, command, search_all_alerts_success
 ):
     runner.invoke(
         cli, [*command, "--advanced-query", ADVANCED_QUERY_JSON], obj=cli_state,
     )
-    passed_filter_groups = alert_extractor.extract.call_args[0]
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    passed_filter_groups = query._filter_group_list
     expected_actor_filter = f.Actor.contains(ADVANCED_QUERY_VALUES["actor"])
     expected_actor_filter.filter_clause = "OR"
     expected_timestamp_filter = f.DateObserved.in_range(
@@ -373,16 +494,6 @@ def test_search_and_send_to_when_advanced_query_passed_as_json_string_builds_exp
     assert expected_timestamp_filter in passed_filter_groups
     assert expected_state_filter in passed_filter_groups
     assert expected_rule_id_filter in passed_filter_groups
-
-
-@search_and_send_to_test
-def test_search_and_send_to_without_advanced_query_uses_only_the_extract_method(
-    cli_state, alert_extractor, runner, command
-):
-
-    runner.invoke(cli, [*command, "--begin", "1d"], obj=cli_state)
-    assert alert_extractor.extract.call_count == 1
-    assert alert_extractor.extract_advanced.call_count == 0
 
 
 @advanced_query_incompat_test_params
@@ -415,7 +526,7 @@ def test_send_to_with_advanced_query_and_incompatible_argument_errors(
 
 @search_and_send_to_test
 def test_search_and_send_to_when_given_begin_and_end_dates_uses_expected_query(
-    cli_state, alert_extractor, runner, command
+    cli_state, runner, command, search_all_alerts_success
 ):
     begin_date = get_test_date_str(days_ago=89)
     end_date = get_test_date_str(days_ago=1)
@@ -423,18 +534,22 @@ def test_search_and_send_to_when_given_begin_and_end_dates_uses_expected_query(
     runner.invoke(
         cli, [*command, "--begin", begin_date, "--end", end_date], obj=cli_state,
     )
-    filters = alert_extractor.extract.call_args[0][0]
-    actual_begin = get_filter_value_from_json(filters, filter_index=0)
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    query_dict = dict(query)
+
+    actual_begin = query_dict["groups"][0]["filters"][0]["value"]
     expected_begin = f"{begin_date}T00:00:00.000000Z"
-    actual_end = get_filter_value_from_json(filters, filter_index=1)
+
+    actual_end = query_dict["groups"][0]["filters"][1]["value"]
     expected_end = f"{end_date}T23:59:59.999999Z"
+
     assert actual_begin == expected_begin
     assert actual_end == expected_end
 
 
 @search_and_send_to_test
 def test_search_when_given_begin_and_end_date_and_times_uses_expected_query(
-    cli_state, alert_extractor, runner, command
+    cli_state, runner, command, search_all_alerts_success
 ):
     begin_date = get_test_date_str(days_ago=89)
     end_date = get_test_date_str(days_ago=1)
@@ -444,32 +559,36 @@ def test_search_when_given_begin_and_end_date_and_times_uses_expected_query(
         [*command, "--begin", f"{begin_date} {time}", "--end", f"{end_date} {time}"],
         obj=cli_state,
     )
-    filters = alert_extractor.extract.call_args[0][0]
-    actual_begin = get_filter_value_from_json(filters, filter_index=0)
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    query_dict = dict(query)
+
+    actual_begin = query_dict["groups"][0]["filters"][0]["value"]
     expected_begin = f"{begin_date}T{time}.000000Z"
-    actual_end = get_filter_value_from_json(filters, filter_index=1)
+
+    actual_end = query_dict["groups"][0]["filters"][1]["value"]
     expected_end = f"{end_date}T{time}.000000Z"
+
     assert actual_begin == expected_begin
     assert actual_end == expected_end
 
 
 @search_and_send_to_test
 def test_search_when_given_begin_date_and_time_without_seconds_uses_expected_query(
-    cli_state, alert_extractor, runner, command
+    cli_state, runner, command, search_all_alerts_success
 ):
     date = get_test_date_str(days_ago=89)
     time = "15:33"
     runner.invoke(cli, [*command, "--begin", f"{date} {time}"], obj=cli_state)
-    actual = get_filter_value_from_json(
-        alert_extractor.extract.call_args[0][0], filter_index=0
-    )
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    query_dict = dict(query)
+    actual = query_dict["groups"][0]["filters"][0]["value"]
     expected = f"{date}T{time}:00.000000Z"
     assert actual == expected
 
 
 @search_and_send_to_test
 def test_search_and_send_to_when_given_end_date_and_time_uses_expected_query(
-    cli_state, alert_extractor, runner, command
+    cli_state, runner, command, search_all_alerts_success
 ):
     begin_date = get_test_date_str(days_ago=10)
     end_date = get_test_date_str(days_ago=1)
@@ -479,9 +598,9 @@ def test_search_and_send_to_when_given_end_date_and_time_uses_expected_query(
         [*command, "--begin", begin_date, "--end", f"{end_date} {time}"],
         obj=cli_state,
     )
-    actual = get_filter_value_from_json(
-        alert_extractor.extract.call_args[0][0], filter_index=1
-    )
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    query_dict = dict(query)
+    actual = query_dict["groups"][0]["filters"][1]["value"]
     expected = f"{end_date}T{time}:00.000000Z"
     assert actual == expected
 
@@ -497,30 +616,17 @@ def test_search_and_send_to_when_given_begin_date_more_than_ninety_days_back_err
 
 
 @search_and_send_to_test
-def test_search_and_send_to_when_given_begin_date_past_90_days_and_use_checkpoint_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
-    cli_state, alert_cursor_with_checkpoint, alert_extractor, runner, command
-):
-    begin_date = get_test_date_str(days_ago=91) + " 12:51:00"
-    runner.invoke(
-        cli,
-        [*command, "--begin", begin_date, "--use-checkpoint", "test"],
-        obj=cli_state,
-    )
-    assert not filter_term_is_in_call_args(alert_extractor, f.DateObserved._term)
-
-
-@search_and_send_to_test
 def test_search_and_send_to_when_given_begin_date_and_not_use_checkpoint_and_cursor_exists_uses_begin_date(
-    cli_state, alert_extractor, runner, command
+    cli_state, runner, command, search_all_alerts_success
 ):
     begin_date = get_test_date_str(days_ago=1)
     runner.invoke(cli, [*command, "--begin", begin_date], obj=cli_state)
-    actual_ts = get_filter_value_from_json(
-        alert_extractor.extract.call_args[0][0], filter_index=0
-    )
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    query_dict = dict(query)
+    actual_ts = query_dict["groups"][0]["filters"][0]["value"]
     expected_ts = f"{begin_date}T00:00:00.000000Z"
     assert actual_ts == expected_ts
-    assert filter_term_is_in_call_args(alert_extractor, f.DateObserved._term)
+    assert filter_term_is_in_call_args(query, f.DateObserved._term)
 
 
 @search_and_send_to_test
@@ -537,16 +643,26 @@ def test_search_and_send_to_when_end_date_is_before_begin_date_causes_exit(
 
 
 @search_and_send_to_test
-def test_search_and_send_to_with_only_begin_calls_extract_with_expected_filters(
-    cli_state, alert_extractor, begin_option, runner, command
+def test_search_and_send_to_with_only_begin_calls_search_all_alerts_with_expected_filters(
+    cli_state, begin_option, runner, command, search_all_alerts_success
 ):
     res = runner.invoke(cli, [*command, "--begin", "1d"], obj=cli_state)
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    query_dict = dict(query)
+    expected_filter_groups = [
+        {
+            "filterClause": "AND",
+            "filters": [
+                {
+                    "operator": "ON_OR_AFTER",
+                    "term": "createdAt",
+                    "value": begin_option.expected_timestamp,
+                }
+            ],
+        }
+    ]
     assert res.exit_code == 0
-    assert (
-        str(alert_extractor.extract.call_args[0][0])
-        == '{"filterClause":"AND", "filters":[{"operator":"ON_OR_AFTER", "term":"createdAt", '
-        f'"value":"{begin_option.expected_timestamp}"}}]}}'
-    )
+    assert query_dict["groups"] == expected_filter_groups
 
 
 @search_and_send_to_test
@@ -562,78 +678,81 @@ def test_search_and_send_to_with_use_checkpoint_and_without_begin_and_without_st
 
 
 @search_and_send_to_test
-def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_extract_with_begin_date(
+def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_without_checkpoint_calls_search_all_alerts_with_begin_date(
     cli_state,
-    alert_extractor,
     begin_option,
     alert_cursor_without_checkpoint,
     runner,
     command,
+    search_all_alerts_success,
 ):
     res = runner.invoke(
         cli, [*command, "--use-checkpoint", "test", "--begin", "1d"], obj=cli_state,
     )
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    query_dict = dict(query)
+    actual_begin = query_dict["groups"][0]["filters"][0]["value"]
+
     assert res.exit_code == 0
-    assert len(alert_extractor.extract.call_args[0]) == 1
-    assert begin_option.expected_timestamp in str(
-        alert_extractor.extract.call_args[0][0]
-    )
+    assert len(query._filter_group_list) == 1
+    assert begin_option.expected_timestamp == actual_begin
 
 
 @search_and_send_to_test
-def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_calls_extract_with_checkpoint_and_ignores_begin_arg(
-    cli_state, alert_extractor, alert_cursor_with_checkpoint, runner, command
+def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_with_stored_checkpoint_calls_search_all_alerts_with_checkpoint_and_ignores_begin_arg(
+    cli_state, alert_cursor_with_checkpoint, runner, command, search_all_alerts_success
 ):
     result = runner.invoke(
         cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
     )
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     assert result.exit_code == 0
-    assert alert_extractor.extract.call_count == 1
+    assert len(query._filter_group_list) == 1
     assert (
-        f"checkpoint of {alert_cursor_with_checkpoint.expected_timestamp} exists"
+        f"checkpoint of {alert_cursor_with_checkpoint.expected_datetime} exists"
         in result.output
     )
 
 
 @search_and_send_to_test
 def test_search_and_send_to_when_given_actor_is_uses_username_filter(
-    cli_state, alert_extractor, runner, command
+    cli_state, runner, command, search_all_alerts_success
 ):
     actor_name = "test.testerson"
     runner.invoke(
         cli, [*command, "--begin", "1h", "--actor", actor_name], obj=cli_state
     )
-    filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(f.Actor.is_in([actor_name])) in filter_strings
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    assert f.Actor.is_in([actor_name]) in query._filter_group_list
 
 
 @search_and_send_to_test
 def test_search_and_send_to_when_given_exclude_actor_uses_actor_filter(
-    cli_state, alert_extractor, runner, command
+    cli_state, runner, command, search_all_alerts_success
 ):
     actor_name = "test.testerson"
     runner.invoke(
         cli, [*command, "--begin", "1h", "--exclude-actor", actor_name], obj=cli_state,
     )
-    filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(f.Actor.not_in([actor_name])) in filter_strings
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    assert f.Actor.not_in([actor_name]) in query._filter_group_list
 
 
 @search_and_send_to_test
 def test_search_and_send_to_when_given_rule_name_uses_rule_name_filter(
-    cli_state, alert_extractor, runner, command
+    cli_state, runner, command, search_all_alerts_success
 ):
     rule_name = "departing employee"
     runner.invoke(
         cli, [*command, "--begin", "1h", "--rule-name", rule_name], obj=cli_state,
     )
-    filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(f.RuleName.is_in([rule_name])) in filter_strings
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    assert f.RuleName.is_in([rule_name]) in query._filter_group_list
 
 
 @search_and_send_to_test
 def test_search_and_send_to_when_given_exclude_rule_name_uses_rule_name_not_filter(
-    cli_state, alert_extractor, runner, command
+    cli_state, runner, command, search_all_alerts_success
 ):
     rule_name = "departing employee"
     runner.invoke(
@@ -641,25 +760,25 @@ def test_search_and_send_to_when_given_exclude_rule_name_uses_rule_name_not_filt
         [*command, "--begin", "1h", "--exclude-rule-name", rule_name],
         obj=cli_state,
     )
-    filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(f.RuleName.not_in([rule_name])) in filter_strings
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    assert f.RuleName.not_in([rule_name]) in query._filter_group_list
 
 
 @search_and_send_to_test
 def test_search_and_send_to_when_given_rule_type_uses_rule_name_filter(
-    cli_state, alert_extractor, runner, command
+    cli_state, runner, command, search_all_alerts_success
 ):
     rule_type = "FedEndpointExfiltration"
     runner.invoke(
         cli, [*command, "--begin", "1h", "--rule-type", rule_type], obj=cli_state,
     )
-    filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(f.RuleType.is_in([rule_type])) in filter_strings
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    assert f.RuleType.is_in([rule_type]) in query._filter_group_list
 
 
 @search_and_send_to_test
 def test_search_and_send_to_when_given_exclude_rule_type_uses_rule_name_not_filter(
-    cli_state, alert_extractor, runner, command
+    cli_state, runner, command, search_all_alerts_success
 ):
     rule_type = "FedEndpointExfiltration"
     runner.invoke(
@@ -667,47 +786,47 @@ def test_search_and_send_to_when_given_exclude_rule_type_uses_rule_name_not_filt
         [*command, "--begin", "1h", "--exclude-rule-type", rule_type],
         obj=cli_state,
     )
-    filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(f.RuleType.not_in([rule_type])) in filter_strings
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    assert f.RuleType.not_in([rule_type]) in query._filter_group_list
 
 
 @search_and_send_to_test
 def test_search_and_send_to_when_given_rule_id_uses_rule_name_filter(
-    cli_state, alert_extractor, runner, command
+    cli_state, runner, command, search_all_alerts_success
 ):
     rule_id = "departing employee"
     runner.invoke(cli, [*command, "--begin", "1h", "--rule-id", rule_id], obj=cli_state)
-    filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(f.RuleId.is_in([rule_id])) in filter_strings
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    assert f.RuleId.is_in([rule_id]) in query._filter_group_list
 
 
 @search_and_send_to_test
 def test_search_and_send_to_when_given_exclude_rule_id_uses_rule_name_not_filter(
-    cli_state, alert_extractor, runner, command
+    cli_state, runner, command, search_all_alerts_success
 ):
     rule_id = "departing employee"
     runner.invoke(
         cli, [*command, "--begin", "1h", "--exclude-rule-id", rule_id], obj=cli_state,
     )
-    filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(f.RuleId.not_in([rule_id])) in filter_strings
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    assert f.RuleId.not_in([rule_id]) in query._filter_group_list
 
 
 @search_and_send_to_test
 def test_search_and_send_to_when_given_description_uses_description_filter(
-    cli_state, alert_extractor, runner, command
+    cli_state, runner, command, search_all_alerts_success
 ):
     description = "test description"
     runner.invoke(
         cli, [*command, "--begin", "1h", "--description", description], obj=cli_state,
     )
-    filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(f.Description.contains(description)) in filter_strings
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    assert f.Description.contains(description) in query._filter_group_list
 
 
 @search_and_send_to_test
 def test_search_and_send_to_when_given_multiple_search_args_uses_expected_filters(
-    cli_state, alert_extractor, runner, command
+    cli_state, runner, command, search_all_alerts_success
 ):
     actor = "test.testerson@example.com"
     exclude_actor = "flag.flagerson@example.com"
@@ -728,15 +847,15 @@ def test_search_and_send_to_when_given_multiple_search_args_uses_expected_filter
         ],
         obj=cli_state,
     )
-    filter_strings = [str(arg) for arg in alert_extractor.extract.call_args[0]]
-    assert str(f.Actor.is_in([actor])) in filter_strings
-    assert str(f.Actor.not_in([exclude_actor])) in filter_strings
-    assert str(f.RuleName.is_in([rule_name])) in filter_strings
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    assert f.Actor.is_in([actor]) in query._filter_group_list
+    assert f.Actor.not_in([exclude_actor]) in query._filter_group_list
+    assert f.RuleName.is_in([rule_name]) in query._filter_group_list
 
 
 @search_and_send_to_test
 def test_search_and_send_to_with_or_query_flag_produces_expected_query(
-    runner, cli_state, command
+    runner, cli_state, command, search_all_alerts_success
 ):
     begin_date = get_test_date_str(days_ago=10)
     test_actor = "test@example.com"
@@ -782,27 +901,27 @@ def test_search_and_send_to_with_or_query_flag_produces_expected_query(
             },
         ],
         "pgNum": 0,
-        "pgSize": 500,
+        "pgSize": 25,
         "srtDirection": "asc",
         "srtKey": "CreatedAt",
     }
-    actual_query = json.loads(str(cli_state.sdk.alerts.search.call_args[0][0]))
+    query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
+    actual_query = dict(query)
     assert actual_query == expected_query
 
 
 @search_and_send_to_test
-def test_search_and_send_to_when_extraction_handles_error_expected_message_logged_and_printed_and_global_errored_flag_set(
+def test_search_and_send_to_handles_error_expected_message_logged_and_printed(
     runner, cli_state, caplog, command
 ):
-    errors.ERRORED = False
     exception_msg = "Test Exception"
-    cli_state.sdk.alerts.search.side_effect = Exception(exception_msg)
+    expected_msg = "Unknown problem occurred"
+    cli_state.sdk.alerts.get_all_alert_details.side_effect = Exception(exception_msg)
     with caplog.at_level(logging.ERROR):
         result = runner.invoke(cli, [*command, "--begin", "1d"], obj=cli_state)
         assert "Error:" in result.output
-        assert exception_msg in result.output
+        assert expected_msg in result.output
         assert exception_msg in caplog.text
-        assert errors.ERRORED
 
 
 @pytest.mark.parametrize(
@@ -935,20 +1054,6 @@ def test_send_to_when_given_certs_with_non_tls_protocol_fails_expectedly(
         obj=cli_state,
     )
     assert "'--certs' can only be used with '--protocol TLS-TCP'" in res.output
-
-
-def test_get_alert_details_batches_results_according_to_batch_size(sdk):
-    extraction._ALERT_DETAIL_BATCH_SIZE = 2
-    sdk.alerts.get_details.side_effect = ALERT_DETAIL_RESULT
-    extraction._get_alert_details(sdk, ALERT_SUMMARY_LIST)
-    assert sdk.alerts.get_details.call_count == 10
-
-
-def test_get_alert_details_sorts_results_by_date(sdk):
-    extraction._ALERT_DETAIL_BATCH_SIZE = 2
-    sdk.alerts.get_details.side_effect = ALERT_DETAIL_RESULT
-    results = extraction._get_alert_details(sdk, ALERT_SUMMARY_LIST)
-    assert results == SORTED_ALERT_DETAILS
 
 
 def test_show_outputs_expected_headers(cli_state, runner, full_alert_details_response):

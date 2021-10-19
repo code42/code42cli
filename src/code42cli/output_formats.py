@@ -221,6 +221,9 @@ class FileEventsOutputFormatter(OutputFormatter):
         if output_format == FileEventsOutputFormat.CEF:
             self._format_func = to_cef
 
+    def echo_formatted_generated_output(self, event):
+        pass
+
 
 def to_cef(output):
     """Output is a single record"""
