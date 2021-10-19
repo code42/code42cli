@@ -1,6 +1,9 @@
+import functools
+
 import click
 from pandas import DataFrame
 from pandas import json_normalize
+from py42.exceptions import Py42NotFoundError
 
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
@@ -17,12 +20,7 @@ from code42cli.output_formats import OutputFormatter
 from code42cli.worker import create_worker_stats
 
 
-@click.group(cls=OrderedGroup)
-@sdk_options(hidden=True)
-def users(state):
-    """Manage users within your Code42 environment."""
-    pass
-
+username_arg = click.argument("username")
 
 org_uid_option = click.option(
     "--org-uid",
@@ -42,8 +40,14 @@ user_id_option = click.option(
 )
 org_id_option = click.option(
     "--org-id",
-    help="The identifier for the organization to which the user will be moved.",
+    help="The unique identifier (UID) for the organization to which the user will be moved.",
     required=True,
+)
+include_legal_hold_option = click.option(
+    "--include-legal-hold-membership",
+    default=False,
+    is_flag=True,
+    help="Include legal hold membership in output.",
 )
 
 
@@ -55,21 +59,33 @@ def username_option(help, required=False):
     return click.option("--username", help=help, required=required)
 
 
+@click.group(cls=OrderedGroup)
+@sdk_options(hidden=True)
+def users(state):
+    """Manage users within your Code42 environment."""
+    pass
+
+
 @users.command(name="list")
 @org_uid_option
 @role_name_option("Limit results to only users having the specified role.")
 @active_option
 @inactive_option
+@include_legal_hold_option
 @click.option(
-    "--include-legal-hold-membership",
-    default=False,
-    is_flag=True,
-    help="Include legal hold membership in output.",
+    "--include-roles", default=False, is_flag=True, help="Include user roles."
 )
 @format_option
 @sdk_options()
 def list_users(
-    state, org_uid, role_name, active, inactive, include_legal_hold_membership, format
+    state,
+    org_uid,
+    role_name,
+    active,
+    inactive,
+    include_legal_hold_membership,
+    include_roles,
+    format,
 ):
     """List users in your Code42 environment."""
     if inactive:
@@ -80,7 +96,11 @@ def list_users(
         if format == OutputFormat.TABLE
         else None
     )
-    df = _get_users_dataframe(state.sdk, columns, org_uid, role_id, active)
+    if include_roles and columns:
+        columns.append("roles")
+    df = _get_users_dataframe(
+        state.sdk, columns, org_uid, role_id, active, include_roles
+    )
     if include_legal_hold_membership:
         df = _add_legal_hold_membership_to_user_dataframe(state.sdk, df)
     if df.empty:
@@ -88,6 +108,29 @@ def list_users(
     else:
         formatter = DataFrameOutputFormatter(format)
         formatter.echo_formatted_dataframes(df)
+
+
+@users.command("show")
+@username_arg
+@include_legal_hold_option
+@format_option
+@sdk_options()
+def show_user(state, username, include_legal_hold_membership, format):
+    """Show user details."""
+    columns = (
+        ["userUid", "status", "username", "orgUid", "roles"]
+        if format == OutputFormat.TABLE
+        else None
+    )
+    response = state.sdk.users.get_by_username(username, incRoles=True)
+    df = DataFrame.from_records(response["users"], columns=columns)
+    if include_legal_hold_membership and not df.empty:
+        df = _add_legal_hold_membership_to_user_dataframe(state.sdk, df)
+    if df.empty:
+        click.echo("No results found.")
+    else:
+        formatter = DataFrameOutputFormatter(format)
+        formatter.echo_formatted_dataframe(df)
 
 
 @users.command()
@@ -146,7 +189,7 @@ def update_user(
 
 
 @users.command()
-@click.argument("username")
+@username_arg
 @sdk_options()
 def deactivate(state, username):
     """Deactivate a user."""
@@ -155,7 +198,7 @@ def deactivate(state, username):
 
 
 @users.command()
-@click.argument("username")
+@username_arg
 @sdk_options()
 def reactivate(state, username):
     """Reactivate a user."""
@@ -176,6 +219,8 @@ _bulk_user_update_headers = [
 
 _bulk_user_move_headers = ["username", "org_id"]
 
+_bulk_user_roles_headers = ["username", "role_name"]
+
 
 @users.command(name="move")
 @username_option("The username of the user to move.", required=True)
@@ -183,8 +228,62 @@ _bulk_user_move_headers = ["username", "org_id"]
 @sdk_options()
 def change_organization(state, username, org_id):
     """Change the organization of the user with the given username
-    to the org with the given org ID."""
+    to the org with the given org UID."""
     _change_organization(state.sdk, username, org_id)
+
+
+@users.group(cls=OrderedGroup)
+@sdk_options(hidden=True)
+def orgs(state):
+    """Tools for viewing user orgs."""
+    pass
+
+
+def _get_orgs_header():
+    return {
+        "orgId": "ID",
+        "orgUid": "UID",
+        "orgName": "Name",
+        "status": "Status",
+        "parentOrgId": "Parent ID",
+        "parentOrgUid": "Parent UID",
+        "type": "Type",
+        "classification": "Classification",
+        "creationDate": "Creation Date",
+        "settings": "Settings",
+    }
+
+
+@orgs.command(name="list")
+@format_option
+@sdk_options()
+def list_orgs(
+    state, format,
+):
+    """List all orgs."""
+    pages = state.sdk.orgs.get_all()
+    formatter = OutputFormatter(format, _get_orgs_header())
+    orgs = [org for page in pages for org in page["orgs"]]
+    if orgs:
+        formatter.echo_formatted_list(orgs)
+    else:
+        click.echo("No orgs found.")
+
+
+@orgs.command(name="show")
+@click.argument("org-uid")
+@format_option
+@sdk_options()
+def show_org(
+    state, org_uid, format,
+):
+    """Show org details."""
+    formatter = OutputFormatter(format)
+    try:
+        response = state.sdk.orgs.get_by_uid(org_uid)
+        formatter.echo_formatted_list([response.data])
+    except Py42NotFoundError:
+        raise Code42CLIError(f"Invalid org UID {org_uid}.")
 
 
 @users.group(cls=OrderedGroup)
@@ -366,6 +465,86 @@ def bulk_reactivate(state, csv_rows, format):
     formatter.echo_formatted_list(result_rows)
 
 
+@bulk.command(
+    name="add-roles",
+    help=f"Add roles to a list of users from the provided CSV in format: {','.join(_bulk_user_roles_headers)}",
+)
+@read_csv_arg(headers=_bulk_user_roles_headers)
+@format_option
+@sdk_options()
+def bulk_add_roles(state, csv_rows, format):
+    """Bulk add roles to a list of users."""
+
+    # Initialize the SDK before starting any bulk processes
+    # to prevent multiple instances and having to enter 2fa multiple times.
+    sdk = state.sdk
+    status_header = "role added"
+
+    csv_rows[0][status_header] = "False"
+    formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+    stats = create_worker_stats(len(csv_rows))
+
+    def handle_row(**row):
+        try:
+            _add_user_role(
+                sdk, **{key: row[key] for key in row.keys() if key != status_header}
+            )
+            row[status_header] = "True"
+        except Exception as err:
+            row[status_header] = f"False: {err}"
+            stats.increment_total_errors()
+        return row
+
+    result_rows = run_bulk_process(
+        handle_row,
+        csv_rows,
+        progress_label="Adding roles to users:",
+        stats=stats,
+        raise_global_error=False,
+    )
+    formatter.echo_formatted_list(result_rows)
+
+
+@bulk.command(
+    name="remove-roles",
+    help=f"Remove roles from a list of users from the provided CSV in format: {','.join(_bulk_user_roles_headers)}",
+)
+@read_csv_arg(headers=_bulk_user_roles_headers)
+@format_option
+@sdk_options()
+def bulk_remove_roles(state, csv_rows, format):
+    """Bulk remove roles from a list of users."""
+
+    # Initialize the SDK before starting any bulk processes
+    # to prevent multiple instances and having to enter 2fa multiple times.
+    sdk = state.sdk
+    success_header = "role removed"
+
+    csv_rows[0][success_header] = "False"
+    formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+    stats = create_worker_stats(len(csv_rows))
+
+    def handle_row(**row):
+        try:
+            _remove_user_role(
+                sdk, **{key: row[key] for key in row.keys() if key != success_header}
+            )
+            row[success_header] = "True"
+        except Exception as err:
+            row[success_header] = f"False: {err}"
+            stats.increment_total_errors()
+        return row
+
+    result_rows = run_bulk_process(
+        handle_row,
+        csv_rows,
+        progress_label="Removing roles from users:",
+        stats=stats,
+        raise_global_error=False,
+    )
+    formatter.echo_formatted_list(result_rows)
+
+
 def _add_user_role(sdk, username, role_name):
     user_id = _get_legacy_user_id(sdk, username)
     _get_role_id(sdk, role_name)  # function provides role name validation
@@ -389,6 +568,7 @@ def _get_legacy_user_id(sdk, username):
     return user_id
 
 
+@functools.lru_cache()
 def _get_role_id(sdk, role_name):
     try:
         roles_dataframe = DataFrame.from_records(
@@ -400,8 +580,10 @@ def _get_role_id(sdk, role_name):
         raise Code42CLIError(f"Role with name '{role_name}' not found.")
 
 
-def _get_users_dataframe(sdk, columns, org_uid, role_id, active):
-    users_generator = sdk.users.get_all(active=active, org_uid=org_uid, role_id=role_id)
+def _get_users_dataframe(sdk, columns, org_uid, role_id, active, include_roles):
+    users_generator = sdk.users.get_all(
+        active=active, org_uid=org_uid, role_id=role_id, incRoles=include_roles
+    )
     users_list = []
     for page in users_generator:
         users_list.extend(page["users"])
@@ -413,6 +595,7 @@ def _add_legal_hold_membership_to_user_dataframe(sdk, df):
     columns = ["legalHold.legalHoldUid", "legalHold.name", "user.userUid"]
 
     custodians = list(_get_all_active_hold_memberships(sdk))
+
     if len(custodians) == 0:
         return df
 

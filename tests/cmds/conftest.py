@@ -50,13 +50,6 @@ def cli_logger(mocker):
 
 
 @pytest.fixture
-def event_extractor_logger(mocker):
-    mock = mocker.patch("code42cli.logger.handlers.NoPrioritySysLogHandler")
-    mock.emit.return_value = mocker.MagicMock()
-    return mock
-
-
-@pytest.fixture
 def cli_state_with_user(sdk_with_user, cli_state):
     cli_state.sdk = sdk_with_user
     return cli_state
@@ -86,9 +79,8 @@ def get_filter_value_from_json(json, filter_index):
     return json_module.loads(str(json))["filters"][filter_index]["value"]
 
 
-def filter_term_is_in_call_args(extractor, term):
-    arg_filters = extractor.extract.call_args[0]
-    for f in arg_filters:
+def filter_term_is_in_call_args(filter_group, term):
+    for f in filter_group:
         if term in str(f):
             return True
     return False

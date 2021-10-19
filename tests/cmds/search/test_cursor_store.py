@@ -24,6 +24,12 @@ def mock_open(mocker):
     return mock
 
 
+@pytest.fixture
+def mock_empty_checkpoint(mocker):
+    mock = mocker.patch("builtins.open", mocker.mock_open(read_data=""))
+    return mock
+
+
 AUDIT_LOG_EVENT_HASH_1 = "bc8f70ff821cadcc3e717d534d14737d"
 AUDIT_LOG_EVENT_HASH_2 = "66ad12c0a0dba2b41520fb69aeefd84d"
 
@@ -142,7 +148,7 @@ class TestFileEventCursorStore:
     def test_get_returns_expected_timestamp(self, mock_open):
         store = FileEventCursorStore(PROFILE_NAME)
         checkpoint = store.get(CURSOR_NAME)
-        assert checkpoint == 123456789
+        assert checkpoint == "123456789"
 
     def test_get_reads_expected_file(self, mock_open):
         store = FileEventCursorStore(PROFILE_NAME)

@@ -95,3 +95,5 @@ code42 devices list --active \
 This lists all devices that have not connected within a year _and_
 are not a user's most-recently-connected device, and then attempts
 to deactivate them.
+
+Learn more about [Managing Devices](../commands/devices.md).
