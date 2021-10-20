@@ -742,6 +742,24 @@ def test_list_invalid_org_uid_raises_error(runner, cli_state, custom_error):
     )
 
 
+def test_list_excludes_recently_connected_devices_before_filtering_by_date(
+    runner, cli_state, get_all_devices_success,
+):
+    result = runner.invoke(
+        cli,
+        [
+            "devices",
+            "list",
+            "--exclude-most-recently-connected",
+            "1",
+            "--last-connected-before",
+            TEST_DATE_NEWER,
+        ],
+        obj=cli_state,
+    )
+    assert "839648314463407622" in result.output
+
+
 def test_list_backup_sets_invalid_org_uid_raises_error(runner, cli_state, custom_error):
     custom_error.response.text = "Unable to find org"
     invalid_org_uid = "invalid_org_uid"
