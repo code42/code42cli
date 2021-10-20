@@ -13,6 +13,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Fixed
 
 - Incorrect column title on `code42 trusted-activities bulk create` command help text.
+- `code42 devices list` will now process `--exclude-most-recently-connected` prior to `--last-connected-before` instead of after.
 
 ### Added
 
