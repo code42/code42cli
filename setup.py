@@ -29,7 +29,7 @@ setup(
     package_dir={"": "src"},
     include_package_data=True,
     zip_safe=False,
-    python_requires=">3, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, <4",
+    python_requires=">=3.6.2, <4",
     install_requires=[
         "chardet",
         "click>=7.1.1, <8",
@@ -37,7 +37,7 @@ setup(
         "colorama>=0.4.3",
         "keyring==18.0.1",
         "keyrings.alt==3.2.0",
-        "ipython>=7.16.1",
+        "ipython==7.16.1",
         "pandas>=1.1.3",
         "py42>=1.19.1",
     ],

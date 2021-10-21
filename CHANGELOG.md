@@ -14,6 +14,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 - Incorrect column title on `code42 trusted-activities bulk create` command help text.
 - `code42 devices list` will now process `--exclude-most-recently-connected` prior to `--last-connected-before` instead of after.
+- The minimum required version of Python for code42cli is now correctly set as 3.6.2.
 
 ### Added
 
