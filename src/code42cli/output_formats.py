@@ -79,7 +79,7 @@ class DataFrameOutputFormatter:
         self.checkpoint_func = checkpoint_func or (lambda x: None)
 
     def _ensure_iterable(self, dfs):
-        if not isinstance(dfs, (Generator, list)):
+        if not isinstance(dfs, (Generator, list, tuple)):
             return [dfs]
         return dfs
 
