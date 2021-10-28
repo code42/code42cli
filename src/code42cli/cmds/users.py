@@ -130,7 +130,7 @@ def show_user(state, username, include_legal_hold_membership, format):
         click.echo("No results found.")
     else:
         formatter = DataFrameOutputFormatter(format)
-        formatter.echo_formatted_dataframe(df)
+        formatter.echo_formatted_dataframes(df)
 
 
 @users.command()
