@@ -334,6 +334,13 @@ def list_devices(
         org_uid,
         (include_backup_usage or include_total_storage),
     )
+    if exclude_most_recently_connected:
+        most_recent = (
+            df.sort_values(["userUid", "lastConnected"], ascending=False)
+            .groupby("userUid")
+            .head(exclude_most_recently_connected)
+        )
+        df = df.drop(most_recent.index)
     if last_connected_after:
         df = df.loc[to_datetime(df.lastConnected) > last_connected_after]
     if last_connected_before:
@@ -342,13 +349,6 @@ def list_devices(
         df = df.loc[to_datetime(df.creationDate) > created_after]
     if created_before:
         df = df.loc[to_datetime(df.creationDate) < created_before]
-    if exclude_most_recently_connected:
-        most_recent = (
-            df.sort_values(["userUid", "lastConnected"], ascending=False)
-            .groupby("userUid")
-            .head(exclude_most_recently_connected)
-        )
-        df = df.drop(most_recent.index)
     if include_total_storage:
         df = _add_storage_totals_to_dataframe(df, include_backup_usage)
     if include_settings:
