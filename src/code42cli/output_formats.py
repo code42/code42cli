@@ -111,6 +111,7 @@ class DataFrameOutputFormatter:
             yield from self._checkpoint_and_iter_formatted_events(df, formatted_rows)
 
     def _iter_json(self, dfs, **kwargs):
+        kwargs = {"ensure_ascii": False, **kwargs}
         dfs = self._ensure_iterable(dfs)
         for df in dfs:
             # converts np.NaN nulls to None
@@ -119,7 +120,6 @@ class DataFrameOutputFormatter:
             for i, row in enumerate(df.iterrows(), start=1):
                 event = dict(row[1])
                 self.checkpoint_func(event)
-                kwargs = {"ensure_ascii": False, **kwargs}
                 json_string = json.dumps(event, **kwargs)
                 if i == row_count:
                     yield json_string
