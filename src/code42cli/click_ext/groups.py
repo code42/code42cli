@@ -107,7 +107,7 @@ class ExceptionHandlingGroup(click.Group):
             else:
                 cmd = 'export PYTHONIOENCODING="utf-8"'
             raise Code42CLIError(
-                f"Error writing unicode character using environment's detected encoding, try running:\n\n  {cmd}\n\nand then re-run your `code42` command."
+                f"Failed to handle unicode character using environment's detected encoding, try running:\n\n  {cmd}\n\nand then re-run your `code42` command."
             )
 
         except OSError:
