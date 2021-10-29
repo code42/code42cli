@@ -119,6 +119,7 @@ class DataFrameOutputFormatter:
             for i, row in enumerate(df.iterrows(), start=1):
                 event = dict(row[1])
                 self.checkpoint_func(event)
+                kwargs = {"ensure_ascii": False, **kwargs}
                 json_string = json.dumps(event, **kwargs)
                 if i == row_count:
                     yield json_string
