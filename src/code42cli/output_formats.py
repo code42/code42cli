@@ -96,6 +96,7 @@ class DataFrameOutputFormatter:
                 "orient": "records",
                 "lines": True,
                 "index": True,
+                "force_ascii": False,
                 "default_handler": str,
             }
             defaults.update(kwargs)
@@ -106,6 +107,7 @@ class DataFrameOutputFormatter:
                 "orient": "records",
                 "lines": False,
                 "index": True,
+                "force_ascii": False,
                 "default_handler": str,
             }
             defaults.update(kwargs)
