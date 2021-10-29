@@ -1,4 +1,5 @@
 import difflib
+import platform
 import re
 from collections import OrderedDict
 
@@ -99,6 +100,15 @@ class ExceptionHandlingGroup(click.Group):
         except Py42HTTPError as err:
             self.logger.log_verbose_error(self._original_args, err.response.request)
             raise LoggedCLIError("Problem making request to server.")
+
+        except UnicodeEncodeError:
+            if platform.system() == "Windows":
+                cmd = '$ENV:PYTHONIOENCODING="utf-16"'
+            else:
+                cmd = 'export PYTHONIOENCODING="utf-8"'
+            raise Code42CLIError(
+                f"Error writing unicode to output, run:\n\n\t{cmd}\n\nand then re-run your `code42` command."
+            )
 
         except OSError:
             raise
