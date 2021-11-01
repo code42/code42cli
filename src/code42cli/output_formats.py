@@ -96,6 +96,7 @@ class DataFrameOutputFormatter:
                 "orient": "records",
                 "lines": True,
                 "index": True,
+                "force_ascii": False,
                 "default_handler": str,
             }
             defaults.update(kwargs)
@@ -106,13 +107,14 @@ class DataFrameOutputFormatter:
                 "orient": "records",
                 "lines": False,
                 "index": True,
+                "force_ascii": False,
                 "default_handler": str,
             }
             defaults.update(kwargs)
             return df.to_json(**defaults)
 
         elif self.output_format == OutputFormat.CSV:
-            defaults = {"index": False}
+            defaults = {"index": False, "line_terminator": "\n"}
             defaults.update(kwargs)
             df = df.fillna("")
             return df.to_csv(**defaults)
