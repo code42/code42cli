@@ -103,11 +103,11 @@ class ExceptionHandlingGroup(click.Group):
 
         except UnicodeEncodeError:
             if platform.system() == "Windows":
-                cmd = '$ENV:PYTHONIOENCODING="utf-16"'
+                cmd = 'if using powershell: $ENV:PYTHONIOENCODING="utf-16"\nif using cmd.exe:    SET PYTHONIOENCODING="utf-16"'
             else:
                 cmd = 'export PYTHONIOENCODING="utf-8"'
             raise Code42CLIError(
-                f"Failed to handle unicode character using environment's detected encoding, try running:\n\n  {cmd}\n\nand then re-run your `code42` command."
+                f"Failed to handle unicode character using environment's detected encoding, try running the following:\n\n{cmd}\n\nand then re-run your `code42` command."
             )
 
         except OSError:
