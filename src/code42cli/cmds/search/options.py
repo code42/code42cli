@@ -143,6 +143,22 @@ def advanced_query_option(term, **kwargs):
     return click.option("--advanced-query", **defaults)
 
 
+or_query_option = click.option(
+    "--or-query",
+    is_flag=True,
+    cls=AdvancedQueryAndSavedSearchIncompatible,
+    help="Combine query filter options with 'OR' logic instead of the default 'AND'.",
+)
+
+include_all_option = click.option(
+    "--include-all",
+    default=False,
+    is_flag=True,
+    help="Display simple properties of the primary level of the nested response.",
+    cls=incompatible_with("columns"),
+)
+
+
 def server_options(f):
     hostname_arg = click.argument("hostname")
     protocol_option = click.option(
