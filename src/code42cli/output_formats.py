@@ -245,7 +245,7 @@ class FileEventsOutputFormatter(DataFrameOutputFormatter):
 
     def __init__(self, output_format, checkpoint_func=None):
         self.output_format = (
-            output_format.upper() if output_format else OutputFormat.TABLE
+            output_format.upper() if output_format else OutputFormat.RAW
         )
         if self.output_format not in FileEventsOutputFormat.choices():
             raise Code42CLIError(
