@@ -83,10 +83,22 @@ class DataFrameOutputFormatter:
             return [dfs]
         return dfs
 
-    def _iter_table(self, dfs, **kwargs):
-        df = pandas.concat(self._ensure_iterable(dfs)).fillna("")
+    def _iter_table(self, dfs, columns=None, **kwargs):
+        dfs = self._ensure_iterable(dfs)
+        df = pandas.concat(dfs)
+        if df.empty:
+            return
+        if columns:
+            df = self._select_columns(df, columns)
+        # convert everything to strings so we can left-justify format
+        df = df.fillna("").applymap(str)
         # set overrideable default kwargs
-        kwargs = {"index": False, **kwargs}
+        kwargs = {
+            "index": False,
+            "justify": "left",
+            "formatters": make_left_aligned_formatter(df),
+            **kwargs,
+        }
         formatted_rows = df.to_string(**kwargs).splitlines(keepends=True)
         # don't checkpoint the header row
         if kwargs.get("header") is not False:
@@ -94,13 +106,17 @@ class DataFrameOutputFormatter:
 
         yield from self._checkpoint_and_iter_formatted_events(df, formatted_rows)
 
-    def _iter_csv(self, dfs, **kwargs):
+    def _iter_csv(self, dfs, columns=None, **kwargs):
         dfs = self._ensure_iterable(dfs)
         no_header = kwargs.get("header") is False
 
         for i, df in enumerate(dfs):
+            if i == 0 and df.empty:
+                return
             # convert null values to empty string
             df.fillna("", inplace=True)
+            if columns:
+                df = self._select_columns(df, columns)
             # only add header on first df and if header=False was not passed in kwargs
             header = False if no_header else (i == 0)
             kwargs = {"index": False, "header": header, **kwargs}
@@ -110,21 +126,11 @@ class DataFrameOutputFormatter:
 
             yield from self._checkpoint_and_iter_formatted_events(df, formatted_rows)
 
-    def _iter_json(self, dfs, **kwargs):
+    def _iter_json(self, dfs, columns=None, **kwargs):
         kwargs = {"ensure_ascii": False, **kwargs}
-        dfs = self._ensure_iterable(dfs)
-        for df in dfs:
-            # converts np.NaN nulls to None
-            df = df.mask(df.isna(), other=None)
-            row_count = len(df)
-            for i, row in enumerate(df.iterrows(), start=1):
-                event = dict(row[1])
-                self.checkpoint_func(event)
-                json_string = json.dumps(event, **kwargs)
-                if i == row_count:
-                    yield json_string
-                else:
-                    yield f"{json_string}\n"
+        for event in self.iter_rows(dfs, columns=columns):
+            json_string = json.dumps(event, **kwargs)
+            yield f"{json_string}\n"
 
     def _checkpoint_and_iter_formatted_events(self, df, formatted_rows):
         events = (dict(row[1]) for row in df.iterrows())
@@ -143,19 +149,47 @@ class DataFrameOutputFormatter:
 
         click.echo_via_pager(chain(first_rows, gen))
 
-    def get_formatted_output(self, dfs, **kwargs):
+    def _select_columns(self, df, columns):
+        if df.empty:
+            return df
+        if not isinstance(columns, (list, tuple)):
+            raise Code42CLIError(
+                "'columns' parameter must be a list or tuple of column names."
+            )
+        normalized_map = {c.lower(): c for c in df.columns}
+        try:
+            columns = [normalized_map[c.lower()] for c in columns]
+            return df[columns]
+        except KeyError as e:
+            key = e.args[0]
+            raise click.BadArgumentUsage(
+                f"'{key}' is not a valid column. Valid columns are: {list(df.columns)}"
+            )
+
+    def iter_rows(self, dfs, columns=None):
+        dfs = self._ensure_iterable(dfs)
+        for df in dfs:
+            if columns:
+                df = self._select_columns(df, columns)
+            df = df.mask(df.isna(), other=None)
+            for i, row in df.iterrows():
+                event = dict(row)
+                yield event
+                self.checkpoint_func(event)
+
+    def get_formatted_output(self, dfs, columns=None, **kwargs):
         if self.output_format == OutputFormat.TABLE:
-            yield from self._iter_table(dfs, **kwargs)
+            yield from self._iter_table(dfs, columns=columns, **kwargs)
 
         elif self.output_format == OutputFormat.CSV:
-            yield from self._iter_csv(dfs, **kwargs)
+            yield from self._iter_csv(dfs, columns=columns, **kwargs)
 
         elif self.output_format == OutputFormat.JSON:
             kwargs = {"indent": 4, **kwargs}
-            yield from self._iter_json(dfs, **kwargs)
+            yield from self._iter_json(dfs, columns=columns, **kwargs)
 
         elif self.output_format == OutputFormat.RAW:
-            yield from self._iter_json(dfs, **kwargs)
+            yield from self._iter_json(dfs, columns=columns, **kwargs)
 
         else:
             raise Code42CLIError(
@@ -163,13 +197,13 @@ class DataFrameOutputFormatter:
             )
 
     def echo_formatted_dataframes(
-        self, dfs, force_pager=False, force_no_pager=False, **kwargs
+        self, dfs, columns=None, force_pager=False, force_no_pager=False, **kwargs
     ):
         """
         Accepts a dataframe or list/generator of dataframes and formats and echos the
         result to stdout. If total lines > 10, results will be sent to pager.
         """
-        lines = self.get_formatted_output(dfs, **kwargs)
+        lines = self.get_formatted_output(dfs, columns=columns, **kwargs)
         if force_pager and force_no_pager:
             raise Code42CLIError("force_pager cannot be used with force_no_pager.")
         if force_pager:
@@ -179,6 +213,33 @@ class DataFrameOutputFormatter:
                 click.echo(line)
         else:
             self._echo_via_pager_if_over_threshold(lines)
+
+
+class FileEventsOutputFormatter(DataFrameOutputFormatter):
+    def __init__(self, output_format, checkpoint_func=None):
+        self.output_format = (
+            output_format.upper() if output_format else OutputFormat.TABLE
+        )
+        if self.output_format not in FileEventsOutputFormat.choices():
+            raise Code42CLIError(
+                f"FileEventsOutputFormatter received an invalid format: {self.output_format}"
+            )
+        self.checkpoint_func = checkpoint_func or (lambda x: None)
+
+    def _iter_cef(self, dfs, **kwargs):
+        dfs = self._ensure_iterable(dfs)
+        for df in dfs:
+            df = df.mask(df.isna(), other=None)
+            for i, row in df.iterrows():
+                event = dict(row)
+                yield f"{_convert_event_to_cef(event)}\n"
+                self.checkpoint_func(event)
+
+    def get_formatted_output(self, dfs, columns=None, **kwargs):
+        if self.output_format == FileEventsOutputFormat.CEF:
+            yield from self._iter_cef(dfs, **kwargs)
+        else:
+            yield from super().get_formatted_output(dfs, columns=columns, **kwargs)
 
 
 def to_csv(output):
@@ -213,19 +274,6 @@ def to_formatted_json(output):
     return f"{json.dumps(output, indent=4)}\n"
 
 
-class FileEventsOutputFormatter(OutputFormatter):
-    def __init__(self, output_format, header=None):
-        output_format = (
-            output_format.upper() if output_format else FileEventsOutputFormat.TABLE
-        )
-        super().__init__(output_format, header)
-        if output_format == FileEventsOutputFormat.CEF:
-            self._format_func = to_cef
-
-    def echo_formatted_generated_output(self, event):
-        pass
-
-
 def to_cef(output):
     """Output is a single record"""
     return f"{_convert_event_to_cef(output)}\n"
@@ -241,3 +289,7 @@ def _convert_event_to_cef(event):
         extension=ext,
     )
     return cef_log
+
+
+def make_left_aligned_formatter(df):
+    return {c: f"{{:<{df[c].str.len().max()}s}}".format for c in df.columns}
