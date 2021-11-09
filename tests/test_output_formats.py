@@ -318,56 +318,6 @@ class TestOutputFormatter:
         mock_to_table.assert_called_once_with("TEST", None, include_header=True)
 
 
-class TestFileEventsOutputFormatter:
-    def test_init_sets_format_func_to_dynamic_csv_function_when_csv_option_is_passed(
-        self, mock_to_csv
-    ):
-        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.CSV)
-        for _ in formatter.get_formatted_output("TEST"):
-            pass
-        mock_to_csv.assert_called_once_with("TEST")
-
-    def test_init_sets_format_func_to_formatted_json_function_when_json__option_is_passed(
-        self, mock_to_formatted_json
-    ):
-        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.JSON)
-        for _ in formatter.get_formatted_output(["TEST"]):
-            pass
-        mock_to_formatted_json.assert_called_once_with("TEST")
-
-    def test_init_sets_format_func_to_json_function_when_raw_json_format_option_is_passed(
-        self, mock_to_json
-    ):
-        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.RAW)
-        for _ in formatter.get_formatted_output(["TEST"]):
-            pass
-        mock_to_json.assert_called_once_with("TEST")
-
-    def test_init_sets_format_func_to_cef_function_when_cef_format_option_is_passed(
-        self, mock_to_cef
-    ):
-        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.CEF)
-        for _ in formatter.get_formatted_output(["TEST"]):
-            pass
-        mock_to_cef.assert_called_once_with("TEST")
-
-    def test_init_sets_format_func_to_table_function_when_table_format_option_is_passed(
-        self, mock_to_table
-    ):
-        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.TABLE)
-        for _ in formatter.get_formatted_output("TEST"):
-            pass
-        mock_to_table.assert_called_once_with("TEST", None, include_header=True)
-
-    def test_init_sets_format_func_to_table_function_when_no_format_option_is_passed(
-        self, mock_to_table
-    ):
-        formatter = FileEventsOutputFormatter(None)
-        for _ in formatter.get_formatted_output("TEST"):
-            pass
-        mock_to_table.assert_called_once_with("TEST", None, include_header=True)
-
-
 def test_to_cef_returns_cef_tagged_string(mock_file_event):
     cef_out = to_cef(mock_file_event)
     cef_parts = get_cef_parts(cef_out)
@@ -531,7 +481,9 @@ def test_to_cef_includes_removable_media_serial_number_label_if_present(
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_actor_if_present(mock_file_event_cloud_activity_event,):
+def test_to_cef_includes_actor_if_present(
+    mock_file_event_cloud_activity_event,
+):
     expected_field_name = "suser"
     expected_value = "actor@example.com"
     cef_out = to_cef(mock_file_event_cloud_activity_event)
@@ -610,7 +562,9 @@ def test_to_cef_includes_exposure_if_present(mock_file_event):
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_url_if_present(mock_file_event_cloud_activity_event,):
+def test_to_cef_includes_url_if_present(
+    mock_file_event_cloud_activity_event,
+):
     expected_field_name = "filePath"
     expected_value = "https://www.example.com"
     cef_out = to_cef(mock_file_event_cloud_activity_event)
@@ -668,35 +622,45 @@ def test_to_cef_includes_cloud_drive_id_if_present(
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_shared_with_if_present(mock_file_event_cloud_activity_event,):
+def test_to_cef_includes_shared_with_if_present(
+    mock_file_event_cloud_activity_event,
+):
     expected_field_name = "duser"
     expected_value = "example1@example.com,example2@example.com"
     cef_out = to_cef(mock_file_event_cloud_activity_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_tab_url_if_present(mock_file_event_cloud_activity_event,):
+def test_to_cef_includes_tab_url_if_present(
+    mock_file_event_cloud_activity_event,
+):
     expected_field_name = "request"
     expected_value = "TEST_TAB_URL"
     cef_out = to_cef(mock_file_event_cloud_activity_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_window_title_if_present(mock_file_event_cloud_activity_event,):
+def test_to_cef_includes_window_title_if_present(
+    mock_file_event_cloud_activity_event,
+):
     expected_field_name = "requestClientApplication"
     expected_value = "TEST_WINDOW_TITLE"
     cef_out = to_cef(mock_file_event_cloud_activity_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_email_recipients_if_present(mock_file_event_email_event,):
+def test_to_cef_includes_email_recipients_if_present(
+    mock_file_event_email_event,
+):
     expected_field_name = "duser"
     expected_value = "test.recipient1@example.com,test.recipient2@example.com"
     cef_out = to_cef(mock_file_event_email_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_email_sender_if_present(mock_file_event_email_event,):
+def test_to_cef_includes_email_sender_if_present(
+    mock_file_event_email_event,
+):
     expected_field_name = "suser"
     expected_value = "TEST_EMAIL_SENDER"
     cef_out = to_cef(mock_file_event_email_event)
@@ -799,7 +763,7 @@ class TestDataFrameOutputFormatter:
         output = formatter.get_formatted_output(self.test_df)
         assert (
             "".join(output)
-            == '{\n    "string_column": "string1",\n    "int_column": 42,\n    "null_column": null\n}\n{\n    "string_column": "string2",\n    "int_column": 43,\n    "null_column": null\n}'
+            == '{\n    "string_column": "string1",\n    "int_column": 42,\n    "null_column": null\n}\n{\n    "string_column": "string2",\n    "int_column": 43,\n    "null_column": null\n}\n'
         )
 
     def test_raw_formatter_converts_to_expected_string(self):
@@ -807,7 +771,7 @@ class TestDataFrameOutputFormatter:
         output = formatter.get_formatted_output(self.test_df)
         assert (
             "".join(output)
-            == '{"string_column": "string1", "int_column": 42, "null_column": null}\n{"string_column": "string2", "int_column": 43, "null_column": null}'
+            == '{"string_column": "string1", "int_column": 42, "null_column": null}\n{"string_column": "string2", "int_column": 43, "null_column": null}\n'
         )
 
     def test_csv_formatter_converts_to_expected_string(self):
@@ -822,9 +786,9 @@ class TestDataFrameOutputFormatter:
         formatter = DataFrameOutputFormatter(OutputFormat.TABLE)
         output = formatter.get_formatted_output(self.test_df)
         assert "".join(output) == (
-            "string_column  int_column null_column\n"
-            "      string1          42            \n"
-            "      string2          43            "
+            "string_column int_column null_column\n"
+            "string1       42                    \n"
+            "string2       43                    "
         )
 
     def test_echo_formatted_dataframes_uses_pager_when_len_rows_gt_threshold_const(
@@ -851,3 +815,28 @@ class TestDataFrameOutputFormatter:
         formatter = DataFrameOutputFormatter(fmt, checkpoint_func=checkpoint)
         list(formatter.get_formatted_output(self.test_df))
         assert checkpointed == list(self.test_df.string_column.values)
+
+
+class TestFileEventsOutputFormatter:
+    test_df = DataFrame([AED_EVENT_DICT])
+
+    def test_format_when_none_passed_defaults_to_raw_json(self):
+        formatter = FileEventsOutputFormatter(output_format=None)
+        assert formatter.output_format == FileEventsOutputFormat.RAW
+
+    def test_format_when_unknown_format_raises_CLI_error(self):
+        with pytest.raises(Code42CLIError):
+            FileEventsOutputFormatter("NOT_A_FORMAT")
+
+        with pytest.raises(Code42CLIError):
+            formatter = FileEventsOutputFormatter(FileEventsOutputFormat.JSON)
+            formatter.output_format = "NOT_A_FORMAT"
+            list(formatter.get_formatted_output(self.test_df))
+
+    def test_CEF_formatter_converts_to_expected_string(self):
+        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.CEF)
+        output = formatter.get_formatted_output(self.test_df)
+        assert (
+            next(output)
+            == "CEF:0|Code42|Advanced Exfiltration Detection|1|C42203|READ_BY_APP|5|externalId=0_1d71796f-af5b-4231-9d8e-df6434da4663_912339407325443353_918253081700247636_16 end=1567996943851 rt=1568069262724 filePath=/Users/testtesterson/Downloads/About Downloads.lpdf/Contents/Resources/English.lproj/ fname=InfoPlist.strings fileType=UNCATEGORIZED fsize=86 fileHash=19b92e63beb08c27ab4489fcfefbbe44 fileCreateTime=1342923569000 fileModificationTime=1355886008000 suser=test.testerson+testair@example.com shost=Test's MacBook Air dvchost=192.168.0.3 src=71.34.4.22 deviceExternalId=912339407325443353 suid=912338501981077099 sourceServiceName=Endpoint reason=ApplicationRead spriv=testtesterson sproc=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\n"
+        )
