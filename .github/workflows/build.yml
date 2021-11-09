@@ -32,29 +32,29 @@ jobs:
         uses: codecov/codecov-action@v1.0.7
         with:
           file: code42cli/coverage.xml
-#      - name: Checkout mock servers
-#        uses: actions/checkout@v2
-#        with:
-#          repository: code42/code42-mock-servers
-#          path: code42-mock-servers
-#      - name: Add mock servers host addresses
-#        run: |
-#          sudo tee -a /etc/hosts <<EOF
-#          127.0.0.1 core
-#          127.0.0.1 alerts
-#          127.0.0.1 alert-rules
-#          127.0.0.1 detection-lists
-#          127.0.0.1 audit-log
-#          127.0.0.1 file-events
-#          127.0.0.1 storage
-#          127.0.0.1 preservation-data-service
-#          127.0.0.1 connected-server
-#          127.0.0.1 cases
-#          127.0.0.1 trusted-activities-service
-#          EOF
-#      - name: Install ncat
-#        run: sudo apt-get install ncat
-#      - name: Start up the mock servers
-#        run: cd code42-mock-servers; docker-compose up -d --build
-#      - name: Run the integration tests
-#        run: cd code42cli; tox -e integration
+      - name: Checkout mock servers
+        uses: actions/checkout@v2
+        with:
+          repository: code42/code42-mock-servers
+          path: code42-mock-servers
+      - name: Add mock servers host addresses
+        run: |
+          sudo tee -a /etc/hosts <<EOF
+          127.0.0.1 core
+          127.0.0.1 alerts
+          127.0.0.1 alert-rules
+          127.0.0.1 detection-lists
+          127.0.0.1 audit-log
+          127.0.0.1 file-events
+          127.0.0.1 storage
+          127.0.0.1 preservation-data-service
+          127.0.0.1 connected-server
+          127.0.0.1 cases
+          127.0.0.1 trusted-activities-service
+          EOF
+      - name: Install ncat
+        run: sudo apt-get install ncat
+      - name: Start up the mock servers
+        run: cd code42-mock-servers; docker-compose up -d --build
+      - name: Run the integration tests
+        run: cd code42cli; tox -e integration
