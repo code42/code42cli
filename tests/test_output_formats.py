@@ -816,6 +816,16 @@ class TestDataFrameOutputFormatter:
         list(formatter.get_formatted_output(self.test_df))
         assert checkpointed == list(self.test_df.string_column.values)
 
+    def test_iter_rows_calls_checkpoint_func_on_every_row_in_df(self):
+        checkpointed = []
+
+        def checkpoint(event):
+            checkpointed.append(event["string_column"])
+
+        formatter = DataFrameOutputFormatter(None, checkpoint_func=checkpoint)
+        list(formatter.iter_rows(self.test_df))
+        assert checkpointed == list(self.test_df.string_column.values)
+
 
 class TestFileEventsOutputFormatter:
     test_df = DataFrame([AED_EVENT_DICT])
