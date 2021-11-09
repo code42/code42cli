@@ -167,6 +167,14 @@ class DataFrameOutputFormatter:
             )
 
     def iter_rows(self, dfs, columns=None):
+        """
+        Accepts a pandas DataFrame or list/generator of DataFrames and yields each
+        'row' of the DataFrame as a dict, calling the `checkpoint_func` on each row
+        after it has been yielded.
+
+        Accepts an optional list of column names that filter
+        columns in the yielded results.
+        """
         dfs = self._ensure_iterable(dfs)
         for df in dfs:
             if columns:
@@ -178,6 +186,16 @@ class DataFrameOutputFormatter:
                 self.checkpoint_func(event)
 
     def get_formatted_output(self, dfs, columns=None, **kwargs):
+        """
+        Accepts a pandas DataFrame or list/generator of DataFrames and formats and yields
+        the results line by line to the caller as a generator.
+
+        Accepts an optional list
+        of column names that filter columns in the yielded results.
+
+        Any additional kwargs provided will be passed to the underlying format method
+        if customizations are required.
+        """
         if self.output_format == OutputFormat.TABLE:
             yield from self._iter_table(dfs, columns=columns, **kwargs)
 
@@ -200,8 +218,15 @@ class DataFrameOutputFormatter:
         self, dfs, columns=None, force_pager=False, force_no_pager=False, **kwargs
     ):
         """
-        Accepts a dataframe or list/generator of dataframes and formats and echos the
-        result to stdout. If total lines > 10, results will be sent to pager.
+        Accepts a pandas DataFrame or list/generator of DataFrames and formats and echos the
+        result to stdout. If total lines > 10, results will be sent to pager. `force_pager`
+        and `force_no_pager` can be set to override the pager logic based on line count.
+
+        Accepts an optional list of column names that filter
+        columns in the echoed results.
+
+        Any additional kwargs provided will be passed to the underlying format method
+        if customizations are required.
         """
         lines = self.get_formatted_output(dfs, columns=columns, **kwargs)
         if force_pager and force_no_pager:
@@ -216,6 +241,8 @@ class DataFrameOutputFormatter:
 
 
 class FileEventsOutputFormatter(DataFrameOutputFormatter):
+    """Class that adds CEF format output option to base DataFrameOutputFormatter."""
+
     def __init__(self, output_format, checkpoint_func=None):
         self.output_format = (
             output_format.upper() if output_format else OutputFormat.TABLE
