@@ -816,6 +816,23 @@ class TestDataFrameOutputFormatter:
         list(formatter.get_formatted_output(self.test_df))
         assert checkpointed == list(self.test_df.string_column.values)
 
+    @pytest.mark.parametrize("fmt", OutputFormat.choices())
+    def test_get_formatted_ouput_calls_checkpoint_func_on_every_row_in_df_when_checkpoint_key_not_in_column_list(
+        self, fmt
+    ):
+        checkpointed = []
+
+        def checkpoint(event):
+            checkpointed.append(event["string_column"])
+
+        formatter = DataFrameOutputFormatter(fmt, checkpoint_func=checkpoint)
+        list(
+            formatter.get_formatted_output(
+                self.test_df, columns=["int_column", "null_column"]
+            )
+        )
+        assert checkpointed == list(self.test_df.string_column.values)
+
     def test_iter_rows_calls_checkpoint_func_on_every_row_in_df(self):
         checkpointed = []
 
