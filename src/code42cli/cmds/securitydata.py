@@ -444,7 +444,9 @@ def _list(state, format=None):
     if saved_searches_df.empty:
         click.echo("No results found.")
     else:
-        formatter.echo_formatted_dataframes(saved_searches_df, columns=["name", "id"])
+        formatter.echo_formatted_dataframes(
+            saved_searches_df, columns=["name", "id", "notes"]
+        )
 
 
 @saved_search.command()
