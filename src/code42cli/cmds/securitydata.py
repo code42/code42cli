@@ -13,7 +13,6 @@ from py42.sdk.queries.fileevents.filters.risk_filter import RiskIndicator
 from py42.sdk.queries.fileevents.filters.risk_filter import RiskSeverity
 
 import code42cli.cmds.search.options as searchopt
-from code42cli.enums import OutputFormat
 import code42cli.options as opt
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
@@ -24,10 +23,11 @@ from code42cli.cmds.util import convert_to_or_query
 from code42cli.cmds.util import create_time_range_filter
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import limit_date_range
+from code42cli.enums import OutputFormat
 from code42cli.logger import get_main_cli_logger
+from code42cli.options import column_option
 from code42cli.options import format_option
 from code42cli.options import sdk_options
-from code42cli.options import column_option
 from code42cli.output_formats import DataFrameOutputFormatter
 from code42cli.output_formats import FileEventsOutputFormat
 from code42cli.output_formats import FileEventsOutputFormatter
@@ -233,8 +233,7 @@ risk_indicator_option = click.option(
     "--risk-indicator",
     multiple=True,
     type=MapChoice(
-        choices=list(risk_indicator_map.keys()),
-        extras_map=risk_indicator_map_reversed,
+        choices=list(risk_indicator_map.keys()), extras_map=risk_indicator_map_reversed,
     ),
     callback=risk_indicator_callback(f.RiskIndicator),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,

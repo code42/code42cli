@@ -264,7 +264,7 @@ class FileEventsOutputFormatter(DataFrameOutputFormatter):
         dfs = self._ensure_iterable(dfs)
         for df in dfs:
             df = df.mask(df.isna(), other=None)
-            for i, row in df.iterrows():
+            for _i, row in df.iterrows():
                 event = dict(row)
                 yield f"{_convert_event_to_cef(event)}\n"
                 self.checkpoint_func(event)
