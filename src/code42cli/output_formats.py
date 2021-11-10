@@ -88,8 +88,6 @@ class DataFrameOutputFormatter:
         df = pandas.concat(dfs)
         if df.empty:
             return
-        if columns:
-            df = self._select_columns(df, columns)
         # convert everything to strings so we can left-justify format
         df = df.fillna("").applymap(str)
         # set overrideable default kwargs
@@ -99,7 +97,11 @@ class DataFrameOutputFormatter:
             "formatters": make_left_aligned_formatter(df),
             **kwargs,
         }
-        formatted_rows = df.to_string(**kwargs).splitlines(keepends=True)
+        if columns:
+            filtered = self._select_columns(df, columns)
+            formatted_rows = filtered.to_string(**kwargs).splitlines(keepends=True)
+        else:
+            formatted_rows = df.to_string(**kwargs).splitlines(keepends=True)
         # don't checkpoint the header row
         if kwargs.get("header") is not False:
             yield formatted_rows.pop(0)
@@ -115,12 +117,14 @@ class DataFrameOutputFormatter:
                 return
             # convert null values to empty string
             df.fillna("", inplace=True)
-            if columns:
-                df = self._select_columns(df, columns)
             # only add header on first df and if header=False was not passed in kwargs
             header = False if no_header else (i == 0)
             kwargs = {"index": False, "header": header, **kwargs}
-            formatted_rows = df.to_csv(**kwargs).splitlines(keepends=True)
+            if columns:
+                filtered = self._select_columns(df, columns)
+                formatted_rows = filtered.to_csv(**kwargs).splitlines(keepends=True)
+            else:
+                formatted_rows = df.to_csv(**kwargs).splitlines(keepends=True)
             if header:
                 yield formatted_rows.pop(0)
 
@@ -156,6 +160,7 @@ class DataFrameOutputFormatter:
             raise Code42CLIError(
                 "'columns' parameter must be a list or tuple of column names."
             )
+        # enable case-insensitive column selection
         normalized_map = {c.lower(): c for c in df.columns}
         try:
             columns = [normalized_map[c.lower()] for c in columns]
@@ -177,13 +182,15 @@ class DataFrameOutputFormatter:
         """
         dfs = self._ensure_iterable(dfs)
         for df in dfs:
-            if columns:
-                df = self._select_columns(df, columns)
             df = df.mask(df.isna(), other=None)
-            for i, row in df.iterrows():
+            if columns:
+                filtered = self._select_columns(df, columns)
+            else:
+                filtered = df
+            for i, row in filtered.iterrows():
                 event = dict(row)
                 yield event
-                self.checkpoint_func(event)
+                self.checkpoint_func(dict(df.iloc[i]))
 
     def get_formatted_output(self, dfs, columns=None, **kwargs):
         """
