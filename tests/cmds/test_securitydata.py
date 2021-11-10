@@ -145,8 +145,13 @@ TEST_EVENTS = [
         "eventTimestamp": TEST_FILE_EVENT_TIMESTAMP_1,
         "insertionTimestamp": TEST_FILE_EVENT_TIMESTAMP_1,
         "fileName": "test.txt",
+        "filePath": "/my/path",
+        "fileSize": 4242,
+        "fileOwner": "john.doe",
         "fileType": "FILE",
         "fileCategory": "Document",
+        "md5Checksum": "abcdef12345",
+        "sha256Checksum": "12345abcdef",
         "destinationCategory": "Cloud Storage",
         "destinationName": "Google Drive",
         "riskScore": 5,
@@ -162,8 +167,13 @@ TEST_EVENTS = [
         "eventTimestamp": TEST_FILE_EVENT_TIMESTAMP_2,
         "insertionTimestamp": TEST_FILE_EVENT_TIMESTAMP_2,
         "fileName": "test2.txt",
+        "filePath": "/my/path/2",
+        "fileSize": 4242,
+        "fileOwner": "john.doe",
         "fileType": "FILE",
         "fileCategory": "Document",
+        "md5Checksum": "abcdef1234567",
+        "sha256Checksum": "1234567abcdef",
         "destinationCategory": "Cloud Storage",
         "destinationName": "Google Drive",
         "riskScore": 5,
@@ -486,7 +496,9 @@ def test_search_and_send_to_when_given_begin_date_and_time_without_seconds_uses_
     time = "15:33"
 
     runner.invoke(
-        cli, [*command, "--begin", f"{date} {time}"], obj=cli_state,
+        cli,
+        [*command, "--begin", f"{date} {time}"],
+        obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
     query_dict = dict(query)
@@ -572,7 +584,9 @@ def test_search_and_send_to_when_end_date_is_before_begin_date_causes_exit(
     begin_date = get_test_date_str(days_ago=1)
     end_date = get_test_date_str(days_ago=3)
     result = runner.invoke(
-        cli, [*command, "--begin", begin_date, "--end", end_date], obj=cli_state,
+        cli,
+        [*command, "--begin", begin_date, "--end", end_date],
+        obj=cli_state,
     )
     assert result.exit_code == 2
     assert "'--begin': cannot be after --end date" in result.output
@@ -627,7 +641,9 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_without_check
     search_all_file_events_success,
 ):
     result = runner.invoke(
-        cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
+        cli,
+        [*command, "--use-checkpoint", "test", "--begin", "1h"],
+        obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
     query_dict = dict(query)
@@ -647,7 +663,9 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_with_stored_c
     search_all_file_events_success,
 ):
     result = runner.invoke(
-        cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
+        cli,
+        [*command, "--use-checkpoint", "test", "--begin", "1h"],
+        obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
     query_dict = dict(query)
@@ -669,7 +687,9 @@ def test_search_and_send_to_with_use_checkpoint_and_with_stored_checkpoint_as_ev
     search_all_file_events_success,
 ):
     result = runner.invoke(
-        cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
+        cli,
+        [*command, "--use-checkpoint", "test", "--begin", "1h"],
+        obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
     assert result.exit_code == 0
@@ -685,7 +705,9 @@ def test_search_and_send_to_when_given_invalid_exposure_type_causes_exit(
     runner, cli_state, command
 ):
     result = runner.invoke(
-        cli, [*command, "--begin", "1d", "-t", "NotValid"], obj=cli_state,
+        cli,
+        [*command, "--begin", "1d", "-t", "NotValid"],
+        obj=cli_state,
     )
     assert result.exit_code == 2
     assert "invalid choice: NotValid" in result.output
@@ -699,7 +721,9 @@ def test_search_and_send_to_when_given_username_uses_username_filter(
     command = [*command, "--begin", "1h", "--c42-username", c42_username]
 
     runner.invoke(
-        cli, [*command], obj=cli_state,
+        cli,
+        [*command],
+        obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
 
@@ -715,7 +739,9 @@ def test_search_and_send_to_when_given_actor_is_uses_username_filter(
     command = [*command, "--begin", "1h", "--actor", actor_name]
 
     runner.invoke(
-        cli, [*command], obj=cli_state,
+        cli,
+        [*command],
+        obj=cli_state,
     )
 
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
@@ -742,7 +768,9 @@ def test_search_and_send_to_when_given_sha256_uses_sha256_filter(
     sha_256 = "abcd12345"
     command = [*command, "--begin", "1h", "--sha256", sha_256]
     runner.invoke(
-        cli, command, obj=cli_state,
+        cli,
+        command,
+        obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
     filter_obj = f.SHA256.is_in([sha_256])
@@ -768,7 +796,9 @@ def test_search_and_send_to_when_given_file_name_uses_file_name_filter(
     filename = "test.txt"
     command = [*command, "--begin", "1h", "--file-name", filename]
     runner.invoke(
-        cli, command, obj=cli_state,
+        cli,
+        command,
+        obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
     filter_obj = f.FileName.is_in([filename])
@@ -782,7 +812,9 @@ def test_search_and_send_to_when_given_file_path_uses_file_path_filter(
     filepath = "C:\\Program Files"
     command = [*command, "--begin", "1h", "--file-path", filepath]
     runner.invoke(
-        cli, command, obj=cli_state,
+        cli,
+        command,
+        obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
     filter_obj = f.FilePath.is_in([filepath])
@@ -796,7 +828,9 @@ def test_search_and_send_to_when_given_file_category_uses_file_category_filter(
     file_category = FileCategory.IMAGE
     command = [*command, "--begin", "1h", "--file-category", file_category]
     runner.invoke(
-        cli, command, obj=cli_state,
+        cli,
+        command,
+        obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
     filter_obj = f.FileCategory.is_in([file_category])
@@ -835,7 +869,9 @@ def test_all_caps_file_category_choices_convert_to_filecategory_constant(
         ALL_CAPS_VALUE,
     ]
     runner.invoke(
-        cli, command, obj=cli_state,
+        cli,
+        command,
+        obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
     filter_obj = f.FileCategory.is_in([camelCaseValue])
@@ -849,7 +885,9 @@ def test_search_and_send_to_when_given_process_owner_uses_process_owner_filter(
     process_owner = "root"
     command = [*command, "-b", "1h", "--process-owner", process_owner]
     runner.invoke(
-        cli, command, obj=cli_state,
+        cli,
+        command,
+        obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
     filter_obj = f.ProcessOwner.is_in([process_owner])
@@ -863,7 +901,9 @@ def test_search_and_send_to_when_given_tab_url_uses_process_tab_url_filter(
     tab_url = "https://example.com"
     command = [*command, "--begin", "1h", "--tab-url", tab_url]
     runner.invoke(
-        cli, command, obj=cli_state,
+        cli,
+        command,
+        obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
     filter_obj = f.TabURL.is_in([tab_url])
@@ -877,7 +917,9 @@ def test_search_and_send_to_when_given_exposure_types_uses_exposure_type_is_in_f
     exposure_type = "SharedViaLink"
     command = [*command, "--begin", "1h", "--type", exposure_type]
     runner.invoke(
-        cli, command, obj=cli_state,
+        cli,
+        command,
+        obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
     filter_obj = f.ExposureType.is_in([exposure_type])
@@ -889,7 +931,9 @@ def test_search_and_send_to_when_given_include_non_exposure_does_not_include_exp
     runner, cli_state, command, search_all_file_events_success
 ):
     runner.invoke(
-        cli, [*command, "--begin", "1h", "--include-non-exposure"], obj=cli_state,
+        cli,
+        [*command, "--begin", "1h", "--include-non-exposure"],
+        obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
     filter_obj = f.ExposureType.exists()
@@ -901,7 +945,9 @@ def test_search_and_send_to_when_not_given_include_non_exposure_includes_exposur
     runner, cli_state, command, search_all_file_events_success
 ):
     runner.invoke(
-        cli, [*command, "--begin", "1h"], obj=cli_state,
+        cli,
+        [*command, "--begin", "1h"],
+        obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
     filter_obj = f.ExposureType.exists()
@@ -962,7 +1008,9 @@ def test_search_and_send_to_when_given_risk_indicator_uses_risk_indicator_filter
     risk_indicator = RiskIndicator.MessagingServiceUploads.SLACK
     command = [*command, "--begin", "1h", "--risk-indicator", risk_indicator]
     runner.invoke(
-        cli, command, obj=cli_state,
+        cli,
+        command,
+        obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
     assert f.RiskIndicator.is_in([risk_indicator]) in query._filter_group_list
@@ -1064,7 +1112,9 @@ def test_all_caps_risk_indicator_choices_convert_to_risk_indicator_string(
         ALL_CAPS_VALUE,
     ]
     runner.invoke(
-        cli, command, obj=cli_state,
+        cli,
+        command,
+        obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
     assert f.RiskIndicator.is_in([string_value]) in query._filter_group_list
@@ -1077,7 +1127,9 @@ def test_search_and_send_to_when_given_risk_severity_uses_risk_severity_filter(
     risk_severity = RiskSeverity.LOW
     command = [*command, "--begin", "1h", "--risk-severity", risk_severity]
     runner.invoke(
-        cli, command, obj=cli_state,
+        cli,
+        command,
+        obj=cli_state,
     )
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
     assert f.RiskSeverity.is_in([risk_severity]) in query._filter_group_list
