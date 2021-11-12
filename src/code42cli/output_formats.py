@@ -5,7 +5,8 @@ from itertools import chain
 from typing import Generator
 
 import click
-import pandas
+from pandas import concat
+from pandas import notnull
 
 from code42cli.enums import FileEventsOutputFormat
 from code42cli.enums import OutputFormat
@@ -85,7 +86,7 @@ class DataFrameOutputFormatter:
 
     def _iter_table(self, dfs, columns=None, **kwargs):
         dfs = self._ensure_iterable(dfs)
-        df = pandas.concat(dfs)
+        df = concat(dfs)
         if df.empty:
             return
         # convert everything to strings so we can left-justify format
@@ -113,8 +114,8 @@ class DataFrameOutputFormatter:
         no_header = kwargs.get("header") is False
 
         for i, df in enumerate(dfs):
-            if i == 0 and df.empty:
-                return
+            if df.empty:
+                continue
             # convert null values to empty string
             df.fillna("", inplace=True)
             # only add header on first df and if header=False was not passed in kwargs
@@ -137,8 +138,7 @@ class DataFrameOutputFormatter:
             yield f"{json_string}\n"
 
     def _checkpoint_and_iter_formatted_events(self, df, formatted_rows):
-        events = (dict(row[1]) for row in df.iterrows())
-        for event, row in zip(events, formatted_rows):
+        for event, row in zip(df.to_dict("records"), formatted_rows):
             yield row
             self.checkpoint_func(event)
 
@@ -182,23 +182,25 @@ class DataFrameOutputFormatter:
         """
         dfs = self._ensure_iterable(dfs)
         for df in dfs:
-            df = df.mask(df.isna(), other=None)
+            # convert pandas' default null (numpy.NaN) to None
+            df = df.astype(object).where(notnull, None)
             if columns:
                 filtered = self._select_columns(df, columns)
             else:
                 filtered = df
-            for i, row in filtered.iterrows():
-                event = dict(row)
-                yield event
-                self.checkpoint_func(dict(df.iloc[i]))
+            for full_event, filtered_event in zip(
+                df.to_dict("records"), filtered.to_dict("records")
+            ):
+                yield filtered_event
+                self.checkpoint_func(full_event)
 
     def get_formatted_output(self, dfs, columns=None, **kwargs):
         """
         Accepts a pandas DataFrame or list/generator of DataFrames and formats and yields
         the results line by line to the caller as a generator.
 
-        Accepts an optional list
-        of column names that filter columns in the yielded results.
+        Accepts an optional list of column names that filter columns in the yielded
+        results.
 
         Any additional kwargs provided will be passed to the underlying format method
         if customizations are required.
