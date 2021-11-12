@@ -770,12 +770,18 @@ class TestDataFrameOutputFormatter:
 
     def test_table_formatter_converts_to_expected_string(self):
         formatter = DataFrameOutputFormatter(OutputFormat.TABLE)
-        output = formatter.get_formatted_output(self.test_df)
-        assert "".join(output) == (
-            "string_column int_column null_column\n"
-            "string1       42                    \n"
-            "string2       43                    "
-        )
+        output = list(formatter.get_formatted_output(self.test_df))
+        assert "string_column" in output[0]
+        assert "int_column" in output[0]
+        assert "null_column" in output[0]
+        assert "string1" in output[1]
+        assert "42" in output[1]
+        assert "null" not in output[1]
+        assert "NaN" not in output[1]
+        assert "string2" in output[2]
+        assert "43" in output[2]
+        assert "null" not in output[2]
+        assert "NaN" not in output[2]
 
     def test_echo_formatted_dataframes_uses_pager_when_len_rows_gt_threshold_const(
         self, mocker
