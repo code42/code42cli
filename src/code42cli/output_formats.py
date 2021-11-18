@@ -238,6 +238,13 @@ class DataFrameOutputFormatter:
         if customizations are required.
         """
         lines = self.get_formatted_output(dfs, columns=columns, **kwargs)
+        try:
+            # check for empty generator
+            first = next(lines)
+            lines = chain([first], lines)
+        except StopIteration:
+            click.echo("No results found.")
+            return
         if force_pager and force_no_pager:
             raise Code42CLIError("force_pager cannot be used with force_no_pager.")
         if force_pager:

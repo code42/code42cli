@@ -233,7 +233,8 @@ risk_indicator_option = click.option(
     "--risk-indicator",
     multiple=True,
     type=MapChoice(
-        choices=list(risk_indicator_map.keys()), extras_map=risk_indicator_map_reversed,
+        choices=list(risk_indicator_map.keys()),
+        extras_map=risk_indicator_map_reversed,
     ),
     callback=risk_indicator_callback(f.RiskIndicator),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
@@ -344,7 +345,9 @@ def search(
 
     """Search for file events."""
     if format == FileEventsOutputFormat.CEF and columns:
-        raise click.BadOptionUsage("--columns option can't be used with CEF format.")
+        raise click.BadOptionUsage(
+            "columns", "--columns option can't be used with CEF format."
+        )
     # set default table columns
     if format == OutputFormat.TABLE:
         if not columns and not include_all:
@@ -440,12 +443,9 @@ def _list(state, format=None):
     formatter = DataFrameOutputFormatter(format)
     response = state.sdk.securitydata.savedsearches.get()
     saved_searches_df = DataFrame(response["searches"])
-    if saved_searches_df.empty:
-        click.echo("No results found.")
-    else:
-        formatter.echo_formatted_dataframes(
-            saved_searches_df, columns=["name", "id", "notes"]
-        )
+    formatter.echo_formatted_dataframes(
+        saved_searches_df, columns=["name", "id", "notes"]
+    )
 
 
 @saved_search.command()
