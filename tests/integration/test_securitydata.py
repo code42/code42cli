@@ -40,11 +40,7 @@ def test_security_data_send_to_udp_return_success_return_code(
 def test_security_data_advanced_query_returns_success_return_code(
     runner, integration_test_profile
 ):
-    advanced_query = """{"groupClause":"AND", "groups":[{"filterClause":"AND",
-    "filters":[{"operator":"ON_OR_AFTER", "term":"eventTimestamp", "value":"2020-09-13T00:00:00.000Z"},
-    {"operator":"ON_OR_BEFORE", "term":"eventTimestamp", "value":"2020-12-07T13:20:15.195Z"}]}],
-    "srtDir":"asc", "srtKey":"eventId", "pgNum":1, "pgSize":10000}
-    """
+    advanced_query = """{"groupClause":"AND", "groups":[{"filterClause":"AND","filters":[{"operator":"ON_OR_AFTER", "term":"eventTimestamp", "value":"2020-09-13T00:00:00.000Z"},{"operator":"ON_OR_BEFORE", "term":"eventTimestamp", "value":"2020-12-07T13:20:15.195Z"}]}],"srtDir":"asc", "srtKey":"eventId", "pgNum":1, "pgSize":10000}"""
     command = f"security-data search --advanced-query '{advanced_query}'"
     assert_test_is_successful(runner, append_profile(command))
 

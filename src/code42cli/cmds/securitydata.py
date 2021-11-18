@@ -233,8 +233,7 @@ risk_indicator_option = click.option(
     "--risk-indicator",
     multiple=True,
     type=MapChoice(
-        choices=list(risk_indicator_map.keys()),
-        extras_map=risk_indicator_map_reversed,
+        choices=list(risk_indicator_map.keys()), extras_map=risk_indicator_map_reversed,
     ),
     callback=risk_indicator_callback(f.RiskIndicator),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,

@@ -10,8 +10,12 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## Unreleased
 
+### Added
+- `--columns` option to `security-data search` and `security-data send-to` commands which reduces output to only the specified colums/json keys. Accepts a comma-separated list of column names (case-insensitive).
+
 ### Changed
-- Updated minimum version of py42 to `1.19.3` to provide access to updated URI paths for new standardized versioning scheme
+- Updated minimum version of py42 to `1.19.3` to provide access to updated URI paths for new standardized versioning scheme.
+- Improved accuracy of checkpointing for `security-data search` (checkpoints every row as it is printed to stdout instead of just the last event of the search response).
 
 ## 1.11.0 - 2021-10-22
 
