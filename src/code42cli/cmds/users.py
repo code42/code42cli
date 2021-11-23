@@ -103,11 +103,8 @@ def list_users(
     )
     if include_legal_hold_membership:
         df = _add_legal_hold_membership_to_user_dataframe(state.sdk, df)
-    if df.empty:
-        click.echo("No results found.")
-    else:
-        formatter = DataFrameOutputFormatter(format)
-        formatter.echo_formatted_dataframes(df)
+    formatter = DataFrameOutputFormatter(format)
+    formatter.echo_formatted_dataframes(df)
 
 
 @users.command("show")
@@ -126,11 +123,8 @@ def show_user(state, username, include_legal_hold_membership, format):
     df = DataFrame.from_records(response["users"], columns=columns)
     if include_legal_hold_membership and not df.empty:
         df = _add_legal_hold_membership_to_user_dataframe(state.sdk, df)
-    if df.empty:
-        click.echo("No results found.")
-    else:
-        formatter = DataFrameOutputFormatter(format)
-        formatter.echo_formatted_dataframes(df)
+    formatter = DataFrameOutputFormatter(format)
+    formatter.echo_formatted_dataframes(df)
 
 
 @users.command()
