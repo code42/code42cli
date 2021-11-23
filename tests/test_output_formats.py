@@ -481,7 +481,7 @@ def test_to_cef_includes_removable_media_serial_number_label_if_present(
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_actor_if_present(mock_file_event_cloud_activity_event,):
+def test_to_cef_includes_actor_if_present(mock_file_event_cloud_activity_event):
     expected_field_name = "suser"
     expected_value = "actor@example.com"
     cef_out = to_cef(mock_file_event_cloud_activity_event)
@@ -560,7 +560,7 @@ def test_to_cef_includes_exposure_if_present(mock_file_event):
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_url_if_present(mock_file_event_cloud_activity_event,):
+def test_to_cef_includes_url_if_present(mock_file_event_cloud_activity_event):
     expected_field_name = "filePath"
     expected_value = "https://www.example.com"
     cef_out = to_cef(mock_file_event_cloud_activity_event)
@@ -618,35 +618,35 @@ def test_to_cef_includes_cloud_drive_id_if_present(
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_shared_with_if_present(mock_file_event_cloud_activity_event,):
+def test_to_cef_includes_shared_with_if_present(mock_file_event_cloud_activity_event):
     expected_field_name = "duser"
     expected_value = "example1@example.com,example2@example.com"
     cef_out = to_cef(mock_file_event_cloud_activity_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_tab_url_if_present(mock_file_event_cloud_activity_event,):
+def test_to_cef_includes_tab_url_if_present(mock_file_event_cloud_activity_event):
     expected_field_name = "request"
     expected_value = "TEST_TAB_URL"
     cef_out = to_cef(mock_file_event_cloud_activity_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_window_title_if_present(mock_file_event_cloud_activity_event,):
+def test_to_cef_includes_window_title_if_present(mock_file_event_cloud_activity_event):
     expected_field_name = "requestClientApplication"
     expected_value = "TEST_WINDOW_TITLE"
     cef_out = to_cef(mock_file_event_cloud_activity_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_email_recipients_if_present(mock_file_event_email_event,):
+def test_to_cef_includes_email_recipients_if_present(mock_file_event_email_event):
     expected_field_name = "duser"
     expected_value = "test.recipient1@example.com,test.recipient2@example.com"
     cef_out = to_cef(mock_file_event_email_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_email_sender_if_present(mock_file_event_email_event,):
+def test_to_cef_includes_email_sender_if_present(mock_file_event_email_event):
     expected_field_name = "suser"
     expected_value = "TEST_EMAIL_SENDER"
     cef_out = to_cef(mock_file_event_email_event)
@@ -834,6 +834,19 @@ class TestDataFrameOutputFormatter:
         formatter = DataFrameOutputFormatter(None, checkpoint_func=checkpoint)
         list(formatter.iter_rows(self.test_df))
         assert checkpointed == list(self.test_df.string_column.values)
+
+    @pytest.mark.parametrize("fmt", OutputFormat.choices())
+    def test_echo_formatted_dataframes_prints_no_results_found_when_dataframes_empty(
+        self, fmt, capsys
+    ):
+        formatter = DataFrameOutputFormatter(fmt)
+
+        def empty_results():
+            yield DataFrame()
+
+        formatter.echo_formatted_dataframes(empty_results())
+        captured = capsys.readouterr()
+        assert "No results found." in captured.out
 
 
 class TestFileEventsOutputFormatter:
