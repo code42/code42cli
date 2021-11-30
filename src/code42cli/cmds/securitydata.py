@@ -464,7 +464,7 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
 
     if advanced_query:
         state.search_filters = advanced_query
-    if saved_search:
+    elif saved_search:
         state.search_filters = saved_search._filter_group_list
     else:
         if begin or end:
