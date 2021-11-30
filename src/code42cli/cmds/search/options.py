@@ -6,8 +6,8 @@ from py42.sdk.queries.query_filter import FilterGroup
 
 from code42cli.click_ext.options import incompatible_with
 from code42cli.click_ext.types import FileOrString
+from code42cli.enums import SendToFileEventsOutputFormat
 from code42cli.logger.enums import ServerProtocol
-from code42cli.output_formats import SendToFileEventsOutputFormat
 
 
 def is_in_filter(filter_cls):
@@ -141,6 +141,22 @@ def advanced_query_option(term, **kwargs):
     )
     defaults.update(kwargs)
     return click.option("--advanced-query", **defaults)
+
+
+or_query_option = click.option(
+    "--or-query",
+    is_flag=True,
+    cls=AdvancedQueryAndSavedSearchIncompatible,
+    help="Combine query filter options with 'OR' logic instead of the default 'AND'.",
+)
+
+include_all_option = click.option(
+    "--include-all",
+    default=False,
+    is_flag=True,
+    help="Display simple properties of the primary level of the nested response.",
+    cls=incompatible_with("columns"),
+)
 
 
 def server_options(f):

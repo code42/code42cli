@@ -6,6 +6,7 @@ from numpy import NaN
 from pandas import DataFrame
 
 import code42cli.output_formats as output_formats_module
+from code42cli.errors import Code42CLIError
 from code42cli.maps import FILE_EVENT_TO_SIGNATURE_ID_MAP
 from code42cli.output_formats import DataFrameOutputFormatter
 from code42cli.output_formats import FileEventsOutputFormat
@@ -317,56 +318,6 @@ class TestOutputFormatter:
         mock_to_table.assert_called_once_with("TEST", None, include_header=True)
 
 
-class TestFileEventsOutputFormatter:
-    def test_init_sets_format_func_to_dynamic_csv_function_when_csv_option_is_passed(
-        self, mock_to_csv
-    ):
-        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.CSV)
-        for _ in formatter.get_formatted_output("TEST"):
-            pass
-        mock_to_csv.assert_called_once_with("TEST")
-
-    def test_init_sets_format_func_to_formatted_json_function_when_json__option_is_passed(
-        self, mock_to_formatted_json
-    ):
-        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.JSON)
-        for _ in formatter.get_formatted_output(["TEST"]):
-            pass
-        mock_to_formatted_json.assert_called_once_with("TEST")
-
-    def test_init_sets_format_func_to_json_function_when_raw_json_format_option_is_passed(
-        self, mock_to_json
-    ):
-        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.RAW)
-        for _ in formatter.get_formatted_output(["TEST"]):
-            pass
-        mock_to_json.assert_called_once_with("TEST")
-
-    def test_init_sets_format_func_to_cef_function_when_cef_format_option_is_passed(
-        self, mock_to_cef
-    ):
-        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.CEF)
-        for _ in formatter.get_formatted_output(["TEST"]):
-            pass
-        mock_to_cef.assert_called_once_with("TEST")
-
-    def test_init_sets_format_func_to_table_function_when_table_format_option_is_passed(
-        self, mock_to_table
-    ):
-        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.TABLE)
-        for _ in formatter.get_formatted_output("TEST"):
-            pass
-        mock_to_table.assert_called_once_with("TEST", None, include_header=True)
-
-    def test_init_sets_format_func_to_table_function_when_no_format_option_is_passed(
-        self, mock_to_table
-    ):
-        formatter = FileEventsOutputFormatter(None)
-        for _ in formatter.get_formatted_output("TEST"):
-            pass
-        mock_to_table.assert_called_once_with("TEST", None, include_header=True)
-
-
 def test_to_cef_returns_cef_tagged_string(mock_file_event):
     cef_out = to_cef(mock_file_event)
     cef_parts = get_cef_parts(cef_out)
@@ -530,7 +481,7 @@ def test_to_cef_includes_removable_media_serial_number_label_if_present(
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_actor_if_present(mock_file_event_cloud_activity_event,):
+def test_to_cef_includes_actor_if_present(mock_file_event_cloud_activity_event):
     expected_field_name = "suser"
     expected_value = "actor@example.com"
     cef_out = to_cef(mock_file_event_cloud_activity_event)
@@ -609,7 +560,7 @@ def test_to_cef_includes_exposure_if_present(mock_file_event):
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_url_if_present(mock_file_event_cloud_activity_event,):
+def test_to_cef_includes_url_if_present(mock_file_event_cloud_activity_event):
     expected_field_name = "filePath"
     expected_value = "https://www.example.com"
     cef_out = to_cef(mock_file_event_cloud_activity_event)
@@ -667,35 +618,35 @@ def test_to_cef_includes_cloud_drive_id_if_present(
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_shared_with_if_present(mock_file_event_cloud_activity_event,):
+def test_to_cef_includes_shared_with_if_present(mock_file_event_cloud_activity_event):
     expected_field_name = "duser"
     expected_value = "example1@example.com,example2@example.com"
     cef_out = to_cef(mock_file_event_cloud_activity_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_tab_url_if_present(mock_file_event_cloud_activity_event,):
+def test_to_cef_includes_tab_url_if_present(mock_file_event_cloud_activity_event):
     expected_field_name = "request"
     expected_value = "TEST_TAB_URL"
     cef_out = to_cef(mock_file_event_cloud_activity_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_window_title_if_present(mock_file_event_cloud_activity_event,):
+def test_to_cef_includes_window_title_if_present(mock_file_event_cloud_activity_event):
     expected_field_name = "requestClientApplication"
     expected_value = "TEST_WINDOW_TITLE"
     cef_out = to_cef(mock_file_event_cloud_activity_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_email_recipients_if_present(mock_file_event_email_event,):
+def test_to_cef_includes_email_recipients_if_present(mock_file_event_email_event):
     expected_field_name = "duser"
     expected_value = "test.recipient1@example.com,test.recipient2@example.com"
     cef_out = to_cef(mock_file_event_email_event)
     assert key_value_pair_in_cef_extension(expected_field_name, expected_value, cef_out)
 
 
-def test_to_cef_includes_email_sender_if_present(mock_file_event_email_event,):
+def test_to_cef_includes_email_sender_if_present(mock_file_event_email_event):
     expected_field_name = "suser"
     expected_value = "TEST_EMAIL_SENDER"
     cef_out = to_cef(mock_file_event_email_event)
@@ -785,43 +736,54 @@ class TestDataFrameOutputFormatter:
         assert formatter.output_format == OutputFormat.TABLE
 
     def test_format_when_unknown_format_raises_value_error(self):
-        with pytest.raises(ValueError):
-            formatter = DataFrameOutputFormatter("NOT_A_FORMAT")
-            formatter.get_formatted_output(self.test_df)
+        with pytest.raises(Code42CLIError):
+            DataFrameOutputFormatter("NOT_A_FORMAT")
+
+        with pytest.raises(Code42CLIError):
+            formatter = DataFrameOutputFormatter("JSON")
+            formatter.output_format = "NOT_A_FORMAT"
+            list(formatter.get_formatted_output(self.test_df))
 
     def test_json_formatter_converts_to_expected_string(self):
         formatter = DataFrameOutputFormatter(OutputFormat.JSON)
         output = formatter.get_formatted_output(self.test_df)
         assert (
-            output.strip()
-            == '{"string_column":"string1","int_column":42,"null_column":null}\n{"string_column":"string2","int_column":43,"null_column":null}'
+            "".join(output)
+            == '{\n    "string_column": "string1",\n    "int_column": 42,\n    "null_column": null\n}\n{\n    "string_column": "string2",\n    "int_column": 43,\n    "null_column": null\n}\n'
         )
 
     def test_raw_formatter_converts_to_expected_string(self):
         formatter = DataFrameOutputFormatter(OutputFormat.RAW)
         output = formatter.get_formatted_output(self.test_df)
         assert (
-            output
-            == '[{"string_column":"string1","int_column":42,"null_column":null},{"string_column":"string2","int_column":43,"null_column":null}]'
+            "".join(output)
+            == '{"string_column": "string1", "int_column": 42, "null_column": null}\n{"string_column": "string2", "int_column": 43, "null_column": null}\n'
         )
 
     def test_csv_formatter_converts_to_expected_string(self):
         formatter = DataFrameOutputFormatter(OutputFormat.CSV)
         output = formatter.get_formatted_output(self.test_df)
         assert (
-            output == "string_column,int_column,null_column\nstring1,42,\nstring2,43,\n"
+            "".join(output)
+            == "string_column,int_column,null_column\nstring1,42,\nstring2,43,\n"
         )
 
     def test_table_formatter_converts_to_expected_string(self):
         formatter = DataFrameOutputFormatter(OutputFormat.TABLE)
-        output = formatter.get_formatted_output(self.test_df)
-        assert output == (
-            "string_column  int_column null_column\n"
-            "      string1          42            \n"
-            "      string2          43            "
-        )
+        output = list(formatter.get_formatted_output(self.test_df))
+        assert "string_column" in output[0]
+        assert "int_column" in output[0]
+        assert "null_column" in output[0]
+        assert "string1" in output[1]
+        assert "42" in output[1]
+        assert "null" not in output[1]
+        assert "NaN" not in output[1]
+        assert "string2" in output[2]
+        assert "43" in output[2]
+        assert "null" not in output[2]
+        assert "NaN" not in output[2]
 
-    def test_echo_formatted_dataframe_uses_pager_when_len_rows_gt_threshold_const(
+    def test_echo_formatted_dataframes_uses_pager_when_len_rows_gt_threshold_const(
         self, mocker
     ):
         mock_echo = mocker.patch("click.echo")
@@ -830,7 +792,83 @@ class TestDataFrameOutputFormatter:
         rows_len = output_formats_module.OUTPUT_VIA_PAGER_THRESHOLD + 1
         big_df = DataFrame([{"column": val} for val in range(rows_len)])
         small_df = DataFrame([{"column": val} for val in range(5)])
-        formatter.echo_formatted_dataframe(big_df)
-        formatter.echo_formatted_dataframe(small_df)
+        formatter.echo_formatted_dataframes(big_df)
+        formatter.echo_formatted_dataframes(small_df)
         assert mock_echo.call_count == 1
         assert mock_pager.call_count == 1
+
+    @pytest.mark.parametrize("fmt", OutputFormat.choices())
+    def test_get_formatted_ouput_calls_checkpoint_func_on_every_row_in_df(self, fmt):
+        checkpointed = []
+
+        def checkpoint(event):
+            checkpointed.append(event["string_column"])
+
+        formatter = DataFrameOutputFormatter(fmt, checkpoint_func=checkpoint)
+        list(formatter.get_formatted_output(self.test_df))
+        assert checkpointed == list(self.test_df.string_column.values)
+
+    @pytest.mark.parametrize("fmt", OutputFormat.choices())
+    def test_get_formatted_ouput_calls_checkpoint_func_on_every_row_in_df_when_checkpoint_key_not_in_column_list(
+        self, fmt
+    ):
+        checkpointed = []
+
+        def checkpoint(event):
+            checkpointed.append(event["string_column"])
+
+        formatter = DataFrameOutputFormatter(fmt, checkpoint_func=checkpoint)
+        list(
+            formatter.get_formatted_output(
+                self.test_df, columns=["int_column", "null_column"]
+            )
+        )
+        assert checkpointed == list(self.test_df.string_column.values)
+
+    def test_iter_rows_calls_checkpoint_func_on_every_row_in_df(self):
+        checkpointed = []
+
+        def checkpoint(event):
+            checkpointed.append(event["string_column"])
+
+        formatter = DataFrameOutputFormatter(None, checkpoint_func=checkpoint)
+        list(formatter.iter_rows(self.test_df))
+        assert checkpointed == list(self.test_df.string_column.values)
+
+    @pytest.mark.parametrize("fmt", OutputFormat.choices())
+    def test_echo_formatted_dataframes_prints_no_results_found_when_dataframes_empty(
+        self, fmt, capsys
+    ):
+        formatter = DataFrameOutputFormatter(fmt)
+
+        def empty_results():
+            yield DataFrame()
+
+        formatter.echo_formatted_dataframes(empty_results())
+        captured = capsys.readouterr()
+        assert "No results found." in captured.out
+
+
+class TestFileEventsOutputFormatter:
+    test_df = DataFrame([AED_EVENT_DICT])
+
+    def test_format_when_none_passed_defaults_to_raw_json(self):
+        formatter = FileEventsOutputFormatter(output_format=None)
+        assert formatter.output_format == FileEventsOutputFormat.RAW
+
+    def test_format_when_unknown_format_raises_CLI_error(self):
+        with pytest.raises(Code42CLIError):
+            FileEventsOutputFormatter("NOT_A_FORMAT")
+
+        with pytest.raises(Code42CLIError):
+            formatter = FileEventsOutputFormatter(FileEventsOutputFormat.JSON)
+            formatter.output_format = "NOT_A_FORMAT"
+            list(formatter.get_formatted_output(self.test_df))
+
+    def test_CEF_formatter_converts_to_expected_string(self):
+        formatter = FileEventsOutputFormatter(FileEventsOutputFormat.CEF)
+        output = formatter.get_formatted_output(self.test_df)
+        assert (
+            next(output)
+            == "CEF:0|Code42|Advanced Exfiltration Detection|1|C42203|READ_BY_APP|5|externalId=0_1d71796f-af5b-4231-9d8e-df6434da4663_912339407325443353_918253081700247636_16 end=1567996943851 rt=1568069262724 filePath=/Users/testtesterson/Downloads/About Downloads.lpdf/Contents/Resources/English.lproj/ fname=InfoPlist.strings fileType=UNCATEGORIZED fsize=86 fileHash=19b92e63beb08c27ab4489fcfefbbe44 fileCreateTime=1342923569000 fileModificationTime=1355886008000 suser=test.testerson+testair@example.com shost=Test's MacBook Air dvchost=192.168.0.3 src=71.34.4.22 deviceExternalId=912339407325443353 suid=912338501981077099 sourceServiceName=Endpoint reason=ApplicationRead spriv=testtesterson sproc=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\n"
+        )

@@ -1,9 +1,9 @@
 import pytest
 
 from code42cli.cmds.search import _try_get_logger_for_server
+from code42cli.enums import SendToFileEventsOutputFormat
 from code42cli.errors import Code42CLIError
 from code42cli.logger.enums import ServerProtocol
-from code42cli.output_formats import SendToFileEventsOutputFormat
 
 
 _TEST_ERROR_MESSAGE = "TEST ERROR MESSAGE"

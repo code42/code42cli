@@ -357,11 +357,8 @@ def list_devices(
         df = _add_usernames_to_device_dataframe(state.sdk, df)
     if include_legal_hold_membership:
         df = _add_legal_hold_membership_to_device_dataframe(state.sdk, df)
-    if df.empty:
-        click.echo("No results found.")
-    else:
-        formatter = DataFrameOutputFormatter(format)
-        formatter.echo_formatted_dataframe(df)
+    formatter = DataFrameOutputFormatter(format)
+    formatter.echo_formatted_dataframes(df)
 
 
 def _add_legal_hold_membership_to_device_dataframe(sdk, df):
@@ -493,11 +490,8 @@ def list_backup_sets(
     if include_usernames:
         df = _add_usernames_to_device_dataframe(state.sdk, df)
     df = _add_backup_set_settings_to_dataframe(state.sdk, df)
-    if df.empty:
-        click.echo("No results found.")
-    else:
-        formatter = DataFrameOutputFormatter(format)
-        formatter.echo_formatted_dataframe(df)
+    formatter = DataFrameOutputFormatter(format)
+    formatter.echo_formatted_dataframes(df)
 
 
 def _add_backup_set_settings_to_dataframe(sdk, devices_dataframe):

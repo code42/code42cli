@@ -3,6 +3,7 @@ from pprint import pformat
 import click
 import py42.sdk.queries.fileevents.filters as f
 from click import echo
+from pandas import DataFrame
 from py42.exceptions import Py42InvalidPageTokenError
 from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
 from py42.sdk.queries.fileevents.filters import InsertionTimestamp
@@ -18,19 +19,18 @@ from code42cli.click_ext.options import incompatible_with
 from code42cli.click_ext.types import MapChoice
 from code42cli.cmds.search import SendToCommand
 from code42cli.cmds.search.cursor_store import FileEventCursorStore
-from code42cli.cmds.search.options import send_to_format_options
-from code42cli.cmds.search.options import server_options
 from code42cli.cmds.util import convert_to_or_query
 from code42cli.cmds.util import create_time_range_filter
-from code42cli.cmds.util import try_get_default_header
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import limit_date_range
+from code42cli.enums import OutputFormat
 from code42cli.logger import get_main_cli_logger
+from code42cli.options import column_option
 from code42cli.options import format_option
 from code42cli.options import sdk_options
+from code42cli.output_formats import DataFrameOutputFormatter
 from code42cli.output_formats import FileEventsOutputFormat
 from code42cli.output_formats import FileEventsOutputFormatter
-from code42cli.output_formats import OutputFormatter
 from code42cli.util import warn_interrupt
 
 logger = get_main_cli_logger()
@@ -276,29 +276,11 @@ def _get_saved_search_option():
     )
 
 
-def _create_header_keys_map():
-    return {"name": "Name", "id": "Id"}
-
-
-def _create_search_header_map():
-    return {
-        "fileName": "FileName",
-        "filePath": "FilePath",
-        "eventType": "Type",
-        "eventTimestamp": "EventTimestamp",
-        "fileCategory": "FileCategory",
-        "fileSize": "FileSize",
-        "fileOwner": "FileOwner",
-        "md5Checksum": "MD5Checksum",
-        "sha256Checksum": "SHA256Checksum",
-        "riskIndicators": "RiskIndicator",
-        "riskSeverity": "RiskSeverity",
-    }
-
-
 def search_options(f):
+    f = column_option(f)
     f = checkpoint_option(f)
     f = advanced_query_option(f)
+    f = searchopt.or_query_option(f)
     f = end_option(f)
     f = begin_option(f)
     return f
@@ -342,16 +324,9 @@ def clear_checkpoint(state, checkpoint_name):
 @security_data.command()
 @file_event_options
 @search_options
-@click.option(
-    "--or-query", is_flag=True, cls=searchopt.AdvancedQueryAndSavedSearchIncompatible
-)
 @sdk_options()
-@click.option(
-    "--include-all",
-    default=False,
-    is_flag=True,
-    help="Display simple properties of the primary level of the nested response.",
-)
+@column_option
+@searchopt.include_all_option
 @file_events_format_option
 def search(
     state,
@@ -362,55 +337,134 @@ def search(
     use_checkpoint,
     saved_search,
     or_query,
+    columns,
     include_all,
     **kwargs,
 ):
 
     """Search for file events."""
-    output_header = try_get_default_header(
-        include_all, _create_search_header_map(), format
-    )
-    formatter = FileEventsOutputFormatter(format, output_header)
-    cursor = _get_cursor(state, use_checkpoint)
-    if use_checkpoint:
-        checkpoint_name = use_checkpoint
-        # if checkpoint name exists, checkpoint should be that eventId,
-        # otherwise it should set the initial value to ""
-        checkpoint = cursor.get(checkpoint_name) or ""
+    if format == FileEventsOutputFormat.CEF and columns:
+        raise click.BadOptionUsage(
+            "columns", "--columns option can't be used with CEF format."
+        )
+    # set default table columns
+    if format == OutputFormat.TABLE:
+        if not columns and not include_all:
+            columns = [
+                "fileName",
+                "filePath",
+                "eventType",
+                "eventTimestamp",
+                "fileCategory",
+                "fileSize",
+                "fileOwner",
+                "md5Checksum",
+                "sha256Checksum",
+                "riskIndicators",
+                "riskSeverity",
+            ]
 
-        # older app versions stored checkpoint as float timestamp.
-        # we handle those here until the next run containing events will store checkpoint as the last eventId
-        try:
-            state.search_filters.append(
-                InsertionTimestamp.on_or_after(float(checkpoint))
-            )
-            checkpoint = ""
-        except ValueError:
-            pass
+    if use_checkpoint:
+        cursor = _get_file_event_cursor_store(state.profile.name)
+        checkpoint = _handle_timestamp_checkpoint(cursor.get(use_checkpoint), state)
+
+        def checkpoint_func(event):
+            cursor.replace(use_checkpoint, event["eventId"])
+
     else:
-        checkpoint = ""
+        checkpoint = checkpoint_func = None
 
     query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
-    events = _get_all_file_events(state, query, checkpoint)
+    dfs = _get_all_file_events(state, query, checkpoint)
+    formatter = FileEventsOutputFormatter(format, checkpoint_func=checkpoint_func)
+    # sending to pager when checkpointing can be inaccurate due to pager buffering, so disallow pager
+    force_no_pager = use_checkpoint
+    formatter.echo_formatted_dataframes(
+        dfs, columns=columns, force_no_pager=force_no_pager
+    )
 
+
+@security_data.command(cls=SendToCommand)
+@file_event_options
+@search_options
+@sdk_options()
+@searchopt.server_options
+@searchopt.send_to_format_options
+def send_to(
+    state,
+    begin,
+    end,
+    advanced_query,
+    use_checkpoint,
+    saved_search,
+    or_query,
+    columns,
+    **kwargs,
+):
+    """Send events to the given server address.
+
+    HOSTNAME format: address:port where port is optional and defaults to 514.
+    """
     if use_checkpoint:
-        checkpoint_name = use_checkpoint
-        events = _store_updated_checkpoint(cursor, checkpoint_name, events)
+        cursor = _get_file_event_cursor_store(state.profile.name)
+        checkpoint = _handle_timestamp_checkpoint(cursor.get(use_checkpoint), state)
 
-    events_list = []
-    for event in events:
-        events_list.append(event)
-    if not events_list:
-        click.echo("No results found.")
-        return
-    formatter.echo_formatted_list(events_list)
+        def checkpoint_func(event):
+            cursor.replace(use_checkpoint, event["eventId"])
+
+    else:
+        checkpoint = checkpoint_func = None
+
+    query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
+    dfs = _get_all_file_events(state, query, checkpoint)
+    formatter = FileEventsOutputFormatter(None, checkpoint_func=checkpoint_func)
+
+    with warn_interrupt():
+        event = None
+        for event in formatter.iter_rows(dfs, columns=columns):
+            state.logger.info(event)
+        if event is None:  # generator was empty
+            click.echo("No results found.")
+
+
+@security_data.group(cls=OrderedGroup)
+@sdk_options()
+def saved_search(state):
+    """Search for file events using saved searches."""
+    pass
+
+
+@saved_search.command("list")
+@format_option
+@sdk_options()
+def _list(state, format=None):
+    """List available saved searches."""
+    formatter = DataFrameOutputFormatter(format)
+    response = state.sdk.securitydata.savedsearches.get()
+    saved_searches_df = DataFrame(response["searches"])
+    formatter.echo_formatted_dataframes(
+        saved_searches_df, columns=["name", "id", "notes"]
+    )
+
+
+@saved_search.command()
+@click.argument("search-id")
+@sdk_options()
+def show(state, search_id):
+    """Get the details of a saved search."""
+    response = state.sdk.securitydata.savedsearches.get_by_id(search_id)
+    echo(pformat(response["searches"]))
+
+
+def _get_file_event_cursor_store(profile_name):
+    return FileEventCursorStore(profile_name)
 
 
 def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
 
     if advanced_query:
         state.search_filters = advanced_query
-    if saved_search:
+    elif saved_search:
         state.search_filters = saved_search._filter_group_list
     else:
         if begin or end:
@@ -427,117 +481,24 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
 
 
 def _get_all_file_events(state, query, checkpoint=""):
-
     try:
         response = state.sdk.securitydata.search_all_file_events(
             query, page_token=checkpoint
         )
     except Py42InvalidPageTokenError:
         response = state.sdk.securitydata.search_all_file_events(query)
-    yield from response["fileEvents"]
+    yield DataFrame(response["fileEvents"])
     while response["nextPgToken"]:
         response = state.sdk.securitydata.search_all_file_events(
             query, page_token=response["nextPgToken"]
         )
-        yield from response["fileEvents"]
+        yield DataFrame(response["fileEvents"])
 
 
-@security_data.group(cls=OrderedGroup)
-@sdk_options()
-def saved_search(state):
-    """Search for file events using saved searches."""
-    pass
-
-
-@saved_search.command("list")
-@format_option
-@sdk_options()
-def _list(state, format=None):
-    """List available saved searches."""
-    formatter = OutputFormatter(format, _create_header_keys_map())
-    response = state.sdk.securitydata.savedsearches.get()
-    saved_searches = response["searches"]
-    if saved_searches:
-        formatter.echo_formatted_list(saved_searches)
-
-
-@saved_search.command()
-@click.argument("search-id")
-@sdk_options()
-def show(state, search_id):
-    """Get the details of a saved search."""
-    response = state.sdk.securitydata.savedsearches.get_by_id(search_id)
-    echo(pformat(response["searches"]))
-
-
-@security_data.command(cls=SendToCommand)
-@file_event_options
-@search_options
-@click.option(
-    "--or-query",
-    is_flag=True,
-    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
-    help="Combine query filter options with 'OR' logic instead of the default 'AND'.",
-)
-@sdk_options()
-@server_options
-@click.option(
-    "--include-all",
-    default=False,
-    is_flag=True,
-    help="Display simple properties of the primary level of the nested response.",
-)
-@send_to_format_options
-def send_to(
-    state, begin, end, advanced_query, use_checkpoint, saved_search, or_query, **kwargs,
-):
-    """Send events to the given server address.
-
-    HOSTNAME format: address:port where port is optional and defaults to 514.
-    """
-    cursor = _get_cursor(state, use_checkpoint)
-
-    if use_checkpoint:
-        checkpoint_name = use_checkpoint
-        # if checkpoint name exists, checkpoint should be that eventId,
-        # otherwise it should set the initial value to ""
-        checkpoint = cursor.get(checkpoint_name) or ""
-
-        # older app versions stored checkpoint as float timestamp.
-        # we handle those here until the next run containing events will store checkpoint as the last eventId
-        try:
-            state.search_filters.append(
-                InsertionTimestamp.on_or_after(float(checkpoint))
-            )
-            checkpoint = ""
-        except ValueError:
-            pass
-    else:
-        checkpoint = ""
-
-    query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
-    events = _get_all_file_events(state, query, checkpoint)
-
-    with warn_interrupt():
-        event = None
-        for event in events:
-            if use_checkpoint:
-                checkpoint_name = use_checkpoint
-                cursor.replace(checkpoint_name, event["eventId"])
-            state.logger.info(event)
-        if event is None:  # generator was empty
-            click.echo("No results found.")
-
-
-def _get_cursor(state, use_checkpoint):
-    return _get_file_event_cursor_store(state.profile.name) if use_checkpoint else None
-
-
-def _get_file_event_cursor_store(profile_name):
-    return FileEventCursorStore(profile_name)
-
-
-def _store_updated_checkpoint(cursor, checkpoint_name, events):
-    for event in events:
-        yield event
-        cursor.replace(checkpoint_name, event["eventId"])
+def _handle_timestamp_checkpoint(checkpoint, state):
+    try:
+        checkpoint = float(checkpoint)
+        state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
+        return None
+    except (ValueError, TypeError):
+        return checkpoint

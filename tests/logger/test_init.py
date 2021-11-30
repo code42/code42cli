@@ -5,6 +5,8 @@ from logging.handlers import RotatingFileHandler
 import pytest
 from requests import Request
 
+from code42cli.enums import OutputFormat
+from code42cli.enums import SendToFileEventsOutputFormat
 from code42cli.logger import add_handler_to_logger
 from code42cli.logger import CliLogger
 from code42cli.logger import get_logger_for_server
@@ -15,8 +17,6 @@ from code42cli.logger.formatters import FileEventDictToCEFFormatter
 from code42cli.logger.formatters import FileEventDictToJSONFormatter
 from code42cli.logger.formatters import FileEventDictToRawJSONFormatter
 from code42cli.logger.handlers import NoPrioritySysLogHandler
-from code42cli.output_formats import OutputFormat
-from code42cli.output_formats import SendToFileEventsOutputFormat
 from code42cli.util import get_user_project_path
 
 

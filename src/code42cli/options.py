@@ -7,10 +7,10 @@ from code42cli.cmds.search.options import BeginOption
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import round_datetime_to_day_end
 from code42cli.date_helper import round_datetime_to_day_start
+from code42cli.enums import OutputFormat
+from code42cli.enums import SendToFileEventsOutputFormat
 from code42cli.errors import Code42CLIError
 from code42cli.logger.enums import ServerProtocol
-from code42cli.output_formats import OutputFormat
-from code42cli.output_formats import SendToFileEventsOutputFormat
 from code42cli.profile import get_profile
 from code42cli.sdk_client import create_sdk
 
@@ -210,3 +210,11 @@ def set_end_default_dict(term):
         "the same as `--begin`.",
         callback=lambda ctx, param, arg: convert_datetime_to_timestamp(arg),
     )
+
+
+column_option = click.option(
+    "--columns",
+    default=None,
+    callback=lambda ctx, param, value: value.split(",") if value is not None else None,
+    help="Filter output to include only specified columns. Accepts comma-separated list of column names (case-insensitive).",
+)
