@@ -517,9 +517,9 @@ def _add_backup_set_settings_to_dataframe(sdk, devices_dataframe):
                     "destinations": [
                         destination for destination in backup_set.destinations.values()
                     ],
-                    "included files": backup_set.included_files,
-                    "excluded files": backup_set.excluded_files,
-                    "filename exclusions": backup_set.filename_exclusions,
+                    "included files": list(backup_set.included_files),
+                    "excluded files": list(backup_set.excluded_files),
+                    "filename exclusions": list(backup_set.filename_exclusions),
                     "locked": backup_set.locked,
                 }
                 for backup_set in current_device_settings.backup_sets
