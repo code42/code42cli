@@ -10,7 +10,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## 1.12.0 - 2021-12-13
 
-### Fixed 
+### Fixed
 - Bug where device settings were unable to be serialized to json.
 
 ### Added
