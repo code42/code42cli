@@ -8,14 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-## 1.11.1 - 2021-11-09
+## 1.12.0 - 2021-12-13
+
+### Fixed
+- Bug where device settings were unable to be serialized to json.
 
 ### Added
 - `--columns` option to `security-data search` and `security-data send-to` commands which reduces output to only the specified colums/json keys. Accepts a comma-separated list of column names (case-insensitive).
 
 ### Changed
-- Updated minimum version of py42 to `1.19.3` to provide access to updated URI paths for new standardized versioning scheme.
 - Improved accuracy of checkpointing for `security-data search` (checkpoints every row as it is printed to stdout instead of just the last event of the search response).
+
+## 1.11.1 - 2021-11-09
+
+### Changed
+- Updated minimum version of py42 to `1.19.3` to provide access to updated URI paths for new standardized versioning scheme.
 
 ## 1.11.0 - 2021-10-22
 
