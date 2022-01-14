@@ -87,8 +87,9 @@ class ExceptionHandlingGroup(click.Group):
             Py42TrustedActivityInvalidCharacterError,
             Py42TrustedActivityIdNotFound,
         ) as err:
-            self.logger.log_error(err)
-            raise Code42CLIError(str(err))
+            msg = err.args[0]
+            self.logger.log_error(msg)
+            raise Code42CLIError(msg)
 
         except Py42ForbiddenError as err:
             self.logger.log_verbose_error(self._original_args, err.response.request)
