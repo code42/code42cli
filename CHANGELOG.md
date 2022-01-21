@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## 1.12.1 - 2022-01-21
+
+### Fixed
+
+- Vulnerability in `ipython` dependency. See [CVE-2022-21699](https://nvd.nist.gov/vuln/detail/CVE-2022-21699).
 ## 1.12.0 - 2021-12-13
 
 ### Fixed
