@@ -38,6 +38,10 @@ device_guid_argument = click.argument(
     "device-guid", type=str, callback=lambda ctx, param, arg: _verify_guid_type(arg),
 )
 
+new_device_name_option = click.option(
+    "-n", "--new-device-name", help="The new name for the device.", required=True
+)
+
 
 def change_device_name_option(help_msg):
     return click.option(
@@ -58,6 +62,20 @@ purge_date_option = click.option(
     help="The date on which the archive should be purged from cold storage in yyyy-MM-dd format. "
     "If not provided, the date will be set according to the appropriate organization settings.",
 )
+
+
+@devices.command()
+@device_guid_argument
+@new_device_name_option
+@sdk_options()
+def rename(state, device_guid, new_device_name):
+    """Rename a device with Code42. Requires the device GUID to rename."""
+    try:
+        _change_device_name(state.sdk, device_guid, new_device_name)
+    except exceptions.Py42ForbiddenError:
+        raise Code42CLIError(f"Unable to rename the device with GUID '{device_guid}'.")
+    except exceptions.Py42NotFoundError:
+        raise Code42CLIError(f"The device with GUID '{device_guid}' was not found.")
 
 
 @devices.command()
@@ -544,6 +562,7 @@ def bulk(state):
 
 
 _bulk_device_activation_headers = ["guid"]
+_bulk_device_rename_headers = ["guid", "name"]
 
 
 devices_generate_template = generate_template_cmd_factory(
@@ -551,6 +570,7 @@ devices_generate_template = generate_template_cmd_factory(
     commands_dict={
         "reactivate": _bulk_device_activation_headers,
         "deactivate": _bulk_device_activation_headers,
+        "rename": _bulk_device_rename_headers,
     },
     help_message="Generate the CSV template needed for bulk device commands.",
 )
@@ -628,6 +648,40 @@ def bulk_reactivate(state, csv_rows, format):
         handle_row,
         csv_rows,
         progress_label="Reactivating devices:",
+        stats=stats,
+        raise_global_error=False,
+    )
+    formatter.echo_formatted_list(result_rows)
+
+
+@bulk.command(name="rename")
+@read_csv_arg(headers=_bulk_device_rename_headers)
+@format_option
+@sdk_options()
+def bulk_rename(state, csv_rows, format):
+    """Rename all devices from the provided CSV containing a 'guid' and a 'name' column."""
+
+    # Initialize the SDK before starting any bulk processes
+    # to prevent multiple instances and having to enter 2fa multiple times.
+    sdk = state.sdk
+
+    csv_rows[0]["renamed"] = "False"
+    formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+    stats = create_worker_stats(len(csv_rows))
+
+    def handle_row(**row):
+        try:
+            _change_device_name(sdk, row["guid"], row["name"])
+            row["renamed"] = "True"
+        except Exception as err:
+            row["renamed"] = f"False: {err}"
+            stats.increment_total_errors()
+        return row
+
+    result_rows = run_bulk_process(
+        handle_row,
+        csv_rows,
+        progress_label="Renaming devices:",
         stats=stats,
         raise_global_error=False,
     )
