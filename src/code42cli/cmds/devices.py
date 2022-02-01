@@ -162,7 +162,9 @@ def _change_device_name(sdk, guid, name):
         device_settings.name = name
         sdk.devices.update_settings(device_settings)
     except exceptions.Py42ForbiddenError:
-        raise Code42CLIError(f"Unable to rename the device with GUID '{guid}'.")
+        raise Code42CLIError(
+            f"You don't have the necessary permissions to rename the device with GUID '{guid}'."
+        )
     except exceptions.Py42NotFoundError:
         raise Code42CLIError(f"The device with GUID '{guid}' was not found.")
 
