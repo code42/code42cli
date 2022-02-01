@@ -70,13 +70,7 @@ purge_date_option = click.option(
 @sdk_options()
 def rename(state, device_guid, new_device_name):
     """Rename a device with Code42. Requires the device GUID to rename."""
-    try:
-        _change_device_name(state.sdk, device_guid, new_device_name)
-    except exceptions.Py42ForbiddenError:
-        raise Code42CLIError(f"Unable to rename the device with GUID '{device_guid}'.")
-    except exceptions.Py42NotFoundError:
-        raise Code42CLIError(f"The device with GUID '{device_guid}' was not found.")
-
+    _change_device_name(state.sdk, device_guid, new_device_name)
 
 @devices.command()
 @device_guid_argument
@@ -162,9 +156,15 @@ def _update_cold_storage_purge_date(sdk, guid, purge_date):
 
 
 def _change_device_name(sdk, guid, name):
-    device_settings = sdk.devices.get_settings(guid)
-    device_settings.name = name
-    sdk.devices.update_settings(device_settings)
+    try:
+        device_settings = sdk.devices.get_settings(guid)
+        device_settings.name = name
+        sdk.devices.update_settings(device_settings)
+    except exceptions.Py42ForbiddenError:
+        raise Code42CLIError(f"Unable to rename the device with GUID '{guid}'.")
+    except exceptions.Py42NotFoundError:
+        raise Code42CLIError(f"The device with GUID '{guid}' was not found.")
+
 
 
 @devices.command()
