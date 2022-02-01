@@ -22,6 +22,7 @@ from code42cli.main import cli
 from code42cli.worker import WorkerStats
 
 _NAMESPACE = "code42cli.cmds.devices"
+TEST_NEW_DEVICE_NAME = "test-new-device-name-123"
 TEST_DATE_OLDER = "2020-01-01T12:00:00.774Z"
 TEST_DATE_NEWER = "2021-01-01T12:00:00.774Z"
 TEST_DATE_MIDDLE = "2020-06-01T12:00:00"
@@ -466,6 +467,61 @@ def worker_stats(mocker, worker_stats_factory):
     stats = mocker.MagicMock(spec=WorkerStats)
     worker_stats_factory.return_value = stats
     return stats
+
+
+def test_rename_calls_get_and_update_settings_with_expected_params(runner, cli_state):
+    cli_state.sdk.devices.get_settings.return_value = mock_device_settings
+    runner.invoke(
+        cli,
+        [
+            "devices",
+            "rename",
+            TEST_DEVICE_GUID,
+            "--new-device-name",
+            TEST_NEW_DEVICE_NAME,
+        ],
+        obj=cli_state,
+    )
+    cli_state.sdk.devices.get_settings.assert_called_once_with(TEST_DEVICE_GUID)
+    cli_state.sdk.devices.update_settings.assert_called_once_with(mock_device_settings)
+
+
+def test_rename_when_missing_guid_prints_error(runner, cli_state):
+    result = runner.invoke(
+        cli, ["devices", "rename", "-n", TEST_NEW_DEVICE_NAME], obj=cli_state
+    )
+    assert result.exit_code == 2
+    assert "Missing argument 'DEVICE_GUID'" in result.output
+
+
+def test_rename_when_missing_name_prints_error(runner, cli_state):
+    result = runner.invoke(cli, ["devices", "rename", TEST_DEVICE_GUID], obj=cli_state)
+    assert result.exit_code == 2
+    assert "Missing option '-n' / '--new-device-name'" in result.output
+
+
+def test_rename_when_guid_not_found_py42_raises_exception_prints_error(
+    runner, cli_state, custom_error
+):
+    cli_state.sdk.devices.get_settings.side_effect = Py42NotFoundError(custom_error)
+
+    result = runner.invoke(
+        cli,
+        [
+            "devices",
+            "rename",
+            TEST_DEVICE_GUID,
+            "--new-device-name",
+            TEST_NEW_DEVICE_NAME,
+        ],
+        obj=cli_state,
+    )
+    cli_state.sdk.devices.get_settings.assert_called_once_with(TEST_DEVICE_GUID)
+    assert result.exit_code == 1
+    assert (
+        f"Error: The device with GUID '{TEST_DEVICE_GUID}' was not found."
+        in result.output
+    )
 
 
 def test_deactivate_deactivates_device(
@@ -982,4 +1038,53 @@ def test_bulk_reactivate_uses_handler_that_when_encounters_error_increments_tota
     handler = bulk_processor.call_args[0][0]
     handler(guid="test")
     handler(guid="not test")
+    assert worker_stats.increment_total_errors.call_count == 1
+
+
+def test_bulk_rename_uses_expected_arguments(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_rename.csv", "w") as csv:
+            csv.writelines(["guid,name\n", "test-guid,test-name\n"])
+        runner.invoke(
+            cli, ["devices", "bulk", "rename", "test_bulk_rename.csv"], obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"guid": "test-guid", "name": "test-name", "renamed": "False"}
+    ]
+
+
+def test_bulk_rename_ignores_blank_lines(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_rename.csv", "w") as csv:
+            csv.writelines(["guid,name\n", "\n", "test-guid,test-name\n\n"])
+        runner.invoke(
+            cli, ["devices", "bulk", "rename", "test_bulk_rename.csv"], obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"guid": "test-guid", "name": "test-name", "renamed": "False"}
+    ]
+    bulk_processor.assert_called_once()
+
+
+def test_bulk_rename_uses_handler_that_when_encounters_error_increments_total_errors(
+    runner, mocker, cli_state, worker_stats
+):
+    def _get(guid):
+        if guid == "test":
+            raise Exception("TEST")
+        return create_mock_response(mocker, data=TEST_DEVICE_RESPONSE)
+
+    cli_state.sdk.devices.get_settings = _get
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_rename.csv", "w") as csv:
+            csv.writelines(["guid,name\n", "1,2\n"])
+        runner.invoke(
+            cli, ["devices", "bulk", "rename", "test_bulk_rename.csv"], obj=cli_state,
+        )
+    handler = bulk_processor.call_args[0][0]
+    handler(guid="test", name="test-name-1")
+    handler(guid="not test", name="test-name-2")
     assert worker_stats.increment_total_errors.call_count == 1
