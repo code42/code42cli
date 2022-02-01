@@ -72,6 +72,7 @@ def rename(state, device_guid, new_device_name):
     """Rename a device with Code42. Requires the device GUID to rename."""
     _change_device_name(state.sdk, device_guid, new_device_name)
 
+
 @devices.command()
 @device_guid_argument
 @change_device_name_option(
@@ -164,7 +165,6 @@ def _change_device_name(sdk, guid, name):
         raise Code42CLIError(f"Unable to rename the device with GUID '{guid}'.")
     except exceptions.Py42NotFoundError:
         raise Code42CLIError(f"The device with GUID '{guid}' was not found.")
-
 
 
 @devices.command()
