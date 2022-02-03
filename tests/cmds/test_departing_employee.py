@@ -277,13 +277,76 @@ def test_remove_bulk_users_uses_expected_arguments(runner, mocker, cli_state_wit
     bulk_processor = mocker.patch("code42cli.cmds.departing_employee.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_remove.csv", "w") as csv:
+            csv.writelines(["username\n", "test_user1\n", "test_user2\n"])
+        runner.invoke(
+            cli,
+            ["departing-employee", "bulk", "remove", "test_remove.csv"],
+            obj=cli_state_with_user,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": "test_user1"},
+        {"username": "test_user2"},
+    ]
+
+
+def test_remove_bulk_users_uses_expected_arguments_when_no_header(
+    runner, mocker, cli_state_with_user
+):
+    bulk_processor = mocker.patch("code42cli.cmds.departing_employee.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_remove.csv", "w") as csv:
+            csv.writelines(["test_user1\n", "test_user2\n"])
+        runner.invoke(
+            cli,
+            ["departing-employee", "bulk", "remove", "test_remove.csv"],
+            obj=cli_state_with_user,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": "test_user1"},
+        {"username": "test_user2"},
+    ]
+
+
+def test_remove_bulk_users_uses_expected_arguments_when_extra_columns(
+    runner, mocker, cli_state_with_user
+):
+    bulk_processor = mocker.patch("code42cli.cmds.departing_employee.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_remove.csv", "w") as csv:
+            csv.writelines(
+                [
+                    "username,test_column\n",
+                    "test_user1,test_value1\n",
+                    "test_user2,test_value2\n",
+                ]
+            )
+        runner.invoke(
+            cli,
+            ["departing-employee", "bulk", "remove", "test_remove.csv"],
+            obj=cli_state_with_user,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": "test_user1"},
+        {"username": "test_user2"},
+    ]
+
+
+def test_remove_bulk_users_uses_expected_arguments_when_header_commented_out(
+    runner, mocker, cli_state_with_user
+):
+    bulk_processor = mocker.patch("code42cli.cmds.departing_employee.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_remove.csv", "w") as csv:
             csv.writelines(["# username\n", "test_user1\n", "test_user2\n"])
         runner.invoke(
             cli,
             ["departing-employee", "bulk", "remove", "test_remove.csv"],
             obj=cli_state_with_user,
         )
-    assert bulk_processor.call_args[0][1] == ["test_user1", "test_user2"]
+    assert bulk_processor.call_args[0][1] == [
+        {"username": "test_user1"},
+        {"username": "test_user2"},
+    ]
 
 
 def test_add_departing_employee_when_invalid_date_validation_raises_error(
@@ -350,7 +413,7 @@ def test_remove_departing_employee_when_user_not_on_list_prints_expected_error(
         (f"{DEPARTING_EMPLOYEE_COMMAND} add", "Missing argument 'USERNAME'."),
         (f"{DEPARTING_EMPLOYEE_COMMAND} remove", "Missing argument 'USERNAME'.",),
         (f"{DEPARTING_EMPLOYEE_COMMAND} bulk add", "Missing argument 'CSV_FILE'.",),
-        (f"{DEPARTING_EMPLOYEE_COMMAND} bulk remove", "Missing argument 'FILE'.",),
+        (f"{DEPARTING_EMPLOYEE_COMMAND} bulk remove", "Missing argument 'CSV_FILE'.",),
     ],
 )
 def test_departing_employee_command_when_missing_required_parameters_returns_error(

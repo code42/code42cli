@@ -886,6 +886,28 @@ def test_bulk_deactivate_uses_expected_arguments(runner, mocker, cli_state):
     ]
 
 
+def test_bulk_deactivate_uses_expected_arguments_when_no_header(
+    runner, mocker, cli_state
+):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_deactivate.csv", "w") as csv:
+            csv.writelines(["test_guid1\n"])
+        runner.invoke(
+            cli,
+            ["devices", "bulk", "deactivate", "test_bulk_deactivate.csv"],
+            obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {
+            "guid": "test_guid1",
+            "deactivated": "False",
+            "change_device_name": False,
+            "purge_date": None,
+        }
+    ]
+
+
 def test_bulk_deactivate_ignores_blank_lines(runner, mocker, cli_state):
     bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
@@ -943,6 +965,23 @@ def test_bulk_reactivate_uses_expected_arguments(runner, mocker, cli_state):
             obj=cli_state,
         )
     assert bulk_processor.call_args[0][1] == [{"guid": "test", "reactivated": "False"}]
+
+
+def test_bulk_reactivate_uses_expected_arguments_when_no_header(
+    runner, mocker, cli_state
+):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_bulk_reactivate.csv", "w") as csv:
+            csv.writelines(["test_guid1\n"])
+        runner.invoke(
+            cli,
+            ["devices", "bulk", "reactivate", "test_bulk_reactivate.csv"],
+            obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"guid": "test_guid1", "reactivated": "False"},
+    ]
 
 
 def test_bulk_reactivate_ignores_blank_lines(runner, mocker, cli_state):

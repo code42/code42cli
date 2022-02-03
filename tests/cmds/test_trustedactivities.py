@@ -365,13 +365,13 @@ def test_bulk_update_trusted_activities_uses_expected_arguments(
     ]
 
 
-def test_bulk_remove_trusted_activities_uses_expected_arguments(
+def test_bulk_remove_trusted_activities_uses_expected_arguments_when_no_header(
     runner, mocker, cli_state_with_user
 ):
     bulk_processor = mocker.patch("code42cli.cmds.trustedactivities.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_remove.csv", "w") as csv:
-            csv.writelines(["resource_id\n", "1\n", "2\n"])
+            csv.writelines(["1\n", "2\n"])
         command = ["trusted-activities", "bulk", "remove", "test_remove.csv"]
         runner.invoke(
             cli, command, obj=cli_state_with_user,

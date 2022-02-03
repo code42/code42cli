@@ -289,6 +289,48 @@ def test_bulk_remove_employees_uses_expected_arguments(runner, cli_state, mocker
     bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_remove.csv", "w") as csv:
+            csv.writelines(["username\n", "test@example.com\n", "test2@example.com"])
+        runner.invoke(
+            cli,
+            ["high-risk-employee", "bulk", "remove", "test_remove.csv"],
+            obj=cli_state,
+        )
+        assert bulk_processor.call_args[0][1] == [
+            {"username": "test@example.com"},
+            {"username": "test2@example.com"},
+        ]
+
+
+def test_bulk_remove_employees_uses_expected_arguments_when_extra_columns(
+    runner, cli_state, mocker
+):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_remove.csv", "w") as csv:
+            csv.writelines(
+                [
+                    "username,test_column\n",
+                    "test@example.com,test_value1\n",
+                    "test2@example.com,test_value2\n",
+                ]
+            )
+        runner.invoke(
+            cli,
+            ["high-risk-employee", "bulk", "remove", "test_remove.csv"],
+            obj=cli_state,
+        )
+        assert bulk_processor.call_args[0][1] == [
+            {"username": "test@example.com"},
+            {"username": "test2@example.com"},
+        ]
+
+
+def test_bulk_remove_employees_uses_expected_arguments_when_header_commented_out(
+    runner, cli_state, mocker
+):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_remove.csv", "w") as csv:
             csv.writelines(["# username\n", "test@example.com\n", "test2@example.com"])
         runner.invoke(
             cli,
@@ -296,8 +338,26 @@ def test_bulk_remove_employees_uses_expected_arguments(runner, cli_state, mocker
             obj=cli_state,
         )
         assert bulk_processor.call_args[0][1] == [
-            "test@example.com",
-            "test2@example.com",
+            {"username": "test@example.com"},
+            {"username": "test2@example.com"},
+        ]
+
+
+def test_bulk_remove_employees_uses_expected_arguments_when_no_header(
+    runner, cli_state, mocker
+):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_remove.csv", "w") as csv:
+            csv.writelines(["test@example.com\n", "test2@example.com"])
+        runner.invoke(
+            cli,
+            ["high-risk-employee", "bulk", "remove", "test_remove.csv"],
+            obj=cli_state,
+        )
+        assert bulk_processor.call_args[0][1] == [
+            {"username": "test@example.com"},
+            {"username": "test2@example.com"},
         ]
 
 
@@ -364,7 +424,7 @@ def test_remove_high_risk_employee_when_user_not_on_list_prints_expected_error(
         (f"{HR_EMPLOYEE_COMMAND} add", "Missing argument 'USERNAME'."),
         (f"{HR_EMPLOYEE_COMMAND} remove", "Missing argument 'USERNAME'."),
         (f"{HR_EMPLOYEE_COMMAND} bulk add", "Missing argument 'CSV_FILE'."),
-        (f"{HR_EMPLOYEE_COMMAND} bulk remove", "Missing argument 'FILE'."),
+        (f"{HR_EMPLOYEE_COMMAND} bulk remove", "Missing argument 'CSV_FILE'."),
         (f"{HR_EMPLOYEE_COMMAND} bulk add-risk-tags", "Missing argument 'CSV_FILE'."),
         (
             f"{HR_EMPLOYEE_COMMAND} bulk remove-risk-tags",
