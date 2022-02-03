@@ -331,16 +331,16 @@ def test_remove_bulk_users_uses_expected_arguments_when_extra_columns(
     ]
 
 
-def test_remove_bulk_users_uses_expected_arguments_when_header_commented_out(
+def test_remove_bulk_users_uses_expected_arguments_when_flat_file(
     runner, mocker, cli_state_with_user
 ):
     bulk_processor = mocker.patch("code42cli.cmds.departing_employee.run_bulk_process")
     with runner.isolated_filesystem():
-        with open("test_remove.csv", "w") as csv:
+        with open("test_remove.txt", "w") as csv:
             csv.writelines(["# username\n", "test_user1\n", "test_user2\n"])
         runner.invoke(
             cli,
-            ["departing-employee", "bulk", "remove", "test_remove.csv"],
+            ["departing-employee", "bulk", "remove", "test_remove.txt"],
             obj=cli_state_with_user,
         )
     assert bulk_processor.call_args[0][1] == [
