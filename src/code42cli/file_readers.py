@@ -31,8 +31,8 @@ def read_csv(file, headers):
 
     # check if header is commented for flat-file backwards compatability
     if lines[0].startswith("#"):
-        # strip comment character
-        lines[0] = (lines[0].split("#"))[1].strip()
+        # strip comment line
+        lines.pop(0)
 
     first_line = lines[0].strip().split(",")
 
