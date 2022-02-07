@@ -17,14 +17,9 @@ class BulkCommandType:
         return iter([self.ADD, self.REMOVE])
 
 
-def write_template_file(path, columns=None, flat_item=None):
+def write_template_file(path, columns):
     with open(path, "w", encoding="utf8") as new_file:
-        if columns:
-            new_file.write(",".join(columns))
-        else:
-            new_file.write(
-                f"# This template takes a single {flat_item or 'item'} to be processed on each row."
-            )
+        new_file.write(",".join(columns))
 
 
 def generate_template_cmd_factory(group_name, commands_dict, help_message=None):
@@ -58,10 +53,7 @@ def generate_template_cmd_factory(group_name, commands_dict, help_message=None):
         if not path:
             filename = f"{group_name}_bulk_{cmd.replace('-', '_')}.csv"
             path = os.path.join(os.getcwd(), filename)
-        if isinstance(columns, str):
-            write_template_file(path, columns=None, flat_item=columns)
-        else:
-            write_template_file(path, columns=columns)
+        write_template_file(path, columns)
 
     return generate_template
 
@@ -148,10 +140,7 @@ class BulkProcessor:
         return self._stats._results
 
     def _process_row(self, row):
-        if isinstance(row, dict):
-            self._process_csv_row(row)
-        elif row:
-            self._process_flat_file_row(row.strip())
+        self._process_csv_row(row)
 
     def _process_csv_row(self, row):
         # Removes problems from including extra columns. Error messages from out of order args
@@ -162,12 +151,6 @@ class BulkProcessor:
         self.__worker.do_async(
             lambda *args, **kwargs: self._handle_row(*args, **kwargs), **row_values
         )
-
-    def _process_flat_file_row(self, row):
-        if row:
-            self.__worker.do_async(
-                lambda *args, **kwargs: self._handle_row(*args, **kwargs), row
-            )
 
     def _handle_row(self, *args, **kwargs):
         return self._row_handler(*args, **kwargs)

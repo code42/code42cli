@@ -128,25 +128,12 @@ class TestBulkProcessor:
         processor.run()
         assert processed_rows == [1]
 
-    def test_run_when_reader_returns_strs_processes_strs(self):
-        processed_rows = []
-
-        def func_for_bulk(test):
-            processed_rows.append(test)
-
-        rows = ["row1", "row2", "row3"]
-        processor = BulkProcessor(func_for_bulk, rows)
-        processor.run()
-        assert "row1" in processed_rows
-        assert "row2" in processed_rows
-        assert "row3" in processed_rows
-
     def test_run_when_error_occurs_raises_expected_logged_cli_error(self):
         def func_for_bulk(test):
             if test == "row2":
                 raise Exception()
 
-        rows = ["row1", "row2", "row3"]
+        rows = [{"test": "row1"}, {"test": "row2"}, {"test": "row3"}]
         with pytest.raises(errors.LoggedCLIError) as err:
             processor = BulkProcessor(func_for_bulk, rows)
             processor.run()
@@ -157,7 +144,7 @@ class TestBulkProcessor:
         def func_for_bulk(test):
             pass
 
-        rows = ["row1", "row2", "row3"]
+        rows = [{"test": "row1"}, {"test": "row2"}, {"test": "row3"}]
         processor = BulkProcessor(func_for_bulk, rows)
 
         processor.run()
@@ -170,7 +157,7 @@ class TestBulkProcessor:
         def func_for_bulk(test):
             processed_rows.append(test)
 
-        rows = ["row1", "row2", "\n"]
+        rows = [{"test": "row1"}, {"test": "row2"}, {"test": "\n"}]
         processor = BulkProcessor(func_for_bulk, rows)
         processor.run()
 
@@ -196,7 +183,7 @@ class TestBulkProcessor:
         def func_for_bulk(test):
             return test
 
-        rows = ["row1", "row2", "row3"]
+        rows = [{"test": "row1"}, {"test": "row2"}, {"test": "row3"}]
         processor = BulkProcessor(func_for_bulk, rows)
         processor.run()
         assert "row1" in processor._stats.results

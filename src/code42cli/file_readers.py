@@ -28,6 +28,12 @@ def read_csv(file, headers):
     else error is raised.
     """
     lines = file.readlines()
+
+    # check if header is commented for flat-file backwards compatability
+    if lines[0].startswith("#"):
+        # strip comment line
+        lines.pop(0)
+
     first_line = lines[0].strip().split(",")
 
     # handle when first row has all of our expected headers
@@ -52,21 +58,3 @@ def read_csv(file, headers):
     else:
         missing = [field for field in headers if field not in first_line]
         raise Code42CLIError(f"Missing required columns in csv: {missing}")
-
-
-def read_flat_file(file):
-    """Helper to read rows of a flat file, automatically removing header comment row if
-    it exists, and strips whitespace from each row automatically."""
-    first_row = next(file)
-    if first_row.startswith("#"):
-        return [row.strip() for row in file]
-    else:
-        return [first_row.strip(), *[row.strip() for row in file]]
-
-
-read_flat_file_arg = click.argument(
-    "file_rows",
-    type=AutoDecodedFile("r"),
-    metavar="FILE",
-    callback=lambda ctx, param, arg: read_flat_file(arg),
-)

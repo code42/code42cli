@@ -18,7 +18,6 @@ from code42cli.cmds.detectionlists.options import notes_option
 from code42cli.cmds.detectionlists.options import username_arg
 from code42cli.cmds.shared import get_user_id
 from code42cli.file_readers import read_csv_arg
-from code42cli.file_readers import read_flat_file_arg
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 
@@ -110,12 +109,13 @@ def bulk(state):
 
 HIGH_RISK_EMPLOYEE_CSV_HEADERS = ["username", "cloud_alias", "risk_tag", "notes"]
 RISK_TAG_CSV_HEADERS = ["username", "tag"]
+REMOVE_EMPLOYEE_HEADERS = ["username"]
 
 high_risk_employee_generate_template = generate_template_cmd_factory(
     group_name="high_risk_employee",
     commands_dict={
         "add": HIGH_RISK_EMPLOYEE_CSV_HEADERS,
-        "remove": "username",
+        "remove": REMOVE_EMPLOYEE_HEADERS,
         "add-risk-tags": RISK_TAG_CSV_HEADERS,
         "remove-risk-tags": RISK_TAG_CSV_HEADERS,
     },
@@ -145,12 +145,11 @@ def bulk_add(state, csv_rows):
 
 @bulk.command(
     name="remove",
-    help="Bulk remove users from the high risk employees detection list using a line-separated file "
-    "of usernames.",
+    help=f"Bulk remove users from the high risk employees detection list using a CSV file with format {','.join(REMOVE_EMPLOYEE_HEADERS)}.",
 )
-@read_flat_file_arg
+@read_csv_arg(headers=REMOVE_EMPLOYEE_HEADERS)
 @sdk_options()
-def bulk_remove(state, file_rows):
+def bulk_remove(state, csv_rows):
     sdk = state.sdk
 
     def handle_row(username):
@@ -158,7 +157,7 @@ def bulk_remove(state, file_rows):
 
     run_bulk_process(
         handle_row,
-        file_rows,
+        csv_rows,
         progress_label="Removing users from high risk employee detection list:",
     )
 

@@ -11,3 +11,4 @@
 * [Configure Trusted Activities](userguides/trustedactivities.md)
 * [Configure Alert Rules](userguides/alertrules.md)
 * [Add and Manage Cases](userguides/cases.md)
+* [Use Bulk Commands](userguides/bulkcommands.md)

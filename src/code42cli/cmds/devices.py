@@ -566,7 +566,6 @@ def bulk(state):
 _bulk_device_activation_headers = ["guid"]
 _bulk_device_rename_headers = ["guid", "name"]
 
-
 devices_generate_template = generate_template_cmd_factory(
     group_name="devices",
     commands_dict={
