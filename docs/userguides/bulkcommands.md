@@ -15,7 +15,7 @@ The CSV file can contain more columns than are necessary for the command, howeve
 
 If the CSV file contains the *exact* number of columns that are necessary for the command then the header row is **optional**, but columns are expected to be in the same order as the template.
 
-To run a bulk method, simple pass the CSV file path to the desired command.  For example, you would use to following command to deactivate multiple devices within your organization at once:
+To run a bulk method, simply pass the CSV file path to the desired command.  For example, you would use to following command to deactivate multiple devices within your organization at once:
 
 
 ```bash
