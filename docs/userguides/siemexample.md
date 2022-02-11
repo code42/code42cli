@@ -8,6 +8,8 @@ into a security information and event management (SIEM) tool like LogRhythm, Sum
 To ingest file events or alerts into a SIEM tool using the Code42 command-line interface, the Code42 user account running the integration
 must be assigned roles that provide the necessary permissions.
 
+The CEF format is not recommended because it was not designed for insider risk event data. Code42 file event data contains many fields that provide valuable insider risk context that have no CEF equivalent. However, if you need to use CEF, the JSON-to-CEF mapping at the bottom of this document indicates which fields are included and how the field names map to other formats.
+
 ## Before you begin
 
 First install and configure the Code42 CLI following the instructions in
