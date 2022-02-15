@@ -57,4 +57,4 @@ jobs:
       - name: Start up the mock servers
         run: cd code42-mock-servers; docker-compose up -d --build
       - name: Run the integration tests
-        run: cd code42cli; tox -e integration
+        run: sleep 15; cd code42cli; tox -e integration
