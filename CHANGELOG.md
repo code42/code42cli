@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## Unreleased
+
+### Added
+- `users add-alias`, `users remove-alias`, `users bulk add-alias`, and `users bulk remove-alias` for managing cloud aliases for users.
+
 ## 1.12.1 - 2022-01-21
 
 ### Fixed

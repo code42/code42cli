@@ -215,6 +215,8 @@ _bulk_user_move_headers = ["username", "org_id"]
 
 _bulk_user_roles_headers = ["username", "role_name"]
 
+_bulk_user_alias_headers = ["username", "alias"]
+
 
 @users.command(name="move")
 @username_option("The username of the user to move.", required=True)
@@ -224,6 +226,24 @@ def change_organization(state, username, org_id):
     """Change the organization of the user with the given username
     to the org with the given org UID."""
     _change_organization(state.sdk, username, org_id)
+
+
+@users.command()
+@click.argument("username")
+@click.argument("alias")
+@sdk_options()
+def add_alias(state, username, alias):
+    """Add a cloud alias for a given user."""
+    _add_cloud_alias(state.sdk, username, alias)
+
+
+@users.command()
+@click.argument("username")
+@click.argument("alias")
+@sdk_options()
+def remove_alias(state, username, alias):
+    """Remove a cloud alias for a given user."""
+    _remove_cloud_alias(state.sdk, username, alias)
 
 
 @users.group(cls=OrderedGroup)
@@ -292,6 +312,8 @@ users_generate_template = generate_template_cmd_factory(
     commands_dict={
         "update": _bulk_user_update_headers,
         "move": _bulk_user_move_headers,
+        "add-alias": _bulk_user_alias_headers,
+        "remove-alias": _bulk_user_alias_headers,
     },
     help_message="Generate the CSV template needed for bulk user commands.",
 )
@@ -539,6 +561,86 @@ def bulk_remove_roles(state, csv_rows, format):
     formatter.echo_formatted_list(result_rows)
 
 
+@bulk.command(
+    name="add-alias",
+    help=f"Add aliases to a list of users from the provided CSV in format: {','.join(_bulk_user_alias_headers)}",
+)
+@read_csv_arg(headers=_bulk_user_alias_headers)
+@format_option
+@sdk_options()
+def bulk_add_alias(state, csv_rows, format):
+    """Bulk add aliases to users"""
+
+    # Initialize the SDK before starting any bulk processes
+    # to prevent multiple instances and having to enter 2fa multiple times.
+    sdk = state.sdk
+    success_header = "alias added"
+
+    csv_rows[0][success_header] = "False"
+    formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+    stats = create_worker_stats(len(csv_rows))
+
+    def handle_row(**row):
+        try:
+            _add_cloud_alias(
+                sdk, **{key: row[key] for key in row.keys() if key != success_header}
+            )
+            row[success_header] = "True"
+        except Exception as err:
+            row[success_header] = f"False: {err}"
+            stats.increment_total_errors()
+        return row
+
+    result_rows = run_bulk_process(
+        handle_row,
+        csv_rows,
+        progress_label="Adding aliases to users:",
+        stats=stats,
+        raise_global_error=False,
+    )
+    formatter.echo_formatted_list(result_rows)
+
+
+@bulk.command(
+    name="remove-alias",
+    help=f"Remove aliases from a list of users from the provided CSV in format: {','.join(_bulk_user_alias_headers)}",
+)
+@read_csv_arg(headers=_bulk_user_alias_headers)
+@format_option
+@sdk_options()
+def bulk_remove_alias(state, csv_rows, format):
+    """Bulk remove aliases from users"""
+
+    # Initialize the SDK before starting any bulk processes
+    # to prevent multiple instances and having to enter 2fa multiple times.
+    sdk = state.sdk
+    success_header = "alias removed"
+
+    csv_rows[0][success_header] = "False"
+    formatter = OutputFormatter(format, {key: key for key in csv_rows[0].keys()})
+    stats = create_worker_stats(len(csv_rows))
+
+    def handle_row(**row):
+        try:
+            _remove_cloud_alias(
+                sdk, **{key: row[key] for key in row.keys() if key != success_header}
+            )
+            row[success_header] = "True"
+        except Exception as err:
+            row[success_header] = f"False: {err}"
+            stats.increment_total_errors()
+        return row
+
+    result_rows = run_bulk_process(
+        handle_row,
+        csv_rows,
+        progress_label="Removing aliases from users:",
+        stats=stats,
+        raise_global_error=False,
+    )
+    formatter.echo_formatted_list(result_rows)
+
+
 def _add_user_role(sdk, username, role_name):
     user_id = _get_legacy_user_id(sdk, username)
     _get_role_id(sdk, role_name)  # function provides role name validation
@@ -666,3 +768,17 @@ def _deactivate_user(sdk, username):
 def _reactivate_user(sdk, username):
     user_id = _get_legacy_user_id(sdk, username)
     sdk.users.reactivate(user_id)
+
+
+def _get_user_id(sdk, username):
+    return sdk.detectionlists.get_user(username).data["userId"]
+
+
+def _add_cloud_alias(sdk, username, alias):
+    user_id = _get_user_id(sdk, username)
+    sdk.detectionlists.add_user_cloud_alias(user_id, alias)
+
+
+def _remove_cloud_alias(sdk, username, alias):
+    user_id = _get_user_id(sdk, username)
+    sdk.detectionlists.remove_user_cloud_alias(user_id, alias)
