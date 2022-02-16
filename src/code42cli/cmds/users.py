@@ -3,6 +3,8 @@ import functools
 import click
 from pandas import DataFrame
 from pandas import json_normalize
+from py42.exceptions import Py42BadRequestError
+from py42.exceptions import Py42CloudAliasLimitExceededError
 from py42.exceptions import Py42NotFoundError
 
 from code42cli.bulk import generate_template_cmd_factory
@@ -771,12 +773,20 @@ def _reactivate_user(sdk, username):
 
 
 def _get_user_id(sdk, username):
-    return sdk.detectionlists.get_user(username).data["userId"]
+    try:
+        return sdk.detectionlists.get_user(username).data["userId"]
+    except Py42BadRequestError:
+        raise Code42CLIError(
+            f"Unable to find user {username}. Either it does not exist, or you do not have permission to view it."
+        )
 
 
 def _add_cloud_alias(sdk, username, alias):
     user_id = _get_user_id(sdk, username)
-    sdk.detectionlists.add_user_cloud_alias(user_id, alias)
+    try:
+        sdk.detectionlists.add_user_cloud_alias(user_id, alias)
+    except Py42CloudAliasLimitExceededError:
+        raise Code42CLIError(f"Alias {alias} exceeds maximum length.")
 
 
 def _remove_cloud_alias(sdk, username, alias):

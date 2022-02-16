@@ -2,6 +2,8 @@ import json
 
 import pytest
 from py42.exceptions import Py42ActiveLegalHoldError
+from py42.exceptions import Py42BadRequestError
+from py42.exceptions import Py42CloudAliasLimitExceededError
 from py42.exceptions import Py42InvalidEmailError
 from py42.exceptions import Py42InvalidPasswordError
 from py42.exceptions import Py42InvalidUsernameError
@@ -155,6 +157,14 @@ def get_user_response(mocker):
 
 
 @pytest.fixture
+def get_user_failure(mocker):
+    return Py42BadRequestError(
+        create_mock_http_error(mocker, data=None, status=400),
+        "Failure in HTTP call 400 Client Error: Bad Request for url: https://ecm-east.us.code42.com/svc/api/v2/user/getbyusername.",
+    )
+
+
+@pytest.fixture
 def change_org_response(mocker):
     return create_mock_response(mocker)
 
@@ -203,6 +213,11 @@ def get_user_id_success(cli_state, get_users_response):
 def get_user_uid_success(cli_state, get_user_response):
     """detectionlists.get_user returns a single user"""
     cli_state.sdk.detectionlists.get_user.return_value = get_user_response
+
+
+@pytest.fixture
+def get_user_uid_failure(cli_state, get_user_failure):
+    cli_state.sdk.detectionlists.get_user.side_effect = get_user_failure
 
 
 @pytest.fixture
@@ -284,6 +299,13 @@ def change_org_success(cli_state, change_org_response):
 def add_alias_success(mocker, cli_state):
     cli_state.sdk.detectionlists.add_user_cloud_alias.return_value = create_mock_response(
         mocker
+    )
+
+
+@pytest.fixture
+def add_alias_failure(mocker, cli_state):
+    cli_state.sdk.detectionlists.add_user_cloud_alias.side_effect = Py42CloudAliasLimitExceededError(
+        create_mock_http_error(mocker)
     )
 
 
@@ -1536,3 +1558,26 @@ def test_bulk_remove_alias_uses_handler_that_when_encounters_error_increments_to
     handler(username="test@example.com", alias=TEST_ALIAS)
     handler(username="not.test@example.com", alias=TEST_ALIAS)
     assert worker_stats.increment_total_errors.call_count == 1
+
+
+def test_add_alias_raises_error_when_user_does_not_exist(
+    runner, cli_state, get_user_uid_failure
+):
+    command = ["users", "add-alias", "fake@notreal.com", "alias@example.com"]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert result.exit_code == 1
+    assert "Unable to find user" in result.output
+
+
+def test_add_alias_raises_error_when_alias_is_too_long(
+    runner, cli_state, add_alias_failure
+):
+    command = [
+        "users",
+        "add-alias",
+        "fake@notreal.com",
+        "alias-is-too-long-its-very-long-for-real@example.com",
+    ]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert result.exit_code == 1
+    assert "exceeds maximum length" in result.output
