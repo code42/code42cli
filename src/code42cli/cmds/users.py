@@ -783,10 +783,12 @@ def _get_user_id(sdk, username):
 
 def _add_cloud_alias(sdk, username, alias):
     user_id = _get_user_id(sdk, username)
+    if(len(str(alias)) > 50):
+        raise Code42CLIError(f"Unable to add alias {alias} because it is greater than 50 characters.")
     try:
         sdk.detectionlists.add_user_cloud_alias(user_id, alias)
     except Py42CloudAliasLimitExceededError:
-        raise Code42CLIError(f"Alias {alias} exceeds maximum length.")
+        raise Code42CLIError(f"User {username} cannot have more than two aliases.")
 
 
 def _remove_cloud_alias(sdk, username, alias):

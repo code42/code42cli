@@ -1576,8 +1576,21 @@ def test_add_alias_raises_error_when_alias_is_too_long(
         "users",
         "add-alias",
         "fake@notreal.com",
-        "alias-is-too-long-its-very-long-for-real@example.com",
+        "alias-is-too-long-its-very-long-for-real-more-than-50-characters@example.com",
     ]
     result = runner.invoke(cli, command, obj=cli_state)
     assert result.exit_code == 1
-    assert "exceeds maximum length" in result.output
+    assert "it is greater than 50 characters" in result.output
+
+def test_add_alias_raises_error_when_user_has_two_aliases(
+    runner, cli_state, add_alias_failure
+):
+    command = [
+        "users",
+        "add-alias",
+        "fake@notreal.com",
+        "second_alias",
+    ]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert result.exit_code == 1
+    assert "cannot have more than two" in result.output
