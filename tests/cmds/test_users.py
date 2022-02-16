@@ -1582,6 +1582,7 @@ def test_add_alias_raises_error_when_alias_is_too_long(
     assert result.exit_code == 1
     assert "it is greater than 50 characters" in result.output
 
+
 def test_add_alias_raises_error_when_user_has_two_aliases(
     runner, cli_state, add_alias_failure
 ):
