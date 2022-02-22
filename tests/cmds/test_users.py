@@ -1434,6 +1434,17 @@ def test_list_aliases_calls_get_user_with_expected_parameters(runner, cli_state)
     cli_state.sdk.detectionlists.get_user.assert_called_once_with("alias@example")
 
 
+def test_list_aliases_prints_no_aliases_found_when_empty_list(runner, cli_state, mocker):
+    cli_state.sdk.detectionlists.get_user.return_value = create_mock_response(mocker, data={
+        "cloudUsernames": []
+    })
+    username = "alias@example"
+    command = ["users", "list-aliases", username]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert result.exit_code == 0
+    assert f"No cloud aliases for user '{username}' found" in result.output
+
+
 def test_list_aliases_prints_expected_data(runner, cli_state, get_user_uid_success):
     result = runner.invoke(
         cli, ["users", "list-aliases", "alias@example.com"], obj=cli_state
