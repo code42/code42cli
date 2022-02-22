@@ -3,6 +3,7 @@ import json
 import pytest
 from py42.exceptions import Py42ActiveLegalHoldError
 from py42.exceptions import Py42BadRequestError
+from py42.exceptions import Py42CloudAliasCharacterLimitExceededError
 from py42.exceptions import Py42CloudAliasLimitExceededError
 from py42.exceptions import Py42InvalidEmailError
 from py42.exceptions import Py42InvalidPasswordError
@@ -303,7 +304,7 @@ def add_alias_success(mocker, cli_state):
 
 
 @pytest.fixture
-def add_alias_failure(mocker, cli_state):
+def add_alias_limit_failure(mocker, cli_state):
     cli_state.sdk.detectionlists.add_user_cloud_alias.side_effect = Py42CloudAliasLimitExceededError(
         create_mock_http_error(mocker)
     )
@@ -1426,6 +1427,34 @@ def test_orgs_show_when_invalid_org_uid_raises_error(runner, cli_state, custom_e
     assert f"Invalid org UID {TEST_ORG_UID}." in result.output
 
 
+def test_list_aliases_calls_get_user_with_expected_parameters(runner, cli_state):
+    username = "alias@example"
+    command = ["users", "list-aliases", username]
+    runner.invoke(cli, command, obj=cli_state)
+    cli_state.sdk.detectionlists.get_user.assert_called_once_with("alias@example")
+
+
+def test_list_aliases_prints_expected_data(runner, cli_state, get_user_uid_success):
+    result = runner.invoke(
+        cli, ["users", "list-aliases", "alias@example.com"], obj=cli_state
+    )
+    assert result.exit_code == 0
+    assert "['Sample.User1@samplecase.com', 'Sample.User1@gmail.com']" in result.output
+
+
+def test_list_aliases_raises_error_when_user_does_not_exist(
+    runner, cli_state, get_user_uid_failure
+):
+    username = "fake@notreal.com"
+    command = ["users", "list-aliases", username]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert result.exit_code == 1
+    assert (
+        f"User '{username}' does not exist or you do not have permission to view them."
+        in result.output
+    )
+
+
 def test_add_cloud_alias_calls_add_cloud_alias_with_correct_parameters(
     runner, cli_state, get_user_uid_success, add_alias_success
 ):
@@ -1436,6 +1465,51 @@ def test_add_cloud_alias_calls_add_cloud_alias_with_correct_parameters(
     )
 
 
+def test_add_alias_raises_error_when_user_does_not_exist(
+    runner, cli_state, get_user_uid_failure
+):
+    username = "fake@notreal.com"
+    command = ["users", "add-alias", username, "alias@example.com"]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert result.exit_code == 1
+    assert (
+        f"User '{username}' does not exist or you do not have permission to view them."
+        in result.output
+    )
+
+
+def test_add_alias_raises_error_when_alias_is_too_long(runner, cli_state):
+    command = [
+        "users",
+        "add-alias",
+        "fake@notreal.com",
+        "alias-is-too-long-its-very-long-for-real-more-than-50-characters@example.com",
+    ]
+    cli_state.sdk.detectionlists.add_user_cloud_alias.side_effect = (
+        Py42CloudAliasCharacterLimitExceededError
+    )
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert result.exit_code == 1
+    assert "Cloud alias character limit exceeded" in result.output
+
+
+def test_add_alias_raises_error_when_user_has_two_aliases(
+    runner, cli_state, add_alias_limit_failure
+):
+    command = [
+        "users",
+        "add-alias",
+        "fake@notreal.com",
+        "second_alias",
+    ]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert result.exit_code == 1
+    assert (
+        "Error: Cloud alias limit exceeded. A max of 2 cloud aliases are allowed."
+        in result.output
+    )
+
+
 def test_remove_cloud_alias_calls_remove_cloud_alias_with_correct_parameters(
     runner, cli_state, get_user_uid_success, remove_alias_success
 ):
@@ -1443,6 +1517,19 @@ def test_remove_cloud_alias_calls_remove_cloud_alias_with_correct_parameters(
     runner.invoke(cli, command, obj=cli_state)
     cli_state.sdk.detectionlists.remove_user_cloud_alias.assert_called_once_with(
         TEST_USER_UID, "alias@example.com"
+    )
+
+
+def test_remove_alias_raises_error_when_user_does_not_exist(
+    runner, cli_state, get_user_uid_failure
+):
+    username = "fake@notreal.com"
+    command = ["users", "remove-alias", username, "alias@example.com"]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert result.exit_code == 1
+    assert (
+        f"User '{username}' does not exist or you do not have permission to view them."
+        in result.output
     )
 
 
@@ -1558,40 +1645,3 @@ def test_bulk_remove_alias_uses_handler_that_when_encounters_error_increments_to
     handler(username="test@example.com", alias=TEST_ALIAS)
     handler(username="not.test@example.com", alias=TEST_ALIAS)
     assert worker_stats.increment_total_errors.call_count == 1
-
-
-def test_add_alias_raises_error_when_user_does_not_exist(
-    runner, cli_state, get_user_uid_failure
-):
-    command = ["users", "add-alias", "fake@notreal.com", "alias@example.com"]
-    result = runner.invoke(cli, command, obj=cli_state)
-    assert result.exit_code == 1
-    assert "Unable to find user" in result.output
-
-
-def test_add_alias_raises_error_when_alias_is_too_long(
-    runner, cli_state, add_alias_failure
-):
-    command = [
-        "users",
-        "add-alias",
-        "fake@notreal.com",
-        "alias-is-too-long-its-very-long-for-real-more-than-50-characters@example.com",
-    ]
-    result = runner.invoke(cli, command, obj=cli_state)
-    assert result.exit_code == 1
-    assert "it is greater than 50 characters" in result.output
-
-
-def test_add_alias_raises_error_when_user_has_two_aliases(
-    runner, cli_state, add_alias_failure
-):
-    command = [
-        "users",
-        "add-alias",
-        "fake@notreal.com",
-        "second_alias",
-    ]
-    result = runner.invoke(cli, command, obj=cli_state)
-    assert result.exit_code == 1
-    assert "cannot have more than two" in result.output

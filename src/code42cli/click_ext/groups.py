@@ -7,6 +7,8 @@ import click
 from py42.exceptions import Py42ActiveLegalHoldError
 from py42.exceptions import Py42CaseAlreadyHasEventError
 from py42.exceptions import Py42CaseNameExistsError
+from py42.exceptions import Py42CloudAliasCharacterLimitExceededError
+from py42.exceptions import Py42CloudAliasLimitExceededError
 from py42.exceptions import Py42DescriptionLimitExceededError
 from py42.exceptions import Py42ForbiddenError
 from py42.exceptions import Py42HTTPError
@@ -86,6 +88,8 @@ class ExceptionHandlingGroup(click.Group):
             Py42TrustedActivityConflictError,
             Py42TrustedActivityInvalidCharacterError,
             Py42TrustedActivityIdNotFound,
+            Py42CloudAliasLimitExceededError,
+            Py42CloudAliasCharacterLimitExceededError,
         ) as err:
             msg = err.args[0]
             self.logger.log_error(msg)
