@@ -2,6 +2,9 @@ import json
 
 import pytest
 from py42.exceptions import Py42ActiveLegalHoldError
+from py42.exceptions import Py42BadRequestError
+from py42.exceptions import Py42CloudAliasCharacterLimitExceededError
+from py42.exceptions import Py42CloudAliasLimitExceededError
 from py42.exceptions import Py42InvalidEmailError
 from py42.exceptions import Py42InvalidPasswordError
 from py42.exceptions import Py42InvalidUsernameError
@@ -39,6 +42,25 @@ TEST_USERS_RESPONSE = {
             "quotaInBytes": 55555,
         }
     ]
+}
+TEST_USER_RESPONSE = {
+    "tenantId": "SampleTenant1",
+    "userId": 12345,
+    "userName": "Sample.User1@samplecase.com",
+    "displayName": "Sample User1",
+    "notes": "This is an example of notes about Sample User1.",
+    "cloudUsernames": ["Sample.User1@samplecase.com", "Sample.User1@gmail.com"],
+    "managerUid": 12345,
+    "managerUsername": "manager.user1@samplecase.com",
+    "managerDisplayName": "Manager Name",
+    "title": "Software Engineer",
+    "division": "Engineering",
+    "department": "Research and Development",
+    "employmentType": "Full-time",
+    "city": "Anytown",
+    "state": "MN",
+    "country": "US",
+    "riskFactors": ["FLIGHT_RISK", "HIGH_IMPACT_EMPLOYEE"],
 }
 TEST_MATTER_RESPONSE = {
     "legalHolds": [
@@ -78,7 +100,9 @@ TEST_EMPTY_CUSTODIANS_RESPONSE = {"legalHoldMemberships": []}
 TEST_EMPTY_MATTERS_RESPONSE = {"legalHolds": []}
 TEST_EMPTY_USERS_RESPONSE = {"users": []}
 TEST_USERNAME = TEST_USERS_RESPONSE["users"][0]["username"]
+TEST_ALIAS = TEST_USER_RESPONSE["cloudUsernames"][0]
 TEST_USER_ID = TEST_USERS_RESPONSE["users"][0]["userId"]
+TEST_USER_UID = TEST_USER_RESPONSE["userId"]
 TEST_ROLE_NAME = TEST_ROLE_RETURN_DATA["data"][0]["roleName"]
 TEST_GET_ORG_RESPONSE = {
     "orgId": 9087,
@@ -129,6 +153,19 @@ def get_users_response(mocker):
 
 
 @pytest.fixture
+def get_user_response(mocker):
+    return create_mock_response(mocker, data=TEST_USER_RESPONSE)
+
+
+@pytest.fixture
+def get_user_failure(mocker):
+    return Py42BadRequestError(
+        create_mock_http_error(mocker, data=None, status=400),
+        "Failure in HTTP call 400 Client Error: Bad Request for url: https://ecm-east.us.code42.com/svc/api/v2/user/getbyusername.",
+    )
+
+
+@pytest.fixture
 def change_org_response(mocker):
     return create_mock_response(mocker)
 
@@ -171,6 +208,17 @@ def get_all_users_success(mocker, cli_state):
 def get_user_id_success(cli_state, get_users_response):
     """Get by username returns a list of users"""
     cli_state.sdk.users.get_by_username.return_value = get_users_response
+
+
+@pytest.fixture
+def get_user_uid_success(cli_state, get_user_response):
+    """detectionlists.get_user returns a single user"""
+    cli_state.sdk.detectionlists.get_user.return_value = get_user_response
+
+
+@pytest.fixture
+def get_user_uid_failure(cli_state, get_user_failure):
+    cli_state.sdk.detectionlists.get_user.side_effect = get_user_failure
 
 
 @pytest.fixture
@@ -246,6 +294,27 @@ def reactivate_user_success(mocker, cli_state):
 @pytest.fixture
 def change_org_success(cli_state, change_org_response):
     cli_state.sdk.users.change_org_assignment.return_value = change_org_response
+
+
+@pytest.fixture
+def add_alias_success(mocker, cli_state):
+    cli_state.sdk.detectionlists.add_user_cloud_alias.return_value = create_mock_response(
+        mocker
+    )
+
+
+@pytest.fixture
+def add_alias_limit_failure(mocker, cli_state):
+    cli_state.sdk.detectionlists.add_user_cloud_alias.side_effect = Py42CloudAliasLimitExceededError(
+        create_mock_http_error(mocker)
+    )
+
+
+@pytest.fixture
+def remove_alias_success(mocker, cli_state):
+    cli_state.sdk.detectionlists.remove_user_cloud_alias.return_value = create_mock_response(
+        mocker
+    )
 
 
 @pytest.fixture
@@ -1356,3 +1425,236 @@ def test_orgs_show_when_invalid_org_uid_raises_error(runner, cli_state, custom_e
     result = runner.invoke(cli, ["users", "orgs", "show", TEST_ORG_UID], obj=cli_state)
     assert result.exit_code == 1
     assert f"Invalid org UID {TEST_ORG_UID}." in result.output
+
+
+def test_list_aliases_calls_get_user_with_expected_parameters(runner, cli_state):
+    username = "alias@example"
+    command = ["users", "list-aliases", username]
+    runner.invoke(cli, command, obj=cli_state)
+    cli_state.sdk.detectionlists.get_user.assert_called_once_with("alias@example")
+
+
+def test_list_aliases_prints_no_aliases_found_when_empty_list(
+    runner, cli_state, mocker
+):
+    cli_state.sdk.detectionlists.get_user.return_value = create_mock_response(
+        mocker, data={"cloudUsernames": []}
+    )
+    username = "alias@example"
+    command = ["users", "list-aliases", username]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert result.exit_code == 0
+    assert f"No cloud aliases for user '{username}' found" in result.output
+
+
+def test_list_aliases_prints_expected_data(runner, cli_state, get_user_uid_success):
+    result = runner.invoke(
+        cli, ["users", "list-aliases", "alias@example.com"], obj=cli_state
+    )
+    assert result.exit_code == 0
+    assert "['Sample.User1@samplecase.com', 'Sample.User1@gmail.com']" in result.output
+
+
+def test_list_aliases_raises_error_when_user_does_not_exist(
+    runner, cli_state, get_user_uid_failure
+):
+    username = "fake@notreal.com"
+    command = ["users", "list-aliases", username]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert result.exit_code == 1
+    assert (
+        f"User '{username}' does not exist or you do not have permission to view them."
+        in result.output
+    )
+
+
+def test_add_cloud_alias_calls_add_cloud_alias_with_correct_parameters(
+    runner, cli_state, get_user_uid_success, add_alias_success
+):
+    command = ["users", "add-alias", "test@example.com", "alias@example.com"]
+    runner.invoke(cli, command, obj=cli_state)
+    cli_state.sdk.detectionlists.add_user_cloud_alias.assert_called_once_with(
+        TEST_USER_UID, "alias@example.com"
+    )
+
+
+def test_add_alias_raises_error_when_user_does_not_exist(
+    runner, cli_state, get_user_uid_failure
+):
+    username = "fake@notreal.com"
+    command = ["users", "add-alias", username, "alias@example.com"]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert result.exit_code == 1
+    assert (
+        f"User '{username}' does not exist or you do not have permission to view them."
+        in result.output
+    )
+
+
+def test_add_alias_raises_error_when_alias_is_too_long(runner, cli_state):
+    command = [
+        "users",
+        "add-alias",
+        "fake@notreal.com",
+        "alias-is-too-long-its-very-long-for-real-more-than-50-characters@example.com",
+    ]
+    cli_state.sdk.detectionlists.add_user_cloud_alias.side_effect = (
+        Py42CloudAliasCharacterLimitExceededError
+    )
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert result.exit_code == 1
+    assert "Cloud alias character limit exceeded" in result.output
+
+
+def test_add_alias_raises_error_when_user_has_two_aliases(
+    runner, cli_state, add_alias_limit_failure
+):
+    command = [
+        "users",
+        "add-alias",
+        "fake@notreal.com",
+        "second_alias",
+    ]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert result.exit_code == 1
+    assert (
+        "Error: Cloud alias limit exceeded. A max of 2 cloud aliases are allowed."
+        in result.output
+    )
+
+
+def test_remove_cloud_alias_calls_remove_cloud_alias_with_correct_parameters(
+    runner, cli_state, get_user_uid_success, remove_alias_success
+):
+    command = ["users", "remove-alias", "test@example.com", "alias@example.com"]
+    runner.invoke(cli, command, obj=cli_state)
+    cli_state.sdk.detectionlists.remove_user_cloud_alias.assert_called_once_with(
+        TEST_USER_UID, "alias@example.com"
+    )
+
+
+def test_remove_alias_raises_error_when_user_does_not_exist(
+    runner, cli_state, get_user_uid_failure
+):
+    username = "fake@notreal.com"
+    command = ["users", "remove-alias", username, "alias@example.com"]
+    result = runner.invoke(cli, command, obj=cli_state)
+    assert result.exit_code == 1
+    assert (
+        f"User '{username}' does not exist or you do not have permission to view them."
+        in result.output
+    )
+
+
+def test_bulk_add_alias_uses_expected_arguments(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_add_alias.csv", "w") as csv:
+            csv.writelines(["username,alias\n", f"{TEST_USERNAME},{TEST_ALIAS}\n"])
+        runner.invoke(
+            cli, ["users", "bulk", "add-alias", "test_add_alias.csv"], obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": TEST_USERNAME, "alias": TEST_ALIAS, "alias added": "False"}
+    ]
+    bulk_processor.assert_called_once()
+
+
+def test_bulk_add_alias_ignores_blank_lines(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_add_alias.csv", "w") as csv:
+            csv.writelines(
+                ["username,alias\n\n\n", f"{TEST_USERNAME},{TEST_ALIAS}\n\n\n"]
+            )
+        runner.invoke(
+            cli, ["users", "bulk", "add-alias", "test_add_alias.csv"], obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": TEST_USERNAME, "alias": TEST_ALIAS, "alias added": "False"}
+    ]
+    bulk_processor.assert_called_once()
+
+
+def test_bulk_add_alias_uses_handler_that_when_encounters_error_increments_total_errors(
+    runner, mocker, cli_state, worker_stats, get_user_response
+):
+    lines = ["username,alias\n", f"{TEST_USERNAME},{TEST_ALIAS}\n"]
+
+    def _get(username, *args, **kwargs):
+        if username == "test@example.com":
+            raise Exception("TEST")
+        return get_user_response
+
+    cli_state.sdk.detectionlists.get_user.side_effect = _get
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_add_alias.csv", "w") as csv:
+            csv.writelines(lines)
+        runner.invoke(
+            cli, ["users", "bulk", "add-alias", "test_add_alias.csv"], obj=cli_state,
+        )
+    handler = bulk_processor.call_args[0][0]
+    handler(username="test@example.com", alias=TEST_ALIAS)
+    handler(username="not.test@example.com", alias=TEST_ALIAS)
+    assert worker_stats.increment_total_errors.call_count == 1
+
+
+def test_bulk_remove_alias_uses_expected_arguments(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_remove_alias.csv", "w") as csv:
+            csv.writelines(["username,alias\n", f"{TEST_USERNAME},{TEST_ALIAS}\n"])
+        runner.invoke(
+            cli,
+            ["users", "bulk", "remove-alias", "test_remove_alias.csv"],
+            obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": TEST_USERNAME, "alias": TEST_ALIAS, "alias removed": "False"}
+    ]
+    bulk_processor.assert_called_once()
+
+
+def test_bulk_remove_alias_ignores_blank_lines(runner, mocker, cli_state):
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_remove_alias.csv", "w") as csv:
+            csv.writelines(
+                ["username,alias\n\n\n", f"{TEST_USERNAME},{TEST_ALIAS}\n\n\n"]
+            )
+        runner.invoke(
+            cli,
+            ["users", "bulk", "remove-alias", "test_remove_alias.csv"],
+            obj=cli_state,
+        )
+    assert bulk_processor.call_args[0][1] == [
+        {"username": TEST_USERNAME, "alias": TEST_ALIAS, "alias removed": "False"}
+    ]
+    bulk_processor.assert_called_once()
+
+
+def test_bulk_remove_alias_uses_handler_that_when_encounters_error_increments_total_errors(
+    runner, mocker, cli_state, worker_stats, get_user_response
+):
+    lines = ["username,alias\n", f"{TEST_USERNAME},{TEST_ALIAS}\n"]
+
+    def _get(username, *args, **kwargs):
+        if username == "test@example.com":
+            raise Exception("TEST")
+        return get_user_response
+
+    cli_state.sdk.detectionlists.get_user.side_effect = _get
+    bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
+    with runner.isolated_filesystem():
+        with open("test_remove_alias.csv", "w") as csv:
+            csv.writelines(lines)
+        runner.invoke(
+            cli,
+            ["users", "bulk", "remove-alias", "test_remove_alias.csv"],
+            obj=cli_state,
+        )
+    handler = bulk_processor.call_args[0][0]
+    handler(username="test@example.com", alias=TEST_ALIAS)
+    handler(username="not.test@example.com", alias=TEST_ALIAS)
+    assert worker_stats.increment_total_errors.call_count == 1
