@@ -174,7 +174,7 @@ The following tables map the file event data from the Code42 CLI to common event
 The table below maps JSON fields, CEF fields, and [Forensic Search fields](https://code42.com/r/support/forensic-search-fields)
 to one another.
 
-```eval_rst
+```{eval-rst}
 
 +----------------------------+---------------------------------+----------------------------------------+
 | JSON field                 | CEF field                       | Forensic Search field                  |
@@ -255,7 +255,7 @@ to one another.
 
 See the table below to map file events to CEF signature IDs.
 
-```eval_rst
+```{eval-rst}
 
 +--------------------+-----------+
 | Exfiltration event | CEF field |
