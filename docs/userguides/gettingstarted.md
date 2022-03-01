@@ -68,7 +68,7 @@ python3 -m pip install code42cli --upgrade
 
 ## Authentication
 
-```eval_rst
+```{eval-rst}
 .. important:: The Code42 CLI currently only supports token-based authentication.
 ```
 

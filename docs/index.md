@@ -1,5 +1,21 @@
 # Code42 command-line interface (CLI)
 
+```{eval-rst}
+.. toctree::
+    :hidden:
+    :maxdepth: 2
+
+    guides
+```
+
+```{eval-rst}
+.. toctree::
+    :hidden:
+    :maxdepth: 2
+
+    commands
+```
+
 [![license](https://img.shields.io/pypi/l/code42cli.svg)](https://pypi.org/project/code42cli/)
 [![versions](https://img.shields.io/pypi/pyversions/code42cli.svg)](https://pypi.org/project/code42cli/)
 

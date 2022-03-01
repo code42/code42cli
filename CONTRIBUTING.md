@@ -172,7 +172,7 @@ tox -e docs
 To build and run the documentation locally, run the following from the `docs` directory:
 
 ```bash
-pip install sphinx recommonmark sphinx_rtd_theme
+pip install sphinx myst_parser sphinx_rtd_theme
 make html
 ```
 
