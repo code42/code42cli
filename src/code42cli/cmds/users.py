@@ -234,7 +234,9 @@ def change_organization(state, username, org_id):
 @click.argument("alias")
 @sdk_options()
 def add_alias(state, username, alias):
-    """Add a cloud alias for a given user."""
+    """Add a cloud alias for a given user.
+
+    A cloud alias is the username an employee uses to access cloud services such as Google Drive or Box. Adding a cloud alias allows Incydr to link a user's cloud activity with their Code42 username. Each user has a default cloud alias of their Code42 username. You can add one additional alias."""
     _add_cloud_alias(state.sdk, username, alias)
 
 
@@ -251,7 +253,7 @@ def remove_alias(state, username, alias):
 @click.argument("username")
 @sdk_options()
 def list_aliases(state, username):
-    """List the cloud aliases for a given user."""
+    """List the cloud aliases for a given user.  Each user has a default cloud alias of their Code42 username with up to one additional alias."""
     user = _get_user(state.sdk, username)
     aliases = user["cloudUsernames"]
     if aliases:
@@ -577,7 +579,7 @@ def bulk_remove_roles(state, csv_rows, format):
 
 @bulk.command(
     name="add-alias",
-    help=f"Add aliases to a list of users from the provided CSV in format: {','.join(_bulk_user_alias_headers)}",
+    help=f"Add aliases to a list of users from the provided CSV in format: {','.join(_bulk_user_alias_headers)}.\n\nA cloud alias is the username an employee uses to access cloud services such as Google Drive or Box. Adding a cloud alias allows Incydr to link a user's cloud activity with their Code42 username. Each user has a default cloud alias of their Code42 username. You can add one additional alias.",
 )
 @read_csv_arg(headers=_bulk_user_alias_headers)
 @format_option
