@@ -2,6 +2,7 @@ from datetime import date
 
 import click
 import numpy as np
+import py42.clients.settings.device_settings
 from pandas import concat
 from pandas import DataFrame
 from pandas import json_normalize
@@ -161,13 +162,16 @@ def _update_cold_storage_purge_date(sdk, guid, purge_date):
 def _change_device_name(sdk, guid, name):
     try:
         device_settings = sdk.devices.get_settings(guid)
+        if isinstance(device_settings, py42.clients.settings.device_settings.IncydrDeviceSettings):
+            raise Code42CLIError(
+                "Failed to rename device. Incydr devices cannot be renamed."
+            )
         device_settings.name = name
         sdk.devices.update_settings(device_settings)
-    except KeyError as e:
-        if e.args[0] == "availableDestinations":
-            raise Code42CLIError(
-                "This device is missing the expected settings. Incydr devices cannot be renamed."
-            )
+    except KeyError:
+        raise Code42CLIError(
+            "Failed to rename device. This device is missing expected settings fields."
+        )
     except exceptions.Py42ForbiddenError:
         raise Code42CLIError(
             f"You don't have the necessary permissions to rename the device with GUID '{guid}'."
