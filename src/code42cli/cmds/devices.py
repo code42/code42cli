@@ -9,6 +9,7 @@ from pandas import json_normalize
 from pandas import Series
 from pandas import to_datetime
 from py42 import exceptions
+from py42.clients.settings.device_settings import IncydrDeviceSettings
 from py42.exceptions import Py42NotFoundError
 
 from code42cli.bulk import generate_template_cmd_factory
@@ -162,7 +163,7 @@ def _update_cold_storage_purge_date(sdk, guid, purge_date):
 def _change_device_name(sdk, guid, name):
     try:
         device_settings = sdk.devices.get_settings(guid)
-        if isinstance(device_settings, py42.clients.settings.device_settings.IncydrDeviceSettings):
+        if isinstance(device_settings, IncydrDeviceSettings):
             raise Code42CLIError(
                 "Failed to rename device. Incydr devices cannot be renamed."
             )
