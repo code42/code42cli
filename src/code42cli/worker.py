@@ -98,8 +98,7 @@ class Worker:
 
     @property
     def stats(self):
-        """Stats about the tasks that have been executed, such as the total errors that occurred.
-        """
+        """Stats about the tasks that have been executed, such as the total errors that occurred."""
         return self._stats
 
     def wait(self):

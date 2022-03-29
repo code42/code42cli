@@ -471,7 +471,9 @@ def test_search_and_send_to_when_advanced_query_passed_as_json_string_builds_exp
     cli_state, runner, command, search_all_alerts_success
 ):
     runner.invoke(
-        cli, [*command, "--advanced-query", ADVANCED_QUERY_JSON], obj=cli_state,
+        cli,
+        [*command, "--advanced-query", ADVANCED_QUERY_JSON],
+        obj=cli_state,
     )
     query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     passed_filter_groups = query._filter_group_list
@@ -532,7 +534,9 @@ def test_search_and_send_to_when_given_begin_and_end_dates_uses_expected_query(
     end_date = get_test_date_str(days_ago=1)
 
     runner.invoke(
-        cli, [*command, "--begin", begin_date, "--end", end_date], obj=cli_state,
+        cli,
+        [*command, "--begin", begin_date, "--end", end_date],
+        obj=cli_state,
     )
     query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     query_dict = dict(query)
@@ -636,7 +640,9 @@ def test_search_and_send_to_when_end_date_is_before_begin_date_causes_exit(
     begin_date = get_test_date_str(days_ago=1)
     end_date = get_test_date_str(days_ago=3)
     result = runner.invoke(
-        cli, [*command, "--begin", begin_date, "--end", end_date], obj=cli_state,
+        cli,
+        [*command, "--begin", begin_date, "--end", end_date],
+        obj=cli_state,
     )
     assert result.exit_code == 2
     assert "'--begin': cannot be after --end date" in result.output
@@ -687,7 +693,9 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_without_check
     search_all_alerts_success,
 ):
     res = runner.invoke(
-        cli, [*command, "--use-checkpoint", "test", "--begin", "1d"], obj=cli_state,
+        cli,
+        [*command, "--use-checkpoint", "test", "--begin", "1d"],
+        obj=cli_state,
     )
     query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     query_dict = dict(query)
@@ -703,7 +711,9 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_with_stored_c
     cli_state, alert_cursor_with_checkpoint, runner, command, search_all_alerts_success
 ):
     result = runner.invoke(
-        cli, [*command, "--use-checkpoint", "test", "--begin", "1h"], obj=cli_state,
+        cli,
+        [*command, "--use-checkpoint", "test", "--begin", "1h"],
+        obj=cli_state,
     )
     query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     assert result.exit_code == 0
@@ -732,7 +742,9 @@ def test_search_and_send_to_when_given_exclude_actor_uses_actor_filter(
 ):
     actor_name = "test.testerson"
     runner.invoke(
-        cli, [*command, "--begin", "1h", "--exclude-actor", actor_name], obj=cli_state,
+        cli,
+        [*command, "--begin", "1h", "--exclude-actor", actor_name],
+        obj=cli_state,
     )
     query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     assert f.Actor.not_in([actor_name]) in query._filter_group_list
@@ -744,7 +756,9 @@ def test_search_and_send_to_when_given_rule_name_uses_rule_name_filter(
 ):
     rule_name = "departing employee"
     runner.invoke(
-        cli, [*command, "--begin", "1h", "--rule-name", rule_name], obj=cli_state,
+        cli,
+        [*command, "--begin", "1h", "--rule-name", rule_name],
+        obj=cli_state,
     )
     query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     assert f.RuleName.is_in([rule_name]) in query._filter_group_list
@@ -770,7 +784,9 @@ def test_search_and_send_to_when_given_rule_type_uses_rule_name_filter(
 ):
     rule_type = "FedEndpointExfiltration"
     runner.invoke(
-        cli, [*command, "--begin", "1h", "--rule-type", rule_type], obj=cli_state,
+        cli,
+        [*command, "--begin", "1h", "--rule-type", rule_type],
+        obj=cli_state,
     )
     query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     assert f.RuleType.is_in([rule_type]) in query._filter_group_list
@@ -806,7 +822,9 @@ def test_search_and_send_to_when_given_exclude_rule_id_uses_rule_name_not_filter
 ):
     rule_id = "departing employee"
     runner.invoke(
-        cli, [*command, "--begin", "1h", "--exclude-rule-id", rule_id], obj=cli_state,
+        cli,
+        [*command, "--begin", "1h", "--exclude-rule-id", rule_id],
+        obj=cli_state,
     )
     query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     assert f.RuleId.not_in([rule_id]) in query._filter_group_list
@@ -818,7 +836,9 @@ def test_search_and_send_to_when_given_description_uses_description_filter(
 ):
     description = "test description"
     runner.invoke(
-        cli, [*command, "--begin", "1h", "--description", description], obj=cli_state,
+        cli,
+        [*command, "--begin", "1h", "--description", description],
+        obj=cli_state,
     )
     query = cli_state.sdk.alerts.get_all_alert_details.call_args[0][0]
     assert f.Description.contains(description) in query._filter_group_list

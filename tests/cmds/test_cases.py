@@ -101,7 +101,9 @@ def update_on_a_closed_case_error(custom_error):
 
 def test_create_calls_create_with_expected_params(runner, cli_state):
     runner.invoke(
-        cli, ["cases", "create", "TEST_CASE"], obj=cli_state,
+        cli,
+        ["cases", "create", "TEST_CASE"],
+        obj=cli_state,
     )
     cli_state.sdk.cases.create.assert_called_once_with(
         "TEST_CASE", assignee=None, description=None, findings=None, subject=None
@@ -177,7 +179,9 @@ def test_update_with_optional_fields_calls_update_with_expected_params(
 
 def test_update_calls_update_with_expected_params(runner, cli_state):
     runner.invoke(
-        cli, ["cases", "update", "1", "--name", "TEST_CASE2"], obj=cli_state,
+        cli,
+        ["cases", "update", "1", "--name", "TEST_CASE2"],
+        obj=cli_state,
     )
     cli_state.sdk.cases.update.assert_called_once_with(
         1,
@@ -199,7 +203,9 @@ def test_update_when_missing_case_number_prints_error(runner, cli_state):
 
 def test_list_calls_get_all_with_expected_params(runner, cli_state):
     runner.invoke(
-        cli, ["cases", "list"], obj=cli_state,
+        cli,
+        ["cases", "list"],
+        obj=cli_state,
     )
     assert cli_state.sdk.cases.get_all.call_count == 1
 
@@ -211,14 +217,20 @@ def test_list_prints_expected_data(runner, cli_state, py42_response):
         yield py42_response.data
 
     cli_state.sdk.cases.get_all.return_value = gen()
-    result = runner.invoke(cli, ["cases", "list"], obj=cli_state,)
+    result = runner.invoke(
+        cli,
+        ["cases", "list"],
+        obj=cli_state,
+    )
     assert "2021-01-24T11:00:04.217878Z" in result.output
     assert "942897" in result.output
 
 
 def test_show_calls_get_case_with_expected_params(runner, cli_state):
     runner.invoke(
-        cli, ["cases", "show", "1"], obj=cli_state,
+        cli,
+        ["cases", "show", "1"],
+        obj=cli_state,
     )
     cli_state.sdk.cases.get.assert_called_once_with(1)
 
@@ -227,7 +239,9 @@ def test_show_with_include_file_events_calls_file_events_get_all_with_expected_p
     runner, cli_state
 ):
     runner.invoke(
-        cli, ["cases", "show", "1", "--include-file-events"], obj=cli_state,
+        cli,
+        ["cases", "show", "1", "--include-file-events"],
+        obj=cli_state,
     )
     cli_state.sdk.cases.get.assert_called_once_with(1)
     cli_state.sdk.cases.file_events.get_all.assert_called_once_with(1)
@@ -240,7 +254,9 @@ def test_show_when_py42_raises_exception_prints_error_message(
         custom_error
     )
     result = runner.invoke(
-        cli, ["cases", "show", "1", "--include-file-events"], obj=cli_state,
+        cli,
+        ["cases", "show", "1", "--include-file-events"],
+        obj=cli_state,
     )
     cli_state.sdk.cases.file_events.get_all.assert_called_once_with(1)
     assert "Invalid case-number 1." in result.output
@@ -249,7 +265,11 @@ def test_show_when_py42_raises_exception_prints_error_message(
 def test_show_prints_expected_data(runner, cli_state, py42_response):
     py42_response.data = json.loads(CASE_DETAILS)
     cli_state.sdk.cases.get.return_value = py42_response
-    result = runner.invoke(cli, ["cases", "show", "1"], obj=cli_state,)
+    result = runner.invoke(
+        cli,
+        ["cases", "show", "1"],
+        obj=cli_state,
+    )
     assert "test-single@example.com" in result.output
     assert "2021-01-24T11:00:04.217878Z" in result.output
     assert "123456" in result.output
@@ -264,7 +284,9 @@ def test_show_prints_expected_data_with_include_file_events_option(
     cli_state.sdk.cases.get.return_value = get_case_response
     cli_state.sdk.cases.file_events.get_all.return_value = py42_response
     result = runner.invoke(
-        cli, ["cases", "show", "1", "--include-file-events"], obj=cli_state,
+        cli,
+        ["cases", "show", "1", "--include-file-events"],
+        obj=cli_state,
     )
     assert (
         "0_147e9445-2f30-4a91-8b2a-9455332e880a_973435567569502913_986467523038446097_163"
@@ -285,7 +307,9 @@ def test_show_case_when_missing_case_number_prints_error(runner, cli_state):
 def test_export_calls_export_summary_with_expected_params(runner, cli_state, mocker):
     with mock.patch("builtins.open", mock_open()) as mf:
         runner.invoke(
-            cli, ["cases", "export", "1"], obj=cli_state,
+            cli,
+            ["cases", "export", "1"],
+            obj=cli_state,
         )
         cli_state.sdk.cases.export_summary.assert_called_once_with(1)
         expected = os.path.join(os.getcwd(), "1_case_summary.pdf")
@@ -373,14 +397,20 @@ def test_file_events_remove_when_missing_case_number_prints_error(runner, cli_st
 
 def test_file_events_list_calls_get_all_with_expected_params(runner, cli_state):
     runner.invoke(
-        cli, ["cases", "file-events", "list", "1"], obj=cli_state,
+        cli,
+        ["cases", "file-events", "list", "1"],
+        obj=cli_state,
     )
     cli_state.sdk.cases.file_events.get_all.assert_called_once_with(1)
 
 
 def test_file_events_list_prints_expected_data(runner, cli_state):
     cli_state.sdk.cases.file_events.get_all.return_value = json.loads(ALL_EVENTS)
-    result = runner.invoke(cli, ["cases", "file-events", "list", "1"], obj=cli_state,)
+    result = runner.invoke(
+        cli,
+        ["cases", "file-events", "list", "1"],
+        obj=cli_state,
+    )
     assert (
         "0_147e9445-2f30-4a91-8b2a-9455332e880a_973435567569502913_986467523038446097_163"
         in result.output
@@ -399,7 +429,11 @@ def test_cases_create_when_case_name_already_exists_raises_exception_prints_erro
     runner, cli_state, case_already_exists_error
 ):
     cli_state.sdk.cases.create.side_effect = case_already_exists_error
-    result = runner.invoke(cli, ["cases", "create", "test case"], obj=cli_state,)
+    result = runner.invoke(
+        cli,
+        ["cases", "create", "test case"],
+        obj=cli_state,
+    )
     assert (
         "Case name 'test case' already exists, please set another name" in result.output
     )
@@ -422,7 +456,9 @@ def test_cases_update_when_description_length_limit_exceeds_raises_exception_pri
 ):
     cli_state.sdk.cases.update.side_effect = case_description_limit_exceeded_error
     result = runner.invoke(
-        cli, ["cases", "update", "1", "--description", "too long"], obj=cli_state,
+        cli,
+        ["cases", "update", "1", "--description", "too long"],
+        obj=cli_state,
     )
     assert "Description limit exceeded, max 250 characters allowed." in result.output
 

@@ -586,7 +586,9 @@ def test_deactivate_does_not_change_device_name_when_not_given_flag(
 ):
     cli_state.sdk.devices.get_settings.return_value = mock_device_settings
     runner.invoke(
-        cli, ["devices", "deactivate", TEST_DEVICE_GUID], obj=cli_state,
+        cli,
+        ["devices", "deactivate", TEST_DEVICE_GUID],
+        obj=cli_state,
     )
     assert mock_device_settings.name == "testname"
     cli_state.sdk.devices.update_settings.assert_not_called()
@@ -799,7 +801,9 @@ def test_list_invalid_org_uid_raises_error(runner, cli_state, custom_error):
 
 
 def test_list_excludes_recently_connected_devices_before_filtering_by_date(
-    runner, cli_state, get_all_devices_success,
+    runner,
+    cli_state,
+    get_all_devices_success,
 ):
     result = runner.invoke(
         cli,
@@ -875,7 +879,9 @@ def test_created_after_filters_appropriate_results(
     cli_state, runner, get_all_devices_success
 ):
     result = runner.invoke(
-        cli, ["devices", "list", "--created-after", TEST_DATE_MIDDLE], obj=cli_state,
+        cli,
+        ["devices", "list", "--created-after", TEST_DATE_MIDDLE],
+        obj=cli_state,
     )
     assert TEST_DATE_NEWER in result.output
     assert TEST_DATE_OLDER not in result.output
@@ -885,7 +891,9 @@ def test_created_before_filters_appropriate_results(
     cli_state, runner, get_all_devices_success
 ):
     result = runner.invoke(
-        cli, ["devices", "list", "--created-before", TEST_DATE_MIDDLE], obj=cli_state,
+        cli,
+        ["devices", "list", "--created-before", TEST_DATE_MIDDLE],
+        obj=cli_state,
     )
     assert TEST_DATE_NEWER not in result.output
     assert TEST_DATE_OLDER in result.output
@@ -1086,7 +1094,9 @@ def test_bulk_rename_uses_expected_arguments(runner, mocker, cli_state):
         with open("test_bulk_rename.csv", "w") as csv:
             csv.writelines(["guid,name\n", "test-guid,test-name\n"])
         runner.invoke(
-            cli, ["devices", "bulk", "rename", "test_bulk_rename.csv"], obj=cli_state,
+            cli,
+            ["devices", "bulk", "rename", "test_bulk_rename.csv"],
+            obj=cli_state,
         )
     assert bulk_processor.call_args[0][1] == [
         {"guid": "test-guid", "name": "test-name", "renamed": "False"}
@@ -1099,7 +1109,9 @@ def test_bulk_rename_ignores_blank_lines(runner, mocker, cli_state):
         with open("test_bulk_rename.csv", "w") as csv:
             csv.writelines(["guid,name\n", "\n", "test-guid,test-name\n\n"])
         runner.invoke(
-            cli, ["devices", "bulk", "rename", "test_bulk_rename.csv"], obj=cli_state,
+            cli,
+            ["devices", "bulk", "rename", "test_bulk_rename.csv"],
+            obj=cli_state,
         )
     assert bulk_processor.call_args[0][1] == [
         {"guid": "test-guid", "name": "test-name", "renamed": "False"}
@@ -1121,7 +1133,9 @@ def test_bulk_rename_uses_handler_that_when_encounters_error_increments_total_er
         with open("test_bulk_rename.csv", "w") as csv:
             csv.writelines(["guid,name\n", "1,2\n"])
         runner.invoke(
-            cli, ["devices", "bulk", "rename", "test_bulk_rename.csv"], obj=cli_state,
+            cli,
+            ["devices", "bulk", "rename", "test_bulk_rename.csv"],
+            obj=cli_state,
         )
     handler = bulk_processor.call_args[0][0]
     handler(guid="test", name="test-name-1")

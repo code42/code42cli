@@ -118,8 +118,8 @@ def test_add_user_adds_user_list_to_alert_rules(runner, cli_state):
 def test_add_user_when_returns_invalid_rule_type_error_and_system_rule_exits(
     mocker, runner, cli_state
 ):
-    cli_state.sdk.alerts.rules.add_user.side_effect = create_invalid_rule_type_side_effect(
-        mocker
+    cli_state.sdk.alerts.rules.add_user.side_effect = (
+        create_invalid_rule_type_side_effect(mocker)
     )
     result = runner.invoke(
         cli,
@@ -149,8 +149,8 @@ def test_add_user_when_returns_500_and_not_system_rule_raises_Py42InternalServer
 
 
 def test_add_user_when_rule_not_found_prints_expected_output(mocker, runner, cli_state):
-    cli_state.sdk.alerts.rules.get_by_observer_id.side_effect = get_rule_not_found_side_effect(
-        mocker
+    cli_state.sdk.alerts.rules.get_by_observer_id.side_effect = (
+        get_rule_not_found_side_effect(mocker)
     )
     result = runner.invoke(
         cli,
@@ -177,8 +177,8 @@ def test_remove_user_removes_user_list_from_alert_rules(runner, cli_state):
 def test_remove_user_when_raise_invalid_rule_type_error_and_system_rule_raises_InvalidRuleTypeError(
     mocker, runner, cli_state
 ):
-    cli_state.sdk.alerts.rules.remove_user.side_effect = create_invalid_rule_type_side_effect(
-        mocker
+    cli_state.sdk.alerts.rules.remove_user.side_effect = (
+        create_invalid_rule_type_side_effect(mocker)
     )
     result = runner.invoke(
         cli,
@@ -196,8 +196,8 @@ def test_remove_user_when_raise_invalid_rule_type_error_and_system_rule_raises_I
 def test_remove_user_when_rule_not_found_prints_expected_output(
     mocker, runner, cli_state
 ):
-    cli_state.sdk.alerts.rules.get_by_observer_id.side_effect = get_rule_not_found_side_effect(
-        mocker
+    cli_state.sdk.alerts.rules.get_by_observer_id.side_effect = (
+        get_rule_not_found_side_effect(mocker)
     )
     result = runner.invoke(
         cli,
@@ -210,8 +210,8 @@ def test_remove_user_when_rule_not_found_prints_expected_output(
 def test_remove_user_when_raises_invalid_rule_type_side_effect_and_not_system_rule_raises_Py42InternalServerError(
     mocker, runner, cli_state
 ):
-    cli_state.sdk.alerts.rules.remove_user.side_effect = create_invalid_rule_type_side_effect(
-        mocker
+    cli_state.sdk.alerts.rules.remove_user.side_effect = (
+        create_invalid_rule_type_side_effect(mocker)
     )
     result = runner.invoke(
         cli,
@@ -317,8 +317,8 @@ def test_list_cmd_formats_to_csv_when_format_is_passed(runner, cli_state):
 
 
 def test_remove_when_user_not_on_rule_raises_expected_error(runner, cli_state, mocker):
-    cli_state.sdk.alerts.rules.remove_user.side_effect = get_user_not_on_alert_rule_side_effect(
-        mocker
+    cli_state.sdk.alerts.rules.remove_user.side_effect = (
+        get_user_not_on_alert_rule_side_effect(mocker)
     )
     test_username = "test@example.com"
     test_rule_id = "101010"
@@ -347,8 +347,14 @@ def test_remove_when_user_not_on_rule_raises_expected_error(runner, cli_state, m
         (f"{ALERT_RULES_COMMAND} add-user", "Missing option '--rule-id'."),
         (f"{ALERT_RULES_COMMAND} remove-user", "Missing option '--rule-id'."),
         (f"{ALERT_RULES_COMMAND} show", "Missing argument 'RULE_ID'."),
-        (f"{ALERT_RULES_COMMAND} bulk add", "Error: Missing argument 'CSV_FILE'.",),
-        (f"{ALERT_RULES_COMMAND} bulk remove", "Error: Missing argument 'CSV_FILE'.",),
+        (
+            f"{ALERT_RULES_COMMAND} bulk add",
+            "Error: Missing argument 'CSV_FILE'.",
+        ),
+        (
+            f"{ALERT_RULES_COMMAND} bulk remove",
+            "Error: Missing argument 'CSV_FILE'.",
+        ),
     ],
 )
 def test_alert_rules_command_when_missing_required_parameters_errors(

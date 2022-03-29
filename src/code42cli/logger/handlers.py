@@ -50,8 +50,7 @@ class NoPrioritySysLogHandler(SysLogHandler):
         return self._protocol == ServerProtocol.TLS_TCP
 
     def connect_socket(self):
-        """Call to initialize the socket. If using TCP/TLS, it will also establish the connection.
-        """
+        """Call to initialize the socket. If using TCP/TLS, it will also establish the connection."""
         if not self.socket:
             self.socket = self._create_socket(self._hostname, self._port, self._certs)
 

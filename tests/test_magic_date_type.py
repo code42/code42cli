@@ -34,7 +34,8 @@ class TestMagicDateNoRounding:
         assert actual == expected
 
     @pytest.mark.parametrize(
-        "param", [begin_date_str_with_time, begin_date_str_with_t_time],
+        "param",
+        [begin_date_str_with_time, begin_date_str_with_t_time],
     )
     def test_when_given_date_str_with_time_parses_successfully(self, param):
         actual = self.convert(param)
@@ -86,7 +87,9 @@ class TestMagicDateRoundingToStart:
         expected = utc(datetime.strptime(begin_date_str, "%Y-%m-%d"))
         assert actual == expected
 
-    def test_when_given_date_str_with_time_parses_successfully(self,):
+    def test_when_given_date_str_with_time_parses_successfully(
+        self,
+    ):
         actual = self.convert(begin_date_str_with_time)
         expected = utc(datetime.strptime(begin_date_str_with_time, "%Y-%m-%d %H:%M:%S"))
         assert actual == expected

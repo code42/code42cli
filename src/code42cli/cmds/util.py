@@ -66,14 +66,14 @@ def try_get_default_header(include_all, default_header, output_format):
 
 def create_time_range_filter(filter_cls, begin_date=None, end_date=None):
     """Creates a filter using the given filter class (must be a subclass of
-        :class:`py42.sdk.queries.query_filter.QueryFilterTimestampField`) and date args. Returns
-        `None` if both begin_date and end_date args are `None`.
+    :class:`py42.sdk.queries.query_filter.QueryFilterTimestampField`) and date args. Returns
+    `None` if both begin_date and end_date args are `None`.
 
-        Args:
-            filter_cls: The class of filter to create. (must be a subclass of
-              :class:`py42.sdk.queries.query_filter.QueryFilterTimestampField`)
-            begin_date: The begin date for the range.
-            end_date: The end date for the range.
+    Args:
+        filter_cls: The class of filter to create. (must be a subclass of
+          :class:`py42.sdk.queries.query_filter.QueryFilterTimestampField`)
+        begin_date: The begin date for the range.
+        end_date: The end date for the range.
     """
     if not issubclass(filter_cls, QueryFilterTimestampField):
         raise Exception("filter_cls must be a subclass of QueryFilterTimestampField")
