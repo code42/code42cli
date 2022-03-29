@@ -35,7 +35,9 @@ def devices(state):
 
 
 device_guid_argument = click.argument(
-    "device-guid", type=str, callback=lambda ctx, param, arg: _verify_guid_type(arg),
+    "device-guid",
+    type=str,
+    callback=lambda ctx, param, arg: _verify_guid_type(arg),
 )
 
 new_device_name_option = click.option(
@@ -161,6 +163,11 @@ def _change_device_name(sdk, guid, name):
         device_settings = sdk.devices.get_settings(guid)
         device_settings.name = name
         sdk.devices.update_settings(device_settings)
+    except KeyError as e:
+        if e.args[0] == "availableDestinations":
+            raise Code42CLIError(
+                "This device is missing the expected settings. Incydr devices cannot be renamed."
+            )
     except exceptions.Py42ForbiddenError:
         raise Code42CLIError(
             f"You don't have the necessary permissions to rename the device with GUID '{guid}'."
@@ -500,7 +507,12 @@ def _break_backup_usage_into_total_storage(backup_usage):
 @format_option
 @sdk_options()
 def list_backup_sets(
-    state, active, inactive, org_uid, include_usernames, format,
+    state,
+    active,
+    inactive,
+    org_uid,
+    include_usernames,
+    format,
 ):
     """Get information about many devices and their backup sets."""
     if inactive:
