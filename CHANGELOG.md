@@ -13,7 +13,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Added
 - `departing-employee bulk remove` and `high-risk-employee bulk remove` commands now accept an optional header, as well as extraneous columns if a header is provided.
 - Added `devices rename` and `devices bulk rename` commands to rename devices.
-  - *Note: Incydr devices cannot be renamed.* 
+  - *Note: Incydr devices cannot be renamed.*
 - Added the following commands for managing users' cloud aliases:
   - `users add-alias`
   - `users remove-alias`
