@@ -154,7 +154,8 @@ def test_create_profile_if_credentials_invalid_password_not_saved(
 ):
     mock_cliprofile_namespace.profile_exists.return_value = False
     result = runner.invoke(
-        cli, ["profile", "create", "-n", "foo", "-s", "bar", "-u", "baz"],
+        cli,
+        ["profile", "create", "-n", "foo", "-s", "bar", "-u", "baz"],
     )
     assert "Password not stored!" in result.output
     assert not mock_cliprofile_namespace.set_password.call_count
@@ -272,7 +273,8 @@ def test_update_profile_updates_default_profile(
     profile.name = name
     mock_cliprofile_namespace.get_profile.return_value = profile
     runner.invoke(
-        cli, ["profile", "update", "-s", "bar", "-u", "baz", "--disable-ssl-errors"],
+        cli,
+        ["profile", "update", "-s", "bar", "-u", "baz", "--disable-ssl-errors"],
     )
     mock_cliprofile_namespace.update_profile.assert_called_once_with(
         name, "bar", "baz", True
@@ -286,7 +288,8 @@ def test_update_profile_updates_name_alone(
     profile.name = name
     mock_cliprofile_namespace.get_profile.return_value = profile
     runner.invoke(
-        cli, ["profile", "update", "-u", "baz", "--disable-ssl-errors"],
+        cli,
+        ["profile", "update", "-u", "baz", "--disable-ssl-errors"],
     )
     mock_cliprofile_namespace.update_profile.assert_called_once_with(
         name, None, "baz", True

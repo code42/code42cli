@@ -80,7 +80,9 @@ def trusted_activity_resource_id_not_found_error(custom_error):
 def test_create_calls_create_with_expected_params(runner, cli_state):
     command = ["trusted-activities", "create", "DOMAIN", "test-activity"]
     runner.invoke(
-        cli, command, obj=cli_state,
+        cli,
+        command,
+        obj=cli_state,
     )
     cli_state.sdk.trustedactivities.create.assert_called_once_with(
         "DOMAIN", "test-activity", description=None
@@ -99,7 +101,9 @@ def test_create_with_optional_fields_calls_create_with_expected_params(
         "description",
     ]
     runner.invoke(
-        cli, command, obj=cli_state,
+        cli,
+        command,
+        obj=cli_state,
     )
     cli_state.sdk.trustedactivities.create.assert_called_once_with(
         "SLACK", "test-activity", description="description"
@@ -170,10 +174,14 @@ def test_update_calls_update_with_expected_params(runner, cli_state):
         "test-activity-update",
     ]
     runner.invoke(
-        cli, command, obj=cli_state,
+        cli,
+        command,
+        obj=cli_state,
     )
     cli_state.sdk.trustedactivities.update.assert_called_once_with(
-        TEST_RESOURCE_ID, value="test-activity-update", description=None,
+        TEST_RESOURCE_ID,
+        value="test-activity-update",
+        description=None,
     )
 
 
@@ -190,7 +198,9 @@ def test_update_with_optional_fields_calls_update_with_expected_params(
         "update description",
     ]
     runner.invoke(
-        cli, command, obj=cli_state,
+        cli,
+        command,
+        obj=cli_state,
     )
     cli_state.sdk.trustedactivities.update.assert_called_once_with(
         TEST_RESOURCE_ID,
@@ -332,7 +342,9 @@ def test_bulk_add_trusted_activities_uses_expected_arguments(
             )
         command = ["trusted-activities", "bulk", "create", "test_create.csv"]
         runner.invoke(
-            cli, command, obj=cli_state_with_user,
+            cli,
+            command,
+            obj=cli_state_with_user,
         )
     assert bulk_processor.call_args[0][1] == [
         {"type": "DOMAIN", "value": "test-domain", "description": ""},
@@ -356,7 +368,9 @@ def test_bulk_update_trusted_activities_uses_expected_arguments(
             )
         command = ["trusted-activities", "bulk", "update", "test_update.csv"]
         runner.invoke(
-            cli, command, obj=cli_state_with_user,
+            cli,
+            command,
+            obj=cli_state_with_user,
         )
     assert bulk_processor.call_args[0][1] == [
         {"resource_id": "1", "value": "test-domain", "description": ""},
@@ -374,7 +388,9 @@ def test_bulk_remove_trusted_activities_uses_expected_arguments_when_no_header(
             csv.writelines(["1\n", "2\n"])
         command = ["trusted-activities", "bulk", "remove", "test_remove.csv"]
         runner.invoke(
-            cli, command, obj=cli_state_with_user,
+            cli,
+            command,
+            obj=cli_state_with_user,
         )
     assert bulk_processor.call_args[0][1] == [
         {"resource_id": "1"},

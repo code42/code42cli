@@ -28,7 +28,10 @@ org_uid_option = click.option(
     help="Limit users to only those in the organization you specify. Note that child orgs are included.",
 )
 active_option = click.option(
-    "--active", is_flag=True, help="Limits results to only active users.", default=None,
+    "--active",
+    is_flag=True,
+    help="Limits results to only active users.",
+    default=None,
 )
 inactive_option = click.option(
     "--inactive",
@@ -288,7 +291,8 @@ def _get_orgs_header():
 @format_option
 @sdk_options()
 def list_orgs(
-    state, format,
+    state,
+    format,
 ):
     """List all orgs."""
     pages = state.sdk.orgs.get_all()
@@ -305,7 +309,9 @@ def list_orgs(
 @format_option
 @sdk_options()
 def show_org(
-    state, org_uid, format,
+    state,
+    org_uid,
+    format,
 ):
     """Show org details."""
     formatter = OutputFormatter(format)

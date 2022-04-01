@@ -684,11 +684,23 @@ def test_search_events_when_no_results_outputs_no_results(runner, cli_state):
             f"{LEGAL_HOLD_COMMAND} remove-user --matter-id test-matter-id",
             "Missing option '-u' / '--username'.",
         ),
-        (f"{LEGAL_HOLD_COMMAND} add-user", "Missing option '-m' / '--matter-id'.",),
-        (f"{LEGAL_HOLD_COMMAND} remove-user", "Missing option '-m' / '--matter-id'.",),
+        (
+            f"{LEGAL_HOLD_COMMAND} add-user",
+            "Missing option '-m' / '--matter-id'.",
+        ),
+        (
+            f"{LEGAL_HOLD_COMMAND} remove-user",
+            "Missing option '-m' / '--matter-id'.",
+        ),
         (f"{LEGAL_HOLD_COMMAND} show", "Missing argument 'MATTER_ID'."),
-        (f"{LEGAL_HOLD_COMMAND} bulk add", "Error: Missing argument 'CSV_FILE'.",),
-        (f"{LEGAL_HOLD_COMMAND} bulk remove", "Error: Missing argument 'CSV_FILE'.",),
+        (
+            f"{LEGAL_HOLD_COMMAND} bulk add",
+            "Error: Missing argument 'CSV_FILE'.",
+        ),
+        (
+            f"{LEGAL_HOLD_COMMAND} bulk remove",
+            "Error: Missing argument 'CSV_FILE'.",
+        ),
     ],
 )
 def test_legal_hold_command_when_missing_required_parameters_returns_error(

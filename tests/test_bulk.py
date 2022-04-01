@@ -179,7 +179,9 @@ class TestBulkProcessor:
         assert (None, "foo") in processed_rows
         assert ("bar", None) in processed_rows
 
-    def test_processor_stores_results_in_stats(self,):
+    def test_processor_stores_results_in_stats(
+        self,
+    ):
         def func_for_bulk(test):
             return test
 

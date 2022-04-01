@@ -298,22 +298,22 @@ def change_org_success(cli_state, change_org_response):
 
 @pytest.fixture
 def add_alias_success(mocker, cli_state):
-    cli_state.sdk.detectionlists.add_user_cloud_alias.return_value = create_mock_response(
-        mocker
+    cli_state.sdk.detectionlists.add_user_cloud_alias.return_value = (
+        create_mock_response(mocker)
     )
 
 
 @pytest.fixture
 def add_alias_limit_failure(mocker, cli_state):
-    cli_state.sdk.detectionlists.add_user_cloud_alias.side_effect = Py42CloudAliasLimitExceededError(
-        create_mock_http_error(mocker)
+    cli_state.sdk.detectionlists.add_user_cloud_alias.side_effect = (
+        Py42CloudAliasLimitExceededError(create_mock_http_error(mocker))
     )
 
 
 @pytest.fixture
 def remove_alias_success(mocker, cli_state):
-    cli_state.sdk.detectionlists.remove_user_cloud_alias.return_value = create_mock_response(
-        mocker
+    cli_state.sdk.detectionlists.remove_user_cloud_alias.return_value = (
+        create_mock_response(mocker)
     )
 
 
@@ -511,7 +511,9 @@ def test_list_prints_expected_data_if_include_roles(
 
 def test_show_calls_get_by_username_with_expected_params(runner, cli_state):
     runner.invoke(
-        cli, ["users", "show", "test.username@example.com"], obj=cli_state,
+        cli,
+        ["users", "show", "test.username@example.com"],
+        obj=cli_state,
     )
     cli_state.sdk.users.get_by_username.assert_called_once_with(
         "test.username@example.com", incRoles=True
@@ -521,7 +523,9 @@ def test_show_calls_get_by_username_with_expected_params(runner, cli_state):
 def test_show_prints_expected_data(runner, cli_state, get_users_response):
     cli_state.sdk.users.get_by_username.return_value = get_users_response
     result = runner.invoke(
-        cli, ["users", "show", "test.username@example.com"], obj=cli_state,
+        cli,
+        ["users", "show", "test.username@example.com"],
+        obj=cli_state,
     )
     assert "test.username@example.com" in result.output
     assert "911162111513111325" in result.output
@@ -945,7 +949,9 @@ def test_bulk_update_uses_handler_that_when_encounters_error_increments_total_er
         with open("test_bulk_update.csv", "w") as csv:
             csv.writelines(lines)
         runner.invoke(
-            cli, ["users", "bulk", "update", "test_bulk_update.csv"], obj=cli_state,
+            cli,
+            ["users", "bulk", "update", "test_bulk_update.csv"],
+            obj=cli_state,
         )
     handler = bulk_processor.call_args[0][0]
     handler(
@@ -1033,7 +1039,9 @@ def test_bulk_move_uses_handler_that_when_encounters_error_increments_total_erro
         with open("test_bulk_move.csv", "w") as csv:
             csv.writelines(lines)
         runner.invoke(
-            cli, ["users", "bulk", "move", "test_bulk_move.csv"], obj=cli_state,
+            cli,
+            ["users", "bulk", "move", "test_bulk_move.csv"],
+            obj=cli_state,
         )
     handler = bulk_processor.call_args[0][0]
     handler(username="test@example.com", org_id="test")
@@ -1186,7 +1194,9 @@ def test_bulk_add_roles_uses_expected_arguments(runner, mocker, cli_state_with_u
             )
         command = ["users", "bulk", "add-roles", "test_bulk_add_roles.csv"]
         runner.invoke(
-            cli, command, obj=cli_state_with_user,
+            cli,
+            command,
+            obj=cli_state_with_user,
         )
     assert bulk_processor.call_args[0][1] == [
         {"username": TEST_USERNAME, "role_name": TEST_ROLE_NAME, "role added": "False"},
@@ -1241,7 +1251,8 @@ def test_bulk_add_roles_uses_handler_that_when_encounters_error_increments_total
     handler = bulk_processor.call_args[0][0]
 
     handler(
-        username="test@example.com", role_name=TEST_ROLE_NAME,
+        username="test@example.com",
+        role_name=TEST_ROLE_NAME,
     )
     handler(username="not.test@example.com", role_name=TEST_ROLE_NAME)
     assert worker_stats.increment_total_errors.call_count == 1
@@ -1256,7 +1267,9 @@ def test_bulk_remove_roles_uses_expected_arguments(runner, mocker, cli_state_wit
             )
         command = ["users", "bulk", "remove-roles", "test_bulk_remove_roles.csv"]
         runner.invoke(
-            cli, command, obj=cli_state_with_user,
+            cli,
+            command,
+            obj=cli_state_with_user,
         )
     assert bulk_processor.call_args[0][1] == [
         {
@@ -1319,7 +1332,8 @@ def test_bulk_remove_roles_uses_handler_that_when_encounters_error_increments_to
         )
     handler = bulk_processor.call_args[0][0]
     handler(
-        username="test@example.com", role_name=TEST_ROLE_NAME,
+        username="test@example.com",
+        role_name=TEST_ROLE_NAME,
     )
     handler(username="not.test@example.com", role_name=TEST_ROLE_NAME)
     assert worker_stats.increment_total_errors.call_count == 1
@@ -1371,7 +1385,8 @@ def test_orgs_list_prints_all_data_fields_when_not_table_format(
 
 
 def test_orgs_show_calls_orgs_get_by_uid_with_expected_params(
-    runner, cli_state,
+    runner,
+    cli_state,
 ):
     runner.invoke(cli, ["users", "orgs", "show", TEST_ORG_UID], obj=cli_state)
     cli_state.sdk.orgs.get_by_uid.assert_called_once_with(TEST_ORG_UID)
@@ -1384,7 +1399,9 @@ def test_orgs_show_exits_and_returns_error_if_uid_arg_not_provided(runner, cli_s
 
 
 def test_orgs_show_prints_expected_data(
-    runner, cli_state, get_org_success,
+    runner,
+    cli_state,
+    get_org_success,
 ):
     result = runner.invoke(cli, ["users", "orgs", "show", TEST_ORG_UID], obj=cli_state)
     assert "9087" in result.output
@@ -1400,7 +1417,9 @@ def test_orgs_show_prints_expected_data(
 
 
 def test_orgs_show_prints_all_data_fields_when_not_table_format(
-    runner, cli_state, get_org_success,
+    runner,
+    cli_state,
+    get_org_success,
 ):
     result = runner.invoke(
         cli, ["users", "orgs", "show", TEST_ORG_UID, "-f", "JSON"], obj=cli_state
@@ -1552,7 +1571,9 @@ def test_bulk_add_alias_uses_expected_arguments(runner, mocker, cli_state):
         with open("test_add_alias.csv", "w") as csv:
             csv.writelines(["username,alias\n", f"{TEST_USERNAME},{TEST_ALIAS}\n"])
         runner.invoke(
-            cli, ["users", "bulk", "add-alias", "test_add_alias.csv"], obj=cli_state,
+            cli,
+            ["users", "bulk", "add-alias", "test_add_alias.csv"],
+            obj=cli_state,
         )
     assert bulk_processor.call_args[0][1] == [
         {"username": TEST_USERNAME, "alias": TEST_ALIAS, "alias added": "False"}
@@ -1568,7 +1589,9 @@ def test_bulk_add_alias_ignores_blank_lines(runner, mocker, cli_state):
                 ["username,alias\n\n\n", f"{TEST_USERNAME},{TEST_ALIAS}\n\n\n"]
             )
         runner.invoke(
-            cli, ["users", "bulk", "add-alias", "test_add_alias.csv"], obj=cli_state,
+            cli,
+            ["users", "bulk", "add-alias", "test_add_alias.csv"],
+            obj=cli_state,
         )
     assert bulk_processor.call_args[0][1] == [
         {"username": TEST_USERNAME, "alias": TEST_ALIAS, "alias added": "False"}
@@ -1592,7 +1615,9 @@ def test_bulk_add_alias_uses_handler_that_when_encounters_error_increments_total
         with open("test_add_alias.csv", "w") as csv:
             csv.writelines(lines)
         runner.invoke(
-            cli, ["users", "bulk", "add-alias", "test_add_alias.csv"], obj=cli_state,
+            cli,
+            ["users", "bulk", "add-alias", "test_add_alias.csv"],
+            obj=cli_state,
         )
     handler = bulk_processor.call_args[0][0]
     handler(username="test@example.com", alias=TEST_ALIAS)

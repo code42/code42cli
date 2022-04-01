@@ -8,6 +8,7 @@ from pandas import json_normalize
 from pandas import Series
 from pandas import to_datetime
 from py42 import exceptions
+from py42.clients.settings.device_settings import IncydrDeviceSettings
 from py42.exceptions import Py42NotFoundError
 
 from code42cli.bulk import generate_template_cmd_factory
@@ -35,7 +36,9 @@ def devices(state):
 
 
 device_guid_argument = click.argument(
-    "device-guid", type=str, callback=lambda ctx, param, arg: _verify_guid_type(arg),
+    "device-guid",
+    type=str,
+    callback=lambda ctx, param, arg: _verify_guid_type(arg),
 )
 
 new_device_name_option = click.option(
@@ -159,8 +162,16 @@ def _update_cold_storage_purge_date(sdk, guid, purge_date):
 def _change_device_name(sdk, guid, name):
     try:
         device_settings = sdk.devices.get_settings(guid)
+        if isinstance(device_settings, IncydrDeviceSettings):
+            raise Code42CLIError(
+                "Failed to rename device. Incydr devices cannot be renamed."
+            )
         device_settings.name = name
         sdk.devices.update_settings(device_settings)
+    except KeyError:
+        raise Code42CLIError(
+            "Failed to rename device. This device is missing expected settings fields."
+        )
     except exceptions.Py42ForbiddenError:
         raise Code42CLIError(
             f"You don't have the necessary permissions to rename the device with GUID '{guid}'."
@@ -500,7 +511,12 @@ def _break_backup_usage_into_total_storage(backup_usage):
 @format_option
 @sdk_options()
 def list_backup_sets(
-    state, active, inactive, org_uid, include_usernames, format,
+    state,
+    active,
+    inactive,
+    org_uid,
+    include_usernames,
+    format,
 ):
     """Get information about many devices and their backup sets."""
     if inactive:

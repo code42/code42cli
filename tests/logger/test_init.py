@@ -29,7 +29,10 @@ def init_socket_mock(mocker):
 def fresh_syslog_handler(init_socket_mock):
     # Set handlers to empty list so it gets initialized each test
     get_logger_for_server(
-        "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None,
+        "example.com",
+        ServerProtocol.TCP,
+        SendToFileEventsOutputFormat.CEF,
+        None,
     ).handlers = []
     init_socket_mock.call_count = 0
 
@@ -134,7 +137,10 @@ def test_get_logger_for_server_when_hostname_includes_port_constructs_handler_wi
         "example.com:999", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None
     )
     no_priority_syslog_handler.assert_called_once_with(
-        "example.com", 999, ServerProtocol.TCP, None,
+        "example.com",
+        999,
+        ServerProtocol.TCP,
+        None,
     )
 
 

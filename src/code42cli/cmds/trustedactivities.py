@@ -55,7 +55,9 @@ def create(state, type, value, description):
     VALUE is the name of the domain or Slack workspace.
     """
     state.sdk.trustedactivities.create(
-        type, value, description=description,
+        type,
+        value,
+        description=description,
     )
 
 
@@ -67,7 +69,9 @@ def create(state, type, value, description):
 def update(state, resource_id, value, description):
     """Update a trusted activity.  Requires the activity's resource ID."""
     state.sdk.trustedactivities.update(
-        resource_id, value=value, description=description,
+        resource_id,
+        value=value,
+        description=description,
     )
 
 
@@ -154,7 +158,9 @@ def bulk_create(state, csv_rows):
         sdk.trustedactivities.create(type, value, description)
 
     run_bulk_process(
-        handle_row, csv_rows, progress_label="Creating trusting activities:",
+        handle_row,
+        csv_rows,
+        progress_label="Creating trusting activities:",
     )
 
 
@@ -200,7 +206,9 @@ def bulk_remove(state, csv_rows):
         sdk.trustedactivities.delete(resource_id)
 
     run_bulk_process(
-        handle_row, csv_rows, progress_label="Removing trusted activities:",
+        handle_row,
+        csv_rows,
+        progress_label="Removing trusted activities:",
     )
 
 

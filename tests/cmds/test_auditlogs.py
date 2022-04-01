@@ -419,7 +419,9 @@ def test_search_and_send_to_with_checkpoint_saves_expected_cursor_timestamp(
 ):
     cli_state.sdk.auditlogs.get_all.return_value = mock_audit_log_response
     runner.invoke(
-        cli, [*command, "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state,
+        cli,
+        [*command, "--begin", "1d", "--use-checkpoint", "test"],
+        obj=cli_state,
     )
     assert audit_log_cursor_with_checkpoint.replace.call_count == 4
     assert audit_log_cursor_with_checkpoint.replace.call_args_list[3][0] == (
@@ -438,7 +440,9 @@ def test_search_and_send_to_with_existing_checkpoint_replaces_begin_arg_if_passe
     command,
 ):
     runner.invoke(
-        cli, [*command, "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state,
+        cli,
+        [*command, "--begin", "1d", "--use-checkpoint", "test"],
+        obj=cli_state,
     )
     assert (
         cli_state.sdk.auditlogs.get_all.call_args[1]["begin_time"] == CURSOR_TIMESTAMP
@@ -474,7 +478,9 @@ def test_search_and_send_to_without_existing_checkpoint_writes_both_event_hashes
         mock_audit_log_response_with_only_same_timestamps
     )
     runner.invoke(
-        cli, [*command, "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state,
+        cli,
+        [*command, "--begin", "1d", "--use-checkpoint", "test"],
+        obj=cli_state,
     )
     assert audit_log_cursor_with_checkpoint.replace_events.call_count == 2
     assert audit_log_cursor_with_checkpoint.replace_events.call_args_list[1][0][1] == [
@@ -539,7 +545,9 @@ def test_search_and_send_when_timestamps_missing_milliseconds_saves_checkpoint(
         mock_audit_log_response_with_missing_ms_timestamp
     )
     runner.invoke(
-        cli, [*command, "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state,
+        cli,
+        [*command, "--begin", "1d", "--use-checkpoint", "test"],
+        obj=cli_state,
     )
     audit_log_cursor_with_checkpoint.replace.assert_called_once_with(
         "test", 1577880000.0
@@ -559,7 +567,9 @@ def test_search_and_send_when_timestamps_have_microseconds_saves_checkpoint(
         mock_audit_log_response_with_micro_seconds
     )
     runner.invoke(
-        cli, [*command, "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state,
+        cli,
+        [*command, "--begin", "1d", "--use-checkpoint", "test"],
+        obj=cli_state,
     )
     audit_log_cursor_with_checkpoint.replace.assert_called_once_with(
         "test", 1625150833.093616
@@ -579,7 +589,9 @@ def test_search_and_send_when_timestamps_have_nanoseconds_saves_checkpoint(
         mock_audit_log_response_with_nano_seconds
     )
     runner.invoke(
-        cli, [*command, "--begin", "1d", "--use-checkpoint", "test"], obj=cli_state,
+        cli,
+        [*command, "--begin", "1d", "--use-checkpoint", "test"],
+        obj=cli_state,
     )
     call_args = audit_log_cursor_with_checkpoint.replace.call_args
     assert call_args[0][0] == "test"
@@ -596,7 +608,9 @@ def test_search_if_error_occurs_when_processing_event_timestamp_does_not_store_e
         mock_audit_log_response_with_error_causing_timestamp
     )
     runner.invoke(
-        cli, ["audit-logs", "search", "--use-checkpoint", "test"], obj=cli_state,
+        cli,
+        ["audit-logs", "search", "--use-checkpoint", "test"],
+        obj=cli_state,
     )
 
     # Saved the timestamp from the good event but not the bad event
@@ -615,7 +629,9 @@ def test_search_when_table_format_and_using_output_via_pager_only_includes_heade
         mock_audit_log_response_with_10_records
     )
     result = runner.invoke(
-        cli, ["audit-logs", "search", "--use-checkpoint", "test"], obj=cli_state,
+        cli,
+        ["audit-logs", "search", "--use-checkpoint", "test"],
+        obj=cli_state,
     )
     output = result.output
     output = output.split(" ")

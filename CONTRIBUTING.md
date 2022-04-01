@@ -50,6 +50,8 @@ pyenv virtualenv 3.6.10 code42cli
 pyenv activate code42cli
 ```
 
+**Note**: The CLI supports pythons versions 3.6 through 3.9 - any versions within that range should work for your virtual environment.  Use `pyenv --versions` to see all versions available for install. There are some known issues installing python 3.6 with pyenv on certain OS.
+
 Use `source deactivate` to exit the virtual environment and `pyenv activate code42cli` to reactivate it.
 
 ### Windows/Linux
@@ -76,7 +78,7 @@ Next, with your virtual environment activated, install code42cli and its develop
 ["editable mode"](https://pip.pypa.io/en/stable/reference/pip_install/#editable-installs).
 
 ```bash
-pip install -e .[dev]
+pip install -e .'[dev]'
 ```
 
 Open the project in your IDE of choice and change the python environment to

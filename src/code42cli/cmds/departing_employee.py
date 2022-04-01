@@ -49,7 +49,9 @@ def _list(state, format, filter):
     """Lists the users on the Departing Employees list."""
     employee_generator = _get_departing_employees(state.sdk, filter)
     list_employees(
-        employee_generator, format, {"departureDate": "Departure Date"},
+        employee_generator,
+        format,
+        {"departureDate": "Departure Date"},
     )
 
 

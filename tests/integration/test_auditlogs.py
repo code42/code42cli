@@ -47,7 +47,8 @@ def test_auditlogs_search_command_with_short_hand_begin_returns_success_return_c
 
 @pytest.mark.integration
 def test_auditlogs_search_command_with_full_begin_returns_success_return_code(
-    runner, integration_test_profile,
+    runner,
+    integration_test_profile,
 ):
     command = f"audit-logs search --begin '{begin_date_str}'"
     assert_test_is_successful(runner, append_profile(command))

@@ -432,7 +432,9 @@ def bulk_update(cli_state, csv_rows):
         _update_alert(sdk, id, state, note)
 
     run_bulk_process(
-        handle_row, csv_rows, progress_label="Updating alerts:",
+        handle_row,
+        csv_rows,
+        progress_label="Updating alerts:",
     )
 
 

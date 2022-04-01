@@ -11,7 +11,15 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ## Unreleased
 
 ### Added
-- `users add-alias`, `users remove-alias`, `users bulk add-alias`, and `users bulk remove-alias` for managing cloud aliases for users.
+- `departing-employee bulk remove` and `high-risk-employee bulk remove` commands now accept an optional header, as well as extraneous columns if a header is provided.
+- Added `devices rename` and `devices bulk rename` commands to rename devices.
+  - *Note: Incydr devices cannot be renamed.*
+- Added the following commands for managing users' cloud aliases:
+  - `users add-alias`
+  - `users remove-alias`
+  - `users list-aliases`
+  - `users bulk add-alias`
+  - `users bulk remove-alias`
 
 ## 1.12.1 - 2022-01-21
 

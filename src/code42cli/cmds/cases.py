@@ -24,7 +24,10 @@ case_number_arg = click.argument("case-number", type=int)
 case_number_option = click.option(
     "--case-number", type=int, help="The number assigned to the case.", required=True
 )
-name_option = click.option("--name", help="The name of the case.",)
+name_option = click.option(
+    "--name",
+    help="The name of the case.",
+)
 assignee_option = click.option(
     "--assignee", help="The UID of the user to assign to the case."
 )
@@ -117,7 +120,8 @@ def update(state, case_number, name, subject, assignee, description, findings, s
 
 @cases.command("list")
 @click.option(
-    "--name", help="Filter by name of a case. Supports partial name matches.",
+    "--name",
+    help="Filter by name of a case. Supports partial name matches.",
 )
 @click.option("--subject", help="Filter by the user UID of the subject of a case.")
 @click.option("--assignee", help="Filter by the user UID of an assignee.")
@@ -299,7 +303,9 @@ def bulk_add(state, csv_rows):
         sdk.cases.file_events.add(number, event_id)
 
     run_bulk_process(
-        handle_row, csv_rows, progress_label="Associating file events to cases:",
+        handle_row,
+        csv_rows,
+        progress_label="Associating file events to cases:",
     )
 
 

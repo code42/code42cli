@@ -176,7 +176,9 @@ def bulk_add_risk_tags(state, csv_rows):
         _add_risk_tags(sdk, username, tag)
 
     run_bulk_process(
-        handle_row, csv_rows, progress_label="Adding risk tags to users:",
+        handle_row,
+        csv_rows,
+        progress_label="Adding risk tags to users:",
     )
 
 
@@ -194,7 +196,9 @@ def bulk_remove_risk_tags(state, csv_rows):
         _remove_risk_tags(sdk, username, tag)
 
     run_bulk_process(
-        handle_row, csv_rows, progress_label="Removing risk tags from users:",
+        handle_row,
+        csv_rows,
+        progress_label="Removing risk tags from users:",
     )
 
 

@@ -162,7 +162,8 @@ def test_add_departing_employee_when_given_notes_updates_notes(
 
 
 def test_add_departing_employee_adds(
-    runner, cli_state_with_user,
+    runner,
+    cli_state_with_user,
 ):
     departure_date = "2020-02-02"
     runner.invoke(
@@ -394,8 +395,8 @@ def test_add_departing_employee_when_invalid_date_format_validation_raises_error
 def test_remove_departing_employee_when_user_not_on_list_prints_expected_error(
     mocker, runner, cli_state
 ):
-    cli_state.sdk.detectionlists.departing_employee.remove.side_effect = get_user_not_on_list_side_effect(
-        mocker, "departing-employee"
+    cli_state.sdk.detectionlists.departing_employee.remove.side_effect = (
+        get_user_not_on_list_side_effect(mocker, "departing-employee")
     )
     test_username = "test@example.com"
     result = runner.invoke(
@@ -411,9 +412,18 @@ def test_remove_departing_employee_when_user_not_on_list_prints_expected_error(
     "command, error_msg",
     [
         (f"{DEPARTING_EMPLOYEE_COMMAND} add", "Missing argument 'USERNAME'."),
-        (f"{DEPARTING_EMPLOYEE_COMMAND} remove", "Missing argument 'USERNAME'.",),
-        (f"{DEPARTING_EMPLOYEE_COMMAND} bulk add", "Missing argument 'CSV_FILE'.",),
-        (f"{DEPARTING_EMPLOYEE_COMMAND} bulk remove", "Missing argument 'CSV_FILE'.",),
+        (
+            f"{DEPARTING_EMPLOYEE_COMMAND} remove",
+            "Missing argument 'USERNAME'.",
+        ),
+        (
+            f"{DEPARTING_EMPLOYEE_COMMAND} bulk add",
+            "Missing argument 'CSV_FILE'.",
+        ),
+        (
+            f"{DEPARTING_EMPLOYEE_COMMAND} bulk remove",
+            "Missing argument 'CSV_FILE'.",
+        ),
     ],
 )
 def test_departing_employee_command_when_missing_required_parameters_returns_error(

@@ -21,7 +21,10 @@ def profile():
 
 
 debug_option = click.option(
-    "-d", "--debug", is_flag=True, help="Turn on debug logging.",
+    "-d",
+    "--debug",
+    is_flag=True,
+    help="Turn on debug logging.",
 )
 totp_option = click.option(
     "--totp", help="TOTP token for multi-factor authentication.", type=TOTP()
