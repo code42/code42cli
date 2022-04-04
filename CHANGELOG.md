@@ -8,10 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-## Unreleased
+## 1.13.0 - 2022-04-04
 
 ### Added
-- `departing-employee bulk remove` and `high-risk-employee bulk remove` commands now accept an optional header, as well as extraneous columns if a header is provided.
+
+- `departing-employee bulk remove` and `high-risk-employee bulk remove` commands now accept CSVs with an optional header, as well as extraneous columns if a header is provided.
 - Added `devices rename` and `devices bulk rename` commands to rename devices.
   - *Note: Incydr devices cannot be renamed.*
 - Added the following commands for managing users' cloud aliases:
@@ -26,6 +27,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Fixed
 
 - Vulnerability in `ipython` dependency. See [CVE-2022-21699](https://nvd.nist.gov/vuln/detail/CVE-2022-21699).
+
 ## 1.12.0 - 2021-12-13
 
 ### Fixed
