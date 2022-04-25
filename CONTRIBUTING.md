@@ -45,12 +45,12 @@ eval "$(pyenv virtualenv-init -)"
 Then, create your virtual environment.
 
 ```bash
-pyenv install 3.6.10
-pyenv virtualenv 3.6.10 code42cli
+pyenv install 3.9.10
+pyenv virtualenv 3.9.10 code42cli
 pyenv activate code42cli
 ```
 
-**Note**: The CLI supports pythons versions 3.6 through 3.9 - any versions within that range should work for your virtual environment.  Use `pyenv --versions` to see all versions available for install. There are some known issues installing python 3.6 with pyenv on certain OS.
+**Note**: The CLI supports pythons versions 3.6 through 3.9 for end users. However due to some of the build dependencies, you'll need a version >=3.7 for your virtual environment.  Use `pyenv --versions` to see all versions available for install. There are some known issues installing python 3.6 with pyenv on certain OS.
 
 Use `source deactivate` to exit the virtual environment and `pyenv activate code42cli` to reactivate it.
 
@@ -174,7 +174,7 @@ tox -e docs
 To build and run the documentation locally, run the following from the `docs` directory:
 
 ```bash
-pip install sphinx myst_parser sphinx_rtd_theme
+pip install sphinx myst-parser sphinx_rtd_theme
 make html
 ```
 

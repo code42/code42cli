@@ -71,6 +71,8 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
 
+# generate header anchors
+myst_heading_anchors = 4
 
 # -- Options for HTML output -------------------------------------------------
 
