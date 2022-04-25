@@ -48,7 +48,13 @@ setup(
             "pytest-cov==2.10.0",
             "pytest-mock==2.0.0",
             "tox>=3.17.1",
-        ]
+        ],
+        "docs": [
+            "sphinx==4.4.0",
+            "myst-parser==0.16",
+            "sphinx_rtd_theme==1.0.0",
+            "sphinx-click",
+        ],
     },
     classifiers=[
         "Intended Audience :: Developers",
