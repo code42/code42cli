@@ -51,6 +51,8 @@ def _list(state, format):
 @sdk_options()
 def list_users(state, watchlist_type, watchlist_id, format):
     """List all users on a given watchlist."""
+    if not watchlist_id and not watchlist_type:
+        raise click.ClickException("--watchlist-id OR --watchlist-type is required.")
     if watchlist_type:
         watchlist_id = state.sdk.watchlists._watchlists_service.watchlist_type_id_map[
             watchlist_type
