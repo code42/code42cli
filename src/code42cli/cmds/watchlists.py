@@ -15,6 +15,7 @@ from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.output_formats import DataFrameOutputFormatter
+from code42cli.bulk import generate_template_cmd_factory
 
 
 @click.group(cls=OrderedGroup)
@@ -132,6 +133,16 @@ def remove(state, watchlist_id, watchlist_type, user):
 def bulk(state):
     """Tools for executing bulk watchlist actions."""
     pass
+
+
+watchlists_generate_template = generate_template_cmd_factory(
+    group_name="watchlists",
+    commands_dict={
+        "add": ["watchlist_id", "watchlist_type", "user_id", "username"],
+        "remove": ["watchlist_id", "watchlist_type", "user_id", "username"],
+    },
+)
+bulk.add_command(watchlists_generate_template)
 
 
 @bulk.command(
