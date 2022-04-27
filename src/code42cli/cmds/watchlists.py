@@ -1,18 +1,20 @@
 import csv
+
 import click
 from pandas import DataFrame
+from py42.constants import WatchlistType
+from py42.exceptions import Py42NotFoundError
+from py42.exceptions import Py42WatchlistNotFound
 
+from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
 from code42cli.click_ext.types import AutoDecodedFile
-from code42cli.bulk import run_bulk_process
 from code42cli.errors import Code42CLIError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.output_formats import DataFrameOutputFormatter
-
-from py42.constants import WatchlistType
 
 
 @click.group(cls=OrderedGroup)
@@ -49,7 +51,9 @@ def _list(state, format):
 def list_users(state, watchlist_type, watchlist_id, format):
     """List all users on a given watchlist."""
     if watchlist_type:
-        watchlist_id = state.sdk.watchlists._watchlists_service.watchlist_type_id_map[watchlist_type]
+        watchlist_id = state.sdk.watchlists._watchlists_service.watchlist_type_id_map[
+            watchlist_type
+        ]
     pages = state.sdk.watchlists.get_all_included_users(watchlist_id)
     dfs = (DataFrame(page["includedUsers"]) for page in pages)
     formatter = DataFrameOutputFormatter(format)
@@ -69,13 +73,25 @@ def list_users(state, watchlist_type, watchlist_id, format):
 )
 @click.argument("user", metavar="USER_ID|USERNAME")
 @sdk_options()
-def add(state, watchlist_id, user):
+def add(state, watchlist_id, watchlist_type, user):
+    if not watchlist_id and not watchlist_type:
+        raise click.ClickException("--watchlist-id OR --watchlist-type is required.")
     try:
         user = int(user)
     except ValueError:
         # assume username if `user` is not an int
         user = state.sdk.userriskprofile.get_by_username(user)["userId"]
-    state.sdk.watchlists.add_included_users_by_watchlist_id(user, watchlist_id)
+    try:
+        if watchlist_id:
+            state.sdk.watchlists.add_included_users_by_watchlist_id(user, watchlist_id)
+        elif watchlist_type:
+            state.sdk.watchlists.add_included_users_by_watchlist_type(
+                user, watchlist_type
+            )
+    except Py42WatchlistNotFound:
+        raise
+    except Py42NotFoundError:
+        raise Code42CLIError(f"User ID {user} not found.")
 
 
 @watchlists.command()
@@ -89,12 +105,26 @@ def add(state, watchlist_id, user):
 @click.argument("user", metavar="USER_ID|USERNAME")
 @sdk_options()
 def remove(state, watchlist_id, watchlist_type, user):
+    if not watchlist_id and not watchlist_type:
+        raise click.ClickException("--watchlist-id OR --watchlist-type is required.")
     try:
         user = int(user)
     except ValueError:
         # assume username if `user` is not an int
         user = state.sdk.userriskprofile.get_by_username(user)["userId"]
-    state.sdk.watchlists.remove_included_users_by_watchlist_id(user, watchlist_id)
+    try:
+        if watchlist_id:
+            state.sdk.watchlists.remove_included_users_by_watchlist_id(
+                user, watchlist_id
+            )
+        elif watchlist_type:
+            state.sdk.watchlists.remove_included_users_by_watchlist_type(
+                user, watchlist_type
+            )
+    except Py42WatchlistNotFound:
+        raise
+    except Py42NotFoundError:
+        raise Code42CLIError(f"User ID {user} not found.")
 
 
 @watchlists.group(cls=OrderedGroup)
@@ -107,8 +137,8 @@ def bulk(state):
 @bulk.command(
     name="add",
     help="Bulk add users to watchlists using a CSV file. Requires either a `watchlist_id` or "
-         "`watchlist_type` column header to identify the watchlist, and either a `user_id` or "
-         "`username` column header to identify the user to add."
+    "`watchlist_type` column header to identify the watchlist, and either a `user_id` or "
+    "`username` column header to identify the user to add.",
 )
 @click.argument(
     "csv_rows",
@@ -119,25 +149,20 @@ def bulk(state):
 @sdk_options()
 def bulk_add(state, csv_rows):
     headers = csv_rows.fieldnames
-    if "userId" not in headers and "username" not in headers:
+    if "user_id" not in headers and "username" not in headers:
         raise Code42CLIError(
-            "CSV requires either a `username` or `userId` "
+            "CSV requires either a `username` or `user_id` "
             "column to identify which users to add to watchlist."
         )
-    if "watchlistId" not in headers and "watchlistType" not in headers:
+    if "watchlist_id" not in headers and "watchlist_type" not in headers:
         raise Code42CLIError(
-            "CSV requires either a `watchlistId` or `watchlistType` "
+            "CSV requires either a `watchlist_id` or `watchlist_type` "
             "column to identify which watchlist to add user to."
         )
 
     sdk = state.sdk
 
-    def handle_row(
-        watchlist_id=None,
-        watchlist_type=None,
-        user_id=None,
-        username=None
-    ):
+    def handle_row(watchlist_id=None, watchlist_type=None, user_id=None, username=None):
         if username and not user_id:
             user_id = sdk.userriskprofile.get_by_username(username)["userId"]
         if watchlist_id:
@@ -166,8 +191,8 @@ def bulk_add(state, csv_rows):
 @bulk.command(
     name="remove",
     help="Bulk remove users from watchlists using a CSV file. Requires either a `watchlist_id` or "
-         "`watchlist_type` column header to identify the watchlist, and either a `user_id` or "
-         "`username` header to identify the user to remove."
+    "`watchlist_type` column header to identify the watchlist, and either a `user_id` or "
+    "`username` header to identify the user to remove.",
 )
 @click.argument(
     "csv_rows",

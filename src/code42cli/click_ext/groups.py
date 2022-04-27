@@ -17,6 +17,7 @@ from py42.exceptions import Py42InvalidPasswordError
 from py42.exceptions import Py42InvalidRuleOperationError
 from py42.exceptions import Py42InvalidUsernameError
 from py42.exceptions import Py42LegalHoldNotFoundOrPermissionDeniedError
+from py42.exceptions import Py42NotFoundError
 from py42.exceptions import Py42OrgNotFoundError
 from py42.exceptions import Py42TrustedActivityConflictError
 from py42.exceptions import Py42TrustedActivityIdNotFound
@@ -25,6 +26,8 @@ from py42.exceptions import Py42UpdateClosedCaseError
 from py42.exceptions import Py42UserAlreadyAddedError
 from py42.exceptions import Py42UsernameMustBeEmailError
 from py42.exceptions import Py42UserNotOnListError
+from py42.exceptions import Py42UserRiskProfileNotFound
+from py42.exceptions import Py42WatchlistNotFound
 
 from code42cli.errors import Code42CLIError
 from code42cli.errors import LoggedCLIError
@@ -90,6 +93,9 @@ class ExceptionHandlingGroup(click.Group):
             Py42TrustedActivityIdNotFound,
             Py42CloudAliasLimitExceededError,
             Py42CloudAliasCharacterLimitExceededError,
+            Py42UserRiskProfileNotFound,
+            Py42WatchlistNotFound,
+            Py42NotFoundError,
         ) as err:
             msg = err.args[0]
             self.logger.log_error(msg)
