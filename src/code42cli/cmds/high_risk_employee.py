@@ -20,7 +20,9 @@ from code42cli.cmds.shared import get_user_id
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.options import sdk_options
+from code42cli.util import deprecation_warning
 
+DEPRECATION_TEXT = "(DEPRECATED): Use `code42 watchlists` commands instead."
 
 def _get_filter_choices():
     filters = HighRiskEmployeeFilters.choices()
@@ -48,7 +50,9 @@ risk_tag_option = click.option(
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def high_risk_employee(state):
-    """Add and remove employees from the High Risk Employees detection list."""
+    f"""{DEPRECATION_TEXT}
+    
+    Add and remove employees from the High Risk Employees detection list."""
     pass
 
 
@@ -57,8 +61,10 @@ def high_risk_employee(state):
 @format_option
 @filter_option
 def _list(state, format, filter):
-    """Lists the employees on the High Risk Employee list."""
-
+    f"""{DEPRECATION_TEXT}
+    
+    Lists the employees on the High Risk Employee list."""
+    deprecation_warning(DEPRECATION_TEXT)
     employee_generator = _get_high_risk_employees(state.sdk, filter)
     list_employees(employee_generator, format)
 
@@ -70,7 +76,10 @@ def _list(state, format, filter):
 @username_arg
 @sdk_options()
 def add(state, username, cloud_alias, risk_tag, notes):
-    """Add a user to the high risk employees detection list."""
+    f"""{DEPRECATION_TEXT}
+    
+    Add a user to the high risk employees detection list."""
+    deprecation_warning(DEPRECATION_TEXT)
     _add_high_risk_employee(state.sdk, username, cloud_alias, risk_tag, notes)
 
 
@@ -78,7 +87,10 @@ def add(state, username, cloud_alias, risk_tag, notes):
 @username_arg
 @sdk_options()
 def remove(state, username):
-    """Remove a user from the high risk employees detection list."""
+    f"""{DEPRECATION_TEXT}
+    
+    Remove a user from the high risk employees detection list."""
+    deprecation_warning(DEPRECATION_TEXT)
     _remove_high_risk_employee(state.sdk, username)
 
 
@@ -87,7 +99,10 @@ def remove(state, username):
 @risk_tag_option
 @sdk_options()
 def add_risk_tags(state, username, risk_tag):
-    """Associates risk tags with a user."""
+    f"""{DEPRECATION_TEXT}
+    
+    Associates risk tags with a user."""
+    deprecation_warning(DEPRECATION_TEXT)
     _add_risk_tags(state.sdk, username, risk_tag)
 
 
@@ -96,14 +111,19 @@ def add_risk_tags(state, username, risk_tag):
 @risk_tag_option
 @sdk_options()
 def remove_risk_tags(state, username, risk_tag):
-    """Disassociates risk tags from a user."""
+    f"""{DEPRECATION_TEXT}
+    
+    Disassociates risk tags from a user."""
+    deprecation_warning(DEPRECATION_TEXT)
     _remove_risk_tags(state.sdk, username, risk_tag)
 
 
 @high_risk_employee.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def bulk(state):
-    """Tools for executing high risk employee actions in bulk."""
+    f"""{DEPRECATION_TEXT}
+    
+    Tools for executing high risk employee actions in bulk."""
     pass
 
 
@@ -125,12 +145,13 @@ bulk.add_command(high_risk_employee_generate_template)
 
 @bulk.command(
     name="add",
-    help="Bulk add users to the high risk employees detection list using a CSV file with "
-    f"format: {','.join(HIGH_RISK_EMPLOYEE_CSV_HEADERS)}.",
+    help=f"{DEPRECATION_TEXT}\n\nBulk add users to the high risk employees detection list using a "
+         f"CSV file with format: {','.join(HIGH_RISK_EMPLOYEE_CSV_HEADERS)}.",
 )
 @read_csv_arg(headers=HIGH_RISK_EMPLOYEE_CSV_HEADERS)
 @sdk_options()
 def bulk_add(state, csv_rows):
+    deprecation_warning(DEPRECATION_TEXT)
     sdk = state.sdk
 
     def handle_row(username, cloud_alias, risk_tag, notes):
@@ -145,11 +166,13 @@ def bulk_add(state, csv_rows):
 
 @bulk.command(
     name="remove",
-    help=f"Bulk remove users from the high risk employees detection list using a CSV file with format {','.join(REMOVE_EMPLOYEE_HEADERS)}.",
+    help=f"{DEPRECATION_TEXT}\n\nBulk remove users from the high risk employees detection list "
+         f"using a CSV file with format {','.join(REMOVE_EMPLOYEE_HEADERS)}.",
 )
 @read_csv_arg(headers=REMOVE_EMPLOYEE_HEADERS)
 @sdk_options()
 def bulk_remove(state, csv_rows):
+    deprecation_warning(DEPRECATION_TEXT)
     sdk = state.sdk
 
     def handle_row(username):
@@ -164,12 +187,13 @@ def bulk_remove(state, csv_rows):
 
 @bulk.command(
     name="add-risk-tags",
-    help=f"Adds risk tags to users in bulk using a CSV file with format: "
-    f"{','.join(RISK_TAG_CSV_HEADERS)}.",
+    help=f"{DEPRECATION_TEXT}\n\nAdds risk tags to users in bulk using a CSV file with format: "
+         f"{','.join(RISK_TAG_CSV_HEADERS)}.",
 )
 @read_csv_arg(headers=RISK_TAG_CSV_HEADERS)
 @sdk_options()
 def bulk_add_risk_tags(state, csv_rows):
+    deprecation_warning(DEPRECATION_TEXT)
     sdk = state.sdk
 
     def handle_row(username, tag):
@@ -184,12 +208,13 @@ def bulk_add_risk_tags(state, csv_rows):
 
 @bulk.command(
     name="remove-risk-tags",
-    help=f"Removes risk tags from users in bulk using a CSV file with format: "
-    f"{','.join(RISK_TAG_CSV_HEADERS)}.",
+    help=f"{DEPRECATION_TEXT}\n\nRemoves risk tags from users in bulk using a CSV file with "
+         f"format: {','.join(RISK_TAG_CSV_HEADERS)}.",
 )
 @read_csv_arg(headers=RISK_TAG_CSV_HEADERS)
 @sdk_options()
 def bulk_remove_risk_tags(state, csv_rows):
+    deprecation_warning(DEPRECATION_TEXT)
     sdk = state.sdk
 
     def handle_row(username, tag):
