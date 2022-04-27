@@ -2,6 +2,7 @@ import os
 import signal
 import site
 import sys
+import warnings
 
 import click
 from click_plugins import with_plugins
@@ -26,6 +27,8 @@ from code42cli.cmds.trustedactivities import trusted_activities
 from code42cli.cmds.users import users
 from code42cli.cmds.watchlists import watchlists
 from code42cli.options import sdk_options
+
+warnings.simplefilter("ignore", DeprecationWarning)
 
 
 # Handle KeyboardInterrupts by just exiting instead of printing out a stack
