@@ -904,12 +904,11 @@ def _remove_cloud_alias(sdk, username, alias):
     sdk.userriskprofile.delete_cloud_aliases(user["userId"], alias)
 
 
-def _update_userriskprofile(sdk, append_notes=False, username=None, user_id=None, start_date=None, end_date=None, notes=None):
-    if (username and not user_id) or append_notes:
-        user = _get_user(sdk, username)
-        user_id = user["userId"]
-        if notes != "null":
-            notes = user["notes"] + f"\n\n{notes}"
+def _update_userriskprofile(sdk, append_notes=False, username=None, start_date=None, end_date=None, notes=None):
+    user = _get_user(sdk, username)
+    user_id = user["userId"]
+    if append_notes and notes != "null":
+        notes = user["notes"] + f"\n\n{notes}"
     
     # py42 interprets empty string as "clear this value" for kwarg values. Since empty CSV columns 
     # get parsed as "" we want to have user provide explicit 'null' string to indicate desire to 
