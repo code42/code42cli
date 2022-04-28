@@ -10,6 +10,7 @@ from py42.exceptions import Py42InvalidPasswordError
 from py42.exceptions import Py42InvalidUsernameError
 from py42.exceptions import Py42NotFoundError
 from py42.exceptions import Py42OrgNotFoundError
+from py42.exceptions import Py42UserRiskProfileNotFound
 from tests.conftest import create_mock_http_error
 from tests.conftest import create_mock_response
 
@@ -49,7 +50,7 @@ TEST_USER_RESPONSE = {
     "userName": "Sample.User1@samplecase.com",
     "displayName": "Sample User1",
     "notes": "This is an example of notes about Sample User1.",
-    "cloudUsernames": ["Sample.User1@samplecase.com", "Sample.User1@gmail.com"],
+    "cloudAliases": ["Sample.User1@samplecase.com", "Sample.User1@gmail.com"],
     "managerUid": 12345,
     "managerUsername": "manager.user1@samplecase.com",
     "managerDisplayName": "Manager Name",
@@ -100,7 +101,7 @@ TEST_EMPTY_CUSTODIANS_RESPONSE = {"legalHoldMemberships": []}
 TEST_EMPTY_MATTERS_RESPONSE = {"legalHolds": []}
 TEST_EMPTY_USERS_RESPONSE = {"users": []}
 TEST_USERNAME = TEST_USERS_RESPONSE["users"][0]["username"]
-TEST_ALIAS = TEST_USER_RESPONSE["cloudUsernames"][0]
+TEST_ALIAS = TEST_USER_RESPONSE["cloudAliases"][0]
 TEST_USER_ID = TEST_USERS_RESPONSE["users"][0]["userId"]
 TEST_USER_UID = TEST_USER_RESPONSE["userId"]
 TEST_ROLE_NAME = TEST_ROLE_RETURN_DATA["data"][0]["roleName"]
@@ -159,7 +160,7 @@ def get_user_response(mocker):
 
 @pytest.fixture
 def get_user_failure(mocker):
-    return Py42BadRequestError(
+    return Py42UserRiskProfileNotFound(
         create_mock_http_error(mocker, data=None, status=400),
         "Failure in HTTP call 400 Client Error: Bad Request for url: https://ecm-east.us.code42.com/svc/api/v2/user/getbyusername.",
     )
@@ -212,13 +213,13 @@ def get_user_id_success(cli_state, get_users_response):
 
 @pytest.fixture
 def get_user_uid_success(cli_state, get_user_response):
-    """detectionlists.get_user returns a single user"""
-    cli_state.sdk.detectionlists.get_user.return_value = get_user_response
+    """userriskprofile.get_by_username returns a single user"""
+    cli_state.sdk.userriskprofile.get_by_username.return_value = get_user_response
 
 
 @pytest.fixture
 def get_user_uid_failure(cli_state, get_user_failure):
-    cli_state.sdk.detectionlists.get_user.side_effect = get_user_failure
+    cli_state.sdk.userriskprofile.get_by_username.side_effect = get_user_failure
 
 
 @pytest.fixture
@@ -305,14 +306,14 @@ def add_alias_success(mocker, cli_state):
 
 @pytest.fixture
 def add_alias_limit_failure(mocker, cli_state):
-    cli_state.sdk.detectionlists.add_user_cloud_alias.side_effect = (
+    cli_state.sdk.userriskprofile.add_cloud_aliases.side_effect = (
         Py42CloudAliasLimitExceededError(create_mock_http_error(mocker))
     )
 
 
 @pytest.fixture
 def remove_alias_success(mocker, cli_state):
-    cli_state.sdk.detectionlists.remove_user_cloud_alias.return_value = (
+    cli_state.sdk.userriskprofile.delete_cloud_aliases.return_value = (
         create_mock_response(mocker)
     )
 
@@ -1450,14 +1451,14 @@ def test_list_aliases_calls_get_user_with_expected_parameters(runner, cli_state)
     username = "alias@example"
     command = ["users", "list-aliases", username]
     runner.invoke(cli, command, obj=cli_state)
-    cli_state.sdk.detectionlists.get_user.assert_called_once_with("alias@example")
+    cli_state.sdk.userriskprofile.get_by_username.assert_called_once_with("alias@example")
 
 
 def test_list_aliases_prints_no_aliases_found_when_empty_list(
     runner, cli_state, mocker
 ):
-    cli_state.sdk.detectionlists.get_user.return_value = create_mock_response(
-        mocker, data={"cloudUsernames": []}
+    cli_state.sdk.userriskprofile.get_by_username.return_value = create_mock_response(
+        mocker, data={"cloudAliases": []}
     )
     username = "alias@example"
     command = ["users", "list-aliases", username]
@@ -1492,7 +1493,7 @@ def test_add_cloud_alias_calls_add_cloud_alias_with_correct_parameters(
 ):
     command = ["users", "add-alias", "test@example.com", "alias@example.com"]
     runner.invoke(cli, command, obj=cli_state)
-    cli_state.sdk.detectionlists.add_user_cloud_alias.assert_called_once_with(
+    cli_state.sdk.userriskprofile.add_cloud_aliases.assert_called_once_with(
         TEST_USER_UID, "alias@example.com"
     )
 
@@ -1517,7 +1518,7 @@ def test_add_alias_raises_error_when_alias_is_too_long(runner, cli_state):
         "fake@notreal.com",
         "alias-is-too-long-its-very-long-for-real-more-than-50-characters@example.com",
     ]
-    cli_state.sdk.detectionlists.add_user_cloud_alias.side_effect = (
+    cli_state.sdk.userriskprofile.add_cloud_aliases.side_effect = (
         Py42CloudAliasCharacterLimitExceededError
     )
     result = runner.invoke(cli, command, obj=cli_state)
@@ -1547,7 +1548,7 @@ def test_remove_cloud_alias_calls_remove_cloud_alias_with_correct_parameters(
 ):
     command = ["users", "remove-alias", "test@example.com", "alias@example.com"]
     runner.invoke(cli, command, obj=cli_state)
-    cli_state.sdk.detectionlists.remove_user_cloud_alias.assert_called_once_with(
+    cli_state.sdk.userriskprofile.delete_cloud_aliases.assert_called_once_with(
         TEST_USER_UID, "alias@example.com"
     )
 
@@ -1609,7 +1610,7 @@ def test_bulk_add_alias_uses_handler_that_when_encounters_error_increments_total
             raise Exception("TEST")
         return get_user_response
 
-    cli_state.sdk.detectionlists.get_user.side_effect = _get
+    cli_state.sdk.userriskprofile.get_by_username.side_effect = _get
     bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_add_alias.csv", "w") as csv:
@@ -1669,7 +1670,7 @@ def test_bulk_remove_alias_uses_handler_that_when_encounters_error_increments_to
             raise Exception("TEST")
         return get_user_response
 
-    cli_state.sdk.detectionlists.get_user.side_effect = _get
+    cli_state.sdk.userriskprofile.get_by_username.side_effect = _get
     bulk_processor = mocker.patch(f"{_NAMESPACE}.run_bulk_process")
     with runner.isolated_filesystem():
         with open("test_remove_alias.csv", "w") as csv:
