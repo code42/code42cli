@@ -259,8 +259,8 @@ def remove_alias(state, username, alias):
 @click.argument("date", type=click.DateTime(formats=["%Y-%m-%d"]), required=False, metavar="DATE")
 @click.option("--clear", is_flag=True, help="Clears the current `start_date` value.")
 @sdk_options()
-def add_start_date(state, username, date, clear):
-    """Adds a `start_date` to a User's risk profile (useful for users on the New Hire Watchlist). 
+def update_start_date(state, username, date, clear):
+    """Sets the `start_date` on a User's risk profile (useful for users on the New Hire Watchlist). 
     Date format: %Y-%m-%d"""
     if not date and not clear:
         raise Code42CLIError("Must supply DATE argument if --clear is not used.")
@@ -273,8 +273,8 @@ def add_start_date(state, username, date, clear):
 @click.argument("date", type=click.DateTime(formats=["%Y-%m-%d"]), required=False)
 @click.option("--clear", is_flag=True, help="Clears the current `end_date` value.")
 @sdk_options()
-def add_departure_date(state, username, date, clear):
-    """Adds an `end_date` to a User's risk profile (useful for users on the Departing Employee 
+def update_departure_date(state, username, date, clear):
+    """Sets the `end_date` on a User's risk profile (useful for users on the Departing Employee 
     Watchlist). Date format: %Y-%m-%d
     """
     if not date and not clear:
@@ -287,10 +287,10 @@ def add_departure_date(state, username, date, clear):
 @click.argument("username")
 @click.argument("note", required=False)
 @click.option("--clear", is_flag=True, help="Clears the current `notes` value.")
-@click.option("--append", is_flag=True, help="Appends provided string to existing risk profile notes as a new line.")
+@click.option("--append", is_flag=True, help="Appends provided note to existing note text as a new line.")
 @sdk_options()
-def add_risk_profile_note(state, username, note, clear, append):
-    """Adds `notes` to a User's risk profile.
+def update_risk_profile_note(state, username, note, clear, append):
+    """Sets the `notes` value of a User's risk profile.
     
     WARNING: Overwrites any existing note value."""
     if not note and not clear:
