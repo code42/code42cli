@@ -1,3 +1,4 @@
+import datetime
 import json
 
 import pytest
@@ -1684,3 +1685,102 @@ def test_bulk_remove_alias_uses_handler_that_when_encounters_error_increments_to
     handler(username="test@example.com", alias=TEST_ALIAS)
     handler(username="not.test@example.com", alias=TEST_ALIAS)
     assert worker_stats.increment_total_errors.call_count == 1
+
+
+def test_update_start_date_without_date_arg_or_clear_option_raises_cli_error(runner, cli_state):
+    res = runner.invoke(cli, ["users", "update-start-date", "test@example.com"], obj=cli_state)
+    assert res.exit_code == 1
+    assert "Must supply DATE argument if --clear is not used." in res.output
+
+
+def test_update_start_date_with_date_makes_expected_call(mocker, runner, cli_state):
+    cli_state.sdk.userriskprofile.get_by_username.return_value = create_mock_response(mocker, data={"userId": 1234})
+    res = runner.invoke(cli, ["users", "update-start-date", "test@example.com", "2020-10-10"], obj=cli_state)
+    assert res.exit_code == 0
+    cli_state.sdk.userriskprofile.update.assert_called_once_with(1234, start_date=datetime.datetime(2020, 10, 10))
+
+
+def test_update_start_date_with_clear_option_clears_date(mocker, runner, cli_state):
+    cli_state.sdk.userriskprofile.get_by_username.return_value = create_mock_response(mocker, data={"userId": 1234})
+    res = runner.invoke(cli, ["users", "update-start-date", "test@example.com", "--clear"], obj=cli_state)
+    assert res.exit_code == 0
+    cli_state.sdk.userriskprofile.update.assert_called_once_with(1234, start_date="")
+
+
+def test_update_departure_date_without_date_arg_or_clear_option_raises_cli_error(runner, cli_state):
+    res = runner.invoke(cli, ["users", "update-departure-date", "test@example.com"], obj=cli_state)
+    assert res.exit_code == 1
+    assert "Must supply DATE argument if --clear is not used." in res.output
+
+
+def test_update_departure_date_with_clear_option_clears_date(mocker, runner, cli_state):
+    cli_state.sdk.userriskprofile.get_by_username.return_value = create_mock_response(mocker, data={"userId": 1234})
+    res = runner.invoke(cli, ["users", "update-departure-date", "test@example.com", "--clear"], obj=cli_state)
+    assert res.exit_code == 0
+    cli_state.sdk.userriskprofile.update.assert_called_once_with(1234, end_date="")
+
+
+def test_update_departure_date_with_date_makes_expected_call(mocker, runner, cli_state):
+    cli_state.sdk.userriskprofile.get_by_username.return_value = create_mock_response(mocker, data={"userId": 1234})
+    res = runner.invoke(cli, ["users", "update-departure-date", "test@example.com", "2020-10-10"], obj=cli_state)
+    assert res.exit_code == 0
+    cli_state.sdk.userriskprofile.update.assert_called_once_with(1234, end_date=datetime.datetime(2020, 10, 10))
+
+
+def test_update_notes_without_note_arg_or_clear_option_raises_cli_error(runner, cli_state):
+    res = runner.invoke(cli, ["users", "update-risk-profile-notes", "test@example.com"], obj=cli_state)
+    assert res.exit_code == 1
+    assert "Must supply NOTE argument if --clear is not used." in res.output
+
+
+def test_update_notes_with_clear_option_clears_date(mocker, runner, cli_state):
+    cli_state.sdk.userriskprofile.get_by_username.return_value = create_mock_response(mocker, data={"userId": 1234})
+    res = runner.invoke(cli, ["users", "update-risk-profile-notes", "test@example.com", "--clear"], obj=cli_state)
+    assert res.exit_code == 0
+    cli_state.sdk.userriskprofile.update.assert_called_once_with(1234, notes="")
+
+
+def test_update_notes_with_note_makes_expected_call(mocker, runner, cli_state):
+    cli_state.sdk.userriskprofile.get_by_username.return_value = create_mock_response(mocker, data={"userId": 1234})
+    res = runner.invoke(cli, ["users", "update-risk-profile-notes", "test@example.com", "new note"], obj=cli_state)
+    assert res.exit_code == 0
+    cli_state.sdk.userriskprofile.update.assert_called_once_with(1234, notes="new note")
+
+
+def test_update_notes_with_append_option_appends_note_value(mocker, runner, cli_state):
+    cli_state.sdk.userriskprofile.get_by_username.return_value = create_mock_response(mocker, data={"userId": 1234, "notes": "existing note"})
+    res = runner.invoke(cli, ["users", "update-risk-profile-notes", "test@example.com", "--append", "new note"], obj=cli_state)
+    assert res.exit_code == 0
+    cli_state.sdk.userriskprofile.update.assert_called_once_with(1234, notes="existing note\n\nnew note")
+
+
+def test_bulk_update_risk_profile_makes_expected_calls(mocker, runner, cli_state):
+    cli_state.sdk.userriskprofile.get_by_username.return_value = create_mock_response(mocker, data={"userId": 1234})
+    with runner.isolated_filesystem():
+        with open("csv", "w") as file:
+            file.write("username,start_date,end_date,notes\ntest@example.com,2020-10-10,2022-10-10,new note\n")
+        res = runner.invoke(cli, ["users", "bulk", "update-risk-profile", "csv"], obj=cli_state)
+        assert res.exit_code == 0
+        cli_state.sdk.userriskprofile.update.assert_called_once_with(
+            1234,
+            start_date="2020-10-10",
+            end_date="2022-10-10",
+            notes="new note"
+        )
+    
+    
+def test_bulk_update_risk_profile_with_append_note_option_appends_note(mocker, runner, cli_state):
+    cli_state.sdk.userriskprofile.get_by_username.return_value = create_mock_response(mocker, data={
+        "userId": 1234, "notes":"existing note"})
+    with runner.isolated_filesystem():
+        with open("csv", "w") as file:
+            file.write(
+                "username,start_date,end_date,notes\ntest@example.com,2020-10-10,2022-10-10,new note\n")
+        res = runner.invoke(cli, ["users", "bulk", "update-risk-profile", "--append-notes", "csv"], obj=cli_state)
+        assert res.exit_code == 0
+        cli_state.sdk.userriskprofile.update.assert_called_once_with(
+            1234,
+            start_date="2020-10-10",
+            end_date="2022-10-10",
+            notes="existing note\n\nnew note"
+        )
