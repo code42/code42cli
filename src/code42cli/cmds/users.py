@@ -264,6 +264,8 @@ def update_start_date(state, username, date, clear):
     Date format: %Y-%m-%d"""
     if not date and not clear:
         raise Code42CLIError("Must supply DATE argument if --clear is not used.")
+    if clear:
+        date = ""
     user_id = _get_user(state.sdk, username)["userId"]
     state.sdk.userriskprofile.update(user_id, start_date=date)
     
@@ -279,6 +281,8 @@ def update_departure_date(state, username, date, clear):
     """
     if not date and not clear:
         raise Code42CLIError("Must supply DATE argument if --clear is not used.")
+    if clear:
+        date = ""
     user_id = _get_user(state.sdk, username)["userId"]
     state.sdk.userriskprofile.update(user_id, end_date=date)
 
@@ -289,7 +293,7 @@ def update_departure_date(state, username, date, clear):
 @click.option("--clear", is_flag=True, help="Clears the current `notes` value.")
 @click.option("--append", is_flag=True, help="Appends provided note to existing note text as a new line.")
 @sdk_options()
-def update_risk_profile_note(state, username, note, clear, append):
+def update_risk_profile_notes(state, username, note, clear, append):
     """Sets the `notes` value of a User's risk profile.
     
     WARNING: Overwrites any existing note value."""
@@ -299,6 +303,8 @@ def update_risk_profile_note(state, username, note, clear, append):
     user_id = user["userId"]
     if append and user["notes"]:
         note = user["notes"] + f"\n\n{note}"
+    if clear:
+        note = ""
     state.sdk.userriskprofile.update(user_id, notes=note)
     
 
