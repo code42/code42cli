@@ -190,7 +190,7 @@ def bulk_add(state, csv_rows):
         else:
             raise Code42CLIError(
                 f"Row for username={username}, user_id={user_id} "
-                "missing value for `watchlistId` and `watchlistType` columns."
+                "missing value for `watchlist_id` or `watchlist_type` columns."
             )
 
     run_bulk_process(
@@ -215,32 +215,32 @@ def bulk_add(state, csv_rows):
 @sdk_options()
 def bulk_remove(state, csv_rows):
     headers = csv_rows.fieldnames
-    if "userId" not in headers and "username" not in headers:
+    if "user_id" not in headers and "username" not in headers:
         raise Code42CLIError(
-            "CSV requires either a `username` or `userId` "
+            "CSV requires either a `username` or `user_id` "
             "column to identify which users to remove from watchlist."
         )
-    if "watchlistId" not in headers and "watchlistType" not in headers:
+    if "watchlist_id" not in headers and "watchlist_type" not in headers:
         raise Code42CLIError(
-            "CSV requires either a `watchlistId` or `watchlistType` "
+            "CSV requires either a `watchlist_id` or `watchlist_type` "
             "column to identify which watchlist to remove user from."
         )
 
     sdk = state.sdk
 
-    def handle_row(watchlistId=None, watchlistType=None, userId=None, username=None):
-        if username and not userId:
-            userId = sdk.userriskprofile.get_by_username(username)["userId"]
-        if watchlistId:
-            sdk.watchlists.remove_included_users_by_watchlist_id(userId, watchlistId)
-        elif watchlistType:
+    def handle_row(watchlist_id=None, watchlist_type=None, user_id=None, username=None):
+        if username and not user_id:
+            user_id = sdk.userriskprofile.get_by_username(username)["userId"]
+        if watchlist_id:
+            sdk.watchlists.remove_included_users_by_watchlist_id(user_id, watchlist_id)
+        elif watchlist_type:
             sdk.watchlists.remove_included_users_by_watchlist_type(
-                userId, watchlistType
+                user_id, watchlist_type
             )
         else:
             raise Code42CLIError(
-                f"Row for username={username}, userId={userId} "
-                "missing value for `watchlistId` and `watchlistType` columns."
+                f"Row for username={username}, user_id={user_id} "
+                "missing value for `watchlist_id` or `watchlist_type` columns."
             )
 
     run_bulk_process(
