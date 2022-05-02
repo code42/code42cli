@@ -1,11 +1,10 @@
 import pytest
-
-from code42cli.main import cli
-from .conftest import create_mock_response
-
-from py42.exceptions import Py42UserRiskProfileNotFound
 from py42.exceptions import Py42NotFoundError
+from py42.exceptions import Py42UserRiskProfileNotFound
 from py42.exceptions import Py42WatchlistNotFound
+
+from .conftest import create_mock_response
+from code42cli.main import cli
 
 WATCHLISTS_RESPONSE = {
     "watchlists": [

@@ -6,6 +6,7 @@ from py42.constants import WatchlistType
 from py42.exceptions import Py42NotFoundError
 from py42.exceptions import Py42WatchlistNotFound
 
+from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
 from code42cli.click_ext.groups import OrderedGroup
 from code42cli.click_ext.options import incompatible_with
@@ -14,7 +15,6 @@ from code42cli.errors import Code42CLIError
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.output_formats import DataFrameOutputFormatter
-from code42cli.bulk import generate_template_cmd_factory
 
 
 @click.group(cls=OrderedGroup)
@@ -43,7 +43,7 @@ def _list(state, format):
 @click.option(
     "--watchlist-type",
     type=click.Choice(WatchlistType.choices()),
-    help="Type of watchlist to remove user from. For CUSTOM watchlists, --watchlist-id is required.",
+    help="Type of watchlist to list.",
     cls=incompatible_with("watchlist_id"),
 )
 @format_option
@@ -70,12 +70,13 @@ def list_users(state, watchlist_type, watchlist_id, format):
 @click.option(
     "--watchlist-type",
     type=click.Choice(WatchlistType.choices()),
-    help="Type of watchlist to remove user from. For CUSTOM watchlists, --watchlist-id is required.",
+    help="Type of watchlist to add user to.",
     cls=incompatible_with("watchlist_id"),
 )
 @click.argument("user", metavar="USER_ID|USERNAME")
 @sdk_options()
 def add(state, watchlist_id, watchlist_type, user):
+    """Add a user to a watchlist."""
     if not watchlist_id and not watchlist_type:
         raise click.ClickException("--watchlist-id OR --watchlist-type is required.")
     try:
@@ -101,12 +102,13 @@ def add(state, watchlist_id, watchlist_type, user):
 @click.option(
     "--watchlist-type",
     type=click.Choice(WatchlistType.choices()),
-    help="Type of watchlist to remove user from. For CUSTOM watchlists, --watchlist-id is required.",
+    help="Type of watchlist to remove user from.",
     cls=incompatible_with("watchlist_id"),
 )
 @click.argument("user", metavar="USER_ID|USERNAME")
 @sdk_options()
 def remove(state, watchlist_id, watchlist_type, user):
+    """Remove a user from a watchlist."""
     if not watchlist_id and not watchlist_type:
         raise click.ClickException("--watchlist-id OR --watchlist-type is required.")
     try:

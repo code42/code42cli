@@ -3,8 +3,9 @@ import functools
 import click
 from pandas import DataFrame
 from pandas import json_normalize
-from py42.exceptions import Py42BadRequestError, Py42UserRiskProfileNotFound
+from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42NotFoundError
+from py42.exceptions import Py42UserRiskProfileNotFound
 
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
@@ -256,11 +257,13 @@ def remove_alias(state, username, alias):
 
 @users.command()
 @click.argument("username")
-@click.argument("date", type=click.DateTime(formats=["%Y-%m-%d"]), required=False, metavar="DATE")
+@click.argument(
+    "date", type=click.DateTime(formats=["%Y-%m-%d"]), required=False, metavar="DATE"
+)
 @click.option("--clear", is_flag=True, help="Clears the current `start_date` value.")
 @sdk_options()
 def update_start_date(state, username, date, clear):
-    """Sets the `start_date` on a User's risk profile (useful for users on the New Hire Watchlist). 
+    """Sets the `start_date` on a User's risk profile (useful for users on the New Hire Watchlist).
     Date format: %Y-%m-%d"""
     if not date and not clear:
         raise Code42CLIError("Must supply DATE argument if --clear is not used.")
@@ -268,7 +271,7 @@ def update_start_date(state, username, date, clear):
         date = ""
     user_id = _get_user(state.sdk, username)["userId"]
     state.sdk.userriskprofile.update(user_id, start_date=date)
-    
+
 
 @users.command()
 @click.argument("username")
@@ -276,9 +279,7 @@ def update_start_date(state, username, date, clear):
 @click.option("--clear", is_flag=True, help="Clears the current `end_date` value.")
 @sdk_options()
 def update_departure_date(state, username, date, clear):
-    """Sets the `end_date` on a User's risk profile (useful for users on the Departing Employee 
-    Watchlist). Date format: %Y-%m-%d
-    """
+    """Sets the `end_date` on a User's risk profile (useful for users on the Departing Watchlist). Date format: %Y-%m-%d"""
     if not date and not clear:
         raise Code42CLIError("Must supply DATE argument if --clear is not used.")
     if clear:
@@ -291,11 +292,15 @@ def update_departure_date(state, username, date, clear):
 @click.argument("username")
 @click.argument("note", required=False)
 @click.option("--clear", is_flag=True, help="Clears the current `notes` value.")
-@click.option("--append", is_flag=True, help="Appends provided note to existing note text as a new line.")
+@click.option(
+    "--append",
+    is_flag=True,
+    help="Appends provided note to existing note text as a new line.",
+)
 @sdk_options()
 def update_risk_profile_notes(state, username, note, clear, append):
     """Sets the `notes` value of a User's risk profile.
-    
+
     WARNING: Overwrites any existing note value."""
     if not note and not clear:
         raise Code42CLIError("Must supply NOTE argument if --clear is not used.")
@@ -306,14 +311,14 @@ def update_risk_profile_notes(state, username, note, clear, append):
     if clear:
         note = ""
     state.sdk.userriskprofile.update(user_id, notes=note)
-    
+
 
 @users.command()
 @click.argument("username")
 @sdk_options()
 def list_aliases(state, username):
-    """List the cloud aliases for a given user. 
-    
+    """List the cloud aliases for a given user.
+
     Each user has a default cloud alias of their Code42 username with up to one additional alias."""
     user = _get_user(state.sdk, username)
     aliases = user["cloudAliases"]
@@ -725,28 +730,37 @@ def bulk_remove_alias(state, csv_rows, format):
 @bulk.command(
     name="update-risk-profile",
     help=f"Update user risk profile data from the provided CSV in format: {','.join(_bulk_user_risk_profile_headers)}"
-         "\n\nTo clear a value, set column item to the string: 'null'.")
+    "\n\nTo clear a value, set column item to the string: 'null'.",
+)
 @format_option
 @read_csv_arg(headers=_bulk_user_risk_profile_headers)
-@click.option("--append-notes", is_flag=True, help="Append provided note value to already existing note on a new line. Defaults to overwrite.")
+@click.option(
+    "--append-notes",
+    is_flag=True,
+    help="Append provided note value to already existing note on a new line. Defaults to overwrite.",
+)
 @sdk_options()
 def bulk_update_risk_profile(state, csv_rows, format, append_notes):
     """Bulk update User Risk Profile data."""
     sdk = state.sdk
 
     success_header = "updated_user"
-    formatter = OutputFormatter(format, {key: key for key in [*csv_rows[0].keys(), success_header]})
+    formatter = OutputFormatter(
+        format, {key: key for key in [*csv_rows[0].keys(), success_header]}
+    )
     stats = create_worker_stats(len(csv_rows))
-    
+
     def handle_row(**row):
         try:
-            updated_user = _update_userriskprofile(sdk, append_notes=append_notes, **row)
+            updated_user = _update_userriskprofile(
+                sdk, append_notes=append_notes, **row
+            )
             row[success_header] = updated_user
         except Exception as err:
             row[success_header] = f"Error: {err}"
             stats.increment_total_errors()
         return row
-            
+
     result_rows = run_bulk_process(
         handle_row,
         csv_rows,
@@ -887,7 +901,7 @@ def _reactivate_user(sdk, username):
 
 
 def _get_user(sdk, username):
-    # use when retrieving the user risk profile information 
+    # use when retrieving the user risk profile information
     try:
         return sdk.userriskprofile.get_by_username(username)
     except Py42UserRiskProfileNotFound:
@@ -904,19 +918,28 @@ def _remove_cloud_alias(sdk, username, alias):
     sdk.userriskprofile.delete_cloud_aliases(user["userId"], alias)
 
 
-def _update_userriskprofile(sdk, append_notes=False, username=None, start_date=None, end_date=None, notes=None):
+def _update_userriskprofile(
+    sdk, append_notes=False, username=None, start_date=None, end_date=None, notes=None
+):
     user = _get_user(sdk, username)
     user_id = user["userId"]
     if append_notes and notes != "null":
         notes = user["notes"] + f"\n\n{notes}"
-    
-    # py42 interprets empty string as "clear this value" for kwarg values. Since empty CSV columns 
-    # get parsed as "" we want to have user provide explicit 'null' string to indicate desire to 
+
+    # py42 interprets empty string as "clear this value" for kwarg values. Since empty CSV columns
+    # get parsed as "" we want to have user provide explicit 'null' string to indicate desire to
     # clear instead of just not update value
-    start_date = None if start_date == "" else ("" if start_date == "null" else start_date)
+    start_date = (
+        None if start_date == "" else ("" if start_date == "null" else start_date)
+    )
     end_date = None if end_date == "" else ("" if end_date == "null" else end_date)
     notes = None if notes == "" else ("" if notes == "null" else notes)
 
-    updated_user = sdk.userriskprofile.update(user_id, start_date=start_date, end_date=end_date, notes=notes)
-    return {k: v for k, v in updated_user.data.items() if k in ["username", "userId", "startDate", "endDate", "notes"]}
-    
+    updated_user = sdk.userriskprofile.update(
+        user_id, start_date=start_date, end_date=end_date, notes=notes
+    )
+    return {
+        k: v
+        for k, v in updated_user.data.items()
+        if k in ["username", "userId", "startDate", "endDate", "notes"]
+    }

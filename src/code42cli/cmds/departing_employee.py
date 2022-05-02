@@ -24,6 +24,7 @@ def _get_filter_choices():
     filters = DepartingEmployeeFilters.choices()
     return get_choices(filters)
 
+
 DEPRECATION_TEXT = "(DEPRECATED): Use `code42 watchlists` commands instead."
 
 DATE_FORMAT = "%Y-%m-%d"
@@ -40,7 +41,7 @@ filter_option = click.option(
 @sdk_options(hidden=True)
 def departing_employee(state):
     f"""{DEPRECATION_TEXT}
-    
+
     Add and remove employees from the Departing Employees detection list."""
     pass
 
@@ -51,7 +52,7 @@ def departing_employee(state):
 @filter_option
 def _list(state, format, filter):
     f"""{DEPRECATION_TEXT}
-    
+
     Lists the users on the Departing Employees list."""
     deprecation_warning(DEPRECATION_TEXT)
     employee_generator = _get_departing_employees(state.sdk, filter)
@@ -74,7 +75,7 @@ def _list(state, format, filter):
 @sdk_options()
 def add(state, username, cloud_alias, departure_date, notes):
     f"""{DEPRECATION_TEXT}
-    
+
     Add a user to the Departing Employees detection list."""
     deprecation_warning(DEPRECATION_TEXT)
     _add_departing_employee(state.sdk, username, cloud_alias, departure_date, notes)
@@ -85,7 +86,7 @@ def add(state, username, cloud_alias, departure_date, notes):
 @sdk_options()
 def remove(state, username):
     f"""{DEPRECATION_TEXT}
-    
+
     Remove a user from the Departing Employees detection list."""
     deprecation_warning(DEPRECATION_TEXT)
     _remove_departing_employee(state.sdk, username)
@@ -95,7 +96,7 @@ def remove(state, username):
 @sdk_options(hidden=True)
 def bulk(state):
     f"""{DEPRECATION_TEXT}
-    
+
     Tools for executing bulk departing employee actions."""
     pass
 
@@ -117,7 +118,7 @@ bulk.add_command(departing_employee_generate_template)
 @bulk.command(
     name="add",
     help=f"{DEPRECATION_TEXT}\n\nBulk add users to the departing employees detection list using "
-         f"a CSV file with format: {','.join(DEPARTING_EMPLOYEE_CSV_HEADERS)}.",
+    f"a CSV file with format: {','.join(DEPARTING_EMPLOYEE_CSV_HEADERS)}.",
 )
 @read_csv_arg(headers=DEPARTING_EMPLOYEE_CSV_HEADERS)
 @sdk_options()
@@ -148,7 +149,7 @@ def bulk_add(state, csv_rows):
 @bulk.command(
     name="remove",
     help=f"{DEPRECATION_TEXT}\n\nBulk remove users from the departing employees detection list "
-         f"using a CSV file with format {','.join(REMOVE_EMPLOYEE_HEADERS)}.",
+    f"using a CSV file with format {','.join(REMOVE_EMPLOYEE_HEADERS)}.",
 )
 @read_csv_arg(headers=REMOVE_EMPLOYEE_HEADERS)
 @sdk_options()
