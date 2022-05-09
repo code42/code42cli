@@ -48,16 +48,16 @@ def _list(state, format):
 )
 @format_option
 @sdk_options()
-def list_users(state, watchlist_type, watchlist_id, format):
-    """List all users on a given watchlist."""
+def list_members(state, watchlist_type, watchlist_id, format):
+    """List all members on a given watchlist."""
     if not watchlist_id and not watchlist_type:
         raise click.ClickException("--watchlist-id OR --watchlist-type is required.")
     if watchlist_type:
         watchlist_id = state.sdk.watchlists._watchlists_service.watchlist_type_id_map[
             watchlist_type
         ]
-    pages = state.sdk.watchlists.get_all_included_users(watchlist_id)
-    dfs = (DataFrame(page["includedUsers"]) for page in pages)
+    pages = state.sdk.watchlists.get_all_watchlist_members(watchlist_id)
+    dfs = (DataFrame(page["watchlistMembers"]) for page in pages)
     formatter = DataFrameOutputFormatter(format)
     formatter.echo_formatted_dataframes(dfs)
 
