@@ -3,7 +3,6 @@ import functools
 import click
 from pandas import DataFrame
 from pandas import json_normalize
-from py42.exceptions import Py42BadRequestError
 from py42.exceptions import Py42NotFoundError
 from py42.exceptions import Py42UserRiskProfileNotFound
 
@@ -223,6 +222,8 @@ _bulk_user_roles_headers = ["username", "role_name"]
 _bulk_user_alias_headers = ["username", "alias"]
 
 _bulk_user_risk_profile_headers = ["username", "start_date", "end_date", "notes"]
+
+_bulk_user_activation_headers = ["username"]
 
 
 @users.command(name="move")
@@ -484,9 +485,6 @@ def bulk_move(state, csv_rows, format):
         raise_global_error=False,
     )
     formatter.echo_formatted_list(result_rows)
-
-
-_bulk_user_activation_headers = ["username"]
 
 
 @bulk.command(
