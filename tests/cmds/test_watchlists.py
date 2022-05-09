@@ -249,7 +249,7 @@ class TestWatchlistsAddCmd:
     ):
         mock_user_response = create_mock_response(mocker, data={"userId": 1234})
         cli_state.sdk.userriskprofile.get_by_username.return_value = mock_user_response
-        res = runner.invoke(
+        runner.invoke(
             cli,
             [
                 "watchlists",
@@ -348,7 +348,7 @@ class TestWatchlistsRemoveCmd:
     ):
         mock_user_response = create_mock_response(mocker, data={"userId": 1234})
         cli_state.sdk.userriskprofile.get_by_username.return_value = mock_user_response
-        res = runner.invoke(
+        runner.invoke(
             cli,
             [
                 "watchlists",
@@ -470,9 +470,7 @@ class TestWatchlistBulkAddCmd:
                 file.write(
                     "username,user_id,watchlist_id,watchlist_type\ntest@example.com,1234,abcd,DEPARTING_EMPLOYEE\n"
                 )
-            res = runner.invoke(
-                cli, ["watchlists", "bulk", "add", "csv"], obj=cli_state
-            )
+            runner.invoke(cli, ["watchlists", "bulk", "add", "csv"], obj=cli_state)
             cli_state.sdk.watchlists.add_included_users_by_watchlist_id.assert_called_once_with(
                 "1234", "abcd"
             )
@@ -489,9 +487,7 @@ class TestWatchlistBulkAddCmd:
                 file.write(
                     "username,watchlist_type\ntest@example.com,DEPARTING_EMPLOYEE\n"
                 )
-            res = runner.invoke(
-                cli, ["watchlists", "bulk", "add", "csv"], obj=cli_state
-            )
+            runner.invoke(cli, ["watchlists", "bulk", "add", "csv"], obj=cli_state)
             cli_state.sdk.watchlists.add_included_users_by_watchlist_type.assert_called_once_with(
                 1234, "DEPARTING_EMPLOYEE"
             )
@@ -536,9 +532,7 @@ class TestWatchlistBulkRemoveCmd:
                 file.write(
                     "username,user_id,watchlist_id,watchlist_type\ntest@example.com,1234,abcd,DEPARTING_EMPLOYEE\n"
                 )
-            res = runner.invoke(
-                cli, ["watchlists", "bulk", "remove", "csv"], obj=cli_state
-            )
+            runner.invoke(cli, ["watchlists", "bulk", "remove", "csv"], obj=cli_state)
             cli_state.sdk.watchlists.remove_included_users_by_watchlist_id.assert_called_once_with(
                 "1234", "abcd"
             )
@@ -555,9 +549,7 @@ class TestWatchlistBulkRemoveCmd:
                 file.write(
                     "username,watchlist_type\ntest@example.com,DEPARTING_EMPLOYEE\n"
                 )
-            res = runner.invoke(
-                cli, ["watchlists", "bulk", "remove", "csv"], obj=cli_state
-            )
+            runner.invoke(cli, ["watchlists", "bulk", "remove", "csv"], obj=cli_state)
             cli_state.sdk.watchlists.remove_included_users_by_watchlist_type.assert_called_once_with(
                 1234, "DEPARTING_EMPLOYEE"
             )
