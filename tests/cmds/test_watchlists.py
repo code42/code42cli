@@ -66,8 +66,8 @@ WATCHLISTS_RESPONSE = {
     "totalCount": 9,
 }
 
-WATCHLISTS_INCLUDED_USERS_RESPONSE = {
-    "includedUsers": [
+WATCHLISTS_MEMBERS_RESPONSE = {
+    "watchlistMembers": [
         {
             "userId": "1234",
             "username": "one@example.com",
@@ -94,8 +94,8 @@ def mock_watchlists_response(mocker):
 
 
 @pytest.fixture()
-def mock_included_users_response(mocker):
-    return create_mock_response(mocker, data=WATCHLISTS_INCLUDED_USERS_RESPONSE)
+def mock_members_response(mocker):
+    return create_mock_response(mocker, data=WATCHLISTS_MEMBERS_RESPONSE)
 
 
 class TestWatchlistsListCmd:
@@ -141,14 +141,14 @@ class TestWatchlistsListCmd:
 
 class TestWatchlistsListUsersCmd:
     def test_table_output_contains_expected_properties(
-        self, runner, cli_state, mock_included_users_response
+        self, runner, cli_state, mock_members_response
     ):
-        cli_state.sdk.watchlists.get_all_included_users.return_value = iter(
-            [mock_included_users_response]
+        cli_state.sdk.watchlists.get_all_watchlist_members.return_value = iter(
+            [mock_members_response]
         )
         res = runner.invoke(
             cli,
-            ["watchlists", "list-users", "--watchlist-id", "test-id"],
+            ["watchlists", "list-members", "--watchlist-id", "test-id"],
             obj=cli_state,
         )
         assert "userId" in res.output
@@ -163,14 +163,14 @@ class TestWatchlistsListUsersCmd:
         assert "2022-04-10T23:05:48.096964" in res.output
 
     def test_json_output_contains_expected_properties(
-        self, runner, cli_state, mock_included_users_response
+        self, runner, cli_state, mock_members_response
     ):
-        cli_state.sdk.watchlists.get_all_included_users.return_value = iter(
-            [mock_included_users_response]
+        cli_state.sdk.watchlists.get_all_watchlist_members.return_value = iter(
+            [mock_members_response]
         )
         res = runner.invoke(
             cli,
-            ["watchlists", "list-users", "--watchlist-id", "test-id", "-f", "JSON"],
+            ["watchlists", "list-members", "--watchlist-id", "test-id", "-f", "JSON"],
             obj=cli_state,
         )
         assert "userId" in res.output
@@ -185,14 +185,14 @@ class TestWatchlistsListUsersCmd:
         assert "2022-04-10T23:05:48.096964" in res.output
 
     def test_csv_output_contains_expected_properties(
-        self, runner, cli_state, mock_included_users_response
+        self, runner, cli_state, mock_members_response
     ):
-        cli_state.sdk.watchlists.get_all_included_users.return_value = iter(
-            [mock_included_users_response]
+        cli_state.sdk.watchlists.get_all_watchlist_members.return_value = iter(
+            [mock_members_response]
         )
         res = runner.invoke(
             cli,
-            ["watchlists", "list-users", "--watchlist-id", "test-id", "-f", "CSV"],
+            ["watchlists", "list-members", "--watchlist-id", "test-id", "-f", "CSV"],
             obj=cli_state,
         )
         assert "userId" in res.output
@@ -209,7 +209,7 @@ class TestWatchlistsListUsersCmd:
     def test_invalid_watchlist_type_raises_cli_error(self, runner, cli_state):
         res = runner.invoke(
             cli,
-            ["watchlists", "list-users", "--watchlist-type", "INVALID"],
+            ["watchlists", "list-members", "--watchlist-type", "INVALID"],
             obj=cli_state,
         )
         assert res.exit_code == 2
@@ -220,7 +220,7 @@ class TestWatchlistsListUsersCmd:
     ):
         res = runner.invoke(
             cli,
-            ["watchlists", "list-users"],
+            ["watchlists", "list-members"],
             obj=cli_state,
         )
         assert res.exit_code == 1
