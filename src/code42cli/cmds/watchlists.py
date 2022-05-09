@@ -73,7 +73,7 @@ def list_users(state, watchlist_type, watchlist_id, format):
     help="Type of watchlist to add user to.",
     cls=incompatible_with("watchlist_id"),
 )
-@click.argument("user", metavar="USER_ID|USERNAME")
+@click.argument("user", metavar="[USER_ID|USERNAME]")
 @sdk_options()
 def add(state, watchlist_id, watchlist_type, user):
     """Add a user to a watchlist."""
@@ -105,7 +105,7 @@ def add(state, watchlist_id, watchlist_type, user):
     help="Type of watchlist to remove user from.",
     cls=incompatible_with("watchlist_id"),
 )
-@click.argument("user", metavar="USER_ID|USERNAME")
+@click.argument("user", metavar="[USER_ID|USERNAME]")
 @sdk_options()
 def remove(state, watchlist_id, watchlist_type, user):
     """Remove a user from a watchlist."""
