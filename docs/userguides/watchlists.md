@@ -13,13 +13,13 @@ code42 watchlists list
 You can list watchlists either by their Type:
 
 ```bash
-code42 watchlists list-users --watchlist-type DEPARTING_EMPLOYEE
+code42 watchlists list-members --watchlist-type DEPARTING_EMPLOYEE
 ```
 
 or by their ID (get watchlist IDs from `code42 watchlist list` output):
 
 ```bash
-code42 watchlists list-users --watchlist-id 6e6c5acc-2568-4e5f-8324-e73f2811fa7c
+code42 watchlists list-members --watchlist-id 6e6c5acc-2568-4e5f-8324-e73f2811fa7c
 ```
 
 ## Add or remove a single user from watchlist membership
