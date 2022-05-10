@@ -87,10 +87,36 @@ WATCHLISTS_MEMBERS_RESPONSE = {
     "totalCount": 3,
 }
 
+WATCHLISTS_INCLUDED_USERS_RESPONSE = {
+    "includedUsers": [
+        {
+            "userId": "1234",
+            "username": "one@example.com",
+            "addedTime": "2022-04-10T23:05:48.096964",
+        },
+        {
+            "userId": "2345",
+            "username": "two@example.com",
+            "addedTime": "2022-02-26T18:52:36.805807",
+        },
+        {
+            "userId": "3456",
+            "username": "three@example.com",
+            "addedTime": "2022-02-26T18:52:36.805807",
+        },
+    ],
+    "totalCount": 3,
+}
+
 
 @pytest.fixture()
 def mock_watchlists_response(mocker):
     return create_mock_response(mocker, data=WATCHLISTS_RESPONSE)
+
+
+@pytest.fixture()
+def mock_included_users_response(mocker):
+    return create_mock_response(mocker, data=WATCHLISTS_INCLUDED_USERS_RESPONSE)
 
 
 @pytest.fixture()
@@ -139,10 +165,11 @@ class TestWatchlistsListCmd:
         assert "tenant-123" in res.output
 
 
-class TestWatchlistsListUsersCmd:
+class TestWatchlistsListMembersCmd:
     def test_table_output_contains_expected_properties(
-        self, runner, cli_state, mock_members_response
+        self, runner, cli_state, mock_members_response, mock_included_users_response
     ):
+        # all members:
         cli_state.sdk.watchlists.get_all_watchlist_members.return_value = iter(
             [mock_members_response]
         )
@@ -162,9 +189,36 @@ class TestWatchlistsListUsersCmd:
         assert "three@example.com" in res.output
         assert "2022-04-10T23:05:48.096964" in res.output
 
+        # only included users:
+        cli_state.sdk.watchlists.get_all_included_users.return_value = iter(
+            [mock_included_users_response]
+        )
+        res = runner.invoke(
+            cli,
+            [
+                "watchlists",
+                "list-members",
+                "--watchlist-id",
+                "test-id",
+                "--only-included-users",
+            ],
+            obj=cli_state,
+        )
+        assert "userId" in res.output
+        assert "username" in res.output
+        assert "addedTime" in res.output
+        assert "1234" in res.output
+        assert "2345" in res.output
+        assert "3456" in res.output
+        assert "one@example.com" in res.output
+        assert "two@example.com" in res.output
+        assert "three@example.com" in res.output
+        assert "2022-04-10T23:05:48.096964" in res.output
+
     def test_json_output_contains_expected_properties(
-        self, runner, cli_state, mock_members_response
+        self, runner, cli_state, mock_members_response, mock_included_users_response
     ):
+        # all members:
         cli_state.sdk.watchlists.get_all_watchlist_members.return_value = iter(
             [mock_members_response]
         )
@@ -184,15 +238,72 @@ class TestWatchlistsListUsersCmd:
         assert "three@example.com" in res.output
         assert "2022-04-10T23:05:48.096964" in res.output
 
+        # only included users:
+        cli_state.sdk.watchlists.get_all_included_users.return_value = iter(
+            [mock_included_users_response]
+        )
+        res = runner.invoke(
+            cli,
+            [
+                "watchlists",
+                "list-members",
+                "--watchlist-id",
+                "test-id",
+                "-f",
+                "JSON",
+                "--only-included-users",
+            ],
+            obj=cli_state,
+        )
+        assert "userId" in res.output
+        assert "username" in res.output
+        assert "addedTime" in res.output
+        assert "1234" in res.output
+        assert "2345" in res.output
+        assert "3456" in res.output
+        assert "one@example.com" in res.output
+        assert "two@example.com" in res.output
+        assert "three@example.com" in res.output
+        assert "2022-04-10T23:05:48.096964" in res.output
+
     def test_csv_output_contains_expected_properties(
-        self, runner, cli_state, mock_members_response
+        self, runner, cli_state, mock_members_response, mock_included_users_response
     ):
+        # all members:
         cli_state.sdk.watchlists.get_all_watchlist_members.return_value = iter(
             [mock_members_response]
         )
         res = runner.invoke(
             cli,
             ["watchlists", "list-members", "--watchlist-id", "test-id", "-f", "CSV"],
+            obj=cli_state,
+        )
+        assert "userId" in res.output
+        assert "username" in res.output
+        assert "addedTime" in res.output
+        assert "1234" in res.output
+        assert "2345" in res.output
+        assert "3456" in res.output
+        assert "one@example.com" in res.output
+        assert "two@example.com" in res.output
+        assert "three@example.com" in res.output
+        assert "2022-04-10T23:05:48.096964" in res.output
+
+        # only included users:
+        cli_state.sdk.watchlists.get_all_included_users.return_value = iter(
+            [mock_included_users_response]
+        )
+        res = runner.invoke(
+            cli,
+            [
+                "watchlists",
+                "list-members",
+                "--watchlist-id",
+                "test-id",
+                "-f",
+                "CSV",
+                "--only-included-users",
+            ],
             obj=cli_state,
         )
         assert "userId" in res.output

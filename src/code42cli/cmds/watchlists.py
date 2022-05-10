@@ -46,9 +46,15 @@ def _list(state, format):
     help="Type of watchlist to list.",
     cls=incompatible_with("watchlist_id"),
 )
+@click.option(
+    "--only-included-users",
+    help="Restrict results to users explicitly added to watchlist via API or Console. "
+    "Users added implicitly via group membership or other dynamic rule will not be listed.",
+    is_flag=True,
+)
 @format_option
 @sdk_options()
-def list_members(state, watchlist_type, watchlist_id, format):
+def list_members(state, watchlist_type, watchlist_id, only_included_users, format):
     """List all members on a given watchlist."""
     if not watchlist_id and not watchlist_type:
         raise click.ClickException("--watchlist-id OR --watchlist-type is required.")
@@ -56,8 +62,12 @@ def list_members(state, watchlist_type, watchlist_id, format):
         watchlist_id = state.sdk.watchlists._watchlists_service.watchlist_type_id_map[
             watchlist_type
         ]
-    pages = state.sdk.watchlists.get_all_watchlist_members(watchlist_id)
-    dfs = (DataFrame(page["watchlistMembers"]) for page in pages)
+    if only_included_users:
+        pages = state.sdk.watchlists.get_all_included_users(watchlist_id)
+        dfs = (DataFrame(page["includedUsers"]) for page in pages)
+    else:
+        pages = state.sdk.watchlists.get_all_watchlist_members(watchlist_id)
+        dfs = (DataFrame(page["watchlistMembers"]) for page in pages)
     formatter = DataFrameOutputFormatter(format)
     formatter.echo_formatted_dataframes(dfs)
 
