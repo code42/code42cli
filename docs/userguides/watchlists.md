@@ -22,6 +22,12 @@ or by their ID (get watchlist IDs from `code42 watchlist list` output):
 code42 watchlists list-members --watchlist-id 6e6c5acc-2568-4e5f-8324-e73f2811fa7c
 ```
 
+A "member" of a watchlist is any user that the watchlist alerting rules apply to. Users can be members of a watchlist
+either by being explicitly added (via console or `code42 watchlists add [USER_ID|USERNAME]`), but they can also be
+implicitly included based on some user profile property (like working in a specific department). To get a list of only
+those "members" who have been explicitly added (and thus can be removed via the `code42 watchlists remove [USER_ID|USERNAME]`
+command), add the `--only-included-users` option to `list-members`.
+
 ## Add or remove a single user from watchlist membership
 
 A user can be added to a watchlist using either the watchlist ID or Type, just like listing watchlists, and the user
