@@ -441,7 +441,7 @@ class TestWatchlistsRemoveCmd:
     def test_missing_watchlist_identifying_option_raises_cli_error(
         self, runner, cli_state
     ):
-        res = runner.invoke(cli, ["watchlists", "add", "1234"], obj=cli_state)
+        res = runner.invoke(cli, ["watchlists", "remove", "1234"], obj=cli_state)
         assert res.exit_code == 1
         assert "Error: --watchlist-id OR --watchlist-type is required" in res.output
 
