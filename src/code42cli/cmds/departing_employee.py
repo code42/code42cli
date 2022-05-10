@@ -17,12 +17,15 @@ from code42cli.errors import Code42CLIError
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.options import sdk_options
+from code42cli.util import deprecation_warning
 
 
 def _get_filter_choices():
     filters = DepartingEmployeeFilters.choices()
     return get_choices(filters)
 
+
+DEPRECATION_TEXT = "(DEPRECATED): Use `code42 watchlists` commands instead."
 
 DATE_FORMAT = "%Y-%m-%d"
 filter_option = click.option(
@@ -34,19 +37,18 @@ filter_option = click.option(
 )
 
 
-@click.group(cls=OrderedGroup)
+@click.group(cls=OrderedGroup, help=f"{DEPRECATION_TEXT}\n\nAdd and remove employees from the Departing Employees detection list.")
 @sdk_options(hidden=True)
 def departing_employee(state):
-    """Add and remove employees from the Departing Employees detection list."""
     pass
 
 
-@departing_employee.command("list")
+@departing_employee.command("list", help=f"{DEPRECATION_TEXT}\n\nLists the users on the Departing Employees list.")
 @sdk_options()
 @format_option
 @filter_option
 def _list(state, format, filter):
-    """Lists the users on the Departing Employees list."""
+    deprecation_warning(DEPRECATION_TEXT)
     employee_generator = _get_departing_employees(state.sdk, filter)
     list_employees(
         employee_generator,
@@ -55,7 +57,7 @@ def _list(state, format, filter):
     )
 
 
-@departing_employee.command()
+@departing_employee.command(help=f"{DEPRECATION_TEXT}\n\nAdd a user to the Departing Employees detection list.")
 @username_arg
 @click.option(
     "--departure-date",
@@ -66,22 +68,22 @@ def _list(state, format, filter):
 @notes_option
 @sdk_options()
 def add(state, username, cloud_alias, departure_date, notes):
-    """Add a user to the Departing Employees detection list."""
+
+    deprecation_warning(DEPRECATION_TEXT)
     _add_departing_employee(state.sdk, username, cloud_alias, departure_date, notes)
 
 
-@departing_employee.command()
+@departing_employee.command(help=f"{DEPRECATION_TEXT}\n\nRemove a user from the Departing Employees detection list.")
 @username_arg
 @sdk_options()
 def remove(state, username):
-    """Remove a user from the Departing Employees detection list."""
+    deprecation_warning(DEPRECATION_TEXT)
     _remove_departing_employee(state.sdk, username)
 
 
-@departing_employee.group(cls=OrderedGroup)
+@departing_employee.group(cls=OrderedGroup, help=f"{DEPRECATION_TEXT}\n\nTools for executing bulk departing employee actions.")
 @sdk_options(hidden=True)
 def bulk(state):
-    """Tools for executing bulk departing employee actions."""
     pass
 
 
@@ -101,12 +103,13 @@ bulk.add_command(departing_employee_generate_template)
 
 @bulk.command(
     name="add",
-    help="Bulk add users to the departing employees detection list using a CSV file with "
-    f"format: {','.join(DEPARTING_EMPLOYEE_CSV_HEADERS)}.",
+    help=f"{DEPRECATION_TEXT}\n\nBulk add users to the departing employees detection list using "
+    f"a CSV file with format: {','.join(DEPARTING_EMPLOYEE_CSV_HEADERS)}.",
 )
 @read_csv_arg(headers=DEPARTING_EMPLOYEE_CSV_HEADERS)
 @sdk_options()
 def bulk_add(state, csv_rows):
+    deprecation_warning(DEPRECATION_TEXT)
     sdk = state.sdk  # Force initialization of py42 to only happen once.
 
     def handle_row(username, cloud_alias, departure_date, notes):
@@ -131,11 +134,13 @@ def bulk_add(state, csv_rows):
 
 @bulk.command(
     name="remove",
-    help=f"Bulk remove users from the departing employees detection list using a CSV file with format {','.join(REMOVE_EMPLOYEE_HEADERS)}.",
+    help=f"{DEPRECATION_TEXT}\n\nBulk remove users from the departing employees detection list "
+    f"using a CSV file with format {','.join(REMOVE_EMPLOYEE_HEADERS)}.",
 )
 @read_csv_arg(headers=REMOVE_EMPLOYEE_HEADERS)
 @sdk_options()
 def bulk_remove(state, csv_rows):
+    deprecation_warning(DEPRECATION_TEXT)
     sdk = state.sdk
 
     def handle_row(username):

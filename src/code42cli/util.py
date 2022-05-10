@@ -198,3 +198,7 @@ def parse_timestamp(date_str):
     ts = date_str[:-1]
     date = dateutil.parser.parse(ts).replace(tzinfo=timezone.utc)
     return date.timestamp()
+
+
+def deprecation_warning(text):
+    echo(style(text, fg="red"), err=True)

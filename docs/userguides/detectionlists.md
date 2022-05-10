@@ -1,4 +1,14 @@
-# Manage Detection List Users
+# (DEPRECATED) Manage Detection List Users
+
+```{eval-rst}
+.. note::
+
+    Detection Lists have been replaced by Watchlists.
+
+    Functionality for adding users to Departing Employee and High Risk Employee categories has been migrated to the :code:`code42 watchlists` command group.
+
+    Functionality for listing and managing User Risk Profiles (e.g. adding Cloud Aliases, Notes, and Start/End dates to a user profile) has been migrated to the :code:`code42 users` command group.
+```
 
 Use the `departing-employee` commands to add employees to or remove employees from the Departing Employees list. Use the `high-risk-employee` commands to add employees to or remove employees from the High Risk list, or update risk tags for those users.
 

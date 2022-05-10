@@ -34,6 +34,34 @@ code42 users add-role --username "sean.cassidy@example.com" --role-name "Desktop
 
 Similarly, use the `remove-role` command to remove a role from a user.
 
+## Manage User Risk Profile info
+
+To set a start or end/departure date on a User's profile (useful for users on the "New Hire" and "Departing" Watchlists):
+
+```bash
+code42 users update-start-date 2020-03-10 user@example.com
+
+code42 users update-departure-date 2022-06-20 user@example.com
+```
+
+To clear the value of start_date/end_date on a User's profile, use the `--clear` option to the above commands:
+
+```bash
+code42 users update-departure-date --clear user@example.com
+```
+
+To update a User's Risk Profile notes field:
+
+```bash
+code42 users update-risk-profile-notes user@example.com "New note text"
+```
+
+By default, the note text will overwrite notes are already on the profile. To keep existing note data, use the `--append` option:
+
+```bash
+code42 users update-risk-profile-notes user@example.com "Additional note text" --append
+```
+
 ## Deactivate a User
 
 You can deactivate a user with the following command:
@@ -73,17 +101,18 @@ Alternatively, to move multiple users between organizations, fill out the `move`
 code42 users bulk move bulk-command.csv
 ```
 
-## Get CSV Template
+## Get CSV Template for bulk commands
 
-The following command generates a CSV template to either update users' data, or move users between organizations.  The csv file is saved to the current working directory.
+The following command generates a CSV template for each of the available bulk user commands.  The CSV file is saved to the current working directory.
 ```bash
-code42 trusted-activities bulk generate-template [update|move]
+code42 users bulk generate-template [update|move|add-alias|remove-alias|update-risk-profile]
 ```
 
 Once generated, fill out and use each of the CSV templates with their respective bulk commands.
 ```bash
-code42 trusted-activities bulk [update|move|reactivate|deactivate] bulk-command.csv
+code42 users bulk [update|move|deactivate|reactivate|add-alias|remove-alias|update-risk-profile] bulk-command.csv
 ```
+
 A CSV with a `username` column and a single username on each new line is used for the `reactivate` and `deactivate` bulk commands.  These commands are not available as options for `generate-template`.
 
 Learn more about [Managing Users](../commands/users.md).

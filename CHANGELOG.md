@@ -8,6 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+
+## Unreleased
+
+### Added
+
+- `watchlists` command group for interacting with watchlists.
+  - `watchlists add` for adding users to a watchlist
+  - `watchlists remove` for removing users from a watchlist
+  - `watchlists list` for listing existing watchlists
+  - `watchlists list-members` for listing users who are members of a given watchlist
+  - `watchlist bulk add|remove` for adding/removing multiple users via CSV file
+
+- `users update-start-date` command to add/modify the "start date" property of a User's risk profile.
+- `users update-departure-date` command to add/modify the "end date" property of a User's risk profile.
+- `users update-risk-profile-notes` command to add/modify the "notes" property of a User's risk profile.
+
+### Deprecated
+
+- `departing-employee` and `high-risk-employee` command groups. These actions have been replaced by the `watchlists` command group.
+
 ## 1.13.0 - 2022-04-04
 
 ### Added
