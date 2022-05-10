@@ -48,83 +48,79 @@ risk_tag_option = click.option(
 )
 
 
-@click.group(cls=OrderedGroup)
+@click.group(
+    cls=OrderedGroup,
+    help=f"{DEPRECATION_TEXT}\n\nAdd and remove employees from the High Risk Employees detection list.",
+)
 @sdk_options(hidden=True)
 def high_risk_employee(state):
-    f"""{DEPRECATION_TEXT}
-
-    Add and remove employees from the High Risk Employees detection list."""
     pass
 
 
-@high_risk_employee.command("list")
+@high_risk_employee.command(
+    "list",
+    help=f"{DEPRECATION_TEXT}\n\nLists the employees on the High Risk Employee list.",
+)
 @sdk_options()
 @format_option
 @filter_option
 def _list(state, format, filter):
-    f"""{DEPRECATION_TEXT}
-
-    Lists the employees on the High Risk Employee list."""
     deprecation_warning(DEPRECATION_TEXT)
     employee_generator = _get_high_risk_employees(state.sdk, filter)
     list_employees(employee_generator, format)
 
 
-@high_risk_employee.command()
+@high_risk_employee.command(
+    help=f"{DEPRECATION_TEXT}\n\nAdd a user to the high risk employees detection list."
+)
 @cloud_alias_option
 @notes_option
 @risk_tag_option
 @username_arg
 @sdk_options()
 def add(state, username, cloud_alias, risk_tag, notes):
-    f"""{DEPRECATION_TEXT}
-
-    Add a user to the high risk employees detection list."""
     deprecation_warning(DEPRECATION_TEXT)
     _add_high_risk_employee(state.sdk, username, cloud_alias, risk_tag, notes)
 
 
-@high_risk_employee.command()
+@high_risk_employee.command(
+    help=f"{DEPRECATION_TEXT}\n\nRemove a user from the high risk employees detection list."
+)
 @username_arg
 @sdk_options()
 def remove(state, username):
-    f"""{DEPRECATION_TEXT}
-
-    Remove a user from the high risk employees detection list."""
     deprecation_warning(DEPRECATION_TEXT)
     _remove_high_risk_employee(state.sdk, username)
 
 
-@high_risk_employee.command()
+@high_risk_employee.command(
+    help=f"{DEPRECATION_TEXT}\n\nAssociates risk tags with a user."
+)
 @username_arg
 @risk_tag_option
 @sdk_options()
 def add_risk_tags(state, username, risk_tag):
-    f"""{DEPRECATION_TEXT}
-
-    Associates risk tags with a user."""
     deprecation_warning(DEPRECATION_TEXT)
     _add_risk_tags(state.sdk, username, risk_tag)
 
 
-@high_risk_employee.command()
+@high_risk_employee.command(
+    help=f"{DEPRECATION_TEXT}\n\nDisassociates risk tags from a user."
+)
 @username_arg
 @risk_tag_option
 @sdk_options()
 def remove_risk_tags(state, username, risk_tag):
-    f"""{DEPRECATION_TEXT}
-
-    Disassociates risk tags from a user."""
     deprecation_warning(DEPRECATION_TEXT)
     _remove_risk_tags(state.sdk, username, risk_tag)
 
 
-@high_risk_employee.group(cls=OrderedGroup)
+@high_risk_employee.group(
+    cls=OrderedGroup,
+    help=f"{DEPRECATION_TEXT}\n\nTools for executing high risk employee actions in bulk.",
+)
 @sdk_options(hidden=True)
 def bulk(state):
-    f"""{DEPRECATION_TEXT}
-
-    Tools for executing high risk employee actions in bulk."""
     pass
 
 
