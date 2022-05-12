@@ -39,7 +39,7 @@ setup(
         "keyrings.alt==3.2.0",
         "ipython==7.16.3",
         "pandas>=1.1.3",
-        "py42>=1.22.0",
+        "py42>=1.23.0",
     ],
     extras_require={
         "dev": [
