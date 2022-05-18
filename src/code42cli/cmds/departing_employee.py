@@ -37,13 +37,19 @@ filter_option = click.option(
 )
 
 
-@click.group(cls=OrderedGroup, help=f"{DEPRECATION_TEXT}\n\nAdd and remove employees from the Departing Employees detection list.")
+@click.group(
+    cls=OrderedGroup,
+    help=f"{DEPRECATION_TEXT}\n\nAdd and remove employees from the Departing Employees detection list.",
+)
 @sdk_options(hidden=True)
 def departing_employee(state):
     pass
 
 
-@departing_employee.command("list", help=f"{DEPRECATION_TEXT}\n\nLists the users on the Departing Employees list.")
+@departing_employee.command(
+    "list",
+    help=f"{DEPRECATION_TEXT}\n\nLists the users on the Departing Employees list.",
+)
 @sdk_options()
 @format_option
 @filter_option
@@ -57,7 +63,9 @@ def _list(state, format, filter):
     )
 
 
-@departing_employee.command(help=f"{DEPRECATION_TEXT}\n\nAdd a user to the Departing Employees detection list.")
+@departing_employee.command(
+    help=f"{DEPRECATION_TEXT}\n\nAdd a user to the Departing Employees detection list."
+)
 @username_arg
 @click.option(
     "--departure-date",
@@ -73,7 +81,9 @@ def add(state, username, cloud_alias, departure_date, notes):
     _add_departing_employee(state.sdk, username, cloud_alias, departure_date, notes)
 
 
-@departing_employee.command(help=f"{DEPRECATION_TEXT}\n\nRemove a user from the Departing Employees detection list.")
+@departing_employee.command(
+    help=f"{DEPRECATION_TEXT}\n\nRemove a user from the Departing Employees detection list."
+)
 @username_arg
 @sdk_options()
 def remove(state, username):
@@ -81,7 +91,10 @@ def remove(state, username):
     _remove_departing_employee(state.sdk, username)
 
 
-@departing_employee.group(cls=OrderedGroup, help=f"{DEPRECATION_TEXT}\n\nTools for executing bulk departing employee actions.")
+@departing_employee.group(
+    cls=OrderedGroup,
+    help=f"{DEPRECATION_TEXT}\n\nTools for executing bulk departing employee actions.",
+)
 @sdk_options(hidden=True)
 def bulk(state):
     pass
