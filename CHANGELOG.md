@@ -9,7 +9,7 @@ The intended audience of this file is for py42 consumers -- as such, changes tha
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
 
-## 1.14.0 - 2022-05-18
+## 1.14.0 - 2022-05-19
 
 ### Added
 
