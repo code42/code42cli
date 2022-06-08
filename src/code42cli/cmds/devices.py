@@ -443,10 +443,10 @@ def _get_device_dataframe(
 
 
 def _add_settings_to_dataframe(sdk, device_dataframe):
-    macos_guids = device_dataframe.loc[
+    macos_guids = [{"guid": value} for value in device_dataframe.loc[
         device_dataframe["osName"] == "mac", "guid"
-    ].values
-
+    ].values]
+    click.echo(macos_guids)
     def handle_row(guid):
         try:
             full_disk_access_status = sdk.devices.get_agent_full_disk_access_state(
