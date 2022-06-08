@@ -579,7 +579,7 @@ class TestWatchlistBulkAddCmd:
         with runner.isolated_filesystem():
             with open("csv", "w") as file:
                 file.write(
-                    "username,user_id,watchlist_id,watchlist_type\ntest@example.com,1234,abcd,DEPARTING_EMPLOYEE\n"
+                    "username,user_id,watchlist_id,watchlist_type,extra_header\ntest@example.com,1234,abcd,DEPARTING_EMPLOYEE,\n"
                 )
             runner.invoke(cli, ["watchlists", "bulk", "add", "csv"], obj=cli_state)
             cli_state.sdk.watchlists.add_included_users_by_watchlist_id.assert_called_once_with(

@@ -186,7 +186,7 @@ def bulk_add(state, csv_rows):
 
     sdk = state.sdk
 
-    def handle_row(watchlist_id=None, watchlist_type=None, user_id=None, username=None):
+    def handle_row(watchlist_id=None, watchlist_type=None, user_id=None, username=None, **kwargs):
         if username and not user_id:
             user_id = sdk.userriskprofile.get_by_username(username)["userId"]
         if watchlist_id:
@@ -240,7 +240,7 @@ def bulk_remove(state, csv_rows):
 
     sdk = state.sdk
 
-    def handle_row(watchlist_id=None, watchlist_type=None, user_id=None, username=None):
+    def handle_row(watchlist_id=None, watchlist_type=None, user_id=None, username=None, **kwargs):
         if username and not user_id:
             user_id = sdk.userriskprofile.get_by_username(username)["userId"]
         if watchlist_id:
