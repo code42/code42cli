@@ -57,6 +57,23 @@ code42 watchlists bulk generate-template [add|remove]
 If both username and user_id are provided in the CSV row, the user_id value will take precedence. If watchlist_type and watchlist_id columns
 are both provided, the watchlist_id will take precedence.
 
+```{eval-rst}
+.. note::
+    For watchlists that track additional metadata for a user (e.g. the "departure date" for a user on the Departing watchlist), that data
+    can be added/updated via the `code42 users bulk update-risk-profile` command.
+
+    You can re-use the same CSV file for both commands, just add the required risk profile columns to the CSV.
+
+    For example, to bulk add users to multiple watchlists, with appropriate `start_date`, `end_date`, and `notes` values, create a CSV (named watchlists.csv) like::
+
+        username,watchlist_type,start_date,end_date,notes
+        user_a@example.com,DEPARTING_EMPLOYEE,,2023-10-10,
+        user_b@example.com,NEW_EMPLOYEE,2022-07-04,,2022 Summer Interns
+
+    Then run `code42 watchlists bulk add watchlists.csv`
+    followed by `code42 users bulk update-risk-profile watchlists.csv`
+```
+
 ## Add Watchlist-related metadata to User's Profile
 
 Some Watchlists store related metadata to the watchlist member on the User Risk Profile. For example, when adding a user
