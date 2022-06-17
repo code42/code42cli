@@ -1401,4 +1401,4 @@ def test_non_exposure_only_query_with_checkpoint_does_not_send_empty_filter_list
     runner.invoke(
         cli, ["security-data", "search", "--include-non-exposure", "-c", "checkpoint"]
     )
-    assert len(mock_get_all_file_events.mock_calls[0].args[1]._filter_group_list) > 0
+    assert len(mock_get_all_file_events.call_args[0][1]._filter_group_list) > 0
