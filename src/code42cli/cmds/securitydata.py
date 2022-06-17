@@ -482,7 +482,9 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
         # still cause the query results to only contain events after the checkpointed event.
         _90_days = datetime.datetime.utcnow() - datetime.timedelta(days=90)
         timestamp = convert_datetime_to_timestamp(_90_days)
-        state.search_filters.append(create_time_range_filter(f.EventTimestamp, timestamp, None))
+        state.search_filters.append(
+            create_time_range_filter(f.EventTimestamp, timestamp, None)
+        )
     query = FileEventQuery(*state.search_filters)
     query.page_size = MAX_EVENT_PAGE_SIZE
     query.sort_direction = "asc"

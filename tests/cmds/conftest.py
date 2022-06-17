@@ -65,7 +65,10 @@ def cli_state_without_user(sdk_without_user, cli_state):
 @pytest.fixture
 def mock_file_event_checkpoint(mocker):
     mock_file_event_checkpointer = mocker.MagicMock(spec=FileEventCursorStore)
-    mocker.patch("code42cli.cmds.securitydata._get_file_event_cursor_store", return_value=mock_file_event_checkpointer)
+    mocker.patch(
+        "code42cli.cmds.securitydata._get_file_event_cursor_store",
+        return_value=mock_file_event_checkpointer,
+    )
     return mock_file_event_checkpointer
 
 
