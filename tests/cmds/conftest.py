@@ -13,6 +13,7 @@ from tests.conftest import create_mock_http_error
 from tests.conftest import create_mock_response
 from tests.conftest import TEST_ID
 
+from code42cli.cmds.search.cursor_store import FileEventCursorStore
 from code42cli.logger import CliLogger
 
 
@@ -59,6 +60,16 @@ def cli_state_with_user(sdk_with_user, cli_state):
 def cli_state_without_user(sdk_without_user, cli_state):
     cli_state.sdk = sdk_without_user
     return cli_state
+
+
+@pytest.fixture
+def mock_file_event_checkpoint(mocker):
+    mock_file_event_checkpointer = mocker.MagicMock(spec=FileEventCursorStore)
+    mocker.patch(
+        "code42cli.cmds.securitydata._get_file_event_cursor_store",
+        return_value=mock_file_event_checkpointer,
+    )
+    return mock_file_event_checkpointer
 
 
 @pytest.fixture
