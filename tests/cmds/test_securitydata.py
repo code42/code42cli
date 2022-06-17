@@ -1,9 +1,9 @@
 import json
 import logging
 
+import pandas
 import py42.sdk.queries.fileevents.filters as f
 import pytest
-import pandas
 from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
 from py42.sdk.queries.fileevents.filters import RiskIndicator
 from py42.sdk.queries.fileevents.filters import RiskSeverity
@@ -1401,8 +1401,10 @@ def test_non_exposure_only_query_with_checkpoint_does_not_send_empty_filter_list
 
     def generator():
         yield pandas.DataFrame()
+
     mock_get_all_file_events.return_value = generator()
-    runner.invoke(
+    result = runner.invoke(
         cli, ["security-data", "search", "--include-non-exposure", "-c", "checkpoint"]
     )
+    assert result.exit_code == 0
     assert len(mock_get_all_file_events.call_args[0][1]._filter_group_list) > 0
