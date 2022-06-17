@@ -1388,3 +1388,11 @@ def test_saved_search_list_with_format_option_does_not_return_when_response_is_e
         cli, ["security-data", "saved-search", "list", "-f", "csv"], obj=cli_state
     )
     assert "Name,Id" not in result.output
+
+
+def test_non_exposure_only_query_with_checkpoint_does_not_send_empty_filter_list(runner, cli_state, mock_file_event_checkpoint, mocker):
+    mock_file_event_checkpoint.get.return_value = "event_1234"
+    mock_get_all_file_events = mocker.patch("code42cli.cmds.securitydata._get_all_file_events")
+    mock_get_all_file_events.return_value = []
+    result = runner.invoke(cli, ["security-data", "search", "--include-non-exposure", "-c", "checkpoint"])
+    assert len(mock_get_all_file_events.mock_calls[0].args[1]._filter_group_list) > 0
