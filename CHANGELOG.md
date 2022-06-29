@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## 1.14.3 - 2022-06-29
+
+### Fixed
+- Reverted the change released in v1.14.2.
+  - The same query (including `--begin` and other timestamp filter options) must be reused when checkpointing and paging search results.  Attempting to reuse checkpoints for different searches is unsupported and undefined behavior.
+
 ## 1.14.2 - 2022-06-17
 
 ### Fixed
