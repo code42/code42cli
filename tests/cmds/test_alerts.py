@@ -678,7 +678,7 @@ def test_search_and_send_to_with_use_checkpoint_and_without_begin_and_without_st
     result = runner.invoke(cli, [*command, "--use-checkpoint", "test"], obj=cli_state)
     assert result.exit_code == 2
     assert (
-        "--begin date is required for --use-checkpoint when no checkpoint exists yet."
+        "--begin date is always required for --use-checkpoint when no checkpoint exists yet."
         in result.output
     )
 

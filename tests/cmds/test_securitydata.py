@@ -543,27 +543,6 @@ def test_search_send_to_when_given_begin_date_more_than_ninety_days_back_errors(
 
 
 @search_and_send_to_test
-def test_search_and_send_to_when_given_begin_date_past_90_days_and_use_checkpoint_and_a_stored_cursor_exists_and_not_given_end_date_does_not_use_any_event_timestamp_filter(
-    runner,
-    cli_state,
-    file_event_cursor_with_eventid_checkpoint,
-    command,
-    search_all_file_events_success,
-):
-    begin_date = get_test_date_str(days_ago=91) + " 12:51:00"
-
-    runner.invoke(
-        cli,
-        [*command, "--begin", begin_date, "--use-checkpoint", "test"],
-        obj=cli_state,
-    )
-    query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
-    assert not filter_term_is_in_call_args(
-        query._filter_group_list, f.InsertionTimestamp._term
-    )
-
-
-@search_and_send_to_test
 def test_search_and_send_to_when_given_begin_date_and_not_use_checkpoint_and_cursor_exists_uses_begin_date(
     runner, cli_state, command, search_all_file_events_success
 ):
@@ -620,13 +599,13 @@ def test_search_and_send_to_with_only_begin_calls_search_all_file_events_with_ex
 
 
 @search_and_send_to_test
-def test_search_and_send_to_with_use_checkpoint_and_without_begin_and_without_checkpoint_causes_expected_error(
+def test_search_and_send_to_without_begin_causes_expected_error(
     runner, cli_state, file_event_cursor_without_checkpoint, command
 ):
     result = runner.invoke(cli, [*command, "--use-checkpoint", "test"], obj=cli_state)
     assert result.exit_code == 2
     assert (
-        "--begin date is required for --use-checkpoint when no checkpoint exists yet."
+        "--begin date is always required for --use-checkpoint when no checkpoint exists yet."
         in result.output
     )
 
@@ -679,7 +658,7 @@ def test_search_and_send_to_with_use_checkpoint_and_with_begin_and_with_stored_c
 
 
 @search_and_send_to_test
-def test_search_and_send_to_with_use_checkpoint_and_with_stored_checkpoint_as_eventid_calls_search_all_file_events_with_checkpoint_and_ignores_begin_arg(
+def test_search_and_send_to_with_use_checkpoint_and_with_stored_checkpoint_as_eventid_calls_search_all_file_events_with_checkpoint_and_timestamp_filter(
     runner,
     cli_state,
     file_event_cursor_with_eventid_checkpoint,
@@ -691,13 +670,10 @@ def test_search_and_send_to_with_use_checkpoint_and_with_stored_checkpoint_as_ev
         [*command, "--use-checkpoint", "test", "--begin", "1h"],
         obj=cli_state,
     )
+    print(CURSOR_TIMESTAMP)
     query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
     assert result.exit_code == 0
-    assert len(query._filter_group_list) == 1
-    assert (
-        f"checkpoint of {file_event_cursor_with_eventid_checkpoint.expected_eventid} exists"
-        in result.output
-    )
+    assert len(query._filter_group_list) == 2
 
 
 @search_and_send_to_test

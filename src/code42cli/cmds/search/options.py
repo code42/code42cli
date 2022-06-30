@@ -84,34 +84,36 @@ class BeginOption(AdvancedQueryAndSavedSearchIncompatible):
                 else None
             )
             begin_present = "begin" in opts
-            if (
-                checkpoint_arg_present
-                and checkpoint_value is not None
-                and begin_present
-            ):
-                opts.pop("begin")
-                try:
-                    checkpoint_value = datetime.utcfromtimestamp(
-                        float(checkpoint_value)
-                    )
-                except ValueError:
-                    pass
-                click.echo(
-                    "Ignoring --begin value as --use-checkpoint was passed and checkpoint of "
-                    f"{checkpoint_value} exists.\n",
-                    err=True,
-                )
-            if (
-                checkpoint_arg_present
-                and checkpoint_value is None
-                and not begin_present
-            ):
-                raise click.UsageError(
-                    message="--begin date is required for --use-checkpoint when no checkpoint "
-                    "exists yet.",
-                )
-            if not checkpoint_arg_present and not begin_present:
-                raise click.UsageError(message="--begin date is required.")
+
+            if checkpoint_arg_present:
+                if checkpoint_value is not None:
+                    try:
+                        checkpoint_value = datetime.utcfromtimestamp(
+                            float(checkpoint_value)
+                        )
+                        if begin_present:
+                            # ignore begin arg if using timestamp checkpoint
+                            opts.pop("begin")
+                            click.echo(
+                                "Ignoring --begin value as --use-checkpoint was passed and checkpoint of "
+                                f"{checkpoint_value} exists.\n",
+                                err=True,
+                            )
+                    # If checkpoint is not timestamp
+                    # file event checkpointing requires the same query between checkpoints
+                    except ValueError:
+                        if not begin_present:
+                            raise click.UsageError(
+                                message="--begin date is required."
+                                "Be sure to use the exact same query between checkpoints.\n"
+                            )
+                else:  # if checkpoint value is None
+                    if not begin_present:
+                        raise click.UsageError(
+                            message="--begin date is always required for --use-checkpoint when no checkpoint "
+                            "exists yet."
+                        )
+
         return super().handle_parse_result(ctx, opts, args)
 
 
