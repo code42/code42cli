@@ -488,6 +488,8 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
 
 
 def _get_all_file_events(state, query, checkpoint=""):
+    if checkpoint is None:
+        checkpoint = ""
     try:
         response = state.sdk.securitydata.search_all_file_events(
             query, page_token=checkpoint
@@ -508,6 +510,4 @@ def _handle_timestamp_checkpoint(checkpoint, state):
         state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
         return None
     except (ValueError, TypeError):
-        if checkpoint is not None:
-            return checkpoint
-        return ""
+        return checkpoint
