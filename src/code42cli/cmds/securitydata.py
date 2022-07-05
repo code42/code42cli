@@ -508,4 +508,6 @@ def _handle_timestamp_checkpoint(checkpoint, state):
         state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
         return None
     except (ValueError, TypeError):
-        return checkpoint
+        if checkpoint is not None:
+            return checkpoint
+        return ""

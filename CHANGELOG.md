@@ -13,6 +13,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Fixed
 
 - Bug where the `code42 security-data search` command using a checkpoint and only the `--include-non-exposure` filter resulted in invalid page tokens.
+- Bug where `code42 security-data search` would only return 10,000 events on the first search when using a new checkpoint.
 
 ## 1.14.2 - 2022-06-17
 
