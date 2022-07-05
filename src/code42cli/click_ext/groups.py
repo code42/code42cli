@@ -13,6 +13,7 @@ from py42.exceptions import Py42DescriptionLimitExceededError
 from py42.exceptions import Py42ForbiddenError
 from py42.exceptions import Py42HTTPError
 from py42.exceptions import Py42InvalidEmailError
+from py42.exceptions import Py42InvalidPageTokenError
 from py42.exceptions import Py42InvalidPasswordError
 from py42.exceptions import Py42InvalidRuleOperationError
 from py42.exceptions import Py42InvalidUsernameError
@@ -84,6 +85,7 @@ class ExceptionHandlingGroup(click.Group):
             Py42UpdateClosedCaseError,
             Py42UsernameMustBeEmailError,
             Py42InvalidEmailError,
+            Py42InvalidPageTokenError,
             Py42InvalidPasswordError,
             Py42InvalidUsernameError,
             Py42ActiveLegalHoldError,
