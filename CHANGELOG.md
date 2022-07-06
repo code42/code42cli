@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## 1.14.3 - 2022-07-06
+
+### Fixed
+
+- Bug where the `code42 security-data search` command using a checkpoint and only the `--include-non-exposure` filter resulted in invalid page tokens.
+- Bug where `code42 security-data search` would only return 10,000 events on the first search when using a new checkpoint.
+
 ## 1.14.2 - 2022-06-17
 
 ### Fixed

@@ -1,4 +1,3 @@
-import datetime
 from pprint import pformat
 
 import click
@@ -478,13 +477,9 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
 
     if not state.search_filters:
         # if a checkpoint and _only_ --include-non-exposure is passed, the filter list will be empty, which isn't a
-        # valid query, so in that case we want to fallback to a 90 day (max event age) date range. The checkpoint will
+        # valid query, so in that case we want to fallback to retrieving all events. The checkpoint will
         # still cause the query results to only contain events after the checkpointed event.
-        _90_days = datetime.datetime.utcnow() - datetime.timedelta(days=90)
-        timestamp = convert_datetime_to_timestamp(_90_days)
-        state.search_filters.append(
-            create_time_range_filter(f.EventTimestamp, timestamp, None)
-        )
+        state.search_filters.append(RiskSeverity.exists())
     query = FileEventQuery(*state.search_filters)
     query.page_size = MAX_EVENT_PAGE_SIZE
     query.sort_direction = "asc"
@@ -493,6 +488,8 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
 
 
 def _get_all_file_events(state, query, checkpoint=""):
+    if checkpoint is None:
+        checkpoint = ""
     try:
         response = state.sdk.securitydata.search_all_file_events(
             query, page_token=checkpoint

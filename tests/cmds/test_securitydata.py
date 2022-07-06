@@ -4,6 +4,7 @@ import logging
 import pandas
 import py42.sdk.queries.fileevents.filters as f
 import pytest
+from py42.exceptions import Py42InvalidPageTokenError
 from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
 from py42.sdk.queries.fileevents.filters import RiskIndicator
 from py42.sdk.queries.fileevents.filters import RiskSeverity
@@ -325,6 +326,17 @@ def test_search_and_send_to_when_advanced_query_passed_non_existent_filename_rai
         )
         assert result.exit_code == 2
         assert "Could not open file: not_a_file" in result.stdout
+
+
+@search_and_send_to_test
+def test_search_and_send_to_when_given_invalid_page_token_raises_error(
+    runner, cli_state, custom_error, file_event_cursor_with_eventid_checkpoint, command
+):
+    cli_state.sdk.securitydata.search_all_file_events.side_effect = (
+        Py42InvalidPageTokenError(custom_error, TEST_FILE_EVENT_ID_2)
+    )
+    result = runner.invoke(cli, [*command, "--use-checkpoint", "test"], obj=cli_state)
+    assert f'Invalid page token: "{TEST_FILE_EVENT_ID_2}"' in result.output
 
 
 @advanced_query_incompat_test_params
