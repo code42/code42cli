@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## Unreleased
+
+### Changed
+
+- Reduced the `page_size` in Device API calls from 500 to 100 to reduce possibility of timeouts when including backup usage in `code42 devices list`.
+
 ## 1.14.3 - 2022-07-06
 
 ### Fixed
