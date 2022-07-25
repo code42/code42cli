@@ -10,48 +10,63 @@ from code42cli.enums import SendToFileEventsOutputFormat
 from code42cli.logger.enums import ServerProtocol
 
 
-def is_in_filter(filter_cls):
+def is_in_filter(filter_cls, filter_cls_v2=None):
     def callback(ctx, param, arg):
         if arg:
-            ctx.obj.search_filters.append(filter_cls.is_in(arg))
+            f = filter_cls
+            if filter_cls_v2 and ctx.obj.profile.use_v2_file_events == "True":
+                f = filter_cls_v2
+            ctx.obj.search_filters.append(f.is_in(arg))
         return arg
 
     return callback
 
 
-def not_in_filter(filter_cls):
+def not_in_filter(filter_cls, filter_cls_v2=None):
     def callback(ctx, param, arg):
         if arg:
-            ctx.obj.search_filters.append(filter_cls.not_in(arg))
+            f = filter_cls
+            if filter_cls_v2 and ctx.obj.profile.use_v2_file_events == "True":
+                f = filter_cls_v2
+            ctx.obj.search_filters.append(f.not_in(arg))
         return arg
 
     return callback
 
 
-def exists_filter(filter_cls):
+def exists_filter(filter_cls, filter_cls_v2=None):
     def callback(ctx, param, arg):
         if not arg:
-            ctx.obj.search_filters.append(filter_cls.exists())
+            f = filter_cls
+            if filter_cls_v2 and ctx.obj.profile.use_v2_file_events == "True":
+                f = filter_cls_v2
+            ctx.obj.search_filters.append(f.exists())
             return arg
 
     return callback
 
 
-def contains_filter(filter_cls):
+def contains_filter(filter_cls, filter_cls_v2=None):
     def callback(ctx, param, arg):
         if arg:
+            f = filter_cls
+            if filter_cls_v2 and ctx.obj.profile.use_v2_file_events == "True":
+                f = filter_cls_v2
             for item in arg:
-                ctx.obj.search_filters.append(filter_cls.contains(item))
+                ctx.obj.search_filters.append(f.contains(item))
         return arg
 
     return callback
 
 
-def not_contains_filter(filter_cls):
+def not_contains_filter(filter_cls, filter_cls_v2=None):
     def callback(ctx, param, arg):
         if arg:
+            f = filter_cls
+            if filter_cls_v2 and ctx.obj.profile.use_v2_file_events == "True":
+                f = filter_cls_v2
             for item in arg:
-                ctx.obj.search_filters.append(filter_cls.not_contains(item))
+                ctx.obj.search_filters.append(f.not_contains(item))
         return arg
 
     return callback
@@ -59,6 +74,13 @@ def not_contains_filter(filter_cls):
 
 AdvancedQueryAndSavedSearchIncompatible = incompatible_with(
     ["advanced_query", "saved_search"]
+)
+
+ExposureTypeIncompatible = incompatible_with(
+    ["advanced_query", "saved_search", "event_action"]
+)
+EventActionIncompatible = incompatible_with(
+    ["advanced_query", "saved_search", "exposure_type"]
 )
 
 

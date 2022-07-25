@@ -101,7 +101,7 @@ def test_create_profile_if_user_sets_password_is_created(
         ],
     )
     mock_cliprofile_namespace.create_profile.assert_called_once_with(
-        "foo", "bar", "baz", True
+        "foo", "bar", "baz", True, False
     )
 
 
@@ -121,10 +121,11 @@ def test_create_profile_if_user_does_not_set_password_is_created(
             "-u",
             "baz",
             "--disable-ssl-errors",
+            "--use-v2-file-events",
         ],
     )
     mock_cliprofile_namespace.create_profile.assert_called_once_with(
-        "foo", "bar", "baz", True
+        "foo", "bar", "baz", True, True
     )
 
 
@@ -262,7 +263,7 @@ def test_update_profile_updates_existing_profile(
         ],
     )
     mock_cliprofile_namespace.update_profile.assert_called_once_with(
-        name, "bar", "baz", True
+        name, "bar", "baz", True, False
     )
 
 
@@ -274,10 +275,19 @@ def test_update_profile_updates_default_profile(
     mock_cliprofile_namespace.get_profile.return_value = profile
     runner.invoke(
         cli,
-        ["profile", "update", "-s", "bar", "-u", "baz", "--disable-ssl-errors"],
+        [
+            "profile",
+            "update",
+            "-s",
+            "bar",
+            "-u",
+            "baz",
+            "--disable-ssl-errors",
+            "--use-v2-file-events",
+        ],
     )
     mock_cliprofile_namespace.update_profile.assert_called_once_with(
-        name, "bar", "baz", True
+        name, "bar", "baz", True, True
     )
 
 
@@ -292,7 +302,7 @@ def test_update_profile_updates_name_alone(
         ["profile", "update", "-u", "baz", "--disable-ssl-errors"],
     )
     mock_cliprofile_namespace.update_profile.assert_called_once_with(
-        name, None, "baz", True
+        name, None, "baz", True, False
     )
 
 
@@ -376,12 +386,12 @@ def test_update_profile_when_given_zero_args_prints_error_message(
 ):
     name = "foo"
     profile.name = name
-    profile.ignore_ssl_errors = False
+    profile.ignore_ssl_errors = "False"
     mock_cliprofile_namespace.get_profile.return_value = profile
     result = runner.invoke(cli, ["profile", "update"])
     expected = (
         "Must provide at least one of `--username`, `--server`, `--password`, "
-        "or `--disable-ssl-errors` when updating a profile."
+        "`--use-v2-file-events` or `--disable-ssl-errors` when updating a profile."
     )
     assert "Profile 'foo' has been updated" not in result.output
     assert expected in result.output

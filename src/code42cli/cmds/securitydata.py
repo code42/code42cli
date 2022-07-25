@@ -4,6 +4,7 @@ import click
 import py42.sdk.queries.fileevents.filters as f
 from click import echo
 from pandas import DataFrame
+from pandas import json_normalize
 from py42.exceptions import Py42InvalidPageTokenError
 from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
 from py42.sdk.queries.fileevents.filters import InsertionTimestamp
@@ -11,6 +12,8 @@ from py42.sdk.queries.fileevents.filters.exposure_filter import ExposureType
 from py42.sdk.queries.fileevents.filters.file_filter import FileCategory
 from py42.sdk.queries.fileevents.filters.risk_filter import RiskIndicator
 from py42.sdk.queries.fileevents.filters.risk_filter import RiskSeverity
+from py42.sdk.queries.fileevents.v2 import FileEventQuery as FileEventQueryV2
+from py42.sdk.queries.fileevents.v2 import filters as v2_filters
 
 import code42cli.cmds.search.options as searchopt
 import code42cli.options as opt
@@ -24,6 +27,7 @@ from code42cli.cmds.util import create_time_range_filter
 from code42cli.date_helper import convert_datetime_to_timestamp
 from code42cli.date_helper import limit_date_range
 from code42cli.enums import OutputFormat
+from code42cli.errors import Code42CLIError
 from code42cli.logger import get_main_cli_logger
 from code42cli.options import column_option
 from code42cli.options import format_option
@@ -35,8 +39,55 @@ from code42cli.util import warn_interrupt
 
 logger = get_main_cli_logger()
 MAX_EVENT_PAGE_SIZE = 10000
-
 SECURITY_DATA_KEYWORD = "file events"
+
+
+def exposure_type_callback():
+    def callback(ctx, param, arg):
+        if arg:
+            if ctx.obj.profile.use_v2_file_events == "True":
+                raise Code42CLIError(
+                    "Exposure type (--type/-t) filter is incompatible with V2 file events. Use the event action (--event-action) filter instead."
+                )
+            ctx.obj.search_filters.append(ExposureType.is_in(arg))
+        return arg
+
+    return callback
+
+
+def event_action_callback():
+    def callback(ctx, param, arg):
+        if arg:
+            if ctx.obj.profile.use_v2_file_events == "False":
+                raise Code42CLIError(
+                    "Event action (--event-action) filter is incompatible with V1 file events.  Upgrade your profile to use the V2 file event data model with `code42 profile update --use-v2-file-events`"
+                )
+            ctx.obj.search_filters.append(v2_filters.event.Action.is_in(arg))
+        return arg
+
+    return callback
+
+
+def get_all_events_callback():
+    def callback(ctx, param, arg):
+        if not arg:
+            if ctx.obj.profile.use_v2_file_events == "True":
+                risk_values = [
+                    v2_filters.risk.Severity.LOW,
+                    v2_filters.risk.Severity.MODERATE,
+                    v2_filters.risk.Severity.HIGH,
+                    v2_filters.risk.Severity.CRITICAL,
+                ]
+                ctx.obj.search_filters.append(
+                    v2_filters.risk.Severity.is_in(risk_values)
+                )
+            else:
+                ctx.obj.search_filters.append(ExposureType.exists())
+            return arg
+
+    return callback
+
+
 file_events_format_option = click.option(
     "-f",
     "--format",
@@ -49,21 +100,29 @@ exposure_type_option = click.option(
     "--type",
     multiple=True,
     type=click.Choice(list(ExposureType.choices())),
-    cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
-    callback=searchopt.is_in_filter(f.ExposureType),
-    help="Limits events to those with given exposure types.",
+    cls=searchopt.ExposureTypeIncompatible,
+    callback=exposure_type_callback(),
+    help="Limits events to those with given exposure types. Only compatible with V1 file events.",
+)
+event_action_option = click.option(
+    "--event-action",
+    multiple=True,
+    type=click.Choice(list(v2_filters.event.Action.choices())),
+    cls=searchopt.EventActionIncompatible,
+    callback=event_action_callback(),
+    help="Limits events to those with given event action. Only compatible with V2 file events.",
 )
 username_option = click.option(
     "--c42-username",
     multiple=True,
-    callback=searchopt.is_in_filter(f.DeviceUsername),
+    callback=searchopt.is_in_filter(f.DeviceUsername, v2_filters.user.Email),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to endpoint events for these Code42 users.",
 )
 actor_option = click.option(
     "--actor",
     multiple=True,
-    callback=searchopt.is_in_filter(f.Actor),
+    callback=searchopt.is_in_filter(f.Actor, v2_filters.user.Email),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to only those enacted by the cloud service user "
     "of the person who caused the event.",
@@ -71,35 +130,35 @@ actor_option = click.option(
 md5_option = click.option(
     "--md5",
     multiple=True,
-    callback=searchopt.is_in_filter(f.MD5),
+    callback=searchopt.is_in_filter(f.MD5, v2_filters.file.MD5),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to file events where the file has one of these MD5 hashes.",
 )
 sha256_option = click.option(
     "--sha256",
     multiple=True,
-    callback=searchopt.is_in_filter(f.SHA256),
+    callback=searchopt.is_in_filter(f.SHA256, v2_filters.file.SHA256),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to file events where the file has one of these SHA256 hashes.",
 )
 source_option = click.option(
     "--source",
     multiple=True,
-    callback=searchopt.is_in_filter(f.Source),
+    callback=searchopt.is_in_filter(f.Source, v2_filters.source.Name),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to only those from one of these sources. For example, Gmail, Box, or Endpoint.",
 )
 file_name_option = click.option(
     "--file-name",
     multiple=True,
-    callback=searchopt.is_in_filter(f.FileName),
+    callback=searchopt.is_in_filter(f.FileName, v2_filters.file.Name),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to file events where the file has one of these names.",
 )
 file_path_option = click.option(
     "--file-path",
     multiple=True,
-    callback=searchopt.is_in_filter(f.FilePath),
+    callback=searchopt.is_in_filter(f.FilePath, v2_filters.file.Directory),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to file events where the file is located at one of these paths. Applies to endpoint file events only.",
 )
@@ -125,14 +184,14 @@ file_category_option = click.option(
             "Zip": FileCategory.ZIP,
         },
     ),
-    callback=searchopt.is_in_filter(f.FileCategory),
+    callback=searchopt.is_in_filter(f.FileCategory, v2_filters.file.Category),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to file events where the file can be classified by one of these categories.",
 )
 process_owner_option = click.option(
     "--process-owner",
     multiple=True,
-    callback=searchopt.is_in_filter(f.ProcessOwner),
+    callback=searchopt.is_in_filter(f.ProcessOwner, v2_filters.process.Owner),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits exposure events by process owner, as reported by the device’s operating system. "
     "Applies only to `Printed` and `Browser or app read` events.",
@@ -140,14 +199,16 @@ process_owner_option = click.option(
 tab_url_option = click.option(
     "--tab-url",
     multiple=True,
-    callback=searchopt.is_in_filter(f.TabURL),
+    callback=searchopt.is_in_filter(f.TabURL, v2_filters.destination.TabUrls),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to be exposure events with one of the specified destination tab URLs.",
 )
+
+
 include_non_exposure_option = click.option(
     "--include-non-exposure",
     is_flag=True,
-    callback=searchopt.exists_filter(f.ExposureType),
+    callback=get_all_events_callback(),
     cls=incompatible_with(["advanced_query", "type", "saved_search"]),
     help="Get all events including non-exposure events.",
 )
@@ -219,11 +280,14 @@ risk_indicator_map = {
 risk_indicator_map_reversed = {v: k for k, v in risk_indicator_map.items()}
 
 
-def risk_indicator_callback(filter_cls):
+def risk_indicator_callback():
     def callback(ctx, param, arg):
         if arg:
+            f_cls = f.RiskIndicator
+            if ctx.obj.profile.use_v2_file_events == "True":
+                f_cls = v2_filters.risk.Indicators
             mapped_args = tuple(risk_indicator_map[i] for i in arg)
-            filter_func = searchopt.is_in_filter(filter_cls)
+            filter_func = searchopt.is_in_filter(f_cls)
             return filter_func(ctx, param, mapped_args)
 
     return callback
@@ -236,7 +300,7 @@ risk_indicator_option = click.option(
         choices=list(risk_indicator_map.keys()),
         extras_map=risk_indicator_map_reversed,
     ),
-    callback=risk_indicator_callback(f.RiskIndicator),
+    callback=risk_indicator_callback(),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to those classified by the given risk indicator categories.",
 )
@@ -244,7 +308,7 @@ risk_severity_option = click.option(
     "--risk-severity",
     multiple=True,
     type=click.Choice(list(RiskSeverity.choices())),
-    callback=searchopt.is_in_filter(f.RiskSeverity),
+    callback=searchopt.is_in_filter(f.RiskSeverity, v2_filters.risk.Severity),
     cls=searchopt.AdvancedQueryAndSavedSearchIncompatible,
     help="Limits events to those classified by the given risk severity.",
 )
@@ -289,6 +353,7 @@ def search_options(f):
 
 def file_event_options(f):
     f = exposure_type_option(f)
+    f = event_action_option(f)
     f = username_option(f)
     f = actor_option(f)
     f = md5_option(f)
@@ -342,41 +407,72 @@ def search(
     include_all,
     **kwargs,
 ):
-
     """Search for file events."""
     if format == FileEventsOutputFormat.CEF and columns:
         raise click.BadOptionUsage(
             "columns", "--columns option can't be used with CEF format."
         )
+
+    # cef format unsupported for v2 file events
+    if (
+        format == FileEventsOutputFormat.CEF
+        and state.profile.use_v2_file_events == "True"
+    ):
+        raise click.BadOptionUsage(
+            "format", "--format CEF is unsupported for v2 file events."
+        )
+
     # set default table columns
     if format == OutputFormat.TABLE:
         if not columns and not include_all:
-            columns = [
-                "fileName",
-                "filePath",
-                "eventType",
-                "eventTimestamp",
-                "fileCategory",
-                "fileSize",
-                "fileOwner",
-                "md5Checksum",
-                "sha256Checksum",
-                "riskIndicators",
-                "riskSeverity",
-            ]
+            if state.profile.use_v2_file_events == "True":
+                columns = [
+                    "@timestamp",
+                    "file.name",
+                    "file.directory",
+                    "event.action",
+                    "file.category",
+                    "file.sizeInBytes",
+                    "file.owner",
+                    "file.hash.md5",
+                    "file.hash.sha256",
+                    "risk.indicators",
+                    "risk.severity",
+                ]
+            else:
+                columns = [
+                    "fileName",
+                    "filePath",
+                    "eventType",
+                    "eventTimestamp",
+                    "fileCategory",
+                    "fileSize",
+                    "fileOwner",
+                    "md5Checksum",
+                    "sha256Checksum",
+                    "riskIndicators",
+                    "riskSeverity",
+                ]
 
     if use_checkpoint:
         cursor = _get_file_event_cursor_store(state.profile.name)
         checkpoint = _handle_timestamp_checkpoint(cursor.get(use_checkpoint), state)
 
-        def checkpoint_func(event):
-            cursor.replace(use_checkpoint, event["eventId"])
+        if state.profile.use_v2_file_events == "True":
+
+            def checkpoint_func(event):
+                cursor.replace(use_checkpoint, event["event.id"])
+
+        else:
+
+            def checkpoint_func(event):
+                cursor.replace(use_checkpoint, event["eventId"])
 
     else:
         checkpoint = checkpoint_func = None
 
     query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
-    dfs = _get_all_file_events(state, query, checkpoint)
+    dfs = _get_all_file_events(state, query, checkpoint, format == OutputFormat.TABLE)
     formatter = FileEventsOutputFormatter(format, checkpoint_func=checkpoint_func)
     # sending to pager when checkpointing can be inaccurate due to pager buffering, so disallow pager
     force_no_pager = use_checkpoint
@@ -410,8 +506,15 @@ def send_to(
         cursor = _get_file_event_cursor_store(state.profile.name)
         checkpoint = _handle_timestamp_checkpoint(cursor.get(use_checkpoint), state)
 
-        def checkpoint_func(event):
-            cursor.replace(use_checkpoint, event["eventId"])
+        if state.profile.use_v2_file_events == "True":
+
+            def checkpoint_func(event):
+                cursor.replace(use_checkpoint, event["event.id"])
+
+        else:
+
+            def checkpoint_func(event):
+                cursor.replace(use_checkpoint, event["eventId"])
 
     else:
         checkpoint = checkpoint_func = None
@@ -441,7 +544,9 @@ def saved_search(state):
 def _list(state, format=None):
     """List available saved searches."""
     formatter = DataFrameOutputFormatter(format)
-    response = state.sdk.securitydata.savedsearches.get()
+    response = state.sdk.securitydata.savedsearches.get(
+        use_v2=state.profile.use_v2_file_events == "True"
+    )
     saved_searches_df = DataFrame(response["searches"])
     formatter.echo_formatted_dataframes(
         saved_searches_df, columns=["name", "id", "notes"]
@@ -453,7 +558,9 @@ def _list(state, format=None):
 @sdk_options()
 def show(state, search_id):
     """Get the details of a saved search."""
-    response = state.sdk.securitydata.savedsearches.get_by_id(search_id)
+    response = state.sdk.securitydata.savedsearches.get_by_id(
+        search_id, use_v2=state.profile.use_v2_file_events == "True"
+    )
     echo(pformat(response["searches"]))
 
 
@@ -469,8 +576,13 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
         state.search_filters = saved_search._filter_group_list
     else:
         if begin or end:
+            timestamp_class = (
+                v2_filters.timestamp.Timestamp
+                if state.profile.use_v2_file_events == "True"
+                else f.EventTimestamp
+            )
             state.search_filters.append(
-                create_time_range_filter(f.EventTimestamp, begin, end)
+                create_time_range_filter(timestamp_class, begin, end)
             )
     if or_query:
         state.search_filters = convert_to_or_query(state.search_filters)
@@ -480,14 +592,20 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
         # valid query, so in that case we want to fallback to retrieving all events. The checkpoint will
         # still cause the query results to only contain events after the checkpointed event.
         state.search_filters.append(RiskSeverity.exists())
-    query = FileEventQuery(*state.search_filters)
+
+    # construct a v2 model query if profile setting enabled
+    if state.profile.use_v2_file_events == "True":
+        query = FileEventQueryV2(*state.search_filters)
+        query.sort_key = "@timestamp"
+    else:
+        query = FileEventQuery(*state.search_filters)
+        query.sort_key = "insertionTimestamp"
     query.page_size = MAX_EVENT_PAGE_SIZE
     query.sort_direction = "asc"
-    query.sort_key = "insertionTimestamp"
     return query
 
 
-def _get_all_file_events(state, query, checkpoint=""):
+def _get_all_file_events(state, query, checkpoint="", flatten=False):
     if checkpoint is None:
         checkpoint = ""
     try:
@@ -496,18 +614,31 @@ def _get_all_file_events(state, query, checkpoint=""):
         )
     except Py42InvalidPageTokenError:
         response = state.sdk.securitydata.search_all_file_events(query)
-    yield DataFrame(response["fileEvents"])
+
+    data = response["fileEvents"]
+    if data and flatten:
+        data = json_normalize(data)
+    yield DataFrame(data)
+
     while response["nextPgToken"]:
         response = state.sdk.securitydata.search_all_file_events(
             query, page_token=response["nextPgToken"]
         )
-        yield DataFrame(response["fileEvents"])
+        data = response["fileEvents"]
+        if data and flatten:
+            data = json_normalize(data)
+        yield DataFrame(data)
 
 
 def _handle_timestamp_checkpoint(checkpoint, state):
     try:
         checkpoint = float(checkpoint)
-        state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
+        if state.profile.use_v2_file_events == "True":
+            state.search_filters.append(
+                v2_filters.timestamp.Timestamp.on_or_after(checkpoint)
+            )
+        else:
+            state.search_filters.append(InsertionTimestamp.on_or_after(checkpoint))
         return None
     except (ValueError, TypeError):
         return checkpoint

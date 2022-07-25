@@ -9,6 +9,7 @@ from py42.sdk.queries.fileevents.file_event_query import FileEventQuery
 from py42.sdk.queries.fileevents.filters import RiskIndicator
 from py42.sdk.queries.fileevents.filters import RiskSeverity
 from py42.sdk.queries.fileevents.filters.file_filter import FileCategory
+from py42.sdk.queries.fileevents.v2 import filters as v2_filters
 from tests.cmds.conftest import filter_term_is_in_call_args
 from tests.cmds.conftest import get_mark_for_search_and_send_to
 from tests.conftest import create_mock_response
@@ -1374,7 +1375,9 @@ def test_saved_search_show_detail_calls_get_by_id_method(runner, cli_state):
     runner.invoke(
         cli, ["security-data", "saved-search", "show", test_id], obj=cli_state
     )
-    cli_state.sdk.securitydata.savedsearches.get_by_id.assert_called_once_with(test_id)
+    cli_state.sdk.securitydata.savedsearches.get_by_id.assert_called_once_with(
+        test_id, use_v2=False
+    )
 
 
 def test_saved_search_list_with_format_option_returns_csv_formatted_response(
@@ -1422,3 +1425,118 @@ def test_non_exposure_only_query_with_checkpoint_does_not_send_empty_filter_list
     )
     assert result.exit_code == 0
     assert len(mock_get_all_file_events.call_args[0][1]._filter_group_list) > 0
+
+
+def test_saved_search_get_by_id_uses_v2_flag_if_settings_enabled(runner, cli_state):
+    cli_state.profile.use_v2_file_events = "True"
+    test_saved_search_id = "123-test-saved-search"
+    runner.invoke(
+        cli,
+        ["security-data", "saved-search", "show", test_saved_search_id],
+        obj=cli_state,
+    )
+    cli_state.profile.use_v2_file_events = "False"
+    cli_state.sdk.securitydata.savedsearches.get_by_id.assert_called_once_with(
+        test_saved_search_id, use_v2=True
+    )
+
+
+def test_saved_search_list_uses_v2_flag_if_settings_enabled(runner, cli_state):
+    cli_state.profile.use_v2_file_events = "True"
+    runner.invoke(cli, ["security-data", "saved-search", "list"], obj=cli_state)
+    cli_state.profile.use_v2_file_events = "False"
+    cli_state.sdk.securitydata.savedsearches.get.assert_called_once_with(use_v2=True)
+
+
+def test_exposure_type_raises_exception_when_called_with_v2_settings_enabled(
+    runner, cli_state
+):
+    cli_state.profile.use_v2_file_events = "True"
+    result = runner.invoke(
+        cli,
+        ["security-data", "search", "-b", "10d", "--type", "IsPublic"],
+        obj=cli_state,
+    )
+    cli_state.profile.use_v2_file_events = "False"
+    assert result.exit_code == 1
+    assert (
+        "Exposure type (--type/-t) filter is incompatible with V2 file events. Use the event action (--event-action) filter instead."
+        in result.output
+    )
+
+
+def test_event_action_raises_exception_when_called_with_v2_settings_disabled(
+    runner, cli_state
+):
+    cli_state.profile.use_v2_file_events = "False"
+    result = runner.invoke(
+        cli,
+        ["security-data", "search", "-b", "10d", "--event-action", "file-created"],
+        obj=cli_state,
+    )
+    assert result.exit_code == 1
+    assert (
+        "Event action (--event-action) filter is incompatible with V1 file events.  Upgrade your profile to use the V2 file event data model with `code42 profile update --use-v2-file-events`"
+        in result.output
+    )
+
+
+@search_and_send_to_test
+def test_search_and_send_to_builds_correct_query_when_v2_events_enabled(
+    runner, cli_state, command, search_all_file_events_success
+):
+    cli_state.profile.use_v2_file_events = "True"
+    cmd = [
+        *command,
+        "--begin",
+        "1d",
+        "--event-action",
+        "file-created",
+        "--c42-username",
+        "test-username",
+        "--md5",
+        "test-md5-hash",
+        "--sha256",
+        "test-sha256-hash",
+        "--source",
+        "Gmail",
+        "--file-name",
+        "my-test-file.txt",
+        "--file-path",
+        "my/test-directory/",
+        "--file-category",
+        "DOCUMENT",
+        "--process-owner",
+        "test-owner",
+        "--tab-url",
+        "google.com",
+        "--risk-indicator",
+        "SOURCE_CODE",
+    ]
+    runner.invoke(cli, cmd, obj=cli_state)
+    cli_state.profile.use_v2_file_events = "False"
+    query = cli_state.sdk.securitydata.search_all_file_events.call_args[0][0]
+
+    filter_objs = [
+        v2_filters.event.Action.is_in(["file-created"]),
+        v2_filters.user.Email.is_in(["test-username"]),
+        v2_filters.file.MD5.is_in(["test-md5-hash"]),
+        v2_filters.file.SHA256.is_in(["test-sha256-hash"]),
+        v2_filters.source.Name.is_in(["Gmail"]),
+        v2_filters.file.Name.is_in(["my-test-file.txt"]),
+        v2_filters.file.Directory.is_in(["my/test-directory/"]),
+        v2_filters.file.Category.is_in(["Document"]),
+        v2_filters.process.Owner.is_in(["test-owner"]),
+        v2_filters.destination.TabUrls.is_in(["google.com"]),
+        v2_filters.risk.Severity.is_in(
+            [
+                v2_filters.risk.Severity.LOW,
+                v2_filters.risk.Severity.MODERATE,
+                v2_filters.risk.Severity.HIGH,
+                v2_filters.risk.Severity.CRITICAL,
+            ]
+        ),
+        v2_filters.risk.Indicators.is_in(["Source code"]),
+    ]
+    for filter_obj in filter_objs:
+        assert filter_obj in query._filter_group_list

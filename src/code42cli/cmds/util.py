@@ -4,6 +4,9 @@ from py42.sdk.queries.alerts.filters import DateObserved
 from py42.sdk.queries.fileevents.filters import EventTimestamp
 from py42.sdk.queries.fileevents.filters import ExposureType
 from py42.sdk.queries.fileevents.filters import InsertionTimestamp
+from py42.sdk.queries.fileevents.v2.filters.event import Inserted
+from py42.sdk.queries.fileevents.v2.filters.risk import Severity
+from py42.sdk.queries.fileevents.v2.filters.timestamp import Timestamp
 from py42.sdk.queries.query_filter import FilterGroup
 from py42.sdk.queries.query_filter import QueryFilterTimestampField
 
@@ -40,6 +43,12 @@ def _is_exempt_filter(f):
         EventTimestamp,
         DateObserved,
         ExposureType.exists(),
+        # V2 Filters
+        Timestamp,
+        Inserted,
+        Severity.is_in(
+            [Severity.LOW, Severity.MODERATE, Severity.HIGH, Severity.CRITICAL]
+        ),
     ]
 
     for exempt in or_query_exempt_filters:

@@ -86,11 +86,14 @@ def alert_namespace():
     return args
 
 
-def create_profile_values_dict(authority=None, username=None, ignore_ssl=False):
+def create_profile_values_dict(
+    authority=None, username=None, ignore_ssl=False, use_v2_file_events=False
+):
     return {
         ConfigAccessor.AUTHORITY_KEY: "example.com",
         ConfigAccessor.USERNAME_KEY: "foo",
         ConfigAccessor.IGNORE_SSL_ERRORS_KEY: True,
+        ConfigAccessor.USE_V2_FILE_EVENTS_KEY: False,
     }
 
 

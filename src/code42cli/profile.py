@@ -29,6 +29,10 @@ class Code42Profile:
         return self._profile[ConfigAccessor.IGNORE_SSL_ERRORS_KEY]
 
     @property
+    def use_v2_file_events(self):
+        return self._profile[ConfigAccessor.USE_V2_FILE_EVENTS_KEY]
+
+    @property
     def has_stored_password(self):
         stored_password = password.get_stored_password(self)
         return stored_password is not None and stored_password != ""
@@ -99,10 +103,12 @@ def switch_default_profile(profile_name):
     config_accessor.switch_default_profile(profile.name)
 
 
-def create_profile(name, server, username, ignore_ssl_errors):
+def create_profile(name, server, username, ignore_ssl_errors, use_v2_file_events):
     if profile_exists(name):
         raise Code42CLIError(f"A profile named '{name}' already exists.")
-    config_accessor.create_profile(name, server, username, ignore_ssl_errors)
+    config_accessor.create_profile(
+        name, server, username, ignore_ssl_errors, use_v2_file_events
+    )
 
 
 def delete_profile(profile_name):
@@ -116,8 +122,10 @@ def delete_profile(profile_name):
     config_accessor.delete_profile(profile_name)
 
 
-def update_profile(name, server, username, ignore_ssl_errors):
-    config_accessor.update_profile(name, server, username, ignore_ssl_errors)
+def update_profile(name, server, username, ignore_ssl_errors, use_v2_file_events):
+    config_accessor.update_profile(
+        name, server, username, ignore_ssl_errors, use_v2_file_events
+    )
 
 
 def get_all_profiles():
