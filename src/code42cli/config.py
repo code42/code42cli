@@ -115,8 +115,7 @@ class ConfigAccessor:
         profile[self.IGNORE_SSL_ERRORS_KEY] = str(new_value)
 
     def _set_use_v2_file_events(self, new_value, profile):
-        profile.get(self.USE_V2_FILE_EVENTS_KEY, str(new_value))
-        profile.update({self.USE_V2_FILE_EVENTS_KEY: str(new_value)})
+        profile[self.USE_V2_FILE_EVENTS_KEY] = str(new_value)
 
     def _get_sections(self):
         return self.parser.sections()

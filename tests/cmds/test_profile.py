@@ -98,10 +98,11 @@ def test_create_profile_if_user_sets_password_is_created(
             "-u",
             "baz",
             "--disable-ssl-errors",
+            "True",
         ],
     )
     mock_cliprofile_namespace.create_profile.assert_called_once_with(
-        "foo", "bar", "baz", True, False
+        "foo", "bar", "baz", True, None
     )
 
 
@@ -121,7 +122,9 @@ def test_create_profile_if_user_does_not_set_password_is_created(
             "-u",
             "baz",
             "--disable-ssl-errors",
+            "True",
             "--use-v2-file-events",
+            "True",
         ],
     )
     mock_cliprofile_namespace.create_profile.assert_called_once_with(
@@ -145,6 +148,7 @@ def test_create_profile_if_user_does_not_agree_does_not_save_password(
             "-u",
             "baz",
             "--disable-ssl-errors",
+            "True",
         ],
     )
     assert not mock_cliprofile_namespace.set_password.call_count
@@ -237,6 +241,7 @@ def test_create_profile_outputs_confirmation(
             "-u",
             "baz",
             "--disable-ssl-errors",
+            "True",
         ],
     )
     assert "Successfully created profile 'foo'." in result.output
@@ -260,10 +265,11 @@ def test_update_profile_updates_existing_profile(
             "-u",
             "baz",
             "--disable-ssl-errors",
+            "True",
         ],
     )
     mock_cliprofile_namespace.update_profile.assert_called_once_with(
-        name, "bar", "baz", True, False
+        name, "bar", "baz", True, None
     )
 
 
@@ -283,7 +289,9 @@ def test_update_profile_updates_default_profile(
             "-u",
             "baz",
             "--disable-ssl-errors",
+            "True",
             "--use-v2-file-events",
+            "True",
         ],
     )
     mock_cliprofile_namespace.update_profile.assert_called_once_with(
@@ -299,10 +307,10 @@ def test_update_profile_updates_name_alone(
     mock_cliprofile_namespace.get_profile.return_value = profile
     runner.invoke(
         cli,
-        ["profile", "update", "-u", "baz", "--disable-ssl-errors"],
+        ["profile", "update", "-u", "baz", "--disable-ssl-errors", "True"],
     )
     mock_cliprofile_namespace.update_profile.assert_called_once_with(
-        name, None, "baz", True, False
+        name, None, "baz", True, None
     )
 
 
@@ -324,6 +332,7 @@ def test_update_profile_if_user_does_not_agree_does_not_save_password(
             "-u",
             "baz",
             "--disable-ssl-errors",
+            "True",
         ],
     )
     assert not mock_cliprofile_namespace.set_password.call_count
@@ -349,6 +358,7 @@ def test_update_profile_if_credentials_invalid_password_not_saved(
             "-u",
             "baz",
             "--disable-ssl-errors",
+            "True",
         ],
     )
     assert not mock_cliprofile_namespace.set_password.call_count
@@ -374,6 +384,7 @@ def test_update_profile_if_user_agrees_and_valid_connection_sets_password(
             "-u",
             "baz",
             "--disable-ssl-errors",
+            "True",
         ],
     )
     mock_cliprofile_namespace.set_password.assert_called_once_with(

@@ -30,7 +30,7 @@ class Code42Profile:
 
     @property
     def use_v2_file_events(self):
-        return self._profile[ConfigAccessor.USE_V2_FILE_EVENTS_KEY]
+        return self._profile.get(ConfigAccessor.USE_V2_FILE_EVENTS_KEY)
 
     @property
     def has_stored_password(self):
