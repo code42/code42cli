@@ -65,7 +65,9 @@ class ConfigAccessor:
                 raise ex
 
         profile = self.get_profile(name)
-        self.update_profile(profile.name, server, username, ignore_ssl_errors)
+        self.update_profile(
+            profile.name, server, username, ignore_ssl_errors, use_v2_file_events
+        )
         self._try_complete_setup(profile)
 
     def update_profile(
@@ -110,16 +112,11 @@ class ConfigAccessor:
         profile[self.USERNAME_KEY] = new_value.strip()
 
     def _set_ignore_ssl_errors(self, new_value, profile):
-        if profile[self.IGNORE_SSL_ERRORS_KEY] == str(new_value):
-            profile[self.IGNORE_SSL_ERRORS_KEY] = str(False)
-        else:
-            profile[self.IGNORE_SSL_ERRORS_KEY] = str(new_value)
+        profile[self.IGNORE_SSL_ERRORS_KEY] = str(new_value)
 
     def _set_use_v2_file_events(self, new_value, profile):
-        if profile[self.USE_V2_FILE_EVENTS_KEY] == str(new_value):
-            profile[self.USE_V2_FILE_EVENTS_KEY] = str(False)
-        else:
-            profile[self.USE_V2_FILE_EVENTS_KEY] = str(new_value)
+        profile.get(self.USE_V2_FILE_EVENTS_KEY, str(new_value))
+        profile.update({self.USE_V2_FILE_EVENTS_KEY: str(new_value)})
 
     def _get_sections(self):
         return self.parser.sections()

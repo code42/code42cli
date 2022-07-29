@@ -70,7 +70,7 @@ password_option = click.option(
 
 disable_ssl_option = click.option(
     "--disable-ssl-errors",
-    is_flag=True,
+    type=click.types.BOOL,
     help="For development purposes, do not validate the SSL certificates of Code42 servers. "
     "This is not recommended, except for specific scenarios like testing. Attach this flag to the update command to toggle the setting.",
     default=None,
@@ -78,7 +78,7 @@ disable_ssl_option = click.option(
 
 use_v2_file_events_option = click.option(
     "--use-v2-file-events",
-    is_flag=True,
+    type=click.types.BOOL,
     help="Opts to use the V2 file event data model. Attach this flag to the update command to toggle the setting",
     default=None,
 )
@@ -121,10 +121,8 @@ def create(
     totp,
 ):
     """Create profile settings. The first profile created will be the default."""
-    ssl_errors_flag_set = True if disable_ssl_errors else False
-    v2_file_events_flag_set = True if use_v2_file_events else False
     cliprofile.create_profile(
-        name, server, username, ssl_errors_flag_set, v2_file_events_flag_set
+        name, server, username, disable_ssl_errors, use_v2_file_events
     )
     password = password or _prompt_for_password(name)
     if password:
@@ -165,10 +163,8 @@ def update(
             "Must provide at least one of `--username`, `--server`, `--password`, `--use-v2-file-events` or "
             "`--disable-ssl-errors` when updating a profile."
         )
-    ssl_errors_flag_set = True if disable_ssl_errors else False
-    v2_file_events_flag_set = True if use_v2_file_events else False
     cliprofile.update_profile(
-        c42profile.name, server, username, ssl_errors_flag_set, v2_file_events_flag_set
+        c42profile.name, server, username, disable_ssl_errors, use_v2_file_events
     )
     if not password and not c42profile.has_stored_password:
         password = _prompt_for_password(c42profile.name)
