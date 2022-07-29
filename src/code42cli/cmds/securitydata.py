@@ -329,7 +329,7 @@ def _get_saved_search_option():
     def _get_saved_search_query(ctx, param, arg):
         if arg is None:
             return
-        query = ctx.obj.sdk.securitydata.savedsearches.get_query(arg)
+        query = ctx.obj.sdk.securitydata.savedsearches.get_query(arg, use_v2=ctx.obj.profile.use_v2_file_events == 'True')
         return query
 
     return click.option(
