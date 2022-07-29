@@ -13,8 +13,11 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Added
 - Support for the V2 file event data model.
   - V1 file event APIs were marked deprecated in May 2022 and will be no longer be supported after May 2023.
-  - Use the `--use-v2-file-events` flag with the `code42 profile create` or `code42 profile update` commands to enable your code42 CLI profile to use the latest V2 file event data model.
+  - Use the `--use-v2-file-events True` option with the `code42 profile create` or `code42 profile update` commands to enable your code42 CLI profile to use the latest V2 file event data model.
   - See the [V2 File Events User Guide](https://clidocs.code42.com/en/latest/userguides/siemexample.html) for more information.
+
+### Changed
+- The `--disable-ssl-errors` options for the `code42 profile create` and `code42 profile update` commands is no longer a flag and now takes a boolean `True/False` arg.
 
 ## 1.14.4 - 2022-07-21
 
