@@ -16,6 +16,13 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
   - Use the `--use-v2-file-events` flag with the `code42 profile create` or `code42 profile update` commands to enable your code42 CLI profile to use the latest V2 file event data model.
   - See the [V2 File Events User Guide](https://clidocs.code42.com/en/latest/userguides/siemexample.html) for more information.
 
+## 1.14.4 - 2022-07-21
+
+### Changed
+
+- Reduced the `page_size` in Device API calls from 500 to 100 to reduce possibility of timeouts when including backup usage in `code42 devices list`.
+>>>>>>> main
+
 ## 1.14.3 - 2022-07-06
 
 ### Fixed

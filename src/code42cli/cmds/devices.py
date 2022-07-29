@@ -432,7 +432,10 @@ def _get_device_dataframe(
     sdk, columns, active=None, org_uid=None, include_backup_usage=False
 ):
     devices_generator = sdk.devices.get_all(
-        active=active, include_backup_usage=include_backup_usage, org_uid=org_uid
+        active=active,
+        include_backup_usage=include_backup_usage,
+        org_uid=org_uid,
+        page_size=100,
     )
     devices_list = []
     if include_backup_usage:
