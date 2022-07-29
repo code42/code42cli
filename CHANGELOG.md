@@ -21,7 +21,6 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Changed
 
 - Reduced the `page_size` in Device API calls from 500 to 100 to reduce possibility of timeouts when including backup usage in `code42 devices list`.
->>>>>>> main
 
 ## 1.14.3 - 2022-07-06
 
