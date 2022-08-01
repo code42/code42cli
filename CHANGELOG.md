@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## 1.14.5 - 2022-08-01
+
+### Added
+
+- `code42 devices list` and `code42 devices list-backup-sets` now accept a `--page-size <int>` option to enable manually configuring optimal page size.
+
 ## 1.14.4 - 2022-07-21
 
 ### Changed
