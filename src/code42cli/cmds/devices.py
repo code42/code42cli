@@ -249,7 +249,7 @@ page_size_option = click.option(
     type=int,
     default=100,
     help="Number of devices to retrieve per API call. "
-    "Lower this value if you are getting timeouts when retrieving devices with backup info. ",
+    "Lower this value if you are getting timeouts when retrieving devices with backup info. Default: 100",
 )
 
 include_usernames_option = click.option(
