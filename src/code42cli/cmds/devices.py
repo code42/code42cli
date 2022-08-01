@@ -243,6 +243,14 @@ org_uid_option = click.option(
     help="Limit devices to only those in the organization you specify. "
     "Note that child organizations will be included.",
 )
+page_size_option = click.option(
+    "--page-size",
+    required=False,
+    type=int,
+    default=100,
+    help="Number of devices to retrieve per API call. "
+    "Lower this value if you are getting timeouts when retrieving devices with backup info. Default: 100",
+)
 
 include_usernames_option = click.option(
     "--include-usernames",
@@ -323,6 +331,7 @@ include_usernames_option = click.option(
     help="Include devices only when 'creationDate' field is greater than the provided value. "
     "Argument format options are the same as --last-connected-before.",
 )
+@page_size_option
 @format_option
 @sdk_options()
 def list_devices(
@@ -340,6 +349,7 @@ def list_devices(
     last_connected_before,
     created_after,
     created_before,
+    page_size,
     format,
 ):
     """Get information about many devices."""
@@ -359,11 +369,12 @@ def list_devices(
         "userUid",
     ]
     df = _get_device_dataframe(
-        state.sdk,
-        columns,
-        active,
-        org_uid,
-        (include_backup_usage or include_total_storage),
+        sdk=state.sdk,
+        columns=columns,
+        page_size=page_size,
+        active=active,
+        org_uid=org_uid,
+        include_backup_usage=(include_backup_usage or include_total_storage),
     )
     if exclude_most_recently_connected:
         most_recent = (
@@ -429,13 +440,13 @@ def _get_all_active_hold_memberships(sdk):
 
 
 def _get_device_dataframe(
-    sdk, columns, active=None, org_uid=None, include_backup_usage=False
+    sdk, columns, page_size, active=None, org_uid=None, include_backup_usage=False
 ):
     devices_generator = sdk.devices.get_all(
         active=active,
         include_backup_usage=include_backup_usage,
         org_uid=org_uid,
-        page_size=100,
+        page_size=page_size,
     )
     devices_list = []
     if include_backup_usage:
@@ -514,6 +525,7 @@ def _break_backup_usage_into_total_storage(backup_usage):
 @inactive_option
 @org_uid_option
 @include_usernames_option
+@page_size_option
 @format_option
 @sdk_options()
 def list_backup_sets(
@@ -522,6 +534,7 @@ def list_backup_sets(
     inactive,
     org_uid,
     include_usernames,
+    page_size,
     format,
 ):
     """Get information about many devices and their backup sets."""

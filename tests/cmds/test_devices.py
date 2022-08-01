@@ -690,7 +690,7 @@ def test_get_device_dataframe_returns_correct_columns(
         "osVersion",
         "userUid",
     ]
-    result = _get_device_dataframe(cli_state.sdk, columns)
+    result = _get_device_dataframe(cli_state.sdk, columns, page_size=100)
     assert "computerId" in result.columns
     assert "guid" in result.columns
     assert "name" in result.columns
@@ -710,7 +710,9 @@ def test_get_device_dataframe_returns_correct_columns(
 def test_device_dataframe_return_includes_backupusage_when_flag_passed(
     cli_state, get_all_devices_success
 ):
-    result = _get_device_dataframe(cli_state.sdk, columns=[], include_backup_usage=True)
+    result = _get_device_dataframe(
+        cli_state.sdk, columns=[], page_size=100, include_backup_usage=True
+    )
     assert "backupUsage" in result.columns
 
 
@@ -736,6 +738,24 @@ def test_add_legal_hold_membership_to_device_dataframe_adds_legal_hold_columns_t
     result = _add_legal_hold_membership_to_device_dataframe(cli_state.sdk, testdf)
     assert "legalHoldUid" in result.columns
     assert "legalHoldName" in result.columns
+
+
+def test_list_without_page_size_option_defaults_to_100_results_per_page(
+    cli_state, runner
+):
+    runner.invoke(cli, ["devices", "list"], obj=cli_state)
+    cli_state.sdk.devices.get_all.assert_called_once_with(
+        active=None, include_backup_usage=False, org_uid=None, page_size=100
+    )
+
+
+def test_list_with_page_size_option_sets_expected_page_size_in_request(
+    cli_state, runner
+):
+    runner.invoke(cli, ["devices", "list", "--page-size", "1000"], obj=cli_state)
+    cli_state.sdk.devices.get_all.assert_called_once_with(
+        active=None, include_backup_usage=False, org_uid=None, page_size=1000
+    )
 
 
 def test_list_include_legal_hold_membership_pops_legal_hold_if_device_deactivated(
