@@ -72,14 +72,10 @@ def get_all_events_callback():
     def callback(ctx, param, arg):
         if not arg:
             if ctx.obj.profile.use_v2_file_events == "True":
-                risk_values = [
-                    v2_filters.risk.Severity.LOW,
-                    v2_filters.risk.Severity.MODERATE,
-                    v2_filters.risk.Severity.HIGH,
-                    v2_filters.risk.Severity.CRITICAL,
-                ]
                 ctx.obj.search_filters.append(
-                    v2_filters.risk.Severity.is_in(risk_values)
+                    v2_filters.risk.Severity.not_eq(
+                        v2_filters.risk.Severity.NO_RISK_INDICATED
+                    )
                 )
             else:
                 ctx.obj.search_filters.append(ExposureType.exists())

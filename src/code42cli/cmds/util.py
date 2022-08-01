@@ -46,9 +46,7 @@ def _is_exempt_filter(f):
         # V2 Filters
         Timestamp,
         Inserted,
-        Severity.is_in(
-            [Severity.LOW, Severity.MODERATE, Severity.HIGH, Severity.CRITICAL]
-        ),
+        Severity.not_eq(Severity.NO_RISK_INDICATED),
     ]
 
     for exempt in or_query_exempt_filters:

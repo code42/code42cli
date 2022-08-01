@@ -1528,14 +1528,7 @@ def test_search_and_send_to_builds_correct_query_when_v2_events_enabled(
         v2_filters.file.Category.is_in(["Document"]),
         v2_filters.process.Owner.is_in(["test-owner"]),
         v2_filters.destination.TabUrls.is_in(["google.com"]),
-        v2_filters.risk.Severity.is_in(
-            [
-                v2_filters.risk.Severity.LOW,
-                v2_filters.risk.Severity.MODERATE,
-                v2_filters.risk.Severity.HIGH,
-                v2_filters.risk.Severity.CRITICAL,
-            ]
-        ),
+        v2_filters.risk.Severity.not_eq(v2_filters.risk.Severity.NO_RISK_INDICATED),
         v2_filters.risk.Indicators.is_in(["Source code"]),
     ]
     for filter_obj in filter_objs:
