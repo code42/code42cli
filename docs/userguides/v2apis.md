@@ -8,7 +8,7 @@ For details on the updated File Event Model, see the V2 File Events API document
 
 V1 file event APIs were marked deprecated in May 2022 and will be no longer be supported after May 2023.
 
-Use the `--use-v2-file-events` flag with the `code42 profile create` or `code42 profile update` commands to enable your code42 CLI profile to use the latest V2 file event data model.
+Use the `--use-v2-file-events True` option with the `code42 profile create` or `code42 profile update` commands to enable your code42 CLI profile to use the latest V2 file event data model.
 
 Use `code42 profile show` to check the status of this setting on your profile:
 ```bash
@@ -24,7 +24,7 @@ test-user-profile:
 
 ```
 
-For details on setting up a profile, see the [profile configuration user guide](./profile.md).
+For details on setting up a profile, see the [profile set up user guide](./profile.md).
 
 Enabling this setting will use the V2 data model for querying searches and saved searches with all `code security-data` commands.
 The response shape for these events has changed from V1 and contains various field remappings, renamings, additions and removals.  Column names will also be different when using the `Table` format for outputting events.

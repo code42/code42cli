@@ -470,7 +470,8 @@ def search(
         checkpoint = checkpoint_func = None
 
     query = _construct_query(state, begin, end, saved_search, advanced_query, or_query)
-    dfs = _get_all_file_events(state, query, checkpoint, format == OutputFormat.TABLE)
+    flatten = format in (OutputFormat.TABLE, OutputFormat.CSV)
+    dfs = _get_all_file_events(state, query, checkpoint, flatten)
     formatter = FileEventsOutputFormatter(format, checkpoint_func=checkpoint_func)
     # sending to pager when checkpointing can be inaccurate due to pager buffering, so disallow pager
     force_no_pager = use_checkpoint
