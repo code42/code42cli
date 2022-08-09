@@ -19,6 +19,7 @@ class ConfigAccessor:
     AUTHORITY_KEY = "c42_authority_url"
     USERNAME_KEY = "c42_username"
     IGNORE_SSL_ERRORS_KEY = "ignore-ssl-errors"
+    USE_V2_FILE_EVENTS_KEY = "use-v2-file-events"
     DEFAULT_PROFILE = "default_profile"
     _INTERNAL_SECTION = "Internal"
 
@@ -51,7 +52,9 @@ class ConfigAccessor:
             profiles.append(self.get_profile(name))
         return profiles
 
-    def create_profile(self, name, server, username, ignore_ssl_errors):
+    def create_profile(
+        self, name, server, username, ignore_ssl_errors, use_v2_file_events
+    ):
         """Creates a new profile if one does not already exist for that name."""
         try:
             self.get_profile(name)
@@ -62,10 +65,19 @@ class ConfigAccessor:
                 raise ex
 
         profile = self.get_profile(name)
-        self.update_profile(profile.name, server, username, ignore_ssl_errors)
+        self.update_profile(
+            profile.name, server, username, ignore_ssl_errors, use_v2_file_events
+        )
         self._try_complete_setup(profile)
 
-    def update_profile(self, name, server=None, username=None, ignore_ssl_errors=None):
+    def update_profile(
+        self,
+        name,
+        server=None,
+        username=None,
+        ignore_ssl_errors=None,
+        use_v2_file_events=None,
+    ):
         profile = self.get_profile(name)
         if server:
             self._set_authority_url(server, profile)
@@ -73,6 +85,8 @@ class ConfigAccessor:
             self._set_username(username, profile)
         if ignore_ssl_errors is not None:
             self._set_ignore_ssl_errors(ignore_ssl_errors, profile)
+        if use_v2_file_events is not None:
+            self._set_use_v2_file_events(use_v2_file_events, profile)
         self._save()
 
     def switch_default_profile(self, new_default_name):
@@ -99,6 +113,9 @@ class ConfigAccessor:
 
     def _set_ignore_ssl_errors(self, new_value, profile):
         profile[self.IGNORE_SSL_ERRORS_KEY] = str(new_value)
+
+    def _set_use_v2_file_events(self, new_value, profile):
+        profile[self.USE_V2_FILE_EVENTS_KEY] = str(new_value)
 
     def _get_sections(self):
         return self.parser.sections()
@@ -130,6 +147,7 @@ class ConfigAccessor:
         self.parser[name][self.AUTHORITY_KEY] = self.DEFAULT_VALUE
         self.parser[name][self.USERNAME_KEY] = self.DEFAULT_VALUE
         self.parser[name][self.IGNORE_SSL_ERRORS_KEY] = str(False)
+        self.parser[name][self.USE_V2_FILE_EVENTS_KEY] = str(False)
 
     def _save(self):
         with open(self.path, "w+", encoding="utf-8") as file:

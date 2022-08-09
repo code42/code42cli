@@ -138,9 +138,11 @@ def test_create_profile_uses_expected_profile_values(config_accessor):
     server = "server"
     username = "username"
     ssl_errors_disabled = True
-    cliprofile.create_profile(profile_name, server, username, ssl_errors_disabled)
+    cliprofile.create_profile(
+        profile_name, server, username, ssl_errors_disabled, False
+    )
     config_accessor.create_profile.assert_called_once_with(
-        profile_name, server, username, ssl_errors_disabled
+        profile_name, server, username, ssl_errors_disabled, False
     )
 
 
@@ -149,7 +151,7 @@ def test_create_profile_if_profile_exists_exits(
 ):
     config_accessor.get_profile.return_value = mocker.MagicMock()
     with pytest.raises(Code42CLIError):
-        cliprofile.create_profile("foo", "bar", "baz", True)
+        cliprofile.create_profile("foo", "bar", "baz", True, False)
 
 
 def test_get_all_profiles_returns_expected_profile_list(config_accessor):
