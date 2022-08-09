@@ -18,6 +18,11 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Changed
 - The `--disable-ssl-errors` options for the `code42 profile create` and `code42 profile update` commands is no longer a flag and now takes a boolean `True/False` arg.
+## 1.14.5 - 2022-08-01
+
+### Added
+
+- `code42 devices list` and `code42 devices list-backup-sets` now accept a `--page-size <int>` option to enable manually configuring optimal page size.
 
 ## 1.14.4 - 2022-07-21
 
