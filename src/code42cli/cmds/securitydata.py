@@ -35,10 +35,13 @@ from code42cli.options import sdk_options
 from code42cli.output_formats import DataFrameOutputFormatter
 from code42cli.output_formats import FileEventsOutputFormat
 from code42cli.output_formats import FileEventsOutputFormatter
+from code42cli.util import deprecation_warning
 from code42cli.util import warn_interrupt
 
 logger = get_main_cli_logger()
 MAX_EVENT_PAGE_SIZE = 10000
+DEPRECATION_TEXT = "(DEPRECATED): V1 file events are deprecated.  Update your profile with `code42 profile update --use-v2-file-events true` to use the new V2 file event data model."
+
 SECURITY_DATA_KEYWORD = "file events"
 
 
@@ -406,6 +409,10 @@ def search(
     **kwargs,
 ):
     """Search for file events."""
+
+    if state.profile.use_v2_file_events != "True":
+        deprecation_warning(DEPRECATION_TEXT)
+
     if format == FileEventsOutputFormat.CEF and columns:
         raise click.BadOptionUsage(
             "columns", "--columns option can't be used with CEF format."
@@ -501,6 +508,9 @@ def send_to(
 
     HOSTNAME format: address:port where port is optional and defaults to 514.
     """
+    if state.profile.use_v2_file_events != "True":
+        deprecation_warning(DEPRECATION_TEXT)
+
     if use_checkpoint:
         cursor = _get_file_event_cursor_store(state.profile.name)
         checkpoint = _handle_timestamp_checkpoint(cursor.get(use_checkpoint), state)
@@ -542,6 +552,9 @@ def saved_search(state):
 @sdk_options()
 def _list(state, format=None):
     """List available saved searches."""
+    if state.profile.use_v2_file_events != "True":
+        deprecation_warning(DEPRECATION_TEXT)
+
     formatter = DataFrameOutputFormatter(format)
     response = state.sdk.securitydata.savedsearches.get(
         use_v2=state.profile.use_v2_file_events == "True"
@@ -557,6 +570,9 @@ def _list(state, format=None):
 @sdk_options()
 def show(state, search_id):
     """Get the details of a saved search."""
+    if state.profile.use_v2_file_events != "True":
+        deprecation_warning(DEPRECATION_TEXT)
+
     response = state.sdk.securitydata.savedsearches.get_by_id(
         search_id, use_v2=state.profile.use_v2_file_events == "True"
     )
@@ -590,7 +606,12 @@ def _construct_query(state, begin, end, saved_search, advanced_query, or_query):
         # if a checkpoint and _only_ --include-non-exposure is passed, the filter list will be empty, which isn't a
         # valid query, so in that case we want to fallback to retrieving all events. The checkpoint will
         # still cause the query results to only contain events after the checkpointed event.
-        state.search_filters.append(RiskSeverity.exists())
+        severity_filter = (
+            v2_filters.risk.Severity.exists()
+            if state.profile.use_v2_file_events == "True"
+            else RiskSeverity.exists()
+        )
+        state.search_filters.append(severity_filter)
 
     # construct a v2 model query if profile setting enabled
     if state.profile.use_v2_file_events == "True":
