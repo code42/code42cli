@@ -1476,7 +1476,7 @@ def test_event_action_raises_exception_when_called_with_v2_settings_disabled(
     )
     assert result.exit_code == 1
     assert (
-        "Event action (--event-action) filter is incompatible with V1 file events.  Upgrade your profile to use the V2 file event data model with `code42 profile update --use-v2-file-events`"
+        "Event action (--event-action) filter is incompatible with V1 file events.  Upgrade your profile to use the V2 file event data model with `code42 profile update --use-v2-file-events True`"
         in result.output
     )
 
