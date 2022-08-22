@@ -12,7 +12,7 @@ Use the `--use-v2-file-events True` option with the `code42 profile create` or `
 
 Use `code42 profile show` to check the status of this setting on your profile:
 ```bash
-% code42 profile update --use-v2-file-events
+% code42 profile update --use-v2-file-events True
 
 % code42 profile show
 

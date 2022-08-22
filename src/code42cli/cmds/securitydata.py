@@ -40,7 +40,7 @@ from code42cli.util import warn_interrupt
 
 logger = get_main_cli_logger()
 MAX_EVENT_PAGE_SIZE = 10000
-DEPRECATION_TEXT = "(DEPRECATED): V1 file events are deprecated.  Update your profile with `code42 profile update --use-v2-file-events true` to use the new V2 file event data model."
+DEPRECATION_TEXT = "(DEPRECATED): V1 file events are deprecated.  Update your profile with `code42 profile update --use-v2-file-events True` to use the new V2 file event data model."
 
 SECURITY_DATA_KEYWORD = "file events"
 
@@ -63,7 +63,7 @@ def event_action_callback():
         if arg:
             if ctx.obj.profile.use_v2_file_events == "False":
                 raise Code42CLIError(
-                    "Event action (--event-action) filter is incompatible with V1 file events.  Upgrade your profile to use the V2 file event data model with `code42 profile update --use-v2-file-events`"
+                    "Event action (--event-action) filter is incompatible with V1 file events.  Upgrade your profile to use the V2 file event data model with `code42 profile update --use-v2-file-events True`"
                 )
             ctx.obj.search_filters.append(v2_filters.event.Action.is_in(arg))
         return arg
