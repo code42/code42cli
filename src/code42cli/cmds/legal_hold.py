@@ -4,6 +4,7 @@ from pprint import pformat
 
 import click
 from click import echo
+from click import style
 
 from code42cli.bulk import generate_template_cmd_factory
 from code42cli.bulk import run_bulk_process
@@ -89,7 +90,7 @@ def add_user(state, matter_id, username):
 @sdk_options()
 def remove_user(state, matter_id, username):
     """Release a custodian from a legal hold matter."""
-    _remove_user_from_legal_hold(state.sdk, matter_id, username)
+    _remove_user_from_legal_hold(state, matter_id, username)
 
 
 @legal_hold.command("list")
@@ -98,7 +99,7 @@ def remove_user(state, matter_id, username):
 def _list(state, format=None):
     """Fetch existing legal hold matters."""
     formatter = OutputFormatter(format, _MATTER_KEYS_MAP)
-    matters = _get_all_active_matters(state.sdk)
+    matters = _get_all_active_matters(state)
     if matters:
         formatter.echo_formatted_list(matters)
 
@@ -120,14 +121,21 @@ def _list(state, format=None):
 def show(state, matter_id, include_inactive=False, include_policy=False):
     """Display details of a given legal hold matter."""
     matter = _check_matter_is_accessible(state.sdk, matter_id)
-    matter["creator_username"] = matter["creator"]["username"]
+
+    if state.profile.api_client_auth == "True":
+        try:
+            matter["creator_username"] = matter["creator"]["user"]["email"]
+        except KeyError:
+            pass
+    else:
+        matter["creator_username"] = matter["creator"]["username"]
     matter = json.loads(matter.text)
 
     # if `active` is None then all matters (whether active or inactive) are returned. True returns
     # only those that are active.
     active = None if include_inactive else True
     memberships = _get_legal_hold_memberships_for_matter(
-        state.sdk, matter_id, active=active
+        state, matter_id, active=active
     )
     active_usernames = [
         member["user"]["username"] for member in memberships if member["active"]
@@ -161,6 +169,16 @@ def show(state, matter_id, include_inactive=False, include_policy=False):
 @sdk_options()
 def search_events(state, matter_id, event_type, begin, end, format):
     """Tools for getting legal hold event data."""
+    # TODO - this method is unavailable with api clients
+    if state.profile.api_client_auth == "True":
+        echo(
+            style(
+                "WARNING: This method is unavailable with API Client Authentication.",
+                fg="red",
+            ),
+            err=True,
+        )
+
     formatter = OutputFormatter(format, _EVENT_KEYS_MAP)
     events = _get_all_events(state.sdk, matter_id, begin, end)
     if event_type:
@@ -211,10 +229,8 @@ def bulk_add(state, csv_rows):
 @read_csv_arg(headers=LEGAL_HOLD_CSV_HEADERS)
 @sdk_options()
 def remove(state, csv_rows):
-    sdk = state.sdk
-
     def handle_row(matter_id, username):
-        _remove_user_from_legal_hold(sdk, matter_id, username)
+        _remove_user_from_legal_hold(state, matter_id, username)
 
     run_bulk_process(
         handle_row, csv_rows, progress_label="Removing users from legal hold:"
@@ -227,12 +243,12 @@ def _add_user_to_legal_hold(sdk, matter_id, username):
     sdk.legalhold.add_to_matter(user_id, matter_id)
 
 
-def _remove_user_from_legal_hold(sdk, matter_id, username):
-    _check_matter_is_accessible(sdk, matter_id)
+def _remove_user_from_legal_hold(state, matter_id, username):
+    _check_matter_is_accessible(state.sdk, matter_id)
     membership_id = _get_legal_hold_membership_id_for_user_and_matter(
-        sdk, username, matter_id
+        state, username, matter_id
     )
-    sdk.legalhold.remove_from_matter(membership_id)
+    state.sdk.legalhold.remove_from_matter(membership_id)
 
 
 def _get_and_print_preservation_policy(sdk, policy_uid):
@@ -241,37 +257,50 @@ def _get_and_print_preservation_policy(sdk, policy_uid):
     echo(pformat(json.loads(preservation_policy.text)))
 
 
-def _get_legal_hold_membership_id_for_user_and_matter(sdk, username, matter_id):
-    user_id = get_user_id(sdk, username)
-    memberships = _get_legal_hold_memberships_for_matter(sdk, matter_id, active=True)
+def _get_legal_hold_membership_id_for_user_and_matter(state, username, matter_id):
+    user_id = get_user_id(state.sdk, username)
+    memberships = _get_legal_hold_memberships_for_matter(state, matter_id, active=True)
     for member in memberships:
         if member["user"]["userUid"] == user_id:
             return member["legalHoldMembershipUid"]
     raise UserNotInLegalHoldError(username, matter_id)
 
 
-def _get_legal_hold_memberships_for_matter(sdk, matter_id, active=True):
-    memberships_generator = sdk.legalhold.get_all_matter_custodians(
-        legal_hold_uid=matter_id, active=active
+def _get_legal_hold_memberships_for_matter(state, matter_id, active=True):
+    memberships_generator = state.sdk.legalhold.get_all_matter_custodians(
+        matter_id, active=active
     )
-    memberships = [
-        member
-        for page in memberships_generator
-        for member in page["legalHoldMemberships"]
-    ]
+    if state.profile.api_client_auth == "True":
+        memberships = [member for page in memberships_generator for member in page]
+    else:
+        memberships = [
+            member
+            for page in memberships_generator
+            for member in page["legalHoldMemberships"]
+        ]
     return memberships
 
 
-def _get_all_active_matters(sdk):
-    matters_generator = sdk.legalhold.get_all_matters()
-    matters = [
-        matter
-        for page in matters_generator
-        for matter in page["legalHolds"]
-        if matter["active"]
-    ]
-    for matter in matters:
-        matter["creator_username"] = matter["creator"]["username"]
+def _get_all_active_matters(state):
+    matters_generator = state.sdk.legalhold.get_all_matters()
+    if state.profile.api_client_auth == "True":
+        matters = [
+            matter for page in matters_generator for matter in page if matter["active"]
+        ]
+        for matter in matters:
+            try:
+                matter["creator_username"] = matter["creator"]["user"]["email"]
+            except KeyError:
+                pass
+    else:
+        matters = [
+            matter
+            for page in matters_generator
+            for matter in page["legalHolds"]
+            if matter["active"]
+        ]
+        for matter in matters:
+            matter["creator_username"] = matter["creator"]["username"]
     return matters
 
 

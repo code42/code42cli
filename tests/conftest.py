@@ -94,6 +94,7 @@ def create_profile_values_dict(
         ConfigAccessor.USERNAME_KEY: "foo",
         ConfigAccessor.IGNORE_SSL_ERRORS_KEY: True,
         ConfigAccessor.USE_V2_FILE_EVENTS_KEY: False,
+        ConfigAccessor.API_CLIENT_AUTH_KEY: False,
     }
 
 

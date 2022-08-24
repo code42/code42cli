@@ -11,6 +11,7 @@ V1 file event APIs were marked deprecated in May 2022 and will be no longer be s
 Use the `--use-v2-file-events True` option with the `code42 profile create` or `code42 profile update` commands to enable your code42 CLI profile to use the latest V2 file event data model.
 
 Use `code42 profile show` to check the status of this setting on your profile:
+
 ```bash
 % code42 profile update --use-v2-file-events True
 
