@@ -85,13 +85,21 @@ Password (TOTP) must be provided at every invocation of the CLI, either via the 
 The Code42 CLI currently does **not** support SSO login providers or any other identity providers such as Active
 Directory or Okta.
 
+## Proxy Support
+
+```{eval-rst}
+.. note:: Proxy support was added in code42cli version 1.16.0
+```
+
+The Code42 CLI will attempt to connect through a proxy if the `https_proxy`/`HTTPS_PROXY` environment variable is set.
+
 ### Windows and Mac
 
 For Windows and Mac systems, the CLI uses Keyring when storing passwords.
 
 ### Red Hat Enterprise Linux
 
-To use Keyring to store the credentials you enter in the Code42 CLI, enter the following commands before installing.
+To use Keyring to store the credentials you 2enter in the Code42 CLI, enter the following commands before installing.
 ```bash
 yum -y install python-pip python3 dbus-python gnome-keyring libsecret dbus-x11
 pip3 install code42cli

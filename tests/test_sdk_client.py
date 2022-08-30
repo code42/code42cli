@@ -116,6 +116,18 @@ def test_create_sdk_uses_given_credentials(
     )
 
 
+@pytest.mark.parametrize("proxy_env", ["HTTPS_PROXY", "https_proxy"])
+def test_create_sdk_uses_proxy_when_env_var_set(
+    mock_profile_with_password, monkeypatch, proxy_env
+):
+    monkeypatch.setenv(proxy_env, "http://test.domain")
+    with pytest.raises(LoggedCLIError) as err:
+        create_sdk(mock_profile_with_password, False)
+
+    assert "Unable to connect to proxy!" in str(err.value)
+    assert py42.settings.proxies["https"] == "http://test.domain"
+
+
 def test_create_sdk_connection_when_2FA_login_config_detected_prompts_for_totp(
     mocker, monkeypatch, mock_sdk_factory, capsys, mock_profile_with_password
 ):

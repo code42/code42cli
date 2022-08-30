@@ -1,3 +1,5 @@
+from os import environ
+
 import py42.sdk
 import py42.settings
 import py42.settings.debug as debug
@@ -19,6 +21,9 @@ logger = get_main_cli_logger()
 
 
 def create_sdk(profile, is_debug_mode, password=None, totp=None):
+    proxy = environ.get("HTTPS_PROXY") or environ.get("https_proxy")
+    if proxy:
+        py42.settings.proxies = {"https": proxy}
     if is_debug_mode:
         py42.settings.debug.level = debug.DEBUG
     if profile.ignore_ssl_errors == "True":
@@ -46,6 +51,10 @@ def _validate_connection(authority_url, username, password, totp=None):
         )
     except ConnectionError as err:
         logger.log_error(err)
+        if "ProxyError" in str(err):
+            raise LoggedCLIError(
+                f"Unable to connect to proxy! Proxy configuration set by environment variable: HTTPS_PROXY={environ.get('HTTPS_PROXY')}"
+            )
         raise LoggedCLIError(f"Problem connecting to {authority_url}.")
     except Py42UnauthorizedError as err:
         logger.log_error(err)
