@@ -21,7 +21,7 @@ logger = get_main_cli_logger()
 
 
 def create_sdk(profile, is_debug_mode, password=None, totp=None):
-    proxy = environ.get("HTTPS_PROXY")
+    proxy = environ.get("HTTPS_PROXY") or environ.get("https_proxy")
     if proxy:
         py42.settings.proxies = {"https": proxy}
     if is_debug_mode:
