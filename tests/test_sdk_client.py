@@ -123,7 +123,7 @@ def test_create_sdk_uses_proxy_when_env_var_set(
     monkeypatch.setenv(proxy_env, "http://test.domain")
     with pytest.raises(LoggedCLIError) as err:
         create_sdk(mock_profile_with_password, False)
-        
+
     assert "Unable to connect to proxy!" in str(err.value)
     assert py42.settings.proxies["https"] == "http://test.domain"
 
