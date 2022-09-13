@@ -160,13 +160,13 @@ def test_create_profile_when_api_client_uses_expected_profile_values(config_acce
     config_accessor.get_profile.side_effect = NoConfigProfileError()
     profile_name = "profilename"
     server = "server"
-    api_key = "key-42"
+    api_client_id = "key-42"
     ssl_errors_disabled = True
     cliprofile.create_profile(
-        profile_name, server, api_key, ssl_errors_disabled, False, True
+        profile_name, server, api_client_id, ssl_errors_disabled, False, True
     )
     config_accessor.create_profile.assert_called_once_with(
-        profile_name, server, api_key, ssl_errors_disabled, False, True
+        profile_name, server, api_client_id, ssl_errors_disabled, False, True
     )
 
 

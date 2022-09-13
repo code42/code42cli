@@ -169,7 +169,7 @@ CREATE_PROFILE_HELP = (
             "\tcode42 profile create-api-client "
             "--name <profile-name> "
             "--server <authority-URL>"
-            "--api-key <api-key> "
+            "--api-client-id <api-client-id> "
             "--secret <api-client-secret>\n",
             bold=True,
         )
