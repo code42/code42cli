@@ -131,6 +131,71 @@ def show_user(state, username, include_legal_hold_membership, format):
     formatter.echo_formatted_dataframes(df)
 
 
+@users.command(name="list-risk-profiles")
+@active_option
+@inactive_option
+@click.option(
+    "--manager-id",
+    help="Matches users whose manager has the given Code42 user ID.",
+)
+@click.option("--department", help="Matches users in the given department.")
+@click.option("--employment-type", help="Matches users with the given employment type.")
+@click.option("-r", "--region", help="Matches users the given region (state).")
+@format_option
+@sdk_options()
+def list_user_risk_profiles(
+    state,
+    active,
+    inactive,
+    manager_id,
+    department,
+    employment_type,
+    region,
+    format,
+):
+    """List users in your Code42 environment."""
+    if inactive:
+        active = False
+    columns = (
+        [
+            "userId",
+            "username",
+            "active",
+            "department",
+            "employmentType",
+            "region",
+            "endDate",
+        ]
+        if format == OutputFormat.TABLE
+        else None
+    )
+    users_generator = state.sdk.userriskprofile.get_all(
+        active=active,
+        manager_id=manager_id,
+        department=department,
+        employment_type=employment_type,
+        region=region,
+    )
+    users_list = []
+    for page in users_generator:
+        users_list.extend(page["userRiskProfiles"])
+
+    df = DataFrame.from_records(users_list, columns=columns)
+    formatter = DataFrameOutputFormatter(format)
+    formatter.echo_formatted_dataframes(df)
+
+
+@users.command("show-risk-profile")
+@username_arg
+@format_option
+@sdk_options()
+def show_user_risk_profile(state, username, format):
+    """Show user risk profile details."""
+    formatter = OutputFormatter(format)
+    response = state.sdk.userriskprofile.get_by_username(username)
+    formatter.echo_formatted_list([response.data])
+
+
 @users.command()
 @username_option("Username of the target user.")
 @role_name_option("Name of role to add.")
