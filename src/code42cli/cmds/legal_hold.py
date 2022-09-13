@@ -169,7 +169,6 @@ def show(state, matter_id, include_inactive=False, include_policy=False):
 @sdk_options()
 def search_events(state, matter_id, event_type, begin, end, format):
     """Tools for getting legal hold event data."""
-    # TODO - this method is unavailable with api clients
     if state.profile.api_client_auth == "True":
         echo(
             style(

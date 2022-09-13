@@ -19,6 +19,10 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
   - `code42 legal-hold list` - Change in response shape.
   - `code42 legal-hold show` - Change in response shape.
   - `code42 legal-hold search-events` - **Not available.**
+- New commands to view details for user risk profiles:
+  - `code42 users list-risk-profiles`
+  - `code42 users show-risk-profile`
+- Proxy support via `HTTPS_PROXY` environment variable.
 
 ## 1.15.0 - 2022-08-23
 

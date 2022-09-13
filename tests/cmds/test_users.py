@@ -63,6 +63,30 @@ TEST_USER_RESPONSE = {
     "country": "US",
     "riskFactors": ["FLIGHT_RISK", "HIGH_IMPACT_EMPLOYEE"],
 }
+TEST_PROFILE_RESPONSE = {
+    "userId": "12345-42",
+    "tenantId": "SampleTenant1",
+    "username": "foo@bar.com",
+    "displayName": "Foo Bar",
+    "notes": "",
+    "managerId": "123-42",
+    "managerUsername": "test@bar.com",
+    "managerDisplayName": "",
+    "title": "Engineer",
+    "division": "Engineering",
+    "department": "RDO",
+    "employmentType": "Remote",
+    "country": "USA",
+    "region": "Minnesota",
+    "locality": "Minneapolis",
+    "active": True,
+    "deleted": False,
+    "supportUser": False,
+    "startDate": {"year": 2020, "month": 8, "day": 10},
+    "endDate": {"year": 2021, "month": 5, "day": 1},
+    "cloudAliases": ["baz@bar.com", "foo@bar.com"],
+}
+
 TEST_MATTER_RESPONSE = {
     "legalHolds": [
         {"legalHoldUid": "123456789", "name": "Legal Hold #1", "active": True},
@@ -613,6 +637,61 @@ def test_show_include_legal_hold_membership_merges_in_and_concats_legal_hold_inf
 
     assert "Legal Hold #1,Legal Hold #2" in result.output
     assert "123456789,987654321" in result.output
+
+
+def test_list_risk_profiles_calls_get_all_user_risk_profiles_with_default_parameters(
+    runner, cli_state
+):
+    runner.invoke(
+        cli,
+        ["users", "list-risk-profiles"],
+        obj=cli_state,
+    )
+    cli_state.sdk.userriskprofile.get_all.assert_called_once_with(
+        active=None, manager_id=None, department=None, employment_type=None, region=None
+    )
+
+
+def test_list_risk_profiles_calls_get_all_user_risk_profiles_with_correct_parameters(
+    runner, cli_state
+):
+    r = runner.invoke(
+        cli,
+        [
+            "users",
+            "list-risk-profiles",
+            "--active",
+            "--manager-id",
+            "123-42",
+            "--department",
+            "Engineering",
+            "--employment-type",
+            "Remote",
+            "--region",
+            "Minnesota",
+        ],
+        obj=cli_state,
+    )
+    print(r.output)
+    cli_state.sdk.userriskprofile.get_all.assert_called_once_with(
+        active=True,
+        manager_id="123-42",
+        department="Engineering",
+        employment_type="Remote",
+        region="Minnesota",
+    )
+
+
+def test_show_risk_profile_calls_user_risk_profile_get_by_username_with(
+    runner, cli_state, get_users_response
+):
+    runner.invoke(
+        cli,
+        ["users", "show-risk-profile", "foo@bar.com"],
+        obj=cli_state,
+    )
+
+    cli_state.sdk.userriskprofile.get_by_username.assert_called_once_with("foo@bar.com")
 
 
 def test_add_user_role_adds(
