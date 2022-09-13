@@ -112,7 +112,7 @@ def show(profile_name):
     c42profile = cliprofile.get_profile(profile_name)
     echo(f"\n{c42profile.name}:")
     if c42profile.api_client_auth == "True":
-        echo(f"\t* api-client = {c42profile.username}")
+        echo(f"\t* api-client-id = {c42profile.username}")
     else:
         echo(f"\t* username = {c42profile.username}")
     echo(f"\t* authority url = {c42profile.authority_url}")

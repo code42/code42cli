@@ -145,6 +145,7 @@ class ConfigAccessor:
         self.parser[name][self.USERNAME_KEY] = self.DEFAULT_VALUE
         self.parser[name][self.IGNORE_SSL_ERRORS_KEY] = str(False)
         self.parser[name][self.USE_V2_FILE_EVENTS_KEY] = str(False)
+        self.parser[name][self.API_CLIENT_AUTH_KEY] = str(False)
 
     def _save(self):
         with open(self.path, "w+", encoding="utf-8") as file:

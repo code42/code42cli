@@ -34,8 +34,7 @@ class Code42Profile:
 
     @property
     def api_client_auth(self):
-        val = self._profile.get(ConfigAccessor.API_CLIENT_AUTH_KEY)
-        return val if val is not None else False
+        return self._profile.get(ConfigAccessor.API_CLIENT_AUTH_KEY)
 
     @property
     def has_stored_password(self):
