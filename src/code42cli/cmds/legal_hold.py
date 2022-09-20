@@ -90,7 +90,7 @@ def add_user(state, matter_id, username):
 @sdk_options()
 def remove_user(state, matter_id, username):
     """Release a custodian from a legal hold matter."""
-    _remove_user_from_legal_hold(state, matter_id, username)
+    _remove_user_from_legal_hold(state, state.sdk, matter_id, username)
 
 
 @legal_hold.command("list")
@@ -135,7 +135,7 @@ def show(state, matter_id, include_inactive=False, include_policy=False):
     # only those that are active.
     active = None if include_inactive else True
     memberships = _get_legal_hold_memberships_for_matter(
-        state, matter_id, active=active
+        state, state.sdk, matter_id, active=active
     )
     active_usernames = [
         member["user"]["username"] for member in memberships if member["active"]
@@ -228,8 +228,10 @@ def bulk_add(state, csv_rows):
 @read_csv_arg(headers=LEGAL_HOLD_CSV_HEADERS)
 @sdk_options()
 def remove(state, csv_rows):
+    sdk = state.sdk
+
     def handle_row(matter_id, username):
-        _remove_user_from_legal_hold(state, matter_id, username)
+        _remove_user_from_legal_hold(state, sdk, matter_id, username)
 
     run_bulk_process(
         handle_row, csv_rows, progress_label="Removing users from legal hold:"
@@ -242,12 +244,21 @@ def _add_user_to_legal_hold(sdk, matter_id, username):
     sdk.legalhold.add_to_matter(user_id, matter_id)
 
 
-def _remove_user_from_legal_hold(state, matter_id, username):
-    _check_matter_is_accessible(state.sdk, matter_id)
-    membership_id = _get_legal_hold_membership_id_for_user_and_matter(
-        state, username, matter_id
+def _remove_user_from_legal_hold(state, sdk, matter_id, username):
+    _check_matter_is_accessible(sdk, matter_id)
+
+    user_id = get_user_id(sdk, username)
+    memberships = _get_legal_hold_memberships_for_matter(
+        state, sdk, matter_id, active=True
     )
-    state.sdk.legalhold.remove_from_matter(membership_id)
+    membership_id = None
+    for member in memberships:
+        if member["user"]["userUid"] == user_id:
+            membership_id = member["legalHoldMembershipUid"]
+    if not membership_id:
+        raise UserNotInLegalHoldError(username, matter_id)
+
+    sdk.legalhold.remove_from_matter(membership_id)
 
 
 def _get_and_print_preservation_policy(sdk, policy_uid):
@@ -256,17 +267,8 @@ def _get_and_print_preservation_policy(sdk, policy_uid):
     echo(pformat(json.loads(preservation_policy.text)))
 
 
-def _get_legal_hold_membership_id_for_user_and_matter(state, username, matter_id):
-    user_id = get_user_id(state.sdk, username)
-    memberships = _get_legal_hold_memberships_for_matter(state, matter_id, active=True)
-    for member in memberships:
-        if member["user"]["userUid"] == user_id:
-            return member["legalHoldMembershipUid"]
-    raise UserNotInLegalHoldError(username, matter_id)
-
-
-def _get_legal_hold_memberships_for_matter(state, matter_id, active=True):
-    memberships_generator = state.sdk.legalhold.get_all_matter_custodians(
+def _get_legal_hold_memberships_for_matter(state, sdk, matter_id, active=True):
+    memberships_generator = sdk.legalhold.get_all_matter_custodians(
         matter_id, active=active
     )
     if state.profile.api_client_auth == "True":
