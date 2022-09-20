@@ -154,7 +154,7 @@ def set_password(new_password, profile_name=None):
 
 
 CREATE_PROFILE_HELP = (
-    "\nTo add a profile with OAuth token authentication, use:\n{}".format(
+    "\nTo add a profile with username/password authentication, use:\n{}".format(
         style(
             "\tcode42 profile create "
             "--name <profile-name> "

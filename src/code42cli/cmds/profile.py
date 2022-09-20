@@ -150,7 +150,7 @@ def create(
     totp,
 ):
     """
-    Create a profile with user token authentication.
+    Create a profile with username/password authentication.
     The first profile created will be the default.
     """
     cliprofile.create_profile(
@@ -239,17 +239,17 @@ def update(
             raise click.UsageError(
                 "Must provide at least one of `--server`, `--api-client-id`, `--secret`, `--use-v2-file-events` or "
                 "`--disable-ssl-errors` when updating an API client profile.  "
-                "Provide both `--username` and `--password` options to switch this profile to user token authentication."
+                "Provide both `--username` and `--password` options to switch this profile to username/password authentication."
             )
         if (username and not password) or (password and not username):
             raise click.UsageError(
                 "This profile currently uses API client authentication.  "
-                "Please provide both the `--username` and `--password` options to update this profile to use user token authentication."
+                "Please provide both the `--username` and `--password` options to update this profile to use username/password authentication."
             )
         elif username and password:
             if does_user_agree(
                 "You passed the `--username` and `--password options for a profile currently using Code42 API client authentication.  "
-                "Are you sure you would like to update this profile to use user token authentication? This will overwrite existing credentials. (y/n): "
+                "Are you sure you would like to update this profile to use username/password authentication? This will overwrite existing credentials. (y/n): "
             ):
                 cliprofile.update_profile(
                     c42profile.name,
@@ -284,17 +284,17 @@ def update(
         ):
             raise click.UsageError(
                 "Must provide at least one of `--server`, `--username`, `--password`, `--use-v2-file-events` or "
-                "`--disable-ssl-errors` when updating a user token authenticated profile.  "
+                "`--disable-ssl-errors` when updating a username/password authenticated profile.  "
                 "Provide both `--api-client-id` and `--secret` options to switch this profile to Code42 API client authentication."
             )
         if (api_client_id and not secret) or (api_client_id and not secret):
             raise click.UsageError(
-                "This profile currently uses user token authentication.  "
+                "This profile currently uses username/password authentication.  "
                 "Please provide both the `--api-client-id` and `--secret` options to update this profile to use Code42 API client authentication."
             )
         elif api_client_id and secret:
             if does_user_agree(
-                "You passed the `--api-client-id` and `--secret options for a profile currently using user token authentication.  "
+                "You passed the `--api-client-id` and `--secret options for a profile currently using username/password authentication.  "
                 "Are you sure you would like to update this profile to use Code42 API client authentication? This will overwrite existing credentials. (y/n): "
             ):
                 cliprofile.update_profile(
