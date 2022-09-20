@@ -229,12 +229,14 @@ def update(
     c42profile = cliprofile.get_profile(name)
 
     if c42profile.api_client_auth == "True":
-        if (
-            not server
-            and not api_client_id
-            and not secret
-            and disable_ssl_errors is None
-            and use_v2_file_events is None
+        if not any(
+            [
+                server,
+                api_client_id,
+                secret,
+                disable_ssl_errors is not None,
+                use_v2_file_events is not None,
+            ]
         ):
             raise click.UsageError(
                 "Must provide at least one of `--server`, `--api-client-id`, `--secret`, `--use-v2-file-events` or "
