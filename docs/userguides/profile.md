@@ -25,7 +25,7 @@ code42 profile create-api-client --name MY_API_CLIENT_PROFILE --server example.a
 ```
 
 ```{eval-rst}
-.. note:: Remember to escape special characters in your API client secret like `!` with a backslash. ex: `"my!secret"` should be passed in as `"my\!secret"`
+.. note:: Remember to wrap your API client secret with single quotes to avoid issues with bash expansion and special characters.
 ```
 
 ## View profiles
