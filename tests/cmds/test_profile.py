@@ -430,7 +430,7 @@ def test_update_profile_when_given_zero_args_prints_error_message(
     result = runner.invoke(cli, ["profile", "update"])
     expected = (
         "Must provide at least one of `--server`, `--username`, `--password`, "
-        "`--use-v2-file-events` or `--disable-ssl-errors` when updating a user token authenticated profile."
+        "`--use-v2-file-events` or `--disable-ssl-errors` when updating a username/password authenticated profile."
     )
     assert "Profile 'foo' has been updated" not in result.output
     assert expected in result.output
