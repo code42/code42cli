@@ -12,6 +12,13 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Added
 
+- Support for Code42 API clients.
+  - You can create a new profile with API client authentication using `code42 profile create-api-client`
+  - Or, update your existing profile to use API clients with `code42 update --api-client-id <id> --secret <secret>`
+- When using API client authentication, changes to the following `legal-hold` commands:
+  - `code42 legal-hold list` - Change in response shape.
+  - `code42 legal-hold show` - Change in response shape.
+  - `code42 legal-hold search-events` - **Not available.**
 - New commands to view details for user risk profiles:
   - `code42 users list-risk-profiles`
   - `code42 users show-risk-profile`

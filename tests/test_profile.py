@@ -64,7 +64,15 @@ class TestCode42Profile:
 
     def test_ignore_ssl_errors_returns_expected_value(self):
         mock_profile = create_mock_profile()
-        assert mock_profile.ignore_ssl_errors
+        assert mock_profile.ignore_ssl_errors == "True"
+
+    def test_use_v2_file_events_returns_expected_value(self):
+        mock_profile = create_mock_profile()
+        assert mock_profile.use_v2_file_events == "False"
+
+    def test_api_client_auth_returns_expected_value(self):
+        mock_profile = create_mock_profile()
+        assert mock_profile.api_client_auth == "False"
 
 
 def test_get_profile_returns_expected_profile(config_accessor):
@@ -132,17 +140,33 @@ def test_switch_default_profile_switches_to_expected_profile(config_accessor):
     config_accessor.switch_default_profile.assert_called_once_with("switchtome")
 
 
-def test_create_profile_uses_expected_profile_values(config_accessor):
+def test_create_profile_when_user_credentials_uses_expected_profile_values(
+    config_accessor,
+):
     config_accessor.get_profile.side_effect = NoConfigProfileError()
     profile_name = "profilename"
     server = "server"
     username = "username"
     ssl_errors_disabled = True
     cliprofile.create_profile(
-        profile_name, server, username, ssl_errors_disabled, False
+        profile_name, server, username, ssl_errors_disabled, False, False
     )
     config_accessor.create_profile.assert_called_once_with(
-        profile_name, server, username, ssl_errors_disabled, False
+        profile_name, server, username, ssl_errors_disabled, False, False
+    )
+
+
+def test_create_profile_when_api_client_uses_expected_profile_values(config_accessor):
+    config_accessor.get_profile.side_effect = NoConfigProfileError()
+    profile_name = "profilename"
+    server = "server"
+    api_client_id = "key-42"
+    ssl_errors_disabled = True
+    cliprofile.create_profile(
+        profile_name, server, api_client_id, ssl_errors_disabled, False, True
+    )
+    config_accessor.create_profile.assert_called_once_with(
+        profile_name, server, api_client_id, ssl_errors_disabled, False, True
     )
 
 
@@ -151,7 +175,7 @@ def test_create_profile_if_profile_exists_exits(
 ):
     config_accessor.get_profile.return_value = mocker.MagicMock()
     with pytest.raises(Code42CLIError):
-        cliprofile.create_profile("foo", "bar", "baz", True, False)
+        cliprofile.create_profile("foo", "bar", "baz", True, False, False)
 
 
 def test_get_all_profiles_returns_expected_profile_list(config_accessor):

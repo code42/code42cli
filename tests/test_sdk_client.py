@@ -28,6 +28,11 @@ def mock_sdk_factory(mocker):
 
 
 @pytest.fixture
+def mock_api_client_sdk_factory(mocker):
+    return mocker.patch("py42.sdk.from_api_client")
+
+
+@pytest.fixture
 def mock_profile_with_password():
     profile = create_mock_profile()
 
@@ -152,6 +157,20 @@ def test_create_sdk_connection_when_mfa_token_invalid_raises_expected_cli_error(
     with pytest.raises(Code42CLIError) as err:
         create_sdk(mock_profile_with_password, False, totp="1234")
     assert str(err.value) == "Invalid credentials or TOTP token for user foo."
+
+
+def test_create_sdk_connection_when_using_api_client_credentials_uses_api_client_function(
+    mock_api_client_sdk_factory, mock_profile_with_password
+):
+    create_sdk(
+        mock_profile_with_password,
+        False,
+        password="api-client-secret-42",
+        api_client=True,
+    )
+    mock_api_client_sdk_factory.assert_called_once_with(
+        "example.com", "foo", "api-client-secret-42"
+    )
 
 
 def test_totp_option_when_passed_is_passed_to_sdk_initialization(

@@ -3,7 +3,9 @@
 Use the [code42 profile](../commands/profile.md) set of commands to establish the Code42 environment you're working
 within and your user information.
 
-First, create your profile:
+## User token authentication
+
+Use the following command to create your profile with user token authentication:
 ```bash
 code42 profile create --name MY_FIRST_PROFILE --server example.authority.com --username security.admin@example.com
 ```
@@ -14,6 +16,19 @@ the program prompts you about storing a password. If you agree, you are then pro
 Your password is not shown when you do `code42 profile show`. However, `code42 profile show` will confirm that a
 password exists for your profile. If you do not set a password, you will be securely prompted to enter a password each
 time you run a command.
+
+## API client authentication
+
+Once you've generated an API Client in your Code42 console, use the following command to create your profile with API client authentication:
+```bash
+code42 profile create-api-client --name MY_API_CLIENT_PROFILE --server example.authority.com --api-client-id "key-42" --secret "code42%api%client%secret"
+```
+
+```{eval-rst}
+.. note:: Remember to wrap your API client secret with single quotes to avoid issues with bash expansion and special characters.
+```
+
+## View profiles
 
 You can add multiple profiles with different names and the change the default profile with the `use` command:
 

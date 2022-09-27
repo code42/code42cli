@@ -20,7 +20,7 @@ py42.settings.items_per_page = 500
 logger = get_main_cli_logger()
 
 
-def create_sdk(profile, is_debug_mode, password=None, totp=None):
+def create_sdk(profile, is_debug_mode, password=None, totp=None, api_client=False):
     proxy = environ.get("HTTPS_PROXY") or environ.get("https_proxy")
     if proxy:
         py42.settings.proxies = {"https": proxy}
@@ -38,11 +38,17 @@ def create_sdk(profile, is_debug_mode, password=None, totp=None):
         )
         py42.settings.verify_ssl_certs = False
     password = password or profile.get_password()
-    return _validate_connection(profile.authority_url, profile.username, password, totp)
+    return _validate_connection(
+        profile.authority_url, profile.username, password, totp, api_client
+    )
 
 
-def _validate_connection(authority_url, username, password, totp=None):
+def _validate_connection(
+    authority_url, username, password, totp=None, api_client=False
+):
     try:
+        if api_client:
+            return py42.sdk.from_api_client(authority_url, username, password)
         return py42.sdk.from_local_account(authority_url, username, password, totp=totp)
     except SSLError as err:
         logger.log_error(err)

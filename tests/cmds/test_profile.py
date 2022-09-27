@@ -102,7 +102,7 @@ def test_create_profile_if_user_sets_password_is_created(
         ],
     )
     mock_cliprofile_namespace.create_profile.assert_called_once_with(
-        "foo", "bar", "baz", True, None
+        "foo", "bar", "baz", True, None, api_client_auth=False
     )
 
 
@@ -128,7 +128,7 @@ def test_create_profile_if_user_does_not_set_password_is_created(
         ],
     )
     mock_cliprofile_namespace.create_profile.assert_called_once_with(
-        "foo", "bar", "baz", True, True
+        "foo", "bar", "baz", True, True, api_client_auth=False
     )
 
 
@@ -243,6 +243,34 @@ def test_create_profile_outputs_confirmation(
             "--disable-ssl-errors",
             "True",
         ],
+    )
+    assert "Successfully created profile 'foo'." in result.output
+
+
+def test_create_api_client_profile_with_api_client_id_and_secret_creates_profile(
+    runner, mock_cliprofile_namespace, valid_connection, profile
+):
+    mock_cliprofile_namespace.profile_exists.return_value = False
+    mock_cliprofile_namespace.get_profile.return_value = profile
+    result = runner.invoke(
+        cli,
+        [
+            "profile",
+            "create-api-client",
+            "-n",
+            "foo",
+            "-s",
+            "bar",
+            "--api-client-id",
+            "baz",
+            "--secret",
+            "fob",
+            "--disable-ssl-errors",
+            "True",
+        ],
+    )
+    mock_cliprofile_namespace.create_profile.assert_called_once_with(
+        "foo", "bar", "baz", True, None, api_client_auth=True
     )
     assert "Successfully created profile 'foo'." in result.output
 
@@ -401,11 +429,117 @@ def test_update_profile_when_given_zero_args_prints_error_message(
     mock_cliprofile_namespace.get_profile.return_value = profile
     result = runner.invoke(cli, ["profile", "update"])
     expected = (
-        "Must provide at least one of `--username`, `--server`, `--password`, "
-        "`--use-v2-file-events` or `--disable-ssl-errors` when updating a profile."
+        "Must provide at least one of `--server`, `--username`, `--password`, "
+        "`--use-v2-file-events` or `--disable-ssl-errors` when updating a username/password authenticated profile."
     )
     assert "Profile 'foo' has been updated" not in result.output
     assert expected in result.output
+
+
+def test_update_profile_when_api_client_authentication_and_is_given_zero_args_prints_error_message(
+    runner, mock_cliprofile_namespace, profile
+):
+    name = "foo"
+    profile.name = name
+    profile.api_client_auth = "True"
+    mock_cliprofile_namespace.get_profile.return_value = profile
+    result = runner.invoke(cli, ["profile", "update"])
+    expected = (
+        "Must provide at least one of `--server`, `--api-client-id`, `--secret`, `--use-v2-file-events` or "
+        "`--disable-ssl-errors` when updating an API client profile."
+    )
+    assert "Profile 'foo' has been updated" not in result.output
+    assert expected in result.output
+
+
+def test_update_profile_when_api_client_authentication_updates_existing_profile(
+    runner, mock_cliprofile_namespace, profile
+):
+    name = "foo"
+    profile.name = name
+    profile.api_client_auth = "True"
+    mock_cliprofile_namespace.get_profile.return_value = profile
+    result = runner.invoke(
+        cli,
+        [
+            "profile",
+            "update",
+            "-n",
+            name,
+            "-s",
+            "bar",
+            "--api-client-id",
+            "baz",
+            "--use-v2-file-events",
+            "True",
+        ],
+    )
+    mock_cliprofile_namespace.update_profile.assert_called_once_with(
+        name, "bar", "baz", None, True
+    )
+    assert "Profile 'foo' has been updated" in result.output
+
+
+def test_update_profile_when_updating_auth_profile_to_api_client_updates_existing_profile(
+    runner, valid_connection, mock_cliprofile_namespace, profile
+):
+    name = "foo"
+    profile.name = name
+    profile.api_client_auth = "False"
+    mock_cliprofile_namespace.get_profile.return_value = profile
+    result = runner.invoke(
+        cli,
+        [
+            "profile",
+            "update",
+            "-n",
+            name,
+            "-s",
+            "bar",
+            "--api-client-id",
+            "baz",
+            "--secret",
+            "fob",
+            "--use-v2-file-events",
+            "True",
+            "-y",
+        ],
+    )
+    mock_cliprofile_namespace.update_profile.assert_called_once_with(
+        name, "bar", "baz", None, True, api_client_auth=True
+    )
+    assert "Profile 'foo' has been updated" in result.output
+
+
+def test_update_profile_when_updating_api_client_profile_to_user_credentails_updates_existing_profile(
+    runner, mock_cliprofile_namespace, profile, valid_connection
+):
+    name = "foo"
+    profile.name = name
+    profile.api_client_auth = "True"
+    mock_cliprofile_namespace.get_profile.return_value = profile
+    result = runner.invoke(
+        cli,
+        [
+            "profile",
+            "update",
+            "-n",
+            name,
+            "-s",
+            "bar",
+            "-u",
+            "baz",
+            "--password",
+            "fob",
+            "--use-v2-file-events",
+            "True",
+            "-y",
+        ],
+    )
+    mock_cliprofile_namespace.update_profile.assert_called_once_with(
+        name, "bar", "baz", None, True, api_client_auth=False
+    )
+    assert "Profile 'foo' has been updated" in result.output
 
 
 def test_delete_profile_warns_if_deleting_default(runner, mock_cliprofile_namespace):

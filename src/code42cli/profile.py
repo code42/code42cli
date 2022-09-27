@@ -33,6 +33,10 @@ class Code42Profile:
         return self._profile.get(ConfigAccessor.USE_V2_FILE_EVENTS_KEY)
 
     @property
+    def api_client_auth(self):
+        return self._profile.get(ConfigAccessor.API_CLIENT_AUTH_KEY)
+
+    @property
     def has_stored_password(self):
         stored_password = password.get_stored_password(self)
         return stored_password is not None and stored_password != ""
@@ -103,11 +107,13 @@ def switch_default_profile(profile_name):
     config_accessor.switch_default_profile(profile.name)
 
 
-def create_profile(name, server, username, ignore_ssl_errors, use_v2_file_events):
+def create_profile(
+    name, server, username, ignore_ssl_errors, use_v2_file_events, api_client_auth
+):
     if profile_exists(name):
         raise Code42CLIError(f"A profile named '{name}' already exists.")
     config_accessor.create_profile(
-        name, server, username, ignore_ssl_errors, use_v2_file_events
+        name, server, username, ignore_ssl_errors, use_v2_file_events, api_client_auth
     )
 
 
@@ -122,9 +128,11 @@ def delete_profile(profile_name):
     config_accessor.delete_profile(profile_name)
 
 
-def update_profile(name, server, username, ignore_ssl_errors, use_v2_file_events):
+def update_profile(
+    name, server, username, ignore_ssl_errors, use_v2_file_events, api_client_auth=None
+):
     config_accessor.update_profile(
-        name, server, username, ignore_ssl_errors, use_v2_file_events
+        name, server, username, ignore_ssl_errors, use_v2_file_events, api_client_auth
     )
 
 
@@ -145,13 +153,25 @@ def set_password(new_password, profile_name=None):
     password.set_password(profile, new_password)
 
 
-CREATE_PROFILE_HELP = "\nTo add a profile, use:\n{}".format(
-    style(
-        "\tcode42 profile create "
-        "--name <profile-name> "
-        "--server <authority-URL> "
-        "--username <username>\n",
-        bold=True,
+CREATE_PROFILE_HELP = (
+    "\nTo add a profile with username/password authentication, use:\n{}".format(
+        style(
+            "\tcode42 profile create "
+            "--name <profile-name> "
+            "--server <authority-URL> "
+            "--username <username>\n",
+            bold=True,
+        )
+    )
+    + "\nOr to add a profile with API client authentication, use:\n{}".format(
+        style(
+            "\tcode42 profile create-api-client "
+            "--name <profile-name> "
+            "--server <authority-URL>"
+            "--api-client-id <api-client-id> "
+            "--secret <api-client-secret>\n",
+            bold=True,
+        )
     )
 )
 

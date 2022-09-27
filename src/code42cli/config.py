@@ -20,6 +20,7 @@ class ConfigAccessor:
     USERNAME_KEY = "c42_username"
     IGNORE_SSL_ERRORS_KEY = "ignore-ssl-errors"
     USE_V2_FILE_EVENTS_KEY = "use-v2-file-events"
+    API_CLIENT_AUTH_KEY = "api-client-auth"
     DEFAULT_PROFILE = "default_profile"
     _INTERNAL_SECTION = "Internal"
 
@@ -39,10 +40,10 @@ class ConfigAccessor:
         If the name does not exist or there is no existing profile, it will throw an exception.
         """
         name = name or self._default_profile_name
-        if name not in self._get_sections() or name == self.DEFAULT_VALUE:
+        if name not in self.parser.sections() or name == self.DEFAULT_VALUE:
             name = name if name != self.DEFAULT_VALUE else None
             raise NoConfigProfileError(name)
-        return self._get_profile(name)
+        return self.parser[name]
 
     def get_all_profiles(self):
         """Returns all the available profiles."""
@@ -53,7 +54,13 @@ class ConfigAccessor:
         return profiles
 
     def create_profile(
-        self, name, server, username, ignore_ssl_errors, use_v2_file_events
+        self,
+        name,
+        server,
+        username,
+        ignore_ssl_errors,
+        use_v2_file_events,
+        api_client_auth,
     ):
         """Creates a new profile if one does not already exist for that name."""
         try:
@@ -66,7 +73,12 @@ class ConfigAccessor:
 
         profile = self.get_profile(name)
         self.update_profile(
-            profile.name, server, username, ignore_ssl_errors, use_v2_file_events
+            profile.name,
+            server,
+            username,
+            ignore_ssl_errors,
+            use_v2_file_events,
+            api_client_auth,
         )
         self._try_complete_setup(profile)
 
@@ -77,16 +89,19 @@ class ConfigAccessor:
         username=None,
         ignore_ssl_errors=None,
         use_v2_file_events=None,
+        api_client_auth=None,
     ):
         profile = self.get_profile(name)
         if server:
-            self._set_authority_url(server, profile)
+            profile[self.AUTHORITY_KEY] = server.strip()
         if username:
-            self._set_username(username, profile)
+            profile[self.USERNAME_KEY] = username.strip()
         if ignore_ssl_errors is not None:
-            self._set_ignore_ssl_errors(ignore_ssl_errors, profile)
+            profile[self.IGNORE_SSL_ERRORS_KEY] = str(ignore_ssl_errors)
         if use_v2_file_events is not None:
-            self._set_use_v2_file_events(use_v2_file_events, profile)
+            profile[self.USE_V2_FILE_EVENTS_KEY] = str(use_v2_file_events)
+        if api_client_auth is not None:
+            profile[self.API_CLIENT_AUTH_KEY] = str(api_client_auth)
         self._save()
 
     def switch_default_profile(self, new_default_name):
@@ -105,24 +120,6 @@ class ConfigAccessor:
             self._internal[self.DEFAULT_PROFILE] = self.DEFAULT_VALUE
         self._save()
 
-    def _set_authority_url(self, new_value, profile):
-        profile[self.AUTHORITY_KEY] = new_value.strip()
-
-    def _set_username(self, new_value, profile):
-        profile[self.USERNAME_KEY] = new_value.strip()
-
-    def _set_ignore_ssl_errors(self, new_value, profile):
-        profile[self.IGNORE_SSL_ERRORS_KEY] = str(new_value)
-
-    def _set_use_v2_file_events(self, new_value, profile):
-        profile[self.USE_V2_FILE_EVENTS_KEY] = str(new_value)
-
-    def _get_sections(self):
-        return self.parser.sections()
-
-    def _get_profile(self, name):
-        return self.parser[name]
-
     @property
     def _internal(self):
         return self.parser[self._INTERNAL_SECTION]
@@ -132,7 +129,7 @@ class ConfigAccessor:
         return self._internal[self.DEFAULT_PROFILE]
 
     def _get_profile_names(self):
-        names = list(self._get_sections())
+        names = list(self.parser.sections())
         names.remove(self._INTERNAL_SECTION)
         return names
 
@@ -148,6 +145,7 @@ class ConfigAccessor:
         self.parser[name][self.USERNAME_KEY] = self.DEFAULT_VALUE
         self.parser[name][self.IGNORE_SSL_ERRORS_KEY] = str(False)
         self.parser[name][self.USE_V2_FILE_EVENTS_KEY] = str(False)
+        self.parser[name][self.API_CLIENT_AUTH_KEY] = str(False)
 
     def _save(self):
         with open(self.path, "w+", encoding="utf-8") as file:

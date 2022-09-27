@@ -87,13 +87,18 @@ def alert_namespace():
 
 
 def create_profile_values_dict(
-    authority=None, username=None, ignore_ssl=False, use_v2_file_events=False
+    authority=None,
+    username=None,
+    ignore_ssl=False,
+    use_v2_file_events=False,
+    api_client_auth="False",
 ):
     return {
         ConfigAccessor.AUTHORITY_KEY: "example.com",
         ConfigAccessor.USERNAME_KEY: "foo",
-        ConfigAccessor.IGNORE_SSL_ERRORS_KEY: True,
-        ConfigAccessor.USE_V2_FILE_EVENTS_KEY: False,
+        ConfigAccessor.IGNORE_SSL_ERRORS_KEY: "True",
+        ConfigAccessor.USE_V2_FILE_EVENTS_KEY: "False",
+        ConfigAccessor.API_CLIENT_AUTH_KEY: "False",
     }
 
 
