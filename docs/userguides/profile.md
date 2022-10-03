@@ -21,7 +21,7 @@ time you run a command.
 
 Once you've generated an API Client in your Code42 console, use the following command to create your profile with API client authentication:
 ```bash
-code42 profile create-api-client --name MY_API_CLIENT_PROFILE --server example.authority.com --api-client-id "key-42" --secret "code42%api%client%secret"
+code42 profile create-api-client --name MY_API_CLIENT_PROFILE --server example.authority.com --api-client-id 'key-42' --secret 'code42%api%client%secret'
 ```
 
 ```{eval-rst}
