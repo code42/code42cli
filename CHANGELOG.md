@@ -8,21 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
-## Unreleased
+## 1.16.0 - 2022-10-06
 
 ### Added
 
 - Support for Code42 API clients.
   - You can create a new profile with API client authentication using `code42 profile create-api-client`
   - Or, update your existing profile to use API clients with `code42 update --api-client-id <id> --secret <secret>`
-- When using API client authentication, changes to the following `legal-hold` commands:
-  - `code42 legal-hold list` - Change in response shape.
-  - `code42 legal-hold show` - Change in response shape.
-  - `code42 legal-hold search-events` - **Not available.**
 - New commands to view details for user risk profiles:
   - `code42 users list-risk-profiles`
   - `code42 users show-risk-profile`
 - Proxy support via `HTTPS_PROXY` environment variable.
+
+### Changed
+
+- **When using API client authentication**, changes to the following `legal-hold` commands:
+    - `code42 legal-hold list` - Change in response shape.
+    - `code42 legal-hold show` - Change in response shape.
+    - `code42 legal-hold search-events` - **Not available.**
 
 ## 1.15.0 - 2022-08-23
 
