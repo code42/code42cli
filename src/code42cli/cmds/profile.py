@@ -228,21 +228,31 @@ def update(
     """Update an existing profile."""
     c42profile = cliprofile.get_profile(name)
 
-    if c42profile.api_client_auth == "True":
-        if not any(
-            [
-                server,
-                api_client_id,
-                secret,
-                disable_ssl_errors is not None,
-                use_v2_file_events is not None,
-            ]
-        ):
+    if not any(
+        [
+            server,
+            api_client_id,
+            secret,
+            username,
+            password,
+            disable_ssl_errors is not None,
+            use_v2_file_events is not None,
+        ]
+    ):
+        if c42profile.api_client_auth == "True":
             raise click.UsageError(
                 "Must provide at least one of `--server`, `--api-client-id`, `--secret`, `--use-v2-file-events` or "
                 "`--disable-ssl-errors` when updating an API client profile.  "
                 "Provide both `--username` and `--password` options to switch this profile to username/password authentication."
             )
+        else:
+            raise click.UsageError(
+                "Must provide at least one of `--server`, `--username`, `--password`, `--use-v2-file-events` or "
+                "`--disable-ssl-errors` when updating a username/password authenticated profile.  "
+                "Provide both `--api-client-id` and `--secret` options to switch this profile to Code42 API client authentication."
+            )
+
+    if c42profile.api_client_auth == "True":
         if (username and not password) or (password and not username):
             raise click.UsageError(
                 "This profile currently uses API client authentication.  "
@@ -277,18 +287,6 @@ def update(
                 _set_pw(c42profile.name, secret, debug, api_client=True)
 
     else:
-        if (
-            not server
-            and not username
-            and not password
-            and disable_ssl_errors is None
-            and use_v2_file_events is None
-        ):
-            raise click.UsageError(
-                "Must provide at least one of `--server`, `--username`, `--password`, `--use-v2-file-events` or "
-                "`--disable-ssl-errors` when updating a username/password authenticated profile.  "
-                "Provide both `--api-client-id` and `--secret` options to switch this profile to Code42 API client authentication."
-            )
         if (api_client_id and not secret) or (api_client_id and not secret):
             raise click.UsageError(
                 "This profile currently uses username/password authentication.  "
