@@ -326,7 +326,10 @@ def test_search_and_send_to_when_advanced_query_passed_non_existent_filename_rai
             cli, [*command, "--advanced-query", "@not_a_file"], obj=cli_state
         )
         assert result.exit_code == 2
-        assert "Could not open file: not_a_file" in result.stdout
+        assert (
+            " Invalid value for '--advanced-query': 'not_a_file': No such file or directory"
+            in result.stdout
+        ) or ("Could not open file: not_a_file" in result.stdout)
 
 
 @search_and_send_to_test
@@ -724,7 +727,9 @@ def test_search_and_send_to_when_given_invalid_exposure_type_causes_exit(
         obj=cli_state,
     )
     assert result.exit_code == 2
-    assert "invalid choice: NotValid" in result.output
+    assert (
+        "Invalid value" in result.output or "invalid choice: NotValid" in result.output
+    )
 
 
 @search_and_send_to_test

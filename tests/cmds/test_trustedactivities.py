@@ -38,7 +38,7 @@ TRUSTED_ACTIVITY_DETAILS = """
 """
 
 MISSING_ARGUMENT_ERROR = "Missing argument '{}'."
-MISSING_TYPE = MISSING_ARGUMENT_ERROR.format("[DOMAIN|SLACK]")
+MISSING_TYPE = MISSING_ARGUMENT_ERROR.format("{DOMAIN|SLACK}")
 MISSING_VALUE = MISSING_ARGUMENT_ERROR.format("VALUE")
 MISSING_RESOURCE_ID_ARG = MISSING_ARGUMENT_ERROR.format("RESOURCE_ID")
 RESOURCE_ID_NOT_FOUND_ERROR = "Resource ID '{}' not found."
@@ -114,7 +114,10 @@ def test_create_when_missing_type_prints_error(runner, cli_state):
     command = ["trusted-activities", "create", "--description", "description"]
     result = runner.invoke(cli, command, obj=cli_state)
     assert result.exit_code == 2
-    assert MISSING_TYPE in result.output
+    assert (
+        MISSING_TYPE in result.output
+        or MISSING_ARGUMENT_ERROR.format("[DOMAIN|SLACK]") in result.output
+    )
 
 
 def test_create_when_missing_value_prints_error(runner, cli_state):

@@ -353,6 +353,7 @@ def test_remove_bulk_users_uses_expected_arguments_when_flat_file(
 def test_add_departing_employee_when_invalid_date_validation_raises_error(
     runner, cli_state_with_user
 ):
+    # day is out of range for month
     departure_date = "2020-02-30"
     result = runner.invoke(
         cli,
@@ -367,6 +368,9 @@ def test_add_departing_employee_when_invalid_date_validation_raises_error(
     )
     assert result.exit_code == 2
     assert (
+        "Invalid value for '--departure-date': '2020-02-30' does not match the format '%Y-%m-%d'"
+        in result.output  # invalid datetime format
+    ) or (
         "Invalid value for '--departure-date': invalid datetime format" in result.output
     )
 
@@ -388,6 +392,9 @@ def test_add_departing_employee_when_invalid_date_format_validation_raises_error
     )
     assert result.exit_code == 2
     assert (
+        "Invalid value for '--departure-date': '2020-30-01' does not match the format '%Y-%m-%d'"
+        in result.output
+    ) or (
         "Invalid value for '--departure-date': invalid datetime format" in result.output
     )
 
