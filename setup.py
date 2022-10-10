@@ -32,7 +32,7 @@ setup(
     python_requires=">=3.6.2, <4",
     install_requires=[
         "chardet",
-        "click>=7.1.1",
+        "click==7.1.1",
         "click_plugins>=1.1.1",
         "colorama>=0.4.3",
         "keyring==18.0.1",
