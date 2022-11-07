@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## 1.16.2 - 2022-11-07
+
+### Fixed
+
+- Updated setup requirements to allow for install with any `click` version `>=7.1.1`
+
 ## 1.16.1 - 2022-10-10
 
 ### Added
