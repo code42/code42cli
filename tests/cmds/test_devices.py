@@ -280,41 +280,41 @@ MATTER_RESPONSE = {
     ]
 }
 API_CLIENT_MATTER_RESPONSE = [
-        {
-            "legalHoldUid": "123456789",
-            "name": "Test legal hold matter",
-            "description": "",
-            "notes": None,
-            "holdExtRef": None,
-            "active": True,
-            "creationDate": "2020-08-05T10:49:58.353-05:00",
-            "lastModified": "2020-08-05T10:49:58.358-05:00",
-            "creator": {
-                "userUid": "12345",
-                "username": "user@code42.com",
-                "email": "user@code42.com",
-                "userExtRef": None,
-            },
-            "holdPolicyUid": "966191295667423997",
+    {
+        "legalHoldUid": "123456789",
+        "name": "Test legal hold matter",
+        "description": "",
+        "notes": None,
+        "holdExtRef": None,
+        "active": True,
+        "creationDate": "2020-08-05T10:49:58.353-05:00",
+        "lastModified": "2020-08-05T10:49:58.358-05:00",
+        "creator": {
+            "userUid": "12345",
+            "username": "user@code42.com",
+            "email": "user@code42.com",
+            "userExtRef": None,
         },
-        {
-            "legalHoldUid": "987654321",
-            "name": "Another Matter",
-            "description": "",
-            "notes": None,
-            "holdExtRef": None,
-            "active": True,
-            "creationDate": "2020-05-20T15:58:31.375-05:00",
-            "lastModified": "2020-05-28T13:49:16.098-05:00",
-            "creator": {
-                "userUid": "76543",
-                "username": "user2@code42.com",
-                "email": "user2@code42.com",
-                "userExtRef": None,
-            },
-            "holdPolicyUid": "946178665645035826",
+        "holdPolicyUid": "966191295667423997",
+    },
+    {
+        "legalHoldUid": "987654321",
+        "name": "Another Matter",
+        "description": "",
+        "notes": None,
+        "holdExtRef": None,
+        "active": True,
+        "creationDate": "2020-05-20T15:58:31.375-05:00",
+        "lastModified": "2020-05-28T13:49:16.098-05:00",
+        "creator": {
+            "userUid": "76543",
+            "username": "user2@code42.com",
+            "email": "user2@code42.com",
+            "userExtRef": None,
         },
-    ]
+        "holdPolicyUid": "946178665645035826",
+    },
+]
 ALL_CUSTODIANS_RESPONSE = {
     "legalHoldMemberships": [
         {
@@ -347,34 +347,34 @@ ALL_CUSTODIANS_RESPONSE = {
     ]
 }
 API_CLIENT_ALL_CUSTODIANS_RESPONSE = [
-        {
-            "legalHoldMembershipUid": "99999",
-            "active": True,
-            "creationDate": "2020-07-16T08:50:23.405Z",
-            "legalHold": {
-                "legalHoldUid": "123456789",
-                "name": "Test legal hold matter",
-            },
-            "user": {
-                "userUid": "840103986007089121",
-                "username": "ttranda_deactivated@ttrantest.com",
-                "email": "ttranda_deactivated@ttrantest.com",
-                "userExtRef": None,
-            },
+    {
+        "legalHoldMembershipUid": "99999",
+        "active": True,
+        "creationDate": "2020-07-16T08:50:23.405Z",
+        "legalHold": {
+            "legalHoldUid": "123456789",
+            "name": "Test legal hold matter",
         },
-        {
-            "legalHoldMembershipUid": "88888",
-            "active": True,
-            "creationDate": "2020-07-16T08:50:23.405Z",
-            "legalHold": {"legalHoldUid": "987654321", "name": "Another Matter"},
-            "user": {
-                "userUid": "840103986007089121",
-                "username": "ttranda_deactivated@ttrantest.com",
-                "email": "ttranda_deactivated@ttrantest.com",
-                "userExtRef": None,
-            },
+        "user": {
+            "userUid": "840103986007089121",
+            "username": "ttranda_deactivated@ttrantest.com",
+            "email": "ttranda_deactivated@ttrantest.com",
+            "userExtRef": None,
         },
-    ]
+    },
+    {
+        "legalHoldMembershipUid": "88888",
+        "active": True,
+        "creationDate": "2020-07-16T08:50:23.405Z",
+        "legalHold": {"legalHoldUid": "987654321", "name": "Another Matter"},
+        "user": {
+            "userUid": "840103986007089121",
+            "username": "ttranda_deactivated@ttrantest.com",
+            "email": "ttranda_deactivated@ttrantest.com",
+            "userExtRef": None,
+        },
+    },
+]
 
 
 @pytest.fixture
@@ -520,16 +520,21 @@ def get_all_users_success(cli_state):
 def get_all_matter_success(mocker, cli_state):
     cli_state.sdk.legalhold.get_all_matters.return_value = matter_list_generator(mocker)
 
+
 @pytest.fixture
 def get_api_client_all_matter_success(mocker, cli_state):
-    cli_state.sdk.legalhold.get_all_matters.return_value = matter_list_generator(mocker, api_client=True)
+    cli_state.sdk.legalhold.get_all_matters.return_value = matter_list_generator(
+        mocker, api_client=True
+    )
+
 
 @pytest.fixture
 def get_all_custodian_success(mocker, cli_state):
     cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
         custodian_list_generator(mocker)
     )
-    
+
+
 @pytest.fixture
 def get_api_client_all_custodian_success(mocker, cli_state):
     cli_state.sdk.legalhold.get_all_matter_custodians.return_value = (
