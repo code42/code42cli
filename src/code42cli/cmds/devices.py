@@ -432,11 +432,21 @@ def _add_legal_hold_membership_to_device_dataframe(sdk, df):
 
 def _get_all_active_hold_memberships(sdk):
     for page in sdk.legalhold.get_all_matters(active=True):
-        for matter in page["legalHolds"]:
-            for _page in sdk.legalhold.get_all_matter_custodians(
-                legal_hold_uid=matter["legalHoldUid"], active=True
-            ):
-                yield from _page["legalHoldMemberships"]
+        if sdk._auth_flag == 1: # noqa: api client endpoint returns a list directly
+            matters = page.data
+        else:
+            matters = page["legalHolds"]
+        for matter in matters:
+            if sdk._auth_flag == 1: # noqa: api client endpoint returns a list directly
+                for _page in sdk.legalhold.get_all_matter_custodians(
+                    legal_hold_matter_uid=matter["legalHoldUid"], active=True
+                ):
+                    yield from _page.data
+            else:
+                for _page in sdk.legalhold.get_all_matter_custodians(
+                    legal_hold_uid=matter["legalHoldUid"], active=True
+                ):
+                    yield from _page["legalHoldMemberships"]
 
 
 def _get_device_dataframe(
