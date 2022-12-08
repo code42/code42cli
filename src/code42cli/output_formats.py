@@ -138,7 +138,7 @@ class DataFrameOutputFormatter:
             yield f"{json_string}\n"
 
     def _checkpoint_and_iter_formatted_events(self, df, formatted_rows):
-        for event, row in zip(df.to_dict("records"), formatted_rows):
+        for event, row in zip(df.to_dict("records"), formatted_rows):  # noqa: B905
             yield row
             self.checkpoint_func(event)
 
@@ -188,7 +188,7 @@ class DataFrameOutputFormatter:
                 filtered = self._select_columns(df, columns)
             else:
                 filtered = df
-            for full_event, filtered_event in zip(
+            for full_event, filtered_event in zip(  # noqa: B905
                 df.to_dict("records"), filtered.to_dict("records")
             ):
                 yield filtered_event
