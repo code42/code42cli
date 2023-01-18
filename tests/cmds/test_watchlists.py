@@ -589,8 +589,8 @@ class TestWatchlistBulkAddCmd:
     def test_handle_row_when_passed_no_id_headers_uses_username_and_watchlist_type(
         self, mocker, runner, cli_state
     ):
-        cli_state.sdk.users.get_by_username.return_value = (
-            create_mock_response(mocker, data={"users": [{"userUid": 1234}]})
+        cli_state.sdk.users.get_by_username.return_value = create_mock_response(
+            mocker, data={"users": [{"userUid": 1234}]}
         )
 
         with runner.isolated_filesystem():
@@ -651,8 +651,8 @@ class TestWatchlistBulkRemoveCmd:
     def test_handle_row_when_passed_no_id_headers_uses_username_and_watchlist_type(
         self, mocker, runner, cli_state
     ):
-        cli_state.sdk.users.get_by_username.return_value = (
-            create_mock_response(mocker, data={"users": [{"userUid": 1234}]})
+        cli_state.sdk.users.get_by_username.return_value = create_mock_response(
+            mocker, data={"users": [{"userUid": 1234}]}
         )
 
         with runner.isolated_filesystem():
