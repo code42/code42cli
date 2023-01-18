@@ -93,7 +93,11 @@ def add(state, watchlist_id, watchlist_type, user):
         user = int(user)
     except ValueError:
         # assume username if `user` is not an int
-        user = state.sdk.userriskprofile.get_by_username(user)["userId"]
+        response = state.sdk.users.get_by_username(user)
+        print(response)
+        if not response.data["users"]:
+            raise Code42CLIError(f"User '{user}' not found.")
+        user = response.data["users"][0]["userUid"]
     try:
         if watchlist_id:
             state.sdk.watchlists.add_included_users_by_watchlist_id(user, watchlist_id)
@@ -125,7 +129,10 @@ def remove(state, watchlist_id, watchlist_type, user):
         user = int(user)
     except ValueError:
         # assume username if `user` is not an int
-        user = state.sdk.userriskprofile.get_by_username(user)["userId"]
+        response = state.sdk.users.get_by_username(user)
+        if not response.data["users"]:
+            raise Code42CLIError(f"User '{user}' not found.")
+        user = response.data["users"][0]["userUid"]
     try:
         if watchlist_id:
             state.sdk.watchlists.remove_included_users_by_watchlist_id(

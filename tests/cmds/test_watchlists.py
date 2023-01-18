@@ -1,6 +1,5 @@
 import pytest
 from py42.exceptions import Py42NotFoundError
-from py42.exceptions import Py42UserRiskProfileNotFound
 from py42.exceptions import Py42WatchlistNotFound
 
 from .conftest import create_mock_response
@@ -358,8 +357,10 @@ class TestWatchlistsAddCmd:
     def test_non_int_user_arg_calls_get_by_username_and_uses_user_id(
         self, mocker, runner, cli_state
     ):
-        mock_user_response = create_mock_response(mocker, data={"userId": 1234})
-        cli_state.sdk.userriskprofile.get_by_username.return_value = mock_user_response
+        mock_user_response = create_mock_response(
+            mocker, data={"users": [{"userUid": 1234}]}
+        )
+        cli_state.sdk.users.get_by_username.return_value = mock_user_response
         runner.invoke(
             cli,
             [
@@ -371,19 +372,17 @@ class TestWatchlistsAddCmd:
             ],
             obj=cli_state,
         )
-        cli_state.sdk.userriskprofile.get_by_username.assert_called_once_with(
-            "test@example.com"
-        )
+        cli_state.sdk.users.get_by_username.assert_called_once_with("test@example.com")
         cli_state.sdk.watchlists.add_included_users_by_watchlist_type.assert_called_once_with(
             1234, "DEPARTING_EMPLOYEE"
         )
 
     def test_invalid_username_raises_not_found_cli_error(
-        self, custom_error, runner, cli_state
+        self, mocker, custom_error, runner, cli_state
     ):
         username = "test@example.com"
-        cli_state.sdk.userriskprofile.get_by_username.side_effect = (
-            Py42UserRiskProfileNotFound(custom_error, username, identifier="username")
+        cli_state.sdk.users.get_by_username.return_value = create_mock_response(
+            mocker, data={"users": []}
         )
         res = runner.invoke(
             cli,
@@ -391,10 +390,7 @@ class TestWatchlistsAddCmd:
             obj=cli_state,
         )
         assert res.exit_code == 1
-        assert (
-            "Error: User risk profile for user with the username 'test@example.com' not found."
-            in res.output
-        )
+        assert "Error: User 'test@example.com' not found." in res.output
 
     def test_invalid_user_id_raises_not_found_cli_error(
         self, custom_error, runner, cli_state
@@ -457,8 +453,10 @@ class TestWatchlistsRemoveCmd:
     def test_non_int_user_arg_calls_get_by_username_and_uses_user_id(
         self, mocker, runner, cli_state
     ):
-        mock_user_response = create_mock_response(mocker, data={"userId": 1234})
-        cli_state.sdk.userriskprofile.get_by_username.return_value = mock_user_response
+        mock_user_response = create_mock_response(
+            mocker, data={"users": [{"userUid": 1234}]}
+        )
+        cli_state.sdk.users.get_by_username.return_value = mock_user_response
         runner.invoke(
             cli,
             [
@@ -470,19 +468,17 @@ class TestWatchlistsRemoveCmd:
             ],
             obj=cli_state,
         )
-        cli_state.sdk.userriskprofile.get_by_username.assert_called_once_with(
-            "test@example.com"
-        )
+        cli_state.sdk.users.get_by_username.assert_called_once_with("test@example.com")
         cli_state.sdk.watchlists.remove_included_users_by_watchlist_type.assert_called_once_with(
             1234, "DEPARTING_EMPLOYEE"
         )
 
     def test_invalid_username_raises_not_found_cli_error(
-        self, custom_error, runner, cli_state
+        self, mocker, custom_error, runner, cli_state
     ):
         username = "test@example.com"
-        cli_state.sdk.userriskprofile.get_by_username.side_effect = (
-            Py42UserRiskProfileNotFound(custom_error, username, identifier="username")
+        cli_state.sdk.users.get_by_username.return_value = create_mock_response(
+            mocker, data={"users": []}
         )
         res = runner.invoke(
             cli,
@@ -496,10 +492,7 @@ class TestWatchlistsRemoveCmd:
             obj=cli_state,
         )
         assert res.exit_code == 1
-        assert (
-            "Error: User risk profile for user with the username 'test@example.com' not found."
-            in res.output
-        )
+        assert "Error: User 'test@example.com' not found." in res.output
 
     def test_invalid_user_id_raises_not_found_cli_error(
         self, custom_error, runner, cli_state
