@@ -190,7 +190,10 @@ def bulk_add(state, csv_rows):
         watchlist_id=None, watchlist_type=None, user_id=None, username=None, **kwargs
     ):
         if username and not user_id:
-            user_id = sdk.userriskprofile.get_by_username(username)["userId"]
+            response = sdk.users.get_by_username(username)
+            if not response.data["users"]:
+                raise Code42CLIError(f"User {username} not found.")
+            user_id = response.data["users"][0]["userUid"]
         if watchlist_id:
             sdk.watchlists.add_included_users_by_watchlist_id(user_id, watchlist_id)
         elif watchlist_type:
@@ -246,7 +249,10 @@ def bulk_remove(state, csv_rows):
         watchlist_id=None, watchlist_type=None, user_id=None, username=None, **kwargs
     ):
         if username and not user_id:
-            user_id = sdk.userriskprofile.get_by_username(username)["userId"]
+            response = sdk.users.get_by_username(username)
+            if not response.data["users"]:
+                raise Code42CLIError(f"User {username} not found.")
+            user_id = response.data["users"][0]["userUid"]
         if watchlist_id:
             sdk.watchlists.remove_included_users_by_watchlist_id(user_id, watchlist_id)
         elif watchlist_type:
