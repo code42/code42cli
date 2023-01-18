@@ -297,7 +297,7 @@ def mock_dataframe_to_string(mocker):
 
 
 def create_mock_response(mocker, data=None, status=200):
-    if isinstance(data, dict):
+    if isinstance(data, (dict, list)):
         data = json.dumps(data)
     elif not data:
         data = ""
