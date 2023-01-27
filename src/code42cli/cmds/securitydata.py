@@ -460,7 +460,7 @@ def search(
                 ]
 
     flatten = format in (OutputFormat.TABLE, OutputFormat.CSV)
-    
+
     if use_checkpoint:
         cursor = _get_file_event_cursor_store(state.profile.name)
         checkpoint = _handle_timestamp_checkpoint(cursor.get(use_checkpoint), state)
