@@ -12,7 +12,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ### Fixed
 
-- Bug in `security-data search|send-to` where using `--format json` and a checkpoint raised an error when configured for V2 file events. 
+- Bug in `security-data search|send-to` where using `--format json` and a checkpoint raised an error when configured for V2 file events.
 
 ## 1.16.3 - 2022-12-08
 
