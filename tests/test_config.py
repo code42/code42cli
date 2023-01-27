@@ -151,7 +151,7 @@ class TestConfigAccessor:
         self, config_parser_for_create
     ):
         accessor = ConfigAccessor(config_parser_for_create)
-        with pytest.raises(Exception):
+        with pytest.raises(NoConfigProfileError):
             accessor.create_profile(
                 ConfigAccessor.DEFAULT_VALUE, "foo", "bar", False, False, False
             )
@@ -201,7 +201,7 @@ class TestConfigAccessor:
         self, config_parser_for_multiple_profiles
     ):
         accessor = ConfigAccessor(config_parser_for_multiple_profiles)
-        with pytest.raises(Exception):
+        with pytest.raises(NoConfigProfileError):
             accessor.update_profile("Non-existent Profile")
 
     def test_update_profile_updates_profile(self, config_parser_for_multiple_profiles):
