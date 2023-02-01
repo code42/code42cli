@@ -513,6 +513,8 @@ def send_to(
     if state.profile.use_v2_file_events != "True":
         deprecation_warning(DEPRECATION_TEXT)
 
+    flatten = format in (OutputFormat.TABLE, OutputFormat.CSV)
+
     if use_checkpoint:
         cursor = _get_file_event_cursor_store(state.profile.name)
         checkpoint = _handle_timestamp_checkpoint(cursor.get(use_checkpoint), state)
@@ -520,7 +522,8 @@ def send_to(
         if state.profile.use_v2_file_events == "True":
 
             def checkpoint_func(event):
-                cursor.replace(use_checkpoint, event["event.id"])
+                event_id = event["event.id"] if flatten else event["event"]["id"]
+                cursor.replace(use_checkpoint, event_id)
 
         else:
 
