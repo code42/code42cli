@@ -13,11 +13,6 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 ### Fixed
 
 - Bug in `security-data search|send-to` where using `--format json` and a checkpoint raised an error when configured for V2 file events.
-
-## 1.16.3 - 2022-12-08
-
-### Fixed
-
 - Bug in `devices list` command when using `--include-legal-hold-membership` option with an API client auth profile.
 
 ## 1.16.2 - 2022-11-07
