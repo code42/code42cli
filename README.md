@@ -11,8 +11,7 @@ Use the `code42` command to interact with your Code42 environment.
 * `code42 security-data` is a CLI tool for extracting AED events.
     Additionally, you can choose to only get events that Code42 previously did not observe since you last recorded a
     checkpoint (provided you do not change your query).
-* `code42 high-risk-employee` is a collection of tools for managing the high risk employee detection list. Similarly,
-    there is `code42 departing-employee`.
+* `code42 watchlists` is a collection of tools for managing your employee watchlists.
 
 ## Requirements
 
@@ -211,38 +210,6 @@ To get the results of a saved search, use the `--saved-search` option with your 
 ```bash
 code42 security-data search --saved-search <ID>
 ```
-
-## Detection Lists
-
-You can both add and remove employees from detection lists using the CLI. This example uses `high-risk-employee`.
-
-```bash
-code42 high-risk-employee add user@example.com --notes "These are notes"
-code42 high-risk-employee remove user@example.com
-```
-
-Detection lists include a `bulk` command. To add employees to a list, you can pass in a csv file. First, generate the
-csv file for the desired command by executing the `generate-template` command:
-
-```bash
-code42 high-risk-employee bulk generate-template add
-```
-
-Notice that `generate-template` takes a `cmd` parameter for determining what type of template to generate. In the
-example above, we give it the value `add` to generate a file for bulk adding users to the high risk employee list.
-
-Next, fill out the csv file with all the users and then pass it in as a parameter to `bulk add`:
-
-```bash
-code42 high-risk-employee bulk add users_to_add.csv
-```
-
-Note that for `bulk remove`, the file only has to be an end-line delimited list of users with one line per user.
-
-## Known Issues
-
-In `security-data`, only the first 10,000 of each set of events containing the exact same insertion timestamp is
-reported.
 
 ## Troubleshooting
 

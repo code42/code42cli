@@ -43,7 +43,6 @@ jobs:
           127.0.0.1 core
           127.0.0.1 alerts
           127.0.0.1 alert-rules
-          127.0.0.1 detection-lists
           127.0.0.1 audit-log
           127.0.0.1 file-events
           127.0.0.1 storage

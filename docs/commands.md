@@ -32,5 +32,3 @@
 * [Trusted Activities](commands/trustedactivities.rst)
 * [Users](commands/users.rst)
 * [Watchlists](commands/watchlists.rst)
-* [(DEPRECATED) Departing Employee](commands/departingemployee.rst)
-* [(DEPRECATED) High Risk Employee](commands/highriskemployee.rst)

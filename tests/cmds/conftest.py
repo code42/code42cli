@@ -3,7 +3,6 @@ import json as json_module
 import threading
 
 import pytest
-from py42.exceptions import Py42UserAlreadyAddedError
 from py42.exceptions import Py42UserNotOnListError
 from py42.sdk import SDKClient
 from requests import HTTPError
@@ -79,11 +78,6 @@ def custom_error(mocker):
     resp.text = "TEST_ERR"
     err.response = resp
     return err
-
-
-@pytest.fixture
-def user_already_added_error(custom_error):
-    return Py42UserAlreadyAddedError(custom_error, TEST_ID, "detection list")
 
 
 def get_filter_value_from_json(json, filter_index):

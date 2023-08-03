@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## 1.17.0 - 2023-08-04
+
+### Removed
+
+- Removed the following command groups following deprecation:
+  - `detection-lists`
+  - `departing-employee`
+  - `high-risk-employee`
+- APIs were replaced by the `watchlists` commands
+
 ## 1.16.6 - 2023-04-12
 
 ### Fixed
