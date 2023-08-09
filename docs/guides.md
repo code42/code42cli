@@ -19,7 +19,6 @@
     Add and manage cases <userguides/cases.md>
     Perform bulk actions <userguides/bulkcommands.md>
     Manage watchlist members <userguides/watchlists.md>
-    (DEPRECATED) Manage detection list users <userguides/detectionlists.md>
 ```
 
 * [Get started with the Code42 command-line interface (CLI)](userguides/gettingstarted.md)
@@ -35,4 +34,3 @@
 * [Add and manage cases](userguides/cases.md)
 * [Perform bulk actions](userguides/bulkcommands.md)
 * [Manage watchlist members](userguides/watchlists.md)
-* [(DEPRECATED) Manage detection list users](userguides/detectionlists.md)
