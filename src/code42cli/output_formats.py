@@ -90,7 +90,7 @@ class DataFrameOutputFormatter:
         if df.empty:
             return
         # convert everything to strings so we can left-justify format
-        df = df.fillna("").applymap(str)
+        df = df.fillna("").map(str)
         # set overrideable default kwargs
         kwargs = {
             "index": False,
