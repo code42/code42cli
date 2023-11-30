@@ -77,23 +77,21 @@ def test_get_logger_for_server_when_given_cef_format_uses_cef_formatter():
     logger = get_logger_for_server(
         "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None
     )
-    assert type(logger.handlers[0].formatter) == FileEventDictToCEFFormatter
+    assert isinstance(logger.handlers[0].formatter, FileEventDictToCEFFormatter)
 
 
 def test_get_logger_for_server_when_given_json_format_uses_json_formatter():
     logger = get_logger_for_server(
         "example.com", ServerProtocol.TCP, OutputFormat.JSON, None
     )
-    actual = type(logger.handlers[0].formatter)
-    assert actual == FileEventDictToJSONFormatter
+    assert isinstance(logger.handlers[0].formatter, FileEventDictToJSONFormatter)
 
 
 def test_get_logger_for_server_when_given_raw_json_format_uses_raw_json_formatter():
     logger = get_logger_for_server(
         "example.com", ServerProtocol.TCP, OutputFormat.RAW, None
     )
-    actual = type(logger.handlers[0].formatter)
-    assert actual == FileEventDictToRawJSONFormatter
+    assert isinstance(logger.handlers[0].formatter, FileEventDictToRawJSONFormatter)
 
 
 def test_get_logger_for_server_when_called_twice_only_has_one_handler():
@@ -108,7 +106,7 @@ def test_get_logger_for_server_uses_no_priority_syslog_handler():
     logger = get_logger_for_server(
         "example.com", ServerProtocol.TCP, SendToFileEventsOutputFormat.CEF, None
     )
-    assert type(logger.handlers[0]) == NoPrioritySysLogHandler
+    assert isinstance(logger.handlers[0], NoPrioritySysLogHandler)
 
 
 def test_get_logger_for_server_constructs_handler_with_expected_args(

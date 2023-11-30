@@ -14,20 +14,20 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        python: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          path: code42cli
       - name: Setup Python
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python }}
       - name: Install tox
-        run: pip install tox==3.17.1
+        run: |
+          pip install tox==3.17.1
+          pip install .
       - name: Run Unit tests
-        run: cd code42cli; tox -e py  # Run tox using the version of Python in `PATH`
+        run: tox -e py  # Run tox using the version of Python in `PATH`
       - name: Submit coverage report
         uses: codecov/codecov-action@v1.0.7
         with:
@@ -56,4 +56,4 @@ jobs:
       - name: Start up the mock servers
         run: cd code42-mock-servers; docker-compose up -d --build
       - name: Run the integration tests
-        run: sleep 15; cd code42cli; tox -e integration
+        run: sleep 15; tox -e integration
