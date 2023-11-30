@@ -10,7 +10,7 @@ how a consumer would use the library (e.g. adding unit tests, updating documenta
 
 ## 1.18.0 - 2023-11-30
 
-### Added 
+### Added
 
 - Support for Python 3.12, includes various dependency version requirement updates.
 
