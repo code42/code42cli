@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The intended audience of this file is for py42 consumers -- as such, changes that don't affect
 how a consumer would use the library (e.g. adding unit tests, updating documentation, etc) are not captured here.
 
+## 1.18.0 - 2023-11-30
+
+### Added 
+
+- Support for Python 3.12, includes various dependency version requirement updates.
+
 ## 1.17.0 - 2023-08-04
 
 ### Removed
