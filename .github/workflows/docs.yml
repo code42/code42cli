@@ -20,6 +20,8 @@ jobs:
       with:
         python-version: '3.x'
     - name: Install tox
-      run: pip install tox==3.17.1
+      run: |
+        pip install tox==3.17.1
+        pip install .
     - name: Build docs
       run: tox -e docs

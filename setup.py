@@ -41,14 +41,16 @@ setup(
         "ipython>=8.10.0;python_version>='3.8'",
         "pandas>=1.1.3",
         "py42>=1.26.0",
+        "setuptools>=66.0.0",
     ],
     extras_require={
         "dev": [
-            "flake8==3.8.3",
+            "flake8>=4.0.0",
             "pytest==4.6.11",
             "pytest-cov==2.10.0",
             "pytest-mock==2.0.0",
             "tox>=3.17.1",
+            "importlib-metadata<5.0",
         ],
         "docs": [
             "sphinx==4.4.0",
