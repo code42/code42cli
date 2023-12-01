@@ -28,7 +28,9 @@ jobs:
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
           ssh-add - <<< "${{ secrets.C42_EVENT_EXTRACTOR_PRIVATE_DEPLOY_KEY }}"
       - name: Install tox
-        run: pip install tox==3.17.1
+        run: |
+          pip install tox==3.17.1
+          pip install .
       - name: Run Unit tests
         env:
             SSH_AUTH_SOCK: /tmp/ssh_agent.sock
