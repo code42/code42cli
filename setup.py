@@ -16,7 +16,7 @@ with open(path.join(here, "README.md"), "r", "utf-8") as f:
 setup(
     name="code42cli",
     version=about["__version__"],
-    url="https://github.com/code42/py42",
+    url="https://github.com/code42/code42cli",
     project_urls={
         "Issue Tracker": "https://github.com/code42/code42cli/issues",
         "Documentation": "https://clidocs.code42.com/",
@@ -40,7 +40,7 @@ setup(
         "ipython>=7.16.3;python_version<'3.8'",
         "ipython>=8.10.0;python_version>='3.8'",
         "pandas>=1.1.3",
-        "py42>=1.26.0",
+        "py42>=1.27.1",
         "setuptools>=66.0.0",
     ],
     extras_require={
