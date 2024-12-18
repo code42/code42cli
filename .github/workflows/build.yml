@@ -54,6 +54,6 @@ jobs:
       - name: Install ncat
         run: sudo apt-get install ncat
       - name: Start up the mock servers
-        run: cd code42-mock-servers; docker-compose up -d --build
+        run: cd code42-mock-servers; docker compose up -d --build
       - name: Run the integration tests
         run: sleep 15; tox -e integration
