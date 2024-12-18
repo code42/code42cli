@@ -1,7 +1,6 @@
 import csv
 import io
 import json
-import warnings
 from itertools import chain
 from typing import Generator
 
@@ -16,9 +15,6 @@ from code42cli.logger.formatters import CEF_TEMPLATE
 from code42cli.logger.formatters import map_event_to_cef
 from code42cli.util import find_format_width
 from code42cli.util import format_to_table
-
-# remove this once we drop support for Python 3.7
-warnings.filterwarnings("ignore", category=FutureWarning)
 
 CEF_DEFAULT_PRODUCT_NAME = "Advanced Exfiltration Detection"
 CEF_DEFAULT_SEVERITY_LEVEL = "5"

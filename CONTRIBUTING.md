@@ -50,13 +50,13 @@ pyenv virtualenv 3.9.10 code42cli
 pyenv activate code42cli
 ```
 
-**Note**: The CLI supports pythons versions 3.6 through 3.9 for end users. However due to some of the build dependencies, you'll need a version >=3.7 for your virtual environment.  Use `pyenv --versions` to see all versions available for install. There are some known issues installing python 3.6 with pyenv on certain OS.
+**Note**: The CLI supports pythons versions 3.9 through 3.12 for end users. Use `pyenv --versions` to see all versions available for install.
 
 Use `source deactivate` to exit the virtual environment and `pyenv activate code42cli` to reactivate it.
 
 ### Windows/Linux
 
-Install a version of python 3.6 or higher from [python.org](https://python.org).
+Install a version of python 3.9 or higher from [python.org](https://python.org).
 Next, in a directory somewhere outside the project, create and activate your virtual environment:
 
 ```bash
@@ -86,7 +86,7 @@ point to your virtual environment, and you should be ready to go!
 
 ## Run a full build
 
-We use [tox](https://tox.readthedocs.io/en/latest/#) to run our build against Python 3.6, 3.7, and 3.8. When run locally, `tox` will run only against the version of python that your virtual envrionment is running, but all versions will be validated against when you [open a PR](#opening-a-pr).
+We use [tox](https://tox.readthedocs.io/en/latest/#) to run our build against Python 3.9, 3.10, 3.11 and 3.12. When run locally, `tox` will run only against the version of python that your virtual envrionment is running, but all versions will be validated against when you [open a PR](#opening-a-pr).
 
 To run all the unit tests, do a test build of the documentation, and check that the code meets all style requirements, simply run:
 
@@ -97,7 +97,7 @@ If the full process runs without any errors, your environment is set up correctl
 
 ## Coding Style
 
-Use syntax and built-in modules that are compatible with Python 3.6+.
+Use syntax and built-in modules that are compatible with Python 3.9+.
 
 ### Style linter
 
