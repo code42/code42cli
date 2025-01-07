@@ -40,7 +40,7 @@ setup(
         "ipython>=7.16.3;python_version<'3.8'",
         "ipython>=8.10.0;python_version>='3.8'",
         "pandas>=1.1.3",
-        "py42>=1.26.0",
+        "py42>=1.27.2",
         "setuptools>=66.0.0",
     ],
     extras_require={
