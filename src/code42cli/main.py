@@ -7,10 +7,11 @@ import warnings
 import click
 from click_plugins import with_plugins
 from pkg_resources import iter_entry_points
-from py42.settings import set_user_agent_suffix
+from py42.settings import set_user_agent_prefix
 
 from code42cli import BANNER
 from code42cli import PRODUCT_NAME
+from code42cli.__version__ import __version__
 from code42cli.click_ext.groups import ExceptionHandlingGroup
 from code42cli.cmds.alert_rules import alert_rules
 from code42cli.cmds.alerts import alerts
@@ -39,7 +40,7 @@ signal.signal(signal.SIGINT, exit_on_interrupt)
 
 # Sets part of the user agent string that py42 attaches to requests for the purposes of
 # identifying CLI users.
-set_user_agent_suffix(PRODUCT_NAME)
+set_user_agent_prefix(f"{PRODUCT_NAME}/{__version__}  (Code42; code42.com )")
 
 CONTEXT_SETTINGS = {
     "help_option_names": ["-h", "--help"],

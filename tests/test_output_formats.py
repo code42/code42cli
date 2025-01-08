@@ -2,7 +2,7 @@ import json
 from collections import OrderedDict
 
 import pytest
-from numpy import NaN
+from numpy import nan as NaN
 from pandas import DataFrame
 
 import code42cli.output_formats as output_formats_module
