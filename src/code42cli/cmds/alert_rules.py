@@ -15,6 +15,9 @@ from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.output_formats import OutputFormatter
+from code42cli.util import deprecation_warning
+
+DEPRECATION_TEXT = "Incydr functionality is deprecated. Use the Incydr CLI instead."
 
 
 class AlertRuleTypes:
@@ -31,11 +34,14 @@ _HEADER_KEYS_MAP["type"] = "Type"
 _HEADER_KEYS_MAP["ruleSource"] = "Source"
 _HEADER_KEYS_MAP["isEnabled"] = "Enabled"
 
+DEPRECATION_TEXT = "Incydr functionality is deprecated. Use the Incydr CLI"
+
 
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def alert_rules(state):
-    """Manage users associated with alert rules."""
+    """DEPRECATED - Manage users associated with alert rules."""
+    deprecation_warning(DEPRECATION_TEXT)
     pass
 
 

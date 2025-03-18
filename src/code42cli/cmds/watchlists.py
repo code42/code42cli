@@ -15,12 +15,16 @@ from code42cli.errors import Code42CLIError
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.output_formats import DataFrameOutputFormatter
+from code42cli.util import deprecation_warning
+
+DEPRECATION_TEXT = "Incydr functionality is deprecated. Use the Incydr CLI instead."
 
 
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def watchlists(state):
-    """Manage watchlist user memberships."""
+    """DEPRECATED - Manage watchlist user memberships."""
+    deprecation_warning(DEPRECATION_TEXT)
     pass
 
 

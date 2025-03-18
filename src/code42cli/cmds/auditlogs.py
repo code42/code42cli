@@ -10,9 +10,12 @@ from code42cli.options import checkpoint_option
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.output_formats import OutputFormatter
+from code42cli.util import deprecation_warning
 from code42cli.util import hash_event
 from code42cli.util import parse_timestamp
 from code42cli.util import warn_interrupt
+
+DEPRECATION_TEXT = "Incydr functionality is deprecated. Use the Incydr CLI instead."
 
 EVENT_KEY = "events"
 AUDIT_LOGS_KEYWORD = "audit-logs"
@@ -90,7 +93,8 @@ def filter_options(f):
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def audit_logs(state):
-    """Get and send audit log event data."""
+    """DEPRECATED - Get and send audit log event data."""
+    deprecation_warning(DEPRECATION_TEXT)
     # store cursor getter on the group state so shared --begin option can use it in validation
     state.cursor_getter = _get_audit_log_cursor_store
 

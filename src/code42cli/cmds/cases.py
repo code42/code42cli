@@ -18,6 +18,9 @@ from code42cli.options import sdk_options
 from code42cli.options import set_begin_default_dict
 from code42cli.options import set_end_default_dict
 from code42cli.output_formats import OutputFormatter
+from code42cli.util import deprecation_warning
+
+DEPRECATION_TEXT = "Incydr functionality is deprecated. Use the Incydr CLI instead."
 
 
 case_number_arg = click.argument("case-number", type=int)
@@ -74,7 +77,8 @@ def _get_events_header():
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def cases(state):
-    """Manage cases and events associated with cases."""
+    """DEPRECATED - Manage cases and events associated with cases."""
+    deprecation_warning(DEPRECATION_TEXT)
     pass
 
 
