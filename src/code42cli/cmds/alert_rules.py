@@ -34,8 +34,6 @@ _HEADER_KEYS_MAP["type"] = "Type"
 _HEADER_KEYS_MAP["ruleSource"] = "Source"
 _HEADER_KEYS_MAP["isEnabled"] = "Enabled"
 
-DEPRECATION_TEXT = "Incydr functionality is deprecated. Use the Incydr CLI"
-
 
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
