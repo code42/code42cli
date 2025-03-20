@@ -412,9 +412,6 @@ def search(
 ):
     """Search for file events."""
 
-    if state.profile.use_v2_file_events != "True":
-        deprecation_warning(DEPRECATION_TEXT)
-
     if format == FileEventsOutputFormat.CEF and columns:
         raise click.BadOptionUsage(
             "columns", "--columns option can't be used with CEF format."
