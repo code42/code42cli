@@ -11,7 +11,7 @@ from code42cli.options import sdk_options
 from code42cli.output_formats import OutputFormatter
 from code42cli.util import deprecation_warning
 
-DEPRECATION_TEXT = "Incydr functionality is deprecated. Use the Incydr CLI instead."
+DEPRECATION_TEXT = "Incydr functionality is deprecated. Use the Incydr CLI instead (https://developer.code42.com/)."
 
 resource_id_arg = click.argument("resource-id", type=int)
 type_option = click.option(

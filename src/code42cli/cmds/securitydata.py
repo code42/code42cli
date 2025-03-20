@@ -43,7 +43,7 @@ MAX_EVENT_PAGE_SIZE = 10000
 
 SECURITY_DATA_KEYWORD = "file events"
 
-DEPRECATION_TEXT = "Incydr functionality is deprecated. Use the Incydr CLI instead."
+DEPRECATION_TEXT = "Incydr functionality is deprecated. Use the Incydr CLI instead (https://developer.code42.com/)."
 
 
 def exposure_type_callback():

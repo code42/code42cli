@@ -15,7 +15,7 @@ from code42cli.util import hash_event
 from code42cli.util import parse_timestamp
 from code42cli.util import warn_interrupt
 
-DEPRECATION_TEXT = "Incydr functionality is deprecated. Use the Incydr CLI instead."
+DEPRECATION_TEXT = "Incydr functionality is deprecated. Use the Incydr CLI instead (https://developer.code42.com/)."
 
 EVENT_KEY = "events"
 AUDIT_LOGS_KEYWORD = "audit-logs"

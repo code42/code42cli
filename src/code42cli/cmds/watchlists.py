@@ -17,7 +17,7 @@ from code42cli.options import sdk_options
 from code42cli.output_formats import DataFrameOutputFormatter
 from code42cli.util import deprecation_warning
 
-DEPRECATION_TEXT = "Incydr functionality is deprecated. Use the Incydr CLI instead."
+DEPRECATION_TEXT = "Incydr functionality is deprecated. Use the Incydr CLI instead (https://developer.code42.com/)."
 
 
 @click.group(cls=OrderedGroup)
