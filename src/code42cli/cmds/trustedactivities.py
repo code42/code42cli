@@ -9,6 +9,9 @@ from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.options import sdk_options
 from code42cli.output_formats import OutputFormatter
+from code42cli.util import deprecation_warning
+
+DEPRECATION_TEXT = "Incydr functionality is deprecated. Use the Incydr CLI instead (https://developer.code42.com/)."
 
 resource_id_arg = click.argument("resource-id", type=int)
 type_option = click.option(
@@ -40,7 +43,8 @@ def _get_trust_header():
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def trusted_activities(state):
-    """Manage trusted activities and resources."""
+    """DEPRECATED - Manage trusted activities and resources."""
+    deprecation_warning(DEPRECATION_TEXT)
     pass
 
 

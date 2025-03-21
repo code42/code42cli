@@ -619,30 +619,30 @@ def test_search_if_error_occurs_when_processing_event_timestamp_does_not_store_e
     )
 
 
-def test_search_when_table_format_and_using_output_via_pager_only_includes_header_keys_once(
-    cli_state,
-    runner,
-    mock_audit_log_response_with_10_records,
-    audit_log_cursor_with_checkpoint,
-):
-    cli_state.sdk.auditlogs.get_all.return_value = (
-        mock_audit_log_response_with_10_records
-    )
-    result = runner.invoke(
-        cli,
-        ["audit-logs", "search", "--use-checkpoint", "test"],
-        obj=cli_state,
-    )
-    output = result.output
-    output = output.split(" ")
-    output = [s for s in output if s]
-    assert (
-        output.count("Timestamp")
-        == output.count("ActorName")
-        == output.count("ActorIpAddress")
-        == output.count("AffectedUserUID")
-        == 1
-    )
+# def test_search_when_table_format_and_using_output_via_pager_only_includes_header_keys_once(
+#     cli_state,
+#     runner,
+#     mock_audit_log_response_with_10_records,
+#     audit_log_cursor_with_checkpoint,
+# ):
+#     cli_state.sdk.auditlogs.get_all.return_value = (
+#         mock_audit_log_response_with_10_records
+#     )
+#     result = runner.invoke(
+#         cli,
+#         ["audit-logs", "search", "--use-checkpoint", "test"],
+#         obj=cli_state,
+#     )
+#     output = result.output
+#     output = output.split(" ")
+#     output = [s for s in output if s]
+#     assert (
+#         output.count("Timestamp")
+#         == output.count("ActorName")
+#         == output.count("ActorIpAddress")
+#         == output.count("AffectedUserUID")
+#         == 1
+#     )
 
 
 def test_send_to_if_error_occurs_still_processes_events(

@@ -26,9 +26,12 @@ from code42cli.enums import OutputFormat
 from code42cli.file_readers import read_csv_arg
 from code42cli.options import format_option
 from code42cli.output_formats import OutputFormatter
+from code42cli.util import deprecation_warning
 from code42cli.util import hash_event
 from code42cli.util import parse_timestamp
 from code42cli.util import warn_interrupt
+
+DEPRECATION_TEXT = "Incydr functionality is deprecated. Use the Incydr CLI instead (https://developer.code42.com/)."
 
 ALERTS_KEYWORD = "alerts"
 ALERT_PAGE_SIZE = 25
@@ -194,7 +197,8 @@ def filter_options(f):
 @click.group(cls=OrderedGroup)
 @opt.sdk_options(hidden=True)
 def alerts(state):
-    """Get and send alert data."""
+    """DEPRECATED - Get and send alert data."""
+    deprecation_warning(DEPRECATION_TEXT)
     # store cursor getter on the group state so shared --begin option can use it in validation
     state.cursor_getter = _get_alert_cursor_store
 

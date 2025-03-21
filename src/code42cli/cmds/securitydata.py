@@ -40,9 +40,10 @@ from code42cli.util import warn_interrupt
 
 logger = get_main_cli_logger()
 MAX_EVENT_PAGE_SIZE = 10000
-DEPRECATION_TEXT = "(DEPRECATED): V1 file events are deprecated.  Update your profile with `code42 profile update --use-v2-file-events True` to use the new V2 file event data model."
 
 SECURITY_DATA_KEYWORD = "file events"
+
+DEPRECATION_TEXT = "Incydr functionality is deprecated. Use the Incydr CLI instead (https://developer.code42.com/)."
 
 
 def exposure_type_callback():
@@ -375,7 +376,8 @@ def file_event_options(f):
 @click.group(cls=OrderedGroup)
 @sdk_options(hidden=True)
 def security_data(state):
-    """Get and send file event data."""
+    """DEPRECATED - Get and send file event data."""
+    deprecation_warning(DEPRECATION_TEXT)
     # store cursor getter on the group state so shared --begin option can use it in validation
     state.cursor_getter = _get_file_event_cursor_store
 
@@ -409,9 +411,6 @@ def search(
     **kwargs,
 ):
     """Search for file events."""
-
-    if state.profile.use_v2_file_events != "True":
-        deprecation_warning(DEPRECATION_TEXT)
 
     if format == FileEventsOutputFormat.CEF and columns:
         raise click.BadOptionUsage(
