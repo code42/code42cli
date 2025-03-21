@@ -16,6 +16,10 @@
     commands
 ```
 
+```{eval-rst}
+.. warning:: Incydr functionality in the code42cli is **deprecated**. Use the resources at https://developer.code42.com/ instead.
+```
+
 [![license](https://img.shields.io/pypi/l/code42cli.svg)](https://pypi.org/project/code42cli/)
 [![versions](https://img.shields.io/pypi/pyversions/code42cli.svg)](https://pypi.org/project/code42cli/)
 
