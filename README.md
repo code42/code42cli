@@ -6,6 +6,13 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Documentation Status](https://readthedocs.org/projects/code42cli/badge/?version=latest)](https://clidocs.code42.com/en/latest/?badge=latest)
 
+## Code42CLI end-of-life
+Code42CLI is now deprecated. It has been replaced by the [Incydr CLI](https://support.code42.com/hc/en-us/articles/14827667072279-Introduction-to-the-Incydr-command-line-interface).
+- Code42CLI will reach **end-of-support on January 1, 2026**, and **end-of-life on January 1, 2027**.
+- To ensure uninterrupted functionality and access to the latest features, migrate your integrations to the Incydr CLI as soon as possible.
+
+For more details, [see our FAQ](https://support.code42.com/hc/en-us/articles/32154640298263-Code42-CLI-end-of-life-FAQ).
+
 Use the `code42` command to interact with your Code42 environment.
 
 * `code42 security-data` is a CLI tool for extracting AED events.
